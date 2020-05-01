@@ -6,6 +6,11 @@ The Living Network Meta Analysis System is a platform for researchers
 
 ## Linux System
 
+```bash
+$ sudo apt update
+$ sudo apt install nginx
+```
+
 ## R Packages
 
 ## Python Packages
