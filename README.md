@@ -53,7 +53,7 @@ For the Ubuntu 18.04 system, update and install
 
 ```bash
 $ sudo apt update
-$ sudo apt install nginx
+$ sudo apt upgrade
 ```
 
 ## Nginx
@@ -61,24 +61,28 @@ $ sudo apt install nginx
 Before having a domain name, we can use the self-signed certification: 
 
 ```bash
+$ sudo apt install nginx
 $ sudo mkdir /etc/nginx/ssl/ && sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -subj "/C=US/ST=Minnesota/L=Rochester/O=LINMA/OU=ATA/CN=LNMAServer" -keyout /etc/nginx/ssl/nginx.key -out /etc/nginx/ssl/nginx.crt
 ```
 
-Then edit config file:
+Then, edit config file:
 
 ```bash
 $ sudo vim /etc/nginx/sites-enabled/default
 ```
 
-add ssl related configs in server:
+Then, add ssl related configs in server:
 
-    listen 443 ssl;
-    ssl_certificate /etc/nginx/ssl/nginx.crt;
-    ssl_certificate_key /etc/nginx/ssl/nginx.key;
-
+```bash
+listen 443 ssl;
+ssl_certificate /etc/nginx/ssl/nginx.crt;
+ssl_certificate_key /etc/nginx/ssl/nginx.key;
+```
 and then restart nginx:
 
-    sudo service nginx restart
+```bash
+$ sudo service nginx restart
+```
 
 ## MySQL database
 
@@ -92,7 +96,7 @@ To install the backend R packages, install some dependency packages first:
 $ sudo apt install jags libglpk-dev libxml2-dev libcurl4-openssl-dev libssl-dev build-essential libcurl4-gnutls-dev
 ```
 
-Then add CRAN repository:
+Then add CRAN repository, the last line may be not required if no errors.
 
 ```bash
 $ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
@@ -120,16 +124,7 @@ $ sudo R
 
 ### BUGSnet
 
-The BUGSnet packages requires more packages, first install the following dependency:
-
-```bash
-$ sudo add-apt-repository ppa:jonathonf/gcc-7.1
-$ sudo apt-get update
-$ sudo apt-get install gcc-7 g++-7
-$ sudo apt-get install gfortran-7
-```
-
-Then install the following:
+The BUGSnet packages requires more packages, install the following:
 
 ```bash
 $ sudo R
@@ -140,11 +135,15 @@ $ sudo R
 
 ## Python Packages
 
+First, we use miniconda to manage our virtual environments. Since the server won't have multiple users, this can be installed on the user folder.
+
 ```bash
 $ wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
 $ chmod 755 Miniconda3-latest-Linux-x86_64.sh
-$ sudo ./Miniconda3-latest-Linux-x86_64.sh
+$ ./Miniconda3-latest-Linux-x86_64.sh
 ```
+
+### 
 
 ## Other
 
