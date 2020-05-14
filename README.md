@@ -87,6 +87,28 @@ $ sudo service nginx restart
 ## MySQL database
 
 We can use local MySQL as the start.
+Please follow the instruction on https://dev.mysql.com/doc/mysql-apt-repo-quick-guide/en/ to install the MySQL 8.x:
+
+```bash
+$ sudo wget https://dev.mysql.com/get/mysql-apt-config_0.8.15-1_all.deb
+$ sudo dpkg -i mysql-apt-config_0.8.15-1_all.deb
+```
+when we run above command like below prompt will open, click on Ok.
+Then, update the system and install packages.
+During installation, set the root password and use strong password encryption.
+
+```bash
+$ sudo apt-get update
+$ sudo apt-get install mysql-server
+```
+
+### Users and Database
+
+```bash
+mysql> create database lnma;
+mysql> create user lnma@localhost identified by 'LNMA_password_12#$';
+mysql> grant all on lnma.* to lnma@localhost;
+```
 
 ## R Packages
 
