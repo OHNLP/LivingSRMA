@@ -15,6 +15,19 @@ class User(db.model):
     def __repr__(self):
         return '<User {}>'.format(self.uid)
 
+    # for Flask-Login
+    def is_authenticated(self):
+        return True
+
+    def is_active(self):
+        return True
+
+    def is_anonymous(self):
+        return False
+
+    def get_id(self):
+        return self.uid
+
 
 class Admin(db.model):
     """Data model for admins

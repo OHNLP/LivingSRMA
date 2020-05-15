@@ -17,22 +17,15 @@ from flask_login import logout_user
 from werkzeug.security import check_password_hash
 from werkzeug.security import generate_password_hash
 
+from .models import User
 
 bp = Blueprint("auth", __name__, url_prefix="/auth")
 
 users = {'sysadmin@linma.org': {'password': 'lnma2020'}}
 
 
-class User(UserMixin):
-    pass
-
-
 def user_loader(email):
-    if email not in users:
-        return
-
-    user = User()
-    user.id = email
+    user = User.query.get(email)
     return user
 
 
@@ -54,13 +47,7 @@ def request_loader(request):
 @bp.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'GET':
-        return '''
-               <form action='login' method='POST'>
-                <input type='text' name='email' id='email' placeholder='email'/>
-                <input type='password' name='password' id='password' placeholder='password'/>
-                <input type='submit' name='submit'/>
-               </form>
-               '''
+        return render_template('auth_login.html')
 
     email = request.form['email']
 
