@@ -11,6 +11,14 @@ def create_app(test_config=None):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_pyfile('config.py')
 
+    # print(app.config)
+    # bind db
+    db.init_app(app)
+
+    # use [[ ]] instead of {{ }} for jinja2
+    app.jinja_env.variable_start_string = '[['
+    app.jinja_env.variable_end_string = ']]'
+
     if test_config is not None:
         app.config.update(test_config)
 
@@ -19,10 +27,6 @@ def create_app(test_config=None):
         os.makedirs(app.instance_path)
     except OSError:
         pass
-
-    @app.route("/")
-    def index():
-        return "index"
 
     login_manager = LoginManager()
     login_manager.init_app(app)
@@ -38,9 +42,11 @@ def create_app(test_config=None):
         return auth.request_loader(request)
 
     # apply the blueprints to the app
+    from lnma import index
     from lnma import auth
     from lnma import user_portal
 
+    app.register_blueprint(index.bp)
     app.register_blueprint(auth.bp)
     app.register_blueprint(user_portal.bp)
 

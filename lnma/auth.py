@@ -47,20 +47,23 @@ def request_loader(request):
 @bp.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'GET':
-        return render_template('auth_login.html')
+        return render_template('auth.login.html')
 
-    email = request.form['email']
+    email = request.form.get('email')
+    pswd = request.form.get('password')
 
-    if email not in users:
-        return 'No such user'
+    user = User.query.get(email)
+    
+    if user is None:
+        flash("User doesn't exist or wrong password")
+        return render_template('auth.login.html')
 
-    if request.form['password'] == users[email]['password']:
-        user = User()
-        user.id = email
+    if check_password_hash(user.password, pswd):
         login_user(user)
         return redirect(url_for('user_portal.index'))
 
-    return 'Bad login'
+    flash("User doesn't exist or wrong password.")
+    return render_template('auth.login.html')
 
 
 @bp.route('/logout')

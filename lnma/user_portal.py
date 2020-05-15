@@ -10,4 +10,4 @@ bp = Blueprint("user_portal", __name__, url_prefix="/user_portal")
 @bp.route('/')
 @login_required
 def index():
-    return 'User Portal' + ' | Logged in as: ' + current_user.id
+    return 'User Portal' + ' | Logged in as: ' + current_user.uid
