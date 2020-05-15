@@ -2,7 +2,9 @@ import os
 
 from flask import Flask
 from flask_login import LoginManager
+from flask_sqlalchemy import SQLAlchemy
 
+db = SQLAlchemy()
 
 def create_app(test_config=None):
     """Create and configure an instance of the Flask application."""
