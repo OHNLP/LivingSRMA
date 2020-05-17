@@ -1,0 +1,50 @@
+{% extends '_layout.html' %}
+
+{% block title %}
+User Portal
+{% endblock %}
+
+{% block style %}
+{% endblock %}
+
+{% block main %}
+<div class="container">
+<h2>Create Project</h2>
+<p class="lead">Below is an example form built entirely with Bootstrap’s form controls. Each required form group has a validation state that can be triggered by attempting to submit the form without completing it.</p>
+<form method="POST" action="[[ url_for('user_portal.create_project') ]]">
+    <div class="form-group">
+        <label for="input_title">Project Title</label>
+        <input type="text" class="form-control" id="input_title" name="title"
+            placeholder="The lung cancer meta-analysis">
+        <small id="input_title_help" class="form-text text-muted">
+            The project title must be at least 8 characters long, contain letters and numbers, no special characters.
+        </small>
+    </div>
+
+    <div class="form-group">
+        <label for="input_keystr">Project KEYSTRING</label>
+        <input type="text" class="form-control" id="input_keystr" name="keystr" placeholder="KEYSTR">
+        <small id="input_keystr_help" class="form-text text-muted">
+            The KEYSTRING is used to identify this project in data sources. You can specify your own string, or use the
+            auto-generated one.
+        </small>
+    </div>
+
+    <div class="form-group">
+        <label for="input_abstract">Project Abstract (Optional)</label>
+        <textarea class="form-control" id="input_abstract" name="abstract" rows="3"></textarea>
+        <small id="input_abstract_help" class="form-text text-muted">
+            Describe this project.
+        </small>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+
+</script>
+{% endblock %}

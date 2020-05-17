@@ -30,17 +30,20 @@ def user_loader(email):
 
 
 def request_loader(request):
-    email = request.form.get('email')
-    if email not in users:
-        return
+    email = request.form.get('email')    
+    pswd = request.form.get('password')
+    user = User.query.get(email)
 
-    user = User()
-    user.id = email
+    if user is None:
+        return None
 
     # DO NOT ever store passwords in plaintext and always compare password
     # hashes using constant-time comparison!
-    user.is_authenticated = request.form['password'] == users[email]['password']
-
+    if check_password_hash(user.password, pswd):
+        user.is_authenticated = True
+    else:
+        user.is_authenticated = False
+        
     return user
 
 

@@ -57,8 +57,8 @@ class Project(db.Model):
     __tablename__ = 'projects'
     __table_args__ = {'extend_existing': True}
 
-    project_id = db.Column(db.Integer, primary_key=True)
-    key_str = db.Column(db.String(64), unique=True)
+    project_id = db.Column(db.String(48), primary_key=True)
+    keystr = db.Column(db.String(64), unique=True)
     owner_uid = db.Column(db.String(64), index=False)
     title = db.Column(db.Text, index=False)
     abstract = db.Column(db.Text, index=False)
@@ -77,17 +77,39 @@ class Paper(db.Model):
     __tablename__ = 'papers'
     __table_args__ = {'extend_existing': True}
 
-    pid = db.Column(db.String(64), primary_key=True)
+    paper_id = db.Column(db.String(48), primary_key=True)
+    pid = db.Column(db.String(64), index=False)
     pid_type = db.Column(db.String(8), index=False)
-    project_id = db.Column(db.Integer, index=False)
+    project_id = db.Column(db.String(32), index=False)
     title = db.Column(db.String(256), index=False)
     pub_date = db.Column(db.String(32), index=False)
     authors = db.Column(db.Text, index=False)
     journal = db.Column(db.String(128), index=False)
-    ss_states = db.Column(db.JSON, index=False)
+    meta = db.Column(db.JSON, index=False)
+    ss_st = db.Column(db.String(8), index=False)
+    ss_pr = db.Column(db.String(8), index=False)
+    ss_rs = db.Column(db.String(8), index=False)
     date_created = db.Column(db.DateTime, index=False)
     date_updated = db.Column(db.DateTime, index=False)
     is_deleted = db.Column(db.String(8), index=False)
 
     def __repr__(self):
-        return '<Paper {0}:{1} {2}>'.format(self.pid, self.pub_date, self.title)
+        return '<Paper {0}:{1} {2}>'.format(self.paper_id, self.pub_date, self.title)
+
+
+class Note(db.Model):
+    """Data model for notes
+    """
+    __tablename__ = 'notes'
+    __table_args__ = {'extend_existing': True}
+
+    note_id = db.Column(db.String(48), primary_key=True)
+    paper_id = db.Column(db.String(48), index=False)
+    project_id = db.Column(db.String(48), index=False)
+    data = db.Column(db.JSON, index=False)
+    date_created = db.Column(db.DateTime, index=False)
+    date_updated = db.Column(db.DateTime, index=False)
+    is_deleted = db.Column(db.String(8), index=False)
+
+    def __repr__(self):
+        return '<Note {0}:{1}>'.format(self.note_id, self.date_created)
