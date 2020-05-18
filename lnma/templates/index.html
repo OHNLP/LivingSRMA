@@ -5,6 +5,7 @@
 <title>Living Network Meta-Analysis</title>
 <meta name="description" content="DSVM is a demo platform for our projects.">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<script src="https://kit.fontawesome.com/cb45cc91b0.js" crossorigin="anonymous"></script>
 <style>
 /* ---- CSS Reset ---- */
 html,body,div,span,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,abbr,address,cite,code,del,dfn,em,img,ins,kbd,q,samp,small,strong,sub,sup,var,b,i,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,canvas,details,figcaption,figure,footer,header,hgroup,menu,nav,section,summary,time,mark,audio,video{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}
@@ -39,8 +40,16 @@ canvas{
   display: block;
   vertical-align: bottom;
 }
-
-
+#wrapper {
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
 /* ---- stats.js ---- */
 
 .count-particles{
@@ -78,24 +87,27 @@ canvas{
 }
 /* ---- particles.js container ---- */
 #particles-js{
-  width: 100%;
-  height: 100%;
-  background-color: #000000;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #000000;
+    z-index: 1;
 }
 /* ---- header pane ---- */
 #header-pane {
-    position: absolute;
-    top: 40%;
-    left: 0;
-    width: 100%;
+    margin: 0 auto;
+    padding: 10px 0;
+    width: 500px;
+    text-align: center;
     background: rgba(0, 0, 0, 0.5);
     color: white;
-    padding: 20px 0;
-    text-align: center;
+    z-index: 10;
 }
 #header-pane h1 {
     font-size: 2em;
-    padding: 10px 0;
+    padding: 5px 0;
 }
 #header-pane p {
     font-size: 1.5em;
@@ -111,6 +123,7 @@ canvas{
 </style>
 </head>
 <body>
+<div id="wrapper">
 
 <!-- count particles -->
 <div class="count-particles">
@@ -119,12 +132,17 @@ canvas{
 
 <!-- header -->
 <div id="header-pane">
-    <h1>Living Network Meta-Analysis</h1>
+    <h1>
+        <i class="fa fa-project-diagram"></i>
+        Living Network Meta-Analysis
+    </h1>
     <p><a href="./user_portal/">Go to workspace</a></p>
 </div>
 
 <!-- particles.js container -->
 <div id="particles-js"></div>
+
+</div>
 <!-- scripts -->
 <script src="./static/lib/particles-js/particles.min.js"></script>
 <script>
