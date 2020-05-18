@@ -21,9 +21,6 @@ from .models import User
 
 bp = Blueprint("auth", __name__, url_prefix="/auth")
 
-users = {'sysadmin@linma.org': {'password': 'lnma2020'}}
-
-
 def user_loader(email):
     user = User.query.get(email)
     return user
