@@ -84,6 +84,16 @@ and then restart nginx:
 $ sudo service nginx restart
 ```
 
+### SSL Certification
+
+```bash
+$ sudo apt-get update
+$ sudo apt-get install software-properties-common
+$ sudo add-apt-repository universe
+$ sudo add-apt-repository ppa:certbot/certbot
+$ sudo apt-get update
+```
+
 ## MySQL database
 
 We can use local MySQL as the start.
@@ -102,6 +112,8 @@ $ sudo apt-get update
 $ sudo apt-get install mysql-server
 ```
 
+### password policy
+
 ### Users and Database
 
 ```bash
@@ -109,6 +121,7 @@ mysql> create database lnma;
 mysql> create user lnma@localhost identified with mysql_native_password by 'LNMA_password_12#$';
 mysql> grant all on lnma.* to lnma@localhost;
 ```
+
 
 ## R Packages
 
