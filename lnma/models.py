@@ -8,7 +8,7 @@ class User(db.Model):
     __tablename__ = 'users'
     __table_args__ = {'extend_existing': True}
 
-    uid = db.Column(db.String(64), primary_key=True)
+    uid = db.Column(db.String(64), primary_key=True, nullable=False)
     password = db.Column(db.String(128), index=False)
     first_name = db.Column(db.String(45), index=False)
     last_name = db.Column(db.String(45), index=False)
@@ -41,7 +41,7 @@ class Admin(db.Model):
     __tablename__ = 'admins'
     __table_args__ = {'extend_existing': True}
 
-    uid = db.Column(db.String(64), primary_key=True)
+    uid = db.Column(db.String(64), primary_key=True, nullable=False)
     password = db.Column(db.String(128), index=False)
     first_name = db.Column(db.String(45), index=False)
     last_name = db.Column(db.String(45), index=False)
@@ -57,7 +57,7 @@ class Project(db.Model):
     __tablename__ = 'projects'
     __table_args__ = {'extend_existing': True}
 
-    project_id = db.Column(db.String(48), primary_key=True)
+    project_id = db.Column(db.String(48), primary_key=True, nullable=False)
     keystr = db.Column(db.String(64), unique=True)
     owner_uid = db.Column(db.String(64), index=False)
     title = db.Column(db.Text, index=False)
@@ -77,7 +77,7 @@ class Paper(db.Model):
     __tablename__ = 'papers'
     __table_args__ = {'extend_existing': True}
 
-    paper_id = db.Column(db.String(48), primary_key=True)
+    paper_id = db.Column(db.String(48), primary_key=True, nullable=False)
     pid = db.Column(db.String(64), index=False)
     pid_type = db.Column(db.String(8), index=False)
     project_id = db.Column(db.String(32), index=False)
@@ -103,7 +103,7 @@ class Note(db.Model):
     __tablename__ = 'notes'
     __table_args__ = {'extend_existing': True}
 
-    note_id = db.Column(db.String(48), primary_key=True)
+    note_id = db.Column(db.String(48), primary_key=True, nullable=False)
     paper_id = db.Column(db.String(48), index=False)
     project_id = db.Column(db.String(48), index=False)
     data = db.Column(db.JSON, index=False)
