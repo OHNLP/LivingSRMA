@@ -69,7 +69,10 @@ body {
     user-select: none;
 }
 .flashes {
-    list-style: none;
+    padding: 5px 0;
+}
+.flash-item {
+    padding: 5px 0;
 }
 @media (min-width: 768px) {
     .bd-placeholder-img-lg {
@@ -84,11 +87,11 @@ body {
     <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
     {% with messages = get_flashed_messages() %}
     {% if messages %}
-        <ul class="flashes">
+        <div class="flashes">
         {% for message in messages %}
-            <li>[[ message ]]</li>
+            <div class="flash-item">[[ message ]]</div>
         {% endfor %}
-        </ul>
+        </div>
     {% endif %}
     {% endwith %}
     <label for="inputEmail" class="sr-only">Email address</label>
@@ -101,7 +104,7 @@ body {
         </label>
     </div> -->
     <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
-    <p class="mt-5 mb-3 text-muted">&copy; 2020</p>
+    <p class="mt-5 mb-3 text-muted">LINMA &copy; 2020</p>
 </form>
 
 <!-- Optional JavaScript -->
