@@ -69,4 +69,5 @@ def login():
 @bp.route('/logout')
 def logout():
     logout_user()
-    return 'Logged out'
+    flash("You have logged out.")
+    return redirect(url_for('auth.login'))

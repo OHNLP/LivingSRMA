@@ -94,7 +94,7 @@ label {
           
           <div class="dropdown-divider"></div>
           <a href="#" class="dropdown-item">
-            <i class="fas fa-file mr-2"></i> 3 new articles
+            <i class="fas fa-file mr-2"></i> 3 new papers
             <span class="float-right text-muted text-sm">2 days</span>
           </a>
 
@@ -115,7 +115,11 @@ label {
             <i class="fa fa-user mr-2"></i> Account Settings
             <span class="float-right text-muted text-sm">2 days</span>
           </a>
+          <div class="dropdown-divider"></div>
 
+          <a href="[[ url_for('auth.logout') ]]" class="dropdown-item">
+            <i class="fa fa-sign-out-alt mr-2"></i> Logout
+          </a>
         </div>
       </li>
       <!-- <li class="nav-item">
