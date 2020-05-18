@@ -10,7 +10,4 @@ bp = Blueprint("index", __name__, url_prefix="/")
 
 @bp.route('/')
 def index():
-    rs = Admin.query.all()
-    
-    print(rs)
-    return 'index'
+    return render_template('index.html')
