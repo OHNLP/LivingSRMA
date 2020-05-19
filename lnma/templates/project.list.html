@@ -4,16 +4,29 @@
 My Projects
 {% endblock %}
 
+{% block stylelink %}
+<link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+{% endblock %}
+
 {% block style %}
+<style>
+/* fix vuetify row */
+.row {
+    margin-right: -7.5px;
+    margin-left: -7.5px;
+}
+</style>
 {% endblock %}
 
 {% block content %}
 <!-- Content Header (Page header) -->
 <div class="content-header">
     <div class="container-fluid">
-        <div class="row mb-2">
+        <div class="row">
             <div class="col-sm-3">
                 <h1 class="m-0 text-dark">My Projects</h1>
+                <p class="lead">Al my projects are listed here.</p>
             </div><!-- /.col -->
             <div class="col-sm-6">
                 &nbsp;
@@ -32,12 +45,52 @@ My Projects
 <div class="content">
     <div class="container-fluid">
         <div class="row">
-            <div class="col-lg-6">
-                <p class="lead">Al my projects are listed here.</p>
-                
+            <div class="col-lg-7">
+                <div class="card">
+                    <div class="card-body">
+                        <div id="tb_project_list" style="width: 100%;">
+                            <v-simple-table>
+                                <template v-slot:default>
+                                    <thead>
+                                        <th>Project Title</th>
+                                        <th># Studies</th>
+                                        <th># SR</th>
+                                        <th># MA</th>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="item in projects" 
+                                            :key='item.project_id'
+                                            v-on:click="show_project_info(item)">
+                                            <td>{{ item.title }}</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                            <td>0</td>
+                                        </tr>
+                                    </tbody>
+                                </template>
+                            </v-simple-table>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
+
+            <div class="col-lg-5">
+                <div class="card">
+                    <div class="card-body">
+                        <div id="tb_project_info" style="width: 100%;">
+                            <h4>
+                                <i class="far fa-folder"></i>
+                                {{ project.title }}
+                            </h4>
+                            <p>KEY STRING: <span id="project_keystr">{{ project.keystr }}</span></p>
+                            <p>{{ project.abstract }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div><!-- /.row -->
+
+    </div><!-- /.container-fluid -->
 </div>
 
 
@@ -46,7 +99,100 @@ My Projects
 {% block active_nav_link %}project-list{% endblock %}
 
 {% block script %}
-<script>
+<!-- third party package for this page -->
+<script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
 
+<!-- my script -->
+<script>
+var tb_project_list = {
+    vpp: null,
+    vpp_id: '#tb_project_list',
+    vpp_data: {},
+
+    data_url: "[[ url_for('project.api_list') ]]",
+
+    load: function() {
+        $.get(
+            this.data_url,
+            {},
+            function(data) {
+                tb_project_list.init(data);
+            }, 'json'
+        )
+    },
+
+    init: function(data) {
+        this.data = data;
+        this.vpp_data = {
+            projects: data.projects
+        }
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            vuetify: new Vuetify(),
+            data: this.vpp_data,
+            methods: {
+                show_project_info: function(project) {
+                    tb_project_info.update(project);
+                }
+            }
+        })
+    }
+}
+
+
+var tb_project_info = {
+    vpp: null,
+    vpp_id: '#tb_project_info',
+    vpp_data: {},
+
+    data_url: "[[ url_for('project.api_list') ]]",
+
+    load: function() {
+        $.get(
+            this.data_url,
+            {},
+            function(data) {
+                tb_project_list.init(data);
+            }, 'json'
+        )
+    },
+
+    init: function(data) {
+        this.data = data;
+        this.vpp_data = {
+            project: data.projects[0]
+        }
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            vuetify: new Vuetify(),
+            data: this.vpp_data,
+            methods: {
+
+            }
+        })
+    },
+
+    update: function(project) {
+        this.vpp_data.project = project;
+    }
+}
+
+
+var panda = {
+    init: function() {
+        $.get(
+            tb_project_info.data_url,
+            {},
+            function(data) {
+                tb_project_list.init(data);
+                tb_project_info.init(data);
+            }, 'json'
+        )
+    }
+}
+
+$(document).ready(function() {
+    panda.init();
+})
 </script>
 {% endblock %}

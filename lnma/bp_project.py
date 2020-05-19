@@ -44,6 +44,10 @@ def list():
     projects = dora.list_projects_by_owner_uid(current_user.uid)
 
 
+###############################################################
+# APIs for project
+###############################################################
+
 @bp.route('/api/list')
 @login_required
 def api_list():
@@ -53,4 +57,5 @@ def api_list():
         'success': True,
         'projects': [ project.as_dict() for project in projects ]
     }
+    
     return jsonify(ret)

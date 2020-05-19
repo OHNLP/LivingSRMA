@@ -20,25 +20,30 @@
 <!-- Google Font: Source Sans Pro -->
 <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
 <script src="https://kit.fontawesome.com/cb45cc91b0.js" crossorigin="anonymous"></script>
+{% block stylelink %}
+{% endblock %}
 <style>
 /***************************
  * Reset some settings
  **************************/
+p {
+    margin-bottom: .1rem;
+}
 label {
-  margin: 0;
+    margin: 0;
 }
 /* adminlte and bootstrap */
 .card-body {
-  padding: .5rem;
+    padding: .5rem;
 }
 .table td, .table th {
-  padding: 0;
+    padding: 0;
 }
 .table td {
-  font-size: .9em;
+    font-size: .9em;
 }
 .navbar {
-  padding: .1rem .5rem;
+    padding: .1rem .5rem;
 }
 .layout-navbar-fixed.layout-fixed .wrapper .sidebar {
     margin-top: 0;
@@ -48,6 +53,10 @@ label {
 }
 .content-header {
     padding: 10px .5rem 5px .5rem;
+}
+.col, .col-1, .col-2, .col-3, .col-4, .col-5, .col-6, .col-7, .col-8, .col-9, .col-10, .col-11, .col-12, .col-auto, .col-lg, .col-lg-1, .col-lg-2, .col-lg-3, .col-lg-4, .col-lg-5, .col-lg-6, .col-lg-7, .col-lg-8, .col-lg-9, .col-lg-10, .col-lg-11, .col-lg-12, .col-lg-auto, .col-md, .col-md-1, .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6, .col-md-7, .col-md-8, .col-md-9, .col-md-10, .col-md-11, .col-md-12, .col-md-auto, .col-sm, .col-sm-1, .col-sm-2, .col-sm-3, .col-sm-4, .col-sm-5, .col-sm-6, .col-sm-7, .col-sm-8, .col-sm-9, .col-sm-10, .col-sm-11, .col-sm-12, .col-sm-auto, .col-xl, .col-xl-1, .col-xl-2, .col-xl-3, .col-xl-4, .col-xl-5, .col-xl-6, .col-xl-7, .col-xl-8, .col-xl-9, .col-xl-10, .col-xl-11, .col-xl-12, .col-xl-auto {
+    width: 100%;
+    padding: 5px;
 }
 /* my settings */
 .txt-code {
@@ -103,7 +112,7 @@ label {
           
           <div class="dropdown-divider"></div>
           <a href="#" class="dropdown-item">
-            <i class="fas fa-file mr-2"></i> 3 new papers
+            <i class="fas fa-file mr-2"></i> N new papers
             <span class="float-right text-muted text-sm">2 days</span>
           </a>
 
@@ -158,7 +167,7 @@ label {
               </p>
             </a>
           </li>
-          
+
           <li class="nav-item">
             <a id="nav-link-project-create" href="[[ url_for('project.create') ]]" class="nav-link">
               <i class="nav-icon far fa-folder"></i>
