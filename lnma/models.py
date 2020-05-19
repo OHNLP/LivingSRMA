@@ -2,6 +2,15 @@ from . import db
 from werkzeug.security import generate_password_hash
 from werkzeug.security import check_password_hash
 
+
+# for the relationship between project and user
+rel_project_users = db.Table(
+    'rel_project_users',
+    db.Column('project_id', db.String(48), db.ForeignKey('projects.project_id'), primary_key=True),
+    db.Column('uid', db.String(48), db.ForeignKey('users.uid'), primary_key=True)
+)
+
+
 class User(db.Model):
     """Data model for users
     """
@@ -66,6 +75,10 @@ class Project(db.Model):
     date_updated = db.Column(db.DateTime, index=False)
     settings = db.Column(db.JSON, index=False)
     is_deleted = db.Column(db.String(8), index=False)
+    
+    # for the users
+    users = db.relationship('User', secondary=rel_project_users, lazy='subquery',
+        backref=db.backref('projects', lazy=True))
 
     def __repr__(self):
         return '<Project {0}:{1}>'.format(self.project_id, self.title)

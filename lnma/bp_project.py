@@ -23,14 +23,21 @@ def create():
         return render_template('project.create.html')
 
     project = dora.create_project(
-        keystr = request.form.get('keystr'),
         owner_uid = current_user.uid,
         title = request.form.get('title'),
         abstract = request.form.get('abstract'),
         settings={'collect_template': {}}
     )
 
-    print(project)
     flash('Project is created!')
 
     return 'OK!'
+
+
+@bp.route('/list', methods=['GET', 'POST'])
+@login_required
+def list():
+    if request.method == 'GET':
+        return render_template('project.list.html')
+
+    projects = dora.list_projects_by_owner_uid(current_user.uid)

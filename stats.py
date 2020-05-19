@@ -1,13 +1,21 @@
+#%% load packages and env
 from lnma import db, create_app
-from lnma.models import Admin, User, Project, Paper
+from lnma.models import *
 from lnma import dora
 
 app = create_app()
 db.init_app(app)
 app.app_context().push()
 
+#%% try simple count
 n_users = User.query.count()
 print('* Number of users: {:,}'.format(n_users))
 
-paper = dora.create_paper_by_pmid('123', '24019545')
-print(paper)
+n_projects = Project.query.count()
+print('* Number of projects: {:,}'.format(n_projects))
+
+
+# %%
+rels = Project.query.filter(Project.users.any(uid='hehuan2112@gmail.com')).all()
+
+print(rels)

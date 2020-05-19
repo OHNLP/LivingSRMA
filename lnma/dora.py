@@ -1,20 +1,24 @@
 import uuid
 import datetime
 
+from sqlalchemy import and_, or_, not_
+
 from lnma import ss_state
-from .models import Project
-from .models import Paper
-from .models import Note
+from .models import *
 
 from . import db
 
 IS_DELETED_YES = 'yes'
 IS_DELETED_NO = 'no'
 
-def create_project(keystr, owner_uid, title, abstract, settings):
+REL_PROJECT_USER_CREATOR = 'creator'
+
+def create_project(owner_uid, title, abstract, settings):
     """Create a project based on given parameter
     """
+    # create a project
     project_id = str(uuid.uuid1())
+    keystr = str(uuid.uuid1()).split('-')[0].upper()
     date_created = datetime.datetime.now()
     date_updated = datetime.datetime.now()
     is_deleted = IS_DELETED_NO
@@ -30,11 +34,22 @@ def create_project(keystr, owner_uid, title, abstract, settings):
         settings = settings,
         is_deleted = is_deleted
     )
-
+    owner = User.query.get(owner_uid)
+    project.users.append(owner)
     db.session.add(project)
     db.session.commit()
 
     return project
+
+
+def list_projects_by_owner_uid(owner_uid):
+    projects = Project.query.filter(
+        and_(
+            Project.is_deleted == 'no',
+            Project.owner_uid == owner_uid
+        )
+    ).all()
+    return projects
 
 
 def create_paper_by_pmid(project_id, pmid):
