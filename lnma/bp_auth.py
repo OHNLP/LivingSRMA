@@ -60,7 +60,7 @@ def login():
 
     if check_password_hash(user.password, pswd):
         login_user(user)
-        return redirect(url_for('user_portal.index'))
+        return redirect(url_for('portal.index'))
 
     flash("User doesn't exist or wrong password.")
     return render_template('auth.login.html')
