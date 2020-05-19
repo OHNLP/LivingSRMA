@@ -2,6 +2,7 @@ from flask import request
 from flask import flash
 from flask import render_template
 from flask import Blueprint
+from flask import jsonify
 
 from flask_login import login_required
 from flask_login import current_user
@@ -41,3 +42,15 @@ def list():
         return render_template('project.list.html')
 
     projects = dora.list_projects_by_owner_uid(current_user.uid)
+
+
+@bp.route('/api/list')
+@login_required
+def api_list():
+    projects = dora.list_projects_by_owner_uid(current_user.uid)
+
+    ret = {
+        'success': True,
+        'projects': [ project.as_dict() for project in projects ]
+    }
+    return jsonify(ret)

@@ -43,12 +43,7 @@ def create_project(owner_uid, title, abstract, settings):
 
 
 def list_projects_by_owner_uid(owner_uid):
-    projects = Project.query.filter(
-        and_(
-            Project.is_deleted == 'no',
-            Project.owner_uid == owner_uid
-        )
-    ).all()
+    projects = Project.query.filter(Project.users.any(uid=owner_uid)).all()
     return projects
 
 

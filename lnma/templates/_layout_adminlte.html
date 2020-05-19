@@ -158,29 +158,19 @@ label {
               </p>
             </a>
           </li>
-          <li class="nav-item has-treeview">
-            <a href="#" class="nav-link">
-              <i class="nav-icon fas fa-folder-open"></i>
-              <p>
-                Projects
-                <i class="fas fa-angle-left right"></i>
-                <!-- <span class="badge badge-info right">6</span> -->
-              </p>
+          
+          <li class="nav-item">
+            <a id="nav-link-project-create" href="[[ url_for('project.create') ]]" class="nav-link">
+              <i class="nav-icon far fa-folder"></i>
+              <p>Create New Project</p>
             </a>
-            <ul class="nav nav-treeview">
-              <li class="nav-item">
-                <a id="nav-link-project-create" href="[[ url_for('project.create') ]]" class="nav-link">
-                  <i class="nav-icon far fa-folder"></i>
-                  <p>Create New Project</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a id="nav-link-project-list" href="[[ url_for('project.list') ]]" class="nav-link">
-                  <i class="nav-icon fa fa-list"></i>
-                  <p>List My Projects</p>
-                </a>
-              </li>
-            </ul>
+          </li>
+
+          <li class="nav-item">
+            <a id="nav-link-project-list" href="[[ url_for('project.list') ]]" class="nav-link">
+              <i class="nav-icon fa fa-list"></i>
+              <p>List My Projects</p>
+            </a>
           </li>
 
           <li class="nav-item"><hr></li>

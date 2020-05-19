@@ -15,7 +15,6 @@ n_projects = Project.query.count()
 print('* Number of projects: {:,}'.format(n_projects))
 
 
-# %%
-rels = Project.query.filter(Project.users.any(uid='hehuan2112@gmail.com')).all()
-
-print(rels)
+# %% 
+projects = Project.query.filter(Project.users.any(uid='hehuan2112@gmail.com')).all()
+print(projects)

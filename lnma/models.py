@@ -43,6 +43,15 @@ class User(db.Model):
     def check_password(self, password):
         return check_password_hash(self.password, password)
 
+    # for data API
+    def as_dict(self):
+        return {
+            'uid': self.uid,
+            'first_name': self.first_name,
+            'last_name': self.last_name,
+            'role': self.role
+        }
+
 
 class Admin(db.Model):
     """Data model for admins
@@ -80,6 +89,20 @@ class Project(db.Model):
     users = db.relationship('User', secondary=rel_project_users, lazy='subquery',
         backref=db.backref('projects', lazy=True))
 
+    # for JSON
+    def as_dict(self):
+        return {
+            'project_id': self.project_id,
+            'keystr': self.keystr,
+            'owner_uid': self.owner_uid,
+            'title': self.title,
+            'abstract': self.abstract,
+            'date_created': self.date_created,
+            'date_updated': self.date_updated,
+            'settings': self.settings,
+            'users': [ u.as_dict() for u in self.users ]
+        }
+
     def __repr__(self):
         return '<Project {0}:{1}>'.format(self.project_id, self.title)
 
@@ -105,6 +128,24 @@ class Paper(db.Model):
     date_created = db.Column(db.DateTime, index=False)
     date_updated = db.Column(db.DateTime, index=False)
     is_deleted = db.Column(db.String(8), index=False)
+
+    def as_dict(self):
+        return {
+            'paper_id': self.paper_id,
+            'pid': self.pid,
+            'pid_type': self.pid_type,
+            'project_id': self.project_id,
+            'title': self.title,
+            'pub_date': self.pub_date,
+            'authors': self.authors,
+            'journal': self.journal,
+            'meta': self.meta,
+            'ss_st': self.ss_st,
+            'ss_pr': self.ss_pr,
+            'ss_rs': self.ss_rs,
+            'date_created': self.date_created,
+            'date_updated': self.date_updated,
+        }
 
     def __repr__(self):
         return '<Paper {0}:{1} {2}>'.format(self.paper_id, self.pub_date, self.title)
