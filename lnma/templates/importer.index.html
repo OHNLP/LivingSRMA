@@ -14,6 +14,8 @@ Study Importer
         <div class="row mb-2">
             <div class="col-sm-6">
                 <h1 class="m-0 text-dark">Study Importer</h1>
+                <p class="lead">Import papers to current project.</p>
+                
             </div><!-- /.col -->
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
@@ -30,9 +32,21 @@ Study Importer
     <div class="container-fluid">
         <div class="row">
             <div class="col-lg-6">
-                <p class="lead">Below is an example form built entirely with Bootstrap’s form controls. Each required form group has a
-                    validation state that can be triggered by attempting to submit the form without completing it.</p>
-                
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Import studies by PMID List</h5>
+                        <p class="card-text">Input the PMID in the following area, one PMID per line.</p>
+                        <form action="[[ url_for('importer.upload_pmids') ]]" method="POST">
+                            <div class="form-group">
+                                <textarea class="form-control" id="input_pmids" name="pmids" rows="10"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary" placeholder="123456789\n234567891">
+                                <i class="fa fa-upload"></i>
+                                Upload These PMIDs
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

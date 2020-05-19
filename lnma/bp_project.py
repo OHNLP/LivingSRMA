@@ -57,5 +57,5 @@ def api_list():
         'success': True,
         'projects': [ project.as_dict() for project in projects ]
     }
-    
+
     return jsonify(ret)

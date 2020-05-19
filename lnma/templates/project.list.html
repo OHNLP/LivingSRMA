@@ -84,6 +84,17 @@ My Projects
                             </h4>
                             <p>KEY STRING: <span id="project_keystr">{{ project.keystr }}</span></p>
                             <p>{{ project.abstract }}</p>
+                            <hr>
+                            <button type="submit" class="btn btn-primary"
+                                v-on:click="set_as_working_project();">
+                                <i class="far fa-edit"></i>
+                                Set as Working Project
+                            </button>
+
+                            <button class="btn btn-danger">
+                                <i class="fa fa-trash"></i>
+                                Delete This Project
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -167,7 +178,14 @@ var tb_project_info = {
             vuetify: new Vuetify(),
             data: this.vpp_data,
             methods: {
+                set_as_working_project: function() {
+                    Cookies.set('project_id', this.project.project_id);
+                    Cookies.set('project_title', this.project.title);
+                },
 
+                delete_project: function() {
+                    
+                }
             }
         })
     },
