@@ -8,19 +8,19 @@ from flask_login import current_user
 
 from lnma import dora
 
-bp = Blueprint("user_portal", __name__, url_prefix="/user_portal")
+bp = Blueprint("project", __name__, url_prefix="/project")
 
 @bp.route('/')
 @login_required
 def index():
-    return render_template('user_portal.index.html')
+    return render_template('project.index.html')
 
 
-@bp.route('/create_project', methods=['GET', 'POST'])
+@bp.route('/create', methods=['GET', 'POST'])
 @login_required
-def create_project():
+def create():
     if request.method == 'GET':
-        return render_template('user_portal.create_project.html')
+        return render_template('project.create.html')
 
     project = dora.create_project(
         keystr = request.form.get('keystr'),

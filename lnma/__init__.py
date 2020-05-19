@@ -28,6 +28,15 @@ def create_app(test_config=None):
     except OSError:
         pass
 
+    # load blueprints
+    from lnma import bp_index
+    from lnma import bp_auth
+    from lnma import bp_portal
+    from lnma import bp_project
+    from lnma import bp_collector
+    from lnma import bp_screener
+    from lnma import bp_importer
+
     login_manager = LoginManager()
     login_manager.init_app(app)
     login_manager.login_view = "auth.login"
@@ -35,20 +44,20 @@ def create_app(test_config=None):
     # bind user
     @login_manager.user_loader
     def load_user(user_id):
-        return auth.user_loader(user_id)
+        return bp_auth.user_loader(user_id)
 
     @login_manager.request_loader
     def request_loader(request):
-        return auth.request_loader(request)
+        return bp_auth.request_loader(request)
 
     # apply the blueprints to the app
-    from lnma import index
-    from lnma import auth
-    from lnma import user_portal
-
-    app.register_blueprint(index.bp)
-    app.register_blueprint(auth.bp)
-    app.register_blueprint(user_portal.bp)
+    app.register_blueprint(bp_index.bp)
+    app.register_blueprint(bp_auth.bp)
+    app.register_blueprint(bp_portal.bp)
+    app.register_blueprint(bp_project.bp)
+    app.register_blueprint(bp_collector.bp)
+    app.register_blueprint(bp_screener.bp)
+    app.register_blueprint(bp_importer.bp)
 
     # make url_for('index') == url_for('blog.index')
     # in another app, you might define a separate main index here with
