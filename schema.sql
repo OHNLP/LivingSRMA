@@ -65,6 +65,11 @@ CREATE TABLE `notes` (
 -- Dumping data for table `notes`
 --
 
+LOCK TABLES `notes` WRITE;
+/*!40000 ALTER TABLE `notes` DISABLE KEYS */;
+/*!40000 ALTER TABLE `notes` ENABLE KEYS */;
+UNLOCK TABLES;
+
 --
 -- Table structure for table `papers`
 --
@@ -96,6 +101,12 @@ CREATE TABLE `papers` (
 -- Dumping data for table `papers`
 --
 
+LOCK TABLES `papers` WRITE;
+/*!40000 ALTER TABLE `papers` DISABLE KEYS */;
+INSERT INTO `papers` VALUES ('3dbdd662-97f7-11ea-9a4b-98eecba7646f','24019545','pmid','123','','','','',NULL,'a12','na','na','2020-05-16 23:31:14','2020-05-16 23:31:14','no'),('64a46c7a-99e9-11ea-9a4b-98eecba7646f','24019545','pmid','123','','','','',NULL,'a12','na','na','2020-05-19 10:57:08','2020-05-19 10:57:08','no');
+/*!40000 ALTER TABLE `papers` ENABLE KEYS */;
+UNLOCK TABLES;
+
 --
 -- Table structure for table `projects`
 --
@@ -117,6 +128,40 @@ CREATE TABLE `projects` (
   UNIQUE KEY `key_str_UNIQUE` (`keystr`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `projects`
+--
+
+LOCK TABLES `projects` WRITE;
+/*!40000 ALTER TABLE `projects` DISABLE KEYS */;
+INSERT INTO `projects` VALUES ('0b8098bc-99e9-11ea-9a4b-98eecba7646f','hehuan2112@gmail.com','0B8098BD','The small lung cell project','The small lung cell project','2020-05-19 10:54:39','2020-05-19 10:54:39','{\"collect_template\": {}}','no'),('954af104-99ea-11ea-9a4b-98eecba7646f','hehuan2112@gmail.com','954AF105','The kidney cancer project','The kidney','2020-05-19 11:05:39','2020-05-19 11:05:39','{\"collect_template\": {}}','no');
+/*!40000 ALTER TABLE `projects` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `rel_project_users`
+--
+
+DROP TABLE IF EXISTS `rel_project_users`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `rel_project_users` (
+  `project_id` varchar(48) NOT NULL,
+  `uid` varchar(64) NOT NULL,
+  PRIMARY KEY (`project_id`,`uid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `rel_project_users`
+--
+
+LOCK TABLES `rel_project_users` WRITE;
+/*!40000 ALTER TABLE `rel_project_users` DISABLE KEYS */;
+INSERT INTO `rel_project_users` VALUES ('0b8098bc-99e9-11ea-9a4b-98eecba7646f','hehuan2112@gmail.com'),('954af104-99ea-11ea-9a4b-98eecba7646f','hehuan2112@gmail.com');
+/*!40000 ALTER TABLE `rel_project_users` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `users`
@@ -142,8 +187,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES ('hehuan2112@gmail.com','pbkdf2:sha256:150000$oHLnajng$9be224b50b962de1d83cd745124fc6fe6828e5079c560fa6654d668439b77503','Huan','He','user','no');
-INSERT INTO `users` VALUES ('sipra.irbaz@gmail.com','pbkdf2:sha256:150000$oHLnajng$9be224b50b962de1d83cd745124fc6fe6828e5079c560fa6654d668439b77503','Irbaz','Riaz','user','no');
+INSERT INTO `users` VALUES ('hehuan2112@gmail.com','pbkdf2:sha256:150000$oHLnajng$9be224b50b962de1d83cd745124fc6fe6828e5079c560fa6654d668439b77503','Huan','He','user','no'),('sipra.irbaz@gmail.com','pbkdf2:sha256:150000$oHLnajng$9be224b50b962de1d83cd745124fc6fe6828e5079c560fa6654d668439b77503','Irbaz','Riaz','user','no');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -156,4 +200,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-05-17 20:47:36
+-- Dump completed on 2020-05-19 15:04:28
