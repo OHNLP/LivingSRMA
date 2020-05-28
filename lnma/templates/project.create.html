@@ -7,31 +7,18 @@ Create Project
 {% block style %}
 {% endblock %}
 
+{% block page_name %}
+<i class="far fa-folder"></i>
+Create New Project
+{% endblock %}
+
 {% block content %}
-<!-- Content Header (Page header) -->
-<div class="content-header">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-sm-6">
-                <h1 class="m-0 text-dark">Create Project</h1>
-                <p class="lead">Create a new project of network meta-analysis.</p>
-                
-            </div><!-- /.col -->
-            <div class="col-sm-6">
-                <ol class="breadcrumb float-sm-right">
-                    <li class="breadcrumb-item"><a href="[[ url_for('portal.index') ]]">Home</a></li>
-                    <li class="breadcrumb-item active">Create Project</li>
-                </ol>
-            </div><!-- /.col -->
-        </div><!-- /.row -->
-    </div><!-- /.container-fluid -->
-</div>
-<!-- /.content-header -->
 
 <div class="content">
     <div class="container-fluid">
         <div class="row">
             <div class="col-lg-6">
+                <p class="lead">Please provide the following information to create a new project:</p>
                 <form method="POST" action="[[ url_for('project.create') ]]">
                     <div class="form-group">
                         <label for="input_title">Project Title</label>
@@ -39,6 +26,14 @@ Create Project
                             placeholder="The lung cancer meta-analysis">
                         <small id="input_title_help" class="form-text text-muted">
                             The project title must be at least 8 characters long, contain letters and numbers, no special characters.
+                        </small>
+                    </div>
+                
+                    <div class="form-group">
+                        <label for="input_query">Query</label>
+                        <textarea class="form-control" id="input_query" name="query" rows="2"></textarea>
+                        <small id="input_query_help" class="form-text text-muted">
+                            The query for automatic search.
                         </small>
                     </div>
                 
