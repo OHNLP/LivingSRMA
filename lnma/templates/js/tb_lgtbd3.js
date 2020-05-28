@@ -24,9 +24,9 @@ var tb_lgtbd3 = {
     svg: null,
     width: 500,
     height: 400,
-    width_cell: 80,
-    height_cell: 40,
-    font_size: 13,
+    width_cell: 72,
+    height_cell: 32,
+    font_size: 12,
     color_ctc: '#DFDFDF',
     color_border: 'whitesmoke',
     color_scale: d3.scaleLinear()
