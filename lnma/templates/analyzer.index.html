@@ -5,46 +5,1268 @@ Data Analyzer
 {% endblock %}
 
 {% block style %}
+<style>
+    .content-wrapper {
+        background: white;
+    }
+.d-display-block {
+    display: block;
+}
+.d-display-none {
+    display: none !important;
+}
+.flex-container {
+    display: flex;
+    justify-content: flex-start;
+    width: 100%;
+    height: 100%;
+}
+.box {
+    display: flex;
+    flex-direction: column;
+}
+.box-header {
+    width: 100%;
+    padding: 3px 0;
+    display: flex;
+    align-items: center;
+}
+.box-header a {
+    font-size: .8em;
+}
+.box-header h4 {
+    padding: 0;
+    margin: 0;
+    font-size: .95em;
+    height: 1.6em;
+    line-height: 1.6em;
+    margin: 3px 0;
+}
+.box-header button, 
+.box-body button,
+.box-footer button {
+    height: 1.7em;
+    line-height: 1em;
+    font-size: .8em;
+    margin: 3px;
+}
+.box-header select {
+    height: 1.6em;
+    line-height: 1.2em;
+    font-size: .8em;
+    margin: 3px;
+}
+.box-header span {
+    font-size: .9em;
+}
+.box-header a {
+    padding: 1px 3px;
+    margin: 0 5px;
+    height: 1.6em;
+    line-height: 1.6em;
+}
+.box-header a:hover {
+    text-decoration: underline;
+
+}
+.box-body {
+    width: 100%;
+}
+.box-bodyitem {
+    padding: 0 0 3px 0;
+}
+.box-bodyitem-hl {
+    display: flex;
+    flex-direction: row;
+}
+.box-bodyitem-label {
+    width: 54%;
+    font-size: .9em;
+    line-height: 1.8em;
+}
+.box-bodyitem-value {
+    width: 45%;
+}
+.box-bodyitem select {
+    width: 100%;
+}
+.box-bodyitem input {
+    width: calc(100% - 4px);
+}
+.box-p {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    font-size: .9em;
+    line-height: 1.1em;
+}
+.box-p-fixlen {    
+    white-space: nowrap;
+    text-overflow:ellipsis;
+    overflow: hidden;
+}
+.box-footer {
+    width: 100%;
+    min-height: 20px;
+    padding: 5px 0 5px 0;
+    border-bottom: 1px dotted #CCCCCC;
+}
+
+/* for this page */
+.footer {
+    width: 100%;
+    display: flex;
+    align-items: flex-end;
+    font-size: .75em;
+}
+.footer div {
+    height: 35px;
+    line-height: 4em;
+}
+.footer-link a {
+    padding: 0 5px;
+    color: #999999;
+}
+#wrapper {
+    font-size: 13px;
+}
+#left-pane {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-width: 210px;
+    width: 210px;
+    /* height: calc(100% - 10px); */
+    margin: 0 10px 0 0;
+    padding: 5px 10px;
+    /* border-right: 1px solid lightgray; */
+    /* background-color: #FCFCFC; */
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+#main-pane {
+    /* width: calc(100% - 240px);
+    height: calc(100% - 10px); */
+    margin: 0 10px 0 0;
+    padding: 5px;
+    /* background-color: #FFFFFF; */
+
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+}
+#main-pane .box {
+    /* border-right: 1px dotted #ccc; */
+    /* border-bottom: 1px dotted #ccc; */
+    margin: 0 10px 10px 0;
+    border-radius: 5px;
+}
+.pane-row {
+    display: flex;
+    flex-direction: row;
+}
+/* network plot */
+.fg-net-node-text {
+    cursor: pointer;
+}
+.fg-net-node-text:hover {
+    fill: darkred;
+}
+.selected .fg-net-node-text{
+    font-weight: bold;
+    fill: red;
+}
+/* forest plot styles */
+.fg-title {
+    fill: black;
+    font-weight: bold;
+}
+.fg-subtitle {
+    fill: black;
+    text-decoration: italic;
+}
+.fg-frs-th {
+    font-weight: bold;
+}
+.fg-frs-td {
+    font-weight: normal;
+}
+.fg-frs-item text {
+    font-size: .9em;
+}
+.fg-frs-item:hover text {
+    font-weight: bold;
+}
+.fg-row-bg {
+    fill: white;
+}
+.fg-frs-item:hover .fg-row-bg {
+    fill: whitesmoke;
+}
+.fg-frs-line {
+    stroke-width: 1;
+    stroke: black;
+}
+.fg-frs-box {
+    fill: dodgerblue;
+    fill-opacity: .7;
+}
+.fg-frs-guideline {
+    stroke-width: 1;
+    stroke: black;
+}
+.fg-frs-mddot {
+    fill: black;
+    fill-opacity: .8;
+}
+/* League Table */
+#tb-nma-league-div {
+    display: flex;
+    flex-direction: column;
+}
+.tb-colname {
+    text-align: center;
+    border-bottom: 1px solid dimgray;
+}
+.tb-rowname {
+    width: 30px;
+}
+.tb-th {
+    width: 70px;
+    text-align: center;
+    margin: 0 2px 2px 0;
+}
+.tb-row {
+    display: flex;
+    flex-direction: row;
+}
+.tb-row-lead {
+    width: 80px;
+    height: 35px;
+    line-height: 40px;
+    margin: 0 2px 2px 0;
+    padding: 0 3px 0 0;
+}
+.tb-cell {
+    width: 69px;
+    height: 34px;
+    padding: 1px 0 0 1px;
+    border-right: 2px solid white;
+    border-bottom: 2px solid white;
+    text-align: center;
+    background-color: whitesmoke;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
+}
+.tb-cell:hover {
+    padding: 0 1px 1px 0;
+    border-right: 2px solid gray;
+    border-bottom: 2px solid gray;
+}
+.tb-cell-value {
+    width: 69px;
+    height: 24px;
+    line-height: .9em;
+}
+.tb-cell-blank {
+    width: 69px;
+    height: 16px;
+    font-weight: bold;
+}
+.tb-league-luci {
+    font-size: .8em;
+}
+#start-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    display: flex;
+    background: white;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+#ss-msg {
+    width: 100%;
+    padding: 10px 0;
+    text-align: center;
+}
+
+#dataset_summary {
+    font-size: .7rem;
+    padding: 10px 0 5px 0; 
+    margin: 10px 0 5px 0; 
+    border-top: 1px dotted #EAEAEA;
+    border-bottom: 1px dotted #EAEAEA;
+}
+#dataset_summary p {
+    margin: 0 0 .5rem 0;
+}
+#dataset_summary h4 {
+    margin: 0 0 .5rem 0;
+}
+.rank_table {
+    width: 100%;
+}
+.rank_table th {
+    text-align: left;
+    border-bottom: 1px solid #666666;
+}
+.rank_table td {
+    border-bottom: 1px solid #666666;
+}
+</style>
 {% endblock %}
 
 {% block content %}
-<!-- Content Header (Page header) -->
-<div class="content-header">
-    <div class="container-fluid">
-        <div class="row mb-2">
-            <div class="col-sm-6">
-                <h1 class="m-0 text-dark">Data Analyzer</h1>
-            </div><!-- /.col -->
-            <div class="col-sm-6">
-                <ol class="breadcrumb float-sm-right">
-                    <li class="breadcrumb-item"><a href="[[ url_for('portal.index') ]]">Home</a></li>
-                    <li class="breadcrumb-item active">Data Analyzer</li>
-                </ol>
-            </div><!-- /.col -->
-        </div><!-- /.row -->
-    </div><!-- /.container-fluid -->
-</div>
-<!-- /.content-header -->
 
-<div class="content">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-lg-6">
-                <p class="lead">Below is an example form built entirely with Bootstrap’s form controls. Each required form group has a
-                    validation state that can be triggered by attempting to submit the form without completing it.</p>
+<div id="wrapper" class="flex-container">
+
+<div id="left-pane">
+    <div class="upper">
+        <div class="box" style="width: 200px;" id="fm-nma-dsloader">
+            <div class="box-header">
+                <h4>
+                    <span class="fa fa-database"></span>
+                    DATASET
+                </h4>
+            </div>
+            
+            <div class="box-body">
+
+                <form id="upload-file" method="post" enctype="multipart/form-data">
+                    <label for="file">Select Data File</label>
+                    <input id="ipt-csv-file" name="file" type="file" style="width:200px;">
+                </form>
+                <button v-on:click="upload">
+                    <span class="fa fa-upload"></span>
+                    Upload &amp; Read Data File
+                </button>
+                <div id="dataset_summary"
+                    v-html="dataset_summary">
+                </div>
+            </div>
+            
+        </div><!-- .box / upload file -->
+    
+        <div class="box" style="width: 200px;" id="fm-nma-settings">
+            <div class="box-header">
+                <h4>
+                    <span class="fa fa-sliders-h"></span>
+                    SETTINGS
+                </h4>
+            </div>
+            
+            <div class="box-body">
+                <div class="box-bodyitem box-bodyitem-hl">
+                    <div class="box-bodyitem-label">
+                        <label title="Bayesian NMA Backend Engine">Input Format:</label>
+                    </div>
+                    <div class="box-bodyitem-value">
+                        <select v-model="input_format.selected"
+                            v-bind:disabled="input_format.disabled">
+                            <option v-for="option in input_format.options" v-bind:value="option.value">
+                                {{ option.text }}
+                            </option>
+                        </select>
+                    </div>
+                    
+                </div>
+
+                <div class="box-bodyitem box-bodyitem-hl">
+                    <div class="box-bodyitem-label">
+                        <label title="Bayesian NMA Backend Engine">Analysis Method:</label>
+                    </div>
+                    <div class="box-bodyitem-value">
+                        <select v-model="analysis_method.selected"
+                            v-bind:disabled="analysis_method.disabled">
+                            <option v-for="option in analysis_method.options" v-bind:value="option.value">
+                                {{ option.text }}
+                            </option>
+                        </select>
+                    </div>
+                    
+                </div>
+
+                <div class="box-bodyitem box-bodyitem-hl">
+                    <div class="box-bodyitem-label">
+                        <label title="Measure of Effect">Measure of Effect:</label>
+                    </div>
+                    <div class="box-bodyitem-value">
+                        <select v-model="measures.selected"
+                            v-bind:disabled="measures.disabled">
+                            <option v-for="option in measures.options" v-bind:value="option.value">
+                                {{ option.text }}
+                            </option>
+                        </select>
+                    </div>
+                    
+                </div>
+
+                <div class="box-bodyitem box-bodyitem-hl">
+                    <div class="box-bodyitem-label">
+                        <label title="Reference Treatment">Ref. Treatment: </label>
+                    </div>
+                    <div class="box-bodyitem-value">
+                        <select v-model="treatments.selected">
+                            <option v-for="option in treatments.options" v-bind:value="option.value">
+                                {{ option.text }}
+                            </option>
+                        </select>
+                    </div>
+                    
+                </div>
+    
+                <div class="box-bodyitem box-bodyitem-hl">
+                    <div class="box-bodyitem-label">
+                        <label title="">Fixed / Random: </label>
+                    </div>
+                    <div class="box-bodyitem-value">
+                        <select v-model="fixed_or_random.selected">
+                            <option v-for="option in fixed_or_random.options" v-bind:value="option.value">
+                                {{ option.text }}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+    
+                <div class="box-bodyitem box-bodyitem-hl">
+                    <div class="box-bodyitem-label">
+                        <label title="">Which is Better: </label>
+                    </div>
+                    <div class="box-bodyitem-value">
+                        <select v-model="which_is_better.selected">
+                            <option v-for="option in which_is_better.options" v-bind:value="option.value">
+                                {{ option.text }}
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="box-bodyitem box-bodyitem-hl"
+                    v-bind:class="'d-display-' + (analysis.is_display?'block':'none')">
+                    <div class="box-bodyitem-label">
+                        <label title="">Analysis: </label>
+                    </div>
+                    <div class="box-bodyitem-value">
+                        <select v-model="analysis.selected">
+                            <option v-for="option in analysis.options" v-bind:value="option.value">
+                                {{ option.text }}
+                            </option>
+                        </select>
+                    </div>
+                </div>
                 
+                <div class="box-bodyitem box-bodyitem-hl"
+                    v-bind:class="'d-display-' + (project_name.is_display?'block':'none')">
+                    <div class="box-bodyitem-label">
+                        <label title="">Project: </label>
+                    </div>
+                    <div class="box-bodyitem-value">
+                        <input v-model="project_name.value" />
+                    </div>
+                </div>
+    
+            </div>
+            <div class="box-footer">
+                
+                <button v-on:click="analyze" 
+                    v-bind:disabled="btn_analyze.disabled">
+                    <span class="fa fa-project-diagram"></span>
+                    <span v-if="btn_analyze.disabled">
+                        {{ btn_analyze.txt_working }}
+                    </span>
+                    <span v-else>
+                        {{ btn_analyze.txt_normal }}
+                    </span>
+                </button>
+    
+            </div>
+        </div>
+    
+        <div class="box" style="width: 200px;" id="tb-nma-netcha">
+            <div class="box-header">
+                <h4>
+                    <span class="fa fa-bars"></span>
+                    NET CHARACTERISTICS
+                </h4>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+                <div class="box-bodyitem" v-for="r in tabledata">
+                    <p class="box-p box-p-fixlen" v-bind:title="r.cha">{{ r.cha }}</p>
+                    <p class="box-p box-p-fixlen" style="text-align: right; margin: -2px 0 0 0; border-bottom: 1px solid #EAEAEA; font-weight: bold;">{{ r.val }}</p>
+                </div>
             </div>
         </div>
     </div>
+
+    
+</div><!-- #left-pane -->
+
+<div id="main-pane">
+    <div class="pane-row">
+        <div class="box" style="width: 300px; display: none;" id="fg-nma-netplt">
+            <div class="box-header">
+                <h4>
+                    <span class="fa fa-project-diagram"></span>
+                    NETWORK PLOT
+                </h4>
+                <div style="margin-left: 5px;">
+                    <button onclick="fig_saver.save_png(fg_netplt.svg, 'figure_network_plot');">
+                        <i class="far fa-save"></i> Save PNG
+                    </button>
+                </div>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+                <svg id="fg-nma-netplt-svg"></svg>
+            </div>
+        </div>
+
+        <div class="box" style="width: 360px; display: none;" id="fg-nma-frsplt">
+            <div class="box-header">
+                <h4>
+                    <span class="fa fa-align-left"></span>
+                    INTERVAL PLOT
+                </h4>
+                <div style="margin-left: 5px;">
+                    <button onclick="fig_saver.save_png(fg_frsplt.svg, 'figure_interval_plot');">
+                        <i class="far fa-save"></i> Save PNG
+                    </button>
+                </div>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+                <svg id="fg-nma-frsplt-svg"></svg>
+            </div>
+        </div><!-- .box forest plot -->
+
+        <div class="box" style="width: 320px; display: none;" id="tb_ranktb">
+            <div class="box-header">
+                <h4>
+                    <span class="fa fa-dice-d6"></span>
+                    RANK TABLE
+                </h4>
+                <div style="margin-left: 5px;">
+                    <button onclick="fig_saver.save_csv(tb_ranktb.vpp.$data, 'table-rank');">
+                        <i class="far fa-save"></i> Save CSV
+                    </button>
+                </div>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+               <table class="rank_table">
+                   <thead>
+                       <tr>
+                           <th v-for="item in header">
+                               {{ item }}
+                           </th>
+                       </tr>
+                   </thead>
+                   <tbody>
+                       <tr v-for="item in tabledata">
+                           <td>{{ item.treat }}</td>
+                           <td>{{ item.value }}</td>
+                           <td>{{ item.value_rank }}</td>
+                       </tr>
+                   </tbody>
+               </table>
+            </div>
+        </div>
+
+    </div><!-- .pane-row -->
+    
+    
+    <div class="pane-row">
+        
+        <div class="box" style="width: auto; padding-right: 10px; display: none;" id="tb-nma-league">
+            <div class="box-header">
+                <h4>
+                    <span class="fa fa-table"></span>
+                    LEAGUE TABLE 
+                </h4>
+                <div style="margin-left: 5px;">
+                    <button onclick="fig_saver.save_png(tb_lgtbd3.svg, 'figure_league_table');">
+                        <i class="far fa-save"></i> Save PNG
+                    </button>
+                </div>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+                <svg id="tb_lgtbd3"></svg>
+
+                <p v-html="league_table_explain">
+                </p>
+            </div>
+        </div><!-- .box SUCRA plot -->
+
+
+        <div class="box" style="width: 300px; display: none;" id="fg-nma-scrplt">
+            <div class="box-header">
+                <h4>
+                    <span class="fa fa-chart-line"></span>
+                    SUCRA PLOT
+                </h4>
+                <div style="margin-left: 5px;">
+                    <button onclick="var svg = d3.select('#fg-nma-scrplt-div svg');fig_saver.save_png(svg, 'figure_sucra_plot');">
+                        <i class="far fa-save"></i> Save PNG
+                    </button>
+                </div>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+                <div id="fg-nma-scrplt-div"></div>
+            </div>
+        </div><!-- .box SUCRA plot -->
+
+        <div class="box" style="width: 300px; display: none;" id="fg-nma-pscplt">
+            <div class="box-header">
+                <h4>
+                    <span class="fa fa-chart-line"></span>
+                    P-Score PLOT
+                </h4>
+                <div style="margin-left: 5px;">
+                    <button onclick="var svg = d3.select('#fg-nma-pscplt-div svg');fig_saver.save_png(svg, 'figure_p-score_plot');">
+                        <i class="far fa-save"></i> Save PNG
+                    </button>
+                </div>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+                <div id="fg-nma-pscplt-div"></div>
+            </div>
+        </div><!-- .box P-Score plot -->
+
+    </div>
 </div>
 
-
+</div>
 {% endblock %}
 
 {% block active_nav_link %}analyzer{% endblock %}
 
 {% block script %}
+<!-- D3.js -->
+<script src="/static/lib/d3/d3.min.js"></script>
+<!-- ECharts -->
+<script src="/static/lib/echarts/echarts.js"></script>
+<!-- FileSavaer -->
+<script src="/static/lib/file-saver/FileSaver.min.js"></script>
+<!-- My Scripts -->
 <script>
+
+{% include "js/fg_netplt.js" %}
+{% include "js/fg_frsplt.js" %}
+{% include "js/fg_scrplt.js" %}
+{% include "js/fg_pscplt.js" %}
+
+{% include "js/tb_lgtbd3.js" %}
+{% include "js/tb_ranktb.js" %}
+{% include "js/tb_netcha.js" %}
+
+{% include "js/fig_saver.js" %}
+
+// This is the global variable for all the data used in this analysis
+var dataset = {
+    // there are 3 coltypes:
+    // 'HRLU': ['study', 't1', 't2', 'hr', 'upperci', 'lowerci'],
+    // 'ET': ['study', 'treat', 'event', 'total'],
+    // 'FTET': ['study', 'treat', 'event', 'total', 'time'],
+    coltype: null,
+    raw: [],
+    fn_raw_csv_file: '',
+    treatments: [],
+    nma_result: null,
+
+    // function
+    parse_treatments: function() {
+        if (this.coltype == 'HRLU') {
+            this.parse_treats_hr();
+        } else if (this.coltype == 'ET') {
+            this.parse_treats_et_series();
+        } else if (this.coltype == 'FTET') {
+            this.parse_treats_et_series();
+        } else {
+            msger.show('The data format in the input file is not supported', msger.WARNING);
+        }
+    },
+
+    // function
+    parse_treats_hr: function() {
+        this.treatments = [];
+        var tmp = {};
+        for (let i = 0; i < this.raw.length; i++) {
+            const r = this.raw[i];
+            tmp[r.t1] = 1;
+            tmp[r.t2] = 1;
+        }
+        for (var k in tmp) {
+            this.treatments.push({text: k, value: k});
+        }
+    },
+
+    parse_treats_et_series: function() {
+        // clear old treatments
+        this.treatments = [];
+        var tmp = {}
+        for (let i = 0; i < this.raw.length; i++) {
+            const r = this.raw[i];
+            if (!tmp.hasOwnProperty(r.treat)) {
+                tmp[r.treat] = 1
+            }
+        }
+        for (var k in tmp) {
+            this.treatments.push({text: k, value: k});
+        }
+    },
+
+    end: true
+};
+
+var fm_loader = {
+    box: null,
+    box_id: '#fm-nma-dsloader',
+    vpp: null,
+    vpp_id: '#fm-nma-dsloader',
+    data: null,
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                btn_upload: {
+                    disabled: false,
+                    txt_normal: 'Upload',
+                    txt_working: 'Uploading ...'
+                },
+
+                dataset_summary: '',
+
+                datasets: []
+            },
+            methods: {
+                upload: function() {
+                    fm_loader.upload_data_file();
+                },
+
+                open_dataset: function(fn) {
+                    nma_controller.read_data_file_in_path(fn, 'static');
+                }
+            }
+        });
+    },
+
+    set_dataset_summary: function(s) {
+        this.vpp.dataset_summary = s;
+    },
+
+    toggle_btn_upload: function() {
+        this.vpp.btn_upload.disabled = !this.vpp.btn_upload.disabled;
+    },
+
+    upload_data_file: function() {
+        if ($('#ipt-csv-file').val() == '') {
+            msger.show('Choose a Data File for analysis', msger.WARNING);
+            return;
+        }
+        // update UI
+        this.vpp.btn_upload.disabled = true;
+        var form_data = new FormData($('#upload-file')[0]);
+        $.ajax({
+            type: 'POST',
+            url: './read_file',
+            data: form_data,
+            contentType: false,
+            cache: false,
+            processData: false,
+            success: function(data) {
+                console.log(data);
+                fm_loader.toggle_btn_upload();
+                nma_controller.on_read_data_file(data);
+                dataset.fn_raw_csv_file = data.fn;
+                // msger.show('Data File is uploaded!', msger.SUCCESS);
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.error(textStatus, errorThrown);
+            }
+        });
+    },
+}
+
+var fm_config = {
+    vpp: null,
+    vpp_id: '#fm-nma-settings',
+
+    configs: {
+
+        btn_analyze: {
+            disabled: true,
+            txt_normal: 'Analyze',
+            txt_working: 'Analyzing'
+        },
+
+        btn_getrsrc: {
+            disabled: true
+        },
+
+        treatments: {
+            selected: '',
+            options: []
+        },
+
+        input_format: {
+            selected: 'HRLU',
+            disabled: true,
+            options: [
+                {text: 'HR, Lower, Upper', value: 'HRLU'},
+                {text: 'Event Total', value: 'ET'},
+                {text: 'Follow-up Time, Event, Total', value: 'FTET'}
+            ]
+        },
+
+        analysis_method: {
+            selected: 'freq',
+            options: [
+                {text: 'Frequentist NMA', value: 'freq'},
+                {text: 'Bayesian NMA', value: 'bayes'}
+            ]
+        },
+
+        freq_backends: {
+            selected: 'netmeta',
+            options: [
+                {text: 'BUGsnet Package', value: 'bugsnet'},
+                {text: 'netmeta Package', value: 'netmeta'}
+            ]
+        },
+
+        bayes_backends: {
+            selected: 'dmetar',
+            options: [
+                {text: 'BUGsnet Package', value: 'bugsnet'},
+                {text: 'dmetar Package', value: 'dmetar'}
+            ]
+        },
+
+        measures: {
+            selected: 'rr',
+            disabled: false,
+            options: [
+                {text: 'Hazard Ratio', value: 'hr'},
+                {text: 'Risk Ratio', value: 'rr'},
+                {text: 'Odds Ratio', value: 'or'}
+            ]
+        },
+
+        fixed_or_random: {
+            selected: 'fixed',
+            options: [
+                {text: 'Fixed Effect Model', value: 'fixed'},
+                {text: 'Random Effect Model', value: 'random'}
+            ]
+        },
+
+        which_is_better: {
+            selected: 'small',
+            options: [
+                {text: 'Lower is Better', value: 'small'},
+                {text: 'Larger is Better', value: 'big'}
+            ]
+        },
+        
+        /////////////////////////////////////////////////////
+        // The followings are for development purpose
+        /////////////////////////////////////////////////////
+
+        project_name: {
+            value: 'KDNC',
+            disabled: false,
+            is_display: false
+        },
+
+        analysis: {
+            selected: 'pfs',
+            disabled: false,
+            is_display: false,
+            options: [
+                {text: 'PFS', value: 'pfs'},
+                {text: 'OS', value: 'os'},
+                {text: 'AEs', value: 'aes'}
+            ]
+        },
+
+        is_dev: false
+    },
+
+    settings: {
+        measures: {
+            default: {
+                selected: 'rr',
+                disabled: false,
+                options: [
+                    {text: 'Hazard Ratio', value: 'hr'},
+                    {text: 'Risk Ratio', value: 'rr'},
+                    {text: 'Odds Ratio', value: 'or'}
+                ]
+            },
+
+            hr: {
+                selected: 'hr',
+                disabled: false,
+                options: [
+                    {text: 'Hazard Ratio', value: 'hr'}
+                ]
+            },
+
+            et: {
+                selected: 'rr',
+                disabled: false,
+                options: [
+                    {text: 'Risk Ratio', value: 'rr'},
+                    {text: 'Odds Ratio', value: 'or'}
+                ]
+            },
+
+            ett: {
+                selected: 'rr',
+                disabled: false,
+                options: [
+                    {text: 'Hazard Ratio', value: 'hr'},
+                    {text: 'Risk Ratio', value: 'rr'},
+                    {text: 'Odds Ratio', value: 'or'}
+                ]
+            }
+        }
+    },
+
+    init: function() {
+        // var is_dev = getUrlParameter('is_dev');
+        // if (is_dev == 'yes') {
+        //     this.configs.analysis.is_display = true;
+        //     this.configs.project_name.is_display = true;
+        //     this.configs.is_dev = true;
+        // }
+
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: this.configs,
+            methods: {
+
+                get_selected_for: function() {
+                    return this.fixed_or_random.selected;
+                },
+
+                analyze: function() {
+                    nma_controller.analyze();
+                },
+
+                get_source_code: function() {
+                    window.open('./get_rsrc?fn=' + dataset.nma_params.fn_rscript)
+                }
+            }
+        })
+    },
+
+    enable_btn_analyze: function() {
+        this.vpp.btn_analyze.disabled = false;
+        this.vpp.btn_analyze.disabled = false;
+    },
+
+    disable_btn_analyze: function() {
+        this.vpp.btn_analyze.disabled = true;
+        this.vpp.btn_analyze.disabled = true;
+    },
+
+    enable_btn_getrsrc: function() {
+        this.vpp.btn_getrsrc.disabled = false;
+    },
+
+    disable_btn_getrsrc: function() {
+        this.vpp.btn_getrsrc.disabled = true;
+    },
+
+    set_coltype_hr: function() {
+        this.vpp.measures = this.settings.measures.hr;
+        this.vpp.measures.disabled = true;
+        this.vpp.measures.selected = 'hr';
+        // the methods for calculation
+        this.vpp.freq_backends.selected = 'netmeta';
+        this.vpp.freq_backends.disabled = true;
+
+        this.vpp.bayes_backends.selected = 'dmetar';
+        this.vpp.bayes_backends.disabled = true;
+    },
+
+    set_coltype_et: function() {
+        // this.vpp.measures.disabled = true;
+        this.vpp.measures = this.settings.measures.et;
+
+        // the methods for calculation
+        this.vpp.freq_backends.selected = 'bugsnet';
+        this.vpp.freq_backends.disabled = true;
+
+        this.vpp.bayes_backends.selected = 'bugsnet';
+        this.vpp.bayes_backends.disabled = true;
+    }, 
+
+    set_coltype_ett: function() {
+        // this.vpp.measures.disabled = true;
+        this.vpp.measures = this.settings.measures.ett;
+
+        this.vpp.measures.selected = 'hr';
+        // the methods for calculation
+        this.vpp.freq_backends.selected = 'bugsnet';
+        this.vpp.freq_backends.disabled = true;
+
+        this.vpp.bayes_backends.selected = 'bugsnet';
+        this.vpp.bayes_backends.disabled = true;
+    }, 
+    
+    set_treatments: function(data) {
+        this.vpp.treatments.options = data;
+    },
+
+    set_selected_treatment: function(t) {
+        this.vpp.treatments.selected = t;
+    },
+
+    get_config: function() {
+        var cfg = {
+            analysis_method: this.vpp.analysis_method.selected,
+            input_format: this.vpp.input_format.selected,
+            treat: this.vpp.treatments.selected,
+            measure: this.vpp.measures.selected,
+            model: this.vpp.fixed_or_random.selected,
+            better: this.vpp.which_is_better.selected,
+            analysis: this.vpp.analysis.selected,
+            project_name: this.vpp.project_name.value,
+            is_dev: this.vpp.is_dev
+        };
+        return cfg;
+    }
+};
+
+
+var nma_controller = {
+
+    read_data_file: function(fn) {
+        $.get(
+            './read_data_file',
+            {fn: fn},
+            function(data) {
+                nma_controller.on_read_data_file(data);
+                $( "#dialog-dataset" ).dialog( "close" );
+            }, 'json'
+        )
+    },
+
+    read_data_file_in_path: function(fn, path) {
+        $.get(
+            './read_data_file',
+            {fn: fn, path: path},
+            function(data) {
+                nma_controller.on_read_data_file(data);
+                $( "#dialog-dataset" ).dialog( "close" );
+
+            }, 'json'
+        )
+    },
+
+    on_read_data_file: function(data) {
+        dataset.raw = data.raw;
+        dataset.coltype = data.coltype;
+        dataset.parse_treatments();
+
+        // update loader info        
+        fm_loader.set_dataset_summary(
+            '<p class="box-p"><b>Input Data Summary</b></p>' + 
+            '<p class="box-p"><i class="fa fa-file"></i>: ' + data.filename + '</p>' +
+            '<p class="box-p"><i class="fa fa-shapes"></i>: ' + data.coltype + ' format</p>' +
+            // '<p><i class="fa fa-columns"></i>: ' + data.cols + '</p>' +
+            '<p class="box-p"><i class="fa fa-tablets"></i>: <b>' + data.treats.length + '</b> treats: ' + data.treats.join(', ') + '</p>' + 
+            '<p class="box-p"><i class="far fa-sticky-note"></i>: <b>' + data.n_studies + '</b> studies of ' + data.raw.length +' lines </p>'
+        );
+
+        // update settings
+        fm_config.set_treatments(dataset.treatments);
+        fm_config.set_selected_treatment(dataset.treatments[0].value);
+        fm_config.enable_btn_analyze();
+
+        // the coltype is the input format!!!
+        fm_config.configs.input_format.selected = dataset.coltype;
+
+        if (dataset.coltype == 'HRLU') {
+            fm_config.set_coltype_hr();
+        } else if (dataset.coltype == 'ET') {
+            fm_config.set_coltype_et();
+        } else if (dataset.coltype == 'FTET') {
+            fm_config.set_coltype_ett();
+        } else {
+            fm_config.set_coltype_hr();
+        }
+
+        // clear the old figures
+        this.clear_all_tables_and_figures();
+    },
+
+    analyze: function() {
+        var cfg = fm_config.get_config();
+        var data = dataset.raw;
+        fm_config.disable_btn_analyze();
+        this.clear_all_tables_and_figures();
+
+        $.post(
+            './analyze',
+            {rs: JSON.stringify(data), cfg: JSON.stringify(cfg)},
+            function(data) {
+                fm_config.enable_btn_analyze();
+                msger.show('Data File is analyzed');
+                // nma_controller.update_bayes(data.data);
+                nma_controller.update_plots(data.data);
+            }, 'json'
+
+        ).fail(function() {
+            fm_config.enable_btn_analyze();
+            msger.show('System error when analyzing, try again later', msger.ERROR);
+        });
+    },
+
+    update_plots: function(data) {
+        // bind the result
+        dataset['rst_bayes'] = data;
+
+        // update the figures!
+        tb_netcha.draw(data.netcha);
+
+        // update the league table
+        tb_lgtbd3.draw(data.league);
+
+        // update the forest plot
+        fg_frsplt.draw(data.forest);
+
+        // update the network plot
+        fg_netplt.draw(data.netplt);
+
+        // update the sucra plot
+        if (typeof(data.scrplt) != 'undefined') {
+            fg_scrplt.draw(data.scrplt);
+        }
+
+        // update the sucra rank
+        if (typeof(data.tmrank) != 'undefined') {
+            tb_ranktb.draw(data.tmrank);
+        }
+        
+        // update the pscore rank
+        if (typeof(data.psrank) != 'undefined') {
+            tb_ranktb.draw(data.psrank);
+            fg_pscplt.draw(data.psrank);
+        }
+    },
+
+    clear_all_tables_and_figures: function() {
+        // clear the network plot
+        fg_netplt.clear();
+
+        // clear the forest plot
+        fg_frsplt.clear();
+
+        // clear the sucra plot
+        fg_scrplt.clear();
+
+        // clear the pscore plot
+        fg_pscplt.clear();
+
+        // clear the league table
+        tb_lgtbd3.clear();
+        
+        // clear the rank table
+        tb_ranktb.clear();
+
+        // clear the netchar table
+        tb_netcha.clear();
+    }
+};
+
+var msger = {
+    vpp: null,
+    vpp_id: '',
+
+    SUCCESS: 'success',
+    WARNING: 'warning',
+    ERROR: 'error',
+
+    init: function() {
+        // this.vpp = new Vue({
+        //     methods: {
+        //         show_message: function(msg, type) {
+                    
+        //             this.$message({
+        //                 showClose: true,
+        //                 message: msg,
+        //                 type: type
+        //             });
+        //         }
+        //     }
+        // })
+    },
+
+    show: function(msg, type) {
+        // if (typeof(type) == 'undefined') {
+        //     type = '';
+        // }
+        // this.vpp.show_message(msg, type);
+    },
+
+    ssmsg: function(msg) {
+        $('#ss-msg').html(msg);
+    },
+
+    ssclose: function() {
+        $('#start-screen').hide();
+    },
+};
+
+
+function init() {
+
+    var isIE = /*@cc_on!@*/false || !!document.documentMode;
+    var isChrome = !!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime);
+
+    console.log('* User is using IE:', isIE);
+    if (isIE) {
+        // msger.ssmsg('The functions used in this website require advanced web technologies, which are <b>NOT</b> supported by Internet Explorer<br>Try using Google Chrome, Apple Safari, Mozilla Firefox or other modern browsers.')
+        return;
+    }
+
+    fm_loader.init();
+    fm_config.init();
+
+    tb_netcha.init();
+    fg_netplt.init();
+    fg_frsplt.init();
+    
+    tb_lgtbd3.init();
+    tb_ranktb.init();
+    
+    fg_scrplt.init();
+    fg_pscplt.init();
+
+    msger.init();
+
+    msger.ssmsg('Almost Initialized.')
+    setTimeout('msger.ssclose();', 1400);
+}
+
+$(document).ready(function() {
+    init();
+})
 
 </script>
 {% endblock %}
