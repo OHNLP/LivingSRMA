@@ -337,7 +337,7 @@ Data Analyzer
 
 <div id="left-pane">
     <div class="upper">
-        <div class="box" style="width: 200px;" id="fm-nma-dsloader">
+        <div class="box" style="width: 200px;" id="fm_loader">
             <div class="box-header">
                 <h4>
                     <span class="fa fa-database"></span>
@@ -362,7 +362,7 @@ Data Analyzer
             
         </div><!-- .box / upload file -->
     
-        <div class="box" style="width: 200px;" id="fm-nma-settings">
+        <div class="box" style="width: 200px;" id="fm_config">
             <div class="box-header">
                 <h4>
                     <span class="fa fa-sliders-h"></span>
@@ -739,9 +739,9 @@ var dataset = {
 
 var fm_loader = {
     box: null,
-    box_id: '#fm-nma-dsloader',
+    box_id: '#fm_loader',
     vpp: null,
-    vpp_id: '#fm-nma-dsloader',
+    vpp_id: '#fm_loader',
     data: null,
 
     init: function() {
@@ -809,14 +809,14 @@ var fm_loader = {
 
 var fm_config = {
     vpp: null,
-    vpp_id: '#fm-nma-settings',
+    vpp_id: '#fm_config',
 
     configs: {
 
         btn_analyze: {
             disabled: true,
             txt_normal: 'Analyze',
-            txt_working: 'Analyzing'
+            txt_working: 'Analyze'
         },
 
         btn_getrsrc: {
@@ -1230,6 +1230,7 @@ var msger = {
         //     type = '';
         // }
         // this.vpp.show_message(msg, type);
+        toast(msg);
     },
 
     ssmsg: function(msg) {
