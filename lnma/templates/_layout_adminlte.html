@@ -310,18 +310,17 @@ label {
     <!-- Control sidebar content goes here -->
   </aside>
   <!-- /.control-sidebar -->
-
   
   <div id="toastmsg" class="toast" data-delay="8000" style="position: absolute; top: 20px; right: 20px;">
     <div class="toast-header">
-      <i class="fa fa-info-circle"></i>&nbsp;&nbsp;<strong class="mr-auto">Notification</strong>
+      <i class="fa fa-info-circle"></i>&nbsp;&nbsp;
       <!-- <small>11 mins ago</small> -->
       <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
         <span aria-hidden="true">&times;</span>
       </button>
     </div>
-    <div class="toast-body">
-      Hello, world! This is a toast message.
+    <div id="toastmsg-body" class="toast-body">
+      &nbsp;
     </div>
   </div>
 
@@ -342,6 +341,10 @@ label {
 <script>
 var ACTIVE_NAV_LINK = '{% block active_nav_link %}{% endblock %}';
 $('#nav-link-' + ACTIVE_NAV_LINK).addClass('active');
+function toast(msg) {
+    $('#toastmsg-body').html(msg);
+    $('#toastmsg').toast('show');
+}
 </script>
 {% block script %}
 {% endblock %}
