@@ -36,6 +36,7 @@ def create_app(test_config=None):
     from lnma import bp_collector
     from lnma import bp_screener
     from lnma import bp_importer
+    from lnma import bp_analyzer
 
     login_manager = LoginManager()
     login_manager.init_app(app)
@@ -58,6 +59,7 @@ def create_app(test_config=None):
     app.register_blueprint(bp_collector.bp)
     app.register_blueprint(bp_screener.bp)
     app.register_blueprint(bp_importer.bp)
+    app.register_blueprint(bp_analyzer.bp)
 
     # make url_for('index') == url_for('blog.index')
     # in another app, you might define a separate main index here with
