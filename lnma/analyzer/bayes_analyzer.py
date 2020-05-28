@@ -163,8 +163,7 @@ def analyze_by_bugsnet(rs, params):
             'league': _bugsnet_trans_league(jrst['league'], params),
             'forest': _bugsnet_trans_forest(jrst['league'], params),
             'scrplt': _bugsnet_trans_scrplt(jrst['sucraplot'], params),
-            'tmrank': _bugsnet_trans_rksucra(jrst['sucraplot'], params),
-            'psrank': _netmeta_trans_pscore(jrst, params)
+            'tmrank': _bugsnet_trans_rksucra(jrst['sucraplot'], params)
         }
     }
 

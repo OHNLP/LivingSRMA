@@ -89,70 +89,6 @@ league.out <- nma.league(fr_effects_results,
                          high.colour = "red",
                          digits = 2)
 
-# Plot the league table graph
-fig_width <- length(dich.slr[["treatments"]][["treat"]])
-fig_height <- fig_width * 0.66
-png(filename="{{ fn_leaguet }}", width=fig_width, height=fig_height, units='in', res=300)
-league.out$heatplot
-dev.off()
-
-# Load the netmeta package for getting the p score
-library(netmeta)
-
-# Load the data for p score
-mydata2 <- read.csv("{{ fn_csvfile_bugs2netmeta }}")
-
-# Since the data format used in the netmeta package is different from bugsnet
-# We must conver the data format. Before calling this scripe,
-# The input format has been converted from:
-#   study, treat, event, total
-# to:
-#   study, treat1, event1, n1, treat2, event2, n2
-# to meet the parameter requirement of pairwise function
-# After this pairwise function, the data will be converted to:
-#   TE, seTE, studlab, treat1, treat2, event1, n1, event2, n2, incr, allstudies
-# which is used in the netmeta package for calculating p socre
-mydata2.p <- pairwise(list(treat1, treat2),
-                      list(event1, event2),
-                      list(n1, n2),
-                      data = mydata2
-)
-
-# Prepare data for netmeta package.
-# The netmeta package requires a specific data format with some attributes.
-# Such as `TE`, `seTE`, which can be calculated before running this script.
-# Since current version only supports Hazard Ratio analysis, the `sm`
-# attribute is set to 'HR' as default.
-# It seems that the treatment1 (t1) is the comparator.
-nma <- netmeta(TE = mydata2.p$TE,
-               seTE = mydata2.p$seTE,
-               treat1 = mydata2.p$treat1,
-               treat2 = mydata2.p$treat2,
-               studlab = paste(mydata2.p$study),
-               data = mydata2.p,
-               sm = "{{ netmeta_sm }}",
-               comb.fixed = {{ is_fixed }},
-               comb.random = {{ is_random }},
-               reference.group = "{{ reference_treatment }}"
-)
-
-# Generate ranks
-# the default output on the screen looks like the following
-##               P-score
-## Rosiglitazone  0.9789
-## Metformin      0.8513
-## Pioglitazone   0.7686
-## Miglitol       0.6200
-## Benfluorex     0.5727
-## Acarbose       0.4792
-## Vildagliptin   0.3512
-## Sitagliptin    0.2386
-## Sulfonylurea   0.1395
-## Placebo        0.0000
-# But the format of output variable is different.
-# The format will be parsed with help of `nma$trts` variable
-myrank = netrank(nma, small.values="{{ small_values_are }}")
-
 # Merge all the results.
 # The network characteristic table shows the data in `network_char`.
 # The network plot also shows the data in `network_char`.
@@ -169,11 +105,6 @@ all_ret <- list(
         jsonlite = packageVersion('jsonlite'),
         BUGSnet = packageVersion('BUGSnet'),
         netmeta = packageVersion('netmeta')
-    ),
-    myrank = list(
-        trts = nma$trts,
-        fixed = myrank$Pscore.fixed,
-        random = myrank$Pscore.random
     )
 )
 

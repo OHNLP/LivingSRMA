@@ -49,6 +49,9 @@ Data Analyzer
     line-height: 1em;
     font-size: .8em;
     margin: 3px;
+    background: white;
+    border: 1px solid #333333;
+    border-radius: 3px;
 }
 .box-header select {
     height: 1.6em;
@@ -321,6 +324,11 @@ Data Analyzer
     border-bottom: 1px solid #666666;
 }
 </style>
+{% endblock %}
+
+{% block page_name %}
+<i class="fas fa-chart-pie"></i>
+Data Analyzer
 {% endblock %}
 
 {% block content %}
