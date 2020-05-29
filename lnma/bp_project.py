@@ -45,6 +45,12 @@ def list():
     projects = dora.list_projects_by_owner_uid(current_user.uid)
 
 
+@bp.route('/editor')
+@login_required
+def editor():
+    return render_template('project.editor.html')
+
+
 ###############################################################
 # APIs for project
 ###############################################################
