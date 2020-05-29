@@ -109,7 +109,7 @@ var tb_lgtbd3 = {
                         .attr('y', this.height_cell / 2)
                         .attr('text-anchor', 'middle')
                         .attr('alignment-baseline', 'middle')
-                        .attr('font-size', this.font_size * 1.2)
+                        .attr('font-size', this.font_size * 1.1)
                         .attr('font-weight', 'bold')
                         .text(row);
                     continue

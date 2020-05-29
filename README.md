@@ -194,6 +194,36 @@ $ ./Miniconda3-latest-Linux-x86_64.sh
 
 # Folder Structure
 
+# Data Structure
+
+## Table `papers`
+
+The `ss_st`, `ss_pr`, and `ss_rs` columns indicate which state a study is during screening.
+
+- Screening State (ss) Start (st): for study screening, indicating where the study comes from: 
+   - b10: batch import/search
+   - b11: other, 
+   - b12: other manual way, 
+   - a10: automatic way, 
+   - a11: auto search
+
+- Screening State (ss) Process (pr): for study screening, indicating which process the study is in: 
+   - p30: loaded meta info, 
+   - p40: checked unique, 
+   - p50: checked title, 
+   - p60: checked full text, 
+   - p70: checked sr, 
+   - p80: checked ma
+
+- Screening State (ss) Result (rs): for study screening, indicating what result for the study: 
+   - e11: excluded for duplicate, 
+   - e12: excluded for title, 
+   - e13: excluded for full text, 
+   - e14: excluded for updates, 
+   - f1: included in sr, 
+   - f2: included in ma, 
+   - f3: included in sr and ma
+
 # Usage
 
 # Others
