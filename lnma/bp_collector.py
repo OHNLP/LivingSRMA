@@ -15,3 +15,9 @@ bp = Blueprint("collector", __name__, url_prefix="/collector")
 @login_required
 def index():
     return render_template('collector.index.html')
+
+
+@bp.route('/pdfviewer')
+@login_required
+def pdfviewer():
+    return render_template('collector.pdfviewer.html')
