@@ -26,7 +26,7 @@ var fig_saver = {
 
     save_png: function(d3svg, filename, scale_ratio) {
         function save( dataBlob, filesize ){
-            var fn = filename + '_' + this.date_format(new Date()) + '.png';
+            var fn = filename + '_' + fig_saver.date_format(new Date()) + '.png';
             saveAs( dataBlob, fn);
         }
         var svgString = this.getSVGString(d3svg.node());
