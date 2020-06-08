@@ -33,10 +33,12 @@ def RCC():
 
 @bp.route('/CAT.html')
 def CAT():
-    return render_template('pub.CAT.html')
+    full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, 'CAT', 'GRAPH_LIST.json')
+    j = json.load(open(full_fn))
+    return render_template('pub.CAT.html', j=j)
 
 
-@bp.route('/prisma')
+@bp.route('/prisma.html')
 def prisma():
     prj = request.args.get('prj')
     fn = 'PRISMA.json'
@@ -46,7 +48,7 @@ def prisma():
     return render_template('pub.prisma.html', j=j)
 
 
-@bp.route('/itable')
+@bp.route('/itable.html')
 def itable():
     prj = request.args.get('prj')
     fn_attr = 'ITABLE_ATTR.csv'
