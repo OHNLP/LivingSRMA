@@ -1,5 +1,6 @@
 var tb_netcha = {
     vpp: null,
+    vpp_id: '#tb-nma-netcha',
     data: null,
     sample: {
         tabledata: [
@@ -20,7 +21,7 @@ var tb_netcha = {
 
     init: function() {
         this.vpp = new Vue({
-            el: '#tb-nma-netcha',
+            el: this.vpp_id,
             data: {
                 tabledata: []
             },

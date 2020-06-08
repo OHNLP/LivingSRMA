@@ -21,6 +21,9 @@ from lnma import dora
 from lnma.analyzer import freq_analyzer
 from lnma.analyzer import bayes_analyzer
 
+
+PATH_PUBDATA = 'pubdata'
+
 bp = Blueprint("analyzer", __name__, url_prefix="/analyzer")
 
 @bp.route('/')
@@ -76,6 +79,53 @@ def analyze():
 
     # analyze
     ret = _analyze(rs, cfg)
+
+    return jsonify(ret)
+
+
+@bp.route('/graphdata_maker', methods=['GET', 'POST'])
+@login_required
+def graphdata_maker():
+    if request.method == 'GET':
+        return render_template('analyzer.graphdata_maker.html')
+    
+    # save uploaded file
+    if 'file' not in request.files:
+        return jsonify({'success': False, 'msg':'No file'})
+    file_obj = request.files['file']
+    if file_obj.filename == '':
+        return jsonify({'success': False, 'msg':'No selected file'})
+
+    if file_obj and allowed_file_format(file_obj.filename):
+        fn = secure_filename(file_obj.filename)
+        full_fn = os.path.join(current_app.config['UPLOAD_FOLDER'], fn)
+        file_obj.save(full_fn)
+    
+    # read file
+    file_data = _read_file(full_fn)
+
+    # analyze
+    prj_sname = request.form.get('prj')
+    out_sname = request.form.get('out')
+
+    rs = file_data['raw']
+    cfg = '{"analysis_method":"bayes","input_format":"ET","treat":"EdoX","measure":"rr","model":"random","better":"small"}'
+    cfg = json.loads(cfg)
+
+    # save the graph data
+    
+    for treat in file_data['treats']:
+        cfg['treat'] = treat
+        graph_data = _analyze(rs, cfg)
+        output_fn = 'GRAPH-%s-%s.json' % (out_sname, treat)
+        full_output_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj_sname, output_fn)
+        json.dump(graph_data, open(full_output_fn, 'w'))
+        print('* analyzed and saved %s.[%s] on treat [%s] to %s' % (prj_sname, out_sname, treat, output_fn))
+
+    ret = {
+        'success': True,
+        'msg': 'done!'
+    }
 
     return jsonify(ret)
 
@@ -141,9 +191,6 @@ def _analyze(rs, cfg):
     # get the analysis type for make static json
     input_format = cfg['input_format']
     analysis_method = cfg['analysis_method']
-    ana = cfg['analysis']
-    prj = cfg['project_name']
-    is_dev = cfg['is_dev']
 
     # get all treats
     all_treats = set([])

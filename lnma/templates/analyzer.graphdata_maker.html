@@ -1,0 +1,457 @@
+{% extends '_layout_adminlte.html' %}
+
+{% block title %}
+Graphdata Maker
+{% endblock %}
+
+{% block style %}
+<style>
+    .content-wrapper {
+        background: white;
+    }
+.d-display-block {
+    display: block;
+}
+.d-display-none {
+    display: none !important;
+}
+.flex-container {
+    display: flex;
+    justify-content: flex-start;
+    width: 100%;
+    height: 100%;
+}
+.box {
+    display: flex;
+    flex-direction: column;
+}
+.box-header {
+    width: 100%;
+    padding: 3px 0;
+    display: flex;
+    align-items: center;
+}
+.box-header a {
+    font-size: .8em;
+}
+.box-header h4 {
+    padding: 0;
+    margin: 0;
+    font-size: .95em;
+    height: 1.6em;
+    line-height: 1.6em;
+    margin: 3px 0;
+}
+.box-header button, 
+.box-body button,
+.box-footer button {
+    height: 1.7em;
+    line-height: 1em;
+    font-size: .8em;
+    margin: 3px;
+    background: white;
+    border: 1px solid #333333;
+    border-radius: 3px;
+}
+.box-header select {
+    height: 1.6em;
+    line-height: 1.2em;
+    font-size: .8em;
+    margin: 3px;
+}
+.box-header span {
+    font-size: .9em;
+}
+.box-header a {
+    padding: 1px 3px;
+    margin: 0 5px;
+    height: 1.6em;
+    line-height: 1.6em;
+}
+.box-header a:hover {
+    text-decoration: underline;
+
+}
+.box-body {
+    width: 100%;
+}
+.box-bodyitem {
+    padding: 0 0 3px 0;
+}
+.box-bodyitem-hl {
+    display: flex;
+    flex-direction: row;
+}
+.box-bodyitem-label {
+    width: 54%;
+    font-size: .9em;
+    line-height: 1.8em;
+}
+.box-bodyitem-value {
+    width: 45%;
+}
+.box-bodyitem select {
+    width: 100%;
+}
+.box-bodyitem input {
+    width: calc(100% - 4px);
+}
+.box-p {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    font-size: .9em;
+    line-height: 1.1em;
+}
+.box-p-fixlen {    
+    white-space: nowrap;
+    text-overflow:ellipsis;
+    overflow: hidden;
+}
+.box-footer {
+    width: 100%;
+    min-height: 20px;
+    padding: 5px 0 5px 0;
+    border-bottom: 1px dotted #CCCCCC;
+}
+
+/* for this page */
+.footer {
+    width: 100%;
+    display: flex;
+    align-items: flex-end;
+    font-size: .75em;
+}
+.footer div {
+    height: 35px;
+    line-height: 4em;
+}
+.footer-link a {
+    padding: 0 5px;
+    color: #999999;
+}
+#wrapper {
+    font-size: 13px;
+}
+#left-pane {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-width: 210px;
+    width: 210px;
+    /* height: calc(100% - 10px); */
+    margin: 0 10px 0 0;
+    padding: 5px 10px;
+    /* border-right: 1px solid lightgray; */
+    /* background-color: #FCFCFC; */
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+#main-pane {
+    /* width: calc(100% - 240px);
+    height: calc(100% - 10px); */
+    margin: 0 10px 0 0;
+    padding: 5px;
+    /* background-color: #FFFFFF; */
+
+    display: flex;
+    flex-direction: column;
+    overflow: auto;
+}
+#main-pane .box {
+    /* border-right: 1px dotted #ccc; */
+    /* border-bottom: 1px dotted #ccc; */
+    margin: 0 10px 10px 0;
+    border-radius: 5px;
+}
+.pane-row {
+    display: flex;
+    flex-direction: row;
+}
+/* network plot */
+.fg-net-node-text {
+    cursor: pointer;
+}
+.fg-net-node-text:hover {
+    fill: darkred;
+}
+.selected .fg-net-node-text{
+    font-weight: bold;
+    fill: red;
+}
+/* forest plot styles */
+.fg-title {
+    fill: black;
+    font-weight: bold;
+}
+.fg-subtitle {
+    fill: black;
+    text-decoration: italic;
+}
+.fg-frs-th {
+    font-weight: bold;
+}
+.fg-frs-td {
+    font-weight: normal;
+}
+.fg-frs-item text {
+    font-size: .9em;
+}
+.fg-frs-item:hover text {
+    font-weight: bold;
+}
+.fg-row-bg {
+    fill: white;
+}
+.fg-frs-item:hover .fg-row-bg {
+    fill: whitesmoke;
+}
+.fg-frs-line {
+    stroke-width: 1;
+    stroke: black;
+}
+.fg-frs-box {
+    fill: dodgerblue;
+    fill-opacity: .7;
+}
+.fg-frs-guideline {
+    stroke-width: 1;
+    stroke: black;
+}
+.fg-frs-mddot {
+    fill: black;
+    fill-opacity: .8;
+}
+/* League Table */
+#tb-nma-league-div {
+    display: flex;
+    flex-direction: column;
+}
+.tb-colname {
+    text-align: center;
+    border-bottom: 1px solid dimgray;
+}
+.tb-rowname {
+    width: 30px;
+}
+.tb-th {
+    width: 70px;
+    text-align: center;
+    margin: 0 2px 2px 0;
+}
+.tb-row {
+    display: flex;
+    flex-direction: row;
+}
+.tb-row-lead {
+    width: 80px;
+    height: 35px;
+    line-height: 40px;
+    margin: 0 2px 2px 0;
+    padding: 0 3px 0 0;
+}
+.tb-cell {
+    width: 69px;
+    height: 34px;
+    padding: 1px 0 0 1px;
+    border-right: 2px solid white;
+    border-bottom: 2px solid white;
+    text-align: center;
+    background-color: whitesmoke;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
+}
+.tb-cell:hover {
+    padding: 0 1px 1px 0;
+    border-right: 2px solid gray;
+    border-bottom: 2px solid gray;
+}
+.tb-cell-value {
+    width: 69px;
+    height: 24px;
+    line-height: .9em;
+}
+.tb-cell-blank {
+    width: 69px;
+    height: 16px;
+    font-weight: bold;
+}
+.tb-league-luci {
+    font-size: .8em;
+}
+#start-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    display: flex;
+    background: white;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+#ss-msg {
+    width: 100%;
+    padding: 10px 0;
+    text-align: center;
+}
+
+#dataset_summary {
+    font-size: .7rem;
+    padding: 10px 0 5px 0; 
+    margin: 10px 0 5px 0; 
+    border-top: 1px dotted #EAEAEA;
+    border-bottom: 1px dotted #EAEAEA;
+}
+#dataset_summary p {
+    margin: 0 0 .5rem 0;
+}
+#dataset_summary h4 {
+    margin: 0 0 .5rem 0;
+}
+.rank_table {
+    width: 100%;
+}
+.rank_table th {
+    text-align: left;
+    border-bottom: 1px solid #666666;
+}
+.rank_table td {
+    border-bottom: 1px solid #666666;
+}
+</style>
+{% endblock %}
+
+{% block page_name %}
+<i class="fas fa-chart-pie"></i>
+Graphdata Maker
+{% endblock %}
+
+{% block content %}
+
+<div id="wrapper" class="flex-container">
+
+<div id="left-pane">
+    <div class="upper">
+        <div class="box" style="width: 200px;" id="fm_loader">
+            <div class="box-header">
+                <h4>
+                    <span class="fa fa-database"></span>
+                    DATASET
+                </h4>
+            </div>
+            
+            <div class="box-body">
+
+                <form id="upload-file" method="post" enctype="multipart/form-data">
+                    <label for="file">Select Data File</label>
+                    <input id="ipt-csv-file" name="file" type="file" style="width:200px;">
+                    <label for="file">The Project Short Name</label>
+                    <input type="text" name="prj" value="CAT"/>
+                    <label for="file">The NMA Short Name</label>
+                    <input type="text" name="out" value="ncb"/>
+                </form>
+                
+                <hr>
+                <button v-on:click="upload">
+                    <span class="fa fa-upload"></span>
+                    Upload &amp; Analyze All Treats
+                </button>
+                <div id="dataset_summary"
+                    v-html="dataset_summary">
+                </div>
+            </div>
+            
+        </div><!-- .box / upload file -->
+    
+    </div>
+</div>
+
+</div>
+{% endblock %}
+
+{% block active_nav_link %}analyzer{% endblock %}
+
+{% block script %}
+<!-- My Scripts -->
+<script>
+
+
+var fm_loader = {
+    box: null,
+    box_id: '#fm_loader',
+    vpp: null,
+    vpp_id: '#fm_loader',
+    data: null,
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                btn_upload: {
+                    disabled: false,
+                    txt_normal: 'Upload',
+                    txt_working: 'Parsing ...'
+                },
+
+                dataset_summary: '',
+
+                datasets: []
+            },
+            methods: {
+                upload: function() {
+                    fm_loader.upload_data_file();
+                }
+            }
+        });
+    },
+
+    upload_data_file: function() {
+        if ($('#ipt-csv-file').val() == '') {
+            return;
+        }
+        // update UI
+        this.vpp.btn_upload.disabled = true;
+        var form_data = new FormData($('#upload-file')[0]);
+        $.ajax({
+            type: 'POST',
+            url: './graphdata_maker',
+            data: form_data,
+            contentType: false,
+            cache: false,
+            processData: false,
+            success: function(data) {
+                console.log(data);
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.error(textStatus, errorThrown);
+            }
+        });
+    },
+}
+
+
+function init() {
+
+    var isIE = /*@cc_on!@*/false || !!document.documentMode;
+    var isChrome = !!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime);
+
+    console.log('* User is using IE:', isIE);
+    if (isIE) {
+        // msger.ssmsg('The functions used in this website require advanced web technologies, which are <b>NOT</b> supported by Internet Explorer<br>Try using Google Chrome, Apple Safari, Mozilla Firefox or other modern browsers.')
+        return;
+    }
+
+    fm_loader.init();
+}
+
+$(document).ready(function() {
+    init();
+})
+
+</script>
+{% endblock %}

@@ -180,7 +180,7 @@ h4 {
     <div class="collapse navbar-collapse" id="navbarsExampleDefault" style="justify-content: flex-end;">
         <ul class="navbar-nav">
             <li class="nav-item active">
-                <a class="nav-link" href="#">HOME <span class="sr-only">(current)</span></a>
+                <a class="nav-link" href="./">HOME <span class="sr-only">(current)</span></a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="#sec-intro">INTRODUCTION</a>
@@ -191,7 +191,9 @@ h4 {
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="dropdown02" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">TABLES</a>
                 <div class="dropdown-menu" aria-labelledby="dropdown02">
-                <a class="dropdown-item" href="#sec-intertable">INTERACTIVE TABLE</a>
+                    <a class="dropdown-item" href="#sec-intertable">INTERACTIVE TABLE</a>
+                    <a class="dropdown-item" href="#sec-intertable">Summary of findings(SoF): Pairwise MA</a>
+                    <a class="dropdown-item" href="#sec-intertable">Sumamry of findinds(SoF): NMA</a>
                 </div>
             </li>
 
@@ -214,6 +216,10 @@ h4 {
             </li>
 
             <li class="nav-item">
+                <a class="nav-link" href="#sec-pubs">EVIDENCE MAPS</a>
+            </li>
+
+            <li class="nav-item">
                 <a class="nav-link" href="#sec-pubs">PUBLICATIONS</a>
             </li>
         </ul>
@@ -230,7 +236,10 @@ h4 {
 
     <div class="row">
         <div class="col-md-6">
-            <p>TBD.</p>
+            <p>TOPIC: Direct Oral Anti-Coagulants (DOACS) compared to Dalteparin for treatment of Cancer Associated Thrombosis (CAT): A Living, Interactive Systematic Review (LISR) and Network Meta-Analysis (LNMA)</p>
+            <p>
+                We have maintained a living systematic review and network meta-analysis for treatment of cancer associated thrombosis (CAT) since our original publication in 2019. The results are now updated after the publication of Caravaggio trial.  The results of ongoing trials CASTA-DIVA (NCT02746185), PRIORITY (NCT03139487) and CONKO-011(NCT02583191) are pending and will be considered for addition to living analysis as they become available
+                </p>
         </div>
 
     </div>
@@ -314,6 +323,26 @@ h4 {
 </div>
 
 
+<br id="sec-sof-pma">
+<div class="container" style="margin-top: 4rem; margin-bottom: 3rem;">
+
+    <h3 style="margin-bottom: 2rem;">
+        SUMMARY OF FINDINGS: PAIRWISE MA
+    </h3>
+
+</div>
+
+
+<br id="sec-sof-nma">
+<div class="container" style="margin-top: 4rem; margin-bottom: 3rem;">
+
+    <h3 style="margin-bottom: 2rem;">
+        SUMMARY OF FINDINGS: NMA
+    </h3>
+
+</div>
+
+
 <br id="sec-nma-outcome">
 <div class="container" style="margin-top: 4rem; margin-bottom: 3rem;">
     <h3 style="margin-bottom: 2rem;">
@@ -351,6 +380,12 @@ h4 {
             </div>
         </div>
     </div>
+
+    <div class="row">
+        <div class="col">
+            <img src="" alt="" width="100%">
+        </div>
+    </div>
 </div>
 {% endfor %}
 
@@ -364,209 +399,6 @@ h4 {
     <p>
         Results are summarized in league tables, interactive forest plots, SUCRA curves and Ranking for each clinically important outcome. Forest Plots are interactive, and users can select the reference treatment for relevant clinical decision making.
     </p>
-    <div class="row">
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Progression Free Survival (PFS)</h5>
-                    
-                    <table class="outcome-netchar-table">
-                        <thead>
-                            <tr class="header">
-                                <th colspan="2">Network Characteristics</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr class="odd">
-                                <td>Number of Interventions</td>
-                                <td>10</td>
-                            </tr>
-                            <tr class="even">
-                                <td>Number of Studies</td>
-                                <td>10</td>
-                            </tr>
-                            <tr class="odd">
-                                <td>Total Number of Patients in Network</td>
-                                <td>5,350</td>
-                            </tr>
-                            <tr class="even">
-                                <td>Total Possible Pairwise Comparisons</td>
-                                <td>45</td>
-                            </tr>
-                            <tr class="odd">
-                                <td>Total Number of Pairwise Comparisons With Direct Data</td>
-                                <td>9</td>
-                            </tr>
-                            <tr class="even">
-                                <td>Is the network connected?</td>
-                                <td>TRUE</td>
-                            </tr>
-                            <tr class="odd">
-                                <td>Number of Two-arm Studies</td>
-                                <td>10</td>
-                            </tr>
-                            <tr class="even">
-                                <td>Number of Multi-Arms Studies</td>
-                                <td>0</td>
-                            </tr>
-                            <tr class="odd">
-                                <td>Total Number of Events in Network</td>
-                                <td>NA</td>
-                            </tr>
-                            <tr class="even">
-                                <td>Number of Studies With No Zero Events</td>
-                                <td>10</td>
-                            </tr>
-                            <tr class="odd">
-                                <td>Number of Studies With At Least One Zero Event</td>
-                                <td>0</td>
-                            </tr>
-                            <tr class="even">
-                                <td>Number of Studies with All Zero Events</td>
-                                <td>0</td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                    <a href="#sec-pfs" class="btn btn-primary bg-dark bd-dark">Show Results</a>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Overall Survival (OS)</h5>
-                    
-                    <table class="outcome-netchar-table">
-                        <thead>
-                            <tr class="header">
-                                <th colspan="2">Network Characteristics</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr class="odd">
-                                <td>Number of Interventions</td>
-                                <td>10</td>
-                            </tr>
-                            <tr class="even">
-                                <td>Number of Studies</td>
-                                <td>9</td>
-                            </tr>
-                            <tr class="odd">
-                                <td>Total Number of Patients in Network</td>
-                                <td>5,701</td>
-                            </tr>
-                            <tr class="even">
-                                <td>Total Possible Pairwise Comparisons</td>
-                                <td>45</td>
-                            </tr>
-                            <tr class="odd">
-                                <td>Total Number of Pairwise Comparisons With Direct Data</td>
-                                <td>9</td>
-                            </tr>
-                            <tr class="even">
-                                <td>Is the network connected?</td>
-                                <td>TRUE</td>
-                            </tr>
-                            <tr class="odd">
-                                <td>Number of Two-arm Studies</td>
-                                <td>9</td>
-                            </tr>
-                            <tr class="even">
-                                <td>Number of Multi-Arms Studies</td>
-                                <td>0</td>
-                            </tr>
-                            <tr class="odd">
-                                <td>Total Number of Events in Network</td>
-                                <td>NA</td>
-                            </tr>
-                            <tr class="even">
-                                <td>Number of Studies With No Zero Events</td>
-                                <td>9</td>
-                            </tr>
-                            <tr class="odd">
-                                <td>Number of Studies With At Least One Zero Event</td>
-                                <td>0</td>
-                            </tr>
-                            <tr class="even">
-                                <td>Number of Studies with All Zero Events</td>
-                                <td>0</td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                    <a href="#sec-os" class="btn btn-primary bg-dark bd-dark">Show Results</a>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card" style="margin-bottom: 1rem;">
-                <div class="card-body">
-                    <h5 class="card-title"><sup>*</sup>Serious Adverse Events (AEs) </h5>
-                    <table class="outcome-netchar-table">
-                        <thead>
-                            <tr class="header">
-                                <th colspan="2">Network Characteristics</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr class="odd">
-                                <td>Number of Interventions</td>
-                                <td>7</td>
-                            </tr>
-                            <tr class="even">
-                                <td>Number of Studies</td>
-                                <td>6</td>
-                            </tr>
-                            <tr class="odd">
-                                <td>Total Number of Patients in Network</td>
-                                <td>4,958</td>
-                            </tr>
-                            <tr class="even">
-                                <td>Total Possible Pairwise Comparisons</td>
-                                <td>21</td>
-                            </tr>
-                            <tr class="odd">
-                                <td>Total Number of Pairwise Comparisons With Direct Data</td>
-                                <td>6</td>
-                            </tr>
-                            <tr class="even">
-                                <td>Is the network connected?</td>
-                                <td>TRUE</td>
-                            </tr>
-                            <tr class="odd">
-                                <td>Number of Two-arm Studies</td>
-                                <td>6</td>
-                            </tr>
-                            <tr class="even">
-                                <td>Number of Multi-Arms Studies</td>
-                                <td>0</td>
-                            </tr>
-                            <tr class="odd">
-                                <td>Total Number of Events in Network</td>
-                                <td>3,181</td>
-                            </tr>
-                            <tr class="even">
-                                <td>Number of Studies With No Zero Events</td>
-                                <td>6</td>
-                            </tr>
-                            <tr class="odd">
-                                <td>Number of Studies With At Least One Zero Event</td>
-                                <td>0</td>
-                            </tr>
-                            <tr class="even">
-                                <td>Number of Studies with All Zero Events</td>
-                                <td>0</td>
-                            </tr>
-                        </tbody>
-                    </table>
-
-                    <a href="#sec-severeevent" class="btn btn-primary bg-dark bd-dark">Show Results</a>
-                </div>
-            </div><!-- ./card -->
-            <p class="card-text">* Serious: Grade 3 or higher</p>
-        </div>
-    </div>
 </div>
 
 
@@ -607,7 +439,7 @@ h4 {
                 </button>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton-[[ item['sname'] ]]">
                     {% for it in item['treats'] %}
-                    <a class="dropdown-item" href="javascript:switch_data('[[ item['sname'] ]]', '[[ it ]]');">[[ it ]]</a>
+                    <a class="dropdown-item" href="javascript:switch_nma_data('[[ item['sname'] ]]', '[[ it ]]');">[[ it ]]</a>
                     {% endfor %}
                 </div>
             </div>
@@ -615,18 +447,31 @@ h4 {
     </div>
 </div>
 
-<div class="container" style="margin-bottom: 3rem; max-width: 1220px;">
+<div class="container" style="margin-bottom: 3rem;">
     <div class="row">
         <div class="col">
 
-            <p style="text-indent: 2.6rem;">How to use this figure? <a href="javascript:;" data-toggle="modal" data-target="#exampleModalCenter3">Video demonstration</a></p>
+            <p style="">How to use this figure? <a href="javascript:;" data-toggle="modal" data-target="#exampleModalCenter3">Video demonstration</a></p>
 
-            <iframe id="iframe-[[ item['sname'] ]]" src="" frameborder="0" style="width: 100%; min-height: 800px; overflow: hidden;" scrolling="no" ></iframe>
+            <iframe id="iframe-[[ item['sname'] ]]" src="" frameborder="0" style="width: 100%; min-height: 610px; overflow: hidden;" scrolling="no" ></iframe>
         </div>
     </div>
 </div>
 
 {% endfor %}
+
+
+<br id="sec-pubs">
+<div class="container" style="margin-top: 4rem; margin-bottom:2rem;">
+    <h3 style="margin-bottom: 2rem;">
+        EVIDENCE MAPS
+    </h3>
+    <div class="row">
+        <div class="col">
+            <p>There are no associated publications with this living NMA at this point.</p>
+        </div>
+    </div>
+</div>
 
 
 <br id="sec-pubs">
@@ -663,26 +508,21 @@ The HR for 1,2 , The OR for the last one!
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 
 <script>
-var tag_dict = {
-    'PFS': 'RST-[[ prj ]]-PFS-',
-    'OS':  'RST-[[ prj ]]-OS-',
-    'AES': 'RST-[[ prj ]]-AES-'
-}
 
-function switch_data(tag, trt, display_name) {
+function switch_nma_data(tag, trt, display_name) {
     if (typeof(display_name) == 'undefined') {
         display_name = trt;
     }
-    var fn = tag_dict[tag] + trt;
-    var url = './study_outcome_graph.html?fn=' + fn + '.json';
+    var fn = 'CAT|' + 'GRAPH-' + tag + '-' + trt;
+    var url = '[[ url_for("pub.graph_v2") ]]?fn=' + fn + '.json';
     $('#iframe-' + tag).attr('src', url);
     $('#refname-' + tag).html(display_name);
 }
 
 $(document).ready(function() {
-    switch_data('PFS', 'Suni');
-    switch_data('OS', 'Suni');
-    switch_data('AES', 'Suni');
+    {% for item in j['nma'] %}
+    switch_nma_data('[[ item["sname"] ]]', '[[ item["treats"][0] ]]');
+    {% endfor %}
 });
 </script>
 </body>
