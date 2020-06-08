@@ -91,14 +91,14 @@ def itable():
     return render_template('pub.itable.html', rs=rs, attrs=json.dumps(attrs))
 
 
-@bp.route('/graph_v1')
-def graph():
-    return render_template('pub.graph.html')
+@bp.route('/graph_v1.html')
+def graph_v1():
+    return render_template('pub.graph_v1.html')
 
 
-@bp.route('/graph')
-def graph():
-    return render_template('pub.graph.html')
+@bp.route('/graph_v2.html')
+def graph_v2():
+    return render_template('pub.graph_v2.html')
 
 
 @bp.route('/graphdata/<prj_fn>')
