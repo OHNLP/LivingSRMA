@@ -13,7 +13,7 @@
 <link rel="icon" href="./static/img/favicon.ico">
 <!-- Bootstrap CSS -->
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-<link rel="stylesheet" href="./static/lib/font-awesome/css/all.css">
+<link rel="stylesheet" href="/static/lib/font-awesome/css/all.css">
 
 <style>
 /* GLOBAL STYLES
@@ -238,7 +238,7 @@ h4 {
 
 
 <br id="sec-studysel">
-<div class="container" style="margin-top: 3rem; margin-bottom:2rem;">
+<div class="container" style="margin-top: 4rem; margin-bottom:2rem;">
     <h3 style="margin-bottom: 2rem;">
         STUDY SELECTION
     </h3>
@@ -278,7 +278,7 @@ h4 {
 
 
 <br id="sec-intertable">
-<div class="container" style="margin-top: 3rem; margin-bottom: 3rem;">
+<div class="container" style="margin-top: 4rem; margin-bottom: 3rem;">
 
     <h3 style="margin-bottom: 2rem;">
         INTERACTIVE TABLE
@@ -313,8 +313,50 @@ h4 {
     </div>
 </div>
 
+
 <br id="sec-nma-outcome">
-<div class="container">
+<div class="container" style="margin-top: 4rem; margin-bottom: 3rem;">
+    <h3 style="margin-bottom: 2rem;">
+        Direct MA OUTCOMES
+    </h3>
+    <p>
+        Results are summarized in forest plots.
+    </p>
+</div>
+
+{% for item in j['dma'] %}
+<br id="sec-dma-[[ item['sname'] ]]" style="margin-top: 4rem;">
+<div class="container" style="margin-top: 4rem;">
+    <div class="row">
+        <div class="col">
+            <h4 style="margin-bottom: 2rem;">[[ item['name'] ]]</h4>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-4">
+            <div class="dropdown">
+                <button class="btn btn-primary bg-dark bd-dark dropdown-toggle" type="button" id="dropdownMenuButton-dma-[[ item['sname'] ]]" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  Select plot
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton-dma-[[ item['sname'] ]]">
+                    {% for it in item['outcomes'] %}
+                    <a class="dropdown-item" href="javascript:switch_data('[[ item['sname'] ]]', '[[ it['sname'] ]]');">[[ it['name'] ]]</a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col-8 d-flex justify-content-end">
+            <div style="padding: .5rem; margin-right: 1rem;">
+                Forest plot for <span id="refname-dma-[[ item['sname'] ]]" style="font-weight:bold;">[[ item['outcomes'][0]['name'] ]]</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+
+<br id="sec-nma-outcome" style="margin-top: 4rem;">
+<div class="container" style="margin-top: 4rem;">
     <h3 style="margin-bottom: 2rem;">
         NMA OUTCOMES
     </h3>
@@ -550,14 +592,14 @@ h4 {
 
 {% for item in j['nma'] %}
 <br id="sec-nma-[[ item['sname'] ]]">
-<div class="container" style="margin-top: 3rem;">
+<div class="container" style="margin-top: 4rem;">
     <div class="row">
         <div class="col">
             <h4 style="margin-bottom: 2rem;">[[ item['name'] ]]</h3>
         </div>
         <div class="col d-flex justify-content-end">
             <div style="padding: .5rem; margin-right: 1rem;">
-                Reference: <span id="refname-[[ item['sname'] ]]" style="font-weight:bold;">[[ item['treats'][0] ]]</span>
+                Reference: <span id="refname-nma-[[ item['sname'] ]]" style="font-weight:bold;">[[ item['treats'][0] ]]</span>
             </div>
             <div class="dropdown">
                 <button class="btn btn-primary bg-dark bd-dark dropdown-toggle" type="button" id="dropdownMenuButton-[[ item['sname'] ]]" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -588,7 +630,7 @@ h4 {
 
 
 <br id="sec-pubs">
-<div class="container" style="margin-top: 3rem; margin-bottom:2rem;">
+<div class="container" style="margin-top: 4rem; margin-bottom:2rem;">
     <h3 style="margin-bottom: 2rem;">
         PUBLICATIONS
     </h3>
