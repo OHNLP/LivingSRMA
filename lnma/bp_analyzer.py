@@ -60,7 +60,36 @@ def read_data_file():
             return jsonify({'success': False, 'msg': 'Not supported file format'})
 
     # read csv file
+    ret = _read_file(full_fn)
+    return jsonify(ret)
+
+
+@bp.route('/analyze', methods=['GET', 'POST'])
+@login_required
+def analyze():
+    if request.method == 'GET':
+        return 'USE POST'
+
+    # get the input data and configs
+    rs = json.loads(request.form.get('rs'))
+    cfg = json.loads(request.form.get('cfg'))
+
+    # analyze
+    ret = _analyze(rs, cfg)
+
+    return jsonify(ret)
+
+
+def allowed_file_format(fn):
+    return '.' in fn and \
+        fn.rsplit('.', 1)[1].lower() in ['csv', 'xls', 'xlsx']
+
+
+def _read_file(full_fn):
+    '''Read data file
+    '''
     fmt = full_fn.split('.')[-1].lower()
+    fn = full_fn.split('/')[-1]
     if fmt == 'xls' or fmt == 'xlsx':
         df = pd.read_excel(full_fn)
     else:
@@ -102,19 +131,13 @@ def read_data_file():
         'treats': treats,
         'n_studies': n_studies
     }
-    return jsonify(ret)
+
+    return ret
 
 
-@bp.route('/analyze', methods=['GET', 'POST'])
-@login_required
-def analyze():
-    if request.method == 'GET':
-        return 'USE POST'
-
-    # get the input data and configs
-    rs = json.loads(request.form.get('rs'))
-    cfg = json.loads(request.form.get('cfg'))
-
+def _analyze(rs, cfg):
+    '''Analyze the rs with cfg
+    '''
     # get the analysis type for make static json
     input_format = cfg['input_format']
     analysis_method = cfg['analysis_method']
@@ -142,11 +165,5 @@ def analyze():
         ret = bayes_analyzer.analyze(rs, cfg)
     else:
         ret = bayes_analyzer.analyze(rs, cfg)
-    
 
-    return jsonify(ret)
-
-
-def allowed_file_format(fn):
-    return '.' in fn and \
-        fn.rsplit('.', 1)[1].lower() in ['csv', 'xls', 'xlsx']
+    return ret
