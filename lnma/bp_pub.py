@@ -91,14 +91,19 @@ def itable():
     return render_template('pub.itable.html', rs=rs, attrs=json.dumps(attrs))
 
 
+@bp.route('/graph_v1')
+def graph():
+    return render_template('pub.graph.html')
+
+
 @bp.route('/graph')
-def ograph():
-    return render_template('pub.ograph.html')
+def graph():
+    return render_template('pub.graph.html')
 
 
-@app.route('/graphdata/<prj_fn>')
+@bp.route('/graphdata/<prj_fn>')
 def graphdata(prj_fn):
-    tmp = prj_fn.split('/')
+    tmp = prj_fn.split('|')
     prj = tmp[0]
     fn = tmp[1]
     full_path = os.path.join(current_app.instance_path, PATH_PUBDATA, prj)

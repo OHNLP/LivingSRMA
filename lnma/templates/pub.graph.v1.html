@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<title>Study Outcome Graph</title>
+<link rel="icon" href="/static/img/favicon.png" type="image/png">
+<link rel="stylesheet" href="/static/lib/font-awesome/css/all.css">
+<link rel="stylesheet" href="/static/lib/jquery-ui/jquery-ui.min.css">
+<!-- Element UI CSS -->
+<link rel="stylesheet" href="/static/lib/element-ui/theme-chalk/index.css">
+<style>
+html, body {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+}
+body {
+    font-size: 14px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+a {
+    color: #333333;
+    text-decoration: none;
+}
+.flex-container {
+    display: flex;
+    justify-content: flex-start;
+    width: 100%;
+    height: 100%;
+}
+.box {
+    display: flex;
+    flex-direction: column;
+}
+.box-header {
+    width: 100%;
+    padding: 3px 0;
+    display: flex;
+    align-items: center;
+}
+.box-header a {
+    font-size: .8em;
+}
+.box-header h4 {
+    padding: 0;
+    margin: 0;
+    font-size: .95em;
+    height: 1.6em;
+    line-height: 1.6em;
+    margin: 3px 0;
+}
+.box-header button, .box-footer button {
+    height: 1.6em;
+    line-height: 1em;
+    font-size: .8em;
+    margin: 3px;
+}
+.box-header select {
+    height: 1.6em;
+    line-height: 1.2em;
+    font-size: .8em;
+    margin: 3px;
+}
+.box-header span {
+    font-size: .9em;
+}
+.box-header a {
+    padding: 1px 3px;
+    margin: 0 5px;
+    height: 1.6em;
+    line-height: 1.6em;
+}
+.box-header a:hover {
+    text-decoration: underline;
+
+}
+.box-body {
+    width: 100%;
+}
+.box-bodyitem {
+    padding: 0 0 3px 0;
+}
+.box-bodyitem-hl {
+    display: flex;
+    flex-direction: row;
+}
+.box-bodyitem-label {
+    width: 54%;
+    font-size: .9em;
+    line-height: 1.8em;
+}
+.box-bodyitem-value {
+    width: 45%;
+}
+.box-bodyitem select {
+    width: 100%;
+}
+.box-p {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    font-size: .9em;
+}
+.box-p-fixlen {    
+    white-space: nowrap;
+    text-overflow:ellipsis;
+    overflow: hidden;
+}
+.box-footer {
+    width: 100%;
+    min-height: 20px;
+    padding: 5px 0 5px 0;
+    border-bottom: 1px dotted #CCCCCC;
+}
+
+/* element ui css */
+.el-table td, .el-table th {
+    padding: 0;
+    font-size: .9em;
+}
+.el-table .cell {
+    padding: 0;
+}
+.el-table, .el-table thead {
+    color: #333333;
+}
+.el-table::before {
+    background-color: white;
+}
+/* for this page */
+.footer {
+    width: 100%;
+    display: flex;
+    align-items: flex-end;
+    font-size: .75em;
+}
+.footer div {
+    height: 35px;
+    line-height: 4em;
+}
+.footer-link a {
+    padding: 0 5px;
+    color: #999999;
+}
+#main-pane {
+    width: 100%;
+    height: 100%;
+    padding: 5px;
+    background-color: #FFFFFF;
+    display: flex;
+    flex-direction: column;
+}
+#main-pane .box {
+    margin: 0 5px 0 0;
+}
+.pane-row {
+    display: flex;
+    flex-direction: row;
+}
+/* network plot */
+.fg-net-node-text {
+    cursor: pointer;
+}
+.fg-net-node-text:hover {
+    fill: darkred;
+}
+.selected .fg-net-node-text{
+    font-weight: bold;
+    fill: red;
+}
+/* forest plot styles */
+.fg-title {
+    fill: black;
+    font-weight: bold;
+}
+.fg-subtitle {
+    fill: black;
+    text-decoration: italic;
+}
+.fg-frs-th {
+    font-weight: bold;
+}
+.fg-frs-td {
+    font-weight: normal;
+}
+.fg-frs-item text {
+    font-size: .9em;
+}
+.fg-frs-item:hover text {
+    font-weight: bold;
+}
+.fg-row-bg {
+    fill: white;
+}
+.fg-frs-item:hover .fg-row-bg {
+    fill: whitesmoke;
+}
+.fg-frs-line {
+    stroke-width: 1;
+    stroke: black;
+}
+.fg-frs-box {
+    fill: dodgerblue;
+    fill-opacity: .7;
+}
+.fg-frs-guideline {
+    stroke-width: 1;
+    stroke: black;
+}
+.fg-frs-mddot {
+    fill: black;
+    fill-opacity: .8;
+}
+/* League Table */
+#tb-nma-league-div {
+    display: flex;
+    flex-direction: column;
+}
+.tb-colname {
+    text-align: center;
+    border-bottom: 1px solid dimgray;
+}
+.tb-rowname {
+    width: 30px;
+}
+.tb-th {
+    width: 70px;
+    text-align: center;
+    margin: 0 2px 2px 0;
+}
+.tb-row {
+    display: flex;
+    flex-direction: row;
+}
+.tb-row-lead {
+    width: 80px;
+    height: 35px;
+    line-height: 40px;
+    margin: 0 2px 2px 0;
+    padding: 0 3px 0 0;
+}
+.tb-cell {
+    width: 69px;
+    height: 34px;
+    padding: 1px 0 0 1px;
+    border-right: 2px solid white;
+    border-bottom: 2px solid white;
+    text-align: center;
+    background-color: whitesmoke;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
+}
+.tb-cell:hover {
+    padding: 0 1px 1px 0;
+    border-right: 2px solid gray;
+    border-bottom: 2px solid gray;
+}
+.tb-cell-value {
+    width: 69px;
+    height: 24px;
+    line-height: .9em;
+}
+.tb-cell-blank {
+    width: 69px;
+    height: 16px;
+    font-weight: bold;
+}
+.tb-league-luci {
+    font-size: .8em;
+}
+#start-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    display: flex;
+    background: white;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+#ss-msg {
+    width: 100%;
+    padding: 10px 0;
+    text-align: center;
+}
+</style>
+</head>
+<body>
+<div id="start-screen">
+    <h1>
+        <i class="fa fa-chart-bar"></i>
+        Study Outcome Graphs
+    </h1>
+    <div id="ss-msg">System initializing ...</div>
+</div>
+
+<div class="flex-container" style="width:100%; height:100%;">
+
+<div id="main-pane">
+    <div class="pane-row">
+        <div class="box" style="width: 300px;" id="fg-nma-netplt">
+            <div class="box-header">
+                <h4>
+                    <span class="fa fa-project-diagram"></span>
+                    NETWORK PLOT
+                </h4>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+                <svg id="fg-nma-netplt-svg"></svg>
+            </div>
+        </div>
+
+        <div class="box" style="width: 360px;" id="fg-nma-frsplt">
+            <div class="box-header">
+                <h4>
+                    <span class="fa fa-align-left"></span>
+                    INTERACTIVE FOREST PLOTS
+                </h4>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+                <svg id="fg-nma-frsplt-svg"></svg>
+            </div>
+        </div><!-- .box forest plot -->
+
+        <div class="box" style="width: 320px;" id="tb-nma-ranks">
+            <div class="box-header">
+                <h4>
+                    <span class="fa fa-dice-d6"></span>
+                    RANK TABLE
+                </h4>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+                <el-table ref="multipleTable" :data="tabledata" 
+                    :default-sort="{prop:'sucra', order:'descending'}"
+                    style="width: 100%; height: 300px;">
+                    <el-table-column property="treat" sortable label="Treatment">
+                    </el-table-column>
+                    <el-table-column property="sucra" sortable label="SUCRA">
+                    </el-table-column>
+                    <el-table-column property="sucra_rank" sortable label="S.Rank">
+                    </el-table-column>
+                    <el-table-column property="pscore" sortable label="P-Score">
+                    </el-table-column>
+                    <el-table-column property="pscore_rank" sortable label="P.Rank">
+                    </el-table-column>
+                </el-table>
+            </div>
+        </div>
+
+    </div><!-- .pane-row -->
+    
+    
+    <div class="pane-row">
+        
+        <div class="box" style="width: 300px;" id="tb-nma-league">
+            <div class="box-header">
+                <h4>
+                    <span class="fa fa-table"></span>
+                    LEAGUE TABLE
+                </h4>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+                <div id="tb-nma-league-div"
+                    v-if="backend === 'netmeta'">
+                    <div style="display: flex; flex-direction: column;">
+                        <div class="tb-row" v-for="r in tabledata">
+                            
+                            <div class="tb-cell" 
+                                v-for="(v, i) in r.stat"
+                                v-bind:style="'background-color: ' + get_bg_color(v, r.row, cols[i])"
+                                v-bind:class="'row-' + r.row + ' ' + 'col-' + cols[i]">
+                                <div class="tb-cell-blank" v-if=" r.row == cols[i]">
+                                    {{ r.row }}
+                                </div>
+                                <div class="tb-cell-value" v-else-if="v==''">
+                                    -
+                                </div>
+                                <div class="tb-cell-value" v-else>
+                                    <span>{{ r.star[i] }}</span>{{ fmt_val(v) }}<span>{{ r.star[i] }}</span> <br>
+                                    <span class="tb-league-luci">({{ fmt_val(r.lci[i]) }}, {{ fmt_val(r.uci[i]) }})</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div><!-- tb-league -->
+
+                <div id="tb-nma-league-div"
+                    v-else-if="backend === 'bugsnet'">
+                    <div style="display: flex; flex-direction: row;">
+                        <div style="width:103px; min-width:82px; height:40px;">&nbsp;</div>
+                        <div style="display: flex; flex-direction: column;">
+                            <div class="tb-colname">Treatment</div>
+                            <div style="display: flex; flex-direction: row;">
+                                <div class="tb-th" v-for="col in cols">
+                                    {{ col }}
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    <div style="display: flex; flex-direction: row;">
+                        <div style="width: 20px; transform-origin: 0 0;"
+                            v-bind:style="'transform: rotate(270deg) translate(-' + (cols.length * 18 + 25) + 'px, -3px);'">
+                            Comparator
+                        </div>
+                        <div style="display: flex; flex-direction: column;">
+                            <div class="tb-row" v-for="r in tabledata">
+                                <div class="tb-row-lead">{{ r.row }}</div>
+                                <div class="tb-cell" 
+                                    v-for="(v, i) in r.stat"
+                                    v-bind:style="'background-color: ' + get_bg_color(v, r.row, cols[i])"
+                                    v-bind:class="'row-' + r.row + ' ' + 'col-' + cols[i]">
+                                    <div class="tb-cell-blank" 
+                                        v-if=" r.row == cols[i]">
+                                        &nbsp;
+                                    </div>
+                                    <div class="tb-cell-value" 
+                                        v-else>
+                                        <span>{{ r.star[i] }}</span>{{ v.toFixed(2) }}<span>{{ r.star[i] }}</span> <br>
+                                        <span class="tb-league-luci">({{ r.lci[i].toFixed(2) }}, {{ r.uci[i].toFixed(2) }})</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div><!-- tb-league for bugsnet -->
+
+                <div id="tb-nma-league-div"
+                    v-else>
+
+                </div>
+
+                <p v-html="league_table_explain">
+                </p>
+            </div>
+        </div><!-- .box SUCRA plot -->
+
+
+        <div class="box" style="width: 300px;" id="fg-nma-scrplt">
+            <div class="box-header">
+                <h4>
+                    <span class="fa fa-chart-line"></span>
+                    SUCRA PLOT
+                </h4>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+                <div id="fg-nma-scrplt-div"></div>
+            </div>
+        </div><!-- .box SUCRA plot -->
+
+    </div>
+</div>
+
+</div><!-- .flex-container -->
+
+<!-- use third party libs -->
+<script src="/static/lib/jquery/jquery-3.4.1.min.js"></script>
+<script src="/static/lib/jquery-ui/jquery-ui.min.js"></script>
+<script src="/static/lib/vue.js/vue.min.js"></script>
+<!-- D3.js -->
+<script src="/static/lib/d3/d3.min.js"></script>
+<script src="/static/lib/d3/d3-sankey.js"></script>
+<!-- ECharts -->
+<script src="/static/lib/echarts/echarts.js"></script>
+<!-- Element UI -->
+<script src="/static/lib/element-ui/index.js"></script>
+
+<!-- my scripts -->
+<script>
+
+{% include "js/fg_netplt.js" %}
+{% include "js/fg_frsplt.js" %}
+{% include "js/fg_scrplt.js" %}
+{% include "js/tb_league.js" %}
+{% include "js/tb_tmrank.js" %}
+
+var jarvis = {
+    getUrlParameter: function(name) {
+        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+        var results = regex.exec(location.search);
+        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    },
+
+    ssmsg: function(msg) {
+        $('#ss-msg').html(msg);
+    },
+
+    ssclose: function() {
+        $('#start-screen').hide();
+    },
+
+    draw: function(data) {
+        // update the league table
+        tb_league.draw(data.league);
+
+        // update the forest plot
+        data.forest.subtitle = '';
+        fg_frsplt.draw(data.forest);
+
+        // update the network plot
+        fg_netplt.draw(data.netplt);
+
+        // update the sucra plot
+        fg_scrplt.draw(data.scrplt);
+
+        // update the sucra rank
+        tb_tmrank.draw_col(data.tmrank);
+
+        // update the sucra rank
+        tb_tmrank.draw_col(data.psrank);
+    },
+    
+    init: function() {
+        
+        var isIE = /*@cc_on!@*/false || !!document.documentMode;
+
+        console.log('* User is using IE:', isIE);
+        if (isIE) {
+            jarvis.ssmsg('The functions used in this website require advanced web technologies, which are <b>NOT</b> supported by Internet Explorer<br>Try using Google Chrome, Apple Safari, Mozilla Firefox or other modern browsers.')
+            return;
+        }
+
+        fg_netplt.init();
+        fg_frsplt.init();
+        // fg_frsplt.base_y = fg_frsplt.top_y + fg_frsplt.line_height * 2;
+
+        fg_scrplt.init();
+        tb_league.init();
+        tb_tmrank.init();
+
+        // get filename
+        var fn = jarvis.getUrlParameter('fn');
+        jarvis.ssmsg('Loading data ...');
+
+        $.get(
+            "[[ url_for('pub.graphdata', prj_fn='') ]]" + fn,
+            {},
+            function(data) {
+                jarvis.draw(data.data);
+                jarvis.ssmsg('Data loaded!');
+                setTimeout('jarvis.ssclose();', 300);
+            }, 'json'
+        );
+
+        
+    }
+};
+
+$(document).ready(function() {
+    jarvis.init();
+})
+
+</script>
+</body>
+</html>

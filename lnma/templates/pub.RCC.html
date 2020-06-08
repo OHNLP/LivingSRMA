@@ -723,9 +723,9 @@ The HR for 1,2 , The OR for the last one!
 <script>
 
 var tag_dict = {
-    'PFS': 'RST-KDNC-PFS-',
-    'OS':  'RST-KDNC-OS-',
-    'AES': 'RST-KDNC-AES-'
+    'PFS': 'GRAPH-PFS-',
+    'OS':  'GRAPH-OS-',
+    'AES': 'GRAPH-AES-'
 }
 
 function switch_data(tag, trt, display_name) {
@@ -733,7 +733,8 @@ function switch_data(tag, trt, display_name) {
         display_name = trt;
     }
     var fn = tag_dict[tag] + trt;
-    var url = './study_outcome_graph.html?fn=' + fn + '.json';
+    var url = "[[ url_for('pub.graph') ]]";
+    url += '?fn=' + fn + '.json';
     $('#iframe-' + tag).attr('src', url);
     $('#refname-' + tag).html(display_name);
 }
