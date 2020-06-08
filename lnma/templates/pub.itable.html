@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<title>Study Characteristics Table</title>
+
+<link rel="icon" href="/static/img/favicon.png" type="image/png">
+<script src="https://kit.fontawesome.com/cb45cc91b0.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="/static/lib/jquery-ui/jquery-ui.min.css">
+  
+<style>
+html, body {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+}
+body {
+    font-size: 12px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+a {
+    color: #333333;
+    text-decoration: none;
+}
+.d-flex {
+    display: flex;
+}
+.flex-container {
+    display: flex;
+    justify-content: flex-start;
+    width: 100%;
+    height: 100%;
+}
+.box {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+.box-header {
+    width: 100%;
+    padding: 3px 0;
+    display: flex;
+    flex-direction: row;
+}
+.box-header a {
+    font-size: .8em;
+}
+.box-header h4 {
+    padding: 0;
+    margin: 0;
+    font-size: .95em;
+    height: 1.6em;
+    line-height: 1.6em;
+    margin: 3px 0;
+}
+.box-header button, 
+.box-body button, 
+.box-footer button {
+    height: 1.6em;
+    line-height: 1em;
+    font-size: .8em;
+    margin: 4px;
+}
+.box-header input,
+.box-body input {
+    height: 1em;
+    line-height: 1em;
+    font-size: 1em;
+    margin: 4px 4px 0 4px;
+}
+.box-header select {
+    height: 1.6em;
+    line-height: 1.2em;
+    font-size: .8em;
+    margin: 4px;
+}
+.box-header p {
+    height: 1.6em;
+    line-height: 1.2em;
+    font-size: 1em;
+    margin: 5px 0 0 2px;
+}
+.box-header span {
+    font-size: .9em;
+}
+.box-header-right {
+    font-size: .95em;
+    height: 1.6em;
+    line-height: 1.6em;
+    margin: 3px 0;
+    text-align: right;
+}
+.box-header a {
+    padding: 1px 3px;
+    margin: 0 5px;
+    height: 1.6em;
+    line-height: 1.6em;
+}
+.box-header a:hover {
+    text-decoration: underline;
+}
+.box-body {
+    width: 100%;
+}
+.box-body-item {
+    padding: 5px 0 5px 0;
+    display: flex;
+    flex-direction: column;
+    border-bottom: 1px dotted #cccccc;
+}
+/* for left - right items */
+.box-body-item-left {
+    width: 73%;
+}
+.box-body-item-right {
+    width: 24%;
+    display: flex;
+    flex-direction: row;
+}
+.box-body-item-label {
+    width: 54%;
+    font-size: .9em;
+    line-height: 1.8em;
+}
+.box-body-item-value {
+    width: 45%;
+}
+.box-body-item select {
+    width: 100%;
+}
+/* the label values items */
+.bbi-label {
+    width: 100%;
+    padding: 0 0 3px 0;
+    font-size: .8em;
+    color: #666666;
+    /* just for using the question marks */
+    justify-content: space-between;
+}
+.bbi-value {
+    width: 100%;
+    padding: 2px 0px 2px 10px;
+    font-size: .9em;
+    color: #000000;
+}
+.bbi-label-hint {
+    color: #999999;
+    cursor: help;
+}
+.bbi-label-hint:hover {
+    color: #333333;
+}
+.box-body h5 {
+    padding: 0;
+    margin: 0;
+    font-size: .95em;
+    height: 1.6em;
+    line-height: 1.6em;
+    margin: 3px 0;
+}
+.box-p {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    font-size: .9em;
+}
+.box-p-fixlen {    
+    white-space: nowrap;
+    text-overflow:ellipsis;
+    overflow: hidden;
+}
+.box-footer {
+    width: 100%;
+    min-height: 20px;
+    padding: 5px 0 5px 0;
+}
+.footer {
+    width: 100%;
+    align-items: flex-end;
+    font-size: .75em;
+    line-height: 1.5em;
+    height: 1.5em;
+}
+.footer div {
+    height: 1em;
+    line-height: 1em;
+}
+.footer-link a {
+    padding: 0 5px;
+    color: #999999;
+}
+/* layouts */
+#wrapper {
+    flex-direction: row;
+}
+#dt_tbcore {
+    float: left;
+    width: 100%;
+}
+#tb_stucha {
+    float: left;
+    width: 100%;
+}
+.xbox {
+    width: 100%;
+    height: auto;
+    clear: both;
+}
+.col-sel {
+    float: left;
+    height: 40px;
+    padding: 3px 10px;
+}
+/* for study table */
+.sct-header {
+    height: 30px;
+}
+.sct-header-sm {
+    height: 16px;
+}
+.sct-body {
+}
+.sct-col0 {
+    min-width: 10px;
+    max-width: 10px;
+    width: 10px;
+}
+.sct-tr {
+    background: white;
+}
+.sct-tr:hover {
+    background-color: #EEEEEE;
+}
+.sct-tr:hover .sct-td {
+    color: black;
+}
+.sct-th {
+    /* max-width: 100px; */
+    width: 50px;
+    padding: 0 3px;
+    flex-direction: column;
+    text-align: left;
+    border-top: 1px solid #666666;
+    border-right: 1px solid #aaaaaa;
+}
+.sct-th-sm {
+    /* max-width: 100px; */
+    min-width: 24px;
+    height: 16px;
+    line-height: 16px;
+    padding: 0 3px;
+    border-bottom: 1px solid #666666;
+    text-align: left;
+    font-size: .85em;
+}
+.sct-th-sm-item {
+    padding: 0;
+    color: #aaaaaa;
+}
+.sct-th-sm-item:hover {
+    color: #555555;
+}
+.sct-td {
+    max-width: 100px;
+    width: 50px;
+    padding: 0 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border: 1px solid white;
+    border-left: 0;
+    color: #333333;
+    border-bottom: 1px solid #aaaaaa;
+    border-right: 1px solid #aaaaaa;
+}
+.sct-th-trunk {
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.sct-th-branch {
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.sct-th-branch:hover {
+    background-color: #dddddd;
+}
+.sct-td-val {
+    color: #333333;
+}
+.sct-col-hide {
+    width: 1px !important;
+    display: none;
+}
+.sct-td-val-na {
+    color: #dddddd !important;
+    font-size: .9em;
+}
+.sct-td-val-marked {
+    border-bottom-color: #eeeeee;
+    background-color: #9bcdf1;
+}
+/* for the col table */
+.chk-group {
+    padding: 2px 5px;
+}
+.chk-group:hover {
+    background: lightgrey;
+}
+#start-screen {
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+#ss-msg {
+    width: 100%;
+    padding: 10px 0;
+    text-align: center;
+}
+</style>
+</head>
+<body>
+
+<div id="start-screen">
+    <h1>
+        <i class="fa fa-table"></i>
+        Study Characteristics Table
+    </h1>
+    <div id="ss-msg">Table Initializing ...</div>
+</div>
+
+<div id="wrapper" class="flex-container">
+
+<div id="left-panel" class="flex-container" style="flex-direction: column; justify-content: space-between; min-width: 200px; width: 200px; height: 100%; background: whitesmoke; padding: 0 5px;">
+    <div class="upper">
+        <!-- <h1 style="font-size: 1.1em; margin: 7px 0 0 0;">
+            <i class="fa fa-table"></i>
+            Study Characteristics Table
+        </h1> -->
+        <div id="tb_filter" class="box">
+            <div class="box-header">
+                <h4>
+                    <i class="fa fa-filter"></i>
+                    Filters |
+                </h4>
+                <div>
+                    <button
+                        v-on:click="reset">
+                        <i class="fa fa-sync"></i>
+                        Reset
+                    </button>
+                </div>
+            </div>
+            <div class="box-body">
+                <div class="box-body-item"
+                    v-for="filter, i in filters">
+                    <div class="bbi-label flex-container">
+                        <span>
+                            {{ filter.display_name }}
+                        </span>
+                        <span class="bbi-label-hint"
+                            v-bind:title="'Using attribute ['+filter.attr+'] to filter.'">
+                            <i class="fa fa-question-circle"></i>
+                        </span>
+                        
+                    </div>
+                    <div class="bbi-value"
+                        v-for="val, j in filter.values">
+                        <input type="radio" 
+                            v-bind:name="'filter-' + i" 
+                            v-bind:id="'filter-' + i + '-' + j"
+                            v-model="filter.value"
+                            v-on:change="update_table"
+                            v-bind:value="val.value">
+                        <label v-bind:for="'filter-' + i + '-' + j">{{ val.display_name }}</label>
+                    </div>
+                </div>
+                
+            </div>
+    
+        </div>
+
+    </div>
+
+</div> <!-- /#left-panel -->
+
+<div id="main-panel" style="flex-direction: column; justify-content: space-between; align-items: stretch; min-width: 600px; width: calc(100%-200px);height: 100%; background: white; padding: 0 5px; overflow-y: auto;">
+    <div id="tb_coltab" class="box" style="min-height: 80px; margin: 0 0 5px 0;">
+        <div class="box-header">
+            <h4>
+                <i class="fa fa-columns"></i>
+                Columns |
+            </h4>
+            <div>
+                <button
+                    v-on:click="check_all_cols">
+                    <i class="fa fa-toggle-on"></i>
+                    Check All
+                </button>
+                <button
+                    v-on:click="reset_all_cols">
+                    <i class="fa fa-toggle-off"></i>
+                    Reset All
+                </button>
+            </div>
+        </div>
+        <div class="box-body flex-container" style="flex-direction: column; flex-wrap: wrap;">
+            <div class="attr_cate flex-container" style="width:100%; flex-direction: row; border-bottom: 1px dotted #cccccc;"
+                v-if="cate != '_SYS'"
+                v-for="trunks, cate, cidx in attr_tree">
+                <div class="attr_cate_name" style="width: 100px; padding-top: 5px;">{{ cate }}</div>
+                <div class="flex-container" style="width: calc(100%-100px); flex-direction: row; justify-content: flex-start; flex-wrap: wrap;">
+                    <div class="attr_trunk d-flex" style="flex-wrap: wrap;"
+                        v-for="trunkobj, trunk, idx in trunks">
+
+                        <div class="d-flex" 
+                            style="width: calc(100%-100px); flex-direction: row; justify-content: flex-start; flex-wrap: wrap; width: auto; line-height: 1.5em;"
+                            v-if="trunk == '_'">
+                            <div class="chk-group d-flex" style="align-items: center;"
+                                v-for="attr, i in trunkobj.branches">
+                                <input type="checkbox" style="margin:0 2px 0 0;"
+                                    v-bind:name="'chk-attr-' + cidx + '-' + idx + '-' + i" 
+                                    v-model="attr.is_marked"
+                                    v-bind:disabled="attr.is_fixed"
+                                    v-on:click="show_attr_col(i)"
+                                    v-bind:id="'chk-attr-' + cidx + '-' + idx + '-' + i">
+                                    <label 
+                                        v-bind:for="'chk-attr-' + cidx + '-' + idx + '-' + i">
+                                        {{ attr.branch }}
+                                    </label>
+                            </div>
+                        </div>
+
+                        <div class="d-flex" 
+                            style="width: calc(100%-100px); flex-direction: row; justify-content: flex-start; flex-wrap: wrap; width: auto; line-height: 1.5em;"
+                            v-else>
+                            <div class="chk-group d-flex" style="align-items: center;">
+                                <input type="checkbox" style="margin:0 2px 0 0;"
+                                    v-on:click="show_trunk_attr_cols(cate, trunk)"
+                                    v-model="trunkobj.is_marked"
+                                    v-bind:name="'chk-trunk-' + cidx + '-' + idx" 
+                                    v-bind:id="'chk-trunk-' + cidx + '-' + idx">
+                                    <label 
+                                        v-bind:for="'chk-trunk-' + cidx + '-' + idx">
+                                        {{ trunk }}
+                                    </label>
+                            </div>
+                            <div style="line-height: 2.3em;">[</div>
+                            <div class="chk-group d-flex" style="align-items: center;"
+                                v-for="attr, i in trunkobj.branches">
+                                <input type="checkbox" style="margin:0 2px 0 0;"
+                                    v-bind:name="'chk-attr-' + cidx + '-' + idx + '-' + i" 
+                                    v-model="attr.is_marked"
+                                    v-on:click="show_attr_col(i)"
+                                    v-bind:id="'chk-attr-' + cidx + '-' + idx + '-' + i">
+                                    <label 
+                                        v-bind:for="'chk-attr-' + cidx + '-' + idx + '-' + i">
+                                        {{ attr.branch }}
+                                    </label>
+                            </div>
+                            <div style="line-height: 2.3em; margin-right: 2em;">]</div>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> <!-- /.box -->
+
+    <div id="tb_schtab" class="box" style="padding-bottom: 10px;">
+        <div class="box-header">
+            <h4>
+                <i class="fa fa-table"></i>
+                Data of Studies |
+            </h4>
+            <div>
+                <p>{{ rs.length }} Records</p>
+            </div>
+        </div>
+        <div id="tb_schtab_view" class="box-body" style="overflow-x: auto; padding-bottom: 10px;">
+            <table style="height: 100%;" cellspacing="0">
+                <thead>
+                    <tr class="sct-header">
+                        <th class="sct-col0">&nbsp;</th>
+                        <th class="sct-th"
+                            v-for="attr, idx in attrs"
+                            v-bind:class="get_th_cls(idx)"
+                            v-bind:id="'attr-col-' + idx">
+                            <div class="sct-th-trunk"
+                                v-on:click="toggle_fullname(idx)"
+                                v-if="attr.is_trunk_shown">
+                                <span v-if="attr.is_short_shown">{{ attr.short_trunk }}</span>
+                                <span v-else>{{ attr.trunk }}</span>
+                            </div>
+                            <div class="sct-th-trunk" v-else>&nbsp;</div>
+                            <div class="sct-th-branch"
+                                v-on:click="toggle_fullname(idx)"
+                                v-bind:title="attr.trunk + ':' + attr.branch">
+                                <span v-if="attr.is_short_shown">{{ attr.short_branch }}</span>
+                                <span v-else>{{ attr.branch }}</span>
+                            </div>
+                            <div class="sct-th-sm">
+                                <span class="sct-th-sm-item"
+                                    v-on:click="sort_by_col(idx, 'asc')">
+                                    <i class="fa fa-arrow-circle-up"></i>
+                                </span>
+                                <span class="sct-th-sm-item"
+                                    v-on:click="sort_by_col(idx, 'desc')">
+                                    <i class="fa fa-arrow-circle-down"></i>
+                                </span>
+                            </div>
+                        </th>
+                    </tr> <!-- /.sct-header -->
+                </thead>
+
+                <tbody class="sct-body">
+                    <tr class="sct-tr"
+                        v-for="r in rs">
+                        <td class="sct-col0">&nbsp;</td>
+                        <td class="sct-td"
+                            v-for="col, idx in cols"
+                            v-bind:title="attrs[idx].name + ': ' + r[col]"
+                            v-bind:class="get_td_cls(idx, r[col])"
+                            v-html="r[col]">
+                        </td>
+                    </tr>
+                </tbody><!-- /.sct-body -->
+            </table>
+        </div>
+    </div>
+</div>
+
+</div>
+
+<div style="display:none;" id="data_rs">
+[[rs|safe]]
+</div>
+<div style="display:none;" id="data_attrs">
+[[attrs|safe]]
+</div>
+
+<script src="/static/lib/jquery/jquery-3.4.1.min.js"></script>
+<script src="/static/lib/jquery-ui/jquery-ui.min.js"></script>
+<script src="/static/lib/vue.js/vue.min.js"></script>
+<script src="/static/lib/alasql/alasql.min.js"></script>
+
+<script>
+    
+var dt_tbcore = {
+    rs: [],
+    rs_db: [],
+    rs_col: [], 
+    sql: {
+        base: 'select * from rs where 1=1\n  and',
+        conditions: '',
+        order_by: ''
+    },
+    attrs: [],
+    attr_dict: {},
+    attr_tree: {},
+    cols: [],
+    // translator for db
+    t_a2c: {},
+    t_c2a: {},
+
+    has_attr: function(attr_name_or_id) {
+        var attr_id = this.attr_nm2id(attr_name_or_id);
+        return this.attr_dict.hasOwnProperty(attr_id);
+
+        // for (let i = 0; i < this.attrs.length; i++) {
+        //     const attr = this.attrs[i];
+        //     if (attr.trunk == name || attr.name == name) {
+        //         return true;
+        //     }
+        // }
+        // return false;
+    },
+
+    get_attr: function(attr_name_or_id) {
+        var attr_id = this.attr_nm2id(attr_name_or_id);
+        return this.attr_dict[attr_id];
+    },
+
+    attr_nm2id: function(name) {
+        var ps = name.split('|');
+        var trunk = '';
+        var branch = '';
+        if (ps.length == 1) {
+            trunk = '_';
+            branch = ps[0].trim();
+        } else if (ps.length == 2) {
+            trunk = ps[0].trim();
+            branch = ps[1].trim();
+        } else {
+            trunk = ps[0].trim();
+            branch = ps[1].trim();
+        }
+        var attr_id = trunk.toUpperCase() + '|' + branch.toUpperCase();
+        return attr_id;
+    },
+
+    init: function() {
+        // init the data
+        this.rs = JSON.parse($('#data_rs').html());
+        this.attrs = JSON.parse($('#data_attrs').html());
+
+        // further init the attrs
+        // since we don't have any information with the attrs
+        // we must add the category data to attr by the attr_dict
+        var last_trunk = '';
+        for (let i = 0; i < this.attrs.length; i++) {
+            var cate = this.attrs[i].cate;
+            var trunk = this.attrs[i].trunk;
+
+            // build translator from name to column
+            this.t_a2c[this.attrs[i].attr_id] = 'col'+i;
+            this.t_c2a['col'+i] = this.attrs[i].attr_id;
+            this.cols.push('col'+i);
+
+            // set hide all attributes as default
+            this.attrs[i]['is_marked'] = false;
+            this.attrs[i]['is_fixed'] = false;
+
+            this.attrs[i].is_trunk_shown = (last_trunk == this.attrs[i].trunk || this.attrs[i].trunk == '_')? false : true;
+            // shorter version for display
+            this.attrs[i].short_name = this.get_short_name(this.attrs[i].name);
+            this.attrs[i].short_trunk = this.get_short_name(this.attrs[i].trunk);
+            this.attrs[i].short_branch = this.get_short_name(this.attrs[i].branch);
+
+            // set the display name
+            this.attrs[i].is_short_shown = true;
+
+            // hide the system
+            this.attrs[i].is_system = this.attrs[i].cate == '_SYS'? true : false;
+
+            // bind to dict
+            this.attr_dict[this.attrs[i].attr_id] = this.attrs[i];
+
+            // bind to tree
+            if (!this.attr_tree.hasOwnProperty(cate)) {
+                this.attr_tree[cate] = {};
+            }
+            if (!this.attr_tree[cate].hasOwnProperty(trunk)) {
+                this.attr_tree[cate][trunk] = {
+                    name: trunk,
+                    is_marked: false,
+                    branches: []
+                };
+            }
+            this.attr_tree[cate][trunk].branches.push(this.attrs[i]);
+            
+            // for display 
+            last_trunk = this.attrs[i].trunk;
+        }
+
+        // add to database AlaSQL
+        for (let i = 0; i < this.rs.length; i++) {
+            const r = this.rs[i];
+            var r_col = {'id': i};
+            // copy the value to this rs_db
+            for (let j = 0; j < this.attrs.length; j++) {
+                const attr = this.attrs[j];
+                var col = this.t_a2c[attr.attr_id];
+                // attention! the rs use attr.name to access!!!
+                var val = r[attr.name];
+                if (val == null) {
+                    val = 'NA';
+                }
+                // force to use string
+                // val = "" + val;
+                // val = val.trim()
+                r_col[col] = val;
+            }
+            this.rs_col.push(r_col);
+        }
+        // ok, save these records into sql for later use ...
+        // how can forget to add the []
+        alasql('create table rs');
+        alasql('select * into rs from ?', [this.rs_col]);
+
+        // bind rs_db
+        this.rs_db = alasql('select * from rs');
+    },
+
+    get_short_name: function(name) {
+        return name.substring(0, 3).toUpperCase();
+    },
+
+    update_rs_db: function() {
+        var sql = this.sql.base + ' ' +
+                  this.sql.conditions + ' ' +
+                  this.sql.order_by;
+        console.log('* updated table using SQL:\n', sql);
+        this.rs_db = alasql(sql);
+    }
+};
+
+var tb_filter = {
+    vpp: null,
+    vpp_id: '#tb_filter',
+    /**
+     * Filters
+     * To manage the filters for selecting records
+     * I add this module to organize the filters.
+     * Each filter is defined as follows:
+       filter = {
+           display_name: 'Just a title for this filter',
+           type: 'radio', // or 'checkbox', we will add this later
+           attr: 'the attr name for this option', // this MUST be same to attrs
+           oper: '=', // =, >, <, >=, <=, in, <>, operators in SQL
+           values: [{
+               display_name: 'Just a option for this option',
+               value: 'xxx',
+               default: true, // use this value as default for this filter
+               sql_cond: 'xx != NULL' // this is optional, if sql_cond exist, ignore value
+           }, { ... }]
+       }
+     */
+     filters: [{
+        display_name: 'Is Trial included in meta-analysis?',
+        type: 'radio',
+        attr: 'Is study included in Meta-analysis',
+        value: 0,
+        values: [
+            { display_name: 'All Studies', value: 0, sql_cond: "{$col} is not NULL"},
+            { display_name: 'Meta-Analysis Only', value: 1, sql_cond: "{$col} like '%yes%'"},
+            { display_name: 'Systematic Review Only', value: 2, sql_cond: "{$col} like '%no%'"}
+        ]
+    }, {
+        display_name: 'Number of Arms',
+        type: 'radio',
+        attr: "Number of Arms",
+        value: 0,
+        values: [
+            { display_name: 'Both Two and Three Arms', value: 0, sql_cond: "{$col} is not NULL", default: true },
+            { display_name: 'Two Arms', value: 1, sql_cond: "{$col} in (2)" },
+            { display_name: 'Three Arms', value: 2, sql_cond: "{$col} in (3)" }
+        ]
+    }, {
+        display_name: 'Phase of clinical trial?',
+        type: 'radio',
+        attr: "Phase",
+        value: 0,
+        values: [
+            { display_name: 'All Phases', value: 0, sql_cond: "{$col} is not NULL", default: true },
+            { display_name: 'Phase 2', value: 1, sql_cond: "{$col} in (2)" },
+            { display_name: 'Phase 3', value: 2, sql_cond: "{$col} in (3)" }
+        ]
+    }, {
+        display_name: 'What’s in the treatment arm?',
+        type: 'radio',
+        attr: "Type of Agent in Treatment Arm",
+        value: 0,
+        values: [
+            { display_name: 'All Types', value: 0, sql_cond: "{$col} is not NULL" },
+            { display_name: 'IO + IO', value: 1, sql_cond: "({$col} like '%IO%' and upper({$col}) not like '%TKI%')" },
+            { display_name: 'Only TKI', value: 2, sql_cond: "({$col} like '%TKI%' and upper({$col}) not like '%IO%')" },
+            { display_name: 'IO + TKI Combination', value: 3, sql_cond: "{$col} like '%IO%' and {$col} like '%TKI%'", default: true }
+        ]
+    }, {
+        display_name: 'Risk categories',
+        type: 'radio',
+        attr: "Risk Category Included in Trial",
+        value: 0,
+        values: [
+            { display_name: 'All Risk Categories', value: 0, sql_cond: '{$col} is not NULL', default: true },
+            { display_name: 'Only Poor and Intermediate Risk', value: 1, sql_cond: "(upper({$col}) like '%POOR%' and upper({$col}) like '%INTERMEDIATE%' and upper({$col}) not like '%FAVORABLE%')" }
+        ]
+    }, {
+        display_name: 'Data Availability',
+        type: 'radio',
+        attr: "Is OS data available",
+        value: 0,
+        values: [
+            { display_name: 'All', value: 0, sql_cond: '{$col} is not NULL', default: true },
+            { display_name: 'OS Data Available', value: 1, sql_cond: "upper({$col}) like '%YES%'" },
+            { display_name: 'OS Data NOT Available', value: 2, sql_cond: "upper({$col}) like '%NO%'" }
+        ]
+    }, {
+        display_name: 'Studies with longer followup',
+        type: 'radio',
+        attr: "Original/Follow Up",
+        value: 0,
+        values: [
+            { display_name: 'All versions', value: 0, sql_cond: '{$col} is not NULL', default: true },
+            { display_name: 'Only original', value: 1, sql_cond: "upper({$col}) like '%ORIGINAL%'" },
+            { display_name: 'Only followup', value: 2, sql_cond: "upper({$col}) like '%FOLLOW%'" }
+        ]
+    }],
+
+
+    init: function() {
+        // select acceptable filters
+        // to use this feature, must init the dt_tbcore at begin!
+        var fs = [];
+        for (let i = 0; i < this.filters.length; i++) {
+            const f = this.filters[i];
+            if (dt_tbcore.has_attr(f.attr)) {
+                // add the attr_id
+                f.attr_id = dt_tbcore.get_attr(f.attr).attr_id;
+                fs.push(f);
+            }
+        }
+
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                filters: fs
+            },
+            methods: {
+                reset: function(evt) {
+                    for (let i = 0; i < this.filters.length; i++) {
+                        const filter = this.filters[i];
+                        filter.value = 0;
+                    }
+                    jarvis.update_schtab();
+                },
+
+                update_table: function(evt) {
+                    jarvis.update_schtab();
+                }
+            }
+        });
+    },
+
+    get_all_sql_conds: function() {
+        var sql_conds = [];
+        for (let i = 0; i < this.vpp.filters.length; i++) {
+            const filter = this.vpp.filters[i];
+            var col = dt_tbcore.t_a2c[filter.attr_id];
+            var cond = filter.values[filter.value].sql_cond;
+
+            // replace the {$col} with real col name, such as col32, col24
+            cond = cond.replace(/\{\$col\}/g, col);
+
+            // add this cond
+            sql_conds.push(cond);
+        }
+        return sql_conds.join('\n  and ');
+    }
+};
+
+var tb_coltab = {
+    vpp: null,
+    vpp_id: '#tb_coltab',
+    cols: {
+        fixed: ['NCT', 'TRIAL', 'PUBMED ID', 'PMID', 'AUTHOR', 'YEAR'],
+        default: ['PHASE', 'ORIGINAL/FOLLOW UP', 'NUMBER OF ARMS', 'TREATMENT ARM', 'CONTROL ARM']
+    },
+
+    reset_cols: function() {
+        for (let i = 0; i < dt_tbcore.attrs.length; i++) {
+            const attr = dt_tbcore.attrs[i];
+            attr.is_marked = false;
+            if (this.cols.fixed.includes(attr.name.toUpperCase())) {
+                attr.is_fixed = true;
+                attr.is_marked = true;
+            }
+            if (this.cols.default.includes(attr.name.toUpperCase())) {
+                attr.is_marked = true;
+            }
+        }
+    },
+
+    init: function() {
+        this.reset_cols();
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                attrs: dt_tbcore.attrs,
+                attr_tree: dt_tbcore.attr_tree
+            },
+            methods: {
+                show_attr_col: function(idx) {
+                    jarvis.scroll2col('attr-col-' + idx);
+                    dt_tbcore.attrs[idx].is_short_shown = dt_tbcore.attrs[idx].is_marked;
+                },
+
+                show_trunk_attr_cols: function(cate, trunk) {
+                    this.attr_tree[cate][trunk].is_marked = !this.attr_tree[cate][trunk].is_marked;
+                    for (let i = 0; i < this.attr_tree[cate][trunk].branches.length; i++) {
+                        const attr = this.attr_tree[cate][trunk].branches[i];
+                        attr.is_marked = this.attr_tree[cate][trunk].is_marked;
+                    }
+                },
+
+                check_all_cols: function(evt) {
+                    for (let i = 0; i < this.attrs.length; i++) {
+                        this.attrs[i].is_marked = true;
+                        this.attrs[i].is_short_shown = !this.attrs[i].is_marked;
+                    }
+                },
+
+                reset_all_cols: function(evt) {
+                    tb_coltab.reset_cols();
+                }
+            }
+        });
+    }
+};
+
+var tb_schtab = {
+    vpp: null,
+    vpp_id: '#tb_schtab',
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                attrs: dt_tbcore.attrs,
+                cols: dt_tbcore.cols,
+                rs: dt_tbcore.rs_db
+            },
+            methods: {
+                get_th_cls: function(idx) {
+                    if (!dt_tbcore.attrs[idx].is_marked) {
+                        return 'sct-col-hide';
+                    } else {
+                        return '';
+                    }
+                },
+
+                get_td_cls: function(idx, val) {
+                    // hide this if is_marked false
+                    if (!dt_tbcore.attrs[idx].is_marked) {
+                        return 'sct-col-hide';
+                    }
+                    var cls = '';
+                    if (dt_tbcore.attrs[idx].is_marked) {
+                        cls += ' ';
+                    } else {
+                        cls += ' '
+                    }
+                    if (val == 'NA') {
+                        cls += ' sct-td-val-na';
+                    } else {
+                        cls += ' sct-td-val';
+                    }
+                    return cls.trim();
+                },
+
+                toggle_fullname: function(idx) {
+                    this.attrs[idx].is_short_shown = !this.attrs[idx].is_short_shown;
+                },
+
+                sort_by_col: function(idx, ord) {
+                    var col = this.cols[idx];
+                    var order_by = 'order by ' + col + ' ' + ord;
+                    dt_tbcore.sql.order_by = order_by;
+
+                    jarvis.update_schtab();
+                }
+            }
+        })
+    },
+
+    update: function() {
+        this.vpp.rs = dt_tbcore.rs_db;
+    }
+}
+
+
+var jarvis = {
+    init: function() {
+        var isIE = /*@cc_on!@*/false || !!document.documentMode;
+
+        console.log('* User is using IE:', isIE);
+        if (isIE) {
+            jarvis.ssmsg('The functions used in this website require advanced web technologies, which are <b>NOT</b> supported by Internet Explorer<br>Try using Google Chrome, Apple Safari, Mozilla Firefox or other modern browsers.')
+            return;
+        }
+
+        dt_tbcore.init();
+        tb_filter.init();
+        tb_coltab.init();
+        tb_schtab.init();
+
+        jarvis.update_schtab();
+
+        // clsoe the start-screen
+        jarvis.ssmsg('Almost Initialized.')
+        setTimeout('jarvis.ssclose();', 400);
+    },
+
+    update_schtab: function() {
+        // update sql
+        var cond = tb_filter.get_all_sql_conds();
+        dt_tbcore.sql.conditions = cond;
+
+        // updat rs_db
+        dt_tbcore.update_rs_db();
+
+        // update table
+        tb_schtab.update();
+
+        // update tips
+        $(document).tooltip({
+            position: {
+                my: "left top",
+                at: "right+5 top-5",
+                collision: "none"
+            }
+        });
+    },
+
+    ssmsg: function(msg) {
+        $('#ss-msg').html(msg);
+    },
+
+    ssclose: function() {
+        $('#start-screen').hide();
+    },
+
+    scroll2col: function(elem_id, speed) {
+        var el_tab = document.getElementById('tb_schtab_view');
+        var el_col = document.getElementById(elem_id);
+        if (el_col.offsetLeft > el_tab.scrollLeft && 
+            el_col.offsetLeft < el_tab.scrollLeft + el_tab.offsetWidth) {
+                return;
+        } else {
+            el_tab.scrollLeft = el_col.offsetLeft;
+        }
+    }
+};
+
+$(document).ready(function() {
+    jarvis.init();
+})
+</script>
+</body>
+</html>

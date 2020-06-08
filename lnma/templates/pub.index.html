@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+<!-- Required meta tags -->
+
+<title>Living Interactive Systematic Reviews</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+
+<link rel="icon" href="./static/img/favicon.ico">
+<!-- Bootstrap CSS -->
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+<link rel="stylesheet" href="./static/lib/font-awesome/css/all.css">
+
+<style>
+/* GLOBAL STYLES
+-------------------------------------------------- */
+/* Padding below the footer and lighter body text */
+
+body {
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+  color: #333333;
+}
+h3 {
+    text-decoration: underline;
+    color: #ab7e3b;
+}
+h4 {
+    color: #ab7e3b;
+}
+.bg-dark {
+    background-color: #ab7e3b !important;
+}
+
+.bg-dark2 {
+    background: linear-gradient(to bottom right, #ab7e3b, #ab7e3b 50%);
+}
+
+.bd-dark {
+    border-color: #ab7e3b !important;
+}
+
+.card {
+    margin-bottom: 2rem;
+}
+
+.nav-item {
+    padding: 0 .5rem;
+}
+
+.nav-link {
+    border-bottom: 3px solid transparent;
+}
+
+.nav-link:hover {
+    border-bottom: 3px solid white;
+}
+
+.image-blurred-edge {
+    background: url(./static/img/bg1.jpg) no-repeat;
+    width: 600px;
+    height: 300px;
+    box-shadow: 0 0 60px 40px #125B67 inset;
+    margin: 0 0;
+}
+/* CUSTOMIZE THE CAROUSEL
+-------------------------------------------------- */
+.navbar-brand {
+    margin-right: 1.5rem;
+}
+
+.member-image {
+    width: 100%;
+}
+/* MARKETING CONTENT
+-------------------------------------------------- */
+
+/* Center align the text within the three columns below the carousel */
+.marketing .col-lg-4 {
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+.marketing h2 {
+  font-weight: 400;
+}
+.marketing .col-lg-4 p {
+  margin-right: .75rem;
+  margin-left: .75rem;
+}
+
+
+/* Featurettes
+------------------------- */
+
+.featurette-divider {
+  margin: 5rem 0; /* Space out the Bootstrap <hr> more */
+}
+
+/* Thin out the marketing headings */
+.featurette-heading {
+  font-weight: 300;
+  line-height: 1;
+  letter-spacing: -.05rem;
+}
+
+/* outcome-netchar-table
+------------------------------------- */
+.outcome-netchar-table {
+    font-size: 12px;
+    border: 1px solid #444444;
+    border-top: 0;
+    border-left: 0;
+    border-right: 0;
+    margin: 10px 0 20px 0;
+}
+.outcome-netchar-table .header {
+    border: 1px solid #444444;
+    border-left: 0;
+    border-right: 0;
+}
+.outcome-netchar-table th,
+.outcome-netchar-table td {
+    padding: 3px 5px;
+}
+.outcome-netchar-table td {
+    height: 2rem;
+}
+.outcome-netchar-table .odd {
+    background-color: #EAEAEA;
+}
+
+/* RESPONSIVE CSS
+-------------------------------------------------- */
+
+@media (min-width: 40em) {
+  /* Bump up size of carousel content */
+  .carousel-caption p {
+    margin-bottom: 1.25rem;
+    font-size: 1.25rem;
+    line-height: 1.4;
+  }
+
+  .featurette-heading {
+    font-size: 50px;
+  }
+}
+
+@media (min-width: 62em) {
+  .featurette-heading {
+    margin-top: 7rem;
+  }
+}
+</style>
+</head>
+<body>
+<br id="sec-concept">
+<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark" style="height: 70px;">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <a class="navbar-brand" href="#">
+        <img src="/static/img/logo-lisr.png" alt="" width="180px">
+    </a>
+    
+    <div class="collapse navbar-collapse" id="navbarsExampleDefault" style="justify-content: flex-end;">
+        <ul class="navbar-nav">
+            <li class="nav-item active">
+                <a class="nav-link" href="./">HOME <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#sec-concept">CONCEPT</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#sec-methods">METHODS</a>
+            </li>
+
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="dropdown03" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">TITLES</a>
+                <div class="dropdown-menu" aria-labelledby="dropdown03">
+                    <a class="dropdown-item" href="./CAT.html">Cancer Associated Thrombosis </a>
+                    <a class="dropdown-item" href="./RCC.html">Metastatic Renal Cell Cancer</a>
+                </div>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="#sec-pubs">PUBLICATIONS</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<div class="container" style="margin-top: 3rem; margin-bottom:2rem;">
+    {% include "pub._concept.html" %}
+</div>
+
+
+<br id="sec-methods">
+<div class="container-fluid bg-dark2" style="color: white; padding: 4rem 0; margin: 3rem auto;">
+    <div class="container white-h3" style=" padding: 2rem auto;">
+        <style>
+            .white-h3 h3 {
+                color: white;
+            }
+        </style>
+        {% include "pub._methods.html" %}
+    </div>
+</div>
+
+
+</div>
+
+<hr class="featurette-divider">
+
+<!-- FOOTER -->
+<footer class="container">
+    <p class="float-right"><a href="#">Back to top</a></p>
+    <p>&copy; 2020 &middot; <a href="#">Terms</a></p>
+</footer>
+
+<!-- Estimated HR(OR) reflect outcomes for treatment in columns compared to treatment in rows 
+The HR for 1,2 , The OR for the last one!
+-->
+
+<!-- Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+
+<script>
+$(document).ready(function() {
+});
+</script>
+</body>
+</html>

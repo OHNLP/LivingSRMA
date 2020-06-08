@@ -4,35 +4,24 @@ var tb_studylist = {
     data: {},
     width: 400,
     
-    all_rs: [
-        { pmid: '31079938', b1: 1, b2: 1, b3: 1, b4: 1, b5: 1, b6: 0, b7: 0, e1: 0, e2: 0, e3: 0, a1: 1, a2: 1, a3: 1, u1: 0, u2: 0, f1: 1, f2: 1 },
-        { pmid: '30779531', b1: 1, b2: 1, b3: 1, b4: 1, b5: 1, b6: 1, b7: 1, e1: 0, e2: 0, e3: 0, a1: 0, a2: 0, a3: 0, u1: 0, u2: 0, f1: 1, f2: 1 },
-        { pmid: '29562145', b1: 1, b2: 1, b3: 1, b4: 1, b5: 1, b6: 1, b7: 1, e1: 0, e2: 0, e3: 0, a1: 0, a2: 0, a3: 0, u1: 0, u2: 0, f1: 1, f2: 1 },
-        { pmid: '28199818', b1: 1, b2: 1, b3: 1, b4: 1, b5: 1, b6: 1, b7: 1, e1: 0, e2: 0, e3: 0, a1: 0, a2: 0, a3: 0, u1: 0, u2: 0, f1: 1, f2: 1 },
-        { pmid: '23964934', b1: 1, b2: 1, b3: 1, b4: 1, b5: 1, b6: 1, b7: 1, e1: 0, e2: 0, e3: 0, a1: 0, a2: 0, a3: 0, u1: 0, u2: 0, f1: 1, f2: 1 },
-        { pmid: '24019545', b1: 1, b2: 1, b3: 1, b4: 1, b5: 1, b6: 1, b7: 1, e1: 0, e2: 0, e3: 0, a1: 0, a2: 0, a3: 0, u1: 0, u2: 0, f1: 1, f2: 1 },
-        { pmid: '24206640', b1: 1, b2: 1, b3: 1, b4: 1, b5: 1, b6: 1, b7: 1, e1: 0, e2: 0, e3: 0, a1: 0, a2: 0, a3: 0, u1: 0, u2: 0, f1: 1, f2: 1 },
-        { pmid: '27918762', b1: 1, b2: 1, b3: 1, b4: 1, b5: 1, b6: 1, b7: 0, e1: 0, e2: 0, e3: 1, a1: 0, a2: 0, a3: 0, u1: 0, u2: 0, f1: 1, f2: 0 },
-        { pmid: '25952317', b1: 1, b2: 1, b3: 1, b4: 1, b5: 1, b6: 1, b7: 0, e1: 0, e2: 0, e3: 1, a1: 0, a2: 0, a3: 0, u1: 0, u2: 0, f1: 1, f2: 0 },
-        { pmid: '30529901', b1: 1, b2: 1, b3: 1, b4: 1, b5: 1, b6: 1, b7: 0, e1: 0, e2: 0, e3: 1, a1: 0, a2: 0, a3: 0, u1: 0, u2: 0, f1: 1, f2: 0 },
-        { pmid: '31427204', b1: 1, b2: 1, b3: 1, b4: 1, b5: 1, b6: 1, b7: 1, e1: 0, e2: 0, e3: 0, a1: 1, a2: 0, a3: 0, u1: 1, u2: 1, f1: 1, f2: 1 },
-        // two abstract
-        { pmid: 'NCT01481870', title: 'Comparison of Sequential Therapies With Sunitinib and Sorafenib in Advanced Renal Cell Carcinoma (CROSS-J-RCC)', date: 'December 2015', journal: 'ClinicalTrials.gov', authors: 'Yoshihiko TOMITA, Yamagata University', b1: 1, b2: 1, b3: 1, b4: 1, b5: 1, b6: 1, b7: 1, e1: 0, e2: 0, a1: 0, a2: 0, a3: 0, u1: 0, u2: 0, f1: 1, f2: 1 },
-        { pmid: 'NCT01984242', title: 'A Study of Atezolizumab (an Engineered Anti-Programmed Death-Ligand 1 [PD-L1] Antibody) as Monotherapy or in Combination With Bevacizumab (Avastin®) Compared to Sunitinib (Sutent®) in Participants With Untreated Advanced Renal Cell Carcinoma (IMmotion150)', date: 'January 8, 2019', journal: 'ClinicalTrials.gov', authors: 'Hoffmann-La Roche', b1: 1, b2: 1, b3: 1, b4: 1, b5: 1, b6: 1, b7: 1, e1: 0, e2: 0, a1: 0, a2: 0, a3: 0, u1: 0, u2: 0, f1: 1, f2: 1 },
+    all_rs: [],
 
-    ],
-    
-    load: function() {
+    load: function(data) {
+        this.prisma = data.prisma;
+        this.all_rs = data.studylist;
         // load data of these pmids:
-        var pmids = this.unpack(this.all_rs.slice(0, 11), 'pmid');
-        this.get_summary_of_search_results(pmids, function(data) {
-            tb_studylist.parse_summary_results(data);
+        var pmids = [];
+        for (let i = 0; i < data.studylist.length; i++) {
+            const item = data.studylist[i];
+            if (item.pid_type == 'pmid') {
+                pmids.push(item.pmid);
+            }
+        }
+        // var pmids = this.unpack(this.all_rs.slice(0, 11), 'pmid');
+        this.get_summary_of_search_results(pmids, function(dt) {
+            tb_studylist.parse_summary_results(dt);
             tb_studylist.init();
-            tb_studylist.update_study_list({ 
-                stage: 'f2', 
-                number: 10, 
-                text: 'Final number in quantitative synthesis (meta-analysis)' 
-            });
+            tb_studylist.update_study_list({stage:'f2'});
         });
         
     },
@@ -99,7 +88,7 @@ var tb_studylist = {
     },
 
     update_study_list: function(stage) {
-        this.vpp.stage = stage;
+        this.vpp.stage = this.prisma[stage.stage];
         // filter the studies
         var studies = [];
         for (let i = 0; i < this.all_rs.length; i++) {
