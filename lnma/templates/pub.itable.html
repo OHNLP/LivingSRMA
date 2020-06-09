@@ -423,13 +423,13 @@ a {
             <div class="attr_cate flex-container" style="width:100%; flex-direction: row; border-bottom: 1px dotted #cccccc;"
                 v-if="cate != '_SYS'"
                 v-for="trunks, cate, cidx in attr_tree">
-                <div class="attr_cate_name" style="width: 100px; padding-top: 5px;">{{ cate }}</div>
-                <div class="flex-container" style="width: calc(100%-100px); flex-direction: row; justify-content: flex-start; flex-wrap: wrap;">
+                <div class="attr_cate_name" style="width: 120px; padding-top: 5px;">{{ cate }}</div>
+                <div class="flex-container" style="width: calc(100%-120px); flex-direction: row; justify-content: flex-start; flex-wrap: wrap;">
                     <div class="attr_trunk d-flex" style="flex-wrap: wrap;"
                         v-for="trunkobj, trunk, idx in trunks">
 
                         <div class="d-flex" 
-                            style="width: calc(100%-100px); flex-direction: row; justify-content: flex-start; flex-wrap: wrap; width: auto; line-height: 1.5em;"
+                            style="width: calc(100%-120px); flex-direction: row; justify-content: flex-start; flex-wrap: wrap; width: auto; line-height: 1.5em;"
                             v-if="trunk == '_'">
                             <div class="chk-group d-flex" style="align-items: center;"
                                 v-for="attr, i in trunkobj.branches">
@@ -447,7 +447,7 @@ a {
                         </div>
 
                         <div class="d-flex" 
-                            style="width: calc(100%-100px); flex-direction: row; justify-content: flex-start; flex-wrap: wrap; width: auto; line-height: 1.5em;"
+                            style="width: calc(100%-120px); flex-direction: row; justify-content: flex-start; flex-wrap: wrap; width: auto; line-height: 1.5em;"
                             v-else>
                             <div class="chk-group d-flex" style="align-items: center;">
                                 <input type="checkbox" style="margin:0 2px 0 0;"
@@ -561,7 +561,13 @@ a {
 <script src="/static/lib/alasql/alasql.min.js"></script>
 
 <script>
-    
+var _prj = '[[ prj ]]';
+{% include "js/tb_filter.js" %}
+
+if (_prj == 'CAT') {
+    tb_filter.filters = tb_filter.all_filters.CAT;
+}
+
 var dt_tbcore = {
     rs: [],
     rs_db: [],
@@ -582,14 +588,6 @@ var dt_tbcore = {
     has_attr: function(attr_name_or_id) {
         var attr_id = this.attr_nm2id(attr_name_or_id);
         return this.attr_dict.hasOwnProperty(attr_id);
-
-        // for (let i = 0; i < this.attrs.length; i++) {
-        //     const attr = this.attrs[i];
-        //     if (attr.trunk == name || attr.name == name) {
-        //         return true;
-        //     }
-        // }
-        // return false;
     },
 
     get_attr: function(attr_name_or_id) {
@@ -711,156 +709,12 @@ var dt_tbcore = {
     }
 };
 
-var tb_filter = {
-    vpp: null,
-    vpp_id: '#tb_filter',
-    /**
-     * Filters
-     * To manage the filters for selecting records
-     * I add this module to organize the filters.
-     * Each filter is defined as follows:
-       filter = {
-           display_name: 'Just a title for this filter',
-           type: 'radio', // or 'checkbox', we will add this later
-           attr: 'the attr name for this option', // this MUST be same to attrs
-           oper: '=', // =, >, <, >=, <=, in, <>, operators in SQL
-           values: [{
-               display_name: 'Just a option for this option',
-               value: 'xxx',
-               default: true, // use this value as default for this filter
-               sql_cond: 'xx != NULL' // this is optional, if sql_cond exist, ignore value
-           }, { ... }]
-       }
-     */
-     filters: [{
-        display_name: 'Is Trial included in meta-analysis?',
-        type: 'radio',
-        attr: 'Is study included in Meta-analysis',
-        value: 0,
-        values: [
-            { display_name: 'All Studies', value: 0, sql_cond: "{$col} is not NULL"},
-            { display_name: 'Meta-Analysis Only', value: 1, sql_cond: "{$col} like '%yes%'"},
-            { display_name: 'Systematic Review Only', value: 2, sql_cond: "{$col} like '%no%'"}
-        ]
-    }, {
-        display_name: 'Number of Arms',
-        type: 'radio',
-        attr: "Number of Arms",
-        value: 0,
-        values: [
-            { display_name: 'Both Two and Three Arms', value: 0, sql_cond: "{$col} is not NULL", default: true },
-            { display_name: 'Two Arms', value: 1, sql_cond: "{$col} in (2)" },
-            { display_name: 'Three Arms', value: 2, sql_cond: "{$col} in (3)" }
-        ]
-    }, {
-        display_name: 'Phase of clinical trial?',
-        type: 'radio',
-        attr: "Phase",
-        value: 0,
-        values: [
-            { display_name: 'All Phases', value: 0, sql_cond: "{$col} is not NULL", default: true },
-            { display_name: 'Phase 2', value: 1, sql_cond: "{$col} in (2)" },
-            { display_name: 'Phase 3', value: 2, sql_cond: "{$col} in (3)" }
-        ]
-    }, {
-        display_name: 'What’s in the treatment arm?',
-        type: 'radio',
-        attr: "Type of Agent in Treatment Arm",
-        value: 0,
-        values: [
-            { display_name: 'All Types', value: 0, sql_cond: "{$col} is not NULL" },
-            { display_name: 'IO + IO', value: 1, sql_cond: "({$col} like '%IO%' and upper({$col}) not like '%TKI%')" },
-            { display_name: 'Only TKI', value: 2, sql_cond: "({$col} like '%TKI%' and upper({$col}) not like '%IO%')" },
-            { display_name: 'IO + TKI Combination', value: 3, sql_cond: "{$col} like '%IO%' and {$col} like '%TKI%'", default: true }
-        ]
-    }, {
-        display_name: 'Risk categories',
-        type: 'radio',
-        attr: "Risk Category Included in Trial",
-        value: 0,
-        values: [
-            { display_name: 'All Risk Categories', value: 0, sql_cond: '{$col} is not NULL', default: true },
-            { display_name: 'Only Poor and Intermediate Risk', value: 1, sql_cond: "(upper({$col}) like '%POOR%' and upper({$col}) like '%INTERMEDIATE%' and upper({$col}) not like '%FAVORABLE%')" }
-        ]
-    }, {
-        display_name: 'Data Availability',
-        type: 'radio',
-        attr: "Is OS data available",
-        value: 0,
-        values: [
-            { display_name: 'All', value: 0, sql_cond: '{$col} is not NULL', default: true },
-            { display_name: 'OS Data Available', value: 1, sql_cond: "upper({$col}) like '%YES%'" },
-            { display_name: 'OS Data NOT Available', value: 2, sql_cond: "upper({$col}) like '%NO%'" }
-        ]
-    }, {
-        display_name: 'Studies with longer followup',
-        type: 'radio',
-        attr: "Original/Follow Up",
-        value: 0,
-        values: [
-            { display_name: 'All versions', value: 0, sql_cond: '{$col} is not NULL', default: true },
-            { display_name: 'Only original', value: 1, sql_cond: "upper({$col}) like '%ORIGINAL%'" },
-            { display_name: 'Only followup', value: 2, sql_cond: "upper({$col}) like '%FOLLOW%'" }
-        ]
-    }],
-
-
-    init: function() {
-        // select acceptable filters
-        // to use this feature, must init the dt_tbcore at begin!
-        var fs = [];
-        for (let i = 0; i < this.filters.length; i++) {
-            const f = this.filters[i];
-            if (dt_tbcore.has_attr(f.attr)) {
-                // add the attr_id
-                f.attr_id = dt_tbcore.get_attr(f.attr).attr_id;
-                fs.push(f);
-            }
-        }
-
-        this.vpp = new Vue({
-            el: this.vpp_id,
-            data: {
-                filters: fs
-            },
-            methods: {
-                reset: function(evt) {
-                    for (let i = 0; i < this.filters.length; i++) {
-                        const filter = this.filters[i];
-                        filter.value = 0;
-                    }
-                    jarvis.update_schtab();
-                },
-
-                update_table: function(evt) {
-                    jarvis.update_schtab();
-                }
-            }
-        });
-    },
-
-    get_all_sql_conds: function() {
-        var sql_conds = [];
-        for (let i = 0; i < this.vpp.filters.length; i++) {
-            const filter = this.vpp.filters[i];
-            var col = dt_tbcore.t_a2c[filter.attr_id];
-            var cond = filter.values[filter.value].sql_cond;
-
-            // replace the {$col} with real col name, such as col32, col24
-            cond = cond.replace(/\{\$col\}/g, col);
-
-            // add this cond
-            sql_conds.push(cond);
-        }
-        return sql_conds.join('\n  and ');
-    }
-};
 
 var tb_coltab = {
     vpp: null,
     vpp_id: '#tb_coltab',
     cols: {
-        fixed: ['NCT', 'TRIAL', 'PUBMED ID', 'PMID', 'AUTHOR', 'YEAR'],
+        fixed: ['NCT', 'TRIAL REG #', 'TRIAL', 'PUBMED ID', 'PMID', 'AUTHOR', 'YEAR'],
         default: ['PHASE', 'ORIGINAL/FOLLOW UP', 'NUMBER OF ARMS', 'TREATMENT ARM', 'CONTROL ARM']
     },
 

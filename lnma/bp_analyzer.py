@@ -109,7 +109,7 @@ def graphdata_maker():
     out_sname = request.form.get('out')
 
     rs = file_data['raw']
-    cfg = '{"analysis_method":"bayes","input_format":"ET","treat":"EdoX","measure":"rr","model":"random","better":"small"}'
+    cfg = '{"analysis_method":"bayes","input_format":"ET","treat":"EdoX","measure":"or","model":"fixed","better":"small"}'
     cfg = json.loads(cfg)
 
     # save the graph data

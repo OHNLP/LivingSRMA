@@ -563,6 +563,9 @@ var jarvis = {
         fg_netplt.init();
         fg_frsplt.init();
         
+        // increase the table size
+        tb_lgtbd3.width_cell = 80;
+        tb_lgtbd3.height_cell = 40;
         tb_lgtbd3.init();
         tb_ranktb.init();
         
@@ -575,7 +578,7 @@ var jarvis = {
 
         $.get(
             "[[ url_for('pub.graphdata', prj_fn='') ]]" + fn,
-            {},
+            {ver: Math.random()},
             function(data) {
                 jarvis.draw(data.data);
                 jarvis.ssmsg('Data loaded!');
