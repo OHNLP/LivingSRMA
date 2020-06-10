@@ -15,10 +15,7 @@ from flask_login import current_user
 
 import pandas as pd
 
-from lnma import dora
-
 PATH_PUBDATA = 'pubdata'
-
 
 bp = Blueprint("pub", __name__, url_prefix="/pub")
 
@@ -66,6 +63,9 @@ def CAT():
     
     return render_template('pub.CAT.html', dma=dma, j=j)
 
+###########################################################
+# Modules for public page
+###########################################################
 
 @bp.route('/prisma.html')
 def prisma():
@@ -77,91 +77,9 @@ def itable():
     return render_template('pub.itable.html')
 
 
-@bp.route('/itable2.html')
-def itable2():
-    prj = request.args.get('prj')
-    fn_attr = 'ITABLE_ATTR.csv'
-    fn_data = 'ITABLE_DATA.csv'
-
-    # attrs for project
-    full_fn_attr = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn_attr)
-    full_fn_data = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn_data)
-
-    # get the cols
-    attr_pack = get_attr_pack(full_fn_attr)
-
-    # load file 
-    if full_fn_data.endswith('csv'):
-        df = pd.read_csv(full_fn_data)
-    else:
-        df = pd.read_excel(full_fn_data)
-    rs = df.to_json(orient='records')
-
-    # add the category info for attrs
-    attrs = [ {'name': a} for a in df.columns.tolist() ]
-    for i in range(len(attrs)):
-        name = attrs[i]['name']
-        name_parts = name.split('|')
-        if len(name_parts) > 1:
-            trunk = name_parts[0].strip()
-            branch = name_parts[1].strip()
-        else:
-            trunk = '_'
-            branch = name
-        attr_id = trunk.upper() + '|' + branch.upper()
-
-        if attr_id in attr_pack['attr_dict']:
-            attrs[i].update(attr_pack['attr_dict'][attr_id])
-        else:
-            attrs[i]['cate'] = 'Other'
-            attrs[i]['vtype'] = 'text'
-            attrs[i]['trunk'] = trunk
-            attrs[i]['branch'] = branch
-            attrs[i]['attr_id'] = attr_id
-
-    return render_template('pub.itable.html', prj=prj, rs=rs, attrs=json.dumps(attrs))
-
-
-@bp.route('/itable_v2.html')
-def itable_v2():
-    prj = request.args.get('prj')
-    fn = 'ITABLE_ATTR_DATA.xlsx'
-    full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
-
-    # get the cols
-    attr_pack = get_attr_pack_from_itable(full_fn)
-
-    # load file 
-    # the rows starts from 2nd line are data
-    if full_fn.endswith('csv'):
-        df = pd.read_csv(full_fn, skiprows=[0])
-    else:
-        df = pd.read_excel(full_fn, skiprows=[0])
-    rs = df.to_json(orient='records')
-
-    # add the category info for attrs
-    attrs = [ {'name': a} for a in df.columns.tolist() ]
-    for i in range(len(attrs)):
-        name = attrs[i]['name']
-        name_parts = name.split('|')
-        if len(name_parts) > 1:
-            trunk = name_parts[0].strip()
-            branch = name_parts[1].strip()
-        else:
-            trunk = '_'
-            branch = name
-        attr_id = trunk.upper() + '|' + branch.upper()
-
-        if attr_id in attr_pack['attr_dict']:
-            attrs[i].update(attr_pack['attr_dict'][attr_id])
-        else:
-            attrs[i]['cate'] = 'Other'
-            attrs[i]['vtype'] = 'text'
-            attrs[i]['trunk'] = trunk
-            attrs[i]['branch'] = branch
-            attrs[i]['attr_id'] = attr_id
-
-    return render_template('pub.itable.html', prj=prj, rs=rs, attrs=json.dumps(attrs))
+@bp.route('/slide.html')
+def slide():
+    return render_template('pub.slide.html')
 
 
 @bp.route('/graph_v1.html')
@@ -174,8 +92,14 @@ def graph_v2():
     return render_template('pub.graph_v2.html')
 
 
+###########################################################
+# Data services
+###########################################################
+
 @bp.route('/graphdata/<prj>/<fn>')
 def graphdata(prj, fn):
+    '''General data files
+    '''
     full_path = os.path.join(current_app.instance_path, PATH_PUBDATA, prj)
     return send_from_directory(full_path, fn)
 
@@ -226,58 +150,23 @@ def graphdata_itable_json(prj):
         'rs': rs,
         'attrs': attrs
     }
+    # make a copy of this json
+    full_output_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, 'ITABLE.json')
+    json.dump(ret, open(full_output_fn, 'w'))
     return jsonify(ret)
 
 
-@bp.route('/img/<prj>/<fn>')
-def get_img(prj, fn):
+@bp.route('/graphdata/<prj>/img/<fn>')
+def graphdata_img(prj, fn):
+    '''get image files of specific project
+    '''
     full_path = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, 'img')
     return send_from_directory(full_path, fn)
 
 
-@bp.route('/slide.html')
-def slide():
-    return render_template('pub.slide.html')
-
-
-def get_attr_pack(full_fn):
-    df_attrs = pd.read_csv(full_fn)
-    attr_dict = {}
-    attr_tree = {}
-
-    for idx, row in df_attrs.iterrows():
-        name = row['name'].strip()
-        vtype = row['vtype'].strip()
-        cate = row['cate'].strip()
-
-        # split the name into different parts
-        name_parts = name.split('|')
-        if len(name_parts) > 1:
-            trunk = name_parts[0].strip()
-            branch = name_parts[1].strip()
-        else:
-            trunk = '_'
-            branch = name
-        attr_id = trunk.upper() + '|' + branch.upper()
-
-        if cate not in attr_tree: attr_tree[cate] = {}
-        if trunk not in attr_tree[cate]: attr_tree[cate][trunk] = []
-
-        attr = {
-            'name': name,
-            'cate': cate,
-            'vtype': vtype,
-            'trunk': trunk,
-            'branch': branch,
-            'attr_id': attr_id,
-        }
-
-        # put this item into dict
-        attr_tree[cate][trunk].append(attr)
-        attr_dict[attr_id] = attr
-
-    return { 'attr_dict': attr_dict, 'attr_tree': attr_tree }
-
+###########################################################
+# Other utils
+###########################################################
 
 def get_attr_pack_from_itable(full_fn):
     # read data, hope it is xlsx format ...

@@ -60,12 +60,12 @@ var jarvis = {
         var slides = slides.split('|');
 
         // build the page
-        var url_img_base = '/pub/img/' + prj;
+        var url_img_base = '/pub/graphdata/' + prj + '/img/';
 
         // add each slide
         for (let i = 0; i < slides.length; i++) {
             const s = slides[i];
-            var s_imgurl = url_img_base + '/' + s;
+            var s_imgurl = url_img_base + s;
             var s_class = '';
             if (i == 0) {
                 s_class = 'active';
