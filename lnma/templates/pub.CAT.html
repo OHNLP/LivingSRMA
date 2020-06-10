@@ -192,8 +192,8 @@ h4 {
                 <a class="nav-link dropdown-toggle" href="#" id="dropdown02" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">TABLES</a>
                 <div class="dropdown-menu" aria-labelledby="dropdown02">
                     <a class="dropdown-item" href="#sec-intertable">INTERACTIVE TABLE</a>
-                    <a class="dropdown-item" href="#sec-intertable">Summary of findings(SoF): Pairwise MA</a>
-                    <a class="dropdown-item" href="#sec-intertable">Sumamry of findinds(SoF): NMA</a>
+                    <a class="dropdown-item" href="#sec-sof-pma">Summary of findings(SoF): Pairwise MA</a>
+                    <a class="dropdown-item" href="#sec-sof-nma">Sumamry of findinds(SoF): NMA</a>
                 </div>
             </li>
 
@@ -215,8 +215,13 @@ h4 {
                 </div>
             </li>
 
-            <li class="nav-item">
-                <a class="nav-link" href="#sec-pubs">EVIDENCE MAPS</a>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="dropdown0xx" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">EVIDENCE MAPS</a>
+                <div class="dropdown-menu" aria-labelledby="dropdown0xx">
+                    <a class="dropdown-item" href="#sec-evmap-crem">Comparison Random-Effects Methods</a>
+                    <a class="dropdown-item" href="#sec-evmap-de">Direct Estimates</a>
+                    <a class="dropdown-item" href="#sec-evmap-ne">Network Estimates</a>
+                </div>
             </li>
 
             <li class="nav-item">
@@ -231,17 +236,19 @@ h4 {
 
 <div class="container" style="margin-top: 1rem; margin-bottom:2rem;">
     <h3 style="margin-bottom: 2rem;">
-        A Living Interactive Network Meta-Analysis of Cancer Associated Thrombosis
+        Direct Oral Anti-Coagulants (DOACS) compared to Dalteparin for treatment of Cancer Associated Thrombosis
     </h3>
 
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-5">
             <p>TOPIC: Direct Oral Anti-Coagulants (DOACS) compared to Dalteparin for treatment of Cancer Associated Thrombosis (CAT): A Living, Interactive Systematic Review (LISR) and Network Meta-Analysis (LNMA)</p>
             <p>
-                We have maintained a living systematic review and network meta-analysis for treatment of cancer associated thrombosis (CAT) since our original publication in 2019. The results are now updated after the publication of Caravaggio trial.  The results of ongoing trials CASTA-DIVA (NCT02746185), PRIORITY (NCT03139487) and CONKO-011(NCT02583191) are pending and will be considered for addition to living analysis as they become available
-                </p>
+            We have maintained a living systematic review and network meta-analysis for treatment of cancer associated thrombosis (CAT) since our original publication in 2019. The results are now updated after the publication of Caravaggio trial.  The results of ongoing trials CASTA-DIVA (NCT02746185), PRIORITY (NCT03139487) and CONKO-011(NCT02583191) are pending and will be considered for addition to living analysis as they become available
+            </p>
         </div>
-
+        <div class="col-md-7">
+            <img src="/static/img/pub.CAT.intro.png" width="100%" alt="" />
+        </div>
     </div>
 </div>
 
@@ -328,17 +335,77 @@ h4 {
     <h3 style="margin-bottom: 2rem;">
         SUMMARY OF FINDINGS: PAIRWISE MA
     </h3>
+    <div class="row">
+        <div class="col">
+            {% include 'pub.CAT._SOF_DIRECT.html' %}
+        </div>
+    </div>
 
 </div>
 
-
+<style>
+.sof-table {
+    width: 100%;
+    font-size: 11px;
+}
+.sof-table-note {
+    font-size: 11px;
+    margin: 0;
+}
+.sof-table th {
+    text-align: center;
+    border: 1px solid black;
+}
+.sof-table td {
+    padding: 3px 0;
+    text-align: center;
+    border: 1px solid black;
+}
+.sof-table .hd {
+    background-color: #ab7e3b;
+    color: white;
+}
+.sof-table .dk {
+    background-color: #999999;
+    color: black;
+}
+.sof-sym {
+    font-size: 8px;
+    padding: 0px 5px;
+    border-radius: 10px;
+    margin: 0 2px;
+    border: 1px solid black;
+}
+.sof-sym-b {
+    background-color:  black;
+}
+.sof-sym-w {
+    background-color:  white;
+}
+.fw-b {
+    font-weight: bold;
+}
+.fs-11 {
+    font-size: 11px;
+}
+.ta-l {
+    text-align: left !important;
+}
+.ti-1 {
+    text-indent: 1em;
+}
+</style>
 <br id="sec-sof-nma">
 <div class="container" style="margin-top: 4rem; margin-bottom: 3rem;">
 
     <h3 style="margin-bottom: 2rem;">
         SUMMARY OF FINDINGS: NMA
     </h3>
-
+    <div class="row">
+        <div class="col">
+            {% include 'pub.CAT._SOF_NETWORK.html' %}
+        </div>
+    </div>
 </div>
 
 
@@ -465,9 +532,84 @@ h4 {
     <h3 style="margin-bottom: 2rem;">
         EVIDENCE MAPS
     </h3>
-    <div class="row">
+    <p>Evidence maps</p>
+    <style>
+    .evmap-table {
+        font-size: 11px;
+    }
+    .evmap-table th {
+        border: 1px solid black;
+        padding: 7px 3px;
+        text-align: center;
+    }
+    .evmap-table td {
+        border: 1px solid black;
+        padding: 7px 3px;
+        text-align: center;
+        font-weight: bold;
+    }
+    .evmap-sig-h {
+        background-color: red;
+    }
+    .evmap-sig-n {
+        background-color: gold;
+    }
+    .evmap-sig-b {
+        background-color: limegreen;
+    }
+    .evmap-sym {
+        padding: 3px 6px;
+        border-radius: 12px;
+        border: 1px solid black;
+    }
+    .evmap-sqr {
+        padding: 3px 6px;
+        border: 1px solid black;
+    }
+    .evmap-sym-h {
+        background-color: black;
+        color: white;
+    }
+    .evmap-sym-m {
+        background-color: #333333;
+        color: white;
+    }
+    .evmap-sym-low {
+        background-color: gray;
+        color: black;
+    }
+    .evmap-sym-vlow {
+        background-color: white;
+        color: black;
+    }
+    .evmap-plg-h { fill: black; stroke: black; }
+    .evmap-plg-txt-h { fill: white; }
+    .evmap-plg-m { fill: #333333; stroke: black; }
+    .evmap-plg-txt-m { fill: white; }
+    .evmap-plg-low { fill: gray; stroke: black; }
+    .evmap-plg-txt-low { fill: black; }
+    .evmap-plg-vlow { fill: white; stroke: black; }
+    .evmap-plg-txt-vlow { fill: black; }
+    </style>
+
+    <br id="sec-evmap-crem" style="margin-top: 0rem;">
+    <div class="row" style="margin-top: 2rem; margin-bottom:2rem;">
         <div class="col">
-            <p>There are no associated publications with this living NMA at this point.</p>
+            {% include 'pub.CAT._EVMAP_CREM.html' %}
+        </div>
+    </div>
+
+    <br id="sec-evmap-de" style="margin-top: 2rem;">
+    <div class="row" style="margin-top: 4rem; margin-bottom:2rem;">
+        <div class="col">
+            {% include 'pub.CAT._EVMAP_DE.html' %}
+        </div>
+    </div>
+
+    <br id="sec-evmap-ne" style="margin-top: 2rem;">
+    <div class="row" style="margin-top: 4rem; margin-bottom:2rem;">
+        <div class="col">
+            {% include 'pub.CAT._EVMAP_NE.html' %}
         </div>
     </div>
 </div>
