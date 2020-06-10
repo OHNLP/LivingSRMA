@@ -191,14 +191,14 @@ h4 {
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="dropdown02" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">TABLES</a>
                 <div class="dropdown-menu" aria-labelledby="dropdown02">
-                    <a class="dropdown-item" href="#sec-intertable">INTERACTIVE TABLE</a>
+                    <a class="dropdown-item" href="#sec-intertable">Interactive Table</a>
                     <a class="dropdown-item" href="#sec-sof-pma">Summary of findings(SoF): Pairwise MA</a>
                     <a class="dropdown-item" href="#sec-sof-nma">Sumamry of findinds(SoF): NMA</a>
                 </div>
             </li>
 
             <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Direct MA</a>
+                <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">PAIRWISE MA</a>
                 <div class="dropdown-menu" aria-labelledby="dropdown01">
                     {% for item in j['dma'] %}
                     <a class="dropdown-item" href="#sec-dma-[[ item['sname'] ]]">[[ item['name'] ]]</a>
@@ -218,8 +218,8 @@ h4 {
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="dropdown0xx" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">EVIDENCE MAPS</a>
                 <div class="dropdown-menu" aria-labelledby="dropdown0xx">
-                    <a class="dropdown-item" href="#sec-evmap-crem">Comparison Random-Effects Methods</a>
                     <a class="dropdown-item" href="#sec-evmap-de">Direct Estimates</a>
+                    <a class="dropdown-item" href="#sec-evmap-crem">Comparison of Different Random Effects Methods</a>
                     <a class="dropdown-item" href="#sec-evmap-ne">Network Estimates</a>
                 </div>
             </li>
@@ -303,7 +303,9 @@ h4 {
     <p>How to use this table? <a href="javascript:;" data-toggle="modal" data-target="#exampleModalCenter2">Video demonstration</a></p>
 
     <div class="row">
-        <iframe src="[[ url_for('pub.itable_v2', prj='CAT') ]]" frameborder="0" style="width: 100%; min-height: 780px;"></iframe>
+        <div class="col">
+            <iframe src="[[ url_for('pub.itable_v2', prj='CAT') ]]" frameborder="0" style="width: 100%; min-height: 720px;"></iframe>
+        </div>
     </div>
 </div>
 
@@ -412,7 +414,7 @@ h4 {
 <br id="sec-nma-outcome">
 <div class="container" style="margin-top: 4rem; margin-bottom: 3rem;">
     <h3 style="margin-bottom: 2rem;">
-        Direct MA OUTCOMES
+        PAIRWISE META-ANALYSIS
     </h3>
     <p>
         Results are summarized in forest plots.
@@ -435,7 +437,7 @@ h4 {
                 </button>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton-dma-[[ item['sname'] ]]">
                     {% for it in item['outcomes'] %}
-                    <a class="dropdown-item" href="javascript:switch_data('[[ item['sname'] ]]', '[[ it['sname'] ]]');">[[ it['name'] ]]</a>
+                    <a class="dropdown-item" href="javascript:switch_dma_data('[[ item['sname'] ]]', '[[ it['sname'] ]]');">[[ it['name'] ]]</a>
                     {% endfor %}
                 </div>
             </div>
@@ -449,7 +451,7 @@ h4 {
 
     <div class="row">
         <div class="col">
-            <img src="" alt="" width="100%">
+            <img id="img-dma-[[ item['sname'] ]]" src="" alt="" width="100%">
         </div>
     </div>
 </div>
@@ -459,7 +461,7 @@ h4 {
 <br id="sec-nma-outcome" style="margin-top: 4rem;">
 <div class="container" style="margin-top: 4rem;">
     <h3 style="margin-bottom: 2rem;">
-        NMA OUTCOMES
+        NETWORK META-ANALYSIS
     </h3>
 
     <p>
@@ -592,21 +594,22 @@ h4 {
     .evmap-plg-txt-vlow { fill: black; }
     </style>
 
-    <br id="sec-evmap-crem" style="margin-top: 0rem;">
-    <div class="row" style="margin-top: 2rem; margin-bottom:2rem;">
-        <div class="col">
-            {% include 'pub.CAT._EVMAP_CREM.html' %}
-        </div>
-    </div>
 
-    <br id="sec-evmap-de" style="margin-top: 2rem;">
+    <br id="sec-evmap-de" style="margin-top: 3rem;">
     <div class="row" style="margin-top: 4rem; margin-bottom:2rem;">
         <div class="col">
             {% include 'pub.CAT._EVMAP_DE.html' %}
         </div>
     </div>
 
-    <br id="sec-evmap-ne" style="margin-top: 2rem;">
+    <br id="sec-evmap-crem" style="margin-top: 3rem;">
+    <div class="row" style="margin-top: 2rem; margin-bottom:2rem;">
+        <div class="col">
+            {% include 'pub.CAT._EVMAP_CREM.html' %}
+        </div>
+    </div>
+
+    <br id="sec-evmap-ne" style="margin-top: 3rem;">
     <div class="row" style="margin-top: 4rem; margin-bottom:2rem;">
         <div class="col">
             {% include 'pub.CAT._EVMAP_NE.html' %}
@@ -650,6 +653,11 @@ The HR for 1,2 , The OR for the last one!
 
 <script>
 
+function switch_dma_data(tag, trt, display_name) {
+    if (typeof(display_name) == 'undefined') {
+        display_name = trt;
+    }
+}
 function switch_nma_data(tag, trt, display_name) {
     if (typeof(display_name) == 'undefined') {
         display_name = trt;

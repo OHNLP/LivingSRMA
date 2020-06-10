@@ -27,16 +27,12 @@ var tb_filter = {
         {
             display_name: 'Treatment arm',
             type: 'radio',
-            attr: "Treatment arm",
+            attr: "TARM",
             value: 0,
             values: [
                 { display_name: 'All treatments', value: 0, sql_cond: '{$col} is not NULL', default: true },
-                { display_name: 'Only Edoxaban', value: 1, sql_cond: "{$col} like '%Edoxaban%'" },
-                { display_name: 'Only Rivaroxaban', value: 2, sql_cond: "{$col} like '%Rivaroxaban%'" },
-                { display_name: 'Only Apixaban', value: 3, sql_cond: "{$col} like '%Apixaban%'" },
-                { display_name: 'Only Enoxaparin', value: 4, sql_cond: "{$col} like '%Enoxaparin%'" },
-                { display_name: 'Only Dalteparin', value: 5, sql_cond: "{$col} like '%Dalteparin%'" },
-                { display_name: 'Only Tinzaparin', value: 6, sql_cond: "{$col} like '%Tinzaparin%'" }
+                { display_name: 'Only DOAC', value: 1, sql_cond: "{$col} like '%DOAC%'" },
+                { display_name: 'Only LMWH', value: 2, sql_cond: "{$col} like '%LMWH%'" }
             ]
         },
         {
@@ -81,8 +77,9 @@ var tb_filter = {
             value: 0,
             values: [
                 { display_name: 'All', value: 0, sql_cond: '{$col} is not NULL', default: true },
-                { display_name: 'Not reported', value: 1, sql_cond: "{$col} like '%Not%'" },
-                { display_name: 'Reported', value: 2, sql_cond: "{$col} like '%Has%'" }
+                { display_name: 'Included', value: 1, sql_cond: "{$col} = 'Included'" },
+                { display_name: 'Not Included', value: 2, sql_cond: "{$col} = 'Not Included'" },
+                { display_name: 'Not-specified', value: 3, sql_cond: "{$col} like '%specified%'" }
             ]
         },
         {
@@ -92,8 +89,8 @@ var tb_filter = {
             value: 0,
             values: [
                 { display_name: 'All', value: 0, sql_cond: '{$col} is not NULL', default: true },
-                { display_name: 'Not reported', value: 1, sql_cond: "{$col} like '%Not%'" },
-                { display_name: 'Reported', value: 2, sql_cond: "{$col} like '%Has%'" }
+                { display_name: 'Included', value: 1, sql_cond: "{$col} = 'Included'" },
+                { display_name: 'Not Included', value: 2, sql_cond: "{$col} = 'Not Included'" }
             ]
         },
         {

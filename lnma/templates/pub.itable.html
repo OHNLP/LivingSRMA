@@ -441,7 +441,7 @@ a {
                                     v-bind:id="'chk-attr-' + cidx + '-' + idx + '-' + i">
                                     <label 
                                         v-bind:for="'chk-attr-' + cidx + '-' + idx + '-' + i">
-                                        {{ attr.branch }}
+                                        <span v-html="attr.branch"></span>
                                     </label>
                             </div>
                         </div>
@@ -457,7 +457,7 @@ a {
                                     v-bind:id="'chk-trunk-' + cidx + '-' + idx">
                                     <label 
                                         v-bind:for="'chk-trunk-' + cidx + '-' + idx">
-                                        {{ trunk }}
+                                        <span v-html="trunk"></span>
                                     </label>
                             </div>
                             <div style="line-height: 2.3em;">[</div>
@@ -469,8 +469,8 @@ a {
                                     v-on:click="show_attr_col(i)"
                                     v-bind:id="'chk-attr-' + cidx + '-' + idx + '-' + i">
                                     <label 
-                                        v-bind:for="'chk-attr-' + cidx + '-' + idx + '-' + i">
-                                        {{ attr.branch }}
+                                        v-bind:for="'chk-attr-' + cidx + '-' + idx + '-' + i">                                       
+                                        <span v-html="attr.branch"></span>
                                     </label>
                             </div>
                             <div style="line-height: 2.3em; margin-right: 2em;">]</div>
