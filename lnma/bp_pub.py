@@ -8,6 +8,7 @@ from flask import render_template
 from flask import Blueprint
 from flask import send_from_directory
 from flask import current_app
+from flask import jsonify
 
 from flask_login import login_required
 from flask_login import current_user
@@ -68,16 +69,16 @@ def CAT():
 
 @bp.route('/prisma.html')
 def prisma():
-    prj = request.args.get('prj')
-    fn = 'PRISMA.json'
-    full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
-    print('* load data from %s' % full_fn)
-    j = open(full_fn).read()
-    return render_template('pub.prisma.html', j=j)
+    return render_template('pub.prisma.html')
 
 
 @bp.route('/itable.html')
 def itable():
+    return render_template('pub.itable.html')
+
+
+@bp.route('/itable2.html')
+def itable2():
     prj = request.args.get('prj')
     fn_attr = 'ITABLE_ATTR.csv'
     fn_data = 'ITABLE_DATA.csv'
@@ -130,10 +131,8 @@ def itable_v2():
     # get the cols
     attr_pack = get_attr_pack_from_itable(full_fn)
 
-    # the rows starts from 2nd line are data
-    df_h = pd.read_excel(full_fn, skiprows=[0])
-
     # load file 
+    # the rows starts from 2nd line are data
     if full_fn.endswith('csv'):
         df = pd.read_csv(full_fn, skiprows=[0])
     else:
@@ -179,6 +178,55 @@ def graph_v2():
 def graphdata(prj, fn):
     full_path = os.path.join(current_app.instance_path, PATH_PUBDATA, prj)
     return send_from_directory(full_path, fn)
+
+
+@bp.route('/graphdata/<prj>/ITABLE.json')
+def graphdata_itable_json(prj):
+    '''Special rule for the ITABLE.json which does not exist
+    '''
+    fn = 'ITABLE_ATTR_DATA.xlsx'
+    full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
+
+    # get the cols
+    attr_pack = get_attr_pack_from_itable(full_fn)
+
+    # the rows starts from 2nd line are data
+    df_h = pd.read_excel(full_fn, skiprows=[0])
+
+    # load file 
+    if full_fn.endswith('csv'):
+        df = pd.read_csv(full_fn, skiprows=[0])
+    else:
+        df = pd.read_excel(full_fn, skiprows=[0])
+    rs = json.loads(df.to_json(orient='records'))
+
+    # add the category info for attrs
+    attrs = [ {'name': a} for a in df.columns.tolist() ]
+    for i in range(len(attrs)):
+        name = attrs[i]['name']
+        name_parts = name.split('|')
+        if len(name_parts) > 1:
+            trunk = name_parts[0].strip()
+            branch = name_parts[1].strip()
+        else:
+            trunk = '_'
+            branch = name
+        attr_id = trunk.upper() + '|' + branch.upper()
+
+        if attr_id in attr_pack['attr_dict']:
+            attrs[i].update(attr_pack['attr_dict'][attr_id])
+        else:
+            attrs[i]['cate'] = 'Other'
+            attrs[i]['vtype'] = 'text'
+            attrs[i]['trunk'] = trunk
+            attrs[i]['branch'] = branch
+            attrs[i]['attr_id'] = attr_id
+
+    ret = {
+        'rs': rs,
+        'attrs': attrs
+    }
+    return jsonify(ret)
 
 
 @bp.route('/img/<prj>/<fn>')

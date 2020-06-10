@@ -201,8 +201,8 @@ h4 {
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">PAIRWISE MA</a>
                 <div class="dropdown-menu" aria-labelledby="dropdown01">
-                    {% for item in j['dma'] %}
-                    <a class="dropdown-item" href="#sec-dma-[[ item['sname'] ]]">[[ item['name'] ]]</a>
+                    {% for tp in dma %}
+                    <a class="dropdown-item" href="#sec-dma-[[ tp[:4] ]]">[[ tp ]]</a>
                     {% endfor %}
                 </div>
             </li>

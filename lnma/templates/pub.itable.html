@@ -348,10 +348,6 @@ a {
 
 <div id="left-panel" class="flex-container" style="flex-direction: column; justify-content: space-between; min-width: 200px; width: 200px; height: 100%; background: whitesmoke; padding: 0 5px;">
     <div class="upper">
-        <!-- <h1 style="font-size: 1.1em; margin: 7px 0 0 0;">
-            <i class="fa fa-table"></i>
-            Study Characteristics Table
-        </h1> -->
         <div id="tb_filter" class="box">
             <div class="box-header">
                 <h4>
@@ -548,25 +544,13 @@ a {
 
 </div>
 
-<div style="display:none;" id="data_rs">
-[[rs|safe]]
-</div>
-<div style="display:none;" id="data_attrs">
-[[attrs|safe]]
-</div>
-
 <script src="/static/lib/jquery/jquery-3.4.1.min.js"></script>
 <script src="/static/lib/jquery-ui/jquery-ui.min.js"></script>
 <script src="/static/lib/vue.js/vue.min.js"></script>
 <script src="/static/lib/alasql/alasql.min.js"></script>
 
 <script>
-var _prj = '[[ prj ]]';
 {% include "js/tb_filter.js" %}
-
-if (_prj == 'CAT') {
-    tb_filter.filters = tb_filter.all_filters.CAT;
-}
 
 var dt_tbcore = {
     rs: [],
@@ -613,10 +597,12 @@ var dt_tbcore = {
         return attr_id;
     },
 
-    init: function() {
+    init: function(rs, attrs) {
         // init the data
-        this.rs = JSON.parse($('#data_rs').html());
-        this.attrs = JSON.parse($('#data_attrs').html());
+        // this.rs = JSON.parse($('#data_rs').html());
+        // this.attrs = JSON.parse($('#data_attrs').html());
+        this.rs = rs;
+        this.attrs = attrs;
 
         // further init the attrs
         // since we don't have any information with the attrs
@@ -708,7 +694,6 @@ var dt_tbcore = {
         this.rs_db = alasql(sql);
     }
 };
-
 
 var tb_coltab = {
     vpp: null,
@@ -839,17 +824,36 @@ var jarvis = {
             jarvis.ssmsg('The functions used in this website require advanced web technologies, which are <b>NOT</b> supported by Internet Explorer<br>Try using Google Chrome, Apple Safari, Mozilla Firefox or other modern browsers.')
             return;
         }
+        var prj = jarvis.getUrlParameter('prj');
 
-        dt_tbcore.init();
-        tb_filter.init();
-        tb_coltab.init();
-        tb_schtab.init();
+        // set filter
+        if (tb_filter.all_filters.hasOwnProperty(prj)) {
+            tb_filter.filters = tb_filter.all_filters[prj];
+        }
 
-        jarvis.update_schtab();
+        $.get(
+            '/pub/graphdata/'+prj+'/ITABLE.json',
+            {ver: Math.random()},
+            function(data) {
+                console.log(data);
+                dt_tbcore.init(data.rs, data.attrs);
+                tb_filter.init();
+                tb_coltab.init();
+                tb_schtab.init();
+                jarvis.update_schtab();
 
-        // clsoe the start-screen
-        jarvis.ssmsg('Almost Initialized.')
-        setTimeout('jarvis.ssclose();', 400);
+                // clsoe the start-screen
+                jarvis.ssmsg('Almost Initialized.')
+                setTimeout('jarvis.ssclose();', 400);
+            }, 'json'
+        );
+    },
+
+    getUrlParameter: function(name) {
+        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+        var results = regex.exec(location.search);
+        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
     },
 
     update_schtab: function() {

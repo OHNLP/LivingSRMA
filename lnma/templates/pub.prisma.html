@@ -639,39 +639,25 @@ var jarvis = {
             return;
         }
 
-        var fn = jarvis.getUrlParameter('fn');
-
         // for the message boxes
         $( ".dialog" ).dialog({
             autoOpen: false
         });
 
-        this.data = JSON.parse($('#data_pub').html());
-        
-        fg_prisma.init(this.data.prisma);
-        tb_studylist.load(this.data);
+        var prj = jarvis.getUrlParameter('prj');
 
-        // OK!
-        jarvis.ssmsg('Data loaded!');
-        setTimeout('jarvis.ssclose();', 300);
+        $.get(
+            '/pub/graphdata/' + prj + '/PRISMA.json',
+            {ver: Math.random()},
+            function(data) {
+                fg_prisma.init(data.prisma);
+                tb_studylist.load(data);
 
-        // $.get(
-        //     './graphdata/' + fn,
-        //     {},
-        //     function(data) {
-        //         fg_prisma.init(data.prisma);
-        //         tb_studylist.load(data);
-
-        //         // OK!
-        //         jarvis.ssmsg('Data loaded!');
-        //         setTimeout('jarvis.ssclose();', 300);
-        //     }, 'json'
-        // );
-
-        // load init data
-
-        // $( ".ss-box" ).draggable();
-        // $( ".ss-arrow" ).draggable();
+                // OK!
+                jarvis.ssmsg('Data loaded!');
+                setTimeout('jarvis.ssclose();', 300);
+            }, 'json'
+        );
 
     },
 
