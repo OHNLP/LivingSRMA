@@ -1,0 +1,91 @@
+{% extends '_layout_bs.html' %}
+
+{% block title %}
+Slide
+{% endblock %}
+
+{% block style %}
+<style>
+.carousel-indicators li {
+    width: 50px;
+    height: 15px;
+    background-color: #999999;
+}
+</style>
+{% endblock %}
+
+{% block page_name %}
+<i class="far fa-clipboard"></i>
+Project Editor
+{% endblock %}
+
+{% block main %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col">
+            <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
+                <ol id="slide-idcs" class="carousel-indicators">
+                </ol>
+                <div id="slide-imgs" class="carousel-inner">
+                </div>
+                <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Previous</span>
+                </a>
+                <a class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Next</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+<script>
+var jarvis = {
+    getUrlParameter: function(name) {
+        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+        var results = regex.exec(location.search);
+        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    },
+
+    init: function() {
+        // get filename
+        var prj = jarvis.getUrlParameter('prj');
+        var slides = jarvis.getUrlParameter('slides');
+        var slides = slides.split('|');
+
+        // build the page
+        var url_img_base = '/pub/img/' + prj;
+
+        // add each slide
+        for (let i = 0; i < slides.length; i++) {
+            const s = slides[i];
+            var s_imgurl = url_img_base + '/' + s;
+            var s_class = '';
+            if (i == 0) {
+                s_class = 'active';
+            }
+            // create the idc and img
+            var elem_idc = '<li data-target="#carouselExampleIndicators" data-slide-to="'+i+'" class="'+s_class+'"></li>';
+            var elem_img = '<div class="carousel-item '+s_class+'">' + 
+                '<img src="'+s_imgurl+'" class="d-block w-100" alt="">' +
+                '</div>';
+            // add idc and img to html
+            $('#slide-idcs').append($(elem_idc));
+            $('#slide-imgs').append($(elem_img));
+        }
+
+        // start the loop
+        $('.carousel').carousel('cycle');
+    }
+};
+$(document).ready(function() {
+    jarvis.init();
+});
+</script>
+{% endblock %}

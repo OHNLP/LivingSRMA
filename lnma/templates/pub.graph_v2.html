@@ -573,11 +573,12 @@ var jarvis = {
         fg_pscplt.init();
 
         // get filename
+        var prj = jarvis.getUrlParameter('prj');
         var fn = jarvis.getUrlParameter('fn');
         jarvis.ssmsg('Loading data ...');
 
         $.get(
-            "[[ url_for('pub.graphdata', prj_fn='') ]]" + fn,
+            "/pub/graphdata/" + prj + "/" + fn,
             {ver: Math.random()},
             function(data) {
                 jarvis.draw(data.data);

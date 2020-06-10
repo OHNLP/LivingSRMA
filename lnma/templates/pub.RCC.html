@@ -722,20 +722,14 @@ The HR for 1,2 , The OR for the last one!
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 
 <script>
-
-var tag_dict = {
-    'PFS': 'RCC|GRAPH-PFS-',
-    'OS':  'RCC|GRAPH-OS-',
-    'AES': 'RCC|GRAPH-AES-'
-}
-
 function switch_data(tag, trt, display_name) {
     if (typeof(display_name) == 'undefined') {
         display_name = trt;
     }
-    var fn = tag_dict[tag] + trt;
+    var prj = 'RCC';
+    var fn = 'GRAPH-' + tag + '-' + trt + '.json';
     var url = "[[ url_for('pub.graph_v1') ]]";
-    url += '?fn=' + fn + '.json';
+    url += '?prj=' + prj + '&fn=' + fn;
     $('#iframe-' + tag).attr('src', url);
     $('#refname-' + tag).html(display_name);
 }

@@ -1,5 +1,6 @@
 import os
 import json
+from collections import OrderedDict
 
 from flask import request
 from flask import flash
@@ -33,9 +34,36 @@ def RCC():
 
 @bp.route('/CAT.html')
 def CAT():
-    full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, 'CAT', 'GRAPH_LIST.json')
+    prj = 'CAT'
+    # load the graph data
+    full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, 'GRAPH_LIST.json')
     j = json.load(open(full_fn))
-    return render_template('pub.CAT.html', j=j)
+
+    # load the dma data
+    full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, 'DMA_DATA.xlsx')
+    df = pd.read_excel(full_fn)
+    dma = OrderedDict()
+    for idx, row in df.iterrows():
+        dma_type = row['type']
+        option_text = row['option_text']
+        legend_text = row['legend_text']
+        filename = row['filename']
+        if dma_type not in dma: dma[dma_type] = {
+            '_default_option': option_text
+        }
+        if option_text not in dma[dma_type]: dma[dma_type][option_text] = {
+            'text': option_text,
+            'slides': [],
+            'fns': []
+        }
+        # add this img
+        dma[dma_type][option_text]['fns'].append({
+            'fn': filename,
+            'txt': legend_text
+        })
+        dma[dma_type][option_text]['slides'].append(filename)
+    
+    return render_template('pub.CAT.html', dma=dma, j=j)
 
 
 @bp.route('/prisma.html')
@@ -147,13 +175,21 @@ def graph_v2():
     return render_template('pub.graph_v2.html')
 
 
-@bp.route('/graphdata/<prj_fn>')
-def graphdata(prj_fn):
-    tmp = prj_fn.split('|')
-    prj = tmp[0]
-    fn = tmp[1]
+@bp.route('/graphdata/<prj>/<fn>')
+def graphdata(prj, fn):
     full_path = os.path.join(current_app.instance_path, PATH_PUBDATA, prj)
     return send_from_directory(full_path, fn)
+
+
+@bp.route('/img/<prj>/<fn>')
+def get_img(prj, fn):
+    full_path = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, 'img')
+    return send_from_directory(full_path, fn)
+
+
+@bp.route('/slide.html')
+def slide():
+    return render_template('pub.slide.html')
 
 
 def get_attr_pack(full_fn):
