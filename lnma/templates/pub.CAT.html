@@ -309,7 +309,7 @@
         </div>
         <div class="col-8 d-flex justify-content-end">
             <div style="padding: .5rem; margin-right: 1rem;">
-                Forest plot for <span id="optext-dma-[[ tp[:4] ]]" style="font-weight: bold;"></span>
+                <span id="optext-dma-[[ tp[:4] ]]" style="font-weight: bold;"></span>
             </div>
         </div>
     </div>
@@ -569,6 +569,7 @@ $(document).ready(function() {
         '[[ "|".join(dma[tp][dma[tp]["_default_option"]]["slides"]) ]]', 
         '[[ dma[tp]["_default_option"] ]]'
     );
+    // resize the iframe to fit content
     $('#iframe-dma-[[ tp[:4] ]]').on('load', function() {
         console.log('* loaded iframe#' + 'iframe-dma-[[ tp[:4] ]]');
         resizeIFrameToFitContent('iframe-dma-[[ tp[:4] ]]');
@@ -576,6 +577,7 @@ $(document).ready(function() {
         setTimeout("resizeIFrameToFitContent('iframe-dma-[[ tp[:4] ]]');", 900);
     });
     {% endfor %}
+
     // init the nma
     {% for item in j['nma'] %}
     switch_nma_data('[[ item["sname"] ]]', '[[ item["treats"][0] ]]');

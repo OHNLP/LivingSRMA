@@ -11,6 +11,14 @@ Slide
     height: 8px;
     background-color: #999999;
 }
+.carousel-caption {
+    top: 10px;
+    left: 0;
+    right: 0;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    color: black;
+}
 </style>
 {% endblock %}
 
@@ -56,6 +64,10 @@ var jarvis = {
     init: function() {
         // get filename
         var prj = jarvis.getUrlParameter('prj');
+        /**
+         * slides is a string defined as follows:
+         * filename.png$a sentence for legend|filename.png$xxx
+         */
         var slides = jarvis.getUrlParameter('slides');
         var slides = slides.split('|');
 
@@ -65,7 +77,11 @@ var jarvis = {
         // add each slide
         for (let i = 0; i < slides.length; i++) {
             const s = slides[i];
-            var s_imgurl = url_img_base + s;
+            var tmp = s.split('$');
+            var fn = tmp[0];
+            var legend = tmp[1];
+
+            var s_imgurl = url_img_base + fn;
             var s_class = '';
             if (i == 0) {
                 s_class = 'active';
@@ -74,6 +90,9 @@ var jarvis = {
             var elem_idc = '<li data-target="#carouselExampleIndicators" data-slide-to="'+i+'" class="'+s_class+'"></li>';
             var elem_img = '<div class="carousel-item '+s_class+'">' + 
                 '<img src="'+s_imgurl+'" class="d-block w-100" alt="">' +
+                    '<div class="carousel-caption d-none d-md-block">' +
+                        '<p>' + legend + '</p>' +
+                    '</div>' +
                 '</div>';
             // add idc and img to html
             $('#slide-idcs').append($(elem_idc));

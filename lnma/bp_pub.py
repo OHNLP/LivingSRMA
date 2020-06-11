@@ -59,7 +59,7 @@ def CAT():
             'fn': filename,
             'txt': legend_text
         })
-        dma[dma_type][option_text]['slides'].append(filename)
+        dma[dma_type][option_text]['slides'].append(filename + '$' + legend_text)
     
     return render_template('pub.CAT.html', dma=dma, j=j)
 
