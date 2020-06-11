@@ -4,7 +4,7 @@ var fg_frsplt = {
     svg: null,
     svg_id: '#fg-nma-frsplt-svg',
     data: null,
-    width: 450,
+    width: 435,
     height: 300,
     line_height: 20,
     line_text_padding_top: 5,

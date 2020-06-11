@@ -4,7 +4,7 @@ var fg_scrplt = {
     chart: null,
     chart_id: 'fg-nma-scrplt-div',
     data: null,
-    width: 450,
+    width: 430,
     height: 320,
 
     sample: {
@@ -63,7 +63,8 @@ var fg_scrplt = {
                 show: false
             },
             tooltip: {
-                show: true
+                show: true,
+                trigger: 'axis'
             },
             xAxis: {
                 type: 'category',

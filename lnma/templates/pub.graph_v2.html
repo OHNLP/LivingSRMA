@@ -316,6 +316,8 @@ a {
 .rank_table td {
     border-bottom: 1px solid #666666;
 }
+.pane-col {
+}
 </style>
 </head>
 <body>
@@ -331,145 +333,146 @@ a {
 
 <div id="main-pane">
     <div class="pane-row">
-        
-        <div class="box" style="width: auto; padding-right: 10px; display: none;" id="tb-nma-league">
-            <div class="box-header">
-                <h4>
-                    <span class="fa fa-table"></span>
-                    LEAGUE TABLE 
-                </h4>
-                <!-- <div style="margin-left: 5px;">
-                    <button onclick="fig_saver.save_png(tb_lgtbd3.svg, 'figure_league_table');">
-                        <i class="far fa-save"></i> Save PNG
-                    </button>
-                </div> -->
-            </div>
-            <!-- /.box-header -->
-            <div class="box-body">
-                <svg id="tb_lgtbd3"></svg>
-
-                <p v-html="league_table_explain">
-                </p>
-            </div>
-        </div><!-- .box league table -->
-
-        <div class="box" style="width: 360px;" id="fg-nma-frsplt">
-            <div class="box-header">
-                <h4>
-                    <span class="fa fa-align-left"></span>
-                    INTERACTIVE PLOTS
-                </h4>
-            </div>
-            <!-- /.box-header -->
-            <div class="box-body">
-                <svg id="fg-nma-frsplt-svg"></svg>
-            </div>
-        </div><!-- .box forest plot -->
-        
-        <div class="box" style="width: 320px; display: none;" id="tb_ranktb">
-            <div class="box-header">
-                <h4>
-                    <span class="fa fa-dice-d6"></span>
-                    RANKOGRAM
-                </h4>
-                <div style="margin-left: 5px;">
-                    <button onclick="fig_saver.save_csv(tb_ranktb.vpp.$data, 'table-rank');">
-                        <i class="far fa-save"></i> Save CSV
-                    </button>
+        <div class="pane-col">
+            <div class="box" style="width: auto; padding-right: 10px; display: none;" id="tb-nma-league">
+                <div class="box-header">
+                    <h4>
+                        <span class="fa fa-table"></span>
+                        LEAGUE TABLE 
+                    </h4>
+                    <!-- <div style="margin-left: 5px;">
+                        <button onclick="fig_saver.save_png(tb_lgtbd3.svg, 'figure_league_table');">
+                            <i class="far fa-save"></i> Save PNG
+                        </button>
+                    </div> -->
                 </div>
-            </div>
-            <!-- /.box-header -->
-            <div class="box-body">
-               <table class="rank_table">
-                   <thead>
-                       <tr>
-                           <th v-for="item in header">
-                               {{ item }}
-                           </th>
-                       </tr>
-                   </thead>
-                   <tbody>
-                       <tr v-for="item in tabledata">
-                           <td>{{ item.treat }}</td>
-                           <td>{{ item.value }}</td>
-                           <td>{{ item.value_rank }}</td>
-                       </tr>
-                   </tbody>
-               </table>
-            </div>
-        </div><!-- .box rankogram -->
+                <!-- /.box-header -->
+                <div class="box-body">
+                    <svg id="tb_lgtbd3"></svg>
 
-        
-
-    </div>
-    <div class="pane-row">
-        <div class="box" style="width: 300px;" id="fg-nma-netplt">
-            <div class="box-header">
-                <h4>
-                    <span class="fa fa-project-diagram"></span>
-                    NETWORK PLOT
-                </h4>
-            </div>
-            <!-- /.box-header -->
-            <div class="box-body">
-                <svg id="fg-nma-netplt-svg"></svg>
-            </div>
-        </div><!-- .box network plot -->
-
-        <div class="box" style="width: 300px; display: none;" id="fg-nma-scrplt">
-            <div class="box-header">
-                <h4>
-                    <span class="fa fa-chart-line"></span>
-                    SUCRA PLOT
-                </h4>
-                <!-- <div style="margin-left: 5px;">
-                    <button onclick="var svg = d3.select('#fg-nma-scrplt-div svg');fig_saver.save_png(svg, 'figure_sucra_plot');">
-                        <i class="far fa-save"></i> Save PNG
-                    </button>
-                </div> -->
-            </div>
-            <!-- /.box-header -->
-            <div class="box-body">
-                <div id="fg-nma-scrplt-div"></div>
-            </div>
-        </div><!-- .box SUCRA plot -->
-
-        
-
-        <div class="box" style="width: 300px; display: none;" id="fg-nma-pscplt">
-            <div class="box-header">
-                <h4>
-                    <span class="fa fa-chart-line"></span>
-                    P-Score PLOT
-                </h4>
-                <!-- <div style="margin-left: 5px;">
-                    <button onclick="var svg = d3.select('#fg-nma-pscplt-div svg');fig_saver.save_png(svg, 'figure_p-score_plot');">
-                        <i class="far fa-save"></i> Save PNG
-                    </button>
-                </div> -->
-            </div>
-            <!-- /.box-header -->
-            <div class="box-body">
-                <div id="fg-nma-pscplt-div"></div>
-            </div>
-        </div><!-- .box P-Score plot -->
-
-        <div class="box" style="width: 300px;" id="tb-nma-netcha">
-            <div class="box-header">
-                <h4>
-                    <span class="fa fa-bars"></span>
-                    NET CHARACTERISTICS
-                </h4>
-            </div>
-            <!-- /.box-header -->
-            <div class="box-body">
-                <div class="box-bodyitem" v-for="r in tabledata">
-                    <p class="box-p box-p-fixlen" v-bind:title="r.cha">{{ r.cha }}</p>
-                    <p class="box-p box-p-fixlen" style="text-align: right; margin: -2px 0 0 0; border-bottom: 1px solid #EAEAEA; font-weight: bold;">{{ r.val }}</p>
+                    <p v-html="league_table_explain">
+                    </p>
                 </div>
-            </div>
-        </div><!-- .box net char table -->
+            </div><!-- .box league table -->
 
+            <div class="box" style="width: 300px;" id="fg-nma-netplt">
+                <div class="box-header">
+                    <h4>
+                        <span class="fa fa-project-diagram"></span>
+                        NETWORK PLOT
+                    </h4>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                    <svg id="fg-nma-netplt-svg"></svg>
+                </div>
+            </div><!-- .box network plot -->
+            
+        </div><!-- .pane-col -->
+        
+
+        <div class="pane-col">
+            <div class="box" style="width: 360px;" id="fg-nma-frsplt">
+                <div class="box-header">
+                    <h4>
+                        <span class="fa fa-align-left"></span>
+                        INTERACTIVE PLOTS
+                    </h4>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                    <svg id="fg-nma-frsplt-svg"></svg>
+                </div>
+            </div><!-- .box forest plot -->
+
+            <div class="box" style="width: 300px; display: none;" id="fg-nma-scrplt">
+                <div class="box-header">
+                    <h4>
+                        <span class="fa fa-chart-line"></span>
+                        SUCRA PLOT
+                    </h4>
+                    <!-- <div style="margin-left: 5px;">
+                        <button onclick="var svg = d3.select('#fg-nma-scrplt-div svg');fig_saver.save_png(svg, 'figure_sucra_plot');">
+                            <i class="far fa-save"></i> Save PNG
+                        </button>
+                    </div> -->
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                    <div id="fg-nma-scrplt-div"></div>
+                </div>
+            </div><!-- .box SUCRA plot -->
+
+            <div class="box" style="width: 300px; display: none;" id="fg-nma-pscplt">
+                <div class="box-header">
+                    <h4>
+                        <span class="fa fa-chart-line"></span>
+                        P-Score PLOT
+                    </h4>
+                    <!-- <div style="margin-left: 5px;">
+                        <button onclick="var svg = d3.select('#fg-nma-pscplt-div svg');fig_saver.save_png(svg, 'figure_p-score_plot');">
+                            <i class="far fa-save"></i> Save PNG
+                        </button>
+                    </div> -->
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                    <div id="fg-nma-pscplt-div"></div>
+                </div>
+            </div><!-- .box P-Score plot -->
+
+        </div><!-- .pane-col -->
+
+
+        <div class="pane-col">
+
+            <div class="box" style="width: 320px; display: none;" id="tb_ranktb">
+                <div class="box-header">
+                    <h4>
+                        <span class="fa fa-dice-d6"></span>
+                        RANK TABLE
+                    </h4>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                   <table class="rank_table">
+                       <thead>
+                           <tr>
+                               <th v-for="item in header">
+                                   {{ item }}
+                               </th>
+                           </tr>
+                       </thead>
+                       <tbody>
+                           <tr v-for="item in tabledata">
+                               <td>{{ item.treat }}</td>
+                               <td>{{ item.value }}</td>
+                               <td>{{ item.value_rank }}</td>
+                           </tr>
+                       </tbody>
+                   </table>
+                </div>
+                <div class="box-footer" style="padding:0;">&nbsp;</div>
+            </div><!-- .box rankogram / RANK TABLE -->
+
+            <div class="box" style="width: 320px;" id="tb-nma-netcha">
+                <div class="box-header">
+                    <h4>
+                        <span class="fa fa-bars"></span>
+                        NET CHARACTERISTICS
+                    </h4>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body">
+                    <div class="box-bodyitem" v-for="r in tabledata">
+                        <p class="box-p box-p-fixlen" v-bind:title="r.cha">{{ r.cha }}</p>
+                        <p class="box-p box-p-fixlen" style="text-align: right; margin: -2px 0 0 0; border-bottom: 1px solid #EAEAEA; font-weight: bold;">{{ r.val }}</p>
+                    </div>
+                </div>
+            </div><!-- .box net char table -->
+
+        </div><!-- .pane-col -->
+        
     </div><!-- .pane-row -->
     
     
