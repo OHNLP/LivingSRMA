@@ -537,7 +537,7 @@ var prj = 'CAT';
 function resizeIFrameToFitContent( id ) {
     var iFrame = document.getElementById(id);
     iFrame.height = iFrame.contentWindow.document.body.scrollHeight;
-    console.log('* ' + id + ': ' + iFrame.height);
+    // console.log('* ' + id + ': ' + iFrame.height);
 }
 
 function switch_dma_data(tag, slides, display_name) {
@@ -571,7 +571,7 @@ $(document).ready(function() {
     );
     // resize the iframe to fit content
     $('#iframe-dma-[[ tp[:4] ]]').on('load', function() {
-        console.log('* loaded iframe#' + 'iframe-dma-[[ tp[:4] ]]');
+        // console.log('* loaded iframe#' + 'iframe-dma-[[ tp[:4] ]]');
         resizeIFrameToFitContent('iframe-dma-[[ tp[:4] ]]');
         setTimeout("resizeIFrameToFitContent('iframe-dma-[[ tp[:4] ]]');", 300);
         setTimeout("resizeIFrameToFitContent('iframe-dma-[[ tp[:4] ]]');", 900);
