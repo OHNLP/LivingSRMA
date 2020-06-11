@@ -101,9 +101,9 @@
 
     <div class="row">
         <div class="col-md-5">
-            <p>TOPIC: Direct Oral Anti-Coagulants (DOACS) compared to Dalteparin for treatment of Cancer Associated Thrombosis (CAT): A Living, Interactive Systematic Review (LISR) and Network Meta-Analysis (LNMA)</p>
+            <p>TOPIC: Direct Oral Anti-Coagulants (DOACS) compared to Dalteparin for treatment of Cancer Associated Thrombosis (CAT): A Living, Interactive Systematic Review (LISR) and Network Meta-Analysis (LNMA).</p>
             <p>
-            We have maintained a living systematic review and network meta-analysis for treatment of cancer associated thrombosis (CAT) since our original publication in 2019. The results are now updated after the publication of Caravaggio trial.  The results of ongoing trials CASTA-DIVA (NCT02746185), PRIORITY (NCT03139487) and CONKO-011(NCT02583191) are pending and will be considered for addition to living analysis as they become available
+            We have maintained a living systematic review and network meta-analysis for treatment of cancer associated thrombosis (CAT) since our original publication in 2019. The results are now updated after the publication of Caravaggio trial.  The results of ongoing trials CASTA-DIVA (NCT02746185), PRIORITY (NCT03139487) and CONKO-011(NCT02583191) are pending and will be considered for addition to living analysis as they become available.
             </p>
         </div>
         <div class="col-md-7">
@@ -121,8 +121,6 @@
     <div class="row">
         <div class="col">
             <p>Search strategy is developed in consultation with an information specialist. The strategy is used to generate “auto” search every month (Medline, Embase, Cochrane Central Register of Controlled Trials (CENTRAL). The numbers in the flowsheet will be dynamically updated as new studies are considered for inclusion. Red limb on the right side of the flowsheet represent the living updates. Users can click the colored boxes for additional details.</p>
-
-            <!-- <p>The numbers in the flowsheet will be dynamically updated as new studies are considered for inclusion. Red limb on the right side of the flowsheet represent the living updates. Users can click the colored boxes for additional details</p> -->
 
             <p>How to use this flowsheet? <a href="javascript:;" data-toggle="modal" data-target="#exampleModalCenter">Video demonstration</a></p>
         </div>
@@ -197,9 +195,6 @@
     <h3 style="margin-bottom: 2rem;">
         SUMMARY OF FINDINGS: PAIRWISE MA
     </h3>
-    <p>
-        Pairwise meta-analysis summary of findings (SoF) -next-paragraph- Certainty in evidence of direct oral anticoagulants vs low molecular weight heparin in the treatment of cancer associated thrombosis
-    </p>
     <div class="row">
         <div class="col">
             {% include 'pub.CAT._SOF_DIRECT.html' %}
@@ -275,18 +270,19 @@
 
 
 <br id="sec-nma-outcome">
-<div class="container" style="margin-top: 4rem; margin-bottom: 3rem;">
+<div class="container" style="margin-top: 4rem; margin-bottom: 0rem;">
     <h3 style="margin-bottom: 2rem;">
         PAIRWISE META-ANALYSIS
     </h3>
     <p>
-        Results are summarized in forest plots.
+        Results are summarized as forest plots for primary analysis, sensitivity analysis and subgroup analysis.<br>
+        Users can use dropdown (select plot) to select the outcome of interest.
     </p>
 </div>
 
 {% for tp in dma %}
-<br id="sec-dma-[[ tp[:4] ]]" style="margin-top: 4rem;">
-<div class="container" style="margin-top: 4rem;">
+<br id="sec-dma-[[ tp[:4] ]]" style="margin-top: 1rem;">
+<div class="container" style="margin-top: 3.5rem;">
     <div class="row">
         <div class="col">
             <h4 style="margin-bottom: 2rem;">[[ tp ]]</h4>
