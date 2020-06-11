@@ -270,7 +270,7 @@ a {
 .sct-td {
     max-width: 100px;
     width: 50px;
-    padding: 0 3px;
+    padding: 2px 3px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -493,7 +493,7 @@ a {
             <table style="height: 100%;" cellspacing="0">
                 <thead>
                     <tr class="sct-header">
-                        <th class="sct-col0">&nbsp;</th>
+                        <!-- <th class="sct-col0">&nbsp;</th> -->
                         <th class="sct-th"
                             v-for="attr, idx in attrs"
                             v-bind:class="get_th_cls(idx)"
@@ -528,7 +528,7 @@ a {
                 <tbody class="sct-body">
                     <tr class="sct-tr"
                         v-for="r in rs">
-                        <td class="sct-col0">&nbsp;</td>
+                        <!-- <td class="sct-col0">&nbsp;</td> -->
                         <td class="sct-td"
                             v-for="col, idx in cols"
                             v-bind:title="attrs[idx].name + ': ' + r[col]"
