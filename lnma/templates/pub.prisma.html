@@ -582,11 +582,8 @@ a {
 </div>
 <div id="dialog-message-e2" class="dialog" title="Excluded by full text review">
     <p>
-    Full-text articles excluded (patient reported outcomes, adjuvant setting, studying older treatments, later lines of therapy, first version of updated studies, Variant RCC, preliminary results, conference presentations, secondary analysis.
+    Full-text articles excluded.
     </p>
-    <!-- <p>
-    (n = 60)
-    </p> -->
 </div>
 <div style="display:none;" id="data_pub">
 [[j|safe]]
@@ -652,6 +649,12 @@ var jarvis = {
             function(data) {
                 fg_prisma.init(data.prisma);
                 tb_studylist.load(data);
+
+                // update the e2 detail
+                var e2_details = data.info.e2_details;
+                e2_details = e2_details.split('\n');
+                e2_details = e2_details.map(v=>'<p>'+v+'</p>').join('');
+                $('#dialog-message-e2').html(e2_details);
 
                 // OK!
                 jarvis.ssmsg('Data loaded!');
