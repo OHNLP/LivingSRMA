@@ -300,17 +300,17 @@ Graphdata Maker
     text-align: center;
 }
 
-#dataset_summary {
+#output_summary {
     font-size: .7rem;
     padding: 10px 0 5px 0; 
     margin: 10px 0 5px 0; 
     border-top: 1px dotted #EAEAEA;
     border-bottom: 1px dotted #EAEAEA;
 }
-#dataset_summary p {
+#output_summary p {
     margin: 0 0 .5rem 0;
 }
-#dataset_summary h4 {
+#output_summary h4 {
     margin: 0 0 .5rem 0;
 }
 .rank_table {
@@ -357,17 +357,34 @@ Graphdata Maker
                 </form>
                 
                 <hr>
-                <button v-on:click="upload">
+                <button v-on:click="upload"
+                    v-bind:disabled="btn_upload.disabled">
                     <span class="fa fa-upload"></span>
-                    Upload &amp; Analyze All Treats
+                    Upload and Analyze All Treats
                 </button>
-                <div id="dataset_summary"
-                    v-html="dataset_summary">
+                <div id="output_summary"
+                    v-html="output_summary">
                 </div>
             </div>
             
         </div><!-- .box / upload file -->
     
+    </div>
+</div>
+
+<div id="main-pane">
+    <div class="box">
+        <div class="box-header">
+            <h4>
+                <i class="far fa-comment-alt"></i>
+                Output Message
+            </h4>
+        </div>
+        <div class="box-body">
+            <div id="msg-box">
+
+            </div>
+        </div>
     </div>
 </div>
 
@@ -394,11 +411,11 @@ var fm_loader = {
             data: {
                 btn_upload: {
                     disabled: false,
-                    txt_normal: 'Upload',
-                    txt_working: 'Parsing ...'
+                    txt_normal: '<span class="fa fa-upload"></span> Upload and Analyze All Treats',
+                    txt_working: 'Parsing ... please wait ...'
                 },
 
-                dataset_summary: '',
+                output_summary: '',
 
                 datasets: []
             },
@@ -417,6 +434,7 @@ var fm_loader = {
         // update UI
         this.vpp.btn_upload.disabled = true;
         var form_data = new FormData($('#upload-file')[0]);
+        $('#msg-box').html('Parsing ...');
         $.ajax({
             type: 'POST',
             url: './graphdata_maker',
@@ -425,10 +443,16 @@ var fm_loader = {
             cache: false,
             processData: false,
             success: function(data) {
+                fm_loader.vpp.btn_upload.disabled = false;
                 console.log(data);
+                $('#msg-box').html(data.msg);
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 console.error(textStatus, errorThrown);
+                fm_loader.vpp.btn_upload.disabled = false;
+                var msg = 'There must be something wrong in data file !!! or server ...';
+                $('#msg-box').html(msg);
+                fm_loader.vpp.output_summary = msg;
             }
         });
     },

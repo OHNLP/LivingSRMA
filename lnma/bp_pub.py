@@ -21,7 +21,6 @@ bp = Blueprint("pub", __name__, url_prefix="/pub")
 
 @bp.route('/')
 def index():
-    print('* current app instance_path:', current_app.instance_path)
     return render_template('pub.index.html')
 
 
@@ -34,8 +33,8 @@ def RCC():
 def CAT():
     prj = 'CAT'
     # load the graph data
-    full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, 'GRAPH_LIST.json')
-    j = json.load(open(full_fn))
+    full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, 'NMA_LIST.json')
+    nma = json.load(open(full_fn))
 
     # load the dma data
     full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, 'DMA_DATA.xlsx')
@@ -61,7 +60,7 @@ def CAT():
         })
         dma[dma_type][option_text]['slides'].append(filename + '$' + legend_text)
     
-    return render_template('pub.CAT.html', dma=dma, j=j)
+    return render_template('pub.CAT.html', dma=dma, nma=nma)
 
 ###########################################################
 # Modules for public page

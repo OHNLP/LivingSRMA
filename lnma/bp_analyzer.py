@@ -101,30 +101,43 @@ def graphdata_maker():
         full_fn = os.path.join(current_app.config['UPLOAD_FOLDER'], fn)
         file_obj.save(full_fn)
     
+    # prepare the msg for user
+    msg = ''
     # read file
     file_data = _read_file(full_fn)
 
     # analyze
     prj_sname = request.form.get('prj')
     out_sname = request.form.get('out')
+    msg += 'Project: %s <br>' % prj_sname
+    msg += 'Tag: %s<br>' % out_sname
+    
+    # cfg = request.form.get('cfg')
 
     rs = file_data['raw']
     cfg = '{"analysis_method":"bayes","input_format":"ET","treat":"EdoX","measure":"or","model":"fixed","better":"small"}'
     cfg = json.loads(cfg)
+    
+    msg += 'cfg.analysis_method: %s <br>' % cfg['analysis_method']
+    msg += 'cfg.input_format: %s <br>' % cfg['input_format']
+    msg += 'cfg.measure: %s <br>' % cfg['measure']
+    msg += 'cfg.model: %s <br>' % cfg['model']
+    msg += 'cfg.better: %s <br>' % cfg['better']
 
     # save the graph data
-    
     for treat in file_data['treats']:
         cfg['treat'] = treat
         graph_data = _analyze(rs, cfg)
         output_fn = 'GRAPH-%s-%s.json' % (out_sname, treat)
         full_output_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj_sname, output_fn)
         json.dump(graph_data, open(full_output_fn, 'w'))
-        print('* analyzed and saved %s.[%s] on treat [%s] to %s' % (prj_sname, out_sname, treat, output_fn))
+        _msg = 'analyzed and saved %s.[%s] on treat [%s] to %s' % (prj_sname, out_sname, treat, output_fn)
+        print('* %s' % _msg)
+        msg += '%s<br>' % _msg
 
     ret = {
         'success': True,
-        'msg': 'done!'
+        'msg': msg
     }
 
     return jsonify(ret)
