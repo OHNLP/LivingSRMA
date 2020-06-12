@@ -26,7 +26,12 @@ def index():
 
 @bp.route('/RCC.html')
 def RCC():
-    return render_template('pub.RCC.html')
+    prj = 'RCC'
+    # load the graph data
+    full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, 'NMA_LIST.json')
+    nma = json.load(open(full_fn))
+
+    return render_template('pub.RCC.html', nma=nma)
 
 
 @bp.route('/CAT.html')

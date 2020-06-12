@@ -115,9 +115,13 @@ def graphdata_maker():
     # cfg = request.form.get('cfg')
 
     rs = file_data['raw']
-    cfg = '{"analysis_method":"bayes","input_format":"ET","treat":"EdoX","measure":"or","model":"fixed","better":"small"}'
+    cfg = '{"analysis_method":"freq","input_format":"","treat":"EdoX","measure":"or","model":"fixed","better":"small"}'
     cfg = json.loads(cfg)
+
+    # update file type
+    cfg['input_format'] = file_data['coltype']
     
+    msg += 'treats: ' + ','.join([ '"%s"' % t for t in file_data['treats'] ]) + '<br>'
     msg += 'cfg.analysis_method: %s <br>' % cfg['analysis_method']
     msg += 'cfg.input_format: %s <br>' % cfg['input_format']
     msg += 'cfg.measure: %s <br>' % cfg['measure']
