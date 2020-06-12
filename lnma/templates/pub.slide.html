@@ -84,7 +84,8 @@ var jarvis = {
             var fn = tmp[0];
             var legend = tmp[1];
 
-            var s_imgurl = url_img_base + fn;
+            // to remove cache ...
+            var s_imgurl = url_img_base + fn + '?ver=' + Math.random();
             var s_class = '';
             if (i == 0) {
                 s_class = 'active';
