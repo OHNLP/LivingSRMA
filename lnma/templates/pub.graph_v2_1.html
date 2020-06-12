@@ -11,7 +11,7 @@
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
 
-<title>Study Outcome Graph V3</title>
+<title>Study Outcome Graph V2</title>
 <link rel="icon" href="/static/img/favicon.png" type="image/png">
 <link rel="stylesheet" href="/static/lib/font-awesome/css/all.css">
 <link rel="stylesheet" href="/static/lib/jquery-ui/jquery-ui.min.css">
@@ -322,6 +322,9 @@ a {
 }
 .pane-col {
 }
+.header {
+    font-size: 12px;
+}
 
 .d3-tip {
     line-height: 1;
@@ -350,114 +353,127 @@ a {
 <div class="flex-container" style="width:100%; height:100%;">
 
 <div id="main-pane">
-    <div class="pane-row">
-        <div class="box" style="width: auto; padding-right: 10px; display: none;" id="tb-nma-league">
-            <div class="box-header">
-                <h4>
-                    <span class="fa fa-table"></span>
-                    LEAGUE TABLE 
-                </h4>
-                <!-- <div style="margin-left: 5px;">
-                    <button onclick="fig_saver.save_png(tb_lgtbd3.svg, 'figure_league_table');">
-                        <i class="far fa-save"></i> Save PNG
-                    </button>
-                </div> -->
-            </div>
-            <!-- /.box-header -->
-            <div class="box-body">
-                <svg id="tb_lgtbd3"></svg>
+    <div id="tb-nma-league" class="box"
+        style="width: auto; position: absolute; top: 5px; left: 5px;">
+        <div class="box-header">
+            <h4>
+                <span class="fa fa-table"></span>
+                LEAGUE TABLE 
+            </h4>
+            <!-- <div style="margin-left: 5px;">
+                <button onclick="fig_saver.save_png(tb_lgtbd3.svg, 'figure_league_table');">
+                    <i class="far fa-save"></i> Save PNG
+                </button>
+            </div> -->
+        </div>
+        <!-- /.box-header -->
+        <div class="box-body">
+            <svg id="tb_lgtbd3"></svg>
 
-                <p id="league_table_explain">
-                    The values in each cell represent the relative treatment effect
-                    (and 95% CI) of the treatment on the top, compared to the treatment on the left.
-                </p>
-            </div>
-        </div><!-- .box league table -->
-        
-        <div class="box" style="width: 320px; display: none;" id="tb_ranktb">
-            <div class="box-header">
-                <h4>
-                    <span class="fa fa-dice-d6"></span>
-                    RANK TABLE
-                </h4>
-            </div>
-            <!-- /.box-header -->
-            <div class="box-body">
-                <table class="rank_table">
-                    <thead>
-                        <tr>
-                            <th v-for="item in header">
-                                {{ item }}
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="item in tabledata">
-                            <td>{{ item.treat }}</td>
-                            <td>{{ item.value }}</td>
-                            <td>{{ item.value_rank }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            
-        </div><!-- .box rankogram / RANK TABLE -->
+            <p id="league_table_explain">
+                The values in each cell represent the relative treatment effect
+                (and 95% CI) of the treatment on the top, compared to the treatment on the left.
+            </p>
+        </div>
+    </div><!-- .box league table -->
 
-        
-    </div>
-        
+    <div id="fg-nma-frsplt" class="box" 
+        style="width: 360px; padding: 5px; position: absolute; top: 305px; left: 5px;">
+        <div class="box-header">
+            <h4>
+                <span class="fa fa-align-left"></span>
+                INTERACTIVE PLOT
+            </h4>
+        </div>
+        <!-- /.box-header -->
+        <div class="box-body">
+            <svg id="fg-nma-frsplt-svg"></svg>
+        </div>
+    </div><!-- .box forest plot -->
 
-    <div class="pane-row">
-        <div class="box" style="width: 300px;" id="fg-nma-netplt">
-            <div class="box-header">
-                <h4>
-                    <span class="fa fa-project-diagram"></span>
-                    NETWORK PLOT
-                </h4>
-            </div>
-            <!-- /.box-header -->
-            <div class="box-body">
-                <svg id="fg-nma-netplt-svg"></svg>
-            </div>
-        </div><!-- .box network plot -->
 
-        <div class="box" style="width: 360px;" id="fg-nma-frsplt">
-            <div class="box-header">
-                <h4>
-                    <span class="fa fa-align-left"></span>
-                    INTERACTIVE PLOT
-                </h4>
-            </div>
-            <!-- /.box-header -->
-            <div class="box-body">
-                <svg id="fg-nma-frsplt-svg"></svg>
-            </div>
-        </div><!-- .box forest plot -->
+    <div id="fg-nma-netplt" class="box" 
+        style="width: 300px; position: absolute; top: 5px; left: 460px;">
+        <div class="box-header">
+            <h4>
+                <span class="fa fa-project-diagram"></span>
+                NETWORK PLOT
+            </h4>
+        </div>
+        <!-- /.box-header -->
+        <div class="box-body">
+            <svg id="fg-nma-netplt-svg"></svg>
+        </div>
+    </div><!-- .box network plot -->
 
-        <div class="box" style="width: 300px; display: none;" id="fg-nma-pscplt">
-            <div class="box-header">
-                <h4>
-                    <span class="fa fa-chart-line"></span>
-                    P-Score PLOT
-                </h4>
-                <!-- <div style="margin-left: 5px;">
-                    <button onclick="var svg = d3.select('#fg-nma-pscplt-div svg');fig_saver.save_png(svg, 'figure_p-score_plot');">
-                        <i class="far fa-save"></i> Save PNG
-                    </button>
-                </div> -->
-            </div>
-            <!-- /.box-header -->
-            <div class="box-body">
-                <div id="fg-nma-pscplt-div"></div>
-            </div>
-        </div><!-- .box P-Score plot -->
 
-        
+    <div id="fg-nma-scrplt" class="box"
+        style="width: 300px; position: absolute; top: 250px; left: 460px;">
+        <div class="box-header">
+            <h4>
+                <span class="fa fa-chart-line"></span>
+                SUCRA PLOT
+            </h4>
+            <!-- <div style="margin-left: 5px;">
+                <button onclick="var svg = d3.select('#fg-nma-scrplt-div svg');fig_saver.save_png(svg, 'figure_sucra_plot');">
+                    <i class="far fa-save"></i> Save PNG
+                </button>
+            </div> -->
+        </div>
+        <!-- /.box-header -->
+        <div class="box-body">
+            <div id="fg-nma-scrplt-div"></div>
+        </div>
+    </div><!-- .box SUCRA plot -->
 
-    </div><!-- .pane-row -->
-    
-    
-    
+
+    <div id="tb_ranktb" class="box"
+        style="width: 320px; position: absolute; top: 5px; left: 785px;">
+        <div class="box-header">
+            <h4>
+                <span class="fa fa-dice-d6"></span>
+                RANKING
+            </h4>
+        </div>
+        <!-- /.box-header -->
+        <div class="box-body">
+            <table class="rank_table">
+                <thead>
+                    <tr>
+                        <th v-for="item in header">
+                            {{ item }}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="item in tabledata">
+                        <td>{{ item.treat }}</td>
+                        <td>{{ item.value }}</td>
+                        <td>{{ item.value_rank }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div><!-- .box rankogram / RANK TABLE -->
+
+
+    <div id="tb-nma-netcha" class="box"
+        style="width: 320px; position: absolute; top: 150px; left: 785px;">
+        <div class="box-header">
+            <h4>
+                <span class="fa fa-bars"></span>
+                NET CHARACTERISTICS
+            </h4>
+        </div>
+        <!-- /.box-header -->
+        <div class="box-body">
+            <div class="box-bodyitem" v-for="r in tabledata">
+                <p class="box-p box-p-fixlen" v-bind:title="r.cha">{{ r.cha }}</p>
+                <p class="box-p box-p-fixlen" style="text-align: right; margin: -2px 0 0 0; border-bottom: 1px solid #EAEAEA; font-weight: bold;">{{ r.val }}</p>
+            </div>
+        </div>
+    </div><!-- .box net char table -->
+
 </div>
 
 </div><!-- .flex-container -->
@@ -480,7 +496,6 @@ a {
 {% include "js/fg_netplt.js" %}
 {% include "js/fg_frsplt.js" %}
 {% include "js/fg_scrplt.js" %}
-{% include "js/fg_pscplt.js" %}
 
 {% include "js/tb_lgtbd3_v2.js" %}
 {% include "js/tb_ranktb.js" %}
@@ -505,6 +520,8 @@ var jarvis = {
     },
 
     draw: function(data) {
+        // update the figures!
+        tb_netcha.draw(data.netcha);
 
         // update the network plot
         fg_netplt.draw(data.netplt);
@@ -516,16 +533,16 @@ var jarvis = {
         data.forest.subtitle = '';
         fg_frsplt.draw(data.forest);
 
+        // update the sucra plot
+        if (typeof(data.scrplt) != 'undefined') {
+            fg_scrplt.draw(data.scrplt);
+        }
+
         // update the sucra rank
         if (typeof(data.tmrank) != 'undefined') {
             tb_ranktb.draw(data.tmrank);
         }
         
-        // update the pscore rank
-        if (typeof(data.psrank) != 'undefined') {
-            tb_ranktb.draw(data.psrank);
-            fg_pscplt.draw(data.psrank);
-        }
     },
     
     init: function() {
@@ -537,19 +554,24 @@ var jarvis = {
             jarvis.ssmsg('The functions used in this website require advanced web technologies, which are <b>NOT</b> supported by Internet Explorer<br>Try using Google Chrome, Apple Safari, Mozilla Firefox or other modern browsers.')
             return;
         }
+        tb_netcha.init();
 
+        fg_netplt.width = 400;
+        fg_netplt.height = 200;
         fg_netplt.init();
+        
+        // ini the 
         fg_frsplt.init();
         
         // increase the table size
-        tb_lgtbd3.width_cell = 78;
-        tb_lgtbd3.height_cell = 38;
+        tb_lgtbd3.width_cell = 80;
+        tb_lgtbd3.height_cell = 40;
         tb_lgtbd3.init();
         tb_ranktb.init();
-        
-        fg_pscplt.width = 350;
-        fg_pscplt.height = 270;
-        fg_pscplt.init();
+
+        fg_scrplt.width = 310;
+        fg_scrplt.height = 270;
+        fg_scrplt.init();
 
         // get filename
         var prj = jarvis.getUrlParameter('prj');
@@ -565,7 +587,6 @@ var jarvis = {
                 setTimeout('jarvis.ssclose();', 300);
             }, 'json'
         );
-
         
     }
 };

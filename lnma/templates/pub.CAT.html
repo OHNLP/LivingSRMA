@@ -549,7 +549,7 @@ function switch_nma_data(tag, trt, display_name) {
         display_name = trt;
     }
     var fn = 'GRAPH-' + tag + '-' + trt + '.json';
-    var url = '[[ url_for("pub.graph_v2") ]]?prj=' + prj + '&fn=' + fn;
+    var url = '[[ url_for("pub.graph_v2_1") ]]?prj=' + prj + '&fn=' + fn;
     $('#iframe-nma-' + tag).attr('src', url);
     $('#refname-nma-' + tag).html(display_name);
 }

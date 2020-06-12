@@ -35,6 +35,7 @@ var fg_netplt = {
     r: 120,
     
     init: function() {
+        this.r = Math.min(this.width, this.height) / 2.5;
         this.box = $(this.box_id)
             .css('width', this.width);
 
@@ -50,6 +51,19 @@ var fg_netplt = {
             .range([this.height/2 , 
                     this.height/2 + this.r]);
         this.node2idx = {};
+
+        this.tip = d3.tip()
+            .attr('class', 'd3-tip')
+            .direction('e')
+            .offset([0,5])
+            .html(function(d) {
+                console.log(d);
+                var content = "<div><b>" + d.name + "</b></div>" +
+                    "  <div>No. of studies: " + d.value + "</div>"
+                return content;
+            });
+        this.svg.call(this.tip);
+
     },
 
     clear: function() {
@@ -110,13 +124,20 @@ var fg_netplt = {
             .attr('class', 'fg-net-node')
             .attr('r', function(d, i) { return 5 + d.value; })
             .style('fill', function(d) { return 'orange'; })
-
+        
+        // draw the text
         nodes.append('text')
             .attr('x', function(d, i) { return 5; })
             .attr('y', function(d, i) { return 5; })
             .attr('class', 'fg-net-node-text')
             .attr('title', function(d, i) { return d.value + ' Studies'; })
+            .on('mouseover', this.tip.show)
+            .on('mouseout', this.tip.hide)
             .text(function(d, i) { return d.name; });
+
+        // with d3-tip plugin, we can show some message when hovering
+        // if (d3.hasOwnProperty('tip')) {
+        // }
 
     },
 
