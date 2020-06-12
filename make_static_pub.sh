@@ -19,6 +19,7 @@ curl "$URL_BASE/itable.html" -o "$FOLDER_BASE/pub/itable.html"
 curl "$URL_BASE/slide.html" -o "$FOLDER_BASE/pub/slide.html"
 curl "$URL_BASE/graph_v1.html" -o "$FOLDER_BASE/pub/graph_v1.html"
 curl "$URL_BASE/graph_v2.html" -o "$FOLDER_BASE/pub/graph_v2.html"
+curl "$URL_BASE/graph_v3.html" -o "$FOLDER_BASE/pub/graph_v3.html"
 echo '* downloaed shared module'
 
 
