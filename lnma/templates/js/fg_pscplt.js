@@ -64,7 +64,7 @@ var fg_pscplt = {
         this.option = {
             grid: {
                 top: 15,
-                right: '15%'
+                right: 15
             },
             title: {
                 show: false

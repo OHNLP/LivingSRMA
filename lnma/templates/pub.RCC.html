@@ -200,7 +200,7 @@
                             </tr>
                             <tr class="even">
                                 <td>Total Possible Pairwise Comparisons</td>
-                                <td>45</td>
+                                <td>50</td>
                             </tr>
                             <tr class="odd">
                                 <td>Total Number of Pairwise Comparisons With Direct Data</td>
@@ -267,7 +267,7 @@
                             </tr>
                             <tr class="even">
                                 <td>Total Possible Pairwise Comparisons</td>
-                                <td>45</td>
+                                <td>50</td>
                             </tr>
                             <tr class="odd">
                                 <td>Total Number of Pairwise Comparisons With Direct Data</td>
@@ -411,11 +411,11 @@
 
 </div>
 
-<div class="container" style="margin-bottom: 3rem; max-width: 1220px;">
+<div class="container" style="margin-bottom: 3rem; max-width: 1160px;">
     <div class="row">
         <div class="col">
 
-            <p style="text-indent: 2.6rem;">How to use this figure? <a href="javascript:;" data-toggle="modal" data-target="#exampleModalCenter3">Video demonstration</a></p>
+            <p style="text-indent: .6rem;">How to use this figure? <a href="javascript:;" data-toggle="modal" data-target="#exampleModalCenter3">Video demonstration</a></p>
 
             <iframe id="iframe-PFS" src="" frameborder="0" style="width: 100%; min-height: 800px; overflow: hidden;" scrolling="no" ></iframe>
         </div>
@@ -472,11 +472,11 @@
     </div>
 </div>
     
-<div class="container" style="margin-bottom: 3rem; max-width: 1220px;">
+<div class="container" style="margin-bottom: 3rem; max-width: 1160px;">
     <div class="row">
         <div class="col">
 
-            <p style="text-indent: 2.6rem;">How to use this figure? <a href="javascript:;" data-toggle="modal" data-target="#exampleModalCenter3">Video demonstration</a></p>
+            <p style="text-indent: .6rem;">How to use this figure? <a href="javascript:;" data-toggle="modal" data-target="#exampleModalCenter3">Video demonstration</a></p>
 
             <iframe id="iframe-OS" src="" frameborder="0" style="width: 100%; min-height: 800px; overflow: hidden;" scrolling="no" ></iframe>
         </div>
@@ -513,11 +513,11 @@
     </div>
 </div>
     
-<div class="container" style="margin-bottom: 3rem; max-width: 1220px;">
+<div class="container" style="margin-bottom: 3rem; max-width: 1160px;">
     <div class="row">
         <div class="col">
 
-            <p style="text-indent: 2.6rem;">How to use this figure? <a href="javascript:;" data-toggle="modal" data-target="#exampleModalCenter3">Video demonstration</a></p>
+            <p style="text-indent: .6rem;">How to use this figure? <a href="javascript:;" data-toggle="modal" data-target="#exampleModalCenter3">Video demonstration</a></p>
 
             <iframe id="iframe-AES" src="" frameborder="0" style="width: 100%; min-height: 800px; overflow: hidden;" scrolling="no" ></iframe>
         </div>
@@ -564,7 +564,7 @@ function switch_data(tag, trt, display_name) {
     }
     var prj = 'RCC';
     var fn = 'GRAPH-' + tag + '-' + trt + '.json';
-    var url = "[[ url_for('pub.graph_v1') ]]";
+    var url = "[[ url_for('pub.graph_v3') ]]";
     url += '?prj=' + prj + '&fn=' + fn;
     $('#iframe-' + tag).attr('src', url);
     $('#refname-' + tag).html(display_name);

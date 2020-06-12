@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<title>Study Outcome Graph V3</title>
+<link rel="icon" href="/static/img/favicon.png" type="image/png">
+<link rel="stylesheet" href="/static/lib/font-awesome/css/all.css">
+<link rel="stylesheet" href="/static/lib/jquery-ui/jquery-ui.min.css">
+<style>
+html, body {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+}
+body {
+    font-size: 14px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+a {
+    color: #333333;
+    text-decoration: none;
+}
+.flex-container {
+    display: flex;
+    justify-content: flex-start;
+    width: 100%;
+    height: 100%;
+}
+.box {
+    display: flex;
+    flex-direction: column;
+}
+.box-header {
+    width: 100%;
+    padding: 3px 0;
+    display: flex;
+    align-items: center;
+}
+.box-header a {
+    font-size: .8em;
+}
+.box-header h4 {
+    padding: 0;
+    margin: 0;
+    font-size: .95em;
+    height: 1.6em;
+    line-height: 1.6em;
+    margin: 3px 0;
+}
+.box-header button, .box-footer button {
+    height: 1.6em;
+    line-height: 1em;
+    font-size: .8em;
+    margin: 3px;
+}
+.box-header select {
+    height: 1.6em;
+    line-height: 1.2em;
+    font-size: .8em;
+    margin: 3px;
+}
+.box-header span {
+    font-size: .9em;
+}
+.box-header a {
+    padding: 1px 3px;
+    margin: 0 5px;
+    height: 1.6em;
+    line-height: 1.6em;
+}
+.box-header a:hover {
+    text-decoration: underline;
+
+}
+.box-body {
+    width: 100%;
+}
+.box-bodyitem {
+    padding: 0 0 3px 0;
+}
+.box-bodyitem-hl {
+    display: flex;
+    flex-direction: row;
+}
+.box-bodyitem-label {
+    width: 54%;
+    font-size: .9em;
+    line-height: 1.8em;
+}
+.box-bodyitem-value {
+    width: 45%;
+}
+.box-bodyitem select {
+    width: 100%;
+}
+.box-p {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    font-size: .9em;
+}
+.box-p-fixlen {    
+    white-space: nowrap;
+    text-overflow:ellipsis;
+    overflow: hidden;
+}
+.box-footer {
+    width: 100%;
+    min-height: 20px;
+    padding: 5px 0 5px 0;
+    border-bottom: 1px dotted #CCCCCC;
+}
+
+/* element ui css */
+.el-table td, .el-table th {
+    padding: 0;
+    font-size: .9em;
+}
+.el-table .cell {
+    padding: 0;
+}
+.el-table, .el-table thead {
+    color: #333333;
+}
+.el-table::before {
+    background-color: white;
+}
+/* for this page */
+.footer {
+    width: 100%;
+    display: flex;
+    align-items: flex-end;
+    font-size: .75em;
+}
+.footer div {
+    height: 35px;
+    line-height: 4em;
+}
+.footer-link a {
+    padding: 0 5px;
+    color: #999999;
+}
+#main-pane {
+    width: 100%;
+    height: 100%;
+    padding: 5px;
+    background-color: #FFFFFF;
+    display: flex;
+    flex-direction: column;
+}
+#main-pane .box {
+    margin: 0 5px 0 0;
+}
+.pane-row {
+    display: flex;
+    flex-direction: row;
+}
+/* network plot */
+.fg-net-node-text {
+    cursor: pointer;
+}
+.fg-net-node-text:hover {
+    fill: darkred;
+}
+.selected .fg-net-node-text{
+    font-weight: bold;
+    fill: red;
+}
+/* forest plot styles */
+.fg-title {
+    fill: black;
+    font-weight: bold;
+}
+.fg-subtitle {
+    fill: black;
+    text-decoration: italic;
+}
+.fg-frs-th {
+    font-weight: bold;
+}
+.fg-frs-td {
+    font-weight: normal;
+}
+.fg-frs-item text {
+    font-size: .9em;
+}
+.fg-frs-item:hover text {
+    font-weight: bold;
+}
+.fg-row-bg {
+    fill: white;
+}
+.fg-frs-item:hover .fg-row-bg {
+    fill: whitesmoke;
+}
+.fg-frs-line {
+    stroke-width: 1;
+    stroke: black;
+}
+.fg-frs-box {
+    fill: dodgerblue;
+    fill-opacity: .7;
+}
+.fg-frs-guideline {
+    stroke-width: 1;
+    stroke: black;
+}
+.fg-frs-mddot {
+    fill: black;
+    fill-opacity: .8;
+}
+/* League Table */
+#tb-nma-league-div {
+    display: flex;
+    flex-direction: column;
+}
+.tb-colname {
+    text-align: center;
+    border-bottom: 1px solid dimgray;
+}
+.tb-rowname {
+    width: 30px;
+}
+.tb-th {
+    width: 70px;
+    text-align: center;
+    margin: 0 2px 2px 0;
+}
+.tb-row {
+    display: flex;
+    flex-direction: row;
+}
+.tb-row-lead {
+    width: 80px;
+    height: 35px;
+    line-height: 40px;
+    margin: 0 2px 2px 0;
+    padding: 0 3px 0 0;
+}
+.tb-cell {
+    width: 69px;
+    height: 34px;
+    padding: 1px 0 0 1px;
+    border-right: 2px solid white;
+    border-bottom: 2px solid white;
+    text-align: center;
+    background-color: whitesmoke;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: default;
+}
+.tb-cell:hover {
+    padding: 0 1px 1px 0;
+    border-right: 2px solid gray;
+    border-bottom: 2px solid gray;
+}
+.tb-cell-value {
+    width: 69px;
+    height: 24px;
+    line-height: .9em;
+}
+.tb-cell-blank {
+    width: 69px;
+    height: 16px;
+    font-weight: bold;
+}
+.tb-league-luci {
+    font-size: .8em;
+}
+#start-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    display: flex;
+    background: white;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+#ss-msg {
+    width: 100%;
+    padding: 10px 0;
+    text-align: center;
+}
+
+#dataset_summary {
+    font-size: .7rem;
+    padding: 10px 0 5px 0; 
+    margin: 10px 0 5px 0; 
+    border-top: 1px dotted #EAEAEA;
+    border-bottom: 1px dotted #EAEAEA;
+}
+#dataset_summary p {
+    margin: 0 0 .5rem 0;
+}
+#dataset_summary h4 {
+    margin: 0 0 .5rem 0;
+}
+.rank_table {
+    width: 100%;
+}
+.rank_table th {
+    text-align: left;
+    border-bottom: 1px solid #666666;
+}
+.rank_table td {
+    border-bottom: 1px solid #666666;
+}
+.pane-col {
+}
+</style>
+</head>
+<body>
+<div id="start-screen">
+    <h1>
+        <i class="fa fa-chart-bar"></i>
+        Study Outcome Graphs
+    </h1>
+    <div id="ss-msg">System initializing ...</div>
+</div>
+
+<div class="flex-container" style="width:100%; height:100%;">
+
+<div id="main-pane">
+    <div class="pane-row">
+        <div class="box" style="width: auto; padding-right: 10px; display: none;" id="tb-nma-league">
+            <div class="box-header">
+                <h4>
+                    <span class="fa fa-table"></span>
+                    LEAGUE TABLE 
+                </h4>
+                <!-- <div style="margin-left: 5px;">
+                    <button onclick="fig_saver.save_png(tb_lgtbd3.svg, 'figure_league_table');">
+                        <i class="far fa-save"></i> Save PNG
+                    </button>
+                </div> -->
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+                <svg id="tb_lgtbd3"></svg>
+
+                <p v-html="league_table_explain">
+                </p>
+            </div>
+        </div><!-- .box league table -->
+        
+        <div class="box" style="width: 320px; display: none;" id="tb_ranktb">
+            <div class="box-header">
+                <h4>
+                    <span class="fa fa-dice-d6"></span>
+                    RANK TABLE
+                </h4>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+                <table class="rank_table">
+                    <thead>
+                        <tr>
+                            <th v-for="item in header">
+                                {{ item }}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="item in tabledata">
+                            <td>{{ item.treat }}</td>
+                            <td>{{ item.value }}</td>
+                            <td>{{ item.value_rank }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+        </div><!-- .box rankogram / RANK TABLE -->
+
+        
+    </div>
+        
+
+    <div class="pane-row">
+        <div class="box" style="width: 300px;" id="fg-nma-netplt">
+            <div class="box-header">
+                <h4>
+                    <span class="fa fa-project-diagram"></span>
+                    NETWORK PLOT
+                </h4>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+                <svg id="fg-nma-netplt-svg"></svg>
+            </div>
+        </div><!-- .box network plot -->
+
+        <div class="box" style="width: 360px;" id="fg-nma-frsplt">
+            <div class="box-header">
+                <h4>
+                    <span class="fa fa-align-left"></span>
+                    INTERACTIVE PLOTS
+                </h4>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+                <svg id="fg-nma-frsplt-svg"></svg>
+            </div>
+        </div><!-- .box forest plot -->
+
+        <div class="box" style="width: 300px; display: none;" id="fg-nma-pscplt">
+            <div class="box-header">
+                <h4>
+                    <span class="fa fa-chart-line"></span>
+                    P-Score PLOT
+                </h4>
+                <!-- <div style="margin-left: 5px;">
+                    <button onclick="var svg = d3.select('#fg-nma-pscplt-div svg');fig_saver.save_png(svg, 'figure_p-score_plot');">
+                        <i class="far fa-save"></i> Save PNG
+                    </button>
+                </div> -->
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+                <div id="fg-nma-pscplt-div"></div>
+            </div>
+        </div><!-- .box P-Score plot -->
+
+        
+
+    </div><!-- .pane-row -->
+    
+    
+    
+</div>
+
+</div><!-- .flex-container -->
+
+<!-- use third party libs -->
+<!-- jQuery -->
+<script src="/static/lib/jquery/jquery-3.4.1.min.js"></script>
+<!-- Vue.js -->
+<script src="/static/lib/vue.js/vue.min.js"></script>
+<!-- D3.js -->
+<script src="/static/lib/d3/d3.min.js"></script>
+<!-- ECharts -->
+<script src="/static/lib/echarts/echarts.js"></script>
+<!-- FileSavaer -->
+<script src="/static/lib/file-saver/FileSaver.min.js"></script>
+<!-- My Scripts -->
+<script>
+
+{% include "js/fg_netplt.js" %}
+{% include "js/fg_frsplt.js" %}
+{% include "js/fg_scrplt.js" %}
+{% include "js/fg_pscplt.js" %}
+
+{% include "js/tb_lgtbd3.js" %}
+{% include "js/tb_ranktb.js" %}
+{% include "js/tb_netcha.js" %}
+
+{% include "js/fig_saver.js" %}
+
+var jarvis = {
+    getUrlParameter: function(name) {
+        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+        var results = regex.exec(location.search);
+        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    },
+
+    ssmsg: function(msg) {
+        $('#ss-msg').html(msg);
+    },
+
+    ssclose: function() {
+        $('#start-screen').hide();
+    },
+
+    draw: function(data) {
+
+        // update the network plot
+        fg_netplt.draw(data.netplt);
+
+        // update the league table
+        tb_lgtbd3.draw(data.league);
+
+        // update the forest plot
+        data.forest.subtitle = '';
+        fg_frsplt.draw(data.forest);
+
+        // update the sucra rank
+        if (typeof(data.tmrank) != 'undefined') {
+            tb_ranktb.draw(data.tmrank);
+        }
+        
+        // update the pscore rank
+        if (typeof(data.psrank) != 'undefined') {
+            tb_ranktb.draw(data.psrank);
+            fg_pscplt.draw(data.psrank);
+        }
+    },
+    
+    init: function() {
+        
+        var isIE = /*@cc_on!@*/false || !!document.documentMode;
+
+        console.log('* User is using IE:', isIE);
+        if (isIE) {
+            jarvis.ssmsg('The functions used in this website require advanced web technologies, which are <b>NOT</b> supported by Internet Explorer<br>Try using Google Chrome, Apple Safari, Mozilla Firefox or other modern browsers.')
+            return;
+        }
+
+        fg_netplt.init();
+        fg_frsplt.init();
+        
+        // increase the table size
+        tb_lgtbd3.width_cell = 78;
+        tb_lgtbd3.height_cell = 38;
+        tb_lgtbd3.init();
+        tb_ranktb.init();
+        
+        fg_pscplt.width = 350;
+        fg_pscplt.init();
+
+        // get filename
+        var prj = jarvis.getUrlParameter('prj');
+        var fn = jarvis.getUrlParameter('fn');
+        jarvis.ssmsg('Loading data ...');
+
+        $.get(
+            "/pub/graphdata/" + prj + "/" + fn,
+            {ver: Math.random()},
+            function(data) {
+                jarvis.draw(data.data);
+                jarvis.ssmsg('Data loaded!');
+                setTimeout('jarvis.ssclose();', 300);
+            }, 'json'
+        );
+
+        
+    }
+};
+
+$(document).ready(function() {
+    jarvis.init();
+})
+
+</script>
+</body>
+</html>

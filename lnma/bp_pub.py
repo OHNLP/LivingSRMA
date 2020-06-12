@@ -91,6 +91,11 @@ def graph_v2():
     return render_template('pub.graph_v2.html')
 
 
+@bp.route('/graph_v3.html')
+def graph_v3():
+    return render_template('pub.graph_v3.html')
+
+
 ###########################################################
 # Data services
 ###########################################################
