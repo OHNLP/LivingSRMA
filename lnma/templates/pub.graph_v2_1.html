@@ -490,6 +490,15 @@ a {
 <script src="/static/lib/echarts/echarts.js"></script>
 <!-- FileSavaer -->
 <script src="/static/lib/file-saver/FileSaver.min.js"></script>
+
+<!-- for IE -->
+<script>
+var isIE = /*@cc_on!@*/false || !!document.documentMode;
+if (isIE) {
+    document.getElementById('ss-msg').innerHTML = 'The functions used in this website require advanced web technologies, which are <b>NOT</b> supported by Internet Explorer<br>Try using Google Chrome, Apple Safari, Mozilla Firefox or other modern browsers.';
+}
+</script>
+
 <!-- My Scripts -->
 <script>
 
