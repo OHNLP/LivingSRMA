@@ -603,6 +603,11 @@ a {
 <script src="/static/lib/alasql/alasql.min.js"></script>
 
 <script>
+var isIE = /*@cc_on!@*/false || !!document.documentMode;
+if (isIE) {
+    $('#ss-msg').html('The functions used in this website require advanced web technologies, which are <b>NOT</b> supported by Internet Explorer<br>Try using Google Chrome, Apple Safari, Mozilla Firefox or other modern browsers.')
+}
+
 {% include "js/fg_prisma.js" %}
 {% include "js/tb_studylist.js" %}
 
@@ -629,14 +634,6 @@ var jarvis = {
     },
 
     init: function() {
-        var isIE = /*@cc_on!@*/false || !!document.documentMode;
-
-        console.log('* User is using IE:', isIE);
-        if (isIE) {
-            jarvis.ssmsg('The functions used in this website require advanced web technologies, which are <b>NOT</b> supported by Internet Explorer<br>Try using Google Chrome, Apple Safari, Mozilla Firefox or other modern browsers.')
-            return;
-        }
-
         // for the message boxes
         $( ".dialog" ).dialog({
             autoOpen: false
