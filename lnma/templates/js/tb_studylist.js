@@ -12,7 +12,7 @@ var tb_studylist = {
         // load data of these pmids:
         var pmids = [];
         for (let i = 0; i < data.studylist.length; i++) {
-            const item = data.studylist[i];
+            var item = data.studylist[i];
             if (item.pid_type == 'pmid') {
                 pmids.push(item.pmid);
             }
@@ -92,7 +92,7 @@ var tb_studylist = {
         // filter the studies
         var studies = [];
         for (let i = 0; i < this.all_rs.length; i++) {
-            const study = this.all_rs[i];
+            var study = this.all_rs[i];
             if (study[stage.stage] == 1) {
                 studies.push(study);
             } else {
@@ -120,7 +120,7 @@ var tb_studylist = {
             var authors = [];
             var authors_elems = docsum_xml.find('Item[Name="Author"]');
             for (let j = 0; j < authors_elems.length; j++) {
-                const elem = authors_elems[j];
+                var elem = authors_elems[j];
                 authors.push(elem.textContent);
             }
 

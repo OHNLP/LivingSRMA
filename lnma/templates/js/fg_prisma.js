@@ -29,9 +29,9 @@ var fg_prisma = {
     },
 
     draw_only_number: function(data) {
-        for (const key in data.vals) {
+        for (var key in data.vals) {
             if (data.vals.hasOwnProperty(key)) {
-                const element = data.vals[key];
+                var element = data.vals[key];
                 this.vpp.vals[key].number = element.number;
             }
         }
