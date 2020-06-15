@@ -601,13 +601,14 @@ a {
 <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
 <!-- chance.js -->
 <script src="/static/lib/alasql/alasql.min.js"></script>
-
+<!-- for IE -->
 <script>
 var isIE = /*@cc_on!@*/false || !!document.documentMode;
 if (isIE) {
-    $('#ss-msg').html('The functions used in this website require advanced web technologies, which are <b>NOT</b> supported by Internet Explorer<br>Try using Google Chrome, Apple Safari, Mozilla Firefox or other modern browsers.')
+    document.getElementById('ss-msg').innerHTML = 'The functions used in this website require advanced web technologies, which are <b>NOT</b> supported by Internet Explorer<br>Try using Google Chrome, Apple Safari, Mozilla Firefox or other modern browsers.';
 }
-
+</script>
+<script>
 {% include "js/fg_prisma.js" %}
 {% include "js/tb_studylist.js" %}
 
