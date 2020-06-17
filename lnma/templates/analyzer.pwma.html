@@ -1,7 +1,7 @@
 {% extends '_layout_adminlte.html' %}
 
 {% block title %}
-Data Analyzer
+Pairwise Meta Analyzer
 {% endblock %}
 
 {% block style %}
@@ -341,8 +341,8 @@ Data Analyzer
 {% endblock %}
 
 {% block page_name %}
-<i class="fas fa-chart-pie"></i>
-Data Analyzer
+<i class="fas fa-chart-line"></i>
+Pairwise Meta Analyzer
 {% endblock %}
 
 {% block content %}
@@ -857,8 +857,7 @@ var fm_config = {
             selected: 'freq',
             options: [
                 {text: 'Frequentist NMA', value: 'freq'},
-                {text: 'Bayesian NMA', value: 'bayes'},
-                {text: 'Freq + Bayes NMA', value: 'both'}
+                {text: 'Bayesian NMA', value: 'bayes'}
             ]
         },
 

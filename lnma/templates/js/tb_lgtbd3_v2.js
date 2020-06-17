@@ -263,13 +263,14 @@ var tb_lgtbd3 = {
                 .text(header);
 
             // in each row, this.font_size / 2 is similar to 0.5em
-            tmp_x = this.r_header * this.width_cell + this.font_size / 2;
+            // tmp_x = this.r_header * this.width_cell + this.font_size / 2;
+            tmp_x = this.r_header * this.width_cell + this. width_cell - 9;
             tmp_y = (this.r_header * 2 + i + 0.5) * this.height_cell;
             g_header.append('text')
                 .attr('x', tmp_x)
                 .attr('y', tmp_y)
                 .attr('font-size', this.font_size)
-                .attr('text-anchor', 'start')
+                .attr('text-anchor', 'end')
                 .attr('alignment-baseline', 'middle')
                 .text(header);
         }

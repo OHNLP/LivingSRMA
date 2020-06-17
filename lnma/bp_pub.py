@@ -101,6 +101,11 @@ def graph_v2_1():
     return render_template('pub.graph_v2_1.html')
 
 
+@bp.route('/graph_v2_2.html')
+def graph_v2_2():
+    return render_template('pub.graph_v2_2.html')
+
+
 @bp.route('/graph_v3.html')
 def graph_v3():
     return render_template('pub.graph_v3.html')

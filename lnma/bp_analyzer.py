@@ -32,6 +32,12 @@ def index():
     return render_template('analyzer.index.html')
 
 
+@bp.route('/pwma')
+@login_required
+def pwma():
+    return render_template('analyzer.pwma.html')
+    
+
 @bp.route('/read_file', methods=['GET', 'POST'])
 @login_required
 def read_data_file():
