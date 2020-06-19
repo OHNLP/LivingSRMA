@@ -1,6 +1,9 @@
+import re
 import math
 
 import numpy as np
+
+TPN_NETMETA_LGTB_VALUES = r"(\-?\d+\.\d+)\s+\((\-?\d+\.\d+)\;\s+(\-?\d+\.\d+)\)"
 
 
 ###############################################################
@@ -338,18 +341,35 @@ def _netmeta_trans_league_r(arr, params):
                 lci.append(1)
                 uci.append(1)
             else:
-                ps = val.split(' ')
-                v = float(ps[0])
-                l = float(ps[1][1:-1])
-                u = float(ps[2][0:-1])
+                # split won't deal with multiple space
+                # will cause issue.
+                # ps = val.split(' ')
+                # v = float(ps[0])
+                # l = float(ps[1][1:-1])
+                # u = float(ps[2][0:-1])
+                # 06/18/2020: use regex to detect values
+                ret = re.findall(TPN_NETMETA_LGTB_VALUES, val)
+                if len(ret) == 0:
+                    # values not found?
+                    v, l, u = 1, 1, 1
+                else:
+                    # values should be in the first match groups
+                    ps = ret[0]
+                    print('* found match %s @ [%s, %s]' % (ret, i, j))
+                    v = float(ps[0])
+                    l = float(ps[1])
+                    u = float(ps[2])
+                # put them in to 
                 stat.append(v)
                 all_stats.append(v)
                 lci.append(l)
                 uci.append(u)
+                # fill the upper triangle
                 if i > j:
-                    tb[j]['stat'][i] = 1.0 / v
-                    tb[j]['uci'][i] = 1.0 / l
-                    tb[j]['lci'][i] = 1.0 / u
+                    # 06/18/2020: fix the bug when v,l,or u == 0
+                    tb[j]['stat'][i] = 1.0 / v if v!=0 else 0
+                    tb[j]['uci'][i] = 1.0 / l if l!=0 else 0
+                    tb[j]['lci'][i] = 1.0 / u if u!=0 else 0
             
         tb.append({
             'row': row,

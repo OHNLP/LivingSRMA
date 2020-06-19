@@ -31,10 +31,14 @@ mydata <- read.csv("{{ fn_csvfile }}")
 # After this pairwise function, the data will be converted to:
 #   TE, seTE, studlab, treat1, treat2, event1, n1, event2, n2, incr, allstudies
 # which is used in the netmeta package for calculating p socre
+# RR
+# OR
+# RD
 mydata.p <- pairwise(list(treat1, treat2),
     list(event1, event2),
     list(n1, n2),
-    data = mydata
+    data = mydata,
+    sm = '{{ netmeta_sm }}'
 )
 
 # Prepare data for netmeta package.
@@ -49,7 +53,7 @@ nma <- netmeta(TE = mydata.p$TE,
     treat2 = mydata.p$treat2,
     studlab = paste(mydata.p$study),
     data = mydata.p,
-    sm = "HR",
+    sm = '{{ netmeta_sm }}',
     comb.fixed = {{ is_fixed }},
     comb.random = {{ is_random }},
     reference.group = "{{ reference_treatment }}"
