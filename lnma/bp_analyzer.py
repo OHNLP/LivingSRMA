@@ -60,7 +60,7 @@ def read_data_file():
         file_obj = request.files['file']
         if file_obj.filename == '':
             return jsonify({'success': False, 'msg':'No selected file'})
-
+        # save the upload file
         if file_obj and allowed_file_format(file_obj.filename):
             fn = secure_filename(file_obj.filename)
             full_fn = os.path.join(current_app.config['UPLOAD_FOLDER'], fn)

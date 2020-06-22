@@ -94,7 +94,7 @@ Pairwise Meta Analyzer
     width: 100%;
 }
 .box-bodyitem input {
-    width: calc(100% - 4px);
+    
 }
 .box-p {
     width: 100%;
@@ -137,8 +137,8 @@ Pairwise Meta Analyzer
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    min-width: 210px;
-    width: 210px;
+    min-width: 310px;
+    width: 310px;
     /* height: calc(100% - 10px); */
     margin: 0 10px 0 0;
     padding: 5px 10px;
@@ -351,7 +351,7 @@ Pairwise Meta Analyzer
 
 <div id="left-pane">
     <div class="upper">
-        <div class="box" style="width: 200px;" id="fm_loader">
+        <div class="box" style="width: 300px;" id="fm_loader">
             <div class="box-header">
                 <h4>
                     <span class="fa fa-database"></span>
@@ -376,7 +376,7 @@ Pairwise Meta Analyzer
             
         </div><!-- .box / upload file -->
     
-        <div class="box" style="width: 200px;" id="fm_config">
+        <div class="box" style="width: 300px;" id="fm_config">
             <div class="box-header">
                 <h4>
                     <span class="fa fa-sliders-h"></span>
@@ -387,112 +387,168 @@ Pairwise Meta Analyzer
             <div class="box-body">
                 <div class="box-bodyitem box-bodyitem-hl">
                     <div class="box-bodyitem-label">
-                        <label title="Bayesian NMA Backend Engine">Input Format:</label>
+                        <label>Input Format:</label>
                     </div>
                     <div class="box-bodyitem-value">
-                        <select v-model="input_format.selected"
-                            v-bind:disabled="input_format.disabled">
-                            <option v-for="option in input_format.options" v-bind:value="option.value">
+                        <select v-model="cfgs.input_format.selected"
+                            v-bind:disabled="cfgs.input_format.disabled">
+                            <option
+                                v-for="option in cfgs.input_format.options"
+                                v-bind:value="option.value">
                                 {{ option.text }}
                             </option>
                         </select>
                     </div>
                     
-                </div>
+                </div><!-- /.box-bodyitem -->
 
                 <div class="box-bodyitem box-bodyitem-hl">
                     <div class="box-bodyitem-label">
-                        <label title="Bayesian NMA Backend Engine">Analysis Method:</label>
+                        <label>Pairwise Analysis Method:</label>
                     </div>
                     <div class="box-bodyitem-value">
-                        <select v-model="analysis_method.selected"
-                            v-bind:disabled="analysis_method.disabled">
-                            <option v-for="option in analysis_method.options" v-bind:value="option.value">
+                        <select v-model="cfgs.pairwise_analysis.selected"
+                            v-bind:disabled="cfgs.pairwise_analysis.disabled">
+                            <option v-for="option in cfgs.pairwise_analysis.options" v-bind:value="option.value">
                                 {{ option.text }}
                             </option>
                         </select>
                     </div>
                     
-                </div>
+                </div><!-- /.box-bodyitem -->
 
                 <div class="box-bodyitem box-bodyitem-hl">
                     <div class="box-bodyitem-label">
-                        <label title="Measure of Effect">Measure of Effect:</label>
+                        <label>Model:</label>
                     </div>
                     <div class="box-bodyitem-value">
-                        <select v-model="measures.selected"
-                            v-bind:disabled="measures.disabled">
-                            <option v-for="option in measures.options" v-bind:value="option.value">
+                        <select v-model="cfgs.fixed_or_random.selected"
+                            v-bind:disabled="cfgs.fixed_or_random.disabled">
+                            <option v-for="option in cfgs.fixed_or_random.options" v-bind:value="option.value">
                                 {{ option.text }}
                             </option>
                         </select>
                     </div>
                     
-                </div>
+                </div><!-- /.box-bodyitem -->
 
                 <div class="box-bodyitem box-bodyitem-hl">
                     <div class="box-bodyitem-label">
-                        <label title="Reference Treatment">Ref. Treatment: </label>
+                        <label>Pooling Method:</label>
                     </div>
                     <div class="box-bodyitem-value">
-                        <select v-model="treatments.selected">
-                            <option v-for="option in treatments.options" v-bind:value="option.value">
+                        <select v-model="cfgs.poolinig_method.selected"
+                            v-bind:disabled="cfgs.poolinig_method.disabled">
+                            <option 
+                                v-for="option in cfgs.poolinig_method.options"
+                                v-bind:value="option.value"
+                                v-if="show_cfg_option('poolinig_method', option.value)">
                                 {{ option.text }}
                             </option>
                         </select>
                     </div>
                     
-                </div>
-    
-                <div class="box-bodyitem box-bodyitem-hl">
-                    <div class="box-bodyitem-label">
-                        <label title="">Fixed / Random: </label>
-                    </div>
-                    <div class="box-bodyitem-value">
-                        <select v-model="fixed_or_random.selected">
-                            <option v-for="option in fixed_or_random.options" v-bind:value="option.value">
-                                {{ option.text }}
-                            </option>
-                        </select>
-                    </div>
-                </div>
-    
-                <div class="box-bodyitem box-bodyitem-hl">
-                    <div class="box-bodyitem-label">
-                        <label title="">Which is Better: </label>
-                    </div>
-                    <div class="box-bodyitem-value">
-                        <select v-model="which_is_better.selected">
-                            <option v-for="option in which_is_better.options" v-bind:value="option.value">
-                                {{ option.text }}
-                            </option>
-                        </select>
-                    </div>
-                </div>
+                </div><!-- /.box-bodyitem -->
 
-                <div class="box-bodyitem box-bodyitem-hl"
-                    v-bind:class="'d-display-' + (analysis.is_display?'block':'none')">
+                <div class="box-bodyitem box-bodyitem-hl">
                     <div class="box-bodyitem-label">
-                        <label title="">Analysis: </label>
+                        <label>Measure of Effect:</label>
                     </div>
                     <div class="box-bodyitem-value">
-                        <select v-model="analysis.selected">
-                            <option v-for="option in analysis.options" v-bind:value="option.value">
+                        <select v-model="cfgs.measure_of_effect.selected"
+                            v-bind:disabled="cfgs.measure_of_effect.disabled">
+                            <option 
+                                v-for="option in cfgs.measure_of_effect.options"
+                                v-bind:value="option.value"
+                                v-if="show_cfg_option('measure_of_effect', option.value)">
                                 {{ option.text }}
                             </option>
                         </select>
                     </div>
-                </div>
-                
-                <div class="box-bodyitem box-bodyitem-hl"
-                    v-bind:class="'d-display-' + (project_name.is_display?'block':'none')">
+                    
+                </div><!-- /.box-bodyitem -->
+
+                <div class="box-bodyitem box-bodyitem-hl">
                     <div class="box-bodyitem-label">
-                        <label title="">Project: </label>
+                        <label>Tau Estimation Method:</label>
                     </div>
                     <div class="box-bodyitem-value">
-                        <input v-model="project_name.value" />
+                        <select v-model="cfgs.tau_estimation_method.selected"
+                            v-bind:disabled="cfgs.tau_estimation_method.disabled">
+                            <option v-for="option in cfgs.tau_estimation_method.options" v-bind:value="option.value">
+                                {{ option.text }}
+                            </option>
+                        </select>
                     </div>
-                </div>
+                    
+                </div><!-- /.box-bodyitem -->
+
+                <div class="box-bodyitem box-bodyitem-hl" v-if="show_cfg('hakn_adjustment')">
+                    <div class="box-bodyitem-label">
+                        <label>Hartung-Knapp Adjustment:</label>
+                    </div>
+                    <div class="box-bodyitem-value">
+                        <select v-model="cfgs.hakn_adjustment.selected"
+                            v-bind:disabled="cfgs.hakn_adjustment.disabled">
+                            <option v-for="option in cfgs.hakn_adjustment.options" v-bind:value="option.value">
+                                {{ option.text }}
+                            </option>
+                        </select>
+                    </div>
+                    
+                </div><!-- /.box-bodyitem -->
+
+                <div class="box-bodyitem box-bodyitem-hl" v-if="show_cfg('smd_estimation_method')">
+                    <div class="box-bodyitem-label">
+                        <label>SMD Estimation Method:</label>
+                    </div>
+                    <div class="box-bodyitem-value">
+                        <select v-model="cfgs.smd_estimation_method.selected"
+                            v-bind:disabled="cfgs.smd_estimation_method.disabled">
+                            <option v-for="option in cfgs.smd_estimation_method.options" v-bind:value="option.value">
+                                {{ option.text }}
+                            </option>
+                        </select>
+                    </div>
+                    
+                </div><!-- /.box-bodyitem -->
+
+                <div class="box-bodyitem box-bodyitem-hl">
+                    <div class="box-bodyitem-label">
+                        <label>Prediction Interval:</label>
+                    </div>
+                    <div class="box-bodyitem-value">
+                        <select v-model="cfgs.prediction_interval.selected"
+                            v-bind:disabled="cfgs.prediction_interval.disabled">
+                            <option v-for="option in cfgs.prediction_interval.options" v-bind:value="option.value">
+                                {{ option.text }}
+                            </option>
+                        </select>
+                    </div>
+                    
+                </div><!-- /.box-bodyitem -->
+
+                <div class="box-bodyitem box-bodyitem-hl" v-if="show_cfg('sensitivity_analysis')">
+                    <div class="box-bodyitem-label">
+                        <label>Sensitivity Analysis:</label>
+                    </div>
+                    <div class="box-bodyitem-value" style="padding-top: 3px;">
+                        <input type="radio" id="cfgs_sensitivity_analysis_1" value="yes" v-model="cfgs.sensitivity_analysis.selected"><label style="padding: 0 5px;" for="cfgs_sensitivity_analysis_1">Yes</label>&nbsp;&nbsp;&nbsp;&nbsp;
+                        <input type="radio" id="cfgs_sensitivity_analysis_2" value="no" v-model="cfgs.sensitivity_analysis.selected"><label style="padding: 0 5px;" for="cfgs_sensitivity_analysis_2">No</label>
+                    </div>
+                    
+                </div><!-- /.box-bodyitem -->
+
+                <div class="box-bodyitem box-bodyitem-hl" v-if="show_cfg('cumulative_meta_analysis')">
+                    <div class="box-bodyitem-label">
+                        <label>Cumulative Meta-Analysis:</label>
+                    </div>
+                    <div class="box-bodyitem-value" style="padding-top: 3px;">
+                        <input type="radio" id="cfgs_cumulative_meta_analysis_1" value="yes" v-model="cfgs.cumulative_meta_analysis.selected"><label style="padding: 0 5px;" for="cfgs_cumulative_meta_analysis_1">Yes</label>&nbsp;&nbsp;&nbsp;&nbsp;
+                        <input type="radio" id="cfgs_cumulative_meta_analysis_2" value="no" v-model="cfgs.cumulative_meta_analysis.selected"><label style="padding: 0 5px;" for="cfgs_cumulative_meta_analysis_2">No</label>
+                    </div>
+                    
+                </div><!-- /.box-bodyitem -->
     
             </div>
             <div class="box-footer">
@@ -510,162 +566,14 @@ Pairwise Meta Analyzer
     
             </div>
         </div>
-    
-        <div class="box" style="width: 200px;" id="tb-nma-netcha">
-            <div class="box-header">
-                <h4>
-                    <span class="fa fa-bars"></span>
-                    NET CHARACTERISTICS
-                </h4>
-            </div>
-            <!-- /.box-header -->
-            <div class="box-body">
-                <div class="box-bodyitem" v-for="r in tabledata">
-                    <p class="box-p box-p-fixlen" v-bind:title="r.cha">{{ r.cha }}</p>
-                    <p class="box-p box-p-fixlen" style="text-align: right; margin: -2px 0 0 0; border-bottom: 1px solid #EAEAEA; font-weight: bold;">{{ r.val }}</p>
-                </div>
-            </div>
-        </div>
+
     </div>
 
     
 </div><!-- #left-pane -->
 
 <div id="main-pane">
-    <div class="pane-row">
-        <div class="box" style="width: 300px; display: none;" id="fg-nma-netplt">
-            <div class="box-header">
-                <h4>
-                    <span class="fa fa-project-diagram"></span>
-                    NETWORK PLOT
-                </h4>
-                <div style="margin-left: 5px;">
-                    <button onclick="fig_saver.save_png(fg_netplt.svg, 'figure_network_plot');">
-                        <i class="far fa-save"></i> Save PNG
-                    </button>
-                </div>
-            </div>
-            <!-- /.box-header -->
-            <div class="box-body">
-                <svg id="fg-nma-netplt-svg"></svg>
-            </div>
-        </div>
-
-        <div class="box" style="width: 360px; display: none;" id="fg-nma-frsplt">
-            <div class="box-header">
-                <h4>
-                    <span class="fa fa-align-left"></span>
-                    INTERVAL PLOT
-                </h4>
-                <div style="margin-left: 5px;">
-                    <button onclick="fig_saver.save_png(fg_frsplt.svg, 'figure_interval_plot');">
-                        <i class="far fa-save"></i> Save PNG
-                    </button>
-                </div>
-            </div>
-            <!-- /.box-header -->
-            <div class="box-body">
-                <svg id="fg-nma-frsplt-svg"></svg>
-            </div>
-        </div><!-- .box forest plot -->
-
-        <div class="box" style="width: 320px; display: none;" id="tb_ranktb">
-            <div class="box-header">
-                <h4>
-                    <span class="fa fa-dice-d6"></span>
-                    RANK TABLE
-                </h4>
-                <div style="margin-left: 5px;">
-                    <button onclick="fig_saver.save_csv(tb_ranktb.vpp.$data, 'table-rank');">
-                        <i class="far fa-save"></i> Save CSV
-                    </button>
-                </div>
-            </div>
-            <!-- /.box-header -->
-            <div class="box-body">
-               <table class="rank_table">
-                   <thead>
-                       <tr>
-                           <th v-for="item in header">
-                               {{ item }}
-                           </th>
-                       </tr>
-                   </thead>
-                   <tbody>
-                       <tr v-for="item in tabledata">
-                           <td>{{ item.treat }}</td>
-                           <td>{{ item.value }}</td>
-                           <td>{{ item.value_rank }}</td>
-                       </tr>
-                   </tbody>
-               </table>
-            </div>
-        </div>
-
-    </div><!-- .pane-row -->
     
-    
-    <div class="pane-row">
-        
-        <div class="box" style="width: auto; padding-right: 10px; display: none;" id="tb-nma-league">
-            <div class="box-header">
-                <h4>
-                    <span class="fa fa-table"></span>
-                    LEAGUE TABLE 
-                </h4>
-                <div style="margin-left: 5px;">
-                    <button onclick="fig_saver.save_png(tb_lgtbd3.svg, 'figure_league_table');">
-                        <i class="far fa-save"></i> Save PNG
-                    </button>
-                </div>
-            </div>
-            <!-- /.box-header -->
-            <div class="box-body">
-                <svg id="tb_lgtbd3"></svg>
-
-                <p v-html="league_table_explain">
-                </p>
-            </div>
-        </div><!-- .box LEAGUE Table -->
-
-
-        <div class="box" style="width: 300px; display: none;" id="fg-nma-scrplt">
-            <div class="box-header">
-                <h4>
-                    <span class="fa fa-chart-line"></span>
-                    SUCRA PLOT
-                </h4>
-                <div style="margin-left: 5px;">
-                    <button onclick="var svg = d3.select('#fg-nma-scrplt-div svg');fig_saver.save_png(svg, 'figure_sucra_plot');">
-                        <i class="far fa-save"></i> Save PNG
-                    </button>
-                </div>
-            </div>
-            <!-- /.box-header -->
-            <div class="box-body">
-                <div id="fg-nma-scrplt-div"></div>
-            </div>
-        </div><!-- .box SUCRA plot -->
-
-        <div class="box" style="width: 300px; display: none;" id="fg-nma-pscplt">
-            <div class="box-header">
-                <h4>
-                    <span class="fa fa-chart-line"></span>
-                    P-Score PLOT
-                </h4>
-                <div style="margin-left: 5px;">
-                    <button onclick="var svg = d3.select('#fg-nma-pscplt-div svg');fig_saver.save_png(svg, 'figure_p-score_plot');">
-                        <i class="far fa-save"></i> Save PNG
-                    </button>
-                </div>
-            </div>
-            <!-- /.box-header -->
-            <div class="box-body">
-                <div id="fg-nma-pscplt-div"></div>
-            </div>
-        </div><!-- .box P-Score plot -->
-
-    </div>
 </div>
 
 </div>
@@ -684,427 +592,272 @@ Pairwise Meta Analyzer
 <!-- My Scripts -->
 <script>
 
-{% include "js/fg_netplt.js" %}
-{% include "js/fg_frsplt.js" %}
-{% include "js/fg_scrplt.js" %}
-{% include "js/fg_pscplt.js" %}
-
-{% include "js/tb_lgtbd3_v2.js" %}
-{% include "js/tb_ranktb.js" %}
-{% include "js/tb_netcha.js" %}
-
+{% include 'js/fm_loader.js' %}
 {% include "js/fig_saver.js" %}
 
-// This is the global variable for all the data used in this analysis
-var dataset = {
-    // there are 3 coltypes:
-    // 'HRLU': ['study', 't1', 't2', 'hr', 'upperci', 'lowerci'],
-    // 'ET': ['study', 'treat', 'event', 'total'],
-    // 'FTET': ['study', 'treat', 'event', 'total', 'time'],
-    coltype: null,
-    raw: [],
-    fn_raw_csv_file: '',
-    treatments: [],
-    nma_result: null,
-
-    // function
-    parse_treatments: function() {
-        if (this.coltype == 'HRLU') {
-            this.parse_treats_hr();
-        } else if (this.coltype == 'ET') {
-            this.parse_treats_et_series();
-        } else if (this.coltype == 'FTET') {
-            this.parse_treats_et_series();
-        } else {
-            msger.show('The data format in the input file is not supported', msger.WARNING);
-        }
-    },
-
-    // function
-    parse_treats_hr: function() {
-        this.treatments = [];
-        var tmp = {};
-        for (let i = 0; i < this.raw.length; i++) {
-            const r = this.raw[i];
-            tmp[r.t1] = 1;
-            tmp[r.t2] = 1;
-        }
-        for (var k in tmp) {
-            this.treatments.push({text: k, value: k});
-        }
-    },
-
-    parse_treats_et_series: function() {
-        // clear old treatments
-        this.treatments = [];
-        var tmp = {}
-        for (let i = 0; i < this.raw.length; i++) {
-            const r = this.raw[i];
-            if (!tmp.hasOwnProperty(r.treat)) {
-                tmp[r.treat] = 1
-            }
-        }
-        for (var k in tmp) {
-            this.treatments.push({text: k, value: k});
-        }
-    },
-
-    end: true
-};
-
-var fm_loader = {
-    box: null,
-    box_id: '#fm_loader',
-    vpp: null,
-    vpp_id: '#fm_loader',
-    data: null,
-
-    init: function() {
-        this.vpp = new Vue({
-            el: this.vpp_id,
-            data: {
-                btn_upload: {
-                    disabled: false,
-                    txt_normal: 'Upload',
-                    txt_working: 'Uploading ...'
-                },
-
-                dataset_summary: '',
-
-                datasets: []
-            },
-            methods: {
-                upload: function() {
-                    fm_loader.upload_data_file();
-                },
-
-                open_dataset: function(fn) {
-                    nma_controller.read_data_file_in_path(fn, 'static');
-                }
-            }
-        });
-    },
-
-    set_dataset_summary: function(s) {
-        this.vpp.dataset_summary = s;
-    },
-
-    toggle_btn_upload: function() {
-        this.vpp.btn_upload.disabled = !this.vpp.btn_upload.disabled;
-    },
-
-    upload_data_file: function() {
-        if ($('#ipt-csv-file').val() == '') {
-            msger.show('Choose a Data File for analysis', msger.WARNING);
-            return;
-        }
-        // update UI
-        this.vpp.btn_upload.disabled = true;
-        var form_data = new FormData($('#upload-file')[0]);
-        $.ajax({
-            type: 'POST',
-            url: './read_file',
-            data: form_data,
-            contentType: false,
-            cache: false,
-            processData: false,
-            success: function(data) {
-                console.log(data);
-                fm_loader.toggle_btn_upload();
-                nma_controller.on_read_data_file(data);
-                dataset.fn_raw_csv_file = data.fn;
-                // msger.show('Data File is uploaded!', msger.SUCCESS);
-            },
-            error: function(jqXHR, textStatus, errorThrown) {
-                console.error(textStatus, errorThrown);
-            }
-        });
-    },
-}
 
 var fm_config = {
     vpp: null,
     vpp_id: '#fm_config',
 
-    configs: {
-
-        btn_analyze: {
-            disabled: true,
-            txt_normal: 'Analyze',
-            txt_working: 'Analyze'
-        },
-
-        btn_getrsrc: {
-            disabled: true
-        },
-
+    cfgs: {
         treatments: {
             selected: '',
             options: []
         },
 
         input_format: {
-            selected: 'HRLU',
-            disabled: true,
-            options: [
-                {text: 'HR, Lower, Upper', value: 'HRLU'},
-                {text: 'Event Total', value: 'ET'},
-                {text: 'Follow-up Time, Event, Total', value: 'FTET'}
-            ]
-        },
-
-        analysis_method: {
-            selected: 'freq',
-            options: [
-                {text: 'Frequentist NMA', value: 'freq'},
-                {text: 'Bayesian NMA', value: 'bayes'}
-            ]
-        },
-
-        freq_backends: {
-            selected: 'netmeta',
-            options: [
-                {text: 'BUGsnet Package', value: 'bugsnet'},
-                {text: 'netmeta Package', value: 'netmeta'}
-            ]
-        },
-
-        bayes_backends: {
-            selected: 'dmetar',
-            options: [
-                {text: 'BUGsnet Package', value: 'bugsnet'},
-                {text: 'dmetar Package', value: 'dmetar'}
-            ]
-        },
-
-        measures: {
-            selected: 'rr',
+            selected: 'CAT_PRE',
+            use: true,
             disabled: false,
             options: [
-                {text: 'Hazard Ratio', value: 'hr'},
-                {text: 'Risk Ratio', value: 'rr'},
-                {text: 'Odds Ratio', value: 'or'}
+                {text: 'Categorical + Precalculated', value: 'CAT_PRE'},
+                {text: 'Categorical + Raw', value: 'CAT_RAW'},
+                {text: 'Continuous + Precalculated', value: 'CONTD_PRE'},
+                {text: 'Continuous + Raw', value: 'CONTD_RAW'},
+                {text: 'Primary Analysis', value: 'IRR_RAW'},
+            ]
+        },
+
+        pairwise_analysis: {
+            selected: 'pri',
+            use: true,
+            disabled: false,
+            options: [
+                {text: 'Primary Analysis', value: 'pri'},
+                {text: 'Subgroup Analysis', value: 'sub'}
             ]
         },
 
         fixed_or_random: {
-            selected: 'fixed',
-            options: [
-                {text: 'Fixed Effect Model', value: 'fixed'},
-                {text: 'Random Effect Model', value: 'random'}
-            ]
-        },
-
-        which_is_better: {
-            selected: 'small',
-            options: [
-                {text: 'Lower is Better', value: 'small'},
-                {text: 'Larger is Better', value: 'big'}
-            ]
-        },
-        
-        /////////////////////////////////////////////////////
-        // The followings are for development purpose
-        /////////////////////////////////////////////////////
-
-        project_name: {
-            value: 'KDNC',
+            selected: 'random',
+            use: true,
             disabled: false,
-            is_display: false
-        },
-
-        analysis: {
-            selected: 'pfs',
-            disabled: false,
-            is_display: false,
             options: [
-                {text: 'PFS', value: 'pfs'},
-                {text: 'OS', value: 'os'},
-                {text: 'AEs', value: 'aes'}
+                {text: 'Random-Effect', value: 'random'},
+                {text: 'Fixed-Effect', value: 'fixed'}
             ]
         },
 
-        is_dev: false
-    },
+        poolinig_method: {
+            selected: 'iv',
+            use: true,
+            disabled: false,
+            options: [
+                {text: 'Inverse Variance', value: 'iv'},
+                {text: 'Mantel-Haenszel', value: 'mh'},
+                {text: 'Peto', value: 'peto'}
+            ]
 
-    settings: {
-        measures: {
-            default: {
-                selected: 'rr',
-                disabled: false,
-                options: [
-                    {text: 'Hazard Ratio', value: 'hr'},
-                    {text: 'Risk Ratio', value: 'rr'},
-                    {text: 'Odds Ratio', value: 'or'}
-                ]
-            },
+        },
 
-            hr: {
-                selected: 'hr',
-                disabled: false,
-                options: [
-                    {text: 'Hazard Ratio', value: 'hr'}
-                ]
-            },
+        measure_of_effect: {
+            selected: 'rr',
+            use: true,
+            disabled: false,
+            options: [
+                {text: 'Hazard Ratio', value: 'hr'},
+                {text: 'Odds Ratio', value: 'or'},
+                {text: 'Relative Risk', value: 'rr'},
+                {text: 'Risk Difference', value: 'rd'},
+                {text: 'Incidence Rate Ratio', value: 'irr'},
+                {text: 'Mean Difference', value: 'md'},
+                {text: 'Standardized Mean Difference', value: 'smd'}
+            ]
+        },
 
-            et: {
-                selected: 'rr',
-                disabled: false,
-                options: [
-                    {text: 'Risk Ratio', value: 'rr'},
-                    {text: 'Odds Ratio', value: 'or'}
-                ]
-            },
+        tau_estimation_method: {
+            selected: 'dl',
+            use: true,
+            disabled: false,
+            options: [
+                { text: 'DerSimonian-Laird', value: 'dl' },
+                { text: 'Restricted Maximum-likelihood', value: 'reml' },
+                { text: 'Maximum Likelihood', value: 'ml' },
+                { text: 'Empirical Bayes', value: 'eb' },
+                { text: 'Sidik-Jonkman', value: 'sj' },
+                { text: 'Hedges', value: 'he' },
+                { text: 'Hunter-Schmidt', value: 'hs' },
+                { text: 'Paul-Mendel', value: 'pm' }
+            ]
+        },
 
-            ett: {
-                selected: 'rr',
-                disabled: false,
-                options: [
-                    {text: 'Hazard Ratio', value: 'hr'},
-                    {text: 'Risk Ratio', value: 'rr'},
-                    {text: 'Odds Ratio', value: 'or'}
-                ]
-            }
+        hakn_adjustment: {
+            selected: 'no',
+            use: true,
+            disabled: false,
+            options: [
+                {text: 'No', value: 'no'},
+                {text: 'Yes', value: 'yes'}
+            ]
+        },
+
+        smd_estimation_method: {
+            selected: 'hedges',
+            use: true,
+            disabled: false,
+            options: [
+                {text: 'Hedges', value: 'hedges'},
+                {text: "Cohen's d", value: 'cohensd'},
+                {text: "Glass delta", value: 'glass_delta'}
+            ]
+        },
+
+        prediction_interval: {
+            selected: 'no',
+            use: true,
+            disabled: false,
+            options: [
+                {text: 'Yes', value: 'yes'},
+                {text: "No", value: 'no'}
+            ]
+        },
+
+        sensitivity_analysis: {
+            selected: 'no',
+            use: true,
+            disabled: false,
+            options: [
+                {text: 'Yes', value: 'yes'},
+                {text: "No", value: 'no'}
+            ]
+        },
+
+        cumulative_meta_analysis: {
+            selected: 'no',
+            use: true,
+            disabled: false,
+            options: [
+                {text: 'Yes', value: 'yes'},
+                {text: "No", value: 'no'}
+            ]
         }
     },
 
     init: function() {
-        // var is_dev = getUrlParameter('is_dev');
-        // if (is_dev == 'yes') {
-        //     this.configs.analysis.is_display = true;
-        //     this.configs.project_name.is_display = true;
-        //     this.configs.is_dev = true;
-        // }
 
         this.vpp = new Vue({
             el: this.vpp_id,
-            data: this.configs,
+            data: {
+                cfgs: this.cfgs,
+                btn_analyze: {
+                    disabled: false,
+                    txt_working: 'Analyze',
+                    txt_normal: 'Analyze'
+                }
+            },
             methods: {
+                show_cfg: function(cfg_name) {
+                    switch (cfg_name) {
+                        case 'hakn_adjustment':
+                            if (this.cfgs.fixed_or_random.selected == 'random')
+                                this.cfgs.hakn_adjustment.use = true;
+                            else
+                                this.cfgs.hakn_adjustment.use = false;
+                            break;
+                        case 'smd_estimation_method':
+                            if (this.cfgs.input_format.selected == 'CONTD_RAW' &&
+                                this.cfgs.measure_of_effect.selected == 'SMD')
+                                this.cfgs.smd_estimation_method.use = true;
+                            else
+                                this.cfgs.smd_estimation_method.use = false;
+                            break;
+                        case 'sensitivity_analysis':
+                            if (this.cfgs.pairwise_analysis.selected == 'pri')
+                                this.cfgs.sensitivity_analysis.use = true;
+                            else
+                                this.cfgs.sensitivity_analysis.use = false;
+                            break;
+                        case 'cumulative_meta_analysis':
+                            if (this.cfgs.pairwise_analysis.selected == 'pri')
+                                this.cfgs.cumulative_meta_analysis.use = true;
+                            else
+                                this.cfgs.cumulative_meta_analysis.use = false;
+                            break;
+                    }
 
-                get_selected_for: function() {
-                    return this.fixed_or_random.selected;
+                    return this.cfgs[cfg_name].use;
+                },
+
+                show_cfg_option: function(cfg_name, option) {
+                    switch (cfg_name) {
+                        case 'poolinig_method':
+                            switch (option) {
+                                case 'mh':
+                                    if (this.cfgs.input_format.selected == 'CAT_RAW') return true;
+                                    else return false;
+                                    break;
+                                case 'peto':
+                                    if (this.cfgs.input_format.selected == 'CAT_RAW' &&
+                                        this.cfgs.fixed_or_random.selected == 'fixed') return true;
+                                    else return false;
+                                    break;
+                            }
+                            break;
+                        case 'measure_of_effect':
+                            switch (option) {
+                                case 'md':
+                                case 'smd':
+                                    if (this.cfgs.input_format.selected == 'CONTD_RAW' ||
+                                        this.cfgs.input_format.selected == 'CONTD_PRE') return true;
+                                    else return false;
+                                    break;
+                            }
+                            break;
+                    }
+                    return true;
                 },
 
                 analyze: function() {
-                    nma_controller.analyze();
-                },
-
-                get_source_code: function() {
-                    window.open('./get_rsrc?fn=' + dataset.nma_params.fn_rscript)
+                    this.btn_analyze.disabled = false;
+                    jarvis.analyze();
                 }
+            },
+            computed: {
+
             }
         })
     },
 
     enable_btn_analyze: function() {
         this.vpp.btn_analyze.disabled = false;
-        this.vpp.btn_analyze.disabled = false;
     },
 
     disable_btn_analyze: function() {
         this.vpp.btn_analyze.disabled = true;
-        this.vpp.btn_analyze.disabled = true;
-    },
-
-    enable_btn_getrsrc: function() {
-        this.vpp.btn_getrsrc.disabled = false;
-    },
-
-    disable_btn_getrsrc: function() {
-        this.vpp.btn_getrsrc.disabled = true;
-    },
-
-    set_coltype_hr: function() {
-        this.vpp.measures = this.settings.measures.hr;
-        this.vpp.measures.disabled = true;
-        this.vpp.measures.selected = 'hr';
-        // the methods for calculation
-        this.vpp.freq_backends.selected = 'netmeta';
-        this.vpp.freq_backends.disabled = true;
-
-        this.vpp.bayes_backends.selected = 'dmetar';
-        this.vpp.bayes_backends.disabled = true;
-    },
-
-    set_coltype_et: function() {
-        // this.vpp.measures.disabled = true;
-        this.vpp.measures = this.settings.measures.et;
-
-        // the methods for calculation
-        this.vpp.freq_backends.selected = 'bugsnet';
-        this.vpp.freq_backends.disabled = true;
-
-        this.vpp.bayes_backends.selected = 'bugsnet';
-        this.vpp.bayes_backends.disabled = true;
-    }, 
-
-    set_coltype_ett: function() {
-        // this.vpp.measures.disabled = true;
-        this.vpp.measures = this.settings.measures.ett;
-
-        this.vpp.measures.selected = 'hr';
-        // the methods for calculation
-        this.vpp.freq_backends.selected = 'bugsnet';
-        this.vpp.freq_backends.disabled = true;
-
-        this.vpp.bayes_backends.selected = 'bugsnet';
-        this.vpp.bayes_backends.disabled = true;
-    }, 
-    
-    set_treatments: function(data) {
-        this.vpp.treatments.options = data;
-    },
-
-    set_selected_treatment: function(t) {
-        this.vpp.treatments.selected = t;
     },
 
     get_config: function() {
-        var cfg = {
-            analysis_method: this.vpp.analysis_method.selected,
-            input_format: this.vpp.input_format.selected,
-            treat: this.vpp.treatments.selected,
-            measure: this.vpp.measures.selected,
-            model: this.vpp.fixed_or_random.selected,
-            better: this.vpp.which_is_better.selected,
-            analysis: this.vpp.analysis.selected,
-            project_name: this.vpp.project_name.value,
-            is_dev: this.vpp.is_dev
-        };
+        var cfg = {};
+        Object.keys(this.vpp.cfgs).map(function(k) {
+            cfg[k] = fm_config.vpp.cfgs[k].selected;
+        });
         return cfg;
     }
 };
 
 
-var nma_controller = {
+var jarvis = {
+    data: null,
 
-    read_data_file: function(fn) {
-        $.get(
-            './read_data_file',
-            {fn: fn},
-            function(data) {
-                nma_controller.on_read_data_file(data);
-                $( "#dialog-dataset" ).dialog( "close" );
-            }, 'json'
-        )
-    },
+    init: function() {
+        var isIE = /*@cc_on!@*/false || !!document.documentMode;
+        var isChrome = !!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime);
 
-    read_data_file_in_path: function(fn, path) {
-        $.get(
-            './read_data_file',
-            {fn: fn, path: path},
-            function(data) {
-                nma_controller.on_read_data_file(data);
-                $( "#dialog-dataset" ).dialog( "close" );
+        console.log('* User is using IE:', isIE);
+        if (isIE) {
+            // msger.ssmsg('The functions used in this website require advanced web technologies, which are <b>NOT</b> supported by Internet Explorer<br>Try using Google Chrome, Apple Safari, Mozilla Firefox or other modern browsers.')
+            return;
+        }
 
-            }, 'json'
-        )
+        fm_loader.init();
+        fm_config.init();
+
     },
 
     on_read_data_file: function(data) {
-        dataset.raw = data.raw;
-        dataset.coltype = data.coltype;
-        dataset.parse_treatments();
+        // bind data to local object first
+        this.xlsx_data = data;
 
         // update loader info        
         fm_loader.set_dataset_summary(
@@ -1116,23 +869,11 @@ var nma_controller = {
             '<p class="box-p"><i class="far fa-sticky-note"></i>: <b>' + data.n_studies + '</b> studies of ' + data.raw.length +' lines </p>'
         );
 
+        // TODO check if the uploaded file works for this analysis
+
         // update settings
-        fm_config.set_treatments(dataset.treatments);
-        fm_config.set_selected_treatment(dataset.treatments[0].value);
         fm_config.enable_btn_analyze();
-
-        // the coltype is the input format!!!
-        fm_config.configs.input_format.selected = dataset.coltype;
-
-        if (dataset.coltype == 'HRLU') {
-            fm_config.set_coltype_hr();
-        } else if (dataset.coltype == 'ET') {
-            fm_config.set_coltype_et();
-        } else if (dataset.coltype == 'FTET') {
-            fm_config.set_coltype_ett();
-        } else {
-            fm_config.set_coltype_hr();
-        }
+        fm_config.vpp.cfgs.input_format.selected = data.coltype;
 
         // clear the old figures
         this.clear_all_tables_and_figures();
@@ -1140,7 +881,7 @@ var nma_controller = {
 
     analyze: function() {
         var cfg = fm_config.get_config();
-        var data = dataset.raw;
+        var data = this.xlsx_data.raw;
         fm_config.disable_btn_analyze();
         this.clear_all_tables_and_figures();
 
@@ -1149,147 +890,27 @@ var nma_controller = {
             {rs: JSON.stringify(data), cfg: JSON.stringify(cfg)},
             function(data) {
                 fm_config.enable_btn_analyze();
-                msger.show('Data File is analyzed');
-                // nma_controller.update_bayes(data.data);
-                nma_controller.update_plots(data.data);
+                jarvis.show('Data File is analyzed');
+                jarvis.update_plots(data.data);
             }, 'json'
 
         ).fail(function() {
             fm_config.enable_btn_analyze();
-            msger.show('System error when analyzing, try again later', msger.ERROR);
+            jarvis.show('System error when analyzing, try again later', msger.ERROR);
         });
     },
 
     update_plots: function(data) {
-        // bind the result
-        dataset['rst_bayes'] = data;
-
-        // update the figures!
-        tb_netcha.draw(data.netcha);
-
-        // update the league table
-        tb_lgtbd3.draw(data.league);
-
-        // update the forest plot
-        fg_frsplt.draw(data.forest);
-
-        // update the network plot
-        fg_netplt.draw(data.netplt);
-
-        // update the sucra plot
-        if (typeof(data.scrplt) != 'undefined') {
-            fg_scrplt.draw(data.scrplt);
-        }
-
-        // update the sucra rank
-        if (typeof(data.tmrank) != 'undefined') {
-            tb_ranktb.draw(data.tmrank);
-        }
-        
-        // update the pscore rank
-        if (typeof(data.psrank) != 'undefined') {
-            tb_ranktb.draw(data.psrank);
-            fg_pscplt.draw(data.psrank);
-        }
+        // bind the result data
+        this.plot_data = data;
     },
 
-    clear_all_tables_and_figures: function() {
-        // clear the network plot
-        fg_netplt.clear();
-
-        // clear the forest plot
-        fg_frsplt.clear();
-
-        // clear the sucra plot
-        fg_scrplt.clear();
-
-        // clear the pscore plot
-        fg_pscplt.clear();
-
-        // clear the league table
-        tb_lgtbd3.clear();
-        
-        // clear the rank table
-        tb_ranktb.clear();
-
-        // clear the netchar table
-        tb_netcha.clear();
+    clear_all: function() {
     }
 };
-
-var msger = {
-    vpp: null,
-    vpp_id: '',
-
-    SUCCESS: 'success',
-    WARNING: 'warning',
-    ERROR: 'error',
-
-    init: function() {
-        // this.vpp = new Vue({
-        //     methods: {
-        //         show_message: function(msg, type) {
-                    
-        //             this.$message({
-        //                 showClose: true,
-        //                 message: msg,
-        //                 type: type
-        //             });
-        //         }
-        //     }
-        // })
-    },
-
-    show: function(msg, type) {
-        // if (typeof(type) == 'undefined') {
-        //     type = '';
-        // }
-        // this.vpp.show_message(msg, type);
-        toast(msg);
-    },
-
-    ssmsg: function(msg) {
-        $('#ss-msg').html(msg);
-    },
-
-    ssclose: function() {
-        $('#start-screen').hide();
-    },
-};
-
-
-function init() {
-
-    var isIE = /*@cc_on!@*/false || !!document.documentMode;
-    var isChrome = !!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime);
-
-    console.log('* User is using IE:', isIE);
-    if (isIE) {
-        // msger.ssmsg('The functions used in this website require advanced web technologies, which are <b>NOT</b> supported by Internet Explorer<br>Try using Google Chrome, Apple Safari, Mozilla Firefox or other modern browsers.')
-        return;
-    }
-
-    fm_loader.init();
-    fm_config.init();
-
-    tb_netcha.init();
-    fg_netplt.init();
-    fg_frsplt.init();
-    
-    tb_lgtbd3.init();
-    tb_ranktb.init();
-    
-    fg_scrplt.init();
-    fg_pscplt.init();
-
-    msger.init();
-
-    msger.ssmsg('Almost Initialized.')
-    setTimeout('msger.ssclose();', 1400);
-}
 
 $(document).ready(function() {
-    init();
+    jarvis.init();
 })
 
 </script>

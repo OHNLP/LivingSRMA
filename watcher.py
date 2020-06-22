@@ -1,4 +1,5 @@
 #%% load packages and env
+import os
 import json
 import requests
 
@@ -6,6 +7,7 @@ from lnma import db, create_app
 from lnma.models import *
 from lnma import dora
 
+# app for using LNMA functions and tables
 app = create_app()
 db.init_app(app)
 app.app_context().push()
@@ -49,7 +51,28 @@ def search(term, db='pubmed'):
 
 #%% check updates
 
-query = 'renal cell cancer AND "last 2 years"[Date - Create]'
-j = search(query)
+# query = 'renal cell cancer AND "last 2 years"[Date - Create]'
+# j = search(query)
 
 # %%
+import poplib
+import logging
+
+GMAIL_SERVER = "pop.gmail.com"
+GMAIL_PORT = '995'
+username  = "hehuan2112@gmail.com"
+password = "GT%678uhbg"
+
+# connect to server
+logging.debug('connecting to ' + GMAIL_SERVER)
+server = poplib.POP3_SSL(GMAIL_SERVER, GMAIL_PORT)
+
+# login
+logging.debug('logging in')
+server.user(username)
+server.pass_(password)
+
+# list items on server
+logging.debug('listing emails')
+resp, items, octets = server.list()
+print(items)

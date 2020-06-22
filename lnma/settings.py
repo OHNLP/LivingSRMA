@@ -13,9 +13,20 @@ INPUT_FORMATS_FTET = 'FTET'
 INPUT_FORMATS_ET = 'ET'
 
 STANDARD_DATA_COLS = {
+    # for NMA
     'HRLU': ['study', 't1', 't2', 'hr', 'upperci', 'lowerci'],
     'FTET': ['study', 'treat', 'event', 'total', 'time'],
     'ET': ['study', 'treat', 'event', 'total'],
+    # for PWMA - PRIMARY ANALYSIS / SENSITIVITY / CUMULATIVE
+    'PRIM_CAT_RAW': ['study', 'year', 'et', 'tt', 'ec', 'tc', 'treatment', 'control'],
+    'PRIM_CAT_PRE': ['study', 'year', 'te', 'lowerci', 'upperci', 'treatment', 'control'],
+    'PRIM_CONTD_RAW': ['study', 'year', 'nt', 'mt', 'sdt', 'nc', 'mc', 'sdc', 'treatment', 'control'],
+    'PRIM_CONTD_PRE': ['study', 'year', 'te', 'se', 'treatment', 'control'],
+    # for PWMA - SUBGROUP
+    'SUBG_CAT_RAW': ['study', 'year', 'et', 'tt', 'ec', 'tc', 'treatment', 'control', 'subgroup'],
+    'SUBG_CAT_PRE': ['study', 'year', 'te', 'lowerci', 'upperci', 'treatment', 'control', 'subgroup'],
+    'SUBG_CONTD_RAW': ['study', 'year', 'nt', 'mt', 'sdt', 'nc', 'mc', 'sdc', 'treatment', 'control', 'subgroup'],
+    'SUBG_CONTD_PRE': ['study', 'year', 'te', 'se', 'treatment', 'control', 'subgroup'],
 }
 
 RSCRIPT_TPL = {

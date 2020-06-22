@@ -693,6 +693,7 @@ Data Analyzer
 {% include "js/tb_ranktb.js" %}
 {% include "js/tb_netcha.js" %}
 
+{% include 'js/fm_loader.js' %}
 {% include "js/fig_saver.js" %}
 
 // This is the global variable for all the data used in this analysis
@@ -752,75 +753,6 @@ var dataset = {
     end: true
 };
 
-var fm_loader = {
-    box: null,
-    box_id: '#fm_loader',
-    vpp: null,
-    vpp_id: '#fm_loader',
-    data: null,
-
-    init: function() {
-        this.vpp = new Vue({
-            el: this.vpp_id,
-            data: {
-                btn_upload: {
-                    disabled: false,
-                    txt_normal: 'Upload',
-                    txt_working: 'Uploading ...'
-                },
-
-                dataset_summary: '',
-
-                datasets: []
-            },
-            methods: {
-                upload: function() {
-                    fm_loader.upload_data_file();
-                },
-
-                open_dataset: function(fn) {
-                    nma_controller.read_data_file_in_path(fn, 'static');
-                }
-            }
-        });
-    },
-
-    set_dataset_summary: function(s) {
-        this.vpp.dataset_summary = s;
-    },
-
-    toggle_btn_upload: function() {
-        this.vpp.btn_upload.disabled = !this.vpp.btn_upload.disabled;
-    },
-
-    upload_data_file: function() {
-        if ($('#ipt-csv-file').val() == '') {
-            msger.show('Choose a Data File for analysis', msger.WARNING);
-            return;
-        }
-        // update UI
-        this.vpp.btn_upload.disabled = true;
-        var form_data = new FormData($('#upload-file')[0]);
-        $.ajax({
-            type: 'POST',
-            url: './read_file',
-            data: form_data,
-            contentType: false,
-            cache: false,
-            processData: false,
-            success: function(data) {
-                console.log(data);
-                fm_loader.toggle_btn_upload();
-                nma_controller.on_read_data_file(data);
-                dataset.fn_raw_csv_file = data.fn;
-                // msger.show('Data File is uploaded!', msger.SUCCESS);
-            },
-            error: function(jqXHR, textStatus, errorThrown) {
-                console.error(textStatus, errorThrown);
-            }
-        });
-    },
-}
 
 var fm_config = {
     vpp: null,
@@ -989,7 +921,7 @@ var fm_config = {
                 },
 
                 analyze: function() {
-                    nma_controller.analyze();
+                    jarvis.analyze();
                 },
 
                 get_source_code: function() {
@@ -1079,30 +1011,30 @@ var fm_config = {
 };
 
 
-var nma_controller = {
+var jarvis = {
 
-    read_data_file: function(fn) {
-        $.get(
-            './read_data_file',
-            {fn: fn},
-            function(data) {
-                nma_controller.on_read_data_file(data);
-                $( "#dialog-dataset" ).dialog( "close" );
-            }, 'json'
-        )
-    },
+    // read_data_file: function(fn) {
+    //     $.get(
+    //         './read_data_file',
+    //         {fn: fn},
+    //         function(data) {
+    //             jarvis.on_read_data_file(data);
+    //             $( "#dialog-dataset" ).dialog( "close" );
+    //         }, 'json'
+    //     )
+    // },
 
-    read_data_file_in_path: function(fn, path) {
-        $.get(
-            './read_data_file',
-            {fn: fn, path: path},
-            function(data) {
-                nma_controller.on_read_data_file(data);
-                $( "#dialog-dataset" ).dialog( "close" );
+    // read_data_file_in_path: function(fn, path) {
+    //     $.get(
+    //         './read_data_file',
+    //         {fn: fn, path: path},
+    //         function(data) {
+    //             jarvis.on_read_data_file(data);
+    //             $( "#dialog-dataset" ).dialog( "close" );
 
-            }, 'json'
-        )
-    },
+    //         }, 'json'
+    //     )
+    // },
 
     on_read_data_file: function(data) {
         dataset.raw = data.raw;
@@ -1153,8 +1085,8 @@ var nma_controller = {
             function(data) {
                 fm_config.enable_btn_analyze();
                 msger.show('Data File is analyzed');
-                // nma_controller.update_bayes(data.data);
-                nma_controller.update_plots(data.data);
+                // jarvis.update_bayes(data.data);
+                jarvis.update_plots(data.data);
             }, 'json'
 
         ).fail(function() {
