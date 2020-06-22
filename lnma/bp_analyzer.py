@@ -84,7 +84,16 @@ def analyze():
     cfg = json.loads(request.form.get('cfg'))
 
     # analyze
-    ret = _analyze(rs, cfg)
+    _analyze_type = cfg['_analyze_type']
+
+    if _analyze_type == 'pwma':
+        ret = _pwma_analyze(rs, cfg)
+    elif _analyze_type == 'nma':
+        ret = _nma_analyze(rs, cfg)
+    else:
+        ret = {
+
+        }
 
     return jsonify(ret)
 
@@ -137,7 +146,7 @@ def graphdata_maker():
     # save the graph data
     for treat in file_data['treats']:
         cfg['treat'] = treat
-        graph_data = _analyze(rs, cfg)
+        graph_data = _nma_analyze(rs, cfg)
         output_fn = 'GRAPH-%s-%s.json' % (out_sname, treat)
         full_output_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj_sname, output_fn)
         json.dump(graph_data, open(full_output_fn, 'w'))
@@ -208,8 +217,8 @@ def _read_file(full_fn):
     return ret
 
 
-def _analyze(rs, cfg):
-    '''Analyze the rs with cfg
+def _nma_analyze(rs, cfg):
+    '''Run the network meta-analyze the rs with cfg
     '''
     # get the analysis type for make static json
     input_format = cfg['input_format']
@@ -232,6 +241,26 @@ def _analyze(rs, cfg):
     if analysis_method == 'freq':
         ret = freq_analyzer.analyze(rs, cfg)
     elif analysis_method == 'bayes':
+        ret = bayes_analyzer.analyze(rs, cfg)
+    else:
+        ret = bayes_analyzer.analyze(rs, cfg)
+
+    return ret
+
+
+def _pwma_analyze(rs, cfg):
+    '''Run the pairwise meta-analyze the rs with cfg
+    '''
+    # get the analysis type for make static json
+    input_format = cfg['input_format']
+    pairwise_analysis = cfg['pairwise_analysis']
+
+    # parse other configs
+
+    # analyze!
+    if pairwise_analysis == 'pri':
+        ret = freq_analyzer.analyze(rs, cfg)
+    elif pairwise_analysis == 'sub':
         ret = bayes_analyzer.analyze(rs, cfg)
     else:
         ret = bayes_analyzer.analyze(rs, cfg)

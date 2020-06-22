@@ -775,6 +775,12 @@ var fm_config = {
             options: []
         },
 
+        _analyze_type: {
+            selected: 'pwma',
+            use: true,
+            disabled: false,
+        },
+
         input_format: {
             selected: 'HRLU',
             disabled: true,
@@ -996,6 +1002,7 @@ var fm_config = {
 
     get_config: function() {
         var cfg = {
+            _analyze_type: this.vpp._analyze_type.selected,
             analysis_method: this.vpp.analysis_method.selected,
             input_format: this.vpp.input_format.selected,
             treat: this.vpp.treatments.selected,

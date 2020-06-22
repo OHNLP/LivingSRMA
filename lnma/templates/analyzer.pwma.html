@@ -387,7 +387,7 @@ Pairwise Meta Analyzer
             <div class="box-body">
                 <div class="box-bodyitem box-bodyitem-hl">
                     <div class="box-bodyitem-label">
-                        <label>Input Format:</label>
+                        <label>Data Input Format:</label>
                     </div>
                     <div class="box-bodyitem-value">
                         <select v-model="cfgs.input_format.selected"
@@ -603,7 +603,15 @@ var fm_config = {
     cfgs: {
         treatments: {
             selected: '',
+            use: true,
+            disabled: false,
             options: []
+        },
+
+        _analyze_type: {
+            selected: 'pwma',
+            use: true,
+            disabled: false,
         },
 
         input_format: {
@@ -613,9 +621,9 @@ var fm_config = {
             options: [
                 {text: 'Categorical + Precalculated', value: 'CAT_PRE'},
                 {text: 'Categorical + Raw', value: 'CAT_RAW'},
+                {text: 'Categorical + Raw (Incidence Rate Ratios)', value: 'CAT_RAW_IRR'},
                 {text: 'Continuous + Precalculated', value: 'CONTD_PRE'},
                 {text: 'Continuous + Raw', value: 'CONTD_RAW'},
-                {text: 'Primary Analysis', value: 'IRR_RAW'},
             ]
         },
 
