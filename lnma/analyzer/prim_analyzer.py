@@ -44,12 +44,7 @@ def analyze(rs, cfg):
         'fn_outplt1':  TPL_FN['outplt1'].format(**{
             'subtype': subtype, 'submission_id': submission_id
         }),
-        'fn_outplt2':  TPL_FN['outplt2'].format(**{
-            'subtype': subtype, 'submission_id': submission_id
-        }),
-        'fn_outplt3':  TPL_FN['outplt3'].format(**{
-            'subtype': subtype, 'submission_id': submission_id
-        }),
+        'result_plots': ['fn_outplt1']
     }
 
     # put all the configs into param
@@ -59,6 +54,27 @@ def analyze(rs, cfg):
     # update some configs for R script
     params['measure_of_effect'] = params['measure_of_effect'].upper()
     params['tau_estimation_method'] = params['tau_estimation_method'].upper()
+
+    # update some configs for sensitivity analysis and cumulative analysis
+    if params['sensitivity_analysis'] == 'no' and \
+       params['sensitivity_analysis'] == 'no':
+        params['fn_fnnlplt'] = TPL_FN['fnnlplt'].format(**{
+            'subtype': subtype, 'submission_id': submission_id
+        })
+        params['result_plots'].append('fn_fnnlplt')
+
+    if params['sensitivity_analysis'] == 'yes':
+        params['fn_sensplt'] = TPL_FN['sensplt'].format(**{
+            'subtype': subtype, 'submission_id': submission_id
+        })
+        params['result_plots'].append('fn_sensplt')
+
+    if params['cumulative_meta_analysis'] == 'yes':
+        params['fn_cumuplt'] = TPL_FN['cumuplt'].format(**{
+            'subtype': subtype, 'submission_id': submission_id
+        })
+        params['result_plots'].append('fn_cumuplt')
+
 
     # prepare the file names
     full_filename_csvfile = os.path.join(TMP_FOLDER, params['fn_csvfile'])

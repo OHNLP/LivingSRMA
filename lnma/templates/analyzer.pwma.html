@@ -93,8 +93,8 @@ Pairwise Meta Analyzer
 .box-bodyitem select {
     width: 100%;
 }
-.box-bodyitem input {
-    
+.box img {
+    width: 100%;
 }
 .box-p {
     width: 100%;
@@ -574,7 +574,19 @@ Pairwise Meta Analyzer
 </div><!-- #left-pane -->
 
 <div id="main-pane">
-    
+    <div id="fg_imglst" class="box" style="width: 700px;">
+        <div class="box-header">
+            <h4>
+                <i class="fa fa-tree"></i>
+                PAIRWISE META-ANALYSIS RESULTS
+            </h4>
+        </div>
+        <div class="box-body">
+            <div v-for="fn in img_fns">
+                <img class="img" v-bind:src="'/f/' + fn">
+            </div>
+        </div>
+    </div>
 </div>
 
 </div>
@@ -875,6 +887,33 @@ var fm_config = {
 };
 
 
+var fg_imglst = {
+    vpp: null,
+    vpp_id: "#fg_imglst",
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                img_fns: []
+            },
+            methods: {
+
+            }
+        })
+    },
+
+    draw: function(data) {
+        this.vpp.img_fns = [];
+        for (let i = 0; i < data.params.result_plots.length; i++) {
+            const plt_id = data.params.result_plots[i];
+            // add file name to data
+            var fn = data.params[plt_id];
+            this.vpp.img_fns.push(fn);
+        }
+    }
+}
+
 var jarvis = {
     data: null,
 
@@ -890,6 +929,7 @@ var jarvis = {
         fm_loader.init();
         fm_config.init();
 
+        fg_imglst.init();
     },
 
     on_read_data_file: function(data) {
@@ -928,7 +968,7 @@ var jarvis = {
             function(data) {
                 fm_config.enable_btn_analyze();
                 jarvis.msg('Data File is analyzed');
-                jarvis.update_plots(data.data);
+                jarvis.update(data);
             }, 'json'
 
         ).fail(function() {
@@ -937,9 +977,12 @@ var jarvis = {
         });
     },
 
-    update_plots: function(data) {
+    update: function(data) {
         // bind the result data
         this.plot_data = data;
+
+        // show plots
+        fg_imglst.draw(data);
     },
 
     clear_all: function() {

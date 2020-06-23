@@ -91,7 +91,14 @@ dev.off()
 
 {% if sensitivity_analysis == 'no' and cumulative_meta_analysis == 'no' %}
 #generating the funnel plot (This is only for primary analysis- not for sensitivity and cumulative analysis)
+fig_width <- 8
+fig_height <- fig_width * 0.66
+png(filename="{{ fn_fnnlplt }}", width=fig_width, height=fig_height, units='in', res=300)
+par(mar=c(2, 2, 2, 2))
+
 funnel.meta(results)
+
+dev.off()
 {% endif %}
 
 {% if sensitivity_analysis == 'yes' %}

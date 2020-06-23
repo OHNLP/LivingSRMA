@@ -68,6 +68,9 @@ TPL_FN = {
     'outplt1': 'outplt1-{subtype}-{submission_id}.png',
     'outplt2': 'outplt2-{subtype}-{submission_id}.png',
     'outplt3': 'outplt3-{subtype}-{submission_id}.png',
+    'sensplt': 'sensplt-{subtype}-{submission_id}.png',
+    'cumuplt': 'cumuplt-{subtype}-{submission_id}.png',
+    'fnnlplt': 'fnnlplt-{subtype}-{submission_id}.png',
 }
 
 DIS_TEXT = {
