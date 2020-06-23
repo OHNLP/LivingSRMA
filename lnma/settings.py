@@ -17,16 +17,18 @@ STANDARD_DATA_COLS = {
     'HRLU': ['study', 't1', 't2', 'hr', 'upperci', 'lowerci'],
     'FTET': ['study', 'treat', 'event', 'total', 'time'],
     'ET': ['study', 'treat', 'event', 'total'],
-    # for PWMA - PRIMARY ANALYSIS / SENSITIVITY / CUMULATIVE
-    'PRIM_CAT_RAW': ['study', 'year', 'et', 'tt', 'ec', 'tc', 'treatment', 'control'],
-    'PRIM_CAT_PRE': ['study', 'year', 'te', 'lowerci', 'upperci', 'treatment', 'control'],
-    'PRIM_CONTD_RAW': ['study', 'year', 'nt', 'mt', 'sdt', 'nc', 'mc', 'sdc', 'treatment', 'control'],
-    'PRIM_CONTD_PRE': ['study', 'year', 'te', 'se', 'treatment', 'control'],
     # for PWMA - SUBGROUP
-    'SUBG_CAT_RAW': ['study', 'year', 'et', 'tt', 'ec', 'tc', 'treatment', 'control', 'subgroup'],
-    'SUBG_CAT_PRE': ['study', 'year', 'te', 'lowerci', 'upperci', 'treatment', 'control', 'subgroup'],
-    'SUBG_CONTD_RAW': ['study', 'year', 'nt', 'mt', 'sdt', 'nc', 'mc', 'sdc', 'treatment', 'control', 'subgroup'],
-    'SUBG_CONTD_PRE': ['study', 'year', 'te', 'se', 'treatment', 'control', 'subgroup'],
+    'SUBG_CATIRR_RAW': ['study', 'year', 'Et', 'Tt', 'Ec', 'Tc', 'treatment', 'control', 'subgroup'],
+    'SUBG_CAT_RAW': ['study', 'year', 'Et', 'Nt', 'Ec', 'Nc', 'treatment', 'control', 'subgroup'],
+    'SUBG_CAT_PRE': ['study', 'year', 'TE', 'lowerci', 'upperci', 'treatment', 'control', 'subgroup'],
+    'SUBG_CONTD_RAW': ['study', 'year', 'Nt', 'Nt', 'SDt', 'Nc', 'Mc', 'SDc', 'treatment', 'control', 'subgroup'],
+    'SUBG_CONTD_PRE': ['study', 'year', 'TE', 'SE', 'treatment', 'control', 'subgroup'],
+    # for PWMA - PRIMARY ANALYSIS / SENSITIVITY / CUMULATIVE
+    'PRIM_CATIRR_RAW': ['study', 'year', 'Et', 'Tt', 'Ec', 'Tc', 'treatment', 'control'],
+    'PRIM_CAT_RAW': ['study', 'year', 'Et', 'Nt', 'Ec', 'Nc', 'treatment', 'control'],
+    'PRIM_CAT_PRE': ['study', 'year', 'TE', 'lowerci', 'upperci', 'treatment', 'control'],
+    'PRIM_CONTD_RAW': ['study', 'year', 'Nt', 'Mt', 'SDt', 'Nc', 'Mc', 'SDc', 'treatment', 'control'],
+    'PRIM_CONTD_PRE': ['study', 'year', 'TE', 'SE', 'treatment', 'control'],
 }
 
 RSCRIPT_TPL = {
@@ -37,7 +39,19 @@ RSCRIPT_TPL = {
     # for Bayesian NMA
     'bayes_bugsnet': 'lnma_bayes_bugsnet.tpl.r',
     'bayes_dmetar': 'lnma_bayes_dmetar.tpl.r',
-    'bayes_gemtc': 'lnma_bayes_gemtc.tpl.r'
+    'bayes_gemtc': 'lnma_bayes_gemtc.tpl.r',
+
+    # for PWMA
+    'pwma_PRIM_CAT_PRE': 'lnma_pwma_PRIM_CAT_PRE.tpl.r',
+    'pwma_PRIM_CAT_RAW': 'lnma_pwma_PRIM_CAT_RAW.tpl.r',
+    'pwma_PRIM_CATIRR_RAW': 'lnma_pwma_PRIM_CATIRR_RAW.tpl.r',
+    'pwma_PRIM_CONTD_PRE': 'lnma_pwma_PRIM_CONTD_PRE.tpl.r',
+    'pwma_PRIM_CONTD_RAW': 'lnma_pwma_PRIM_CONTD_RAW.tpl.r',
+    'pwma_SUBG_CAT_PRE': 'lnma_pwma_SUBG_CAT_PRE.tpl.r',
+    'pwma_SUBG_CAT_RAW': 'lnma_pwma_SUBG_CAT_RAW.tpl.r',
+    'pwma_SUBG_CATIRR_RAW': 'lnma_pwma_SUBG_CATIRR_RAW.tpl.r',
+    'pwma_SUBG_CONTD_PRE': 'lnma_pwma_SUBG_CONTD_PRE.tpl.r',
+    'pwma_SUBG_CONTD_RAW': 'lnma_pwma_SUBG_CONTD_RAW.tpl.r',
 }
 
 R_BUGSNET_MEASURE2LINK = {
@@ -51,4 +65,19 @@ TPL_FN = {
     'csvfile': 'csvfile-{subtype}-{submission_id}.csv',
     'jsonret': 'jsonret-{subtype}-{submission_id}.json',
     'leaguet': 'leaguet-{subtype}-{submission_id}.png',
+    'outplt1': 'outplt1-{subtype}-{submission_id}.png',
+    'outplt2': 'outplt2-{subtype}-{submission_id}.png',
+    'outplt3': 'outplt3-{subtype}-{submission_id}.png',
+}
+
+DIS_TEXT = {
+    "MOE": {
+        "hr": "Hazard Ratio",
+        "or": "Odds Ratio",
+        "rr": "Relative Risk",
+        "rd": "Risk Difference",
+        "irr": "Incidence Rate Ratio",
+        "md": "Mean Difference",
+        "smd": "Standardized Mean Difference"
+    }
 }

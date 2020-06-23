@@ -409,7 +409,8 @@ Pairwise Meta Analyzer
                     <div class="box-bodyitem-value">
                         <select v-model="cfgs.pairwise_analysis.selected"
                             v-bind:disabled="cfgs.pairwise_analysis.disabled">
-                            <option v-for="option in cfgs.pairwise_analysis.options" v-bind:value="option.value">
+                            <option v-for="option in cfgs.pairwise_analysis.options" v-bind:value="option.value"
+                            v-if="show_cfg_option('pairwise_analysis', option.value)">
                                 {{ option.text }}
                             </option>
                         </select>
@@ -601,13 +602,6 @@ var fm_config = {
     vpp_id: '#fm_config',
 
     cfgs: {
-        treatments: {
-            selected: '',
-            use: true,
-            disabled: false,
-            options: []
-        },
-
         _analyze_type: {
             selected: 'pwma',
             use: true,
@@ -615,25 +609,31 @@ var fm_config = {
         },
 
         input_format: {
-            selected: 'CAT_PRE',
+            selected: 'PRIM_CAT_PRE',
             use: true,
             disabled: false,
             options: [
-                {text: 'Categorical + Precalculated', value: 'CAT_PRE'},
-                {text: 'Categorical + Raw', value: 'CAT_RAW'},
-                {text: 'Categorical + Raw (Incidence Rate Ratios)', value: 'CAT_RAW_IRR'},
-                {text: 'Continuous + Precalculated', value: 'CONTD_PRE'},
-                {text: 'Continuous + Raw', value: 'CONTD_RAW'},
+                {text: 'Prim | Categorical + Precalculated', value: 'PRIM_CAT_PRE'},
+                {text: 'Prim | Categorical + Raw', value: 'PRIM_CAT_RAW'},
+                {text: 'Prim | Categorical + Raw (Incidence Rate Ratios)', value: 'PRIM_CATIRR_RAW'},
+                {text: 'Prim | Continuous + Precalculated', value: 'PRIM_CONTD_PRE'},
+                {text: 'Prim | Continuous + Raw', value: 'PRIM_CONTD_RAW'},
+
+                {text: 'Subg | Categorical + Precalculated', value: 'SUBG_CAT_PRE'},
+                {text: 'Subg | Categorical + Raw', value: 'SUBG_CAT_RAW'},
+                {text: 'Subg | Categorical + Raw (Incidence Rate Ratios)', value: 'SUBG_CATIRR_RAW'},
+                {text: 'Subg | Continuous + Precalculated', value: 'SUBG_CONTD_PRE'},
+                {text: 'Subg | Continuous + Raw', value: 'SUBG_CONTD_RAW'},
             ]
         },
 
         pairwise_analysis: {
-            selected: 'pri',
+            selected: 'prim',
             use: true,
             disabled: false,
             options: [
-                {text: 'Primary Analysis', value: 'pri'},
-                {text: 'Subgroup Analysis', value: 'sub'}
+                {text: 'Primary Analysis', value: 'prim'},
+                {text: 'Subgroup Analysis', value: 'subg'}
             ]
         },
 
@@ -764,20 +764,20 @@ var fm_config = {
                                 this.cfgs.hakn_adjustment.use = false;
                             break;
                         case 'smd_estimation_method':
-                            if (this.cfgs.input_format.selected == 'CONTD_RAW' &&
+                            if (this.cfgs.input_format.selected.includes('CONTD_RAW') &&
                                 this.cfgs.measure_of_effect.selected == 'SMD')
                                 this.cfgs.smd_estimation_method.use = true;
                             else
                                 this.cfgs.smd_estimation_method.use = false;
                             break;
                         case 'sensitivity_analysis':
-                            if (this.cfgs.pairwise_analysis.selected == 'pri')
+                            if (this.cfgs.pairwise_analysis.selected == 'prim')
                                 this.cfgs.sensitivity_analysis.use = true;
                             else
                                 this.cfgs.sensitivity_analysis.use = false;
                             break;
                         case 'cumulative_meta_analysis':
-                            if (this.cfgs.pairwise_analysis.selected == 'pri')
+                            if (this.cfgs.pairwise_analysis.selected == 'prim')
                                 this.cfgs.cumulative_meta_analysis.use = true;
                             else
                                 this.cfgs.cumulative_meta_analysis.use = false;
@@ -792,11 +792,11 @@ var fm_config = {
                         case 'poolinig_method':
                             switch (option) {
                                 case 'mh':
-                                    if (this.cfgs.input_format.selected == 'CAT_RAW') return true;
+                                    if (this.cfgs.input_format.selected.includes('CAT_RAW')) return true;
                                     else return false;
                                     break;
                                 case 'peto':
-                                    if (this.cfgs.input_format.selected == 'CAT_RAW' &&
+                                    if (this.cfgs.input_format.selected.includes('CAT_RAW') &&
                                         this.cfgs.fixed_or_random.selected == 'fixed') return true;
                                     else return false;
                                     break;
@@ -804,12 +804,37 @@ var fm_config = {
                             break;
                         case 'measure_of_effect':
                             switch (option) {
-                                case 'md':
-                                case 'smd':
-                                    if (this.cfgs.input_format.selected == 'CONTD_RAW' ||
-                                        this.cfgs.input_format.selected == 'CONTD_PRE') return true;
+                                case 'hr':
+                                    if (this.cfgs.input_format.selected.includes('CAT_PRE')) return true;
                                     else return false;
                                     break;
+                                case 'or':
+                                case 'rr':
+                                case 'rd':
+                                    if (this.cfgs.input_format.selected.includes('CAT_PRE') ||
+                                        this.cfgs.input_format.selected.includes('CAT_RAW')) return true;
+                                    else return false;
+                                    break;
+                                case 'irr':
+                                    if (this.cfgs.input_format.selected.includes('CATIRR_RAW')) return true;
+                                    else return false;
+                                    break;
+                                case 'md':
+                                case 'smd':
+                                    if (this.cfgs.input_format.selected.includes('CONTD_RAW') ||
+                                        this.cfgs.input_format.selected.includes('CONTD_PRE')) return true;
+                                    else return false;
+                                    break;
+                            }
+                            break;
+                        case 'pairwise_analysis':
+                            switch (option) {
+                                case 'prim':
+                                    if (this.cfgs.input_format.selected.includes('PRIM')) return true;
+                                    else return false;
+                                case 'subg':
+                                    if (this.cfgs.input_format.selected.includes('SUBG')) return true;
+                                    else return false;
                             }
                             break;
                     }
@@ -835,6 +860,11 @@ var fm_config = {
         this.vpp.btn_analyze.disabled = true;
     },
 
+    update_settings: function(input_format) {
+        this.vpp.cfgs.input_format.selected = input_format;
+        this.vpp.cfgs.pairwise_analysis.selected = input_format.substring(0, 4).toLowerCase();
+    },
+
     get_config: function() {
         var cfg = {};
         Object.keys(this.vpp.cfgs).map(function(k) {
@@ -854,7 +884,6 @@ var jarvis = {
 
         console.log('* User is using IE:', isIE);
         if (isIE) {
-            // msger.ssmsg('The functions used in this website require advanced web technologies, which are <b>NOT</b> supported by Internet Explorer<br>Try using Google Chrome, Apple Safari, Mozilla Firefox or other modern browsers.')
             return;
         }
 
@@ -881,30 +910,30 @@ var jarvis = {
 
         // update settings
         fm_config.enable_btn_analyze();
-        fm_config.vpp.cfgs.input_format.selected = data.coltype;
+        fm_config.update_settings(data.coltype);
 
         // clear the old figures
-        this.clear_all_tables_and_figures();
+        this.clear_all();
     },
 
     analyze: function() {
         var cfg = fm_config.get_config();
-        var data = this.xlsx_data.raw;
+        var rs = this.xlsx_data.raw;
         fm_config.disable_btn_analyze();
-        this.clear_all_tables_and_figures();
+        this.clear_all();
 
         $.post(
             './analyze',
-            {rs: JSON.stringify(data), cfg: JSON.stringify(cfg)},
+            {rs: JSON.stringify(rs), cfg: JSON.stringify(cfg)},
             function(data) {
                 fm_config.enable_btn_analyze();
-                jarvis.show('Data File is analyzed');
+                jarvis.msg('Data File is analyzed');
                 jarvis.update_plots(data.data);
             }, 'json'
 
         ).fail(function() {
             fm_config.enable_btn_analyze();
-            jarvis.show('System error when analyzing, try again later', msger.ERROR);
+            jarvis.msg('System error when analyzing, try again later');
         });
     },
 
@@ -914,6 +943,10 @@ var jarvis = {
     },
 
     clear_all: function() {
+    },
+
+    msg: function(s) {
+        console.log('* ' + s);
     }
 };
 

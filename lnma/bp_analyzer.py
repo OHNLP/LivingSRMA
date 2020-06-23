@@ -20,6 +20,8 @@ from lnma.settings import *
 from lnma import dora
 from lnma.analyzer import freq_analyzer
 from lnma.analyzer import bayes_analyzer
+from lnma.analyzer import prim_analyzer
+from lnma.analyzer import subg_analyzer
 
 
 PATH_PUBDATA = 'pubdata'
@@ -178,7 +180,9 @@ def _read_file(full_fn):
         df = pd.read_csv(full_fn)
 
     # detect the format
-    df_columns = [ (c.lower()).strip() for c in df.columns.tolist() ]
+    # df_columns = [ (c.lower()).strip() for c in df.columns.tolist() ]
+    # 6/22/2020: column names need to be 100% match case sensitive
+    df_columns = [ c.strip() for c in df.columns.tolist() ]
     df_coltype = None
     for coltype in STANDARD_DATA_COLS:
         is_this_coltype = True
@@ -258,11 +262,11 @@ def _pwma_analyze(rs, cfg):
     # parse other configs
 
     # analyze!
-    if pairwise_analysis == 'pri':
-        ret = freq_analyzer.analyze(rs, cfg)
-    elif pairwise_analysis == 'sub':
-        ret = bayes_analyzer.analyze(rs, cfg)
+    if pairwise_analysis == 'prim':
+        ret = prim_analyzer.analyze(rs, cfg)
+    elif pairwise_analysis == 'subg':
+        ret = subg_analyzer.analyze(rs, cfg)
     else:
-        ret = bayes_analyzer.analyze(rs, cfg)
+        ret = prim_analyzer.analyze(rs, cfg)
 
     return ret
