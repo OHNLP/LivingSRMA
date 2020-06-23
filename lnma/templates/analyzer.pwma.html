@@ -518,7 +518,8 @@ Pairwise Meta Analyzer
                     
                 </div><!-- /.box-bodyitem -->
 
-                <div class="box-bodyitem box-bodyitem-hl">
+                <div class="box-bodyitem box-bodyitem-hl"
+                    v-if="show_cfg('prediction_interval')">
                     <div class="box-bodyitem-label">
                         <label>Prediction Interval:</label>
                     </div>
@@ -533,7 +534,8 @@ Pairwise Meta Analyzer
                     
                 </div><!-- /.box-bodyitem -->
 
-                <div class="box-bodyitem box-bodyitem-hl" v-if="show_cfg('sensitivity_analysis')">
+                <div class="box-bodyitem box-bodyitem-hl"
+                    v-if="show_cfg('sensitivity_analysis')">
                     <div class="box-bodyitem-label">
                         <label>Sensitivity Analysis:</label>
                     </div>
@@ -689,12 +691,12 @@ var fm_config = {
         },
 
         pairwise_analysis: {
-            selected: 'prim',
+            selected: 'PRIM',
             use: true,
             disabled: false,
             options: [
-                {text: 'Primary Analysis', value: 'prim'},
-                {text: 'Subgroup Analysis', value: 'subg'}
+                {text: 'Primary Analysis', value: 'PRIM'},
+                {text: 'Subgroup Analysis', value: 'SUBG'}
             ]
         },
 
@@ -721,33 +723,33 @@ var fm_config = {
         },
 
         measure_of_effect: {
-            selected: 'rr',
+            selected: 'RR',
             use: true,
             disabled: false,
             options: [
-                {text: 'Hazard Ratio', value: 'hr'},
-                {text: 'Odds Ratio', value: 'or'},
-                {text: 'Relative Risk', value: 'rr'},
-                {text: 'Risk Difference', value: 'rd'},
-                {text: 'Incidence Rate Ratio', value: 'irr'},
-                {text: 'Mean Difference', value: 'md'},
-                {text: 'Standardized Mean Difference', value: 'smd'}
+                {text: 'Hazard Ratio', value: 'HR'},
+                {text: 'Odds Ratio', value: 'OR'},
+                {text: 'Relative Risk', value: 'RR'},
+                {text: 'Risk Difference', value: 'RD'},
+                {text: 'Incidence Rate Ratio', value: 'IRR'},
+                {text: 'Mean Difference', value: 'MD'},
+                {text: 'Standardized Mean Difference', value: 'SMD'}
             ]
         },
 
         tau_estimation_method: {
-            selected: 'dl',
+            selected: 'DL',
             use: true,
             disabled: false,
             options: [
-                { text: 'DerSimonian-Laird', value: 'dl' },
-                { text: 'Restricted Maximum-likelihood', value: 'reml' },
-                { text: 'Maximum Likelihood', value: 'ml' },
-                { text: 'Empirical Bayes', value: 'eb' },
-                { text: 'Sidik-Jonkman', value: 'sj' },
-                { text: 'Hedges', value: 'he' },
-                { text: 'Hunter-Schmidt', value: 'hs' },
-                { text: 'Paul-Mendel', value: 'pm' }
+                { text: 'DerSimonian-Laird', value: 'DL' },
+                { text: 'Restricted Maximum-likelihood', value: 'REML' },
+                { text: 'Maximum Likelihood', value: 'ML' },
+                { text: 'Empirical Bayes', value: 'EB' },
+                { text: 'Sidik-Jonkman', value: 'SJ' },
+                { text: 'Hedges', value: 'HE' },
+                { text: 'Hunter-Schmidt', value: 'HS' },
+                { text: 'Paul-Mendel', value: 'PM' }
             ]
         },
 
@@ -762,13 +764,13 @@ var fm_config = {
         },
 
         smd_estimation_method: {
-            selected: 'hedges',
+            selected: 'Hedges',
             use: true,
             disabled: false,
             options: [
-                {text: 'Hedges', value: 'hedges'},
-                {text: "Cohen's d", value: 'cohensd'},
-                {text: "Glass delta", value: 'glass_delta'}
+                {text: 'Hedges', value: 'Hedges'},
+                {text: "Cohen's d", value: 'Cohen'},
+                {text: "Glass delta", value: 'Glass'}
             ]
         },
 
@@ -844,16 +846,22 @@ var fm_config = {
                                 this.cfgs.smd_estimation_method.use = false;
                             break;
                         case 'sensitivity_analysis':
-                            if (this.cfgs.pairwise_analysis.selected == 'prim')
+                            if (this.cfgs.pairwise_analysis.selected == 'PRIM')
                                 this.cfgs.sensitivity_analysis.use = true;
                             else
                                 this.cfgs.sensitivity_analysis.use = false;
                             break;
                         case 'cumulative_meta_analysis':
-                            if (this.cfgs.pairwise_analysis.selected == 'prim')
+                            if (this.cfgs.pairwise_analysis.selected == 'PRIM')
                                 this.cfgs.cumulative_meta_analysis.use = true;
                             else
                                 this.cfgs.cumulative_meta_analysis.use = false;
+                            break;
+                        case 'prediction_interval':
+                            if (this.cfgs.pairwise_analysis.selected == 'PRIM')
+                                this.cfgs.prediction_interval.use = true;
+                            else
+                                this.cfgs.prediction_interval.use = false;
                             break;
                     }
 
@@ -864,11 +872,11 @@ var fm_config = {
                     switch (cfg_name) {
                         case 'poolinig_method':
                             switch (option) {
-                                case 'mh':
+                                case 'MH':
                                     if (this.cfgs.input_format.selected.includes('CAT_RAW')) return true;
                                     else return false;
                                     break;
-                                case 'peto':
+                                case 'Peto':
                                     if (this.cfgs.input_format.selected.includes('CAT_RAW') &&
                                         this.cfgs.fixed_or_random.selected == 'fixed') return true;
                                     else return false;
@@ -877,23 +885,23 @@ var fm_config = {
                             break;
                         case 'measure_of_effect':
                             switch (option) {
-                                case 'hr':
+                                case 'HR':
                                     if (this.cfgs.input_format.selected.includes('CAT_PRE')) return true;
                                     else return false;
                                     break;
-                                case 'or':
-                                case 'rr':
-                                case 'rd':
+                                case 'OR':
+                                case 'RR':
+                                case 'RD':
                                     if (this.cfgs.input_format.selected.includes('CAT_PRE') ||
                                         this.cfgs.input_format.selected.includes('CAT_RAW')) return true;
                                     else return false;
                                     break;
-                                case 'irr':
+                                case 'IRR':
                                     if (this.cfgs.input_format.selected.includes('CATIRR_RAW')) return true;
                                     else return false;
                                     break;
-                                case 'md':
-                                case 'smd':
+                                case 'MD':
+                                case 'SMD':
                                     if (this.cfgs.input_format.selected.includes('CONTD_RAW') ||
                                         this.cfgs.input_format.selected.includes('CONTD_PRE')) return true;
                                     else return false;
@@ -902,10 +910,10 @@ var fm_config = {
                             break;
                         case 'pairwise_analysis':
                             switch (option) {
-                                case 'prim':
+                                case 'PRIM':
                                     if (this.cfgs.input_format.selected.includes('PRIM')) return true;
                                     else return false;
-                                case 'subg':
+                                case 'SUBG':
                                     if (this.cfgs.input_format.selected.includes('SUBG')) return true;
                                     else return false;
                             }
@@ -933,9 +941,17 @@ var fm_config = {
         this.vpp.btn_analyze.disabled = true;
     },
 
-    update_settings: function(input_format) {
+    update_settings: function(data) {
+        var input_format = data.coltype;
+
+        // set the input format
         this.vpp.cfgs.input_format.selected = input_format;
-        this.vpp.cfgs.pairwise_analysis.selected = input_format.substring(0, 4).toLowerCase();
+        // set prim or subg
+        this.vpp.cfgs.pairwise_analysis.selected = input_format.substring(0, 4);
+        // update study list
+        this.vpp.cfgs.study_list.selected = data.raw;
+        // update selected for 
+        this.vpp.cfgs.sensitivity_analysis_excluded_study_list.selected = [];
     },
 
     get_config: function() {
@@ -1016,8 +1032,7 @@ var jarvis = {
 
         // update settings
         fm_config.enable_btn_analyze();
-        fm_config.update_settings(data.coltype);
-        fm_config.vpp.cfgs.study_list.selected = this.xlsx_data.raw;
+        fm_config.update_settings(data);
     },
 
     analyze: function() {

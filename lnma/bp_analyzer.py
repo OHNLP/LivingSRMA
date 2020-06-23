@@ -20,8 +20,7 @@ from lnma.settings import *
 from lnma import dora
 from lnma.analyzer import freq_analyzer
 from lnma.analyzer import bayes_analyzer
-from lnma.analyzer import prim_analyzer
-from lnma.analyzer import subg_analyzer
+from lnma.analyzer import pwma_analyzer
 
 
 PATH_PUBDATA = 'pubdata'
@@ -255,18 +254,6 @@ def _nma_analyze(rs, cfg):
 def _pwma_analyze(rs, cfg):
     '''Run the pairwise meta-analyze the rs with cfg
     '''
-    # get the analysis type for make static json
-    input_format = cfg['input_format']
-    pairwise_analysis = cfg['pairwise_analysis']
-
-    # parse other configs
-
-    # analyze!
-    if pairwise_analysis == 'prim':
-        ret = prim_analyzer.analyze(rs, cfg)
-    elif pairwise_analysis == 'subg':
-        ret = subg_analyzer.analyze(rs, cfg)
-    else:
-        ret = prim_analyzer.analyze(rs, cfg)
+    ret = pwma_analyzer.analyze(rs, cfg)
 
     return ret

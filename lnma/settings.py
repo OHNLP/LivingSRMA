@@ -75,12 +75,12 @@ TPL_FN = {
 
 DIS_TEXT = {
     "MOE": {
-        "hr": "Hazard Ratio",
-        "or": "Odds Ratio",
-        "rr": "Relative Risk",
-        "rd": "Risk Difference",
-        "irr": "Incidence Rate Ratio",
-        "md": "Mean Difference",
-        "smd": "Standardized Mean Difference"
+        "HR": "Hazard Ratio",
+        "OR": "Odds Ratio",
+        "RR": "Relative Risk",
+        "RD": "Risk Difference",
+        "IRR": "Incidence Rate Ratio",
+        "MD": "Mean Difference",
+        "SMD": "Standardized Mean Difference"
     }
 }
