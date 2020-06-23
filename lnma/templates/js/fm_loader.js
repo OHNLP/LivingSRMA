@@ -36,13 +36,17 @@ var fm_loader = {
     },
 
     upload_data_file: function() {
+        // check file
         if ($('#ipt-csv-file').val() == '') {
-            // msger.show('Choose a Data File for analysis', msger.WARNING);
             return;
         }
+
         // update UI
         this.vpp.btn_upload.disabled = true;
         var form_data = new FormData($('#upload-file')[0]);
+        jarvis.clear_all();
+
+        // send request
         $.ajax({
             type: 'POST',
             url: './read_file',

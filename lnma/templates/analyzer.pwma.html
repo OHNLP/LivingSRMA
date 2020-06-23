@@ -709,13 +709,13 @@ var fm_config = {
         },
 
         poolinig_method: {
-            selected: 'iv',
+            selected: 'Inverse',
             use: true,
             disabled: false,
             options: [
-                {text: 'Inverse Variance', value: 'iv'},
-                {text: 'Mantel-Haenszel', value: 'mh'},
-                {text: 'Peto', value: 'peto'}
+                {text: 'Inverse Variance', value: 'Inverse'},
+                {text: 'Mantel-Haenszel', value: 'MH'},
+                {text: 'Peto', value: 'Peto'}
             ]
 
         },
@@ -972,6 +972,10 @@ var fg_imglst = {
             var fn = data.params[plt_id];
             this.vpp.img_fns.push(fn);
         }
+    },
+
+    clear: function() {
+        this.vpp.img_fns = [];
     }
 }
 
@@ -997,13 +1001,14 @@ var jarvis = {
         // bind data to local object first
         this.xlsx_data = data;
 
+        // clear the old figures
+        this.clear_all();
+
         // update loader info        
         fm_loader.set_dataset_summary(
             '<p class="box-p"><b>Input Data Summary</b></p>' + 
             '<p class="box-p"><i class="fa fa-file"></i>: ' + data.filename + '</p>' +
             '<p class="box-p"><i class="fa fa-shapes"></i>: ' + data.coltype + ' format</p>' +
-            // '<p><i class="fa fa-columns"></i>: ' + data.cols + '</p>' +
-            '<p class="box-p"><i class="fa fa-tablets"></i>: <b>' + data.treats.length + '</b> treats: ' + data.treats.join(', ') + '</p>' + 
             '<p class="box-p"><i class="far fa-sticky-note"></i>: <b>' + data.n_studies + '</b> studies of ' + data.raw.length +' lines </p>'
         );
 
@@ -1013,9 +1018,6 @@ var jarvis = {
         fm_config.enable_btn_analyze();
         fm_config.update_settings(data.coltype);
         fm_config.vpp.cfgs.study_list.selected = this.xlsx_data.raw;
-
-        // clear the old figures
-        this.clear_all();
     },
 
     analyze: function() {
@@ -1048,6 +1050,7 @@ var jarvis = {
     },
 
     clear_all: function() {
+        fg_imglst.clear();
     },
 
     msg: function(s) {
