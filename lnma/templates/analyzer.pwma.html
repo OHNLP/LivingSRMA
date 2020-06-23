@@ -114,7 +114,11 @@ Pairwise Meta Analyzer
     padding: 5px 0 5px 0;
     border-bottom: 1px dotted #CCCCCC;
 }
-
+.box-smalltable th,
+.box-smalltable td {
+    border-bottom: 1px solid #666666;
+    padding: 0 3px;
+}
 /* for this page */
 .footer {
     width: 100%;
@@ -540,7 +544,30 @@ Pairwise Meta Analyzer
                     
                 </div><!-- /.box-bodyitem -->
 
-                <div class="box-bodyitem box-bodyitem-hl" v-if="show_cfg('cumulative_meta_analysis')">
+                <div class="box-bodyitem" style="padding: 0 0 0 10px;"
+                    v-if="show_cfg('sensitivity_analysis') && cfgs.sensitivity_analysis.selected == 'yes'">
+                    <p>Select the studies to be <b>EXCLUDED</b>:</p>
+                    <table class="box-smalltable" style="margin-bottom: 20px;">
+                        <tr>
+                            <th>&nbsp;</th>
+                            <th>Study</th>
+                            <th>Year</th>
+                        </tr>
+                        <tr v-for="r, idx in cfgs.study_list.selected">
+                            <td>
+                                <input type="checkbox"
+                                    v-bind:id="'sens-chk-' + idx" 
+                                    v-bind:value="r.study"
+                                    v-model="cfgs.sensitivity_analysis_excluded_study_list.selected">
+                            </td>
+                            <td><label v-bind:for="'sens-chk-' + idx">{{ r.study }}</label></td>
+                            <td><label v-bind:for="'sens-chk-' + idx">{{ r.year }}</label></td>
+                        </tr>
+                    </table>
+                </div><!-- /.box-bodyitem -->
+
+                <div class="box-bodyitem box-bodyitem-hl"
+                    v-if="show_cfg('cumulative_meta_analysis')">
                     <div class="box-bodyitem-label">
                         <label>Cumulative Meta-Analysis:</label>
                     </div>
@@ -550,6 +577,24 @@ Pairwise Meta Analyzer
                     </div>
                     
                 </div><!-- /.box-bodyitem -->
+                
+                <div class="box-bodyitem box-bodyitem-hl"
+                    v-if="show_cfg('cumulative_meta_analysis') && cfgs.cumulative_meta_analysis.selected == 'yes'">
+                    <div class="box-bodyitem-label" style="text-indent: 1em;">
+                        <label>Sort by:</label>
+                    </div>
+                    <div class="box-bodyitem-value" style="padding-top: 3px;">
+                        <select v-model="cfgs.cumulative_meta_analysis_sortby.selected"
+                            v-bind:disabled="cfgs.cumulative_meta_analysis_sortby.disabled">
+                            <option v-for="option in cfgs.cumulative_meta_analysis_sortby.options" v-bind:value="option.value">
+                                {{ option.text }}
+                            </option>
+                        </select>
+                    </div>
+                    
+                </div><!-- /.box-bodyitem -->
+
+                
     
             </div>
             <div class="box-footer">
@@ -618,6 +663,10 @@ var fm_config = {
             selected: 'pwma',
             use: true,
             disabled: false,
+        },
+
+        study_list: {
+            selected: []
         },
 
         input_format: {
@@ -743,6 +792,10 @@ var fm_config = {
             ]
         },
 
+        sensitivity_analysis_excluded_study_list: {
+            selected: []
+        },
+
         cumulative_meta_analysis: {
             selected: 'no',
             use: true,
@@ -750,6 +803,14 @@ var fm_config = {
             options: [
                 {text: 'Yes', value: 'yes'},
                 {text: "No", value: 'no'}
+            ]
+        },
+
+        cumulative_meta_analysis_sortby: {
+            selected: 'year',
+            options: [
+                {text: 'Year', value: 'year'},
+                {text: "TE", value: 'TE'}
             ]
         }
     },
@@ -951,6 +1012,7 @@ var jarvis = {
         // update settings
         fm_config.enable_btn_analyze();
         fm_config.update_settings(data.coltype);
+        fm_config.vpp.cfgs.study_list.selected = this.xlsx_data.raw;
 
         // clear the old figures
         this.clear_all();

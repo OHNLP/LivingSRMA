@@ -62,7 +62,7 @@ results <- metagen(TE,
 # generating the forest plot
 # prediction interval can be indicated with a logical
 fig_width <- 8
-fig_height <- fig_width * 0.66
+fig_height <- fig_width * (0.25 + results$k * 0.03)
 png(filename="{{ fn_outplt1 }}", width=fig_width, height=fig_height, units='in', res=300)
 par(mar=c(2, 2, 2, 2))
 
@@ -92,9 +92,9 @@ dev.off()
 {% if sensitivity_analysis == 'no' and cumulative_meta_analysis == 'no' %}
 #generating the funnel plot (This is only for primary analysis- not for sensitivity and cumulative analysis)
 fig_width <- 8
-fig_height <- fig_width * 0.66
+fig_height <- fig_width * 0.6
 png(filename="{{ fn_fnnlplt }}", width=fig_width, height=fig_height, units='in', res=300)
-par(mar=c(2, 2, 2, 2))
+par(mar=c(1.5, 1, 1, 1))
 
 funnel.meta(results)
 
@@ -103,7 +103,12 @@ dev.off()
 
 {% if sensitivity_analysis == 'yes' %}
 #Sensitivity analysis by exclusion (multiple options to exclude more than one study)
-results.sensitivity<- update.meta(results, subset = study != c("Tomita Y et al"))
+results.sensitivity<- update.meta(results, subset = study != c({{ sensitivity_analysis_exsubset }}))
+
+fig_width <- 8
+fig_height <- fig_width * (0.25 + (results$k - {{ sensitivity_analysis_excluded_study_list|length }}) * 0.03)
+png(filename="{{ fn_sensplt }}", width=fig_width, height=fig_height, units='in', res=300)
+par(mar=c(1.5, 1, 1, 1))
 
 #generating the forest plot for sensitivity analysis
 forest.meta(results.sensitivity, 
@@ -113,20 +118,21 @@ forest.meta(results.sensitivity,
             fontsize = 10, 
             squaresize = 0.5, 
             print.pval = TRUE, 
-            smlab = "{{ smlab }} (95% CI)", 
+            smlab = "{{ smlab_text }} (95% CI)", 
             weight.study = "{{ fixed_or_random }}", 
             lwd = 1.8, lty.{{ fixed_or_random }} = 2, 
             plotwidth = "08cm", 
             spacing = 1.3, 
-            colgap.forest.left = "1cm", 
-            colgap.forest.right = "0.1cm", 
-            colgap.left = "0.5cm", 
+            # colgap.forest.left = "1cm", 
+            # colgap.forest.right = "0.1cm", 
+            # colgap.left = "0.5cm", 
             leftcols = c("studlab", "effect", "ci"), 
             rightcols = c("w.{{ fixed_or_random }}"), 
             rightlabs = c("Relative weight"), 
             prediction = {{ is_prediction }}, 
             col.predict = "blue")
 
+dev.off()
 {% endif %}
 
 #running cumulative meta-analysis
@@ -134,7 +140,12 @@ forest.meta(results.sensitivity,
 # x will be an object of class meta
 # sortvar can be indicated by an object of class meta or by an object of original data set
 {% if cumulative_meta_analysis == 'yes' %}
-results.cum <- metacum(results, sortvar = PRI_CAT_PREDATA$year)
+results.cum <- metacum(results, sortvar = PRI_CAT_PREDATA${{ cumulative_meta_analysis_sortby }})
+
+fig_width <- 8
+fig_height <- fig_width * (0.25 + results$k * 0.03)
+png(filename="{{ fn_cumuplt }}", width=fig_width, height=fig_height, units='in', res=300)
+par(mar=c(2, 2, 2, 2))
 
 #generating the forest plot for cumulative meta-analysis
 forest.meta(results.cum, 
@@ -143,14 +154,16 @@ forest.meta(results.cum,
             col.diamond.lines.{{ fixed_or_random }} = "black", 
             fontsize = 10, 
             squaresize = 0.5, 
-            smlab = "{{ smlab_text }} (95% CI)", 
             weight.study = "{{ fixed_or_random }}", 
             lwd = 1.8, lty.{{ fixed_or_random }} = 2, 
             plotwidth = "08cm", 
             spacing = 1.3, 
-            colgap.forest.left = "1cm", 
-            colgap.forest.right = "0.1cm", 
-            colgap.left = "0.5cm")
+            # colgap.forest.left = "1cm", 
+            # colgap.forest.right = "0.1cm", 
+            # colgap.left = "0.5cm",
+            smlab = "{{ smlab_text }} (95% CI)")
+
+dev.off()
 {% endif %}
 
 # Merge all the results.

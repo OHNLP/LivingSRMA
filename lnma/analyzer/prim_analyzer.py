@@ -63,11 +63,17 @@ def analyze(rs, cfg):
         })
         params['result_plots'].append('fn_fnnlplt')
 
+    # the configs for sensitivity analysis
     if params['sensitivity_analysis'] == 'yes':
-        params['fn_sensplt'] = TPL_FN['sensplt'].format(**{
-            'subtype': subtype, 'submission_id': submission_id
-        })
-        params['result_plots'].append('fn_sensplt')
+        if len(params['sensitivity_analysis_excluded_study_list']) == 0:
+            params['sensitivity_analysis'] == 'no'
+        else:
+            params['sensitivity_analysis_exsubset'] = \
+                ",".join([ '"%s"' % s for s in params['sensitivity_analysis_excluded_study_list'] ])
+            params['fn_sensplt'] = TPL_FN['sensplt'].format(**{
+                'subtype': subtype, 'submission_id': submission_id
+            })
+            params['result_plots'].append('fn_sensplt')
 
     if params['cumulative_meta_analysis'] == 'yes':
         params['fn_cumuplt'] = TPL_FN['cumuplt'].format(**{
