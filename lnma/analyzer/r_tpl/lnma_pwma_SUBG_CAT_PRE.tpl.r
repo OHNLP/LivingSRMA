@@ -61,7 +61,7 @@ subgroupresults <- metagen(TE,
 
 fig_width <- 9
 fig_height <- fig_width * (0.25 + subgroupresults$k * 0.06)
-png(filename="{{ fn_outplt1 }}", width=fig_width, height=fig_height, units='in', res=400)
+png(filename="{{ fn_outplt1 }}", width=fig_width, height=fig_height, units='in', res=200)
 par(mar=c(1.5, 1, 1, 1))
 
 # generating the forest plot

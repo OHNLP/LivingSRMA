@@ -60,7 +60,7 @@ resultsraw <- metainc(Et,
 # prediction interval can be used (indicated with a logical)
 fig_width <- 10
 fig_height <- fig_width * (0.25 + resultsraw$k * 0.03)
-png(filename="{{ fn_outplt1 }}", width=fig_width, height=fig_height, units='in', res=300)
+png(filename="{{ fn_outplt1 }}", width=fig_width, height=fig_height, units='in', res=200)
 par(mar=c(1.5, 1, 1, 1))
 
 forest.meta(resultsraw, 
@@ -83,7 +83,7 @@ forest.meta(resultsraw,
             label.left = "Favours Treatment", 
             # colgap.forest.left = "1cm", 
             # colgap.forest.right = "0.1cm", 
-            # colgap.left = "0.5cm", 
+            colgap.left = "0.5cm", 
             leftcols = c("studlab", "event.e", "time.e", "event.c", "time.c", "effect", "ci"), 
             leftlabs = c("Events", "Total", "Events", "Total"), 
             rightcols = c("w.{{ fixed_or_random }}"), 
@@ -98,8 +98,8 @@ dev.off()
 #generating the funnel plot (This is only for primary analysis- not for sensitivity and cumulative analysis)
 fig_width <- 8
 fig_height <- fig_width * 0.6
-png(filename="{{ fn_fnnlplt }}", width=fig_width, height=fig_height, units='in', res=300)
-par(mar=c(1.5, 1, 1, 1))
+png(filename="{{ fn_fnnlplt }}", width=fig_width, height=fig_height, units='in', res=200)
+par(mar=c(2, 2, 1, 1))
 
 funnel.meta(resultsraw)
 
@@ -113,7 +113,7 @@ results.sensitivity<- update.meta(resultsraw, subset = study != c({{ sensitivity
 
 fig_width <- 10
 fig_height <- fig_width * (0.25 + (resultsraw$k - {{ sensitivity_analysis_excluded_study_list|length }}) * 0.03)
-png(filename="{{ fn_sensplt }}", width=fig_width, height=fig_height, units='in', res=300)
+png(filename="{{ fn_sensplt }}", width=fig_width, height=fig_height, units='in', res=200)
 par(mar=c(1.5, 1, 1, 1))
 
 #generating  the forest plot for sensitivity analysis
@@ -137,7 +137,7 @@ forest.meta(results.sensitivity,
             label.left = "Favours Treatment", 
             # colgap.forest.left = "1cm", 
             # colgap.forest.right = "0.1cm", 
-            # colgap.left = "0.5cm", 
+            colgap.left = "0.5cm", 
             leftcols = c("studlab", "event.e", "time.e", "event.c", "time.c", "effect", "ci"), 
             leftlabs = c("Events", "Total", "Events", "Total"), 
             rightcols = c("w.{{ fixed_or_random }}"), 
@@ -158,7 +158,7 @@ results.cum <- metacum(resultsraw, sortvar = PRI_CAT_RAWDATA_IRR${{ cumulative_m
 
 fig_width <- 8
 fig_height <- fig_width * (0.25 + resultsraw$k * 0.03)
-png(filename="{{ fn_cumuplt }}", width=fig_width, height=fig_height, units='in', res=300)
+png(filename="{{ fn_cumuplt }}", width=fig_width, height=fig_height, units='in', res=200)
 par(mar=c(2, 2, 2, 2))
 
 #generating the forest plot for cumulative meta-analysis
@@ -174,7 +174,7 @@ forest.meta(results.cum,
             spacing = 1.3, 
             # colgap.forest.left = "1cm", 
             # colgap.forest.right = "0.1cm", 
-            # colgap.left = "0.5cm",
+            colgap.left = "0.5cm",
             smlab = "{{ smlab_text }} (95% CI)")
 
 dev.off()

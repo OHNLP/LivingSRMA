@@ -627,6 +627,14 @@ Pairwise Meta Analyzer
                 <i class="fa fa-tree"></i>
                 PAIRWISE META-ANALYSIS RESULTS
             </h4>
+            <div>
+                <button
+                    v-if="r_source!=''"
+                    v-on:clikc="download_source_code()">
+                    <i class="fa fa-download"></i>
+                    Source Code
+                </button>
+            </div>
         </div>
         <div class="box-body">
             <div v-for="fn in img_fns">
@@ -982,15 +990,21 @@ var fg_imglst = {
         this.vpp = new Vue({
             el: this.vpp_id,
             data: {
-                img_fns: []
+                img_fns: [],
+                r_source: '',
             },
             methods: {
-
+                download_source_code: function() {
+                    jarvis.download_file(this.r_source);
+                }
             }
         })
     },
 
     draw: function(data) {
+        // update the r source code file
+        this.r_source = data.params.fn_rscript;
+        // update the imgs
         this.vpp.img_fns = [];
         for (let i = 0; i < data.params.result_plots.length; i++) {
             const plt_id = data.params.result_plots[i];
@@ -1002,11 +1016,16 @@ var fg_imglst = {
 
     clear: function() {
         this.vpp.img_fns = [];
+        this.vpp.r_source = '';
     }
 }
 
 var jarvis = {
     data: null,
+    
+    download_file: function(fn) {
+        window.open('/f/' + fn);
+    },
 
     init: function() {
         var isIE = /*@cc_on!@*/false || !!document.documentMode;

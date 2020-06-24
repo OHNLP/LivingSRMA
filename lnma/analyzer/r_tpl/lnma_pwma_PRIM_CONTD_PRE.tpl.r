@@ -74,7 +74,7 @@ forest.meta(results,
             spacing = 1.3, 
             # colgap.forest.left = "1cm", 
             # colgap.forest.right = "0.1cm", 
-            # colgap.left = "0.5cm", 
+            colgap.left = "0.5cm", 
             leftcols = c("studlab", "effect", "ci"), 
             rightcols = c("w.{{ fixed_or_random }}"), 
             rightlabs = c("Relative weight"), 
@@ -88,8 +88,8 @@ dev.off()
 #generating the funnel plot (This is only for primary analysis- not for sensitivity and cumulative analysis)
 fig_width <- 8
 fig_height <- fig_width * 0.6
-png(filename="{{ fn_fnnlplt }}", width=fig_width, height=fig_height, units='in', res=300)
-par(mar=c(1.5, 1, 1, 1))
+png(filename="{{ fn_fnnlplt }}", width=fig_width, height=fig_height, units='in', res=200)
+par(mar=c(2, 2, 1, 1))
 
 funnel.meta(results)
 
@@ -103,7 +103,7 @@ results.sensitivity <- update.meta(results, subset = study != c({{ sensitivity_a
 
 fig_width <- 8
 fig_height <- fig_width * (0.25 + (results$k - {{ sensitivity_analysis_excluded_study_list|length }}) * 0.03)
-png(filename="{{ fn_sensplt }}", width=fig_width, height=fig_height, units='in', res=300)
+png(filename="{{ fn_sensplt }}", width=fig_width, height=fig_height, units='in', res=200)
 par(mar=c(1.5, 1, 1, 1))
 
 #generating the forest plot for sensitivity analysis
@@ -121,7 +121,7 @@ forest.meta(results.sensitivity,
             spacing = 1.3, 
             # colgap.forest.left = "1cm", 
             # colgap.forest.right = "0.1cm", 
-            # colgap.left = "0.5cm", 
+            colgap.left = "0.5cm", 
             leftcols = c("studlab", "effect", "ci"), 
             rightcols = c("w.{{ fixed_or_random }}"), 
             rightlabs = c("Relative weight"), 
@@ -141,7 +141,7 @@ results.cum <- metacum(results, sortvar = PRI_CONTD_PREDATA${{ cumulative_meta_a
 
 fig_width <- 8
 fig_height <- fig_width * (0.25 + results$k * 0.03)
-png(filename="{{ fn_cumuplt }}", width=fig_width, height=fig_height, units='in', res=300)
+png(filename="{{ fn_cumuplt }}", width=fig_width, height=fig_height, units='in', res=200)
 par(mar=c(2, 2, 2, 2))
 
 #generating the forest plot for cumulative meta-analysis
@@ -157,7 +157,7 @@ forest.meta(results.cum,
             spacing = 1.3, 
             # colgap.forest.left = "1cm", 
             # colgap.forest.right = "0.1cm", 
-            # colgap.left = "0.5cm",
+            colgap.left = "0.5cm",
             smlab = "{{ smlab_text }} (95% CI)")
 
 dev.off()
