@@ -1,7 +1,7 @@
 {% extends '_layout_adminlte.html' %}
 
 {% block title %}
-Pairwise Meta Analyzer
+PWMA Analyzer
 {% endblock %}
 
 {% block style %}
@@ -116,8 +116,18 @@ Pairwise Meta Analyzer
 }
 .box-smalltable th,
 .box-smalltable td {
-    border-bottom: 1px solid #666666;
+    border-bottom: 1px dotted #cccccc;
     padding: 0 3px;
+    font-size: .9em;
+}
+.box-chk-fix {
+    display: table-cell; 
+    vertical-align: middle;
+    padding: 2px 0 0 0;
+    line-height: 10px;
+}
+.box-smalltable td label{
+    font-weight: normal;
 }
 /* for this page */
 .footer {
@@ -346,7 +356,7 @@ Pairwise Meta Analyzer
 
 {% block page_name %}
 <i class="fas fa-chart-line"></i>
-Pairwise Meta Analyzer
+PWMA Analyzer
 {% endblock %}
 
 {% block content %}
@@ -557,10 +567,12 @@ Pairwise Meta Analyzer
                         </tr>
                         <tr v-for="r, idx in cfgs.study_list.selected">
                             <td>
-                                <input type="checkbox"
+                                <div class="box-chk-fix">
+                                    <input type="checkbox"
                                     v-bind:id="'sens-chk-' + idx" 
                                     v-bind:value="r.study"
                                     v-model="cfgs.sensitivity_analysis_excluded_study_list.selected">
+                                </div>
                             </td>
                             <td><label v-bind:for="'sens-chk-' + idx">{{ r.study }}</label></td>
                             <td><label v-bind:for="'sens-chk-' + idx">{{ r.year }}</label></td>
