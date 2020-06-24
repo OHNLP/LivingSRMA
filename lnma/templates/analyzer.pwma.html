@@ -630,7 +630,7 @@ Pairwise Meta Analyzer
             <div>
                 <button
                     v-if="r_source!=''"
-                    v-on:clikc="download_source_code()">
+                    v-on:click="download_source_code()">
                     <i class="fa fa-download"></i>
                     Source Code
                 </button>
@@ -1003,7 +1003,7 @@ var fg_imglst = {
 
     draw: function(data) {
         // update the r source code file
-        this.r_source = data.params.fn_rscript;
+        this.vpp.r_source = data.params.fn_rscript;
         // update the imgs
         this.vpp.img_fns = [];
         for (let i = 0; i < data.params.result_plots.length; i++) {
