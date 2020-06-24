@@ -723,7 +723,7 @@ var fm_config = {
         },
 
         measure_of_effect: {
-            selected: 'RR',
+            selected: 'OR',
             use: true,
             disabled: false,
             options: [
@@ -952,6 +952,16 @@ var fm_config = {
         this.vpp.cfgs.study_list.selected = data.raw;
         // update selected for 
         this.vpp.cfgs.sensitivity_analysis_excluded_study_list.selected = [];
+        // update special rules
+        if (input_format.includes('CATIRR_')) {
+            this.vpp.cfgs.measure_of_effect.selected = 'IRR';
+        }
+        if (input_format.includes('CONTD')) {
+            this.vpp.cfgs.measure_of_effect.selected = 'MD';
+        }
+        if (input_format.includes('CAT_')) {
+            this.vpp.cfgs.measure_of_effect.selected = 'OR';
+        }
     },
 
     get_config: function() {
@@ -1057,6 +1067,7 @@ var jarvis = {
     },
 
     update: function(data) {
+        console.log(data);
         // bind the result data
         this.plot_data = data;
 
