@@ -62,7 +62,7 @@ resultsraw <- metacont(Nt,
 
 # generating the forest plot
 # prediction interval can be used (indicated with a logical)
-fig_width <- 8
+fig_width <- 9
 fig_height <- fig_width * (0.25 + resultsraw$k * 0.03)
 png(filename="{{ fn_outplt1 }}", width=fig_width, height=fig_height, units='in', res=400)
 par(mar=c(1.5, 1, 1, 1))
@@ -109,7 +109,7 @@ dev.off()
 #Sensitivity analysis by exclusion (multiple options to exclude more than one study)
 results.sensitivity <- update.meta(resultsraw, subset = study != c({{ sensitivity_analysis_exsubset }}))
 
-fig_width <- 8
+fig_width <- 9
 fig_height <- fig_width * (0.25 + (resultsraw$k - {{ sensitivity_analysis_excluded_study_list|length }}) * 0.03)
 png(filename="{{ fn_sensplt }}", width=fig_width, height=fig_height, units='in', res=200)
 par(mar=c(1.5, 1, 1, 1))

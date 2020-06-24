@@ -57,7 +57,7 @@ subgroupresultsraw <- metainc(Et,
                               hakn = {{ is_hakn }}, 
                               byvar = subgroup)
 
-fig_width <- 10.5
+fig_width <- 11
 fig_height <- fig_width * (0.25 + subgroupresultsraw$k * 0.06)
 png(filename="{{ fn_outplt1 }}", width=fig_width, height=fig_height, units='in', res=200)
 par(mar=c(1.5, 1, 1, 1))

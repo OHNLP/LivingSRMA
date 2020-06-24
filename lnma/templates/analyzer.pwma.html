@@ -632,8 +632,9 @@ Pairwise Meta Analyzer
                     v-if="r_source!=''"
                     v-on:click="download_source_code()">
                     <i class="fa fa-download"></i>
-                    Source Code
-                </button>
+                    Download Source Code
+                </button>&nbsp;
+                
             </div>
         </div>
         <div class="box-body">
@@ -996,6 +997,13 @@ var fg_imglst = {
             methods: {
                 download_source_code: function() {
                     jarvis.download_file(this.r_source);
+                },
+
+                download_imgs: function() {
+                    for (let i = 0; i < this.img_fns.length; i++) {
+                        const fn = this.img_fns[i];
+                        jarvis.download_file(fn);
+                    }
                 }
             }
         })
