@@ -196,13 +196,23 @@ def _read_file(full_fn):
             df_coltype = coltype
             break
     
-    # get all treat
+    # get all treat for nma
     if 'treat' in df_columns:
         treats = list(df['treat'].unique())
     elif 't1' in df_columns:
         treats = list(set(df['t1'].unique().tolist() + df['t2'].unique().tolist()))
     else:
         treats = []
+
+    # get treatment and control for pwma
+    if 'treatment' in df_columns:
+        treatment = df['treatment'].unique().tolist()[0]
+    else:
+        treatment = ''
+    if 'control' in df_columns:
+        control = df['control'].unique().tolist()[0]
+    else:
+        control = ''
 
     # get the number of studies
     n_studies = int(df['study'].nunique())
@@ -214,6 +224,8 @@ def _read_file(full_fn):
         'coltype': df_coltype,
         'cols': ', '.join(STANDARD_DATA_COLS[coltype]),
         'treats': treats,
+        'treatment': treatment,
+        'control': control,
         'n_studies': n_studies
     }
 

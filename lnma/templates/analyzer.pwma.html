@@ -711,6 +711,20 @@ var fm_config = {
             disabled: false,
         },
 
+        treatment: {
+            selected: '',
+            use: true,
+            disabled: false,
+            options: []
+        },
+
+        control: {
+            selected: '',
+            use: true,
+            disabled: false,
+            options: []
+        },
+
         study_list: {
             selected: []
         },
@@ -1006,8 +1020,11 @@ var fm_config = {
         this.vpp.cfgs.pairwise_analysis.selected = input_format.substring(0, 4);
         // update study list
         this.vpp.cfgs.study_list.selected = data.raw;
-        // update selected for 
+        // update selected for sensitivity analysis
         this.vpp.cfgs.sensitivity_analysis_excluded_study_list.selected = [];
+        // update the treatment and control
+        this.vpp.cfgs.treatment.selected = data.treatment;
+        this.vpp.cfgs.control.selected = data.control;
         // update special rules
         if (input_format.includes('CATIRR_')) {
             this.vpp.cfgs.measure_of_effect.selected = 'IRR';
@@ -1129,9 +1146,11 @@ var jarvis = {
         // update loader info        
         fm_loader.set_dataset_summary(
             '<p class="box-p"><b>Input Data Summary</b></p>' + 
-            '<p class="box-p"><i class="fa fa-file"></i>: ' + data.filename + '</p>' +
-            '<p class="box-p"><i class="fa fa-shapes"></i>: ' + data.coltype + ' format</p>' +
-            '<p class="box-p"><i class="far fa-sticky-note"></i>: <b>' + data.n_studies + '</b> studies of ' + data.raw.length +' lines </p>'
+            '<p class="box-p"><i class="far fa-file"></i> Filename: ' + data.filename + '</p>' +
+            '<p class="box-p"><i class="fa fa-shapes"></i> Input Format: <b>' + data.coltype + '</b> format</p>' +
+            '<p class="box-p"><i class="far fa-sticky-note"></i> Studies: <b>' + data.n_studies + '</b> studies of ' + data.raw.length +' lines </p>' +
+            '<p class="box-p"><i class="fa fa-pills"></i> Treatment: <b>' + data.treatment + '</b> </p>' + 
+            '<p class="box-p"><i class="fa fa-tablets"></i> Control: <b>' + data.control + '</b> </p>'
         );
 
         // TODO check if the uploaded file works for this analysis
