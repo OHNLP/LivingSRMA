@@ -77,7 +77,7 @@ forest.meta(resultsraw,
             smlab = "{{ smlab_text }} (95% CI)", 
             weight.study = "{{ fixed_or_random }}", 
             lwd = 1.8, 
-            # plotwidth = "08cm", 
+            plotwidth = "08cm", 
             spacing = 1.3, 
             label.right = "Favours Control", 
             label.left = "Favours Treatment", 
@@ -155,7 +155,7 @@ dev.off()
 results.cum <- metacum(resultsraw, sortvar = PRI_CAT_RAWDATA_IRR${{ cumulative_meta_analysis_sortby }})
 
 fig_width <- 8
-fig_height <- fig_width * (0.25 + resultsraw$k * 0.03)
+fig_height <- fig_width * (0.25 + resultsraw$k * 0.04)
 png(filename="{{ fn_cumuplt }}", width=fig_width, height=fig_height, units='in', res=200)
 par(mar=c(2, 2, 2, 2))
 

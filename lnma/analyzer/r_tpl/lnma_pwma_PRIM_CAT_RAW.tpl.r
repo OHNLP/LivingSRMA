@@ -62,7 +62,7 @@ resultsraw <- metabin(Et,
 # prediction interval can be used (indicated with a logical)
 fig_width <- 10
 fig_height <- fig_width * (0.25 + resultsraw$k * 0.03)
-png(filename="{{ fn_outplt1 }}", width=fig_width, height=fig_height, units='in', res=400)
+png(filename="{{ fn_outplt1 }}", width=fig_width, height=fig_height, units='in', res=200)
 par(mar=c(1.5, 1, 1, 1))
 
 forest.meta(resultsraw, 
@@ -157,7 +157,7 @@ dev.off()
 results.cum <- metacum(resultsraw, sortvar = PRI_CAT_RAWDATA${{ cumulative_meta_analysis_sortby }})
 
 fig_width <- 8
-fig_height <- fig_width * (0.25 + resultsraw$k * 0.03)
+fig_height <- fig_width * (0.25 + resultsraw$k * 0.04)
 png(filename="{{ fn_cumuplt }}", width=fig_width, height=fig_height, units='in', res=200)
 par(mar=c(2, 2, 2, 2))
 

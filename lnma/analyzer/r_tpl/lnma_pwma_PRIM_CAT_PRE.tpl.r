@@ -144,7 +144,7 @@ dev.off()
 results.cum <- metacum(results, sortvar = PRI_CAT_PREDATA${{ cumulative_meta_analysis_sortby }})
 
 fig_width <- 8
-fig_height <- fig_width * (0.25 + results$k * 0.03)
+fig_height <- fig_width * (0.25 + results$k * 0.04)
 png(filename="{{ fn_cumuplt }}", width=fig_width, height=fig_height, units='in', res=200)
 par(mar=c(2, 2, 2, 2))
 
