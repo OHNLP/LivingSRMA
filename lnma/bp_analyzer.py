@@ -237,9 +237,6 @@ def _nma_analyze(rs, cfg):
     all_treats = list(all_treats)
     all_treats.sort()
 
-    # get the ref treatment
-    ref_treat = cfg['treat']
-
     # analyze!
     if analysis_method == 'freq':
         ret = freq_analyzer.analyze(rs, cfg)

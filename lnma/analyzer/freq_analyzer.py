@@ -36,10 +36,6 @@ def analyze(rs, cfg):
 
     params = {
         'submission_id': submission_id,
-        'reference_treatment': cfg['treat'],
-        'fixed_or_random': cfg['model'],
-        'which_is_better': cfg['better'],
-        'measure': cfg['measure'],
         'subtype': subtype,
 
         'fn_rscript': fn_rscript,
@@ -51,6 +47,11 @@ def analyze(rs, cfg):
         }),
     }
 
+    # put all the configs into param
+    for key in cfg:
+        params[key] = cfg[key]
+
+    # get result from other analyzer
     if cfg['freq_backend'] == 'netmeta':
         ret = analyze_by_netmeta(rs, params)
 
@@ -91,7 +92,6 @@ def analyze_by_netmeta(rs, params):
         'is_fixed': 'TRUE' if params['fixed_or_random'] == 'fixed' else 'FALSE',
         'is_random': 'TRUE' if params['fixed_or_random'] == 'random' else 'FALSE',
         'small_values_are': 'bad' if params['which_is_better'] == 'big' else 'good',
-        'netmeta_sm': params['measure'].upper(),
     }
     r_params.update(params)
 
@@ -169,7 +169,6 @@ def analyze_by_pairwise_netmeta(rs, params):
         'is_fixed': 'TRUE' if params['fixed_or_random'] == 'fixed' else 'FALSE',
         'is_random': 'TRUE' if params['fixed_or_random'] == 'random' else 'FALSE',
         'small_values_are': 'bad' if params['which_is_better'] == 'big' else 'good',
-        'netmeta_sm': params['measure'].upper(),
     }
     r_params.update(params)
 

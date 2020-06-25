@@ -116,7 +116,7 @@ def _bugsnet_trans_forest(arr, params):
     ret = {
         'title': "Comparison vs '%s'" % params['reference_treatment'],
         'subtitle': "%s Effect Model" % params['fixed_or_random'].title(),
-        'sm': params['measure'],
+        'sm': params['measure_of_effect'],
         'val_min': val_min,
         'val_max': val_max,
         'glb_min': glb_min,
@@ -249,7 +249,7 @@ def _netmeta_trans_forest(arr, params):
     ret = {
         'title': "Comparison vs '%s'" % params['reference_treatment'],
         'subtitle': "%s Effect Model" % params['fixed_or_random'].title(),
-        'sm': params['measure'],
+        'sm': params['measure_of_effect'],
         'val_min': val_min,
         'val_max': val_max,
         'glb_min': glb_min,
@@ -604,7 +604,7 @@ def _gemtc_trans_forest(arr, params):
     ret = {
         'title': "Comparison vs '%s'" % params['reference_treatment'],
         'subtitle': "%s Effect Model" % params['fixed_or_random'].title(),
-        'sm': params['measure'],
+        'sm': params['measure_of_effect'],
         'val_min': val_min,
         'val_max': val_max,
         'glb_min': glb_min,

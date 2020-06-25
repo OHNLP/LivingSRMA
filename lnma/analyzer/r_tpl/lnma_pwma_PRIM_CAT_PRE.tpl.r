@@ -90,7 +90,6 @@ forest.meta(results,
 dev.off()
 
 
-{% if sensitivity_analysis == 'no' and cumulative_meta_analysis == 'no' %}
 #generating the funnel plot (This is only for primary analysis- not for sensitivity and cumulative analysis)
 fig_width <- 8
 fig_height <- fig_width * 0.6
@@ -100,7 +99,6 @@ par(mar=c(2, 2, 1, 1))
 funnel.meta(results)
 
 dev.off()
-{% endif %}
 
 
 {% if sensitivity_analysis == 'yes' %}

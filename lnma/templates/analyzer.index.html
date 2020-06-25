@@ -390,9 +390,9 @@ Data Analyzer
                         <label title="Bayesian NMA Backend Engine">Input Format:</label>
                     </div>
                     <div class="box-bodyitem-value">
-                        <select v-model="input_format.selected"
-                            v-bind:disabled="input_format.disabled">
-                            <option v-for="option in input_format.options" v-bind:value="option.value">
+                        <select v-model="cfgs.input_format.selected"
+                            v-bind:disabled="cfgs.input_format.disabled">
+                            <option v-for="option in cfgs.input_format.options" v-bind:value="option.value">
                                 {{ option.text }}
                             </option>
                         </select>
@@ -405,9 +405,9 @@ Data Analyzer
                         <label title="Bayesian NMA Backend Engine">Analysis Method:</label>
                     </div>
                     <div class="box-bodyitem-value">
-                        <select v-model="analysis_method.selected"
-                            v-bind:disabled="analysis_method.disabled">
-                            <option v-for="option in analysis_method.options" v-bind:value="option.value">
+                        <select v-model="cfgs.analysis_method.selected"
+                            v-bind:disabled="cfgs.analysis_method.disabled">
+                            <option v-for="option in cfgs.analysis_method.options" v-bind:value="option.value">
                                 {{ option.text }}
                             </option>
                         </select>
@@ -420,9 +420,12 @@ Data Analyzer
                         <label title="Measure of Effect">Measure of Effect:</label>
                     </div>
                     <div class="box-bodyitem-value">
-                        <select v-model="measures.selected"
-                            v-bind:disabled="measures.disabled">
-                            <option v-for="option in measures.options" v-bind:value="option.value">
+                        <select v-model="cfgs.measure_of_effect.selected"
+                            v-bind:disabled="cfgs.measure_of_effect.disabled">
+                            <option 
+                                v-for="option in cfgs.measure_of_effect.options"
+                                v-bind:value="option.value"
+                                v-if="show_cfg_option('measure_of_effect', option.value)">
                                 {{ option.text }}
                             </option>
                         </select>
@@ -435,8 +438,8 @@ Data Analyzer
                         <label title="Reference Treatment">Ref. Treatment: </label>
                     </div>
                     <div class="box-bodyitem-value">
-                        <select v-model="treatments.selected">
-                            <option v-for="option in treatments.options" v-bind:value="option.value">
+                        <select v-model="cfgs.reference_treatment.selected">
+                            <option v-for="option in cfgs.reference_treatment.options" v-bind:value="option.value">
                                 {{ option.text }}
                             </option>
                         </select>
@@ -449,8 +452,8 @@ Data Analyzer
                         <label title="">Fixed / Random: </label>
                     </div>
                     <div class="box-bodyitem-value">
-                        <select v-model="fixed_or_random.selected">
-                            <option v-for="option in fixed_or_random.options" v-bind:value="option.value">
+                        <select v-model="cfgs.fixed_or_random.selected">
+                            <option v-for="option in cfgs.fixed_or_random.options" v-bind:value="option.value">
                                 {{ option.text }}
                             </option>
                         </select>
@@ -462,35 +465,11 @@ Data Analyzer
                         <label title="">Which is Better: </label>
                     </div>
                     <div class="box-bodyitem-value">
-                        <select v-model="which_is_better.selected">
-                            <option v-for="option in which_is_better.options" v-bind:value="option.value">
+                        <select v-model="cfgs.which_is_better.selected">
+                            <option v-for="option in cfgs.which_is_better.options" v-bind:value="option.value">
                                 {{ option.text }}
                             </option>
                         </select>
-                    </div>
-                </div>
-
-                <div class="box-bodyitem box-bodyitem-hl"
-                    v-bind:class="'d-display-' + (analysis.is_display?'block':'none')">
-                    <div class="box-bodyitem-label">
-                        <label title="">Analysis: </label>
-                    </div>
-                    <div class="box-bodyitem-value">
-                        <select v-model="analysis.selected">
-                            <option v-for="option in analysis.options" v-bind:value="option.value">
-                                {{ option.text }}
-                            </option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div class="box-bodyitem box-bodyitem-hl"
-                    v-bind:class="'d-display-' + (project_name.is_display?'block':'none')">
-                    <div class="box-bodyitem-label">
-                        <label title="">Project: </label>
-                    </div>
-                    <div class="box-bodyitem-value">
-                        <input v-model="project_name.value" />
                     </div>
                 </div>
     
@@ -697,93 +676,82 @@ Data Analyzer
 {% include "js/fig_saver.js" %}
 
 // This is the global variable for all the data used in this analysis
-var dataset = {
-    // there are 3 coltypes:
-    // 'HRLU': ['study', 't1', 't2', 'hr', 'upperci', 'lowerci'],
-    // 'ET': ['study', 'treat', 'event', 'total'],
-    // 'FTET': ['study', 'treat', 'event', 'total', 'time'],
-    coltype: null,
-    raw: [],
-    fn_raw_csv_file: '',
-    treatments: [],
-    nma_result: null,
+// var dataset = {
+//     // there are 3 coltypes:
+//     // 'HRLU': ['study', 't1', 't2', 'hr', 'upperci', 'lowerci'],
+//     // 'ET': ['study', 'treat', 'event', 'total'],
+//     // 'FTET': ['study', 'treat', 'event', 'total', 'time'],
+//     coltype: null,
+//     raw: [],
+//     fn_raw_csv_file: '',
+//     reference_treatment: [],
+//     nma_result: null,
 
-    // function
-    parse_treatments: function() {
-        if (this.coltype == 'HRLU') {
-            this.parse_treats_hr();
-        } else if (this.coltype == 'ET') {
-            this.parse_treats_et_series();
-        } else if (this.coltype == 'FTET') {
-            this.parse_treats_et_series();
-        } else {
-            msger.show('The data format in the input file is not supported', msger.WARNING);
-        }
-    },
+//     // function
+//     parse_treatments: function() {
+//         if (this.coltype == 'HRLU') {
+//             this.parse_treats_hr();
+//         } else if (this.coltype == 'ET') {
+//             this.parse_treats_et_series();
+//         } else if (this.coltype == 'FTET') {
+//             this.parse_treats_et_series();
+//         } else {
+//             msger.show('The data format in the input file is not supported', msger.WARNING);
+//         }
+//     },
 
-    // function
-    parse_treats_hr: function() {
-        this.treatments = [];
-        var tmp = {};
-        for (let i = 0; i < this.raw.length; i++) {
-            const r = this.raw[i];
-            tmp[r.t1] = 1;
-            tmp[r.t2] = 1;
-        }
-        for (var k in tmp) {
-            this.treatments.push({text: k, value: k});
-        }
-    },
+//     // function
+//     parse_treats_hr: function() {
+//         this.reference_treatment = [];
+//         var tmp = {};
+//         for (let i = 0; i < this.raw.length; i++) {
+//             const r = this.raw[i];
+//             tmp[r.t1] = 1;
+//             tmp[r.t2] = 1;
+//         }
+//         for (var k in tmp) {
+//             this.reference_treatment.push({text: k, value: k});
+//         }
+//     },
 
-    parse_treats_et_series: function() {
-        // clear old treatments
-        this.treatments = [];
-        var tmp = {}
-        for (let i = 0; i < this.raw.length; i++) {
-            const r = this.raw[i];
-            if (!tmp.hasOwnProperty(r.treat)) {
-                tmp[r.treat] = 1
-            }
-        }
-        for (var k in tmp) {
-            this.treatments.push({text: k, value: k});
-        }
-    },
+//     parse_treats_et_series: function() {
+//         // clear old reference_treatment
+//         this.reference_treatment = [];
+//         var tmp = {}
+//         for (let i = 0; i < this.raw.length; i++) {
+//             const r = this.raw[i];
+//             if (!tmp.hasOwnProperty(r.treat)) {
+//                 tmp[r.treat] = 1
+//             }
+//         }
+//         for (var k in tmp) {
+//             this.reference_treatment.push({text: k, value: k});
+//         }
+//     },
 
-    end: true
-};
+//     end: true
+// };
 
 
 var fm_config = {
     vpp: null,
     vpp_id: '#fm_config',
 
-    configs: {
-
-        btn_analyze: {
-            disabled: true,
-            txt_normal: 'Analyze',
-            txt_working: 'Analyze'
-        },
-
-        btn_getrsrc: {
-            disabled: true
-        },
-
-        treatments: {
-            selected: '',
-            options: []
-        },
-
+    cfgs: {
         _analyze_type: {
-            selected: 'pwma',
+            selected: 'nma',
             use: true,
             disabled: false,
         },
 
+        study_list: {
+            selected: []
+        },
+
         input_format: {
             selected: 'HRLU',
-            disabled: true,
+            use: true,
+            disabled: false,
             options: [
                 {text: 'HR, Lower, Upper', value: 'HRLU'},
                 {text: 'Event Total', value: 'ET'},
@@ -791,8 +759,17 @@ var fm_config = {
             ]
         },
 
+        reference_treatment: {
+            selected: '',
+            use: true,
+            disabled: false,
+            options: []
+        },
+
         analysis_method: {
             selected: 'freq',
+            use: true,
+            disabled: false,
             options: [
                 {text: 'Frequentist NMA', value: 'freq'},
                 {text: 'Bayesian NMA', value: 'bayes'},
@@ -800,35 +777,22 @@ var fm_config = {
             ]
         },
 
-        freq_backends: {
-            selected: 'netmeta',
-            options: [
-                {text: 'BUGsnet Package', value: 'bugsnet'},
-                {text: 'netmeta Package', value: 'netmeta'}
-            ]
-        },
-
-        bayes_backends: {
-            selected: 'dmetar',
-            options: [
-                {text: 'BUGsnet Package', value: 'bugsnet'},
-                {text: 'dmetar Package', value: 'dmetar'}
-            ]
-        },
-
-        measures: {
-            selected: 'rr',
+        measure_of_effect: {
+            selected: 'RR',
+            use: true,
             disabled: false,
             options: [
-                {text: 'Hazard Ratio', value: 'hr'},
-                {text: 'Risk Ratio', value: 'rr'},
-                {text: 'Odds Ratio', value: 'or'},
-                {text: 'Risk Difference', value: 'rd'}
+                {text: 'Hazard Ratio', value: 'HR'},
+                {text: 'Odds Ratio', value: 'OR'},
+                {text: 'Relative Risk', value: 'RR'},
+                {text: 'Risk Difference', value: 'RD'}
             ]
         },
 
         fixed_or_random: {
             selected: 'fixed',
+            use: true,
+            disabled: false,
             options: [
                 {text: 'Fixed Effect Model', value: 'fixed'},
                 {text: 'Random Effect Model', value: 'random'}
@@ -842,96 +806,203 @@ var fm_config = {
                 {text: 'Larger is Better', value: 'big'}
             ]
         },
+
+    },
+
+    // configs: {
+
+    //     btn_analyze: {
+    //         disabled: true,
+    //         txt_normal: 'Analyze',
+    //         txt_working: 'Analyze'
+    //     },
+
+    //     btn_getrsrc: {
+    //         disabled: true
+    //     },
+
+    //     reference_treatment: {
+    //         selected: '',
+    //         options: []
+    //     },
+
+    //     _analyze_type: {
+    //         selected: 'pwma',
+    //         use: true,
+    //         disabled: false,
+    //     },
+
+    //     input_format: {
+    //         selected: 'HRLU',
+    //         disabled: true,
+    //         options: [
+    //             {text: 'HR, Lower, Upper', value: 'HRLU'},
+    //             {text: 'Event Total', value: 'ET'},
+    //             {text: 'Follow-up Time, Event, Total', value: 'FTET'}
+    //         ]
+    //     },
+
+    //     analysis_method: {
+    //         selected: 'freq',
+    //         options: [
+    //             {text: 'Frequentist NMA', value: 'freq'},
+    //             {text: 'Bayesian NMA', value: 'bayes'},
+    //             // {text: 'Freq + Bayes NMA', value: 'both'}
+    //         ]
+    //     },
+
+    //     freq_backends: {
+    //         selected: 'netmeta',
+    //         options: [
+    //             {text: 'BUGsnet Package', value: 'bugsnet'},
+    //             {text: 'netmeta Package', value: 'netmeta'}
+    //         ]
+    //     },
+
+    //     bayes_backends: {
+    //         selected: 'dmetar',
+    //         options: [
+    //             {text: 'BUGsnet Package', value: 'bugsnet'},
+    //             {text: 'dmetar Package', value: 'dmetar'}
+    //         ]
+    //     },
+
+    //     measures: {
+    //         selected: 'rr',
+    //         disabled: false,
+    //         options: [
+    //             {text: 'Hazard Ratio', value: 'hr'},
+    //             {text: 'Risk Ratio', value: 'rr'},
+    //             {text: 'Odds Ratio', value: 'or'},
+    //             {text: 'Risk Difference', value: 'rd'}
+    //         ]
+    //     },
+
+    //     fixed_or_random: {
+    //         selected: 'fixed',
+    //         options: [
+    //             {text: 'Fixed Effect Model', value: 'fixed'},
+    //             {text: 'Random Effect Model', value: 'random'}
+    //         ]
+    //     },
+
+    //     which_is_better: {
+    //         selected: 'small',
+    //         options: [
+    //             {text: 'Lower is Better', value: 'small'},
+    //             {text: 'Larger is Better', value: 'big'}
+    //         ]
+    //     },
         
-        /////////////////////////////////////////////////////
-        // The followings are for development purpose
-        /////////////////////////////////////////////////////
+    //     /////////////////////////////////////////////////////
+    //     // The followings are for development purpose
+    //     /////////////////////////////////////////////////////
 
-        project_name: {
-            value: 'KDNC',
-            disabled: false,
-            is_display: false
-        },
+    //     project_name: {
+    //         value: 'KDNC',
+    //         disabled: false,
+    //         is_display: false
+    //     },
 
-        analysis: {
-            selected: 'pfs',
-            disabled: false,
-            is_display: false,
-            options: [
-                {text: 'PFS', value: 'pfs'},
-                {text: 'OS', value: 'os'},
-                {text: 'AEs', value: 'aes'}
-            ]
-        },
+    //     analysis: {
+    //         selected: 'pfs',
+    //         disabled: false,
+    //         is_display: false,
+    //         options: [
+    //             {text: 'PFS', value: 'pfs'},
+    //             {text: 'OS', value: 'os'},
+    //             {text: 'AEs', value: 'aes'}
+    //         ]
+    //     },
 
-        is_dev: false
-    },
+    //     is_dev: false
+    // },
 
-    settings: {
-        measures: {
-            default: {
-                selected: 'rr',
-                disabled: false,
-                options: [
-                    {text: 'Hazard Ratio', value: 'hr'},
-                    {text: 'Risk Ratio', value: 'rr'},
-                    {text: 'Odds Ratio', value: 'or'}
-                ]
-            },
+    // settings: {
+    //     measures: {
+    //         default: {
+    //             selected: 'rr',
+    //             disabled: false,
+    //             options: [
+    //                 {text: 'Hazard Ratio', value: 'hr'},
+    //                 {text: 'Risk Ratio', value: 'rr'},
+    //                 {text: 'Odds Ratio', value: 'or'}
+    //             ]
+    //         },
 
-            hr: {
-                selected: 'hr',
-                disabled: false,
-                options: [
-                    {text: 'Hazard Ratio', value: 'hr'}
-                ]
-            },
+    //         hr: {
+    //             selected: 'hr',
+    //             disabled: false,
+    //             options: [
+    //                 {text: 'Hazard Ratio', value: 'hr'}
+    //             ]
+    //         },
 
-            et: {
-                selected: 'rr',
-                disabled: false,
-                options: [
-                    {text: 'Risk Ratio', value: 'rr'},
-                    {text: 'Odds Ratio', value: 'or'},
-                    {text: 'Risk Difference', value: 'rd'}
-                ]
-            },
+    //         et: {
+    //             selected: 'rr',
+    //             disabled: false,
+    //             options: [
+    //                 {text: 'Risk Ratio', value: 'rr'},
+    //                 {text: 'Odds Ratio', value: 'or'},
+    //                 {text: 'Risk Difference', value: 'rd'}
+    //             ]
+    //         },
 
-            ett: {
-                selected: 'rr',
-                disabled: false,
-                options: [
-                    {text: 'Hazard Ratio', value: 'hr'},
-                    {text: 'Risk Ratio', value: 'rr'},
-                    {text: 'Odds Ratio', value: 'or'}
-                ]
-            }
-        }
-    },
+    //         ett: {
+    //             selected: 'rr',
+    //             disabled: false,
+    //             options: [
+    //                 {text: 'Hazard Ratio', value: 'hr'},
+    //                 {text: 'Risk Ratio', value: 'rr'},
+    //                 {text: 'Odds Ratio', value: 'or'}
+    //             ]
+    //         }
+    //     }
+    // },
 
     init: function() {
-        // var is_dev = getUrlParameter('is_dev');
-        // if (is_dev == 'yes') {
-        //     this.configs.analysis.is_display = true;
-        //     this.configs.project_name.is_display = true;
-        //     this.configs.is_dev = true;
-        // }
 
         this.vpp = new Vue({
             el: this.vpp_id,
-            data: this.configs,
+            data: {
+                cfgs: this.cfgs,
+                btn_analyze: {
+                    disabled: false,
+                    txt_working: 'Analyze',
+                    txt_normal: 'Analyze'
+                }
+            },
             methods: {
 
-                get_selected_for: function() {
-                    return this.fixed_or_random.selected;
-                },
-
                 analyze: function() {
+                    this.btn_analyze.disabled = true;
                     jarvis.analyze();
                 },
 
-                get_source_code: function() {
-                    window.open('./get_rsrc?fn=' + dataset.nma_params.fn_rscript)
+                show_cfg: function(cfg_name) {
+                    return this.cfgs[cfg_name].use;
+                },
+
+                show_cfg_option: function(cfg_name, option) {
+                    switch (cfg_name) {
+                        case 'measure_of_effect':
+                            switch (option) {
+                                case 'HR':
+                                    if (this.cfgs.input_format.selected == 'HRLU') return true;
+                                    else return false;
+                                    break;
+                                case 'OR':
+                                case 'RR':
+                                case 'RD':
+                                    return true;
+                                    break;
+                            }
+                            break;
+                        case 'fixed_or_random':
+                            return true;
+                            
+                    }
+                    return true;
                 }
             }
         })
@@ -939,80 +1010,28 @@ var fm_config = {
 
     enable_btn_analyze: function() {
         this.vpp.btn_analyze.disabled = false;
-        this.vpp.btn_analyze.disabled = false;
     },
 
     disable_btn_analyze: function() {
         this.vpp.btn_analyze.disabled = true;
-        this.vpp.btn_analyze.disabled = true;
     },
 
-    enable_btn_getrsrc: function() {
-        this.vpp.btn_getrsrc.disabled = false;
-    },
-
-    disable_btn_getrsrc: function() {
-        this.vpp.btn_getrsrc.disabled = true;
-    },
-
-    set_coltype_hr: function() {
-        this.vpp.measures = this.settings.measures.hr;
-        this.vpp.measures.disabled = true;
-        this.vpp.measures.selected = 'hr';
-        // the methods for calculation
-        this.vpp.freq_backends.selected = 'netmeta';
-        this.vpp.freq_backends.disabled = true;
-
-        this.vpp.bayes_backends.selected = 'dmetar';
-        this.vpp.bayes_backends.disabled = true;
-    },
-
-    set_coltype_et: function() {
-        // this.vpp.measures.disabled = true;
-        this.vpp.measures = this.settings.measures.et;
-
-        // the methods for calculation
-        this.vpp.freq_backends.selected = 'bugsnet';
-        this.vpp.freq_backends.disabled = true;
-
-        this.vpp.bayes_backends.selected = 'bugsnet';
-        this.vpp.bayes_backends.disabled = true;
-    }, 
-
-    set_coltype_ett: function() {
-        // this.vpp.measures.disabled = true;
-        this.vpp.measures = this.settings.measures.ett;
-
-        this.vpp.measures.selected = 'hr';
-        // the methods for calculation
-        this.vpp.freq_backends.selected = 'bugsnet';
-        this.vpp.freq_backends.disabled = true;
-
-        this.vpp.bayes_backends.selected = 'bugsnet';
-        this.vpp.bayes_backends.disabled = true;
-    }, 
-    
-    set_treatments: function(data) {
-        this.vpp.treatments.options = data;
-    },
-
-    set_selected_treatment: function(t) {
-        this.vpp.treatments.selected = t;
+    update_settings: function(data) {
+        // update the treatment list
+        this.vpp.cfgs.reference_treatment.options = data.treats.map(function(d) {
+            return { text: d, value: d };
+        })
+        this.vpp.cfgs.reference_treatment.selected = this.vpp.cfgs.reference_treatment.options[0].value;
+        
+        // the coltype is the input format!!!
+        this.vpp.cfgs.input_format.selected = data.coltype;
     },
 
     get_config: function() {
-        var cfg = {
-            _analyze_type: this.vpp._analyze_type.selected,
-            analysis_method: this.vpp.analysis_method.selected,
-            input_format: this.vpp.input_format.selected,
-            treat: this.vpp.treatments.selected,
-            measure: this.vpp.measures.selected,
-            model: this.vpp.fixed_or_random.selected,
-            better: this.vpp.which_is_better.selected,
-            analysis: this.vpp.analysis.selected,
-            project_name: this.vpp.project_name.value,
-            is_dev: this.vpp.is_dev
-        };
+        var cfg = {};
+        Object.keys(this.vpp.cfgs).map(function(k) {
+            cfg[k] = fm_config.vpp.cfgs[k].selected;
+        });
         return cfg;
     }
 };
@@ -1020,80 +1039,40 @@ var fm_config = {
 
 var jarvis = {
 
-    // read_data_file: function(fn) {
-    //     $.get(
-    //         './read_data_file',
-    //         {fn: fn},
-    //         function(data) {
-    //             jarvis.on_read_data_file(data);
-    //             $( "#dialog-dataset" ).dialog( "close" );
-    //         }, 'json'
-    //     )
-    // },
-
-    // read_data_file_in_path: function(fn, path) {
-    //     $.get(
-    //         './read_data_file',
-    //         {fn: fn, path: path},
-    //         function(data) {
-    //             jarvis.on_read_data_file(data);
-    //             $( "#dialog-dataset" ).dialog( "close" );
-
-    //         }, 'json'
-    //     )
-    // },
-
     on_read_data_file: function(data) {
-        dataset.raw = data.raw;
-        dataset.coltype = data.coltype;
-        dataset.parse_treatments();
+        // bind the data
+        this.xlsx_data = data;
+
+        // clear the old figures
+        this.clear_all_tables_and_figures();
 
         // update loader info        
         fm_loader.set_dataset_summary(
             '<p class="box-p"><b>Input Data Summary</b></p>' + 
             '<p class="box-p"><i class="fa fa-file"></i>: ' + data.filename + '</p>' +
             '<p class="box-p"><i class="fa fa-shapes"></i>: ' + data.coltype + ' format</p>' +
-            // '<p><i class="fa fa-columns"></i>: ' + data.cols + '</p>' +
             '<p class="box-p"><i class="fa fa-tablets"></i>: <b>' + data.treats.length + '</b> treats: ' + data.treats.join(', ') + '</p>' + 
             '<p class="box-p"><i class="far fa-sticky-note"></i>: <b>' + data.n_studies + '</b> studies of ' + data.raw.length +' lines </p>'
         );
 
-        // update settings
-        fm_config.set_treatments(dataset.treatments);
-        fm_config.set_selected_treatment(dataset.treatments[0].value);
+        // update the configs
         fm_config.enable_btn_analyze();
-
-        // the coltype is the input format!!!
-        fm_config.configs.input_format.selected = dataset.coltype;
-
-        if (dataset.coltype == 'HRLU') {
-            fm_config.set_coltype_hr();
-        } else if (dataset.coltype == 'ET') {
-            fm_config.set_coltype_et();
-        } else if (dataset.coltype == 'FTET') {
-            fm_config.set_coltype_ett();
-        } else {
-            fm_config.set_coltype_hr();
-        }
-
-        // clear the old figures
-        this.clear_all_tables_and_figures();
+        fm_config.update_settings(data);
     },
 
     analyze: function() {
         var cfg = fm_config.get_config();
-        var data = dataset.raw;
+        var rs = this.xlsx_data.raw;
         fm_config.disable_btn_analyze();
         this.clear_all_tables_and_figures();
 
         $.post(
             './analyze',
-            {rs: JSON.stringify(data), cfg: JSON.stringify(cfg)},
+            {rs: JSON.stringify(rs), cfg: JSON.stringify(cfg)},
             function(data) {
                 fm_config.enable_btn_analyze();
                 msger.show('Data File is analyzed');
-                // jarvis.update_bayes(data.data);
-                jarvis.update_plots(data.data);
+                jarvis.update(data.data);
             }, 'json'
 
         ).fail(function() {
@@ -1102,9 +1081,10 @@ var jarvis = {
         });
     },
 
-    update_plots: function(data) {
+    update: function(data) {
+        this.plot_data = data;
         // bind the result
-        dataset['rst_bayes'] = data;
+        // dataset['rst_bayes'] = data;
 
         // update the figures!
         tb_netcha.draw(data.netcha);
@@ -1163,6 +1143,36 @@ var jarvis = {
 
         // clear the netchar table
         tb_netcha.clear();
+    },
+
+    init: function() {
+
+        var isIE = /*@cc_on!@*/false || !!document.documentMode;
+        var isChrome = !!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime);
+
+        console.log('* User is using IE:', isIE);
+        if (isIE) {
+            // msger.ssmsg('The functions used in this website require advanced web technologies, which are <b>NOT</b> supported by Internet Explorer<br>Try using Google Chrome, Apple Safari, Mozilla Firefox or other modern browsers.')
+            return;
+        }
+
+        fm_loader.init();
+        fm_config.init();
+
+        tb_netcha.init();
+        fg_netplt.init();
+        fg_frsplt.init();
+
+        tb_lgtbd3.init();
+        tb_ranktb.init();
+
+        fg_scrplt.init();
+        fg_pscplt.init();
+
+        msger.init();
+
+        msger.ssmsg('Almost Initialized.')
+        setTimeout('msger.ssclose();', 1400);
     }
 };
 
@@ -1175,25 +1185,9 @@ var msger = {
     ERROR: 'error',
 
     init: function() {
-        // this.vpp = new Vue({
-        //     methods: {
-        //         show_message: function(msg, type) {
-                    
-        //             this.$message({
-        //                 showClose: true,
-        //                 message: msg,
-        //                 type: type
-        //             });
-        //         }
-        //     }
-        // })
     },
 
     show: function(msg, type) {
-        // if (typeof(type) == 'undefined') {
-        //     type = '';
-        // }
-        // this.vpp.show_message(msg, type);
         toast(msg);
     },
 
@@ -1207,38 +1201,8 @@ var msger = {
 };
 
 
-function init() {
-
-    var isIE = /*@cc_on!@*/false || !!document.documentMode;
-    var isChrome = !!window.chrome && (!!window.chrome.webstore || !!window.chrome.runtime);
-
-    console.log('* User is using IE:', isIE);
-    if (isIE) {
-        // msger.ssmsg('The functions used in this website require advanced web technologies, which are <b>NOT</b> supported by Internet Explorer<br>Try using Google Chrome, Apple Safari, Mozilla Firefox or other modern browsers.')
-        return;
-    }
-
-    fm_loader.init();
-    fm_config.init();
-
-    tb_netcha.init();
-    fg_netplt.init();
-    fg_frsplt.init();
-    
-    tb_lgtbd3.init();
-    tb_ranktb.init();
-    
-    fg_scrplt.init();
-    fg_pscplt.init();
-
-    msger.init();
-
-    msger.ssmsg('Almost Initialized.')
-    setTimeout('msger.ssclose();', 1400);
-}
-
 $(document).ready(function() {
-    init();
+    jarvis.init();
 })
 
 </script>

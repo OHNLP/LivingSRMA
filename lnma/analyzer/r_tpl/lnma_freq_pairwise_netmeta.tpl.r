@@ -38,7 +38,7 @@ mydata.p <- pairwise(list(treat1, treat2),
     list(event1, event2),
     list(n1, n2),
     data = mydata,
-    sm = '{{ netmeta_sm }}'
+    sm = '{{ measure_of_effect }}'
 )
 
 # Prepare data for netmeta package.
@@ -53,7 +53,7 @@ nma <- netmeta(TE = mydata.p$TE,
     treat2 = mydata.p$treat2,
     studlab = paste(mydata.p$study),
     data = mydata.p,
-    sm = '{{ netmeta_sm }}',
+    sm = '{{ measure_of_effect }}',
     comb.fixed = {{ is_fixed }},
     comb.random = {{ is_random }},
     reference.group = "{{ reference_treatment }}"
