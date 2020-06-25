@@ -51,10 +51,6 @@ def analyze(rs, cfg):
 
     params = {
         'submission_id': submission_id,
-        'reference_treatment': cfg['treat'],
-        'fixed_or_random': cfg['model'],
-        'which_is_better': cfg['better'],
-        'measure': cfg['measure'],
         'subtype': subtype,
 
         'fn_rscript': fn_rscript,
@@ -68,6 +64,10 @@ def analyze(rs, cfg):
             'subtype': subtype, 'submission_id': submission_id
         }),
     }
+
+    # put all the configs into param
+    for key in cfg:
+        params[key] = cfg[key]
     
     if cfg['bayes_backend'] == 'bugsnet':
         ret = analyze_by_bugsnet(rs, params)
@@ -104,10 +104,10 @@ def analyze_by_bugsnet(rs, params):
         'is_fixed': 'TRUE' if params['fixed_or_random'] == 'fixed' else 'FALSE',
         'is_random': 'TRUE' if params['fixed_or_random'] == 'random' else 'FALSE',
         'small_values_are': 'bad' if params['which_is_better'] == 'big' else 'good',
-        'netmeta_sm': params['measure'].upper(),
+
         # the followings are for BUGSnet
-        'measure_of_effect_to_link': R_BUGSNET_MEASURE2LINK[params['measure']],
-        'model_param_time_column': 'time = "time",' if params['measure'] == 'hr' else '',
+        'measure_of_effect_to_link': R_BUGSNET_MEASURE2LINK[params['measure_of_effect']],
+        'model_param_time_column': 'time = "time",' if params['measure_of_effect'] == 'hr' else '',
         'sucra_largerbetter': 'TRUE' if params['which_is_better'] == 'big' else 'FALSE',
     }
     r_params.update(params)
@@ -198,7 +198,6 @@ def analyze_by_dmetar(rs, params):
         'is_fixed': 'TRUE' if params['fixed_or_random'] == 'fixed' else 'FALSE',
         'is_random': 'TRUE' if params['fixed_or_random'] == 'random' else 'FALSE',
         'small_values_are': 'bad' if params['which_is_better'] == 'big' else 'good',
-        'netmeta_sm': params['measure'].upper(),
         'mtc_model_n_chain': 4,
         'sucra_lower_is_better': 'TRUE' if params['which_is_better'] == 'small' else 'FALSE'
     }

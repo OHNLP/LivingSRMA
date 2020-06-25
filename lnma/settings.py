@@ -55,9 +55,9 @@ RSCRIPT_TPL = {
 }
 
 R_BUGSNET_MEASURE2LINK = {
-    'hr': 'cloglog',  # Hazard Ratio
-    'rr': 'log',      # Risk Ratio
-    'or': 'logit'     # Odds Ratio
+    'HR': 'cloglog',  # Hazard Ratio
+    'RR': 'log',      # Risk Ratio
+    'OR': 'logit'     # Odds Ratio
 }
 
 TPL_FN = {
