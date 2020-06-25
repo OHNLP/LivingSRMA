@@ -56,9 +56,7 @@ def analyze(rs, cfg):
     params['tau_estimation_method'] = params['tau_estimation_method'].upper()
 
     # update some configs for sensitivity analysis and cumulative analysis
-    if params['pairwise_analysis'] == 'PRIM' and \
-       params['sensitivity_analysis'] == 'no' and \
-       params['cumulative_meta_analysis'] == 'no':
+    if params['pairwise_analysis'] == 'PRIM':
         params['fn_fnnlplt'] = TPL_FN['fnnlplt'].format(**{
             'subtype': subtype, 'submission_id': submission_id
         })
