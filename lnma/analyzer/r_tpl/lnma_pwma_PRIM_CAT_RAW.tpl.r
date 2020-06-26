@@ -131,7 +131,7 @@ forest.meta(results.sensitivity,
             smlab = "{{ smlab_text }} (95% CI)", 
             weight.study = "{{ fixed_or_random }}", 
             lwd = 1.8, 
-            plotwidth = "08cm", 
+            # plotwidth = "08cm", 
             spacing = 1.3, 
             label.left = "Favours {{ treatment }}", 
             label.right = "Favours {{ control }}", 
@@ -156,7 +156,7 @@ dev.off()
 # sortvar can be indicated by an object of class meta or by an object of original data set
 results.cum <- metacum(resultsraw, sortvar = PRI_CAT_RAWDATA${{ cumulative_meta_analysis_sortby }})
 
-fig_width <- 8
+fig_width <- 10
 fig_height <- fig_width * (0.25 + resultsraw$k * 0.04)
 png(filename="{{ fn_cumuplt }}", width=fig_width, height=fig_height, units='in', res=200)
 par(mar=c(2, 2, 2, 2))
@@ -170,7 +170,7 @@ forest.meta(results.cum,
             squaresize = 0.5, 
             weight.study = "{{ fixed_or_random }}", 
             lwd = 1.8, lty.{{ fixed_or_random }} = 2, 
-            plotwidth = "08cm", 
+            # plotwidth = "08cm", 
             spacing = 1.3, 
             # colgap.forest.left = "1cm", 
             # colgap.forest.right = "0.1cm", 
