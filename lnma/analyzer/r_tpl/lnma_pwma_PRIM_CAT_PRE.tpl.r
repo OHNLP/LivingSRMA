@@ -61,7 +61,7 @@ results <- metagen(TE,
 
 # generating the forest plot
 # prediction interval can be indicated with a logical
-fig_width <- 8
+fig_width <- 10
 fig_height <- fig_width * (0.3 + results$k * 0.03)
 png(filename="{{ fn_outplt1 }}", width=fig_width, height=fig_height, units='in', res=200)
 par(mar=c(1.5, 1, 1, 1))
