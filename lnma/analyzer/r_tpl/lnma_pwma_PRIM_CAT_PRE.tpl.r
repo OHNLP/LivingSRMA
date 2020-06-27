@@ -1,4 +1,4 @@
-## PWMA: Primary Meta-Analysis of precalculated (computed) risk ratios
+## PWMA: Primary Meta-Analysis of precalculated (computed) risk ratios and risk difference
 # Load meta package.
 library (meta)
 
