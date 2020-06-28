@@ -1,0 +1,111 @@
+{% extends '_layout_bs.html' %}
+
+{% block title %}
+RPLT IOTOX Figure API Demo
+{% endblock %}
+
+{% block style %}
+<style>
+</style>
+{% endblock %}
+
+{% block main %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-5">
+            <h2>RPLT IOTOX Figure API Demo</h2>
+            <p>API Test for <span class="code">/rplt/IOTOX</span>, parameters:</p>
+            <div>
+                <div class="form-group row">
+                    <label for="am" class="col-sm-3 col-form-label">Analyzer Model</label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" id="am" value="FOREST">
+                        <small id="emailHelp" class="form-text text-muted">The R script name for generating this figure. Available values of this parameter include: <br>
+                        FOREST, ;<br>
+                        SUBG: for subgroup analyze.</small>
+                    </div>
+ 
+                </div>
+
+                <div class="form-group row">
+                    <label for="ds" class="col-sm-3 col-form-label">Data Source</label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" id="ds" value="DS92">
+                        <small id="emailHelp" class="form-text text-muted">The data file name for generating this figure.</small>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label for="ct" class="col-sm-3 col-form-label">Cancer Type</label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" id="ct" value="Melanoma">
+                        <small id="emailHelp" class="form-text text-muted">The cancer type.</small>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label for="ae" class="col-sm-3 col-form-label">Adverse Event</label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" id="ae" value="EVENT_NAME">
+                        <small id="emailHelp" class="form-text text-muted">Adverse event name.</small>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label for="gd" class="col-sm-3 col-form-label">Other option</label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" id="gd" value="34">
+                        <small id="emailHelp" class="form-text text-muted">Other options...
+                        </small>
+                    </div>
+
+                </div>
+                
+                <div class="form-group row">
+                    <div class="col-sm-10">
+                        <button onclick="get_data();" class="btn btn-primary">
+                            Request Plot
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-md-7" style="padding-top: 20px;">
+            
+            <h4>Server Response: </h4>
+            <pre id="resp" style="width: 100%;">
+
+            </pre>
+            <img id="img" style="width: 100%; border: 3px solid #cccccc;" src="">
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+<script>
+function get_data() {
+    var ks = [
+        'am',
+        'ds',
+        'ct',
+        'ae'
+    ];
+    var cfg = {};
+    for (const k in ks) { cfg[k] = $('#' + k).val(); }
+
+    $.post(
+        '/rplt/IOTOX',
+        cfg,
+        function(data) {
+            console.log('* get return', data);
+            $('#resp').html(JSON.stringify(data, null, 2));
+            $('#img').attr('src', data.url);
+        }, 'json'
+    )
+}
+</script>
+{% endblock %}

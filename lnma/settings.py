@@ -52,6 +52,9 @@ RSCRIPT_TPL = {
     'pwma_SUBG_CATIRR_RAW': 'lnma_pwma_SUBG_CATIRR_RAW.tpl.r',
     'pwma_SUBG_CONTD_PRE': 'lnma_pwma_SUBG_CONTD_PRE.tpl.r',
     'pwma_SUBG_CONTD_RAW': 'lnma_pwma_SUBG_CONTD_RAW.tpl.r',
+
+    # for R Plots (RPLT)
+    'rplt_IOTOX_FOREST': 'lnma_rplt_IOTOX_FOREST.tpl.r' 
 }
 
 R_BUGSNET_MEASURE2LINK = {
