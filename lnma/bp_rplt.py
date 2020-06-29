@@ -60,6 +60,21 @@ def iotox():
     # is_hakn
     hk = request.form.get('hk', '').strip()
 
+    # check am
+    if am not in set(['FOREST']):
+        ret['msg'] = 'Unsupported analyzer'
+        return jsonify(ret)
+    
+    # check rs
+    if sm not in set(['OR', 'RR', 'RD']):
+        ret['msg'] = 'Unsupported measure of effect'
+        return jsonify(ret)
+    
+    # check hk
+    if hk not in set(['TRUE', 'FALSE']):
+        ret['msg'] = 'Unsupported value for Hartung-Knapp adjustment'
+        return jsonify(ret)
+
     # extract data
     try:
         rs = request.form.get('rs')
