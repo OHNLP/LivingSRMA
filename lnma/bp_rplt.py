@@ -34,7 +34,7 @@ def iotox():
 
     # prepare the return object
     ret = {
-        'success': True,
+        'success': False,
         'msg': '',
         'img': {
             'outplt1': { 'url': '' },
@@ -55,7 +55,6 @@ def iotox():
         rs = json.loads(rs)
     except Exception as err:
         print('wrong rs:', err)
-        ret['success'] = False
         ret['msg'] = 'Input data is not valid JSON format.'
         return jsonify(ret) 
 
@@ -71,14 +70,13 @@ def iotox():
         # TODO the return should be checked here
         # but most of time, the figure will be generated.
         if result['success']:
+            ret['success'] = True
             ret['img']['outplt1']['url'] = url_for('index.f', fn=result['params']['fn_outplt1'])
             ret['img']['cumuplt']['url'] = url_for('index.f', fn=result['params']['fn_cumuplt'])
         else:
-            ret['success'] = False
             ret['msg'] = result['msg']
     except Exception as err:
         print('Handling run-time error:', err)
-        ret['success'] = False
         ret['msg'] = 'System error, please check input data.'
 
     return jsonify(ret)
