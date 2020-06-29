@@ -32,39 +32,54 @@ def iotox():
     # define the pro ject name
     prj = 'IOTOX'
 
+    # prepare the return object
+    ret = {
+        'success': True,
+        'msg': '',
+        'img': {
+            'outplt1': { 'url': '' },
+            'cumuplt': { 'url': '' }
+        }
+    }
+
     # analyzer model
-    am = request.form.get('am')
+    am = request.form.get('am', '').strip()
     # measure_of_effect
-    sm = request.form.get('sm')
+    sm = request.form.get('sm', '').strip()
     # is_hakn
-    hk = request.form.get('hk')
+    hk = request.form.get('hk', '').strip()
 
-    # data
-    rs = request.form.get('rs')
-    rs = json.loads(rs)
+    # extract data
+    try:
+        rs = request.form.get('rs')
+        rs = json.loads(rs)
+    except Exception as err:
+        print('wrong rs:', err)
+        ret['success'] = False
+        ret['msg'] = 'Input data is not valid JSON format.'
+        return jsonify(ret) 
 
+    # create a config
     cfg = {
         'prj': prj,
         'analyzer_model': am,
         'measure_of_effect': sm,
         'is_hakn': hk,
     }
-
-    ret = {
-        'success': True,
-        'img': {
-            'outplt1': { 'url': '' },
-            'cumuplt': { 'url': '' }
-        }
-    }
-    # create a config
-    result = rplt_analyzer.analyze(rs, cfg)
-
-    ret['img']['outplt1']['url'] = url_for('index.f', fn=result['params']['fn_outplt1'])
-    ret['img']['cumuplt']['url'] = url_for('index.f', fn=result['params']['fn_cumuplt'])
-    
-    # TODO the return should be checked here
-    # but most of time, the figure will be generated.
+    try:
+        result = rplt_analyzer.analyze(rs, cfg)
+        # TODO the return should be checked here
+        # but most of time, the figure will be generated.
+        if result['success']:
+            ret['img']['outplt1']['url'] = url_for('index.f', fn=result['params']['fn_outplt1'])
+            ret['img']['cumuplt']['url'] = url_for('index.f', fn=result['params']['fn_cumuplt'])
+        else:
+            ret['success'] = False
+            ret['msg'] = result['msg']
+    except Exception as err:
+        print('Handling run-time error:', err)
+        ret['success'] = False
+        ret['msg'] = 'System error, please check input data.'
 
     return jsonify(ret)
     
