@@ -16,6 +16,7 @@ RPLT IOTOX Figure API Demo
             <h2>RPLT IOTOX Figure API Demo</h2>
             <p>
                 API Test for <span class="code">/rplt/IOTOX</span>. <br>
+                The return URL is the relative path to root, please add to absolute path in your own code. The server supports cross-domain access and HTTP header "Access-Control-Allow-Origin" has been added, so this service can be accessed from any server.
                 The usage of this function in JavaScript is also in the source code of this page for reference. <br>
                 There are 4 parameters:
             </p>
@@ -26,8 +27,7 @@ RPLT IOTOX Figure API Demo
                     <div class="col-sm-9">
                         <input type="text" class="form-control" id="am" value="FOREST">
                         <small id="amHelp" class="form-text text-muted">
-                            Analyzer Model: The R script token name for generating this figure. <br>
-                            Don't modify this.
+                            Analyzer Model: The R script token name for generating this figure. Do NOT modify this.
                         </small>
                     </div>
  
@@ -46,7 +46,7 @@ RPLT IOTOX Figure API Demo
                     <label for="rs" class="col-sm-3 col-form-label">rs</label>
                     <div class="col-sm-9">
                         <textarea class="form-control" id="rs" rows="20" style="font-size: 9px;"></textarea>
-                        <small id="rsHelp" class="form-text text-muted">The data for generating plots. Each study is an object, with 8 attributes (case sensitive), </small>
+                        <small id="rsHelp" class="form-text text-muted">The JSON data for generating plots. Each study is an object, with 8 attributes (case sensitive). The value of this parameter is a stringified JSON object.</small>
                     </div>
                 </div>
 
@@ -104,14 +104,21 @@ function get_data() {
     };
     console.log(params);
 
+    // clear the response area
+    $('#resp').html('Waiting for response ....');
+    $('#img-1').attr('src', '');
+    $('#img-2').attr('src', '');
+
+    var base = '';
+    // var base = 'https://workspace.network-meta-analysis.com/';
     $.post(
-        '/rplt/IOTOX',
+        base + '/rplt/IOTOX',
         params,
         function(data) {
             console.log('* get return', data);
             $('#resp').html(JSON.stringify(data, null, 2));
-            $('#img-1').attr('src', data.img['outplt1'].url);
-            $('#img-2').attr('src', data.img['cumuplt'].url);
+            $('#img-1').attr('src', base + data.img['outplt1'].url);
+            $('#img-2').attr('src', base + data.img['cumuplt'].url);
         }, 'json'
     )
 }
