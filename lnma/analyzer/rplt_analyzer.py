@@ -25,17 +25,36 @@ def analyze(rs, cfg):
     submission_id = hashlib.sha224(str(datetime.datetime.now()).encode('utf8')).hexdigest()[:12].upper()
     fn_rscript = TPL_FN['rscript'].format(submission_id=submission_id, subtype=subtype)
 
+    # prepare 
     params = {
         'submission_id': submission_id,
         'subtype': subtype,
 
+        # for R script
+        'smlab_text':  DIS_TEXT['MOE'][cfg['measure_of_effect']],
+        
         # file names
-        'fn_rscript': fn_rscript
+        'fn_rscript': fn_rscript,
+        'fn_csvfile': TPL_FN['csvfile'].format(**{
+            'subtype': subtype, 'submission_id': submission_id
+        }),
+        'fn_outplt1':  TPL_FN['outplt1'].format(**{
+            'subtype': subtype, 'submission_id': submission_id
+        }),
+        'fn_cumuplt':  TPL_FN['cumuplt'].format(**{
+            'subtype': subtype, 'submission_id': submission_id
+        }),
     }
 
     # put all the configs into param
     for key in cfg:
         params[key] = cfg[key]
+
+    full_filename_csvfile = os.path.join(TMP_FOLDER, params['fn_csvfile'])
+
+    # convert to dataframe and to csv data file for R script to load
+    df = pd.DataFrame(rs)
+    df.to_csv(full_filename_csvfile, index=False)
 
     # generate an R script for producing the results
     gen_rscript(

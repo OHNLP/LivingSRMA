@@ -14,51 +14,48 @@ RPLT IOTOX Figure API Demo
     <div class="row">
         <div class="col-md-5">
             <h2>RPLT IOTOX Figure API Demo</h2>
-            <p>API Test for <span class="code">/rplt/IOTOX</span>, parameters:</p>
+            <p>
+                API Test for <span class="code">/rplt/IOTOX</span>. <br>
+                The usage of this function in JavaScript is also in the source code of this page for reference. <br>
+                There are 4 parameters:
+            </p>
             <div>
                 <div class="form-group row">
-                    <label for="am" class="col-sm-3 col-form-label">Analyzer Model</label>
+                    <label for="am" class="col-sm-3 col-form-label">am
+                    </label>
                     <div class="col-sm-9">
                         <input type="text" class="form-control" id="am" value="FOREST">
-                        <small id="emailHelp" class="form-text text-muted">The R script name for generating this figure. Available values of this parameter include: <br>
-                        FOREST, ;<br>
-                        SUBG: for subgroup analyze.</small>
+                        <small id="amHelp" class="form-text text-muted">
+                            Analyzer Model: The R script token name for generating this figure. <br>
+                            Don't modify this.
+                        </small>
                     </div>
  
                 </div>
 
                 <div class="form-group row">
-                    <label for="ds" class="col-sm-3 col-form-label">Data Source</label>
+                    <label for="sm" class="col-sm-3 col-form-label">sm</label>
                     <div class="col-sm-9">
-                        <input type="text" class="form-control" id="ds" value="DS92">
-                        <small id="emailHelp" class="form-text text-muted">The data file name for generating this figure.</small>
+                        <input type="text" class="form-control" id="sm" value="OR">
+                        <small id="smHelp" class="form-text text-muted">The measure of effect. Available values include: <br>
+                            OR, RR, or RD.</small>
                     </div>
                 </div>
 
                 <div class="form-group row">
-                    <label for="ct" class="col-sm-3 col-form-label">Cancer Type</label>
+                    <label for="rs" class="col-sm-3 col-form-label">rs</label>
                     <div class="col-sm-9">
-                        <input type="text" class="form-control" id="ct" value="Melanoma">
-                        <small id="emailHelp" class="form-text text-muted">The cancer type.</small>
+                        <textarea class="form-control" id="rs" rows="20" style="font-size: 9px;"></textarea>
+                        <small id="rsHelp" class="form-text text-muted">The data for generating plots. Each study is an object, with 8 attributes (case sensitive), </small>
                     </div>
                 </div>
 
                 <div class="form-group row">
-                    <label for="ae" class="col-sm-3 col-form-label">Adverse Event</label>
+                    <label for="hk" class="col-sm-3 col-form-label">hk</label>
                     <div class="col-sm-9">
-                        <input type="text" class="form-control" id="ae" value="EVENT_NAME">
-                        <small id="emailHelp" class="form-text text-muted">Adverse event name.</small>
+                        <input type="text" class="form-control" id="hk" value="FALSE">
+                        <small id="hkHelp" class="form-text text-muted">The Hartung-Knapp adjustment setting, TRUE or FALSE</small>
                     </div>
-                </div>
-
-                <div class="form-group row">
-                    <label for="gd" class="col-sm-3 col-form-label">Other option</label>
-                    <div class="col-sm-9">
-                        <input type="text" class="form-control" id="gd" value="34">
-                        <small id="emailHelp" class="form-text text-muted">Other options...
-                        </small>
-                    </div>
-
                 </div>
                 
                 <div class="form-group row">
@@ -78,7 +75,8 @@ RPLT IOTOX Figure API Demo
             <pre id="resp" style="width: 100%;">
 
             </pre>
-            <img id="img" style="width: 100%; border: 3px solid #cccccc;" src="">
+            <img id="img-1" style="width: 100%; border: 3px solid #cccccc; margin: 5px 0;" src="">
+            <img id="img-2" style="width: 100%; border: 3px solid #cccccc; margin: 5px 0;" src="">
         </div>
     </div>
 </div>
@@ -87,25 +85,37 @@ RPLT IOTOX Figure API Demo
 
 {% block script %}
 <script>
+var rs_sample = [{
+    study: 'Raskob et al', year: 2017, Et: 41, Nt: 522, Ec: 59, Nc: 524
+}, {
+    study: 'Young et al', year: 2018, Et: 8, Nt: 203, Ec: 18, Nc: 203
+}, {
+    study: 'McBane et al', year: 2019, Et: 1, Nt: 145, Ec: 9, Nc: 142
+}, {
+    study: 'Young et al', year: 2020, Et:32, Nt: 576, Ec: 46, Nc: 579
+}];
+
 function get_data() {
-    var ks = [
-        'am',
-        'ds',
-        'ct',
-        'ae'
-    ];
-    var cfg = {};
-    for (const k in ks) { cfg[k] = $('#' + k).val(); }
+    var params = {
+        am: $('#am').val(),
+        sm: $('#sm').val(),
+        rs: $('#rs').val(),
+        hk: $('#hk').val()
+    };
+    console.log(params);
 
     $.post(
         '/rplt/IOTOX',
-        cfg,
+        params,
         function(data) {
             console.log('* get return', data);
             $('#resp').html(JSON.stringify(data, null, 2));
-            $('#img').attr('src', data.url);
+            $('#img-1').attr('src', data.img['outplt1'].url);
+            $('#img-2').attr('src', data.img['cumuplt'].url);
         }, 'json'
     )
 }
+// show the content
+$('#rs').val(JSON.stringify(rs_sample, null, 2));
 </script>
 {% endblock %}
