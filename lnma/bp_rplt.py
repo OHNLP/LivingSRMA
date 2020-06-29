@@ -22,7 +22,7 @@ bp = Blueprint("rplt", __name__, url_prefix="/rplt")
 
 @bp.route('/')
 def index():
-    return 'rplt'
+    return 'RPLT Service'
 
 
 @bp.route('/IOTOX', methods=['GET', 'POST'])
@@ -55,7 +55,7 @@ def iotox():
         rs = json.loads(rs)
     except Exception as err:
         print('wrong rs:', err)
-        ret['msg'] = 'Input data is not valid JSON format.'
+        ret['msg'] = 'Input data is missing or not valid JSON format.'
         return jsonify(ret) 
 
     # create a config
