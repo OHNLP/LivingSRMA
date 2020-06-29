@@ -28,7 +28,7 @@ resultsraw <- metabin(Et,
 # prediction interval can be used (indicated with a logical)
 fig_width <- 10
 fig_height <- fig_width * (0.25 + resultsraw$k * 0.03)
-png(filename="{{ fn_outplt1 }}", width=fig_width, height=fig_height, units='in', res=200)
+png(filename="{{ fn_outplt1 }}", width=fig_width, height=fig_height, units='in', res=150)
 par(mar=c(2, 2, 2, 2))
 
 forest.meta(resultsraw, 
@@ -62,7 +62,7 @@ results.cum <- metacum(resultsraw, sortvar = PRI_CAT_RAWDATA$year)
 
 fig_width <- 10
 fig_height <- fig_width * (0.25 + resultsraw$k * 0.04)
-png(filename="{{ fn_cumuplt }}", width=fig_width, height=fig_height, units='in', res=200)
+png(filename="{{ fn_cumuplt }}", width=fig_width, height=fig_height, units='in', res=150)
 par(mar=c(2, 2, 2, 2))
 
 #generating the forest plot for cumulative meta-analysis
