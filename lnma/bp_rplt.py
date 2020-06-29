@@ -42,6 +42,17 @@ def iotox():
         }
     }
 
+    # Authenticate
+    apikey_set = set([
+        '7323590e-577b-4f46-b19f-3ec401829bd6',
+        '9bebaa87-983d-42e4-ad70-4430c99aa886',
+        'a8c0c749-7263-4072-a313-99ccc76569d3'
+    ])
+    apikey = request.form.get('apikey', '').strip()
+    if apikey not in apikey_set:
+        ret['msg'] = 'Unauthorized request'
+        return jsonify(ret)
+
     # analyzer model
     am = request.form.get('am', '').strip()
     # measure_of_effect
