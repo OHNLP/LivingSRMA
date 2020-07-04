@@ -16,25 +16,31 @@ Study Importer
 
 <div class="content">
     <div class="container-fluid">
-        <div class="row">
-            <div class="col-lg-6">
-                <div class="card">
-                    <div class="card-body">
-                        <h5>Import studies by PMID List</h5>
-                        <p class="card-text">Input the PMID in the following area, one PMID per line.</p>
-                        <form action="[[ url_for('importer.upload_pmids') ]]" method="POST">
-                            <div class="form-group">
-                                <textarea class="form-control" id="input_pmids" name="pmids" rows="10"></textarea>
-                            </div>
-                            <button type="submit" class="btn btn-primary" placeholder="123456789\n234567891">
-                                <i class="fa fa-upload"></i>
-                                Upload These PMIDs
-                            </button>
-                        </form>
+        <div id="vw_uploader" class="row">
+            <div class="col-md-5">
+                <h5>Import Studies</h5>
+                <p class="card-text">Input the PMID in the following area, one PMID per line.</p>
+                <div>
+                    <div class="form-group">
+                        <textarea class="form-control" id="input_pmids" 
+                        name="pmids" rows="10"
+                        v-model="pmids"></textarea>
                     </div>
+                    <button class="btn btn-primary"
+                        v-on:click="import_studies">
+                        <i class="fa fa-upload"></i>
+                        Import these PMIDs
+                    </button>
+                    
                 </div>
             </div>
+
+            <div class="col-md-7">
+
+            </div>
         </div>
+
+
     </div>
 </div>
 
@@ -46,5 +52,40 @@ Study Importer
 {% block script %}
 <script>
 
+var vw_uploader = {
+    vpp: null,
+    vpp_id: '#vw_uploader',
+    api_url: '{{ url_for("importer.upload_pmids") }}',
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                pmids: ''
+            },
+            methods: {
+                import_studies: function() {
+                    vw_uploader.import_studies(this.pmids);
+                }
+            }
+        });
+    },
+
+    import_studies: function(pmids) {
+        $.post(
+            this.api_url,
+            {project_id:project_id, pmids:pmids}
+        )
+    }
+};
+
+var jarvis = {
+    init: function() {
+        vw_uploader.init();
+    }
+};
+$(document).ready(function() {
+    jarvis.init();
+})
 </script>
 {% endblock %}

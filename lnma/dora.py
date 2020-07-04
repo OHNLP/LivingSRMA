@@ -47,16 +47,47 @@ def list_projects_by_owner_uid(owner_uid):
     return projects
 
 
-def create_paper_by_pmid(project_id, pmid):
-    """Create a paper object by only the pmid
+def is_existed_project(project_id):
+    '''Check if a project exists
+    '''
+    project = Project.query.filter(Project.project_id==project_id).first()
+
+    if project is None:
+        return False
+    else:
+        return True
+
+
+def is_existed_paper(project_id, pid, pid_type='pmid'):
+    '''Check if a pid exists
+
+    By default check the pmid
+    '''
+    paper = Paper.query.filter(and_(
+        Paper.project_id == project_id,
+        Paper.pid == pid,
+        Paper.pid_type == pid_type
+    )).first()
+
+    if paper is None:
+        return False
+    else:
+        return True
+
+
+def create_paper(project_id, pid, pid_type='pmid', title=None, pub_date=None, authors=None, journal=None):
+    """Create a paper object, 
+
+    By default, the pmid. 
+    Please make sure the input pmid is NOT exist
     """
     paper_id = str(uuid.uuid1())
-    pid = pmid
-    pid_type = 'pmid'
-    title = ''
-    pub_date = ''
-    authors = ''
-    journal = ''
+    pid = pid
+    pid_type = pid_type
+    title = '' if title is None else title
+    pub_date = '' if pub_date is None else pub_date
+    authors = '' if authors is None else authors
+    journal = '' if journal is None else journal
     ss_st = ss_state.SS_ST_AUTO_PMID
     ss_pr = ss_state.SS_PR_NA
     ss_rs = ss_state.SS_RS_NA
