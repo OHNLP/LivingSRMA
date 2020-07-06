@@ -81,6 +81,7 @@ Study Screener
 
 {% block script %}
 <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+<script src="/static/lib/d3/d3.min.js"></script>
 <script>
 var vw_screener = {
     vpp: null,
@@ -89,6 +90,9 @@ var vw_screener = {
     api_url: {
         get_papers: '[[ url_for("screener.get_papers") ]]'
     },
+
+    fmt_date: d3.timeFormat('%Y-%m-%d'),
+    fmt_datetime: d3.timeFormat('%Y-%m-%d %H:%M:%S'),
 
     sample: {
         papers: [
@@ -108,6 +112,8 @@ var vw_screener = {
             }
             paper.year = paper.pub_date;
             paper.status = paper.ss_rs;
+            // change the date
+            paper.date_created = this.fmt_datetime(new Date(Date.parse(paper.date_created)));
         }
     },
 
@@ -129,11 +135,10 @@ var vw_screener = {
                 papers: data.papers,
                 // for the table
                 headers: [
-                    { text: 'PMID', value: 'pid' },
-                    { text: 'Authors', value: 'authors2' },
-                    { text: 'Year', value: 'year' },
-                    { text: 'Journal', value: 'journal' },
                     { text: 'Status', value: 'status' },
+                    { text: 'Year', value: 'year' },
+                    { text: 'Authors', value: 'authors2' },
+                    { text: 'Journal', value: 'journal' },
                     { text: 'Date Imported', value: 'date_created' },
                 ]
             },

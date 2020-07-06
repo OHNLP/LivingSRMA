@@ -1,0 +1,235 @@
+{% extends '_layout_adminlte.html' %}
+
+{% block title %}
+Study Screener
+{% endblock %}
+
+{% block style %}
+
+<style>
+.expanded-cell {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+.paper-thumbnail {
+    width: 150px;
+    height: 10px;
+    line-height: 8px;
+    font-size: 8px;
+    border: 1px solid #dddddd;
+    background-color: #dedede;
+    margin: 0 0 2px 0;
+    padding: 0 4px;
+    cursor: pointer;
+}
+.paper-thumbnail-small {
+    width: 25px;
+    height: 25px;
+    line-height: 25px;
+    font-size: 8px;
+    border: 1px solid #dddddd;
+    background-color: #ffffff;
+    margin: 0 2px 2px 0;
+    padding: 0;
+    cursor: pointer;
+    text-align: center;
+}
+.paper-thumbnail:hover,
+.paper-thumbnail-small:hover {
+    background-color: #333333;
+    color: white;
+}
+.paper-thumbnail:active,
+.paper-thumbnail-small:active {
+    background-color: #000000;
+    color: white;
+}
+
+/* for bootstrap tooltip */
+.tooltip-inner {
+    min-width: 150px;
+    max-width: 500px; 
+    color: #333333;
+    background-color: #ffffff;
+    border: #cccccc;
+    text-align: left;
+}
+</style>
+{% endblock %}
+
+{% block page_name %}
+<i class="fas fa-filter"></i>
+Study Screener
+{% endblock %}
+
+{% block content %}
+
+<div class="content">
+    <div class="container-fluid">
+        <div id="vw_screener" class="row">
+            <div class="col">
+                <h4 v-if="papers.length==0">All papers are screened!</h4>
+                <h4 v-else>{{ papers.length }} unscreened papers</h4>
+                <div class="row">
+                    <div class="col-2"
+                        v-if="paper_thumbnail_mode == 'short_text_bar'">
+                        <div class="paper-thumbnail"
+                            data-toggle="tooltip"
+                            data-html="true"
+                            v-bind:title="generate_tip(paper)"
+                            v-on:click="show_paper(paper)"
+                            v-for="paper in papers">
+                            {{ paper.year }} {{ paper.authors2 }}
+                        </div>
+                    </div>
+                    <div class="col-2"
+                        v-else>
+                        <div class="paper-thumbnail-small float-left"
+                            data-toggle="tooltip"
+                            data-html="true"
+                            v-bind:title="generate_tip(paper)"
+                            v-on:click="show_paper(paper)"
+                            v-for="paper in papers">{{ paper.year }}
+                        </div>
+                    </div>
+
+                    <div class="col-10">
+                        <div>
+                            <button type="button" class="btn btn-danger btn-sm">Exclude this paper</button> | 
+                            <button type="button" class="btn btn-primary btn-sm">Include this paper in SR</button> 
+                            <button type="button" class="btn btn-success btn-sm">Include this paper in SR + MA</button>
+                        </div>
+                        <hr>
+                        <div>
+                            <h5>{{ selected_paper.title }}</h5>
+                            <p>
+                                {{ selected_paper.pub_date }} 
+                                <b>{{ selected_paper.journal }}</b>
+                                <a title="Check the detail of this study in PubMed" target="_blank" :href="'https://pubmed.ncbi.nlm.nih.gov/' + selected_paper.pid">PMID: {{ selected_paper.pid }} </a>
+                            </p>
+                            <p>{{ selected_paper.authors }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block active_nav_link %}screener{% endblock %}
+
+{% block script %}
+<script src="/static/lib/d3/d3.min.js"></script>
+<script>
+var vw_screener = {
+    vpp: null,
+    vpp_id: '#vw_screener',
+
+    api_url: {
+        get_papers: '[[ url_for("screener.get_unscreened_papers") ]]'
+    },
+
+    fmt_date: d3.timeFormat('%Y-%m-%d'),
+    fmt_datetime: d3.timeFormat('%Y-%m-%d %H:%M:%S'),
+
+    parse_papers: function() {
+        for (let i = 0; i < this.data.papers.length; i++) {
+            const paper = this.data.papers[i];
+            // create a short string for authors
+            paper.authors2 = paper.authors.split(',')[0] + ' et al';
+            if (paper.authors2.length > 30) {
+                paper.authors2 = paper.authors2.substring(0, 30) + '...'
+            }
+            paper.year = paper.pub_date.substring(0, 4);
+            paper.status = paper.ss_rs;
+            // change the date
+            paper.date_created = this.fmt_datetime(new Date(Date.parse(paper.date_created)));
+        }
+    },
+
+    init: function(data) {
+        this.data = data;
+
+        // processing papers
+        this.parse_papers();
+
+        // update UI
+        this.vpp = new Vue({
+            el: this.vpp_id,
+
+            data: {
+                paper_thumbnail_mode: {
+                    selected: 'small_bar',
+                    options: [
+                        { value: 'small_bar', name: 'Small Bar' },
+                        { value: 'short_text_bar', name: 'Short Text Bar'}
+                    ]
+                },
+                selected_paper: data.papers[0],
+                papers: data.papers
+            },
+            methods: {
+                generate_tip: function(p) {
+                    return `${p.title}<br>
+${p.pub_date} <b> ${p.journal} </b> PMID: ${p.pid}<br>
+${p.authors2}`;
+                },
+
+                show_paper: function(p) {
+                    this.selected_paper = p;
+                }
+            },
+            mounted: function() {
+                vw_screener.update_tooltip();
+            }
+        });
+    },
+
+    load: function() {
+        var project_id = Cookies.get('project_id');
+        if (project_id == undefined) {
+            alert('Set working project first.');
+            return;
+        }
+        $.post(
+            this.api_url.get_papers,
+            {project_id: project_id},
+            function(data) {
+                console.log(data);
+                vw_screener.init(data);
+            }, 'json'
+        )
+    },
+
+    update_tooltip: function() {
+        $('.paper-thumbnail').tooltip({
+            html: true,
+            placement: 'right',
+            offset: 5
+        });
+        $('.paper-thumbnail-small').tooltip({
+            html: true,
+            placement: 'right',
+            offset: 5
+        });
+    }
+}
+
+var jarvis = {
+    init: function() {
+        vw_screener.load();
+    },
+
+    get_working_project_id: function() {
+
+    }
+};
+
+$(document).ready(function() {
+    jarvis.init();
+})
+</script>
+{% endblock %}

@@ -16,7 +16,7 @@ bp = Blueprint("screener", __name__, url_prefix="/screener")
 @bp.route('/')
 @login_required
 def index():
-    return render_template('screener.index.html')
+    return render_template('screener.index_v2.html')
 
 
 @bp.route('/get_papers', methods=['GET', 'POST'])
@@ -32,3 +32,19 @@ def get_papers():
         'papers': json_papers
     }
     return jsonify(ret)
+
+
+@bp.route('/get_unscreened_papers', methods=['GET', 'POST'])
+@login_required
+def get_unscreened_papers():
+    project_id = request.form.get('project_id')
+    papers = dora.get_unscreened_papers(project_id)
+
+    json_papers = [ p.as_dict() for p in papers ]
+
+    ret = {
+        'success': True,
+        'papers': json_papers
+    }
+    return jsonify(ret)
+

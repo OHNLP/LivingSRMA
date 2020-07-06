@@ -141,3 +141,12 @@ def get_papers(project_id):
     )).all()
 
     return papers
+
+
+def get_unscreened_papers(project_id):
+    papers = Paper.query.filter(and_(
+        Paper.project_id == project_id,
+        Paper.ss_rs == ss_state.SS_RS_NA
+    )).all()
+
+    return papers

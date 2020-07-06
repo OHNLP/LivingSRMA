@@ -37,6 +37,7 @@ My Projects
                                 <template v-slot:default>
                                     <thead>
                                         <th>Project Title</th>
+                                        <th>Short Identifier</th>
                                         <th># Studies</th>
                                         <th># SR</th>
                                         <th># MA</th>
@@ -46,6 +47,7 @@ My Projects
                                             :key='item.project_id'
                                             v-on:click="show_project_info(item)">
                                             <td>{{ item.title }}</td>
+                                            <td>{{ item.keystr }}</td>
                                             <td>0</td>
                                             <td>0</td>
                                             <td>0</td>
