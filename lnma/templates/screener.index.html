@@ -5,6 +5,15 @@ Study Screener
 {% endblock %}
 
 {% block style %}
+<link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+<style>
+.expanded-cell {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+</style>
 {% endblock %}
 
 {% block page_name %}
@@ -16,11 +25,50 @@ Study Screener
 
 <div class="content">
     <div class="container-fluid">
-        <div class="row">
-            <div class="col-lg-6">
-                <p class="lead">Below is an example form built entirely with Bootstrap’s form controls. Each required form group has a
-                    validation state that can be triggered by attempting to submit the form without completing it.</p>
-                
+        <div id="vw_screener" class="row">
+            <div class="col">
+                <template>
+                    <v-data-table
+                        dense
+                        :headers="headers"
+                        :items="papers"
+                        :single-expand="singleExpand"
+                        :expanded.sync="expanded"
+                        item-key="paper_id"
+                        show-select
+                        show-expand
+                        sort-by="year"
+                        sort-desc
+                        :page="0"
+                        :items-per-page="25"
+                        class="elevation-1">
+
+                        <template v-slot:expanded-item="{ headers, item }">
+                            <td :colspan="headers.length">
+                                <div class="row">
+                                    <div class="col-2">
+                                        <button class="btn btn-danger btn-sm" title="Exclude this study">
+                                           <i class="fa fa-ban"></i>
+                                        </button> | 
+                                        <button class="btn btn-primary btn-sm" title="Include this study in Systematic Review">
+                                            + SR
+                                        </button>
+                                        <button class="btn btn-success btn-sm" title="Include this study in Meta-Analysis">
+                                            + MA
+                                        </button>
+                                    </div>
+                                    <div class="col-10">
+                                        <i class="far fa-file"></i> <b>{{ item.title }}</b><br>
+                                        {{ item.pub_date }} <b>{{ item.journal }} </b> <a title="Check the detail of this study in PubMed" target="_blank" :href="'https://pubmed.ncbi.nlm.nih.gov/' + item.pid">PMID: {{ item.pid }} </a> <br>
+                                        {{ item.authors }}
+
+                                    </div>
+                                </div>
+                            </td>
+                        </template>
+
+                    </v-data-table>
+                </template>
             </div>
         </div>
     </div>
@@ -32,7 +80,97 @@ Study Screener
 {% block active_nav_link %}screener{% endblock %}
 
 {% block script %}
+<script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
 <script>
+var vw_screener = {
+    vpp: null,
+    vpp_id: '#vw_screener',
 
+    api_url: {
+        get_papers: '[[ url_for("screener.get_papers") ]]'
+    },
+
+    sample: {
+        papers: [
+            { paper_id: '0a324bd1', title: 'This is a long title about this study but I do not want to include this long title in the table', status: 'imported', pid: '12312323', authors: 'Authors 1 et al', year: 2019, journal: 'JAMA', date_created: '07/05/2020' },
+            { paper_id: '0a324bd2', title: 'This is a long title about this study but I do not want to include this long title in the table', status: 'imported', pid: '12312324', authors: 'Authors 2 et al', year: 2020, journal: 'JAMA', date_created: '07/01/2020' },
+            { paper_id: '0a324bd3', title: 'This is a long title about this study but I do not want to include this long title in the table', status: 'imported', pid: '12312325', authors: 'Authors 3 et al', year: 2018, journal: 'JAMA', date_created: '07/02/2020' }
+        ]
+    },
+
+    parse_papers: function() {
+        for (let i = 0; i < this.data.papers.length; i++) {
+            const paper = this.data.papers[i];
+            // create a short string for authors
+            paper.authors2 = paper.authors.split(',')[0] + ' et al';
+            if (paper.authors2.length > 30) {
+                paper.authors2 = paper.authors2.substring(0, 30) + '...'
+            }
+            paper.year = paper.pub_date;
+            paper.status = paper.ss_rs;
+        }
+    },
+
+    init: function(data) {
+        this.data = data;
+
+        // processing papers
+        this.parse_papers();
+
+        // update UI
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            vuetify: new Vuetify(),
+
+            data: {
+                expanded: [],
+                singleExpand: true,
+                
+                papers: data.papers,
+                // for the table
+                headers: [
+                    { text: 'PMID', value: 'pid' },
+                    { text: 'Authors', value: 'authors2' },
+                    { text: 'Year', value: 'year' },
+                    { text: 'Journal', value: 'journal' },
+                    { text: 'Status', value: 'status' },
+                    { text: 'Date Imported', value: 'date_created' },
+                ]
+            },
+            methods: {
+            }
+        });
+    },
+
+    load: function() {
+        var project_id = Cookies.get('project_id');
+        if (project_id == undefined) {
+            alert('Set working project first.');
+            return;
+        }
+        $.post(
+            this.api_url.get_papers,
+            {project_id: project_id},
+            function(data) {
+                console.log(data);
+                vw_screener.init(data);
+            }, 'json'
+        )
+    }
+}
+
+var jarvis = {
+    init: function() {
+        vw_screener.load();
+    },
+
+    get_working_project_id: function() {
+
+    }
+};
+
+$(document).ready(function() {
+    jarvis.init();
+})
 </script>
 {% endblock %}

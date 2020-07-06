@@ -1,7 +1,8 @@
 # for study screening import
 SS_ST_BATCH_SEARCH      = 'b10'
 SS_ST_BATCH_OTHER       = 'b11'
-SS_ST_BATCH_MANUAL      = 'b12'
+SS_ST_BATCH_PUBMEDCSV   = 'b12'
+SS_ST_BATCH_PMIDLIST    = 'b13'
 SS_ST_AUTO_SEARCH       = 'a10'
 SS_ST_AUTO_EMAIL        = 'a11'
 SS_ST_AUTO_PMID         = 'a12'
@@ -14,6 +15,7 @@ SS_PR_CHECKED_TITLE     = 'p50'
 SS_PR_CHECKED_FULLTEXT  = 'p60'
 SS_PR_CHECKED_SR        = 'p70'
 SS_PR_CHECKED_MA        = 'p80'
+SS_PR_CHECKED_SRMA      = 'p90'
 SS_PR_NA                = 'na'
 
 # for study screening result

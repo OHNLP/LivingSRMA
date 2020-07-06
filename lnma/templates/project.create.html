@@ -28,12 +28,21 @@ Create New Project
                             The project title must be at least 8 characters long, contain letters and numbers, no special characters.
                         </small>
                     </div>
+
+                    <div class="form-group">
+                        <label for="input_keystr">Short Identifier</label>
+                        <input type="text" class="form-control" id="input_keystr" name="title"
+                            placeholder="CAT">
+                        <small id="input_keystr_help" class="form-text text-muted">
+                            The project short identifier is used for checking updates in email or other data sources. It must be at least 3 characters long, contain upper case letters and numbers
+                        </small>
+                    </div>
                 
                     <div class="form-group">
                         <label for="input_query">Query</label>
                         <textarea class="form-control" id="input_query" name="query" rows="2"></textarea>
                         <small id="input_query_help" class="form-text text-muted">
-                            The query for automatic search.
+                            The query for automatic search in PubMed
                         </small>
                     </div>
                 

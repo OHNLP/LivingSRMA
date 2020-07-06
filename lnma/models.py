@@ -104,7 +104,7 @@ class Project(db.Model):
         }
 
     def __repr__(self):
-        return '<Project {0}:{1}>'.format(self.project_id, self.title)
+        return '<Project {0}: {1}>'.format(self.project_id, self.title)
 
 
 class Paper(db.Model):
@@ -116,7 +116,7 @@ class Paper(db.Model):
     paper_id = db.Column(db.String(48), primary_key=True, nullable=False)
     pid = db.Column(db.String(64), index=False)
     pid_type = db.Column(db.String(8), index=False)
-    project_id = db.Column(db.String(32), index=False)
+    project_id = db.Column(db.String(48), index=False)
     title = db.Column(db.String(256), index=False)
     pub_date = db.Column(db.String(32), index=False)
     authors = db.Column(db.Text, index=False)
@@ -130,25 +130,26 @@ class Paper(db.Model):
     is_deleted = db.Column(db.String(8), index=False)
 
     def as_dict(self):
-        return {
-            'paper_id': self.paper_id,
-            'pid': self.pid,
-            'pid_type': self.pid_type,
-            'project_id': self.project_id,
-            'title': self.title,
-            'pub_date': self.pub_date,
-            'authors': self.authors,
-            'journal': self.journal,
-            'meta': self.meta,
-            'ss_st': self.ss_st,
-            'ss_pr': self.ss_pr,
-            'ss_rs': self.ss_rs,
-            'date_created': self.date_created,
-            'date_updated': self.date_updated,
-        }
+        # return {
+        #     'paper_id': self.paper_id,
+        #     'pid': self.pid,
+        #     'pid_type': self.pid_type,
+        #     'project_id': self.project_id,
+        #     'title': self.title,
+        #     'pub_date': self.pub_date,
+        #     'authors': self.authors,
+        #     'journal': self.journal,
+        #     'meta': self.meta,
+        #     'ss_st': self.ss_st,
+        #     'ss_pr': self.ss_pr,
+        #     'ss_rs': self.ss_rs,
+        #     'date_created': self.date_created,
+        #     'date_updated': self.date_updated,
+        # }
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
     def __repr__(self):
-        return '<Paper {0}:{1} {2}>'.format(self.paper_id, self.pub_date, self.title)
+        return '<Paper {0}: {1} {2}>'.format(self.paper_id, self.pub_date, self.title)
 
 
 class Note(db.Model):
@@ -166,4 +167,4 @@ class Note(db.Model):
     is_deleted = db.Column(db.String(8), index=False)
 
     def __repr__(self):
-        return '<Note {0}:{1}>'.format(self.note_id, self.date_created)
+        return '<Note {0}: {1}>'.format(self.note_id, self.date_created)

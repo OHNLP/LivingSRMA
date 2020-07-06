@@ -13,12 +13,12 @@ IS_DELETED_NO = 'no'
 
 REL_PROJECT_USER_CREATOR = 'creator'
 
-def create_project(owner_uid, title, abstract, settings):
+def create_project(owner_uid, title, keystr=None, abstract="", settings={}):
     """Create a project based on given parameter
     """
     # create a project
     project_id = str(uuid.uuid1())
-    keystr = str(uuid.uuid1()).split('-')[0].upper()
+    keystr = str(uuid.uuid1()).split('-')[0].upper() if keystr is None else keystr
     date_created = datetime.datetime.now()
     date_updated = datetime.datetime.now()
     is_deleted = IS_DELETED_NO
@@ -75,7 +75,9 @@ def is_existed_paper(project_id, pid, pid_type='pmid'):
         return True
 
 
-def create_paper(project_id, pid, pid_type='pmid', title=None, pub_date=None, authors=None, journal=None):
+def create_paper(project_id, pid, 
+    pid_type='pmid', title=None, 
+    pub_date=None, authors=None, journal=None, ss_st=None):
     """Create a paper object, 
 
     By default, the pmid. 
@@ -88,7 +90,7 @@ def create_paper(project_id, pid, pid_type='pmid', title=None, pub_date=None, au
     pub_date = '' if pub_date is None else pub_date
     authors = '' if authors is None else authors
     journal = '' if journal is None else journal
-    ss_st = ss_state.SS_ST_AUTO_PMID
+    ss_st = ss_state.SS_ST_AUTO_PMID if ss_st is None else ss_st
     ss_pr = ss_state.SS_PR_NA
     ss_rs = ss_state.SS_RS_NA
     date_created = datetime.datetime.now()
@@ -117,3 +119,25 @@ def create_paper(project_id, pid, pid_type='pmid', title=None, pub_date=None, au
 
     return paper
     
+
+def create_paper_if_not_exist(project_id, pid, 
+    pid_type='pmid', title=None, 
+    pub_date=None, authors=None, journal=None, ss_st=None):
+    '''A wrapper function for create_paper and is_existed_paper
+    '''
+    
+    if is_existed_paper(project_id, pid, pid_type):
+        return None
+    else:
+        p = create_paper(project_id, pid, 
+            pid_type=pid_type, title=title, 
+            pub_date=pub_date, authors=authors, journal=journal, ss_st=ss_st)
+        return p
+
+
+def get_papers(project_id):
+    papers = Paper.query.filter(and_(
+        Paper.project_id == project_id
+    )).all()
+
+    return papers

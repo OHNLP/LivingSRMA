@@ -27,6 +27,7 @@ def create():
     project = dora.create_project(
         owner_uid = current_user.uid,
         title = request.form.get('title'),
+        keystr = request.form.get('keystr'),
         abstract = request.form.get('abstract'),
         settings={'collect_template': {}}
     )
