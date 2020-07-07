@@ -48,3 +48,22 @@ def get_unscreened_papers():
     }
     return jsonify(ret)
 
+
+@bp.route('/get_prisma')
+@login_required
+def get_prisma():
+    project_id = request.args.get('project_id')
+    prisma = dora.get_prisma(project_id)
+    ret = {
+        'success': True,
+        'prisma': prisma
+    }
+    return jsonify(ret)
+
+
+@bp.route('/sspr/exclude_all', methods=['GET', 'POST'])
+@login_required
+def sspr_exclude_all():
+    project_id = request.form.get('project_id')
+
+    return ''

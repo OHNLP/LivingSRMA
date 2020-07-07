@@ -66,6 +66,11 @@ Study Screener
 
 <div class="content">
     <div class="container-fluid">
+        <div class="row">
+            <div id="svgnode" class="col">
+                {% include 'svg/prisma.svg' %}
+            </div>
+        </div>
         <div id="vw_screener" class="row">
             <div class="col">
                 <h4 v-if="papers.length==0">All papers are screened!</h4>
@@ -95,7 +100,7 @@ Study Screener
 
                     <div class="col-10">
                         <div>
-                            <button type="button" class="btn btn-danger btn-sm">Exclude this paper</button> | 
+                            <button type="button" class="btn btn-danger btn-sm">Exclude this paper by title or abstract</button> | 
                             <button type="button" class="btn btn-primary btn-sm">Include this paper in SR</button> 
                             <button type="button" class="btn btn-success btn-sm">Include this paper in SR + MA</button>
                         </div>
@@ -219,8 +224,50 @@ ${p.authors2}`;
 }
 
 var jarvis = {
+
+    url_get_prisma: '[[ url_for("screener.get_prisma") ]]',
+
     init: function() {
+        var project_id = Cookies.get('project_id');
+        if (project_id == undefined) {
+            alert('Set working project first.');
+            return;
+        }
+
+
+
         vw_screener.load();
+        $('svg div').each(function(i, e) { 
+            var txt = $(e).text();
+
+            if (txt.indexOf('(n')==0) {
+                console.log(txt);
+            }
+        });
+
+        $('svg a').on('click', function(evt) { 
+            var href = $(this).attr('xlink:href');
+            console.log(href);
+        });
+
+        $.get(
+            this.url_get_prisma,
+            {project_id: project_id},
+            function(data) {
+                var svgtxt = document.getElementById('svgnode').innerHTML;
+
+                // replace the $$
+                for (let i = 0; i < data.prisma.sskeys.length; i++) {
+                    const ssk = data.prisma.sskeys[i];
+                    if (ssk == 'project_id') continue;
+                    var val = data.prisma[ssk];
+                    svgtxt = svgtxt.replace('$'+ssk+'$', '<span id="val-'+ssk+'">'+ val +'</span>');
+                }
+                
+                document.getElementById('svgnode').innerHTML = svgtxt;
+
+            }, 'json'
+        )
     },
 
     get_working_project_id: function() {

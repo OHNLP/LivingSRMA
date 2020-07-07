@@ -92,7 +92,7 @@ def upload_pmids():
         journal = paper['source']
 
         paper = dora.create_paper(project_id, pmid, 'pmid',
-            title, pub_date, authors, journal, ss_state.SS_ST_BATCH_PMIDLIST
+            title, pub_date, authors, journal, ss_state.SS_ST_AUTO_OTHER
         )
 
         ret['rs'].append({
@@ -155,7 +155,7 @@ def upload_pubmedcsv():
         p = dora.create_paper_if_not_exist(
             project_id, pmid, 'pmid',
             title, pub_date, authors, journal, 
-            ss_state.SS_ST_BATCH_PUBMEDCSV
+            ss_state.SS_ST_AUTO_OTHER
         )
 
         if p is None:

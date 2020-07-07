@@ -150,3 +150,47 @@ def get_unscreened_papers(project_id):
     )).all()
 
     return papers
+
+
+def get_prisma(project_id):
+    sql = """
+    select project_id,
+        count(*) as cnt,
+        count(case when ss_st = 'b10' then paper_id else null end) as b1,
+        count(case when ss_st = 'b12' then paper_id else null end) as b2,
+        count(case when ss_st in ('b10', 'b12') and ss_rs != 'e1' then paper_id else null end) as b3,
+        count(case when ss_st in ('b10', 'b12') and ss_rs != 'e1' then paper_id else null end) as b4,
+        count(case when ss_st in ('b10', 'b12') and ss_rs != 'e1' and ss_rs != 'e2' then paper_id else null end) as b5,
+        count(case when ss_st in ('b10', 'b12') and ss_rs in ('f1', 'f3') then paper_id else null end) as b6,
+        count(case when ss_st in ('b10', 'b12') and ss_rs = 'f3' then paper_id else null end) as b7,
+        
+        count(case when ss_rs = 'e2' then paper_id else null end) as e1,
+        count(case when ss_rs = 'e3' then paper_id else null end) as e2,
+        count(case when ss_rs = 'f1' then paper_id else null end) as e3,
+
+        count(case when ss_st in ('a10', 'a11', 'a12') then paper_id else null end) as a1,
+        count(case when ss_st in ('a10', 'a11', 'a12') and ss_rs = 'na' then paper_id else null end) as a1_na_na,
+        count(case when ss_st in ('a10', 'a11', 'a12') and ss_rs in ('f1', 'f3') then paper_id else null end) as a2,
+        count(case when ss_st in ('a10', 'a11', 'a12') and ss_rs = 'f3' then paper_id else null end) as a3,
+        
+        count(case when ss_st in ('a10', 'a11', 'a12') and ss_pr = 'p40' and ss_rs in ('f1', 'f3') then paper_id else null end) as u1,
+        count(case when ss_st in ('a10', 'a11', 'a12') and ss_pr = 'p40' and ss_rs = 'f3' then paper_id else null end) as u2,
+        
+        count(case when ss_rs in ('f1', 'f3') then paper_id else null end) as f1,
+        count(case when ss_rs = 'f3' then paper_id else null end) as f2
+
+    from papers
+    where project_id = '{project_id}'
+        and is_deleted = 'no'
+    group by project_id
+    """.format(project_id=project_id)
+    r = db.session.execute(sql).fetchone()
+
+    # put the values in prisma dict
+    prisma = {
+        'sskeys': r.keys()
+    }
+    for k in r.keys():
+        prisma[k] = r[k]
+
+    return prisma
