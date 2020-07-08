@@ -1,0 +1,457 @@
+{% extends '_layout_adminlte.html' %}
+
+{% block title %}
+Study Screener
+{% endblock %}
+
+{% block style %}
+
+<style>
+.expanded-cell {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+.paper-thumbnail {
+    width: 150px;
+    height: 10px;
+    line-height: 8px;
+    font-size: 8px;
+    border: 1px solid #dddddd;
+    background-color: #dedede;
+    margin: 0 0 2px 0;
+    padding: 0 4px;
+    cursor: pointer;
+}
+.paper-thumbnail-small {
+    width: 25px;
+    height: 25px;
+    line-height: 10px;
+    font-size: 8px;
+    border: 1px solid #dddddd;
+    background-color: #ffffff;
+    margin: 0 2px 2px 0;
+    padding: 1px 0 0 0;
+    cursor: pointer;
+    text-align: center;
+}
+.paper-thumbnail:hover,
+.paper-thumbnail-small:hover {
+    background-color: #333333;
+    color: white;
+}
+.paper-thumbnail:active,
+.paper-thumbnail-small:active {
+    background-color: #000000;
+    color: white;
+}
+.selected-paper-thumbnail {
+    border: 2px solid red !important;
+}
+/* for bootstrap tooltip */
+.tooltip-inner {
+    min-width: 150px;
+    max-width: 500px; 
+    color: #333333;
+    background-color: #ffffff;
+    border: #cccccc;
+    text-align: left;
+}
+</style>
+{% endblock %}
+
+{% block page_name %}
+<i class="fas fa-filter"></i>
+Study Screener
+{% endblock %}
+
+{% block content %}
+
+<div class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div id="svgnode" style="width: 500px;">
+                {% include 'svg/prisma.svg' %}
+            </div>
+
+            <div id="vw_screener" style="width: calc(100% - 500px)">
+                <h4 v-if="papers.length==0">No paper is in this stage</h4>
+                <h4 v-else>{{ papers.length }} papers in this stage</h4>
+
+                <div class="row">
+                    <div class="col" style="max-height: 300px; overflow-y: auto;">
+                        <div class="paper-thumbnail-small float-left"
+                            data-toggle="tooltip"
+                            data-html="true"
+                            v-bind:title="generate_tip(paper)"
+                            v-bind:class="paper.pid == selected_paper.pid ? 'selected-paper-thumbnail' : '' "
+                            v-on:click="show_paper(paper)"
+                            v-for="paper in papers" v-html="fmt_display_pmid(paper.pid)">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col">
+                        <div v-if="selected_paper == null">&nbsp;</div>
+
+                        <div v-else>
+                            <div>
+                                <button type="button" class="btn btn-danger btn-sm"
+                                    v-on:click="exclude_pp">
+                                    Exclude this paper
+                                </button> | 
+                                <button type="button" class="btn btn-warning btn-sm"
+                                    v-on:click="set_needchkft">
+                                    Check full text later
+                                </button> | 
+                                <button type="button" class="btn btn-primary btn-sm"
+                                    v-on:click="include_sr">
+                                    Include in SR
+                                </button> 
+                                <button type="button" class="btn btn-success btn-sm"
+                                    v-on:click="include_srma">
+                                    Include in SR + MA
+                                </button>
+                            </div>
+                            <hr>
+                        
+                            <h5>{{ selected_paper.title }}</h5>
+                            <p>
+                                {{ selected_paper.pub_date }} 
+                                <b>{{ selected_paper.journal }}</b>
+                                <a title="Check the detail of this study in PubMed" target="_blank" :href="'https://pubmed.ncbi.nlm.nih.gov/' + selected_paper.pid">PMID: {{ selected_paper.pid }} </a>
+                            </p>
+                            <p style="font-size: 11px;">{{ selected_paper.authors }}</p>
+                            <div style="font-size: 13px;">
+                                {{ selected_paper.abstract }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block active_nav_link %}screener{% endblock %}
+
+{% block script %}
+<script src="/static/lib/d3/d3.min.js"></script>
+<script>
+var vw_prisma = {
+
+    url_get_prisma: '[[ url_for("screener.get_prisma") ]]',
+
+    load: function() {
+        var project_id = Cookies.get('project_id');
+        $.get(
+            this.url_get_prisma,
+            {project_id: project_id},
+            function(data) {
+                vw_prisma.init(data);
+
+            }, 'json'
+        )
+
+    },
+
+    init: function(data) {
+
+        // update the content
+        var svgtxt = document.getElementById('svgnode').innerHTML;
+
+        // replace the $$ with jquery findable tag
+        for (let i = 0; i < data.prisma.stages.length; i++) {
+            const ssk = data.prisma.stages[i];
+            if (ssk == 'project_id') continue;
+            var val = data.prisma[ssk];
+            svgtxt = svgtxt.replace('$'+ssk+'$', '<span id="val-'+ssk+'">'+ val +'</span>');
+        }
+        document.getElementById('svgnode').innerHTML = svgtxt;
+
+        // bind the click event
+        $('svg a').on('click', function(evt) {
+            var stage = $(this).attr('xlink:href');
+            stage = stage.replace('#', '');
+            vw_screener.update_stage_papers(stage);
+        });
+    },
+
+    update: function() {
+        var project_id = Cookies.get('project_id');
+        $.get(
+            this.url_get_prisma,
+            {project_id: project_id},
+            function(data) {
+                // replace the values
+                for (let i = 0; i < data.prisma.stages.length; i++) {
+                    const ssk = data.prisma.stages[i];
+                    if (ssk == 'project_id') continue;
+
+                    // update the value here
+                    var val = data.prisma[ssk];
+                    var tag_id = '#val-' + ssk;
+                    $(tag_id).html(val);
+                }
+
+            }, 'json'
+        )
+    }
+};
+
+var vw_screener = {
+    vpp: null,
+    vpp_id: '#vw_screener',
+    stage: 'a1_na_na',
+
+    api_url: {
+        get_papers_by_stage: '[[ url_for("screener.get_papers_by_stage") ]]',
+        exclude_ta: '[[ url_for("screener.sspr_exclude_papers_ta") ]]',
+        exclude_ft: '[[ url_for("screener.sspr_exclude_papers_ft") ]]',
+        set_needchkft: '[[ url_for("screener.sspr_set_papers_needchkft") ]]',
+        include_sr: '[[ url_for("screener.sspr_include_papers_sr") ]]',
+        include_srma: '[[ url_for("screener.sspr_include_papers_srma") ]]',
+    },
+
+    fmt_date: d3.timeFormat('%Y-%m-%d'),
+    fmt_datetime: d3.timeFormat('%Y-%m-%d %H:%M:%S'),
+
+    parse_papers: function() {
+        for (let i = 0; i < this.data.papers.length; i++) {
+            const paper = this.data.papers[i];
+            // create a short string for authors
+            paper.authors2 = paper.authors.split(',')[0] + ' et al';
+            if (paper.authors2.length > 30) {
+                paper.authors2 = paper.authors2.substring(0, 30) + '...'
+            }
+            paper.year = paper.pub_date.substring(0, 4);
+            paper.status = paper.ss_rs;
+            // change the date
+            paper.date_created = this.fmt_datetime(new Date(Date.parse(paper.date_created)));
+        }
+    },
+
+    init: function() {
+        // update UI
+        this.vpp = new Vue({
+            el: this.vpp_id,
+
+            data: {
+                stage: this.stage,
+                paper_thumbnail_mode: {
+                    selected: 'small_bar',
+                    options: [
+                        { value: 'small_bar', name: 'Small Bar' },
+                        { value: 'short_text_bar', name: 'Short Text Bar'}
+                    ]
+                },
+                selected_paper: null,
+                papers: []
+            },
+            methods: {
+                generate_tip: function(p) {
+                    return `${p.title}\n
+${p.pub_date} ${p.journal}\n
+PMID: ${p.pid}\n
+${p.authors2}`;
+                },
+                generate_tip2: function(p) {
+                    return `${p.title}<br>
+${p.pub_date} <b> ${p.journal} </b> PMID: ${p.pid}<br>
+${p.authors2}`;
+                },
+
+                fmt_display_pmid: function(pmid) {
+                    return pmid.substring(0, 4) + '<br>' +
+                        pmid.substring(4, pmid.length);
+                },
+
+                show_paper: function(p) {
+                    this.selected_paper = p;
+                },
+
+                exclude_pp: function() {
+                    if (this.selected_paper == null) {
+                        alert('Please select one paper');
+                        return;
+                    }
+                    vw_screener.exclude_pp(this.selected_paper);
+                },
+
+                set_needchkft: function() {
+                    if (this.selected_paper == null) {
+                        alert('Please select one paper');
+                        return;
+                    }
+                    vw_screener.set_needchkft(this.selected_paper);
+                },
+
+                include_sr: function() {
+                    if (this.selected_paper == null) {
+                        alert('Please select one paper');
+                        return;
+                    }
+                    vw_screener.include_sr(this.selected_paper);
+                },
+
+                include_srma: function() {
+                    if (this.selected_paper == null) {
+                        alert('Please select one paper');
+                        return;
+                    }
+                    vw_screener.include_srma(this.selected_paper);
+                }
+            },
+            mounted: function() {
+                vw_screener.reset_tooltip();
+            }
+        });
+    },
+
+    exclude_pp: function(paper) {
+        // send request to backend
+        var project_id = Cookies.get('project_id');
+        var paper_ids = [paper.paper_id].join(',');
+        
+        var url = this.api_url.exclude_ta;
+        // there are two ways to decide which url to use
+        // 1. based on the stage of screening
+        // 2. based on the state of paper
+        // the result should be same
+        if (paper.ss_pr == 'p20' && paper.ss_rs == 'na') {
+            url = this.api_url.exclude_ft
+        }
+        $.post(
+            url,
+            {paper_ids: paper_ids, project_id: project_id},
+            function(data) {
+                // update the number and screener
+                vw_prisma.update();
+                vw_screener.update();
+            }, 'json'
+        )
+        
+    },
+
+    set_needchkft: function(paper) {
+        // send request to backend
+        var project_id = Cookies.get('project_id');
+        var paper_ids = [paper.paper_id].join(',');
+        $.post(
+            this.api_url.set_needchkft,
+            {paper_ids: paper_ids, project_id: project_id},
+            function(data) {
+                // update the number and screener
+                vw_prisma.update();
+                vw_screener.update();
+            }, 'json'
+        )
+    },
+
+    include_sr: function(paper) {
+        // send request to backend
+        var project_id = Cookies.get('project_id');
+        var paper_ids = [paper.paper_id].join(',');
+        $.post(
+            this.api_url.include_sr,
+            {paper_ids: paper_ids, project_id: project_id},
+            function(data) {
+                // update the number and screener
+                vw_prisma.update();
+                vw_screener.update();
+            }, 'json'
+        )
+    },
+
+    include_srma: function(paper) {
+        // send request to backend
+        var project_id = Cookies.get('project_id');
+        var paper_ids = [paper.paper_id].join(',');
+        $.post(
+            this.api_url.include_srma,
+            {paper_ids: paper_ids, project_id: project_id},
+            function(data) {
+                // update the number and screener
+                vw_prisma.update();
+                vw_screener.update();
+            }, 'json'
+        )
+    },
+
+    update: function() {
+        var project_id = Cookies.get('project_id');
+        $.post(
+            this.api_url.get_papers_by_stage,
+            {project_id: project_id, stage: this.stage},
+            function(data) {
+                console.log(data);
+
+                // processing papers
+                vw_screener.data = data;
+                vw_screener.parse_papers();
+
+                // update the view
+                vw_screener.vpp.papers = data.papers;
+
+                if (data.papers.length == 0) {
+                    vw_screener.vpp.selected_paper = null;
+                } else {
+                    vw_screener.vpp.selected_paper = data.papers[0];
+                }
+
+                // update the tooltip
+                vw_screener.reset_tooltip();
+            }, 'json'
+        )
+    },
+
+    update_stage_papers: function(stage) {
+        this.stage = stage;
+        this.update();
+    },
+
+    load: function(stage) {
+        var project_id = Cookies.get('project_id');
+        this.init();
+        this.update();
+    },
+
+    reset_tooltip: function() {
+        // $('.paper-thumbnail').tooltip({
+        //     html: true,
+        //     placement: 'bottom',
+        //     offset: 5
+        // });
+        // $('.paper-thumbnail-small').tooltip({
+        //     html: true,
+        //     placement: 'bottom',
+        //     offset: 5
+        // });
+    }
+}
+
+var jarvis = {
+
+    init: function() {
+        var project_id = Cookies.get('project_id');
+        if (project_id == undefined) {
+            alert('Set working project first.');
+            return;
+        }
+        vw_screener.load();
+        vw_prisma.load();
+    },
+
+    get_working_project_id: function() {
+
+    }
+};
+
+$(document).ready(function() {
+    jarvis.init();
+})
+</script>
+{% endblock %}

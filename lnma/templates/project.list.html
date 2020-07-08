@@ -5,8 +5,6 @@ My Projects
 {% endblock %}
 
 {% block stylelink %}
-<link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
 {% endblock %}
 
 {% block style %}
@@ -28,62 +26,37 @@ My Projects
 <div class="content">
     <div class="container-fluid">
         <div class="row">
-            <div class="col-lg-7">
-                <p class="lead">Al my projects are listed here.</p>
-                <div class="card">
-                    <div class="card-body">
-                        <div id="tb_project_list" style="width: 100%;">
-                            <v-simple-table>
-                                <template v-slot:default>
-                                    <thead>
-                                        <th>Project Title</th>
-                                        <th>Short Identifier</th>
-                                        <th># Studies</th>
-                                        <th># SR</th>
-                                        <th># MA</th>
-                                    </thead>
-                                    <tbody>
-                                        <tr v-for="item in projects" 
-                                            :key='item.project_id'
-                                            v-on:click="show_project_info(item)">
-                                            <td>{{ item.title }}</td>
-                                            <td>{{ item.keystr }}</td>
-                                            <td>0</td>
-                                            <td>0</td>
-                                            <td>0</td>
-                                        </tr>
-                                    </tbody>
-                                </template>
-                            </v-simple-table>
+            <div id="tb_project_list" class="col">
+                <div class="row">
+                    
+                    <div class="col-4"
+                        v-for="item in projects">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5>{{ item.title }}</h5>
+                                <p>Project Identifier: <b>{{ item.keystr }}</b></p>
+                                <p>Members: </p>
+                                <p>Studies: </p>
+                                
+                                <div>
+                                    <button type="submit" class="btn btn-primary btn-sm"
+                                        v-on:click="set_as_working_project(item.project_id, item.title);">
+                                        <i class="far fa-edit"></i>
+                                        Set as Working Project
+                                    </button>
+
+                                    <button class="btn btn-sm">
+                                        <i class="fa fa-trash"></i>
+                                        Delete This Project
+                                    </button>
+                                </div>
+                            </div>
+                                
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <div class="col-lg-5">
-                <div class="card">
-                    <div class="card-body">
-                        <div id="tb_project_info" style="width: 100%;">
-                            <h4>
-                                <i class="far fa-folder"></i>
-                                {{ project.title }}
-                            </h4>
-                            <p>KEY STRING: <span id="project_keystr">{{ project.keystr }}</span></p>
-                            <p>{{ project.abstract }}</p>
-                            <hr>
-                            <button type="submit" class="btn btn-primary"
-                                v-on:click="set_as_working_project();">
-                                <i class="far fa-edit"></i>
-                                Set as Working Project
-                            </button>
-
-                            <button class="btn btn-danger">
-                                <i class="fa fa-trash"></i>
-                                Delete This Project
-                            </button>
-                        </div>
-                    </div>
                 </div>
+
             </div>
         </div><!-- /.row -->
 
@@ -96,8 +69,6 @@ My Projects
 {% block active_nav_link %}project-list{% endblock %}
 
 {% block script %}
-<!-- third party package for this page -->
-<script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
 
 <!-- my script -->
 <script>
@@ -125,49 +96,15 @@ var tb_project_list = {
         }
         this.vpp = new Vue({
             el: this.vpp_id,
-            vuetify: new Vuetify(),
             data: this.vpp_data,
             methods: {
                 show_project_info: function(project) {
                     tb_project_info.update(project);
-                }
-            }
-        })
-    }
-}
+                },
 
-
-var tb_project_info = {
-    vpp: null,
-    vpp_id: '#tb_project_info',
-    vpp_data: {},
-
-    data_url: "[[ url_for('project.api_list') ]]",
-
-    load: function() {
-        $.get(
-            this.data_url,
-            {},
-            function(data) {
-                tb_project_list.init(data);
-            }, 'json'
-        )
-    },
-
-    init: function(data) {
-        this.data = data;
-        this.vpp_data = {
-            project: data.projects[0]
-        }
-        this.vpp = new Vue({
-            el: this.vpp_id,
-            vuetify: new Vuetify(),
-            data: this.vpp_data,
-            methods: {
-                set_as_working_project: function() {
-                    Cookies.set('project_id', this.project.project_id);
-                    Cookies.set('project_title', this.project.title);
-
+                set_as_working_project: function(project_id, title) {
+                    Cookies.set('project_id', project_id);
+                    Cookies.set('project_title', title);
                     location.reload();
                 },
 
@@ -176,29 +113,24 @@ var tb_project_info = {
                 }
             }
         })
-    },
-
-    update: function(project) {
-        this.vpp_data.project = project;
     }
 }
 
 
-var panda = {
+var jarvis = {
     init: function() {
         $.get(
-            tb_project_info.data_url,
+            tb_project_list.data_url,
             {},
             function(data) {
                 tb_project_list.init(data);
-                tb_project_info.init(data);
             }, 'json'
         )
     }
 }
 
 $(document).ready(function() {
-    panda.init();
+    jarvis.init();
 })
 </script>
 {% endblock %}

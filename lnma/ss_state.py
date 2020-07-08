@@ -18,6 +18,7 @@ SS_PR_UPDATE_EXIST      = 'p40'
 SS_PR_NA                = 'na'
 
 # for study screening result
+SS_RS_EXCLUDED_NOTFOUND = 'e00'
 SS_RS_EXCLUDED_DUP      = 'e1'
 SS_RS_EXCLUDED_TITLE    = 'e2'
 SS_RS_EXCLUDED_FULLTEXT = 'e3'

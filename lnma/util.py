@@ -1,5 +1,11 @@
+#%% define packages and methods
 import json
+import time
 import requests
+try:
+    import xml.etree.cElementTree as ET
+except ImportError:
+    import xml.etree.ElementTree as ET
 
 from sqlalchemy.ext.declarative import DeclarativeMeta
 
@@ -40,53 +46,185 @@ def allowed_file_format(fn, exts=['csv', 'xls', 'xlsx']):
 PUBMED_URL = {
     'base': 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/',
     'esearch': 'esearch.fcgi?db={db}&term={term}&retmode=json',
-    'esummary': 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db={db}&id={ids}&retmode=json',
-    'efetch': "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db={db}&id={uid}&retmode={retmote}&retype={retype}",
+    'esummary': 'esummary.fcgi?db={db}&id={ids}&retmode=json',
+    'efetch': "efetch.fcgi?db={db}&id={uid}&retmode={retmode}",
 }
 
-def _get_search_url(term, db='pubmed'):
+def _get_e_search_url(term, db='pubmed'):
     url = PUBMED_URL['base'] + PUBMED_URL['esearch'].format(db=db, term=term)
     return url
 
 
-def _get_summary_url(ids, db='pubmed'):
+def _get_e_summary_url(ids, db='pubmed'):
     url = PUBMED_URL['base'] + PUBMED_URL['esummary'].format(db=db, ids=ids)
     return url
 
 
-def _get_fetch_url(uid, db='pubmed', retmode='json', retype='abstract'):
-    url = PUBMED_URL['base'] + PUBMED_URL['efetch'].format(db=db, uid=uid, retmode=retmode, retype=retype)
+def _get_e_fetch_url(uid, db='pubmed', retmode='xml'):
+    url = PUBMED_URL['base'] + PUBMED_URL['efetch'].format(db=db, uid=uid, retmode=retmode)
     return url
 
 
 def e_search(term, db='pubmed'):
     '''search for term in pubmed
     '''
-    url = _get_search_url(term)
-    r = requests.get(url)
-    if r.status_code != 200:
-        print('* something wrong: {0}'.format(r.status_code))
-        return None
-    return r.json()
+    try_times = 0
+
+    while True:
+        url = _get_e_search_url(term)
+        print('* e_search %s' % url)
+        r = requests.get(url)
+
+        if r.status_code == 200:
+            return r.json()
+
+        # something wrong?
+        try_times += 1
+        print('* Something wrong, HTTP Status Code: {0}'.format(r.status_code))
+        if r.status_code == 429:
+            print('* Reached MAX request limit of PubMed')
+
+        if try_times < 3:
+            dur = 7 * try_times
+            print('* Wait for %s seconds and try again ...' % dur)
+            time.sleep(dur)
+        else:
+            break
+    
+    print('* Tried e_search %s times but still failed ...' % try_times)
+    return None
 
 
 def e_summary(ids, db='pubmed'):
     '''get summary of pmid list
     '''
-    url = _get_summary_url(','.join(ids))
-    r = requests.get(url)
-    if r.status_code != 200:
-        print('* something wrong: {0}'.format(r.status_code))
-        return None
-    return r.json()
+    try_times = 0
+
+    while True:
+        url = _get_e_summary_url(','.join(ids))
+        print('* e_summary %s' % url)
+        r = requests.get(url)
+
+        if r.status_code == 200:
+            return r.json()
+
+        # something wrong?
+        try_times += 1
+        print('* Something wrong, HTTP Status Code: {0}'.format(r.status_code))
+        if r.status_code == 429:
+            print('* Reached MAX request limit of PubMed')
+
+        if try_times < 3:
+            dur = 7 * try_times
+            print('* Wait for %s seconds and try again ...' % dur)
+            time.sleep(dur)
+        else:
+            break
+    
+    print('* Tried e_summary %s times but still failed ...' % try_times)
+    return None
+
+    
+def _e_fetch(ids, db='pubmed'):
+    '''get the raw xml data from pubmed
+    '''
+    try_times = 0
+
+    while True:
+        url = _get_e_fetch_url(','.join(ids))
+        print('* e_fetch %s' % url)
+        r = requests.get(url)
+
+        if r.status_code == 200:
+            return r.text
+
+        # something wrong?
+        try_times += 1
+        print('* Something wrong, HTTP Status Code: {0}'.format(r.status_code))
+        if r.status_code == 429:
+            print('* Reached MAX request limit of PubMed')
+
+        if try_times < 3:
+            dur = 7 * try_times
+            print('* Wait for %s seconds and try again ...' % dur)
+            time.sleep(dur)
+        else:
+            break
+    
+    print('* Tried e_fetch %s times but still failed ...' % try_times)
+    return None
 
 
 def e_fetch(ids, db='pubmed'):
-    '''get ?
+    '''get jsonfied data
     '''
-    url = _get_fetch_url(','.join(ids))
-    r = requests.get(url)
-    if r.status_code != 200:
-        print('* something wrong: {0}'.format(r.status_code))
+    text = _e_fetch(ids, db)
+
+    if text is None:
         return None
-    return r.json()
+
+    # parse the xml tree
+    root = ET.fromstring(text)
+
+    ret = {
+        'result': {
+            'uids': []
+        }
+    }
+    for item in root.findall('PubmedArticle'):
+        # check each item
+        paper = {
+            'uid': '',
+            'sortpubdate': [],
+            'source': '',
+            'title': '',
+            'authors': [],
+            'abstract': []
+        }
+
+        # check each xml node
+        for node in item.iter():
+            if node.tag == 'PMID': 
+                paper['uid'] = node.text
+
+            elif node.tag == 'ArticleTitle':
+                paper['title'] = node.text
+
+            elif node.tag == 'Abstract':
+                for c in node:
+                    if c is None or c.text is None:
+                        pass
+                    else:
+                        paper['abstract'].append(c.text)
+
+            elif node.tag == 'ISOAbbreviation':
+                paper['source'] = node.text
+
+            elif node.tag == 'DateRevised':
+                for c in node:
+                    paper['sortpubdate'].append(c.text)
+                
+            elif node.tag == 'AuthorList':
+                for c in node:
+                    fore_name = c.find('ForeName')
+                    last_name = c.find('LastName')
+                    name = ('' if fore_name is None else fore_name.text) + ' ' + \
+                           ('' if last_name is None else last_name.text)
+
+                    paper['authors'].append({
+                        'name': name,
+                        'authtype': 'Author'
+                    })
+        # merge abstract
+        paper['abstract'] = ' '.join(paper['abstract'])
+        paper['sortpubdate'] = '-'.join(paper['sortpubdate'])
+
+        # append to return
+        if paper['uid'] != '':
+            ret['result']['uids'].append(paper['uid'])
+            ret['result'][paper['uid']] = paper
+
+    return ret
+
+
+#%% test 

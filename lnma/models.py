@@ -117,7 +117,8 @@ class Paper(db.Model):
     pid = db.Column(db.String(64), index=False)
     pid_type = db.Column(db.String(8), index=False)
     project_id = db.Column(db.String(48), index=False)
-    title = db.Column(db.String(256), index=False)
+    title = db.Column(db.Text, index=False)
+    abstract = db.Column(db.Text, index=False)
     pub_date = db.Column(db.String(32), index=False)
     authors = db.Column(db.Text, index=False)
     journal = db.Column(db.String(128), index=False)
@@ -136,6 +137,7 @@ class Paper(db.Model):
         #     'pid_type': self.pid_type,
         #     'project_id': self.project_id,
         #     'title': self.title,
+        #     'abstract': self.abstract,
         #     'pub_date': self.pub_date,
         #     'authors': self.authors,
         #     'journal': self.journal,

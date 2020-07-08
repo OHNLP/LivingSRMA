@@ -76,8 +76,8 @@ def is_existed_paper(project_id, pid, pid_type='pmid'):
 
 
 def create_paper(project_id, pid, 
-    pid_type='pmid', title=None, 
-    pub_date=None, authors=None, journal=None, ss_st=None):
+    pid_type='pmid', title=None, abstract=None,
+    pub_date=None, authors=None, journal=None, ss_st=None, ss_pr=None, ss_rs=None):
     """Create a paper object, 
 
     By default, the pmid. 
@@ -87,12 +87,13 @@ def create_paper(project_id, pid,
     pid = pid
     pid_type = pid_type
     title = '' if title is None else title
+    abstract = '' if abstract is None else abstract
     pub_date = '' if pub_date is None else pub_date
     authors = '' if authors is None else authors
     journal = '' if journal is None else journal
-    ss_st = ss_state.SS_ST_AUTO_PMID if ss_st is None else ss_st
-    ss_pr = ss_state.SS_PR_NA
-    ss_rs = ss_state.SS_RS_NA
+    ss_st = ss_state.SS_ST_AUTO_OTHER if ss_st is None else ss_st
+    ss_pr = ss_state.SS_PR_NA if ss_pr is None else ss_pr
+    ss_rs = ss_state.SS_RS_NA if ss_rs is None else ss_rs
     date_created = datetime.datetime.now()
     date_updated = datetime.datetime.now()
     is_deleted = IS_DELETED_NO
@@ -103,6 +104,7 @@ def create_paper(project_id, pid,
         pid_type = pid_type,
         project_id = project_id,
         title = title,
+        abstract = abstract,
         pub_date = pub_date,
         authors = authors,
         journal = journal,
@@ -121,8 +123,8 @@ def create_paper(project_id, pid,
     
 
 def create_paper_if_not_exist(project_id, pid, 
-    pid_type='pmid', title=None, 
-    pub_date=None, authors=None, journal=None, ss_st=None):
+    pid_type='pmid', title=None, abstract=None,
+    pub_date=None, authors=None, journal=None, ss_st=None, ss_pr=None, ss_rs=None):
     '''A wrapper function for create_paper and is_existed_paper
     '''
     
@@ -131,28 +133,171 @@ def create_paper_if_not_exist(project_id, pid,
     else:
         p = create_paper(project_id, pid, 
             pid_type=pid_type, title=title, 
-            pub_date=pub_date, authors=authors, journal=journal, ss_st=ss_st)
+            pub_date=pub_date, authors=authors, journal=journal, 
+            ss_st=ss_st, ss_pr=ss_pr, ss_rs=ss_rs)
         return p
 
 
 def get_papers(project_id):
     papers = Paper.query.filter(and_(
         Paper.project_id == project_id
-    )).all()
+    )).order_by(Paper.date_created.desc()).all()
 
     return papers
 
 
-def get_unscreened_papers(project_id):
-    papers = Paper.query.filter(and_(
-        Paper.project_id == project_id,
-        Paper.ss_rs == ss_state.SS_RS_NA
-    )).all()
+def get_papers_by_stage(project_id, stage):
+    if stage == 'a1':
+        papers = Paper.query.filter(and_(
+            Paper.project_id == project_id,
+            Paper.ss_st.in_([
+                ss_state.SS_ST_AUTO_EMAIL,
+                ss_state.SS_ST_AUTO_SEARCH,
+                ss_state.SS_ST_AUTO_OTHER
+            ])
+        )).order_by(Paper.date_created.desc()).all()
+    elif stage == 'a1_na_na':
+        papers = Paper.query.filter(and_(
+            Paper.project_id == project_id,
+            Paper.ss_pr == ss_state.SS_PR_NA,
+            Paper.ss_rs == ss_state.SS_RS_NA
+        )).order_by(Paper.date_created.desc()).all()
+    elif stage == 'a1_p2_na':
+        papers = Paper.query.filter(and_(
+            Paper.project_id == project_id,
+            Paper.ss_pr == ss_state.SS_PR_CHECKED_TITLE,
+            Paper.ss_rs == ss_state.SS_RS_NA
+        )).order_by(Paper.date_created.desc()).all()
+    elif stage == 'a2':
+        papers = Paper.query.filter(and_(
+            Paper.project_id == project_id,
+            Paper.ss_st.in_([
+                ss_state.SS_ST_AUTO_EMAIL,
+                ss_state.SS_ST_AUTO_SEARCH,
+                ss_state.SS_ST_AUTO_OTHER
+            ]),
+            Paper.ss_rs.in_([
+                ss_state.SS_RS_INCLUDED_ONLY_SR,
+                ss_state.SS_RS_INCLUDED_SRMA
+            ])
+        )).order_by(Paper.date_created.desc()).all()
+    elif stage == 'a3':
+        papers = Paper.query.filter(and_(
+            Paper.project_id == project_id,
+            Paper.ss_st.in_([
+                ss_state.SS_ST_AUTO_EMAIL,
+                ss_state.SS_ST_AUTO_SEARCH,
+                ss_state.SS_ST_AUTO_OTHER
+            ]),
+            Paper.ss_rs.in_([
+                ss_state.SS_RS_INCLUDED_SRMA
+            ])
+        )).order_by(Paper.date_created.desc()).all()
+    elif stage == 'u1':
+        papers = Paper.query.filter(and_(
+            Paper.project_id == project_id,
+            Paper.ss_st.in_([
+                ss_state.SS_ST_AUTO_EMAIL,
+                ss_state.SS_ST_AUTO_SEARCH,
+                ss_state.SS_ST_AUTO_OTHER
+            ]),
+            Paper.ss_pr == ss_state.SS_PR_UPDATE_EXIST,
+            Paper.ss_rs.in_([
+                ss_state.SS_RS_INCLUDED_ONLY_SR,
+                ss_state.SS_RS_INCLUDED_SRMA
+            ])
+        )).order_by(Paper.date_created.desc()).all()
+    elif stage == 'u2':
+        papers = Paper.query.filter(and_(
+            Paper.project_id == project_id,
+            Paper.ss_st.in_([
+                ss_state.SS_ST_AUTO_EMAIL,
+                ss_state.SS_ST_AUTO_SEARCH,
+                ss_state.SS_ST_AUTO_OTHER
+            ]),
+            Paper.ss_pr == ss_state.SS_PR_UPDATE_EXIST,
+            Paper.ss_rs.in_([
+                ss_state.SS_RS_INCLUDED_SRMA
+            ])
+        )).order_by(Paper.date_created.desc()).all()
+    elif stage == 'f1':
+        papers = Paper.query.filter(and_(
+            Paper.project_id == project_id,
+            Paper.ss_rs.in_([
+                ss_state.SS_RS_INCLUDED_ONLY_SR,
+                ss_state.SS_RS_INCLUDED_SRMA
+            ])
+        )).order_by(Paper.date_created.desc()).all()
+    elif stage == 'f2':
+        papers = Paper.query.filter(and_(
+            Paper.project_id == project_id,
+            Paper.ss_rs.in_([
+                ss_state.SS_RS_INCLUDED_SRMA
+            ])
+        )).order_by(Paper.date_created.desc()).all()
+    elif stage == 'e1':
+        papers = Paper.query.filter(and_(
+            Paper.project_id == project_id,
+            Paper.ss_rs.in_([
+                ss_state.SS_RS_EXCLUDED_TITLE
+            ])
+        )).order_by(Paper.date_created.desc()).all()
+    elif stage == 'e2':
+        papers = Paper.query.filter(and_(
+            Paper.project_id == project_id,
+            Paper.ss_rs.in_([
+                ss_state.SS_RS_EXCLUDED_FULLTEXT
+            ])
+        )).order_by(Paper.date_created.desc()).all()
+    elif stage == 'e3':
+        papers = Paper.query.filter(and_(
+            Paper.project_id == project_id,
+            Paper.ss_rs.in_([
+                ss_state.SS_RS_INCLUDED_ONLY_SR
+            ])
+        )).order_by(Paper.date_created.desc()).all()
+    else:
+        papers = []
 
     return papers
+
+
+
+def set_paper_pr_rs(paper_id, pr=None, rs=None):
+    paper = Paper.query.filter_by(
+        paper_id=paper_id
+    ).first()
+    
+    if pr is not None: paper.ss_pr = pr
+    if rs is not None: paper.ss_rs = rs
+
+    db.session.commit()
+
+    return paper
 
 
 def get_prisma(project_id):
+    stages = [
+        'b1',
+        'b2',
+        'b3',
+        'b4',
+        'b5',
+        'b6',
+        'b7',
+        'e1',
+        'e2',
+        'e3',
+        'a1',
+        'a1_na_na',
+        'a1_p2_na',
+        'a2',
+        'a3',
+        'u1',
+        'u2',
+        'f1',
+        'f2'
+    ]
     sql = """
     select project_id,
         count(*) as cnt,
@@ -169,7 +314,8 @@ def get_prisma(project_id):
         count(case when ss_rs = 'f1' then paper_id else null end) as e3,
 
         count(case when ss_st in ('a10', 'a11', 'a12') then paper_id else null end) as a1,
-        count(case when ss_st in ('a10', 'a11', 'a12') and ss_rs = 'na' then paper_id else null end) as a1_na_na,
+        count(case when ss_st in ('a10', 'a11', 'a12') and ss_pr = 'na' and ss_rs = 'na' then paper_id else null end) as a1_na_na,
+        count(case when ss_st in ('a10', 'a11', 'a12') and ss_pr = 'p20' and ss_rs = 'na' then paper_id else null end) as a1_p2_na,
         count(case when ss_st in ('a10', 'a11', 'a12') and ss_rs in ('f1', 'f3') then paper_id else null end) as a2,
         count(case when ss_st in ('a10', 'a11', 'a12') and ss_rs = 'f3' then paper_id else null end) as a3,
         
@@ -186,9 +332,17 @@ def get_prisma(project_id):
     """.format(project_id=project_id)
     r = db.session.execute(sql).fetchone()
 
+    if r is None:
+        prisma = {
+            'stages': stages,
+        }
+        for k in stages:
+            prisma[k] = 0
+        return prisma
+
     # put the values in prisma dict
     prisma = {
-        'sskeys': r.keys()
+        'stages': r.keys()
     }
     for k in r.keys():
         prisma[k] = r[k]
