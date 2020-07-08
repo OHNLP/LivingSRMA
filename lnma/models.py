@@ -86,8 +86,8 @@ class Project(db.Model):
     is_deleted = db.Column(db.String(8), index=False)
     
     # for the users
-    users = db.relationship('User', secondary=rel_project_users, lazy='subquery',
-        backref=db.backref('projects', lazy=True))
+    related_users = db.relationship('User', secondary=rel_project_users, lazy='subquery',
+        backref=db.backref('related_projects', lazy=True))
 
     # for JSON
     def as_dict(self):
@@ -100,7 +100,7 @@ class Project(db.Model):
             'date_created': self.date_created,
             'date_updated': self.date_updated,
             'settings': self.settings,
-            'users': [ u.as_dict() for u in self.users ]
+            'related_users': [ u.as_dict() for u in self.related_users ]
         }
 
     def __repr__(self):

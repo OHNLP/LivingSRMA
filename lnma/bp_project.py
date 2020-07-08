@@ -24,12 +24,17 @@ def create():
     if request.method == 'GET':
         return render_template('project.create.html')
 
+    query = request.form.get('query')
+
     project = dora.create_project(
         owner_uid = current_user.uid,
         title = request.form.get('title'),
         keystr = request.form.get('keystr'),
         abstract = request.form.get('abstract'),
-        settings={'collect_template': {}}
+        settings={
+            'collect_template': {},
+            'query': query
+        }
     )
 
     flash('Project is created!')
@@ -59,6 +64,19 @@ def editor():
 @bp.route('/api/list')
 @login_required
 def api_list():
+    projects = dora.list_projects_by_owner_uid(current_user.uid)
+
+    ret = {
+        'success': True,
+        'projects': [ project.as_dict() for project in projects ]
+    }
+
+    return jsonify(ret)
+
+
+@bp.route('/api/get_project')
+@login_required
+def api_get_project():
     projects = dora.list_projects_by_owner_uid(current_user.uid)
 
     ret = {

@@ -36,6 +36,67 @@ WATCHER_EMAIL_USERNAME = app.config['WATCHER_EMAIL_USERNAME']
 WATCHER_EMAIL_PASSWORD = app.config['WATCHER_EMAIL_PASSWORD']
 
 
+def _update_papers_in_project(prj_updates):
+    # get all keystrs
+    project_keystrs = prj_updates.keys()
+
+    # create / update the list of project
+    for keystr in project_keystrs:
+        pmids = prj_updates[keystr]['pmids']
+        project_id = prj_updates[keystr]['project'].project_id
+
+        new_pmids = []
+        for pmid in pmids:
+            if dora.is_existed_paper(project_id, pmid):
+                prj_updates[keystr]['cnt']['existed'].append(pmid)
+            else:
+                new_pmids.append(pmid)
+
+        if len(new_pmids) == 0:
+            # no new papers!
+            logger.info('found %s pmdis + 0 new studies for project [%s]' % ( len(pmids), keystr))
+            continue
+
+        # get data of these new studies 
+        data = util.e_fetch(new_pmids)
+
+        # create paper in database
+        created_pmids = []
+        for pmid in data['result']['uids']:
+            created_pmids.append(pmid)
+            # ok, save these new papers
+            paper = data['result'][pmid]
+            title = paper['title']
+            pub_date = paper['sortpubdate'].split(' ')[0]
+            authors = ', '.join([ a['name'] for a in paper['authors'] ])
+            journal = paper['source']
+            abstract = paper['abstract']
+
+            paper = dora.create_paper(project_id, pmid, 'pmid',
+                title, abstract, pub_date, authors, journal, 
+                ss_state.SS_ST_AUTO_EMAIL
+            )
+            prj_updates[keystr]['cnt']['created'].append(pmid)
+
+        # for those not founded in pmid
+        notfound_pmids = list(set(new_pmids).difference(created_pmids))
+        for pmid in notfound_pmids:
+            paper = dora.create_paper_if_not_exist(project_id, pmid, 'pmid',
+                ss_st=ss_state.SS_ST_AUTO_EMAIL,
+                ss_rs=ss_state.SS_RS_EXCLUDED_NOTFOUND
+            )
+            prj_updates[keystr]['cnt']['notfound'].append(pmid)
+
+        logger.info('found %s studies for project [%s], existed: %s, created: %s, not found %s' % (\
+            len(pmids), keystr, 
+            len(prj_updates[keystr]['cnt']['existed']), 
+            len(prj_updates[keystr]['cnt']['created']),
+            len(prj_updates[keystr]['cnt']['notfound']),
+        ))
+
+    return prj_updates
+
+
 def lookup_email(username, password):
     '''Check if there is updates in email
     '''
@@ -123,62 +184,8 @@ def lookup_email(username, password):
         cnt['ovid_update'], cnt['other']
     ))
 
-    # create / update the list of project
-    for prj in project_keystrs:
-        pmids = prj_updates[prj]['pmids']
-        project_id = prj_updates[prj]['project'].project_id
-
-        new_pmids = []
-        for pmid in pmids:
-            if dora.is_existed_paper(project_id, pmid):
-                prj_updates[prj]['cnt']['existed'].append(pmid)
-            else:
-                new_pmids.append(pmid)
-
-        if len(new_pmids) == 0:
-            # no new papers!
-            logger.info('found %s pmdis + 0 new studies for project %s' % ( len(pmids), prj))
-            continue
-
-        # get data of these new studies 
-        data = util.e_fetch(new_pmids)
-
-        # create paper in database
-        created_pmids = []
-        for pmid in data['result']['uids']:
-            created_pmids.append(pmid)
-            # ok, save these new papers
-            paper = data['result'][pmid]
-            title = paper['title']
-            pub_date = paper['sortpubdate'].split(' ')[0]
-            authors = ', '.join([ a['name'] for a in paper['authors'] ])
-            journal = paper['source']
-            abstract = paper['abstract']
-
-            paper = dora.create_paper(project_id, pmid, 'pmid',
-                title, abstract, pub_date, authors, journal, 
-                ss_state.SS_ST_AUTO_EMAIL
-            )
-            prj_updates[prj]['cnt']['created'].append(pmid)
-
-        # for those not founded in pmid
-        notfound_pmids = list(set(new_pmids).difference(created_pmids))
-        for pmid in notfound_pmids:
-            paper = dora.create_paper_if_not_exist(project_id, pmid, 'pmid',
-                ss_st=ss_state.SS_ST_AUTO_EMAIL,
-                ss_rs=ss_state.SS_RS_EXCLUDED_NOTFOUND
-            )
-            prj_updates[prj]['cnt']['notfound'].append(pmid)
-
-        logger.info('found %s studies for project %s, existed: %s, created: %s, not found %s' % (\
-            len(pmids), prj, 
-            len(prj_updates[prj]['cnt']['existed']), 
-            len(prj_updates[prj]['cnt']['created']),
-            len(prj_updates[prj]['cnt']['notfound']),
-        ))
-
-        # for the rest of pmids, use esummary to find again?
-        
+    # create or update
+    prj_updates = _update_papers_in_project(prj_updates)
 
     # updated, generate a report for this run
     report = ''
@@ -189,6 +196,53 @@ def lookup_email(username, password):
 def lookup_pubmed():
     '''Check if there is updates in pubmed
     '''
+    # get the project shortnames
+    projects = Project.query.filter(and_(
+        Project.is_deleted == 'no'
+    )).all()
+
+    # prepare the dictionary for updates
+    project_keystrs = []
+    prj_updates = {}
+
+    for project in projects:
+        project_keystrs.append(project.keystr)
+        prj_updates[project.keystr] = {
+            'keyword': '%s_UPDATE' % project.keystr,
+            'project': project,
+            'query': project.settings['query'],
+            'pmids': [],
+            'cnt': {
+                'existed': [],
+                'notfound': [],
+                'created': [],
+            }
+        }
+        logger.info('inited the keywords and for project [%s]' % project.keystr)
+
+    logger.info('found %s projects to be updated' % (len(prj_updates)))
+
+    # loop on project to get the pmids
+    for keystr in project_keystrs:
+        project_id = prj_updates[keystr]['project'].project_id
+        # get the query
+        query = prj_updates[keystr]['query']
+
+        # get data from pubmed
+        data = util.e_search(query)
+        logger.info('searched "%s" for project [%s]' % (query, project.keystr))
+
+        # get all pmids
+        pmids = data['esearchresult']['idlist']
+        prj_updates[keystr]['pmids'] = pmids
+
+    # create or update
+    prj_updates = _update_papers_in_project(prj_updates)
+
+    # updated, generate a report for this run
+    report = ''
+
+    # check each update
     logger.info('* done lookup pubmed!')
 
 
@@ -231,3 +285,5 @@ if args.loop == 'no':
 elif args.loop == 'yes':
     # wow! start loop!
     watcher_tl.start(block=True)
+
+# %%

@@ -45,13 +45,13 @@ def allowed_file_format(fn, exts=['csv', 'xls', 'xlsx']):
 # PubMed related functions
 PUBMED_URL = {
     'base': 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/',
-    'esearch': 'esearch.fcgi?db={db}&term={term}&retmode=json',
+    'esearch': 'esearch.fcgi?db={db}&term={term}&retmode=json&retmax={retmax}',
     'esummary': 'esummary.fcgi?db={db}&id={ids}&retmode=json',
     'efetch': "efetch.fcgi?db={db}&id={uid}&retmode={retmode}",
 }
 
-def _get_e_search_url(term, db='pubmed'):
-    url = PUBMED_URL['base'] + PUBMED_URL['esearch'].format(db=db, term=term)
+def _get_e_search_url(term, db='pubmed', retmax=300):
+    url = PUBMED_URL['base'] + PUBMED_URL['esearch'].format(db=db, term=term, retmax=retmax)
     return url
 
 

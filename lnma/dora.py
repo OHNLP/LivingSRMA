@@ -35,16 +35,28 @@ def create_project(owner_uid, title, keystr=None, abstract="", settings={}):
         is_deleted = is_deleted
     )
     owner = User.query.get(owner_uid)
-    project.users.append(owner)
+    project.related_users.append(owner)
     db.session.add(project)
     db.session.commit()
 
     return project
 
 
+def get_project(project_id):
+    project = Project.query.filter(and_(
+        Project.project_id == project_id
+    )).first()
+
+    return project
+
+
 def list_projects_by_owner_uid(owner_uid):
-    projects = Project.query.filter(Project.users.any(uid=owner_uid)).all()
+    projects = Project.query.filter(Project.related_users.any(uid=owner_uid)).all()
     return projects
+
+
+def list_projects_by_uid(uid):
+    projects = db.session.query()
 
 
 def is_existed_project(project_id):
@@ -278,25 +290,25 @@ def set_paper_pr_rs(paper_id, pr=None, rs=None):
 
 def get_prisma(project_id):
     stages = [
-        'b1',
-        'b2',
-        'b3',
-        'b4',
-        'b5',
-        'b6',
-        'b7',
-        'e1',
-        'e2',
-        'e3',
-        'a1',
-        'a1_na_na',
-        'a1_p2_na',
-        'a2',
-        'a3',
-        'u1',
-        'u2',
-        'f1',
-        'f2'
+        { "stage": "b1", "text": "Records retrieved from database search" },
+        { "stage": "b2", "text": "Records identified through other sources" },
+        { "stage": "b3", "text": "Records after removing dupicates" },
+        { "stage": "b4", "text": "Records initialized screened" },
+        { "stage": "b5", "text": "Full-text articles assessed for eligibility" },
+        { "stage": "b6", "text": "Studies included in systematic review" },
+        { "stage": "b7", "text": "Studies included in meta-analysis" },
+        { "stage": "e1", "text": "Excluded by title and abstract review" },
+        { "stage": "e2", "text": "Excluded by full text review" },
+        { "stage": "e3", "text": "Studies not included in meta-analysis" },
+        { "stage": "a1", "text": "Records identified through automated search" },
+        { "stage": "a1_na_na", "text": "Unscreened records" },
+        { "stage": "a1_p2_na", "text": "Records need to check full text" },
+        { "stage": "a2", "text": "New studies included in systematic review" },
+        { "stage": "a3", "text": "New studies included in meta-analysis" },
+        { "stage": "u1", "text": "Updated studies in SR" },
+        { "stage": "u2", "text": "Updated studies in MA" },
+        { "stage": "f1", "text": "Final number in qualitative synthesis (systematic review)" },
+        { "stage": "f2", "text": "Final number in quantitative synthesis (meta-analysis)" }
     ]
     sql = """
     select project_id,
@@ -334,15 +346,15 @@ def get_prisma(project_id):
 
     if r is None:
         prisma = {
-            'stages': stages,
+            'stages': stages
         }
         for k in stages:
-            prisma[k] = 0
+            prisma[k['stage']] = 0
         return prisma
 
     # put the values in prisma dict
     prisma = {
-        'stages': r.keys()
+        'stages': stages
     }
     for k in r.keys():
         prisma[k] = r[k]

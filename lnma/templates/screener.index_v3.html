@@ -159,16 +159,20 @@ var vw_prisma = {
     },
 
     init: function(data) {
+        this.data = data;
+
+        // create stage dict
+        this.update_stage_dict();
 
         // update the content
         var svgtxt = document.getElementById('svgnode').innerHTML;
 
         // replace the $$ with jquery findable tag
         for (let i = 0; i < data.prisma.stages.length; i++) {
-            const ssk = data.prisma.stages[i];
-            if (ssk == 'project_id') continue;
-            var val = data.prisma[ssk];
-            svgtxt = svgtxt.replace('$'+ssk+'$', '<span id="val-'+ssk+'">'+ val +'</span>');
+            const stage = data.prisma.stages[i];
+            if (stage.stage == 'project_id') continue;
+            var val = data.prisma[stage.stage];
+            svgtxt = svgtxt.replace('$'+stage.stage+'$', '<span id="val-'+stage.stage+'">'+ val +'</span>');
         }
         document.getElementById('svgnode').innerHTML = svgtxt;
 
@@ -186,19 +190,31 @@ var vw_prisma = {
             this.url_get_prisma,
             {project_id: project_id},
             function(data) {
+                vw_prisma.data = data;
+                // create stage dict
+                vw_prisma.update_stage_dict();
+
                 // replace the values
                 for (let i = 0; i < data.prisma.stages.length; i++) {
-                    const ssk = data.prisma.stages[i];
-                    if (ssk == 'project_id') continue;
+                    const stage = data.prisma.stages[i];
+                    if (stage.stage == 'project_id') continue;
 
                     // update the value here
-                    var val = data.prisma[ssk];
-                    var tag_id = '#val-' + ssk;
+                    var val = data.prisma[stage.stage];
+                    var tag_id = '#val-' + stage.stage;
                     $(tag_id).html(val);
                 }
 
             }, 'json'
         )
+    },
+
+    update_stage_dict: function() {
+        this.stage_dict = {};
+        for (let i = 0; i < this.data.prisma.stages.length; i++) {
+            const stage = this.data.prisma.stages[i];
+            this.stage_dict[stage.stage] = stage;
+        }
     }
 };
 
@@ -232,6 +248,12 @@ var vw_screener = {
             // change the date
             paper.date_created = this.fmt_datetime(new Date(Date.parse(paper.date_created)));
         }
+    },
+
+    load: function() {
+        var project_id = Cookies.get('project_id');
+        this.init();
+        this.update();
     },
 
     init: function() {
@@ -413,12 +435,6 @@ ${p.authors2}`;
         this.update();
     },
 
-    load: function(stage) {
-        var project_id = Cookies.get('project_id');
-        this.init();
-        this.update();
-    },
-
     reset_tooltip: function() {
         // $('.paper-thumbnail').tooltip({
         //     html: true,
@@ -441,8 +457,8 @@ var jarvis = {
             alert('Set working project first.');
             return;
         }
-        vw_screener.load();
         vw_prisma.load();
+        vw_screener.load();
     },
 
     get_working_project_id: function() {
