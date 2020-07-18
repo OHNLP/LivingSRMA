@@ -84,7 +84,7 @@ var fg_frsplt = {
             ['Treatment', 'fg-frs-th fg-frs-col1', this.col1_base_x, this.top_y + this.line_height * 2.2],
             ['', 'fg-frs-th fg-frs-col2', this.col2_base_x, this.top_y + this.line_height * 2.2],
             [data.sm.toLocaleUpperCase(), 'fg-frs-th fg-frs-col3', this.col3_base_x, this.top_y + this.line_height * 2.2],
-            ['95% - CI', 'fg-frs-th fg-frs-col4', this.col4_base_x, this.top_y + this.line_height * 2.2]
+            ['95% CI', 'fg-frs-th fg-frs-col4', this.col4_base_x, this.top_y + this.line_height * 2.2]
         ]
         for (let i = 0; i < txts.length; i++) {
             const t = txts[i];
