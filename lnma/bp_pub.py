@@ -19,9 +19,25 @@ PATH_PUBDATA = 'pubdata'
 
 bp = Blueprint("pub", __name__, url_prefix="/pub")
 
+
 @bp.route('/')
 def index():
     return render_template('pub.index.html')
+
+
+
+@bp.route('/blankindex')
+def blankindex():
+    return render_template('pub.blankindex.html')
+
+
+@bp.route('/subindex/<prj>')
+def subindex(prj):
+    prj_data = {
+        'CAT': { 'prj': 'CAT', 'title': 'Cancer Associated Thrombosis'},
+        'RCC': { 'prj': 'RCC', 'title': 'Metastatic Renal Cell Cancer'},
+    }[prj]
+    return render_template('pub.subindex.html', prj_data=prj_data)
 
 
 @bp.route('/RCC.html')

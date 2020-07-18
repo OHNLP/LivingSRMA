@@ -1,13 +1,17 @@
 #!/bin/bash
 
 URL_BASE='http://localhost:8088/pub'
-FOLDER_BASE='../lnma_pub'
+PUB_BASE='../lnma_pub'
+FOLDER_BASE="$PUB_BASE/ALLPRJS"
+mkdir -p $FOLDER_BASE
+
 
 # check sub folders
 mkdir -p $FOLDER_BASE/pub
 mkdir -p $FOLDER_BASE/static/lib
 mkdir -p $FOLDER_BASE/pub/graphdata
 echo "* checked output folders in $FOLDER_BASE"
+
 
 # get the index
 curl "$URL_BASE/" -o "$FOLDER_BASE/index.html"
@@ -52,9 +56,11 @@ cp -r ./lnma/static/lib/jquery-ui $FOLDER_BASE/static/lib/
 cp -r ./lnma/static/lib/vue.js $FOLDER_BASE/static/lib/
 echo '* copied all packages'
 
+
 # copy image
 cp -r ./lnma/static/img $FOLDER_BASE/static/
 echo '* copied all images'
+
 
 # copy data
 cp -r ./instance/pubdata/* $FOLDER_BASE/pub/graphdata/
