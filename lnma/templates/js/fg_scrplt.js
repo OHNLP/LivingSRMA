@@ -4,7 +4,7 @@ var fg_scrplt = {
     chart: null,
     chart_id: 'fg-nma-scrplt-div',
     data: null,
-    width: 430,
+    width: 400,
     height: 320,
 
     sample: {
