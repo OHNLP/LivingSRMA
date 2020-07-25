@@ -24,24 +24,18 @@ class User(db.Model):
     role = db.Column(db.String(16), index=False)
     is_deleted = db.Column(db.String(8), index=False)
 
-    def __repr__(self):
-        return '<User {}>'.format(self.uid)
-
-    # for Flask-Login
+    # for Flask-login
     def is_authenticated(self):
         return True
 
     def is_active(self):
-        return True
+        return self.is_deleted == 'no'
 
     def is_anonymous(self):
         return False
 
     def get_id(self):
         return self.uid
-
-    def check_password(self, password):
-        return check_password_hash(self.password, password)
 
     # for data API
     def as_dict(self):
@@ -52,21 +46,11 @@ class User(db.Model):
             'role': self.role
         }
 
-
-class Admin(db.Model):
-    """Data model for admins
-    """
-    __tablename__ = 'admins'
-    __table_args__ = {'extend_existing': True}
-
-    uid = db.Column(db.String(64), primary_key=True, nullable=False)
-    password = db.Column(db.String(128), index=False)
-    first_name = db.Column(db.String(45), index=False)
-    last_name = db.Column(db.String(45), index=False)
-    role = db.Column(db.String(16), index=False)
+    def set_password(self, raw_pass):
+        self.password = generate_password_hash(raw_pass)
 
     def __repr__(self):
-        return '<Admin {}>'.format(self.uid)
+        return '<User {}>'.format(self.uid)
 
 
 class Project(db.Model):
@@ -103,6 +87,12 @@ class Project(db.Model):
             'related_users': [ u.as_dict() for u in self.related_users ]
         }
 
+    def is_user_in(self, uid):
+        for u in self.related_users:
+            if u.uid == uid:
+                return (True, u)
+        return (False, None)
+
     def __repr__(self):
         return '<Project {0}: {1}>'.format(self.project_id, self.title)
 
@@ -131,23 +121,6 @@ class Paper(db.Model):
     is_deleted = db.Column(db.String(8), index=False)
 
     def as_dict(self):
-        # return {
-        #     'paper_id': self.paper_id,
-        #     'pid': self.pid,
-        #     'pid_type': self.pid_type,
-        #     'project_id': self.project_id,
-        #     'title': self.title,
-        #     'abstract': self.abstract,
-        #     'pub_date': self.pub_date,
-        #     'authors': self.authors,
-        #     'journal': self.journal,
-        #     'meta': self.meta,
-        #     'ss_st': self.ss_st,
-        #     'ss_pr': self.ss_pr,
-        #     'ss_rs': self.ss_rs,
-        #     'date_created': self.date_created,
-        #     'date_updated': self.date_updated,
-        # }
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
     def __repr__(self):

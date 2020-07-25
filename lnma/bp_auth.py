@@ -14,6 +14,7 @@ from flask_login import UserMixin
 from flask_login import login_required
 from flask_login import login_user
 from flask_login import logout_user
+from flask_login import current_user
 
 from werkzeug.security import check_password_hash
 from werkzeug.security import generate_password_hash
@@ -43,6 +44,18 @@ def request_loader(request):
         user.is_authenticated = False
         
     return user
+
+
+def is_role(role):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kw):
+            if role in current_user.role:
+                return func(*args, **kw)
+            else:
+                return redirect(url_for('index.err_permission_denied'))
+        return wrapper
+    return decorator
 
 
 @bp.route('/login', methods=['GET', 'POST'])

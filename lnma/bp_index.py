@@ -6,8 +6,6 @@ from flask import current_app
 from flask_login import login_required
 from flask_login import current_user
 
-from .models import Admin
-
 from lnma.settings import *
 
 bp = Blueprint("index", __name__, url_prefix="/")
@@ -20,3 +18,8 @@ def index():
 @bp.route('/f/<fn>')
 def f(fn):
     return send_from_directory(TMP_FOLDER, fn)
+
+
+@bp.route('/err_permission_denied')
+def err_permission_denied():
+    return render_template('index.err_permission_denied.html')

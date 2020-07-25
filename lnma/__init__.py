@@ -3,6 +3,7 @@ import os
 from flask import Flask
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 
 db = SQLAlchemy()
 
@@ -14,6 +15,7 @@ def create_app(test_config=None):
     # print(app.config)
     # bind db
     db.init_app(app)
+    migrate = Migrate(app, db)
 
     # use [[ ]] instead of {{ }} for jinja2
     app.jinja_env.variable_start_string = '[['
@@ -31,6 +33,7 @@ def create_app(test_config=None):
     # load blueprints
     from lnma import bp_index
     from lnma import bp_auth
+    from lnma import bp_sysmgr
     from lnma import bp_portal
     from lnma import bp_project
     from lnma import bp_collector
@@ -56,6 +59,7 @@ def create_app(test_config=None):
     # apply the blueprints to the app
     app.register_blueprint(bp_index.bp)
     app.register_blueprint(bp_auth.bp)
+    app.register_blueprint(bp_sysmgr.bp)
     app.register_blueprint(bp_portal.bp)
     app.register_blueprint(bp_project.bp)
     app.register_blueprint(bp_collector.bp)

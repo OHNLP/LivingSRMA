@@ -50,6 +50,24 @@ def get_project(project_id):
     return project
 
 
+def add_user_to_project(uid, project_id):
+    project = get_project(project_id)
+    ret = project.is_user_in(uid)
+    if ret[0]:
+        user = ret[1]
+    else:
+        user = User.query.get(uid)
+        project.related_users.append(user)
+        db.session.commit()
+
+    return (user, project)
+
+
+def get_user(uid):
+    user = User.query.filter(User.uid == uid).first()
+    return user
+
+
 def list_projects_by_owner_uid(owner_uid):
     projects = Project.query.filter(Project.related_users.any(uid=owner_uid)).all()
     return projects
