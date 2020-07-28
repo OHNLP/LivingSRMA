@@ -11,6 +11,7 @@ from lnma import dora
 
 bp = Blueprint("collector", __name__, url_prefix="/collector")
 
+
 @bp.route('/')
 @login_required
 def index():

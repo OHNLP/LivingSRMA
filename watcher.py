@@ -286,4 +286,3 @@ elif args.loop == 'yes':
     # wow! start loop!
     watcher_tl.start(block=True)
 
-# %%

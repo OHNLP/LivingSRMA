@@ -35,7 +35,12 @@ My Projects
                             <div class="card-body">
                                 <h5>{{ item.title }}</h5>
                                 <p>Project Identifier: <b>{{ item.keystr }}</b></p>
-                                <p>Members: </p>
+                                <p>
+                                    Members: 
+                                    <span v-for="user in item.related_users">
+                                        {{ user.first_name }} {{ user.last_name }}
+                                    </span>
+                                </p>
                                 <p>Studies: </p>
                                 
                                 <div>

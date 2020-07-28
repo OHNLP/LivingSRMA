@@ -1,4 +1,5 @@
 #%% define packages and methods
+import re
 import json
 import time
 import requests
@@ -8,6 +9,16 @@ except ImportError:
     import xml.etree.ElementTree as ET
 
 from sqlalchemy.ext.declarative import DeclarativeMeta
+
+
+# PubMed related functions
+PUBMED_URL = {
+    'base': 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/',
+    'esearch': 'esearch.fcgi?db={db}&term={term}&retmode=json&retmax={retmax}',
+    'esummary': 'esummary.fcgi?db={db}&id={ids}&retmode=json',
+    'efetch': "efetch.fcgi?db={db}&id={uid}&retmode={retmode}",
+}
+
 
 class AlchemyEncoder(json.JSONEncoder):
 
@@ -41,14 +52,6 @@ def allowed_file_format(fn, exts=['csv', 'xls', 'xlsx']):
     return '.' in fn and \
         fn.rsplit('.', 1)[1].lower() in exts
 
-
-# PubMed related functions
-PUBMED_URL = {
-    'base': 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/',
-    'esearch': 'esearch.fcgi?db={db}&term={term}&retmode=json&retmax={retmax}',
-    'esummary': 'esummary.fcgi?db={db}&id={ids}&retmode=json',
-    'efetch': "efetch.fcgi?db={db}&id={uid}&retmode={retmode}",
-}
 
 def _get_e_search_url(term, db='pubmed', retmax=300):
     url = PUBMED_URL['base'] + PUBMED_URL['esearch'].format(db=db, term=term, retmax=retmax)
@@ -227,4 +230,68 @@ def e_fetch(ids, db='pubmed'):
     return ret
 
 
-#%% test 
+def ovid_parser(txt):
+    '''Parse the email content from OVID 
+    '''
+    lines = txt.split('\n')
+    ptn_attr = r'(^[A-Z]{2})\s+-\s(.*)'
+    ptn_attr_ext = r'^\s+(.*)'
+    ptn_new_art = r'^\<(\d+)\>'
+
+    arts = []
+
+    # temporal variable
+    art = {}
+    attr = ''
+
+    for line in lines:
+        # try attr pattern first, it's the most common pattern
+        m = re.findall(ptn_attr, line)
+        if len(m) > 0:
+            # which means it's a new attribute
+            # for example
+            # > re.findall(ptn_attr, 'DB  - Ovid MEDLINE(R) Revisions')
+            # > [('DB', 'Ovid MEDLINE(R) Revisions')]
+            attr = m[0][0]
+            val = m[0][1]
+            if attr not in art: art[attr] = []
+
+            # put this value into art object
+            art[attr].append(val)
+
+            # once match a pattern, no need to check other patterns
+            continue
+
+        # try next pattern
+        m = re.findall(ptn_attr_ext, line)
+        if len(m) > 0:
+            # this means this line is an extension of previous attr
+            val = m[0]
+            # use previous attr, the attr should exist
+            art[attr].append(val)
+
+            # once match a pattern, no need to check other patterns
+            continue
+
+        # try next pattern
+        m = re.findall(ptn_new_art, line)
+        if len(m) > 0:
+            # this means this line starts a new article
+            if art == {}:
+                pass
+            else:
+                arts.append(art)
+                art = {}
+            
+            # once match a pattern, no need to check other patterns
+            continue
+    
+    # usually, the last art need to be appended manually
+    if art != {}:
+        arts.append(art)
+
+    return arts
+
+
+if __name__ == "__main__":
+    pass
