@@ -233,6 +233,8 @@ def e_fetch(ids, db='pubmed'):
 def ovid_parser(txt):
     '''Parse the email content from OVID 
     '''
+    open('tmp.txt', 'w').write(txt)
+
     lines = txt.split('\n')
     ptn_attr = r'(^[A-Z]{2})\s+-\s(.*)'
     ptn_attr_ext = r'^\s+(.*)'
@@ -268,10 +270,13 @@ def ovid_parser(txt):
             # this means this line is an extension of previous attr
             val = m[0]
             # use previous attr, the attr should exist
-            art[attr].append(val)
+            if attr == '':
+                pass
+            else:
+                art[attr].append(val)
 
-            # once match a pattern, no need to check other patterns
-            continue
+                # once match a pattern, no need to check other patterns
+                continue
 
         # try next pattern
         m = re.findall(ptn_new_art, line)
@@ -290,6 +295,15 @@ def ovid_parser(txt):
     if art != {}:
         arts.append(art)
 
+    # now need to merge
+    for art in arts:
+        for k in art:
+            if len(art[k]) == 1:
+                art[k] = art[k][0]
+            else:
+                if k in ('AU', 'FA', 'ID'): continue
+                elif k == 'AB': art[k] = '\n'.join(art[k])
+                else: art[k] = ' '.join(art[k])
     return arts
 
 

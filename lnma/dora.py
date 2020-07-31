@@ -107,7 +107,8 @@ def is_existed_paper(project_id, pid, pid_type='pmid'):
 
 def create_paper(project_id, pid, 
     pid_type='pmid', title=None, abstract=None,
-    pub_date=None, authors=None, journal=None, ss_st=None, ss_pr=None, ss_rs=None):
+    pub_date=None, authors=None, journal=None, meta={},
+    ss_st=None, ss_pr=None, ss_rs=None):
     """Create a paper object, 
 
     By default, the pmid. 
@@ -121,6 +122,7 @@ def create_paper(project_id, pid,
     pub_date = '' if pub_date is None else pub_date
     authors = '' if authors is None else authors
     journal = '' if journal is None else journal
+    meta = {} if meta is None else meta
     ss_st = ss_state.SS_ST_AUTO_OTHER if ss_st is None else ss_st
     ss_pr = ss_state.SS_PR_NA if ss_pr is None else ss_pr
     ss_rs = ss_state.SS_RS_NA if ss_rs is None else ss_rs
@@ -138,6 +140,7 @@ def create_paper(project_id, pid,
         pub_date = pub_date,
         authors = authors,
         journal = journal,
+        meta = meta,
         ss_st = ss_st,
         ss_pr = ss_pr,
         ss_rs = ss_rs,

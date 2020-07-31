@@ -97,6 +97,69 @@ def _update_papers_in_project(prj_updates):
     return prj_updates
 
 
+def _update_papers_in_project_v2(prj_updates):
+    # get all keystrs
+    project_keystrs = prj_updates.keys()
+
+    # create / update the list of project
+    for keystr in project_keystrs:
+        papers = prj_updates[keystr]['papers']
+        project_id = prj_updates[keystr]['project'].project_id
+
+        new_papers = []
+        for paper in papers:
+            pid = paper['UI']
+
+            if dora.is_existed_paper(project_id, pid):
+                prj_updates[keystr]['cnt']['existed'].append(pid)
+            else:
+                new_papers.append(paper)
+
+        if len(new_papers) == 0:
+            # no new papers!
+            logger.info('found %s pmdis + 0 new studies for project [%s]' % ( len(papers), keystr))
+            continue
+
+        # create paper in database
+        created_paperss = []
+        for paper in new_papers:
+            created_paperss.append(paper)
+
+            # ok, save these new papers
+            pid = paper['UI']
+            title = paper['TI'] if 'TI' in paper else ''
+            abstract = paper['AB'] if 'AB' in paper else ''
+            authors = ', '.join(paper['AU']) if 'AU' in paper else ''
+            pid_type = paper['DB'].upper() if 'DB' in paper else 'OVID'
+
+            if pid_type.startswith('EMBASE'):
+                pid_type = 'EMBASE'
+                pub_date = paper['DP'] if 'DP' in paper else ''
+                journal = paper['JA'] if 'JA' in paper else ''
+            elif pid_type.startswith('OVID MEDLINE'):
+                pid_type = 'OVID MEDLINE'
+                pub_date = paper['EP'] if 'EP' in paper else ''
+                journal = paper['AS'] if 'AS' in paper else ''
+            else:
+                pid_type = 'OVID'
+                pub_date = paper['EP'] if 'EP' in paper else ''
+                journal = paper['AS'] if 'AS' in paper else ''
+        
+            paper_db = dora.create_paper(project_id, pid, pid_type,
+                title, abstract, pub_date, authors, journal, {'paper': paper},
+                ss_state.SS_ST_AUTO_EMAIL, None, None
+            )
+            prj_updates[keystr]['cnt']['created'].append(pid)
+
+        logger.info('found %s studies for project [%s], existed: %s, created: %s' % (\
+            len(papers), keystr, 
+            len(prj_updates[keystr]['cnt']['existed']), 
+            len(prj_updates[keystr]['cnt']['created']),
+        ))
+
+    return prj_updates
+
+
 def lookup_email(username, password):
     '''Check if there is updates in email
     '''
@@ -193,6 +256,98 @@ def lookup_email(username, password):
     logger.info('* done lookup email!')
 
 
+def lookup_email_v2(username, password):
+    '''Check if there is updates in email and parse the email content
+    '''
+    # get the project shortnames
+    projects = Project.query.filter(and_(
+        Project.is_deleted == 'no'
+    )).all()
+
+    # keep the keystr list and dictionary
+    project_keystrs = []
+    prj_updates = {}
+
+    for project in projects:
+        project_keystrs.append(project.keystr)
+        prj_updates[project.keystr] = {
+            'keyword': '%s_UPDATE' % project.keystr,
+            'project': project,
+            'papers': [],
+            'cnt': {
+                'existed': [],
+                'notfound': [],
+                'created': [],
+            }
+        }
+        logger.info('inited the keywords and pmid list for project %s' % project.keystr)
+
+    logger.info('found %s projects to be updated' % (len(project_keystrs)))
+
+    # open the email inbox
+    myimbox = Imbox('imap.gmail.com',
+        username=username,
+        password=password,
+        ssl=True,
+        ssl_context=None,
+        starttls=False)
+
+    # get all the mails
+    all_inbox_messages = myimbox.messages()
+    logger.info('found %s emails!' % len(all_inbox_messages))
+
+    # check the latest mails
+    cnt = {
+        'ovid_update': 0,
+        'other': 0
+    }
+
+    for i in tqdm(range(1, len(all_inbox_messages)+1)):
+        # get the latest one first
+        uid, mail = all_inbox_messages[-i]
+
+        # check the email date, ignore old emails
+        # TODO: also check the title
+
+        # check this email belong to which project or not
+        is_other_email = True
+        for prj in project_keystrs:
+            keyword = prj_updates[prj]['keyword']
+
+            if keyword in mail.subject:
+                is_study_update_email = False
+                cnt['ovid_update'] += 1
+                # check the content of this email
+                content = ''.join(mail.body['plain'])
+
+                # get the articles from email content
+                papers = util.ovid_parser(content)
+                logger.debug('found and %s papers for prject [%s] in %s' % (len(papers), prj, mail.subject))
+
+                # put these papers in update list
+                prj_updates[prj]['papers'] += papers
+
+                # once find project, skip other
+                # so, we have a hypothesis here, that one email belong and only belong to one project if related.
+                break
+
+        if is_other_email:
+            cnt['other'] += 1
+            logger.debug('ignored unrelated email %s' % mail.subject)
+
+    logger.info('parsed %s from OVID updates, %s other emails' % (
+        cnt['ovid_update'], cnt['other']
+    ))
+
+    # create or update
+    prj_updates = _update_papers_in_project_v2(prj_updates)
+
+    # updated, generate a report for this run
+    report = ''
+
+    logger.info('* done lookup email!')
+
+
 def lookup_pubmed():
     '''Check if there is updates in pubmed
     '''
@@ -275,7 +430,7 @@ if args.loop == 'no':
     if args.act == 'lookup_pubmed':
         lookup_pubmed()
     elif args.act == 'lookup_email':
-        lookup_email(WATCHER_EMAIL_USERNAME, WATCHER_EMAIL_PASSWORD)
+        lookup_email_v2(WATCHER_EMAIL_USERNAME, WATCHER_EMAIL_PASSWORD)
     elif args.act == 'all':
         lookup_pubmed()
         lookup_email(WATCHER_EMAIL_USERNAME, WATCHER_EMAIL_PASSWORD)
