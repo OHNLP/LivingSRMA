@@ -226,4 +226,28 @@ The `ss_st`, `ss_pr`, and `ss_rs` columns indicate which state a study is during
 
 # Usage
 
+## Database migration
+
+To copy the table schema from local server to the development server, we use flask-migrate to handle the schema update.
+
+```bash
+(py37lnma) $ pip install Flask-Migrate
+```
+
+On the dev side, we need to follow the tutorial on https://flask-migrate.readthedocs.io/en/latest/
+
+```bash
+$ flask db init
+$ flask db migrate -m "Initial migration."
+$ flask db upgrade
+```
+
+After the first time, we only need to run migrate and upgrade in the future.
+
+On the server side, we don't need to init the migration folder.
+The only thing we need to do is upgrade:
+
+```bash
+(py37lnma) $ flask db upgrade
+```
 # Others
