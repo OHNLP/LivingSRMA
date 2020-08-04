@@ -25,7 +25,6 @@ def index():
     return render_template('pub.index.html')
 
 
-
 @bp.route('/blankindex')
 def blankindex():
     return render_template('pub.blankindex.html')
@@ -38,6 +37,12 @@ def subindex(prj):
         'RCC': { 'prj': 'RCC', 'title': 'Metastatic Renal Cell Cancer'},
     }[prj]
     return render_template('pub.subindex.html', prj_data=prj_data)
+
+
+@bp.route('/IOTOX.html')
+def IOTOX():
+    prj = 'IOTOX'
+    return render_template('pub.IOTOX.html')
 
 
 @bp.route('/RCC.html')
@@ -153,10 +158,11 @@ def graphdata_itable_json(prj):
     df_h = pd.read_excel(full_fn, skiprows=[0])
 
     # load file 
-    if full_fn.endswith('csv'):
-        df = pd.read_csv(full_fn, skiprows=[0])
-    else:
-        df = pd.read_excel(full_fn, skiprows=[0])
+    # if full_fn.endswith('csv'):
+    #     df = pd.read_csv(full_fn, skiprows=[0])
+    # else:
+    #     df = pd.read_excel(full_fn, skiprows=[0])
+    df = pd.read_excel(full_fn, skiprows=[0])
     rs = json.loads(df.to_json(orient='records'))
 
     # add the category info for attrs

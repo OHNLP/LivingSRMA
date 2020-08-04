@@ -134,7 +134,9 @@ a {
     width: 45%;
 }
 .box-body-item select {
-    width: 100%;
+    width: calc(100% - 10px);
+    font-size: 1em;
+    padding: 2px 0;
 }
 /* the label values items */
 .bbi-label {
@@ -146,7 +148,7 @@ a {
     justify-content: space-between;
 }
 .bbi-value {
-    width: 100%;
+    width: calc(100% - 10px);
     padding: 2px 0px 2px 10px;
     font-size: .9em;
     color: #000000;
@@ -366,28 +368,53 @@ a {
             <div class="box-body">
                 <div class="box-body-item"
                     v-for="filter, i in filters">
-                    <div class="bbi-label flex-container">
-                        <span>
-                            {{ filter.display_name }}
-                        </span>
-                        <span class="bbi-label-hint"
-                            v-bind:title="'Using attribute ['+filter.attr+'] to filter.'">
-                            <i class="fa fa-question-circle"></i>
-                        </span>
-                        
+                    <div v-if="filter.type=='radio'">
+                        <div class="bbi-label flex-container">
+                            <span>
+                                {{ filter.display_name }}
+                            </span>
+                            <span class="bbi-label-hint"
+                                v-bind:title="'Using attribute ['+filter.attr+'] to filter.'">
+                                <i class="fa fa-question-circle"></i>
+                            </span>
+                        </div>
+                        <div class="bbi-value"
+                            v-for="val, j in filter.values">
+                            <input type="radio" 
+                                v-bind:name="'filter-' + i" 
+                                v-bind:id="'filter-' + i + '-' + j"
+                                v-model="filter.value"
+                                v-on:change="update_table"
+                                v-bind:value="val.value">
+                            <label v-bind:for="'filter-' + i + '-' + j">{{ val.display_name }}</label>
+                        </div>
                     </div>
-                    <div class="bbi-value"
-                        v-for="val, j in filter.values">
-                        <input type="radio" 
-                            v-bind:name="'filter-' + i" 
-                            v-bind:id="'filter-' + i + '-' + j"
-                            v-model="filter.value"
-                            v-on:change="update_table"
-                            v-bind:value="val.value">
-                        <label v-bind:for="'filter-' + i + '-' + j">{{ val.display_name }}</label>
+                    <!-- /.radio filter -->
+                    <div v-else-if="filter.type=='select'">
+                        <div class="bbi-label flex-container">
+                            <span>
+                                {{ filter.display_name }}
+                            </span>
+                            <span class="bbi-label-hint"
+                                v-bind:title="'Using attribute ['+filter.attr+'] to filter.'">
+                                <i class="fa fa-question-circle"></i>
+                            </span>
+                        </div>
+                        <div class="bbi-value">
+                            <select v-bind:id="'filter-' + i"
+                                v-bind:name="'filter-' + i"
+                                v-model="filter.value"
+                                v-on:change="update_table">
+                                <option v-bind:value="val.value" 
+                                    v-for="val, j in filter.values">
+                                    {{ val.display_name }}
+                                </option>
+                            </select>
+                        </div>
                     </div>
+
                 </div>
-                
+                <!-- /.filters -->
             </div>
     
         </div>
@@ -828,27 +855,47 @@ var jarvis = {
         }
         var prj = jarvis.getUrlParameter('prj');
 
-        // set filter
-        if (tb_filter.all_filters.hasOwnProperty(prj)) {
-            tb_filter.filters = tb_filter.all_filters[prj];
-        }
-
         $.get(
-            '/pub/graphdata/'+prj+'/ITABLE.json',
-            {ver: Math.random()},
-            function(data) {
-                console.log(data);
-                dt_tbcore.init(data.rs, data.attrs);
-                tb_filter.init();
-                tb_coltab.init();
-                tb_schtab.init();
-                jarvis.update_schtab();
+            '/pub/graphdata/' + prj + '/ITABLE_CFG.json',
+            {ver: Math.random},
+            function(cfg_data) {
+                // update the filters
+                tb_filter.filters = tb_filter.filters.concat(cfg_data.filters);
 
-                // clsoe the start-screen
-                jarvis.ssmsg('Almost Initialized.')
-                setTimeout('jarvis.ssclose();', 400);
+                // update columns
+                var cols_fixed = [];
+                var cols_default = [];
+                for (var i = 0; i < cfg_data.cols.fixed.length; i++) {
+                    cols_fixed.push(cfg_data.cols.fixed[i].toUpperCase());
+                }
+                for (var i = 0; i < cfg_data.cols.default.length; i++) {
+                    cols_default.push(cfg_data.cols.default[i].toUpperCase());
+                }
+                tb_coltab.cols.fixed = tb_coltab.cols.fixed.concat(cols_fixed);
+                tb_coltab.cols.default = tb_coltab.cols.default.concat(cols_default);
+
+                // get detailed table data
+                $.get(
+                    '/pub/graphdata/'+prj+'/ITABLE.json',
+                    {ver: Math.random()},
+                    function(data) {
+                        console.log(data);
+                        dt_tbcore.init(data.rs, data.attrs);
+                        tb_filter.init();
+                        tb_coltab.init();
+                        tb_schtab.init();
+                        jarvis.update_schtab();
+
+                        // clsoe the start-screen
+                        jarvis.ssmsg('Almost Initialized.')
+                        setTimeout('jarvis.ssclose();', 400);
+                    }, 'json'
+                );
+
             }, 'json'
         );
+
+        
     },
 
     getUrlParameter: function(name) {
