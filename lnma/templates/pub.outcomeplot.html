@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+
+<title>Outcome Table</title>
+
+<link rel="icon" href="/static/img/favicon.png" type="image/png">
+<script src="https://kit.fontawesome.com/cb45cc91b0.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="/static/lib/jquery-ui/jquery-ui.min.css">
+<link rel="stylesheet" href="/static/css/mybox-0.9.1.css">
+
+<style>
+html, body {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+}
+body {
+    font-size: 12px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+a {
+    color: #333333;
+    text-decoration: none;
+}
+#wrapper {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+}
+#start-screen {
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+#ss-msg {
+    width: 100%;
+    padding: 10px 0;
+    text-align: center;
+}
+
+/* for this page */
+#vw_ocplots {
+    width: 100%;
+    height: 100%;
+}
+#vw_ocplots_navipanel {
+    width: 300px;
+    padding: 0 5px;
+    height: 100%;
+    background-color: whitesmoke;
+}
+#vw_ocplots_mainpanel {
+    width: calc(100% - 300px);
+    padding: 0 5px;
+    height: 100%;
+}
+.oc-name {
+    width:     180px;
+    min-width: 180px;
+    cursor: pointer;
+    padding: 2px 0;
+}
+.oc-type {
+    width: 40px;
+    min-width: 40px;
+    text-align: center;
+    cursor: pointer;
+    padding: 2px 0;
+}
+.oc-type:hover {
+    background-color: #cccccc;
+    font-weight: bold;
+}
+.oc-cate {
+    flex-direction: column;
+}
+.oc-cate-info {
+    width: 100%;
+    border-bottom: 1px solid transparent;
+}
+.oc-cate-info:hover {
+    border-bottom: 1px solid #555555;
+}
+.oc-cate-info .oc-name {
+    font-weight: bold;
+}
+.oc-cate-info .oc-type {
+    font-weight: bold;
+}
+.oc-items {
+    width: 100%;
+    padding-left: 20px;
+}
+.oc-item {
+    width: 100%;
+    border-left: 1px solid #aaaaaa;
+}
+.oc-item-info {
+    width: calc(100% - 20px);
+    border-bottom: 1px solid transparent;
+}
+.oc-item-info:hover {
+    background-color: #efefef;
+    border-bottom: 1px solid #cccccc;
+}
+.oc-item-info .oc-name {
+    width:       150px;
+    min-width:   150px;
+    padding-left: 10px;
+}
+</style>
+</head>
+<body>
+<div id="start-screen">
+    <h1>
+        <i class="fa fa-chart-bar"></i>
+        Outcome Plot
+    </h1>
+    <div id="ss-msg">Loading data and initializing ...</div>
+</div>
+
+<div id="wrapper">
+
+<div id="vw_ocplots" class="d-flex fx-row">
+
+    <div id="vw_ocplots_navipanel">
+        <div class="box">
+            <div class="box-header">
+                <h4>
+                    <i class="fa fa-search"></i>
+                    Outcome List |
+                </h4>
+                <div>
+                    <input type="text" class="box-input" style="background-color: transparent;">
+                </div>
+            </div>
+            <div class="box-body">
+                <div class="oc-cate d-flex fx-col">
+                    <div class="oc-cate-info d-flex fx-row">
+                        <div class="oc-name" style="font-weight: bold;">Outcome Name</div>
+                        <div class="oc-type">
+                            ALL
+                        </div>
+                        <div class="oc-type">
+                            3+
+                        </div>
+                        <div class="oc-type">
+                            5
+                        </div>
+                    </div>
+                </div>
+                <div class="oc-cate d-flex fx-col">
+                    <div class="oc-cate-info d-flex fx-row">
+                        <div class="oc-name">
+                            <i class="far fa-folder-open"></i>
+                            Pulmonary
+                        </div>
+                        <div class="oc-type">
+                            12
+                        </div>
+                        <div class="oc-type">
+                            6
+                        </div>
+                        <div class="oc-type">
+                            0
+                        </div>
+                    </div>
+                    <div class="oc-items d-flex fx-col">
+                        <div class="oc-item">
+                            <div class="oc-item-info d-flex fx-row">
+                                <div class="oc-name">
+                                    <i class="far fa-clipboard"></i>
+                                    Bronchitis
+                                </div>
+                                <div class="oc-type">
+                                    6
+                                </div>
+                                <div class="oc-type">
+                                    2
+                                </div>
+                                <div class="oc-type">
+                                    0
+                                </div>
+                            </div>
+                        </div>
+                        <div class="oc-item">
+                            <div class="oc-item-info d-flex fx-row">
+                                <div class="oc-name">
+                                    <i class="far fa-clipboard"></i>
+                                    Bronchospasm
+                                </div>
+                                <div class="oc-type">
+                                    6
+                                </div>
+                                <div class="oc-type">
+                                    4
+                                </div>
+                                <div class="oc-type">
+                                    0
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+
+            <div class="box-footer">
+
+            </div>
+        </div>
+    </div>
+
+    <div id="vw_ocplots_mainpanel">
+        <div class="box">
+            <div class="box-header">
+                <h4>
+                    <i class="fa fa-chart-bar"></i>
+                    FOREST PLOTS | 
+                </h4>
+                <div class="d-flex fx-row">
+                    <div class="box-radio-group d-flex fx-row">
+                        <div>
+                            <i class="fa fa-ruler"></i>
+                            Measure of effect: 
+                        </div>
+                        <div class="box-radio-item">
+                            <input type="radio" checked name="vw_ocplots_input_sm" id="vw_ocplots_input_sm_or">
+                            <label for="vw_ocplots_input_sm_or">OR</label>
+                        </div>
+                        <div class="box-radio-item">
+                            <input type="radio" name="vw_ocplots_input_sm" id="vw_ocplots_input_sm_rr">
+                            <label for="vw_ocplots_input_sm_rr">RR</label>
+                        </div>
+                        <div class="box-radio-item">
+                            <input type="radio" name="vw_ocplots_input_sm" id="vw_ocplots_input_sm_rd">
+                            <label for="vw_ocplots_input_sm_rd">RD</label>
+                        </div>
+                    </div>
+                    <div class="box-radio-group d-flex fx-row">
+                        <div>
+                            <i class="fa fa-cog"></i>
+                            Hartung-Knapp: 
+                        </div>
+                        <div class="box-radio-item">
+                            <input type="radio" checked name="vw_ocplots_input_hk" id="vw_ocplots_input_hk_t">
+                            <label for="vw_ocplots_input_hk_t">True</label>
+                        </div>
+                        <div class="box-radio-item">
+                            <input type="radio" name="vw_ocplots_input_hk" id="vw_ocplots_input_hk_f">
+                            <label for="vw_ocplots_input_hk_f">False</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
+
+<script src="/static/lib/jquery/jquery-3.4.1.min.js"></script>
+<script src="/static/lib/jquery-ui/jquery-ui.min.js"></script>
+<script src="/static/lib/vue.js/vue.min.js"></script>
+<script src="/static/lib/alasql/alasql.min.js"></script>
+
+<script>
+var isIE = /*@cc_on!@*/false || !!document.documentMode;
+if (isIE) {
+    document.getElementById('ss-msg').innerHTML = 'The functions used in this website require advanced web technologies, which are <b>NOT</b> supported by Internet Explorer<br>Try using Google Chrome, Apple Safari, Mozilla Firefox or other modern browsers.';
+}
+</script>
+
+<script>
+
+
+var jarvis = {
+    init: function() {
+        var isIE = /*@cc_on!@*/false || !!document.documentMode;
+
+        console.log('* User is using IE:', isIE);
+        if (isIE) {
+            jarvis.ssmsg('The functions used in this website require advanced web technologies, which are <b>NOT</b> supported by Internet Explorer<br>Try using Google Chrome, Apple Safari, Mozilla Firefox or other modern browsers.')
+            return;
+        }
+
+        // OK, 
+        var prj = jarvis.getUrlParameter('prj');
+        if (prj == null) {
+            jarvis.ssmsg('Project information error.')
+            return;
+        }
+
+        // $.when(
+        //     $.get(
+        //         '/pub/graphdata/' + prj + '/ITABLE_CFG.json',
+        //         {}
+        //     ),
+        //     $.get(
+        //         '/pub/graphdata/'+prj+'/ITABLE.json',
+        //         {ver: Math.random()},
+        //     )
+        // ).done(function(r1, r2) {
+        //     var data1 = r1[0];
+        //     var data2 = r2[0];
+        //     jarvis.data1 = data1;
+        //     jarvis.data2 = data2;
+
+        //     // init the table
+        //     console.log(data1);
+        //     console.log(data2);
+
+        //     // ok, remove the 
+        //     jarvis.ssmsg('Almost initialized.');
+        //     setTimeout('jarvis.ssclose();', 400);
+        // });
+
+        
+        jarvis.ssmsg('Almost initialized.');
+        jarvis.ssclose();
+    },
+
+    getUrlParameter: function(name) {
+        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+        var results = regex.exec(location.search);
+        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    },
+
+    update_schtab: function() {
+        // update sql
+        var cond = tb_filter.get_all_sql_conds();
+        dt_tbcore.sql.conditions = cond;
+
+        // updat rs_db
+        dt_tbcore.update_rs_db();
+
+        // update table
+        tb_schtab.update();
+
+        // update tips
+        $(document).tooltip({
+            position: {
+                my: "left top",
+                at: "right+5 top-5",
+                collision: "none"
+            }
+        });
+    },
+
+    ssmsg: function(msg) {
+        $('#ss-msg').html(msg);
+    },
+
+    ssclose: function() {
+        $('#start-screen').hide();
+    }
+};
+
+$(document).ready(function() {
+    jarvis.init();
+})
+</script>
+</body>

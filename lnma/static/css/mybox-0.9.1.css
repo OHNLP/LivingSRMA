@@ -1,0 +1,187 @@
+/**
+ * My Box Style
+ * This style is for showing more items on one page.
+ */
+.d-flex {
+    display: flex;
+}
+.fx-row {
+    flex-direction: row;
+}
+.fx-col {
+    flex-direction: column;
+}
+.fx-jc-space-between {
+    justify-content: space-between;
+}
+/* box */
+.box {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    font-size: 12px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+.box-header {
+    width: 100%;
+    padding: 3px 0;
+    display: flex;
+    flex-direction: row;
+}
+.box-header a {
+    font-size: .8em;
+}
+.box-header h4 {
+    padding: 0;
+    margin: 0;
+    font-size: .95em;
+    height: 1.6em;
+    line-height: 1.6em;
+    margin: 3px 0;
+}
+.box-header button, 
+.box-body button, 
+.box-footer button {
+    height: 1.6em;
+    line-height: 1em;
+    font-size: .8em;
+    margin: 4px;
+}
+.box-header input,
+.box-body input {
+    height: 1em;
+    line-height: 1em;
+    font-size: 1em;
+    margin: 4px 4px 0 4px;
+}
+.box-input {
+    border: 0;
+    padding: 2px 3px;
+    border-bottom: 1px solid #333333;
+}
+.box-radio-group {
+    margin: 0 10px;
+}
+.box-radio-item {
+    padding: 0 5px;
+    display: flex;
+    align-items: center;
+}
+.box-radio-item:hover {
+    background-color: whitesmoke;
+} 
+.box-radio-group div {
+    height: 1.6em;
+    line-height: 2em;
+}
+.box-radio-item label {
+    height: 1.6em;
+}
+.box-header select {
+    height: 1.6em;
+    line-height: 1.2em;
+    font-size: .8em;
+    margin: 4px;
+}
+.box-header p {
+    height: 1.6em;
+    line-height: 1.2em;
+    font-size: 1em;
+    margin: 5px 0 0 2px;
+}
+.box-header span {
+    font-size: .9em;
+}
+.box-header-right {
+    font-size: .95em;
+    height: 1.6em;
+    line-height: 1.6em;
+    margin: 3px 0;
+    text-align: right;
+}
+.box-header a {
+    padding: 1px 3px;
+    margin: 0 5px;
+    height: 1.6em;
+    line-height: 1.6em;
+}
+.box-header a:hover {
+    text-decoration: underline;
+}
+.box-body {
+    width: 100%;
+}
+.box-body-item {
+    padding: 5px 0 5px 0;
+    display: flex;
+    flex-direction: column;
+    border-bottom: 1px dotted #cccccc;
+}
+/* for left - right items */
+.box-body-item-left {
+    width: 73%;
+}
+.box-body-item-right {
+    width: 24%;
+    display: flex;
+    flex-direction: row;
+}
+.box-body-item-label {
+    width: 54%;
+    font-size: .9em;
+    line-height: 1.8em;
+}
+.box-body-item-value {
+    width: 45%;
+}
+.box-body-item select {
+    width: calc(100% - 10px);
+    font-size: 1em;
+    padding: 2px 0;
+}
+/* the label values items */
+.bbi-label {
+    width: 100%;
+    padding: 0 0 3px 0;
+    font-size: .8em;
+    color: #666666;
+    /* just for using the question marks */
+    justify-content: space-between;
+}
+.bbi-value {
+    width: calc(100% - 10px);
+    padding: 2px 0px 2px 10px;
+    font-size: .9em;
+    color: #000000;
+}
+.bbi-label-hint {
+    color: #999999;
+    cursor: help;
+}
+.bbi-label-hint:hover {
+    color: #333333;
+}
+.box-body h5 {
+    padding: 0;
+    margin: 0;
+    font-size: .95em;
+    height: 1.6em;
+    line-height: 1.6em;
+    margin: 3px 0;
+}
+.box-p {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    font-size: .9em;
+}
+.box-p-fixlen {    
+    white-space: nowrap;
+    text-overflow:ellipsis;
+    overflow: hidden;
+}
+.box-footer {
+    width: 100%;
+    min-height: 20px;
+    padding: 5px 0 5px 0;
+}

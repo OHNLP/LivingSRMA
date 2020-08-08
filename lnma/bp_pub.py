@@ -132,6 +132,11 @@ def graph_v3():
     return render_template('pub.graph_v3.html')
 
 
+@bp.route('/outcomeplot.html')
+def outcomeplot():
+    return render_template('pub.outcomeplot.html')
+
+
 ###########################################################
 # Data services
 ###########################################################
