@@ -210,6 +210,121 @@ def graphdata_img(prj, fn):
     return send_from_directory(full_path, fn)
 
 
+@bp.route('/graphdata/<prj>/OPLOTS.json')
+def graphdata_oplots(prj):
+    '''Special rule for the OPLOTS.json which does not exist
+    
+    The input file is OPLOTS.xls with multiple sheets
+
+    S.1: Adverse events
+    S.2: ?
+    S.3: All SEs
+    S.4: AE_NAME_1 
+    S.n: AE_NAME_2
+
+    '''
+    fn = 'OPLOTS_DATA.xls'
+    full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
+
+    # load data
+    xls = pd.ExcelFile(full_fn)
+
+    # build AE Category data
+    dft = xls.parse('Adverse events')
+    ae_dict = {}
+    ae_list = []
+
+    for col in dft.columns:
+        ae_cate = col
+        ae_names = dft[col][~dft[col].isna()]
+        ae_item = {
+            'ae_cate': ae_cate,
+            'ae_names': []
+        }
+        
+        for ae_name in ae_names:
+            # remove the white space
+            ae_name = ae_name.strip()
+            if ae_name in ae_dict:
+                cate1 = ae_dict[ae_name]
+                print('! duplicate %s in [%s] and [%s]' % (ae_name, cate1, ae_cate))
+                continue
+            ae_dict[ae_name] = ae_cate
+            ae_item['ae_names'].append(ae_name)
+
+        ae_list.append(ae_item)
+            
+        print('* parsed ae_cate %s with %s names' % (col, len(ae_names)))
+    print('* created ae_dict %s terms' % (len(ae_dict)))
+
+    # build AE details
+    cols = ['author', 'year', 'GA_Et', 'GA_Nt', 'GA_Ec', 'GA_Nc', 
+        'G34_Et', 'G34_Ec', 'G3H_Et', 'G3H_Ec', 'G5N_Et', 'G5N_Ec', 
+        'drug_used', 'malignancy']
+
+    aes_dfts = []
+
+    # add All SEs
+    # dft = xls.parse('All SEs', skiprows=1, usecols='A:L', names=cols[:-2])
+    # dft.loc[:, cols[-2]] = ''
+    # dft.loc[:, cols[-1]] = ''
+    # dft.loc[:, 'ae_cate'] = 'All SEs'
+    # dft.loc[:, 'ae_name'] = 'All SEs'
+    # dft.loc[:, 'is_G34'] = dft.G34_Et.isna()
+    # dft.loc[:, 'is_G3H'] = dft.G3H_Et.isna()
+    # dft.loc[:, 'is_G5N'] = dft.G5N_Et.isna()
+    # aes_dfts.append(dft)
+
+    # add detailed AE
+    # the detailed AE starts from 4th sheet
+    for sheet_name in xls.sheet_names[3:]:
+        ae_name = sheet_name
+        dft = xls.parse(sheet_name, skiprows=1, usecols='A:N', names=cols)
+        
+        # remove those empty lines
+        dft = dft[~dft.author.isna()]
+        
+        # add ae name here
+        ae_name = ae_name.strip()
+        ae_cate = ae_dict[ae_name]
+        dft.loc[:, 'ae_cate'] = ae_cate
+        dft.loc[:, 'ae_name'] = ae_name
+        
+        # add flag
+        dft.loc[:, 'is_G34'] = dft.G34_Et.isna()
+        dft.loc[:, 'is_G3H'] = dft.G3H_Et.isna()
+        dft.loc[:, 'is_G5N'] = dft.G5N_Et.isna()
+        
+        aes_dfts.append(dft)
+        
+    df_aes = pd.concat(aes_dfts)
+
+    # fix data type
+    df_aes['year'] = df_aes['year'].astype('int')
+    def _asint(v):
+        # if v is NaN
+        if v!=v: return v
+        # convert value to int
+        try:
+            v1 = int(v)
+            return v1
+        except:
+            # convert other string to 0
+            return 0
+    for col in cols[2: -3]:
+        df_aes[col] = df_aes[col].apply(_asint)
+        df_aes[col] = df_aes[col].astype('Int64')
+
+    # set index as a column
+    df_aes = df_aes.reset_index()
+    
+    rs = json.loads(df_aes.to_json(orient='records'))
+    ret = {
+        'rs': rs,
+        'ae_list': ae_list
+    }
+    return jsonify(ret)
+
 ###########################################################
 # Other utils
 ###########################################################
