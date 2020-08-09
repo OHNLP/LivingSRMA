@@ -3,7 +3,7 @@
 <head>
 <!-- Required meta tags -->
 
-<title>Metastatic Renal Cell Cancer | Living Interactive Systematic Reviews</title>
+<title>IO Toxicity | Living Interactive Systematic Reviews</title>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
@@ -98,7 +98,7 @@
         </div>
     </div>
     <div class="row">
-        <iframe src="[[ url_for('pub.prisma', prj='RCC') ]]" frameborder="0" style="width: 100%; min-height: 830px;"></iframe>
+        
     </div>
 </div>
 
@@ -191,6 +191,9 @@
         <div class="col">
             <p>You can update the following plots according to the selected <span id="txt-num-selected-studies" class="font-weight-bold">0</span> studies in the interactive table</p>
         </div>
+    </div>
+    <div class="row">
+        <iframe id="ifm-ocplots" src="[[ url_for('pub.outcomeplot', prj='IOTOX') ]]" frameborder="0" style="width: 100%; min-height: 800px;"></iframe>
     </div>
 </div>
 

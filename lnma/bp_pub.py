@@ -291,9 +291,10 @@ def graphdata_oplots(prj):
         dft.loc[:, 'ae_name'] = ae_name
         
         # add flag
-        dft.loc[:, 'is_G34'] = dft.G34_Et.isna()
-        dft.loc[:, 'is_G3H'] = dft.G3H_Et.isna()
-        dft.loc[:, 'is_G5N'] = dft.G5N_Et.isna()
+        dft.loc[:, 'has_GA'] = dft.GA_Et.notna()
+        dft.loc[:, 'has_G34'] = dft.G34_Et.notna()
+        dft.loc[:, 'has_G3H'] = dft.G3H_Et.notna()
+        dft.loc[:, 'has_G5N'] = dft.G5N_Et.notna()
         
         aes_dfts.append(dft)
         
@@ -317,6 +318,7 @@ def graphdata_oplots(prj):
 
     # set index as a column
     df_aes = df_aes.reset_index()
+    df_aes.rename(columns={'index': 'pid'}, inplace=True)
     
     rs = json.loads(df_aes.to_json(orient='records'))
     ret = {

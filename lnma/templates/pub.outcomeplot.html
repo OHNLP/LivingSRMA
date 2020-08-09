@@ -62,12 +62,21 @@ a {
     width: 300px;
     padding: 0 5px;
     height: 100%;
-    background-color: whitesmoke;
+    /* background-color: whitesmoke; */
+}
+#vw_ocplots_aespanel {
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
 }
 #vw_ocplots_mainpanel {
     width: calc(100% - 300px);
     padding: 0 5px;
     height: 100%;
+}
+#vw_ocplots_plotpanel {
+    height: 100%;
+    overflow-y: auto;
 }
 .oc-name {
     width:     180px;
@@ -76,14 +85,19 @@ a {
     padding: 2px 0;
 }
 .oc-type {
-    width: 40px;
-    min-width: 40px;
+    width: 30px;
+    min-width: 30px;
     text-align: center;
     cursor: pointer;
     padding: 2px 0;
 }
 .oc-type:hover {
     background-color: #cccccc;
+    font-weight: bold;
+}
+.oc-type-selected {
+    background-color: #555555;
+    color: #ffffff;
     font-weight: bold;
 }
 .oc-cate {
@@ -123,13 +137,38 @@ a {
     min-width:   150px;
     padding-left: 10px;
 }
+.oc-plot-img {
+    width: 100%;
+}
+.oc-plot-tab {
+    padding: 4px 15px;
+    border: 0;
+    color: #999999;
+    border-bottom: 1px solid #999999;
+    cursor: pointer;
+}
+.oc-plot-tab:hover {
+    color: #555555;
+    border-bottom: 1px solid #555555;
+}
+.oc-plot-tab-selected {
+    color: #000000;
+    font-weight: bold;
+    border-bottom: 1px solid #000000;
+}
+.oc-plot-tab-page {
+    display: none;
+}
+.oc-plot-tab-page-selected {
+    display: block;
+}
 </style>
 </head>
 <body>
 <div id="start-screen">
     <h1>
         <i class="fa fa-chart-bar"></i>
-        Outcome Plot
+        Outcome Plots
     </h1>
     <div id="ss-msg">Loading data and initializing ...</div>
 </div>
@@ -139,20 +178,23 @@ a {
 <div id="vw_ocplots" class="d-flex fx-row">
 
     <div id="vw_ocplots_navipanel">
-        <div class="box">
+        <div class="box" style="height: 100%;">
             <div class="box-header">
                 <h4>
                     <i class="fa fa-search"></i>
                     Outcome List |
                 </h4>
-                <div>
+                <!-- <div>
                     <input type="text" class="box-input" style="background-color: transparent;">
-                </div>
+                </div> -->
             </div>
-            <div class="box-body">
+            <div class="box-body" style="height: calc(100% - 30px);">
                 <div class="oc-cate d-flex fx-col">
                     <div class="oc-cate-info d-flex fx-row">
-                        <div class="oc-name" style="font-weight: bold;">Outcome Name</div>
+                        <div class="oc-name" style="font-weight: bold;">
+                            Outcomes |
+                            {{ rs_stat.cnt_cates }}, {{ rs_stat.cnt_aes }}
+                        </div>
                         <div class="oc-type">
                             ALL
                         </div>
@@ -164,58 +206,63 @@ a {
                         </div>
                     </div>
                 </div>
-                <div class="oc-cate d-flex fx-col">
-                    <div class="oc-cate-info d-flex fx-row">
-                        <div class="oc-name">
-                            <i class="far fa-folder-open"></i>
-                            Pulmonary
+
+                <div id="vw_ocplots_aespanel">
+                    <div class="oc-cate d-flex fx-col"
+                        v-for="r in rs">
+                        <div class="oc-cate-info d-flex fx-row">
+                            <div class="oc-name">
+                                <i class="far fa-folder-open"></i>
+                                {{ r.ae_cate }}
+                            </div>
                         </div>
-                        <div class="oc-type">
-                            12
-                        </div>
-                        <div class="oc-type">
-                            6
-                        </div>
-                        <div class="oc-type">
-                            0
-                        </div>
-                    </div>
-                    <div class="oc-items d-flex fx-col">
-                        <div class="oc-item">
-                            <div class="oc-item-info d-flex fx-row">
-                                <div class="oc-name">
-                                    <i class="far fa-clipboard"></i>
-                                    Bronchitis
-                                </div>
-                                <div class="oc-type">
-                                    6
-                                </div>
-                                <div class="oc-type">
-                                    2
-                                </div>
-                                <div class="oc-type">
-                                    0
+                        <div class="oc-items d-flex fx-col">
+                            <div class="oc-item"
+                                v-for="ae in r.aes">
+                                <div class="oc-item-info d-flex fx-row">
+                                    <div class="oc-name">
+                                        <i class="far fa-clipboard"></i>
+                                        {{ ae.ae_name }}
+                                    </div>
+                                    <div class="oc-type"
+                                        v-bind:title="ae.cnt_ga + ' studies'"
+                                        v-bind:ae_cate="r.ae_cate"
+                                        v-bind:ae_name="ae.ae_name"
+                                        v-bind:ae_grade="'ga'"
+                                        v-on:click="show_plot">
+                                        {{ ae.cnt_ga }}
+                                    </div>
+                                    <div class="oc-type" title="No studies available"
+                                        v-if="ae.cnt_g3h==0">
+                                        -
+                                    </div>
+                                    <div class="oc-type"
+                                        v-else
+                                        v-bind:title="ae.cnt_g3h + ' studies'"
+                                        v-bind:ae_cate="r.ae_cate"
+                                        v-bind:ae_name="ae.ae_name"
+                                        v-bind:ae_grade="'g3h'"
+                                        v-on:click="show_plot">
+                                        {{ ae.cnt_g3h }}
+                                    </div>
+                                    <div class="oc-type" title="No studies available"
+                                        v-if="ae.cnt_g5n==0">
+                                        -
+                                    </div>
+                                    <div class="oc-type"
+                                        v-else
+                                        v-bind:title="ae.cnt_g5n + ' studies'"
+                                        v-bind:ae_cate="r.ae_cate"
+                                        v-bind:ae_name="ae.ae_name"
+                                        v-bind:ae_grade="'g5n'"
+                                        v-on:click="show_plot">
+                                        {{ ae.cnt_g5n }}
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="oc-item">
-                            <div class="oc-item-info d-flex fx-row">
-                                <div class="oc-name">
-                                    <i class="far fa-clipboard"></i>
-                                    Bronchospasm
-                                </div>
-                                <div class="oc-type">
-                                    6
-                                </div>
-                                <div class="oc-type">
-                                    4
-                                </div>
-                                <div class="oc-type">
-                                    0
-                                </div>
-                            </div>
-                        </div>
                     </div>
+
                 </div>
                 
             </div>
@@ -227,7 +274,7 @@ a {
     </div>
 
     <div id="vw_ocplots_mainpanel">
-        <div class="box">
+        <div class="box" style="height: 100%;">
             <div class="box-header">
                 <h4>
                     <i class="fa fa-chart-bar"></i>
@@ -240,15 +287,21 @@ a {
                             Measure of effect: 
                         </div>
                         <div class="box-radio-item">
-                            <input type="radio" checked name="vw_ocplots_input_sm" id="vw_ocplots_input_sm_or">
+                            <input type="radio" checked name="vw_ocplots_input_sm"
+                                value="OR" id="vw_ocplots_input_sm_or"
+                                v-model="params.sm">
                             <label for="vw_ocplots_input_sm_or">OR</label>
                         </div>
                         <div class="box-radio-item">
-                            <input type="radio" name="vw_ocplots_input_sm" id="vw_ocplots_input_sm_rr">
+                            <input type="radio" name="vw_ocplots_input_sm"
+                                value="RR" id="vw_ocplots_input_sm_rr"
+                                v-model="params.sm">
                             <label for="vw_ocplots_input_sm_rr">RR</label>
                         </div>
                         <div class="box-radio-item">
-                            <input type="radio" name="vw_ocplots_input_sm" id="vw_ocplots_input_sm_rd">
+                            <input type="radio" name="vw_ocplots_input_sm"
+                                value="RD" id="vw_ocplots_input_sm_rd"
+                                v-model="params.sm">
                             <label for="vw_ocplots_input_sm_rd">RD</label>
                         </div>
                     </div>
@@ -258,16 +311,59 @@ a {
                             Hartung-Knapp: 
                         </div>
                         <div class="box-radio-item">
-                            <input type="radio" checked name="vw_ocplots_input_hk" id="vw_ocplots_input_hk_t">
+                            <input type="radio" checked name="vw_ocplots_input_hk" 
+                                value="TRUE" id="vw_ocplots_input_hk_t"
+                                v-model="params.hk">
                             <label for="vw_ocplots_input_hk_t">True</label>
                         </div>
                         <div class="box-radio-item">
-                            <input type="radio" name="vw_ocplots_input_hk" id="vw_ocplots_input_hk_f">
+                            <input type="radio" name="vw_ocplots_input_hk"
+                                value="FALSE" id="vw_ocplots_input_hk_f"
+                                v-model="params.hk">
                             <label for="vw_ocplots_input_hk_f">False</label>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <div class="box-body" style="height: 100%;">
+
+                <div id="vw_ocplots_plotpanel"
+                    v-if="current.has_img">
+                    <h5>The forest plots of {{ current.cnt_studies }} studies of {{ current.ae_cate }} - {{ current.ae_name }}, {{ get_grade_label(current.ae_grade) }}</h5>
+                    <div class="d-flex fx-row">
+                        <div class="oc-plot-tab"
+                            v-bind:class="{'oc-plot-tab-selected': current.is_prim_plot}"
+                            v-on:click="switch_plot('is_prim_plot')">
+                            <i class="fa fa-chart-bar"></i>
+                            Primary Plot
+                        </div>
+                        <div class="oc-plot-tab"
+                            v-bind:class="{'oc-plot-tab-selected': current.is_cumu_plot}"
+                            v-on:click="switch_plot('is_cumu_plot')">
+                            <i class="fa fa-chart-bar"></i>
+                            Cumulative Plot
+                        </div>
+                    </div>
+                    <div class="oc-plot-tab-page"
+                        v-bind:class="{'oc-plot-tab-page-selected': current.is_prim_plot}">
+                        <img class="oc-plot-img" alt="Forest"
+                            v-bind:src="current.img.outplt1.url">
+                    </div>
+                    <div class="oc-plot-tab-page"
+                        v-bind:class="{'oc-plot-tab-page-selected': current.is_cumu_plot}">
+                        <img class="oc-plot-img" alt="Cumulative"
+                            v-bind:src="current.img.cumuplt.url">
+                    </div>
+
+                </div>
+                <div v-else>
+                    <h5>{{ current.title }}</h5>
+                    
+                </div>
+
+            </div>
+
         </div>
     </div>
 </div>
@@ -288,6 +384,245 @@ if (isIE) {
 
 <script>
 
+var vw_ocplots = {
+    vpp: null,
+    vpp_id: '#vw_ocplots',
+    apikey: '7323590e-577b-4f46-b19f-3ec401829bd6',
+
+    sample: {
+        "Pulmonary": {
+            cate_name: "Pulmonary",
+            aes: [{
+                ae_name: 'Bronchitis',
+                cnt_ga: 12,
+                cnt_g3h: 2,
+                cnt_g5n: 0
+            }, 
+            {
+                ae_name: 'Bronchospasm',
+                cnt_ga: 2,
+                cnt_g3h: 1,
+                cnt_g5n: 0
+            }]
+        },
+        "Endocrine": {
+            cate_name: "Endocrine",
+            aes: [{
+                ae_name: 'Adrenal insufficiency',
+                cnt_ga: 12,
+                cnt_g3h: 2,
+                cnt_g5n: 0
+            }, 
+            {
+                ae_name: 'Blood TSH increased',
+                cnt_ga: 2,
+                cnt_g3h: 1,
+                cnt_g5n: 0
+            }]
+        }
+    },
+
+    texts: {
+        "ga": "All Grade",
+        "g34": "Grade 3/4",
+        "g3h": "Grade 3 or higher",
+        "g5n": "Grade 5 only"
+    },
+
+    init: function(data) {
+        // bind local data
+        this.data = data;
+
+        // init local db
+        alasql('create table aes');
+        alasql('select * into aes from ?', [this.data.rs])
+        
+        this.rs = {},
+        this.rs_stat = {
+            cnt_cates: 0,
+            cnt_aes: 0,
+        };
+        
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                rs: this.rs,
+                rs_stat: this.rs_stat,
+                params: {
+                    sm: 'OR',
+                    hk: 'FALSE'
+                },
+                current: {
+                    ae_cate: '',
+                    ae_name: '',
+                    ae_grade: '',
+                    cnt_studies: 0, 
+                    has_img: false,
+                    img: {
+                        cumuplt: {},
+                        outplt1: {}
+                    },
+                    title: '',
+                    is_prim_plot: true,
+                    is_cumu_plot: false
+                }
+            },
+            methods: {
+                show_plot: function(event) {
+                    var ae_cate = event.target.getAttribute('ae_cate');
+                    var ae_name = event.target.getAttribute('ae_name');
+                    var ae_grade = event.target.getAttribute('ae_grade');
+                    // add effect
+                    $('.oc-type').removeClass('oc-type-selected');
+                    $(event.target).addClass('oc-type-selected');
+
+                    // call the worker to get plots
+                    vw_ocplots.show_plot(ae_cate, ae_name, ae_grade);
+                },
+
+                get_grade_label: function(g) {
+                    return vw_ocplots.texts[g];
+                },
+
+                switch_plot: function(plot) {
+                    // set all to false
+                    this.current.is_cumu_plot = false;
+                    this.current.is_prim_plot = false;
+
+                    // set the selected as true
+                    this.current[plot] = true;
+                }
+            }
+        });
+
+        this.update();
+    },
+
+    get_pid_condition: function() {
+        return 'pid is not null ';
+    },
+    
+
+    update: function(pids) {
+        // init the result
+        var raw_rs = alasql(
+            'select ae_cate, ae_name, ' +
+            '  count(distinct pid) as cnt_ga, ' +
+            '  count(case when has_G3H = true then pid else null end) as cnt_g3h, ' +
+            '  count(case when has_G5N = true then pid else null end) as cnt_g5n ' +
+            'from aes ' + 
+            'where ' +
+            this.get_pid_condition() + ' ' + 
+            'group by ae_cate, ae_name ' + 
+            'order by ae_cate asc, ae_name asc'
+        );
+        var rs = {};
+        var rs_stat = {
+            cnt_cates: 0,
+            cnt_aes: 0,
+        };
+        for (var i = 0; i < raw_rs.length; i++) {
+            var r = raw_rs[i];
+            if (rs.hasOwnProperty(r.ae_cate)) {
+                //
+            } else {
+                rs[r.ae_cate] = {
+                    ae_cate: r.ae_cate,
+                    aes: []
+                }
+                rs_stat.cnt_cates += 1;
+            }
+            // put this ae into cate
+            rs[r.ae_cate]['aes'].push({
+                ae_name: r.ae_name,
+                cnt_ga: r.cnt_ga,
+                cnt_g3h: r.cnt_g3h,
+                cnt_g5n: r.cnt_g5n
+            });
+            rs_stat.cnt_aes += 1;
+        }
+        // bind results 
+        this.raw_rs = raw_rs;
+        this.rs = rs;
+        this.rs_stat = rs_stat;
+
+        // update vpp data
+        this.vpp.rs = this.rs;
+        this.vpp.rs_stat = this.rs_stat;
+
+        // update tips
+        $(document).tooltip({
+            position: {
+                my: "left top",
+                at: "right+5 top-5",
+                collision: "none"
+            }
+        });
+    },
+
+
+    show_plot: function(ae_cate, ae_name, ae_grade) {
+        console.log('* show_plot ' + ae_cate + ', ' + ae_name + ', ' + ae_grade);
+
+        // set no img and try to load
+        this.vpp.current.has_img = false;
+        
+        // get the studies of this ae cate+name+grade
+        var col_prefix = ae_grade.toUpperCase();
+        var sql = 'select author as study, year, ' + 
+            col_prefix + '_Et as Et, ' +
+            col_prefix + '_Ec as Ec, ' +
+            'GA_Nt as Nt, GA_Nc as Nc ' +
+            'from aes ' + 
+            'where ' + this.get_pid_condition() + ' ' + 
+            "  and ae_cate='" + ae_cate + "' " + 
+            "  and ae_name='" + ae_name + "' " + 
+            "  and has_" + col_prefix + " = true";
+        
+        var rs = alasql(sql);
+        console.log(rs);
+
+        // update the data in vpp
+        this.vpp.current.ae_cate = ae_cate;
+        this.vpp.current.ae_name = ae_name;
+        this.vpp.current.ae_grade = ae_grade;
+        this.vpp.current.cnt_studies = rs.length;
+
+        // send ajax to server
+        var params = {
+            am: 'FOREST',
+            sm: this.vpp.params.sm,
+            rs: JSON.stringify(rs),
+            hk: this.vpp.params.hk,
+            apikey: this.apikey
+        };
+        console.log(params);
+
+        // clear the response area
+
+        var base = '';
+        // var base = 'https://workspace.network-meta-analysis.com/';
+        $.post(
+            base + '/rplt/IOTOX',
+            params,
+            function(data) {
+                console.log('* get return', data);
+                vw_ocplots.update_ocplots(data);
+            }, 'json'
+        )
+    },
+
+    update_ocplots: function(data) {
+        if (data.success) {
+            // great! show images
+            this.vpp.current.img = data.img;
+            this.vpp.current.has_img = true;
+        } else {
+            // update message
+        }
+    }
+};
+
 
 var jarvis = {
     init: function() {
@@ -306,33 +641,33 @@ var jarvis = {
             return;
         }
 
-        // $.when(
-        //     $.get(
-        //         '/pub/graphdata/' + prj + '/ITABLE_CFG.json',
-        //         {}
-        //     ),
-        //     $.get(
-        //         '/pub/graphdata/'+prj+'/ITABLE.json',
-        //         {ver: Math.random()},
-        //     )
-        // ).done(function(r1, r2) {
-        //     var data1 = r1[0];
-        //     var data2 = r2[0];
-        //     jarvis.data1 = data1;
-        //     jarvis.data2 = data2;
+        $.when(
+            $.get(
+                '/pub/graphdata/' + prj + '/ITABLE_CFG.json',
+                {}
+            ),
+            $.get(
+                '/pub/graphdata/'+prj+'/OPLOTS.json',
+                {ver: Math.random()},
+            )
+        ).done(function(r1, r2) {
+            var data1 = r1[0];
+            var data2 = r2[0];
+            jarvis.data1 = data1;
+            jarvis.data2 = data2;
 
-        //     // init the table
-        //     console.log(data1);
-        //     console.log(data2);
+            // init the table
+            console.log(data1);
+            console.log(data2);
 
-        //     // ok, remove the 
-        //     jarvis.ssmsg('Almost initialized.');
-        //     setTimeout('jarvis.ssclose();', 400);
-        // });
+            vw_ocplots.init(data2);
+
+            // ok, remove the 
+            jarvis.ssmsg('Almost initialized.');
+            setTimeout('jarvis.ssclose();', 400);
+        });
 
         
-        jarvis.ssmsg('Almost initialized.');
-        jarvis.ssclose();
     },
 
     getUrlParameter: function(name) {
