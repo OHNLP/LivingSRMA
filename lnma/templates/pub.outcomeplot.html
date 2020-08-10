@@ -422,6 +422,8 @@ var vw_ocplots = {
         }
     },
 
+    pids: [],
+
     texts: {
         "ga": "All Grade",
         "g34": "Grade 3/4",
@@ -495,18 +497,23 @@ var vw_ocplots = {
             }
         });
 
-        this.update();
+        this.update([]);
     },
 
     get_pid_condition: function() {
-        return 'pid is not null ';
+        if (this.pids.length == 0) {
+            return 'pid is not null ';
+        } else {
+            var cond = this.pids.map(function(v) { return '' + v}).join(',');
+            return 'pid in (' + cond + ') '
+        }
     },
     
 
     update: function(pids) {
-        // init the result
-        var raw_rs = alasql(
-            'select ae_cate, ae_name, ' +
+        // update the pid
+        this.pids = pids;
+        var sql = 'select ae_cate, ae_name, ' +
             '  count(distinct pid) as cnt_ga, ' +
             '  count(case when has_G3H = true then pid else null end) as cnt_g3h, ' +
             '  count(case when has_G5N = true then pid else null end) as cnt_g5n ' +
@@ -514,8 +521,10 @@ var vw_ocplots = {
             'where ' +
             this.get_pid_condition() + ' ' + 
             'group by ae_cate, ae_name ' + 
-            'order by ae_cate asc, ae_name asc'
-        );
+            'order by ae_cate asc, ae_name asc';
+        console.log(sql);
+        // init the result
+        var raw_rs = alasql(sql);
         var rs = {};
         var rs_stat = {
             cnt_cates: 0,

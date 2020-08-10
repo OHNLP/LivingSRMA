@@ -19,6 +19,10 @@ var fg_prisma = {
                     if (stage.stage == 'e2') {
                         $( "#dialog-message-e2" ).dialog( "open" );
                     }
+                },
+
+                show_study_by_pmid: function(pmid) {
+
                 }
             }
         });

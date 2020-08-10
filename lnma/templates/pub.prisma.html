@@ -539,7 +539,7 @@ a {
             v-for="r, idx in studies">
 
             <div class="study-title" style="cursor: pointer;"
-                v-bind:title="'Show the abstract of [' + r.title + ']'"
+                v-bind:title="'[' + r.title + ']'"
                 v-on:click="show_study_by_pmid(r.pmid)">
                 <span class="study-badge">{{ idx + 1 }}</span>
                 {{ r.title }}

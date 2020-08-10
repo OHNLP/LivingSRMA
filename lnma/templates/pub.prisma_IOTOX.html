@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+<title>Study Selection v2</title>
+<link rel="icon" href="/static/img/favicon.png" type="image/png">
+<link rel="stylesheet" href="/static/lib/font-awesome/css/all.css">
+<link rel="stylesheet" href="/static/lib/jquery-ui/jquery-ui.min.css">
+
+<link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+
+<style>
+html, body {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+}
+body {
+    font-size: 12px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+p {
+    margin: .1rem;
+}
+a {
+    color: #333333;
+    text-decoration: none;
+}
+.d-flex {
+    display: flex;
+}
+.flex-container {
+    display: flex;
+    justify-content: flex-start;
+    width: 100%;
+    height: 100%;
+}
+.box {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+.box-header {
+    width: 100%;
+    padding: 3px 0;
+    display: flex;
+    flex-direction: row;
+}
+.box-header a {
+    font-size: .8em;
+}
+.box-header h4 {
+    padding: 0;
+    margin: 0;
+    font-size: .95em;
+    height: 1.6em;
+    line-height: 1.6em;
+    margin: 3px 0;
+}
+.box-header button, 
+.box-body button, 
+.box-footer button {
+    height: 1.6em;
+    line-height: 1em;
+    font-size: .8em;
+    margin: 4px;
+}
+.box-header input,
+.box-body input {
+    height: 1em;
+    line-height: 1em;
+    font-size: 1em;
+    margin: 4px 4px 0 4px;
+}
+.box-header select {
+    height: 1.6em;
+    line-height: 1.2em;
+    font-size: .8em;
+    margin: 4px;
+}
+.box-header p {
+    height: 1.6em;
+    line-height: 1.2em;
+    font-size: 1em;
+    margin: 5px 0 0 2px;
+}
+.box-header span {
+    font-size: .9em;
+}
+.box-header-right {
+    font-size: .95em;
+    height: 1.6em;
+    line-height: 1.6em;
+    margin: 3px 0;
+    text-align: right;
+}
+.box-header a {
+    padding: 1px 3px;
+    margin: 0 5px;
+    height: 1.6em;
+    line-height: 1.6em;
+}
+.box-header a:hover {
+    text-decoration: underline;
+}
+.box-body {
+    width: 100%;
+}
+.box-body-item {
+    padding: 5px 0 5px 0;
+    display: flex;
+    flex-direction: column;
+    border-bottom: 1px dotted #cccccc;
+}
+/* for left - right items */
+.box-body-item-left {
+    width: 73%;
+}
+.box-body-item-right {
+    width: 24%;
+    display: flex;
+    flex-direction: row;
+}
+.box-body-item-label {
+    width: 54%;
+    font-size: .9em;
+    line-height: 1.8em;
+}
+.box-body-item-value {
+    width: 45%;
+}
+.box-body-item select {
+    width: 100%;
+}
+/* the label values items */
+.bbi-label {
+    width: 100%;
+    padding: 0 0 3px 0;
+    font-size: .8em;
+    color: #666666;
+    /* just for using the question marks */
+    justify-content: space-between;
+}
+.bbi-value {
+    width: 100%;
+    padding: 2px 0px 2px 10px;
+    font-size: .9em;
+    color: #000000;
+}
+.bbi-label-hint {
+    color: #999999;
+    cursor: help;
+}
+.bbi-label-hint:hover {
+    color: #333333;
+}
+.box-body h5 {
+    padding: 0;
+    margin: 0;
+    font-size: .95em;
+    height: 1.6em;
+    line-height: 1.6em;
+    margin: 3px 0;
+}
+.box-p {
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    font-size: .9em;
+}
+.box-p-fixlen {    
+    white-space: nowrap;
+    text-overflow:ellipsis;
+    overflow: hidden;
+}
+.box-footer {
+    width: 100%;
+    min-height: 20px;
+    padding: 5px 0 5px 0;
+}
+.footer {
+    width: 100%;
+    align-items: flex-end;
+    font-size: .75em;
+    line-height: 1.5em;
+    height: 1.5em;
+}
+.footer div {
+    height: 1em;
+    line-height: 1em;
+}
+.footer-link a {
+    padding: 0 5px;
+    color: #999999;
+}
+
+/* element ui css */
+.text-start {
+    font-size: 10px;
+}
+.v-data-table td {
+    font-size: .8rem;
+}
+/* layouts */
+#wrapper {
+    flex-direction: row;
+}
+#start-screen {
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+#ss-msg {
+    width: 100%;
+    padding: 10px 0;
+    text-align: center;
+}
+/* page */
+.ss-box {
+    position: absolute;
+    width: 150px;
+    /* height: 50px; */
+    border: 1px solid #666666;
+    padding: 5px;
+    text-align: center;
+    box-shadow: 3px 3px #cccccc;
+    cursor: pointer;
+    background-color: white;
+}
+.ss-box2 {
+    border: 1px solid #ab7e3b;
+    background-color: #fff9dc;
+}
+.ss-box2:hover {
+    background: #fff9dc;
+    box-shadow: 3px 3px #aaaaaa;
+}
+.ss-box3 {
+    border-radius: 10px;
+    border: 3px solid red;
+}
+.ss-info {
+    /* max-height: 32px; */
+    line-height: 15px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+.ss-box-stage {
+    font-weight: normal;
+}
+.ss-box-stage:hover {
+    font-weight: bold;
+}
+.ss-box-stage-hover {
+    font-weight: bold;
+}
+.ss-number {
+    font-size: .9rem;
+}
+.ss-arrow {
+    position: absolute;
+    text-align: center;
+    font-size: 2rem;
+}
+.ss-box-legend-text {
+    margin-left: 30px;
+    line-height: 10px;
+    font-size: 11px;
+    white-space: nowrap;
+}
+/* component */
+.result-list-item {
+    margin-bottom: 5px;
+}
+.result-list-item:hover,
+.result-list-item:active {
+    background-color: #eeeeee;
+}
+.study-badge {
+    color: white;
+    background: #6762df;
+    padding: 0px 3px;
+    border-radius: 5px;
+}
+.study-title {
+    font-size: 1.1em;
+    padding: 0 0 0 .2em;
+    color: mediumblue;
+}
+.study-title:hover {
+    color: blue;
+}
+.study-authors {
+    padding: 0 0 0 .2em;
+    font-size: .95em;
+}
+.study-pub {
+    padding: 0 0 0 .2em;
+    font-size: .9em;
+}
+.study-journal {
+    font-weight: bold;
+}
+.study-pmid {
+    color: gray;
+}
+.study-pmid:hover {
+    color: darkblue;
+    text-decoration: none;
+}
+.dialog p {
+    font-size: 14px;
+}
+</style>
+</head>
+<body>
+
+<div id="start-screen">
+    <h1>
+        <i class="fa fa-table"></i>
+        PRISMA Flow Diagram
+    </h1>
+    <div id="ss-msg">Table Initializing ...</div>
+</div>
+
+<div id="wrapper" class="flex-container">
+
+<div id="fg_prisma" class="box" style="width: 500px; min-width: 500px;">
+
+    {% include 'svg/PRISMA_IOTOX_v2.svg' %}
+
+</div><!-- /#fg_prisma -->
+
+<div id="tb_studylist" class="box" style="width: calc(100%-500px); min-width: 500px;">
+
+    <div class="box-header">
+        <h4>
+            <i class="fa fa-file"></i>
+            Study List | 
+        </h4>
+        <div>
+            <p>{{ short_title }}</p>
+        </div>
+    </div>
+
+    <div class="box-body" style="overflow-y: auto;"
+        v-if="total > 0">
+        <div class="box-body-item result-list-item"
+            v-for="r, idx in studies">
+
+            <div class="study-title" style="cursor: pointer;"
+                v-bind:title="'[' + r.title + ']'"
+                v-on:click="show_study(r.pid)">
+                <span class="study-badge">{{ idx + 1 }}</span>
+                {{ r.title }}
+            </div>
+
+            <div class="study-authors">
+                {{ r.authors }}
+            </div>
+
+            <div class="study-pub">
+                {{ r.date }} 
+                <span class="study-journal">{{ r.journal }}</span class="">. 
+                    
+                <a class="study-pmid" target="_blank" title="Open the page in ClinicalTrials.gov" 
+                    v-if="r.pid_type=='nct8'"
+                    v-bind:href="url.ctgov.view_ct + r.pid">{{ r.pid }}</a>
+                <a class="study-pmid" target="_blank" title="Open the page in PubMed" 
+                    v-else
+                    v-bind:href="url.pubmed.view_pmid + r.pid">{{ r.pid }}</a>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="box-footer" style="text-align: right; padding: 0 0 10px 0;">
+        <div v-if="tp>1">
+            <button class="btn"
+                v-on:click="prev_page">
+                <i class="fa fa-arrow-left"></i>
+                Prev Page
+            </button>
+            <button class="btn"
+                v-on:click="next_page">
+                <i class="fa fa-arrow-right"></i>
+                Next Page
+            </button>
+        </div>
+    </div>
+</div><!-- /#tbl_study -->
+
+</div>
+<div id="dialog-message-e2" class="dialog" title="Excluded by full text review">
+    <p>
+    Full-text articles excluded.
+    </p>
+</div>
+<div style="display:none;" id="data_pub">
+[[j|safe]]
+</div>
+
+<!-- use third party libs -->
+<script src="/static/lib/jquery/jquery-3.4.1.min.js"></script>
+<script src="/static/lib/jquery-ui/jquery-ui.min.js"></script>
+<script src="/static/lib/vue.js/vue.min.js"></script>
+<!-- D3.js -->
+<script src="/static/lib/d3/d3.min.js"></script>
+<script src="/static/lib/d3/d3-sankey.js"></script>
+<!-- vuetify -->
+<script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+<!-- chance.js -->
+<script src="/static/lib/alasql/alasql.min.js"></script>
+<!-- for IE -->
+<script>
+var isIE = /*@cc_on!@*/false || !!document.documentMode;
+if (isIE) {
+    document.getElementById('ss-msg').innerHTML = 'The functions used in this website require advanced web technologies, which are <b>NOT</b> supported by Internet Explorer<br>Try using Google Chrome, Apple Safari, Mozilla Firefox or other modern browsers.';
+}
+</script>
+<script>
+var tb_studylist = {
+    vpp: null,
+    vpp_id: '#tb_studylist',
+    data: {},
+    all_rs: [],
+    
+    init: function(data) {
+        this.data = data;
+        // create a st for summary
+
+        // init the UI
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                total: this.all_rs.length,
+                pn: 0,
+                tp: 1,
+                short_title: '',
+                url: jarvis.url,
+                studies: this.all_rs
+            },
+            methods: {
+                show_study: function(pid) {
+
+                },
+
+                prev_page: function() {
+                    if (this.pn > 0) {
+                        this.pn -= 1;
+                        tb_search.search(
+                            tb_search.vpp.keyword,
+                            tb_search.vpp.pn * tb_search.retmax
+                        );
+                    }
+                },
+
+                next_page: function() {
+                    if (this.pn < this.tp) {
+                        this.pn += 1;
+                        tb_search.search(
+                            tb_search.vpp.keyword,
+                            tb_search.vpp.pn * tb_search.retmax
+                        );
+                    }
+                },
+            }
+        });
+    },
+
+    unpack: function(rows, key) {
+        return rows.map(function(row) {
+            return row[key];
+        });
+    },
+
+    clear: function() {
+        this.vpp.n = 0;
+        this.vpp.headers = [];
+        this.vpp.studies = [];
+    },
+
+    set_stage: function(stage, studies) {
+        this.vpp.stage = stage;
+        this.vpp.studies = studies;
+    },
+
+    update_study_list: function(sn, stage) {
+        console.log("* update study list " + sn + ', ' + stage);
+        // filter the studies
+        var studies = [];
+        for (var i = 0; i < this.data.studylist[sn][stage].length; i++) {
+            var pid = this.data.studylist[sn][stage][i];
+            // it should be there ...
+            var study = this.data.study[pid];
+            studies.push(study);
+        }
+        this.vpp.studies = studies;
+        this.vpp.total = studies.length;
+        this.vpp.short_title = "The " + studies.length + 
+            " studies included in " + jarvis.txt_stage(stage) + 
+            " of " + jarvis.txt_sn(sn);
+    }
+}
+
+var jarvis = {
+    data: null,
+    tokens: ['b1', 'b2', 'b3', 'b4', 'b5', 'b6', 'b7', 'e1', 'e2'],
+    url: {
+        sel_pred: './hsra_pred',
+        ctgov: {
+            view_ct: 'https://clinicaltrials.gov/ct2/show/'
+        },
+        pubmed: {
+            esearch: 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed',
+            esummary: 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed',
+            efetch: "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed",
+            view_pmid: 'https://www.ncbi.nlm.nih.gov/pubmed/?term='
+        },
+    },
+
+    current: {
+        sn: 's6'
+    },
+
+    txt_stage: function(stage) {
+        return {
+            'ma': 'meta-analysis',
+            'sr': 'systematic review'
+        }[stage];
+    },
+
+    txt_sn: function(sn) {
+        return {
+            's1': 'search 1',
+            's2': 'search 2',
+            's3': 'search 3',
+            's4': 'search 4',
+            's5': 'search 5',
+            's6': 'search 6'
+        }[sn];
+    },
+
+    prisma_title_id: 'prisma_title',
+
+    getUrlParameter: function(name) {
+        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+        var results = regex.exec(location.search);
+        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    },
+
+    init: function() {
+        // for the message boxes
+        $( ".dialog" ).dialog({
+            autoOpen: false
+        });
+
+        var prj = jarvis.getUrlParameter('prj');
+
+        $.get(
+            '/pub/graphdata/IOTOX/PRISMA_K.json',
+            { ver: Math.random() },
+            function(data) {
+                console.log(data);
+                // update the data and add the st
+                var st_sr_pids = [];
+                var st_ma_pids = [];
+                var sns = ['st'];
+                for (let i = 1; i <= 6; i++) {
+                    var sn = 's' + i;
+                    st_sr_pids = st_sr_pids.concat(data.studylist[sn]['sr']);
+                    st_ma_pids = st_ma_pids.concat(data.studylist[sn]['ma']);
+                    sns.push(sn);
+                }
+                data.studylist['st'] = {
+                    sr: st_sr_pids,
+                    ma: st_ma_pids
+                };
+                data['sns'] = sns;
+
+                // bind data to jarvis
+                jarvis.data = data;
+
+                // init the figure
+                // replace the $$ with jquery findable tag
+                var svgtxt = document.getElementById('fg_prisma').innerHTML;
+
+                // replace the prisma title
+                svgtxt = svgtxt.replace('$prisma_title$', '<span id="'+jarvis.prisma_title_id+'">&nbsp;</span>');
+
+                // replace the numbers
+                for (var i = 0; i < sns.length; i++) {
+                    var sn = sns[i];
+                    svgtxt = svgtxt.replace('$'+sn+'_cnt_sr$', '' + data.studylist[sn]['sr'].length);
+                    svgtxt = svgtxt.replace('$'+sn+'_cnt_ma$', '' + data.studylist[sn]['ma'].length);
+
+                    if (sn != 'st') {
+                        svgtxt = svgtxt.replace('$'+sn+'_date$', '' + data.search[sn].date);
+                    }
+                }
+
+                // replace the PRISMA token
+                for (var i = 0; i < jarvis.tokens.length; i++) {
+                    var token = jarvis.tokens[i];
+                    svgtxt = svgtxt.replace('$'+token+'$', '<span id="val_'+token+'"> - </span>');
+                }
+                document.getElementById('fg_prisma').innerHTML = svgtxt;
+
+                jarvis.update_prisma('s6');
+
+                tb_studylist.init(data);
+                tb_studylist.update_study_list('s6', 'ma');
+
+                // bind the click event
+                $('svg a').on('click', function(evt) {
+                    var link = $(this).attr('xlink:href');
+                    console.log("* clicked: " + link);
+                    
+                    // click the studylist link
+                    var ps = link.split('_');
+                    var sn = ps[1];
+                    var op = ps[2];
+                    var stage = ps[3];
+
+                    // decide what to do with op
+                    if (op == 'sch') {
+                        // clicked the search item
+                        // update the PRISMA plot
+                        jarvis.update_prisma(sn);
+                    } else if (op == 'cnt') {
+                        // clicked the number
+                        // update the study list
+                        if (sn == 'xx') {
+                            // clicked the cell in the PRISMA plot
+                            tb_studylist.update_study_list(jarvis.current.sn, stage);
+                        } else {
+                            // update plot
+                            jarvis.update_prisma(sn);
+                            // update list
+                            tb_studylist.update_study_list(sn, stage);
+                        }
+                    }
+                    return false;
+                });
+                $('svg a').hover(
+                    function(evt) {
+                        var fill = $($(this)[0].childNodes[1]).attr('fill');
+                        $($(this)[0].childNodes[1]).attr('fill_bak', fill);
+                        $($(this)[0].childNodes[1]).attr('fill', '#fdec12');
+                    },
+                    function(evt) {
+                        var fill = $($(this)[0].childNodes[1]).attr('fill_bak');
+                        $($(this)[0].childNodes[1]).attr('fill', fill);
+                    }
+                );
+        
+                jarvis.ssmsg('Data loaded!');
+                setTimeout('jarvis.ssclose();', 300);
+            }, 'json'
+        )
+    },
+
+    update_prisma: function(sn) {
+        if (sn == 'st') { return }
+        if (sn == 'xx') { return }
+        jarvis.current.sn = sn;
+        var title = "The PRISMA plot of " + jarvis.txt_sn(sn) + 
+            ' (' + jarvis.data.search[sn].date + ')';
+        $('#' + jarvis.prisma_title_id).html(title);
+
+        for (let i = 0; i < jarvis.tokens.length; i++) {
+            var token = jarvis.tokens[i];
+            var val = jarvis.data.prisma[sn][token];
+            $('#val_' + token).html(val);
+        }
+    },
+
+    ssmsg: function(msg) {
+        $('#ss-msg').html(msg);
+    },
+
+    ssclose: function() {
+        $('#start-screen').hide();
+    }
+};
+
+$(document).ready(function() {
+    jarvis.init();
+})
+</script>
+</body>
+</html>

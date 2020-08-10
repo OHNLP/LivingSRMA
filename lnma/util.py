@@ -188,7 +188,11 @@ def e_fetch(ids, db='pubmed'):
         # check each xml node
         for node in item.iter():
             if node.tag == 'PMID': 
-                paper['uid'] = node.text
+                if paper['uid'] == '':
+                    paper['uid'] = node.text
+                else:
+                    # other PMIDs will also appear in result
+                    pass
 
             elif node.tag == 'ArticleTitle':
                 paper['title'] = node.text

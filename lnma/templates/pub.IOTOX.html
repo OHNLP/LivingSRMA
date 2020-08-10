@@ -98,7 +98,8 @@
         </div>
     </div>
     <div class="row">
-        
+        <iframe id="ifm-prisma" src="[[ url_for('pub.prisma_IOTOX') ]]" frameborder="0" style="width: 100%; min-height: 790px;"></iframe>
+
     </div>
 </div>
 
@@ -233,20 +234,34 @@ The HR for 1,2 , The OR for the last one!
 <script>
 
 function update_num_studies() {
-    var win = $('#ifm-itable')[0].contentWindow;
+    var win_it = $('#ifm-itable')[0].contentWindow;
+    var win_oc = $('#ifm-ocplots')[0].contentWindow;
     var num = '-';
 
     try {
-        var rs_db = win.dt_tbcore.rs_db;
-        num = rs_db.length;
+        var rs_db = win_it.dt_tbcore.rs_db;
+        var pids = rs_db.map(function(r){ return r.id });
+        num = pids.length;
+
+        if (num == jarvis.last_num_itable_rs) {
+            // it seems nothing to do with same number
+            // but need more checking
+        } else {
+            jarvis.last_num_itable_rs = num;
+            $('#txt-num-selected-studies').html(num);
+            // update the ocplots
+            win_oc.vw_ocplots.update(pids);
+        }
+        
     } catch (err) {
         num = '-';
     }
 
-    $('#txt-num-selected-studies').html(num)
 }
 
 var jarvis = {
+    last_num_itable_rs: 0,
+
     init: function() {
 
         // bind the num update

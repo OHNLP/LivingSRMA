@@ -97,6 +97,14 @@ def prisma():
     return render_template('pub.prisma.html')
 
 
+@bp.route('/prisma_IOTOX.html')
+def prisma_IOTOX():
+    '''A special PRISMA for IOTOX project
+    The looking is different from others
+    '''
+    return render_template('pub.prisma_IOTOX.html')
+
+
 @bp.route('/itable.html')
 def itable():
     return render_template('pub.itable.html')
