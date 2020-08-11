@@ -32,7 +32,6 @@ a {
 }
 .flex-container {
     display: flex;
-    justify-content: flex-start;
     width: 100%;
     height: 100%;
 }
@@ -237,7 +236,7 @@ a {
                                 v-bind:id="'filter-' + i + '-' + j"
                                 v-model="filter.value"
                                 v-on:change="update_table"
-                                v-bind:value="val.value">
+                                v-bind:value="j">
                             <label v-bind:for="'filter-' + i + '-' + j">{{ val.display_name }}</label>
                         </div>
                     </div>
@@ -257,7 +256,7 @@ a {
                                 v-bind:name="'filter-' + i"
                                 v-model="filter.value"
                                 v-on:change="update_table">
-                                <option v-bind:value="val.value" 
+                                <option v-bind:value="j" 
                                     v-for="val, j in filter.values">
                                     {{ val.display_name }}
                                 </option>
@@ -709,7 +708,7 @@ var jarvis = {
 
         $.get(
             '/pub/graphdata/' + prj + '/ITABLE_CFG.json',
-            {ver: Math.random},
+            {ver: Math.random() },
             function(cfg_data) {
                 // update the filters
                 tb_filter.filters = tb_filter.filters.concat(cfg_data.filters);

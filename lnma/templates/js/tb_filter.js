@@ -60,8 +60,8 @@ var tb_filter = {
 
     get_all_sql_conds: function() {
         var sql_conds = [];
-        for (let i = 0; i < this.vpp.filters.length; i++) {
-            const filter = this.vpp.filters[i];
+        for (var i = 0; i < this.vpp.filters.length; i++) {
+            var filter = this.vpp.filters[i];
             var col = dt_tbcore.t_a2c[filter.attr_id];
             var cond = filter.values[filter.value].sql_cond;
 
