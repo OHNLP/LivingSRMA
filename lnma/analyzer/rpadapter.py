@@ -685,28 +685,28 @@ def _meta_trans_metabin(j, params):
         'model': {
             'random': {
                 'name': 'Random effects model',
-                'Et': np.sum(data['event.e']),
-                'Nt': np.sum(data['n.e']),
-                'Ec': np.sum(data['event.c']),
-                'Nc': np.sum(data['n.c']),
+                'Et': sum(data['event.e']),
+                'Nt': sum(data['n.e']),
+                'Ec': sum(data['event.c']),
+                'Nc': sum(data['n.c']),
                 'TE': data['TE.random'][0],
                 'seTE': data['seTE.random'][0],
-                'sm': np.e ** data['TE.random'][0],
-                'lower': np.e ** data['lower.random'][0],
-                'upper': np.e ** data['upper.random'][0],
+                'sm': round(np.e ** data['TE.random'][0], 3),
+                'lower': round(np.e ** data['lower.random'][0], 3),
+                'upper': round(np.e ** data['upper.random'][0], 3),
                 'w': 1
             },
             'fixed': {
                 'name': 'Fixed effects model',
-                'Et': np.sum(data['event.e']),
-                'Nt': np.sum(data['n.e']),
-                'Ec': np.sum(data['event.c']),
-                'Nc': np.sum(data['n.c']),
+                'Et': sum(data['event.e']),
+                'Nt': sum(data['n.e']),
+                'Ec': sum(data['event.c']),
+                'Nc': sum(data['n.c']),
                 'TE': data['TE.fixed'][0],
                 'seTE': data['seTE.fixed'][0],
-                'sm': np.e ** data['TE.fixed'][0],
-                'lower': np.e ** data['lower.fixed'][0],
-                'upper': np.e ** data['upper.fixed'][0],
+                'sm': round(np.e ** data['TE.fixed'][0], 3),
+                'lower': round(np.e ** data['lower.fixed'][0], 3),
+                'upper': round(np.e ** data['upper.fixed'][0], 3),
                 'w': 1
             }
         },
@@ -728,11 +728,11 @@ def _meta_trans_metabin(j, params):
             'Nc': data['n.c'][i],
             'TE': data['TE'][i],
             'seTE': data['seTE'][i],
-            'sm': np.e ** data['TE'][i],
-            'lower': np.e ** data['lower'][i],
-            'upper': np.e ** data['upper'][i],
-            'w.random': data['w.random'][i] / np.sum(data['w.random']),
-            'w.fixed': data['w.fixed'][i] / np.sum(data['w.fixed'])
+            'sm': round(np.e ** data['TE'][i], 3),
+            'lower': round(np.e ** data['lower'][i], 3),
+            'upper': round(np.e ** data['upper'][i], 3),
+            'w.random': round(data['w.random'][i] / np.sum(data['w.random']), 4),
+            'w.fixed': round(data['w.fixed'][i] / np.sum(data['w.fixed']), 4)
         })
 
     return ret
@@ -750,23 +750,23 @@ def _meta_trans_metacum(j, params):
                 'name': 'Random effects model',
                 'TE': data['TE'][-1],
                 'seTE': data['seTE'][-1],
-                'sm': np.e ** data['TE'][-1],
-                'lower': np.e ** data['lower'][-1],
-                'upper': np.e ** data['upper'][-1]
+                'sm': round(np.e ** data['TE'][-1], 3),
+                'lower': round(np.e ** data['lower'][-1], 3),
+                'upper': round(np.e ** data['upper'][-1], 3)
             }
         },
         'stus': []
     }
     # second, add all the studies
-    stus = data['studlab']
+    stus = data['studlab'][:-2]
     for i, stu in enumerate(stus):
         ret['stus'].append({
             'name': stu,
             'TE': data['TE'][i],
             'seTE': data['seTE'][i],
-            'sm': np.e ** data['TE'][i],
-            'lower': np.e ** data['lower'][i],
-            'upper': np.e ** data['upper'][i]
+            'sm': round(np.e ** data['TE'][i], 3),
+            'lower': round(np.e ** data['lower'][i], 3),
+            'upper': round(np.e ** data['upper'][i], 3)
         })
-        
+
     return ret

@@ -51,7 +51,6 @@ results.cum <- metacum(resultsraw2, sortvar = PRI_CAT_RAWDATA$year)
 all_ret <- list(
     primma = resultsraw,
     cumuma = results.cum,
-    
     version = list(
         jsonlite = packageVersion('jsonlite'),
         BUGSnet = packageVersion('BUGSnet'),

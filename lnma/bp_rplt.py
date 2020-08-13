@@ -111,6 +111,13 @@ def iotox():
         'is_hakn': hk,
     }
 
+    # set the params for callback usage
+    ret['params'] = {
+        'am': am,
+        'sm': sm,
+        'hk': hk
+    }
+
     try:
         result = rplt_analyzer.analyze(rs, cfg)
         # TODO the return should be checked here
@@ -126,7 +133,13 @@ def iotox():
             ret['msg'] = result['msg']
     except Exception as err:
         print('Handling run-time error:', err)
+
+        if current_app.config['DEBUG']:
+            raise err
+
         ret['msg'] = 'System error, please check input data.'
+
+    print(ret)
 
     return jsonify(ret)
     

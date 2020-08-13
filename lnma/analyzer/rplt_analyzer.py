@@ -82,13 +82,12 @@ def analyze(rs, cfg):
             'params': params,
             'success': True,
             'data': {
-                'primma': _meta_trans_metabin(jrst['primma'], params),
-                'cumuma': _meta_trans_metacum(jrst['cumuma'], params),
+                'primma': _meta_trans_metabin(jrst, params),
+                'cumuma': _meta_trans_metacum(jrst, params),
             }
         }
 
     else:
-
         ret = {
             'submission_id': params['submission_id'],
             'params': params,
