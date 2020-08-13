@@ -1,5 +1,6 @@
 import os
 import json
+from functools import wraps
 
 from flask import request
 from flask import flash
@@ -20,12 +21,41 @@ PATH_PUBDATA = 'pubdata'
 
 bp = Blueprint("rplt", __name__, url_prefix="/rplt")
 
+
+def apikey_required(f):
+    '''Check the APIKEY 
+    '''
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        if request.method=='GET':
+            return f(*args, **kwargs)
+
+        # check the API Keys here
+        apikey_set = set([
+            '7323590e-577b-4f46-b19f-3ec401829bd6',
+            '9bebaa87-983d-42e4-ad70-4430c99aa886',
+            'a8c0c749-7263-4072-a313-99ccc76569d3'
+        ])
+        apikey = request.form.get('apikey', '').strip()
+        if apikey not in apikey_set:
+            ret = {
+                'success': False,
+                'msg': 'Unauthorized request'
+            }
+            return jsonify(ret)
+
+        return f(*args, **kwargs)
+
+    return wrap
+
+
 @bp.route('/')
 def index():
     return 'RPLT Service'
 
 
 @bp.route('/IOTOX', methods=['GET', 'POST'])
+@apikey_required
 def iotox():
     if request.method=='GET':
         return render_template('rplt.IOTOX.html')
@@ -41,17 +71,6 @@ def iotox():
             'cumuplt': { 'url': '' }
         }
     }
-
-    # Authenticate
-    apikey_set = set([
-        '7323590e-577b-4f46-b19f-3ec401829bd6',
-        '9bebaa87-983d-42e4-ad70-4430c99aa886',
-        'a8c0c749-7263-4072-a313-99ccc76569d3'
-    ])
-    apikey = request.form.get('apikey', '').strip()
-    if apikey not in apikey_set:
-        ret['msg'] = 'Unauthorized request'
-        return jsonify(ret)
 
     # analyzer model
     am = request.form.get('am', '').strip()

@@ -189,19 +189,31 @@ a {
                 </div> -->
             </div>
             <div class="box-body" style="height: calc(100% - 30px);">
+                
+                <div class="d-flex fx-col">
+                    <div class="d-flex fx-row ">
+                        <div class="oc-name" style="font-weight: bold;">
+                            &nbsp;
+                        </div>
+                        <div style="width: 90px; text-align: center; border-bottom: 1px solid #555555;">
+                            Grade
+                        </div>
+                    </div>
+                </div>
+
                 <div class="oc-cate d-flex fx-col">
                     <div class="oc-cate-info d-flex fx-row">
                         <div class="oc-name" style="font-weight: bold;">
                             Outcomes |
                             {{ rs_stat.cnt_cates }}, {{ rs_stat.cnt_aes }}
                         </div>
-                        <div class="oc-type">
+                        <div class="oc-type" title="All Grades">
                             ALL
                         </div>
-                        <div class="oc-type">
+                        <div class="oc-type" title="Grade 3 or Higher">
                             3+
                         </div>
-                        <div class="oc-type">
+                        <div class="oc-type" title="Grade 5 Only">
                             5
                         </div>
                     </div>
@@ -336,13 +348,13 @@ a {
                             v-bind:class="{'oc-plot-tab-selected': current.is_prim_plot}"
                             v-on:click="switch_plot('is_prim_plot')">
                             <i class="fa fa-chart-bar"></i>
-                            Primary Plot
+                            Primary Meta-Analysis with {{ params.sm }} and HK={{ params.hk }}
                         </div>
                         <div class="oc-plot-tab"
                             v-bind:class="{'oc-plot-tab-selected': current.is_cumu_plot}"
                             v-on:click="switch_plot('is_cumu_plot')">
                             <i class="fa fa-chart-bar"></i>
-                            Cumulative Plot
+                            Cumulative Meta-Analysis with {{ params.sm }}
                         </div>
                     </div>
                     <div class="oc-plot-tab-page"
