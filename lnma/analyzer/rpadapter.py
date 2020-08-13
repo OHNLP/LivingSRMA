@@ -668,3 +668,105 @@ def _gemtc_trans_netplt(j, params):
         'backend': 'gemtc'
     }
     return ret
+
+
+
+###############################################################
+# Adpaters for IOTOX FOREST plots
+###############################################################
+
+def _meta_trans_metabin(j, params):
+    '''Convert the metabin result for forest plot
+    In IOTOX project, this can be used for primary meta-analysis
+    '''
+    data = j['primma']
+    # first, put the basic values
+    ret = {
+        'model': {
+            'random': {
+                'name': 'Random effects model',
+                'Et': np.sum(data['event.e']),
+                'Nt': np.sum(data['n.e']),
+                'Ec': np.sum(data['event.c']),
+                'Nc': np.sum(data['n.c']),
+                'TE': data['TE.random'][0],
+                'seTE': data['seTE.random'][0],
+                'sm': np.e ** data['TE.random'][0],
+                'lower': np.e ** data['lower.random'][0],
+                'upper': np.e ** data['upper.random'][0],
+                'w': 1
+            },
+            'fixed': {
+                'name': 'Fixed effects model',
+                'Et': np.sum(data['event.e']),
+                'Nt': np.sum(data['n.e']),
+                'Ec': np.sum(data['event.c']),
+                'Nc': np.sum(data['n.c']),
+                'TE': data['TE.fixed'][0],
+                'seTE': data['seTE.fixed'][0],
+                'sm': np.e ** data['TE.fixed'][0],
+                'lower': np.e ** data['lower.fixed'][0],
+                'upper': np.e ** data['upper.fixed'][0],
+                'w': 1
+            }
+        },
+        'heterogeneity': {
+            'i2': data['I2'][0],
+            'tau2': data['tau2'][0],
+            'p': data['pval.Q'][0]
+        },
+        'stus': []
+    }
+    # second, add all the studies
+    stus = data['studlab']
+    for i, stu in enumerate(stus):
+        ret['stus'].append({
+            'name': stu,
+            'Et': data['event.e'][i],
+            'Nt': data['n.e'][i],
+            'Ec': data['event.c'][i],
+            'Nc': data['n.c'][i],
+            'TE': data['TE'][i],
+            'seTE': data['seTE'][i],
+            'sm': np.e ** data['TE'][i],
+            'lower': np.e ** data['lower'][i],
+            'upper': np.e ** data['upper'][i],
+            'w.random': data['w.random'][i] / np.sum(data['w.random']),
+            'w.fixed': data['w.fixed'][i] / np.sum(data['w.fixed'])
+        })
+
+    return ret
+    
+
+def _meta_trans_metacum(j, params):
+    '''Convert the metacum result for forest plot
+    In IOTOX project, this can be used for cumulative meta-analysis
+    '''
+    data = j['cumuma']
+    # first, put the basic values
+    ret = {
+        'model': {
+            'random': {
+                'name': 'Random effects model',
+                'TE': data['TE'][-1],
+                'seTE': data['seTE'][-1],
+                'sm': np.e ** data['TE'][-1],
+                'lower': np.e ** data['lower'][-1],
+                'upper': np.e ** data['upper'][-1]
+            }
+        },
+        'stus': []
+    }
+    # second, add all the studies
+    stus = data['studlab']
+    for i, stu in enumerate(stus):
+        ret['stus'].append({
+            'name': stu,
+            'TE': data['TE'][i],
+            'seTE': data['seTE'][i],
+            'sm': np.e ** data['TE'][i],
+            'lower': np.e ** data['lower'][i],
+            'upper': np.e ** data['upper'][i]
+        })
+        
+    return ret

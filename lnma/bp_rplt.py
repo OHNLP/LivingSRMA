@@ -80,7 +80,7 @@ def iotox():
     hk = request.form.get('hk', '').strip()
 
     # check am
-    if am not in set(['FOREST']):
+    if am not in set(['FOREST', 'FORESTDATA']):
         ret['msg'] = 'Unsupported analyzer'
         return jsonify(ret)
     
@@ -110,14 +110,18 @@ def iotox():
         'measure_of_effect': sm,
         'is_hakn': hk,
     }
+
     try:
         result = rplt_analyzer.analyze(rs, cfg)
         # TODO the return should be checked here
         # but most of time, the figure will be generated.
         if result['success']:
             ret['success'] = True
-            ret['img']['outplt1']['url'] = url_for('index.f', fn=result['params']['fn_outplt1'])
-            ret['img']['cumuplt']['url'] = url_for('index.f', fn=result['params']['fn_cumuplt'])
+            if am == 'FOREST':
+                ret['img']['outplt1']['url'] = url_for('index.f', fn=result['params']['fn_outplt1'])
+                ret['img']['cumuplt']['url'] = url_for('index.f', fn=result['params']['fn_cumuplt'])
+            elif am == 'FORESTDATA': 
+                ret['data'] = result['data']
         else:
             ret['msg'] = result['msg']
     except Exception as err:

@@ -14,6 +14,9 @@ from .data_helper import run_rscript
 
 from lnma.settings import *
 
+from .rpadapter import _meta_trans_metabin
+from .rpadapter import _meta_trans_metacum
+
 
 def analyze(rs, cfg):
     subtype = 'rplt_%s_%s' % (cfg['prj'], cfg['analyzer_model'])
@@ -44,6 +47,9 @@ def analyze(rs, cfg):
         'fn_cumuplt':  TPL_FN['cumuplt'].format(**{
             'subtype': subtype, 'submission_id': submission_id
         }),
+        'fn_jsonret': TPL_FN['jsonret'].format(**{
+            'subtype': subtype, 'submission_id': submission_id
+        }),
     }
 
     # put all the configs into param
@@ -67,12 +73,27 @@ def analyze(rs, cfg):
     # run the R script
     run_rscript(params['fn_rscript'])
 
-    # return
-    ret = {
-        'submission_id': params['submission_id'],
-        'params': params,
-        'success': True
-    }
+    # if use FORESTDATA model, need to convert the results
+    if cfg['analyzer_model'] == 'FORESTDATA':
+        full_filename_jsonret = os.path.join(TMP_FOLDER, params['fn_jsonret'])
+        jrst = json.load(open(full_filename_jsonret))
+        ret = {
+            'submission_id': params['submission_id'],
+            'params': params,
+            'success': True,
+            'data': {
+                'primma': _meta_trans_metabin(jrst['primma'], params),
+                'cumuma': _meta_trans_metacum(jrst['cumuma'], params),
+            }
+        }
+
+    else:
+
+        ret = {
+            'submission_id': params['submission_id'],
+            'params': params,
+            'success': True
+        }
 
     return ret 
 
