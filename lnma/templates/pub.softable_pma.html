@@ -8,7 +8,7 @@
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
 
-<title>Outcome Table</title>
+<title>Summary of Findings: PMA</title>
 
 <link rel="icon" href="/static/img/favicon.png" type="image/png">
 <script src="https://kit.fontawesome.com/cb45cc91b0.js" crossorigin="anonymous"></script>
@@ -54,28 +54,28 @@ a {
 }
 
 /* for this page */
-#vw_ocplots {
+#vw_oclist {
     width: 100%;
     height: 100%;
 }
-#vw_ocplots_navipanel {
+#vw_oclist_navipanel {
     width: 300px;
     padding: 0 5px;
     height: 100%;
     /* background-color: whitesmoke; */
 }
-#vw_ocplots_aespanel {
+#vw_oclist_aespanel {
     width: 100%;
     height: 100%;
     overflow-x: hidden;
     overflow-y: auto;
 }
-#vw_ocplots_mainpanel {
+#vw_oclist_mainpanel {
     width: calc(100% - 300px);
     padding: 0 5px;
     height: 100%;
 }
-#vw_ocplots_plotpanel {
+#vw_oclist_plotpanel {
     height: 100%;
     overflow-y: auto;
 }
@@ -171,17 +171,17 @@ a {
 <body>
 <div id="start-screen">
     <h1>
-        <i class="fa fa-chart-bar"></i>
-        Outcome Plots
+        <i class="fa fa-table"></i>
+        Summary of Findings: Pairwise Meta-Analysis
     </h1>
     <div id="ss-msg">Loading data and initializing ...</div>
 </div>
 
 <div id="wrapper">
 
-<div id="vw_ocplots" class="d-flex fx-row">
+<div id="vw_oclist" class="d-flex fx-row">
 
-    <div id="vw_ocplots_navipanel">
+    <div id="vw_oclist_navipanel">
         <div class="box" style="height: 100%;">
             <div class="box-header">
                 <h4>
@@ -233,7 +233,7 @@ a {
                     </div>
                 </div>
 
-                <div id="vw_ocplots_aespanel">
+                <div id="vw_oclist_aespanel">
                     <div class="oc-cate d-flex fx-col"
                         v-for="r in rs">
                         <div class="oc-cate-info d-flex fx-row"
@@ -302,62 +302,18 @@ a {
         </div>
     </div>
 
-    <div id="vw_ocplots_mainpanel">
+    <div id="vw_oclist_mainpanel">
         <div class="box" style="height: 100%;">
             <div class="box-header">
                 <h4>
                     <i class="fa fa-chart-bar"></i>
-                    FOREST PLOTS | 
+                    Summary of Findings Table | 
                 </h4>
-                <div class="d-flex fx-row">
-                    <div class="box-radio-group d-flex fx-row">
-                        <div>
-                            <i class="fa fa-ruler"></i>
-                            Measure of effect: 
-                        </div>
-                        <div class="box-radio-item">
-                            <input type="radio" checked name="vw_ocplots_input_sm"
-                                value="OR" id="vw_ocplots_input_sm_or"
-                                v-model="params.sm">
-                            <label for="vw_ocplots_input_sm_or">OR</label>
-                        </div>
-                        <div class="box-radio-item">
-                            <input type="radio" name="vw_ocplots_input_sm"
-                                value="RR" id="vw_ocplots_input_sm_rr"
-                                v-model="params.sm">
-                            <label for="vw_ocplots_input_sm_rr">RR</label>
-                        </div>
-                        <div class="box-radio-item">
-                            <input type="radio" name="vw_ocplots_input_sm"
-                                value="RD" id="vw_ocplots_input_sm_rd"
-                                v-model="params.sm">
-                            <label for="vw_ocplots_input_sm_rd">RD</label>
-                        </div>
-                    </div>
-                    <div class="box-radio-group d-flex fx-row">
-                        <div>
-                            <i class="fa fa-cog"></i>
-                            Hartung-Knapp: 
-                        </div>
-                        <div class="box-radio-item">
-                            <input type="radio" checked name="vw_ocplots_input_hk" 
-                                value="TRUE" id="vw_ocplots_input_hk_t"
-                                v-model="params.hk">
-                            <label for="vw_ocplots_input_hk_t">True</label>
-                        </div>
-                        <div class="box-radio-item">
-                            <input type="radio" name="vw_ocplots_input_hk"
-                                value="FALSE" id="vw_ocplots_input_hk_f"
-                                v-model="params.hk">
-                            <label for="vw_ocplots_input_hk_f">False</label>
-                        </div>
-                    </div>
-                </div>
             </div>
 
             <div class="box-body" style="height: 100%;">
 
-                <div id="vw_ocplots_plotpanel"
+                <div id="vw_oclist_plotpanel"
                     v-if="current.has_img">
                     <h5>The forest plots of {{ current.cnt_studies }} studies of {{ current.ae_cate }} - {{ current.ae_name }}, {{ get_grade_label(current.ae_grade) }}</h5>
                     <div class="d-flex fx-row">
@@ -413,9 +369,9 @@ if (isIE) {
 
 <script>
 
-var vw_ocplots = {
+var vw_oclist = {
     vpp: null,
-    vpp_id: '#vw_ocplots',
+    vpp_id: '#vw_oclist',
     apikey: '7323590e-577b-4f46-b19f-3ec401829bd6',
 
     sample: {
@@ -508,11 +464,11 @@ var vw_ocplots = {
                     $(event.target).addClass('oc-type-selected');
 
                     // call the worker to get plots
-                    vw_ocplots.show_plot(ae_cate, ae_name, ae_grade);
+                    vw_oclist.show_plot(ae_cate, ae_name, ae_grade);
                 },
 
                 get_grade_label: function(g) {
-                    return vw_ocplots.texts[g];
+                    return vw_oclist.texts[g];
                 },
 
                 switch_plot: function(plot) {
@@ -656,7 +612,7 @@ var vw_ocplots = {
             params,
             function(data) {
                 console.log('* get return', data);
-                vw_ocplots.update_ocplots(data);
+                vw_oclist.update_ocplots(data);
             }, 'json'
         )
     },
@@ -709,7 +665,7 @@ var jarvis = {
             console.log(data1);
             console.log(data2);
 
-            vw_ocplots.init(data2);
+            vw_oclist.init(data2);
 
             // ok, remove the 
             jarvis.ssmsg('Almost initialized.');

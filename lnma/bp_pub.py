@@ -145,6 +145,15 @@ def outcomeplot():
     return render_template('pub.outcomeplot.html')
 
 
+@bp.route('/softable_pma.html')
+def softable_pma():
+    return render_template('pub.softable_pma.html')
+
+
+@bp.route('/softable_nma.html')
+def softable_nma():
+    return render_template('pub.softable_nma.html')
+
 ###########################################################
 # Data services
 ###########################################################

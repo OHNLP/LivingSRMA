@@ -148,7 +148,10 @@
         </div>
     </div>
     <div class="row">
-        <iframe id="ifm-prisma" src="[[ url_for('pub.prisma_IOTOX') ]]" frameborder="0" style="width: 100%; min-height: 790px;"></iframe>
+        <div class="col">
+
+            <iframe id="ifm-prisma" src="[[ url_for('pub.prisma_IOTOX') ]]" frameborder="0" style="width: 100%; min-height: 790px;"></iframe>
+        </div>
 
     </div>
 </div>
@@ -174,6 +177,21 @@
 </div>
 
 
+<br id="sec-sof-pma">
+<div class="container" style="margin-top: 4rem; margin-bottom: 3rem;">
+
+    <h3 style="margin-bottom: 2rem;">
+        SUMMARY OF FINDINGS: PAIRWISE MA
+    </h3>
+    <div class="row">
+        <div class="col">
+            <iframe id="ifm-ocplots" src="[[ url_for('pub.softable_pma', prj='IOTOX') ]]" frameborder="0" style="width: 100%; min-height: 800px;"></iframe>
+        </div>
+    </div>
+
+</div>
+
+
 <br id="sec-intertable">
 <div class="container" style="margin-top: 3rem; margin-bottom: 3rem;">
 
@@ -184,7 +202,10 @@
     <p>How to use this table? <a href="javascript:;" data-toggle="modal" data-target="#exampleModalCenter2">Video demonstration</a></p>
 
     <div class="row">
-        <iframe id="ifm-itable" src="[[ url_for('pub.itable', prj='IOTOX') ]]" frameborder="0" style="width: 100%; min-height: 790px;"></iframe>
+        <div class="col">
+            <iframe id="ifm-itable" src="[[ url_for('pub.itable', prj='IOTOX') ]]" frameborder="0" style="width: 100%; min-height: 790px;"></iframe>
+
+        </div>
     </div>
 </div>
 
@@ -232,21 +253,6 @@
 </div>
 
 
-<br id="sec-sof-pma">
-<div class="container" style="margin-top: 4rem; margin-bottom: 3rem;">
-
-    <h3 style="margin-bottom: 2rem;">
-        SUMMARY OF FINDINGS: PAIRWISE MA
-    </h3>
-    <div class="row">
-        <div class="col">
-            {% include 'pub.IOTOX._SOF_DIRECT.html' %}
-        </div>
-    </div>
-
-</div>
-
-
 <br id="sec-plots">
 <div class="container" style="margin-top: 3rem; margin-bottom:2rem;">
     <h3 style="margin-bottom: 2rem;">
@@ -258,7 +264,9 @@
         </div>
     </div>
     <div class="row">
-        <iframe id="ifm-ocplots" src="[[ url_for('pub.outcomeplot', prj='IOTOX') ]]" frameborder="0" style="width: 100%; min-height: 800px;"></iframe>
+        <div class="col">
+            <iframe id="ifm-ocplots" src="[[ url_for('pub.outcomeplot', prj='IOTOX') ]]" frameborder="0" style="width: 100%; min-height: 800px;"></iframe>
+        </div>
     </div>
 </div>
 
