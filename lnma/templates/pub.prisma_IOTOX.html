@@ -535,7 +535,8 @@ var jarvis = {
     },
 
     current: {
-        sn: 's6'
+        sn: 's6',
+        total: 7
     },
 
     txt_stage: function(stage) {
@@ -553,6 +554,7 @@ var jarvis = {
             's4': 'search 4',
             's5': 'search 5',
             's6': 'search 6',
+            's7': 'search 7',
             'st': 'all searches'
         }[sn];
     },
@@ -583,12 +585,23 @@ var jarvis = {
                 var st_sr_pids = [];
                 var st_ma_pids = [];
                 var sns = ['st'];
-                for (let i = 1; i <= 6; i++) {
+                var st_prisma = { 
+                    "b1": 0, "b2": 0, "b3": 0, "b4": 0, "b5":  0, 
+                    "b6": 0, "b7": 0, "e1": 0, "e2": 0
+                };
+                for (var i = 1; i <= jarvis.current.total; i++) {
                     var sn = 's' + i;
                     st_sr_pids = st_sr_pids.concat(data.studylist[sn]['sr']);
                     st_ma_pids = st_ma_pids.concat(data.studylist[sn]['ma']);
                     sns.push(sn);
+                    for (var j = 0; j < jarvis.tokens.length; j++) {
+                        var token = jarvis.tokens[j];
+                        st_prisma[token] += data.prisma[sn][token];
+                    }
                 }
+                // update the st for the data
+                data.search['st'] = {'date': 'latest'}
+                data.prisma['st'] = st_prisma;
                 data.studylist['st'] = {
                     sr: st_sr_pids,
                     ma: st_ma_pids
@@ -678,7 +691,6 @@ var jarvis = {
     },
 
     update_prisma: function(sn) {
-        if (sn == 'st') { return }
         if (sn == 'xx') { return }
         jarvis.current.sn = sn;
         var title = "The PRISMA plot of " + jarvis.txt_sn(sn) + 
