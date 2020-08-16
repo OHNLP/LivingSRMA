@@ -15,6 +15,8 @@ from flask_login import current_user
 
 import pandas as pd
 
+import PythonMeta as PMA
+
 PATH_PUBDATA = 'pubdata'
 
 bp = Blueprint("pub", __name__, url_prefix="/pub")
@@ -166,6 +168,182 @@ def graphdata(prj, fn):
     return send_from_directory(full_path, fn)
 
 
+@bp.route('/graphdata/<prj>/SOFTABLE_PMA.json')
+def graphdata_softable_pma_json(prj):
+    '''Special rule for the SoF Table PMA which does not exist
+    In this function, all the data are stored in ALL_DATA.xlsx
+    The first tab is Study characteristics
+    The second tab is Adverse events
+    From third tab all the events
+    '''
+    fn = 'ALL_DATA.xlsx'
+    full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
+
+    # load data
+    xls = pd.ExcelFile(full_fn)
+
+    # build AE Category data
+    dft = xls.parse('Adverse events')
+    ae_dict = {}
+    ae_list = []
+
+    for col in dft.columns:
+        ae_cate = col
+        # get those rows not NaN, which means containing adverse event name
+        ae_names = dft[col][~dft[col].isna()]
+        ae_item = {
+            'ae_cate': ae_cate,
+            'ae_names': []
+        }
+        # build ae_name dict
+        for ae_name in ae_names:
+            # remove the white space
+            ae_name = ae_name.strip()
+            if ae_name in ae_dict:
+                cate1 = ae_dict[ae_name]
+                print('! duplicate %s in [%s] and [%s]' % (ae_name, cate1, ae_cate))
+                continue
+            ae_dict[ae_name] = ae_cate
+            ae_item['ae_names'].append(ae_name)
+
+        ae_list.append(ae_item)
+            
+        print('* parsed ae_cate %s with %s names' % (col, len(ae_names)))
+    print('* created ae_dict %s terms' % (len(ae_dict)))
+
+    # build AE details
+    cols = ['author', 'year', 'GA_Et', 'GA_Nt', 'GA_Ec', 'GA_Nc', 
+        'G34_Et', 'G34_Ec', 'G3H_Et', 'G3H_Ec', 'G5N_Et', 'G5N_Ec', 
+        'drug_used', 'malignancy']
+    sms = ['OR', 'RR', 'RD']
+    grades = ['GA', 'G34', 'G3H', 'G5N']
+    ae_dfts = []
+    ae_rsts = {}
+
+    # add detailed AE
+    # the detailed AE starts from 3rd sheet
+    # each sheet_name is an AE
+    for sheet_name in xls.sheet_names[2:]:
+        ae_name = sheet_name
+        # the first row is no use
+        # the second row is used as column name, but replaced with `cols` from A to N
+        dft = xls.parse(sheet_name, skiprows=1, usecols='A:N', names=cols)
+        
+        # remove those empty lines based on author
+        dft = dft[~dft.author.isna()]
+        
+        # add ae name here
+        ae_name = ae_name.strip()
+        ae_cate = ae_dict[ae_name]
+        dft.loc[:, 'ae_cate'] = ae_cate
+        dft.loc[:, 'ae_name'] = ae_name
+        
+        # add flag
+        dft.loc[:, 'has_GA'] = dft.GA_Et.notna()
+        dft.loc[:, 'has_G34'] = dft.G34_Et.notna()
+        dft.loc[:, 'has_G3H'] = dft.G3H_Et.notna()
+        dft.loc[:, 'has_G5N'] = dft.G5N_Et.notna()
+
+        # add to aes list
+        ae_dfts.append(dft)
+
+        # add the OR/RR/RD here for each measure, there are 3 columns
+        # namely, sm_OR_v, sm_OR_l, sm_OR_u
+        #         sm_RR_v, sm_RR_l, sm_RR_u
+        #         sm_RD_v, sm_RD_l, sm_RD_u
+
+        # add the AE model result
+        # for each grade of each AE, the structure of rsts is as follows:
+        # {
+        #    'grade': grade,
+        #    'stus': ['Name 1', 'Name 2'],
+        #    'result': {
+        #       'OR': {
+        #          'random': pma_result,
+        #          'fixed': pma_result
+        #       } 
+        #    }
+        # }
+        ae_rsts[ae_name] = {}
+        for grade in grades:
+            ae_rsts[ae_name][grade] = {
+                'grade': grade,
+                'stus': [],
+                'Et': 0,
+                'Nt': 0,
+                'Ec': 0,
+                'Nc': 0,
+                'result': {}
+            }
+            # get records of this grade
+            dftt = dft[dft['has_%s' % grade]==True]
+            if len(dftt) == 0:
+                # when no records in this grade, skip
+                print('* NO records in [%s] [%s]' % (ae_name, grade))
+                continue
+
+            # ok, use the existing data to calcuate the 
+            ae_rsts[ae_name][grade]['stus'] = dftt.author.values.tolist()
+            ae_rsts[ae_name][grade]['Et'] = int(dftt['%s_Et' % grade].sum())
+            ae_rsts[ae_name][grade]['Nt'] = int(dftt['GA_Nt'].sum())
+            ae_rsts[ae_name][grade]['Ec'] = int(dftt['%s_Ec' % grade].sum())
+            ae_rsts[ae_name][grade]['Nc'] = int(dftt['GA_Nc'].sum())
+
+            # get the dataset of this grade
+            ds = []
+            for idx, r in dftt.iterrows():
+                ds.append([
+                    r['%s_Et' % grade], 
+                    r['GA_Nt'], 
+                    r['%s_Ec' % grade], 
+                    r['GA_Nc'], 
+                    r['author']
+                ])
+
+            # for each sm, get the PMA result
+            for sm in sms:
+                # get the pma result
+                pma_r = get_pma(ds, datatype="CAT_RAW", sm=sm, random_or_fixed='random')
+                pma_f = get_pma(ds, datatype="CAT_RAW", sm=sm, random_or_fixed='fixed')
+                # bind the result to this ae | grade | sm
+                ae_rsts[ae_name][grade]['result'][sm] = {
+                    'random': pma_r,
+                    'fixed': pma_f
+                }
+    
+    # convert all small AE dft to a big one df_aes
+    df_aes = pd.concat(ae_dfts)
+
+    # fix data type
+    df_aes['year'] = df_aes['year'].astype('int')
+    def _asint(v):
+        # if v is NaN
+        if v!=v: return v
+        # convert value to int
+        try:
+            v1 = int(v)
+            return v1
+        except:
+            # convert other string to 0
+            return 0
+    for col in cols[2: -3]:
+        df_aes[col] = df_aes[col].apply(_asint)
+        df_aes[col] = df_aes[col].astype('Int64')
+
+    # set index as a column
+    df_aes = df_aes.reset_index()
+    df_aes.rename(columns={'index': 'pid'}, inplace=True)
+    
+    rs = json.loads(df_aes.to_json(orient='records'))
+    ret = {
+        'rs': rs,
+        'ae_list': ae_list,
+        'ae_rsts': ae_rsts
+    }
+
+    return jsonify(ret)
+
+
 @bp.route('/graphdata/<prj>/ITABLE.json')
 def graphdata_itable_json(prj):
     '''Special rule for the ITABLE.json which does not exist
@@ -279,7 +457,7 @@ def graphdata_oplots(prj):
         'G34_Et', 'G34_Ec', 'G3H_Et', 'G3H_Ec', 'G5N_Et', 'G5N_Ec', 
         'drug_used', 'malignancy']
 
-    aes_dfts = []
+    ae_dfts = []
 
     # add All SEs
     # dft = xls.parse('All SEs', skiprows=1, usecols='A:L', names=cols[:-2])
@@ -290,7 +468,7 @@ def graphdata_oplots(prj):
     # dft.loc[:, 'is_G34'] = dft.G34_Et.isna()
     # dft.loc[:, 'is_G3H'] = dft.G3H_Et.isna()
     # dft.loc[:, 'is_G5N'] = dft.G5N_Et.isna()
-    # aes_dfts.append(dft)
+    # ae_dfts.append(dft)
 
     # add detailed AE
     # the detailed AE starts from 4th sheet
@@ -313,9 +491,9 @@ def graphdata_oplots(prj):
         dft.loc[:, 'has_G3H'] = dft.G3H_Et.notna()
         dft.loc[:, 'has_G5N'] = dft.G5N_Et.notna()
         
-        aes_dfts.append(dft)
+        ae_dfts.append(dft)
         
-    df_aes = pd.concat(aes_dfts)
+    df_aes = pd.concat(ae_dfts)
 
     # fix data type
     df_aes['year'] = df_aes['year'].astype('int')
@@ -395,3 +573,56 @@ def get_attr_pack_from_itable(full_fn):
         attr_dict[attr_id] = attr
 
     return { 'attr_dict': attr_dict, 'attr_tree': attr_tree }
+
+
+def get_pma(dataset, datatype='CAT_RAW', sm='OR', method='MH', random_or_fixed='random', ):
+    '''Get the PMA results
+    The input dataset should follow:
+
+    [Et, Nt, Ec, Nc, Name 1],
+    [Et, Nt, Ec, Nc, Name 2], ...
+
+    for example:
+
+    dataset = [
+        [41, 522, 59, 524, 'A'], 
+        [8, 203, 18, 203, 'B']
+    ]
+    '''
+    meta = PMA.Meta()
+    meta.datatype = 'CATE' if datatype == 'CAT_RAW' else 'CATE'
+    meta.models = random_or_fixed.capitalize()
+    meta.algorithm = method
+    meta.effect = sm
+    rs = meta.meta(dataset)
+
+    ret = {
+        "model": {
+            'measure': rs[0][0],
+            'sm': rs[0][1],
+            'lower': rs[0][3],
+            'upper': rs[0][4],
+            'total': rs[0][5],
+            'i2': rs[0][9],
+            'tau2': rs[0][12],
+            'q_tval': rs[0][7],
+            'q_pval': rs[0][8],
+            'z_tval': rs[0][10],
+            'z_pval': rs[0][11]
+        },
+        'stus': []
+    }
+
+    # put results of other studies
+    for i in range(1, len(rs)):
+        r = rs[i]
+        ret['stus'].append({
+            'name': r[0],
+            'sm': r[1],
+            'lower': r[3],
+            'upper': r[4],
+            'total': r[5],
+            'w': r[2] / rs[0][2],
+        })
+    
+    return ret

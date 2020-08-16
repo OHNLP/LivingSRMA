@@ -54,11 +54,11 @@ a {
 }
 
 /* for this page */
-#vw_oclist {
+#app {
     width: 100%;
     height: 100%;
 }
-#vw_oclist_navipanel {
+#vw_oclist {
     width: 300px;
     padding: 0 5px;
     height: 100%;
@@ -70,7 +70,7 @@ a {
     overflow-x: hidden;
     overflow-y: auto;
 }
-#vw_oclist_mainpanel {
+#tb_sofpma {
     width: calc(100% - 300px);
     padding: 0 5px;
     height: 100%;
@@ -166,6 +166,32 @@ a {
 .oc-plot-tab-page-selected {
     display: block;
 }
+
+/* for the SoF table */
+.sof-table {
+    width: 100%;
+}
+.sof-table th {
+    text-align: center;
+    background: whitesmoke;
+    padding: 5px 0;
+}
+.sof-table td {
+    text-align: center;
+    line-height: 1.45em;
+    padding: 3px 0;
+    border-bottom: 1px solid #e6e6e6;
+    border-right: 1px solid #e6e6e6;
+    cursor: default;
+}
+.sof-table .col-ae-name {
+    width: 150px;
+    max-width: 180px;
+}
+.sof-table .col-ta-left {
+    text-align: left !important;
+    padding-left: 10px;
+}
 </style>
 </head>
 <body>
@@ -179,9 +205,9 @@ a {
 
 <div id="wrapper">
 
-<div id="vw_oclist" class="d-flex fx-row">
+<div id="app" class="d-flex fx-row">
 
-    <div id="vw_oclist_navipanel">
+    <div id="vw_oclist">
         <div class="box" style="height: 100%;">
             <div class="box-header">
                 <h4>
@@ -257,8 +283,8 @@ a {
                                         v-bind:title="ae.cnt_ga + ' studies'"
                                         v-bind:ae_cate="r.ae_cate"
                                         v-bind:ae_name="ae.ae_name"
-                                        v-bind:ae_grade="'ga'"
-                                        v-on:click="show_plot">
+                                        v-bind:ae_grade="'GA'"
+                                        v-on:click="toggle_ae">
                                         {{ ae.cnt_ga }}
                                     </div>
                                     <div class="oc-type" title="No studies available"
@@ -270,8 +296,8 @@ a {
                                         v-bind:title="ae.cnt_g3h + ' studies'"
                                         v-bind:ae_cate="r.ae_cate"
                                         v-bind:ae_name="ae.ae_name"
-                                        v-bind:ae_grade="'g3h'"
-                                        v-on:click="show_plot">
+                                        v-bind:ae_grade="'G3H'"
+                                        v-on:click="toggle_ae">
                                         {{ ae.cnt_g3h }}
                                     </div>
                                     <div class="oc-type" title="No studies available"
@@ -283,8 +309,8 @@ a {
                                         v-bind:title="ae.cnt_g5n + ' studies'"
                                         v-bind:ae_cate="r.ae_cate"
                                         v-bind:ae_name="ae.ae_name"
-                                        v-bind:ae_grade="'g5n'"
-                                        v-on:click="show_plot">
+                                        v-bind:ae_grade="'G5N'"
+                                        v-on:click="toggle_ae">
                                         {{ ae.cnt_g5n }}
                                     </div>
                                 </div>
@@ -302,50 +328,119 @@ a {
         </div>
     </div>
 
-    <div id="vw_oclist_mainpanel">
+    <div id="tb_sofpma">
         <div class="box" style="height: 100%;">
             <div class="box-header">
                 <h4>
-                    <i class="fa fa-chart-bar"></i>
-                    Summary of Findings Table | 
+                    <i class="fa fa-table"></i>
                 </h4>
+                <div class="d-flex fx-row">
+                    <div class="box-menu-group d-flex fx-row">
+                        <div>
+                            <i class="fa fa-cog"></i>
+                            Measure of effect: 
+                        </div>
+                        <div>
+                            <select v-model='measure'>
+                                <option value="OR">Odds Ratio (OR)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="box-menu-group d-flex fx-row">
+                        <div>
+                            <i class="fa fa-cog"></i>
+                            Display risks per: 
+                        </div>
+                        <div>
+                            <select v-model="baseline">
+                                <option value="100">100</option>
+                                <option value="1000">1000</option>
+                                <option value="10000">10,000</option>
+                                <option value="100000">100,000</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="box-menu-group d-flex fx-row">
+                        <div>
+                            <i class="fa fa-cog"></i>
+                            Assumed risk: 
+                        </div>
+                        <div class="box-radio-item">
+                            <input type="radio" checked value="true"
+                                v-model="use_internal_baseline">
+                            <label for="vw_ocplots_input_sm_or">Internal</label>
+                        </div>
+                        <div class="box-radio-item">
+                            <input type="radio" value="false"
+                                v-model="use_internal_baseline">
+                            <label for="vw_ocplots_input_sm_rr">External</label>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="box-body" style="height: 100%;">
 
-                <div id="vw_oclist_plotpanel"
-                    v-if="current.has_img">
-                    <h5>The forest plots of {{ current.cnt_studies }} studies of {{ current.ae_cate }} - {{ current.ae_name }}, {{ get_grade_label(current.ae_grade) }}</h5>
-                    <div class="d-flex fx-row">
-                        <div class="oc-plot-tab"
-                            v-bind:class="{'oc-plot-tab-selected': current.is_prim_plot}"
-                            v-on:click="switch_plot('is_prim_plot')">
-                            <i class="fa fa-chart-bar"></i>
-                            Primary Meta-Analysis with {{ params.sm }} and HK={{ params.hk }}
-                        </div>
-                        <div class="oc-plot-tab"
-                            v-bind:class="{'oc-plot-tab-selected': current.is_cumu_plot}"
-                            v-on:click="switch_plot('is_cumu_plot')">
-                            <i class="fa fa-chart-bar"></i>
-                            Cumulative Meta-Analysis with {{ params.sm }}
-                        </div>
-                    </div>
-                    <div class="oc-plot-tab-page"
-                        v-bind:class="{'oc-plot-tab-page-selected': current.is_prim_plot}">
-                        <img class="oc-plot-img" alt="Forest"
-                            v-bind:src="current.img.outplt1.url">
-                    </div>
-                    <div class="oc-plot-tab-page"
-                        v-bind:class="{'oc-plot-tab-page-selected': current.is_cumu_plot}">
-                        <img class="oc-plot-img" alt="Cumulative"
-                            v-bind:src="current.img.cumuplt.url">
-                    </div>
+                <table class="sof-table">
+                    <tr>
+                        <th class="col-ae-name" rowspan="2">Outcome</th>
+                        <th rowspan="2">Relative</th>
+                        <th colspan="3">Absolute</th>
+                        <th rowspan="2">Certainty in <br>Evidence</th>
+                        <th rowspan="2">Importance</th>
+                    </tr>
+                    <tr>
+                        <th>Intervention</th>
+                        <th>Control</th>
+                        <th>Risk Difference</th>
+                    </tr>
+                    <tbody v-for="grade in ['GA', 'G3H', 'G5N']">
+                        <tr>
+                            <th class="col-ta-left" colspan="7">{{ get_grade_label(grade) }}</th>
+                        </tr>
 
-                </div>
-                <div v-else>
-                    <h5>{{ current.title }}</h5>
-                    
-                </div>
+                        <tr v-for="r, ae_name in rs[grade]">
+                            <td class="col-ae-name">{{ r.name }}</td>
+                            <td v-if="r.is_show['sm']"
+                                v-on:click="flip_cell(grade, r, 'sm')">
+                                {{ measure }} {{ r.sm.toFixed(2) }}<br>
+                                ({{ r.lower.toFixed(2) }} to {{ r.upper.toFixed(2) }})
+                            </td>
+                            <td v-else class="col-ta-left"
+                                v-on:click="flip_cell(grade, r, 'sm')">
+                                <b>{{ r.n_stu }}</b> Studies<br>
+                                Events: <b>{{ r.Et }}</b><br>
+                                Participants: <b>{{ r.Nt }}</b><br>
+                                Follow up: 6 months
+                            </td>
+                            <td>
+                                {{ get_CIR(r).toFixed(0) }} per {{ baseline }}
+                            </td>
+                            <td>
+                                {{ get_ACR(r).toFixed(0) }} per {{ baseline }}
+                            </td>
+                            <td v-if="r.is_show['ARD']"
+                                v-on:click="flip_cell(grade, r, 'ARD')">
+                                {{ get_ARD_txt(r) }} per {{ baseline }}
+                            </td>
+                            <td v-else class="col-ta-left"
+                                v-on:click="flip_cell(grade, r, 'ARD')">
+                                CI: {{ get_ARD_txt(r, 'lower') }} to 
+                                    {{ get_ARD_txt(r, 'upper') }}<br>
+                                RD(%): {{ get_ARDp_txt(r) }}<br>
+                                ({{ get_ARDp_txt(r, 'lower')}} to {{ get_ARDp_txt(r, 'upper')}})
+                            </td>
+                            <td>
+                                High
+                            </td>
+                            <td>
+                                Critical
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
 
             </div>
 
@@ -373,48 +468,7 @@ var vw_oclist = {
     vpp: null,
     vpp_id: '#vw_oclist',
     apikey: '7323590e-577b-4f46-b19f-3ec401829bd6',
-
-    sample: {
-        "Pulmonary": {
-            cate_name: "Pulmonary",
-            aes: [{
-                ae_name: 'Bronchitis',
-                cnt_ga: 12,
-                cnt_g3h: 2,
-                cnt_g5n: 0
-            }, 
-            {
-                ae_name: 'Bronchospasm',
-                cnt_ga: 2,
-                cnt_g3h: 1,
-                cnt_g5n: 0
-            }]
-        },
-        "Endocrine": {
-            cate_name: "Endocrine",
-            aes: [{
-                ae_name: 'Adrenal insufficiency',
-                cnt_ga: 12,
-                cnt_g3h: 2,
-                cnt_g5n: 0
-            }, 
-            {
-                ae_name: 'Blood TSH increased',
-                cnt_ga: 2,
-                cnt_g3h: 1,
-                cnt_g5n: 0
-            }]
-        }
-    },
-
     pids: [],
-
-    texts: {
-        "ga": "All Grade",
-        "g34": "Grade 3/4",
-        "g3h": "Grade 3 or higher",
-        "g5n": "Grade 5 only"
-    },
 
     init: function(data) {
         // bind local data
@@ -455,20 +509,21 @@ var vw_oclist = {
                 }
             },
             methods: {
-                show_plot: function(event) {
+                toggle_ae: function(event) {
                     var ae_cate = event.target.getAttribute('ae_cate');
                     var ae_name = event.target.getAttribute('ae_name');
                     var ae_grade = event.target.getAttribute('ae_grade');
-                    // add effect
-                    $('.oc-type').removeClass('oc-type-selected');
-                    $(event.target).addClass('oc-type-selected');
 
-                    // call the worker to get plots
-                    vw_oclist.show_plot(ae_cate, ae_name, ae_grade);
+                    // add effect
+                    // $('.oc-type').removeClass('oc-type-selected');
+                    $(event.target).toggleClass('oc-type-selected');
+
+                    // call the worker to update everything related
+                    jarvis.toggle_ae(ae_cate, ae_name, ae_grade);
                 },
 
                 get_grade_label: function(g) {
-                    return vw_oclist.texts[g];
+                    return jarvis.texts[g];
                 },
 
                 switch_plot: function(plot) {
@@ -565,58 +620,6 @@ var vw_oclist = {
         });
     },
 
-
-    show_plot: function(ae_cate, ae_name, ae_grade) {
-        console.log('* show_plot ' + ae_cate + ', ' + ae_name + ', ' + ae_grade);
-
-        // set no img and try to load
-        this.vpp.current.has_img = false;
-        
-        // get the studies of this ae cate+name+grade
-        var col_prefix = ae_grade.toUpperCase();
-        var sql = 'select author as study, year, ' + 
-            col_prefix + '_Et as Et, ' +
-            col_prefix + '_Ec as Ec, ' +
-            'GA_Nt as Nt, GA_Nc as Nc ' +
-            'from aes ' + 
-            'where ' + this.get_pid_condition() + ' ' + 
-            "  and ae_cate='" + ae_cate + "' " + 
-            "  and ae_name='" + ae_name + "' " + 
-            "  and has_" + col_prefix + " = true";
-        
-        var rs = alasql(sql);
-        console.log(rs);
-
-        // update the data in vpp
-        this.vpp.current.ae_cate = ae_cate;
-        this.vpp.current.ae_name = ae_name;
-        this.vpp.current.ae_grade = ae_grade;
-        this.vpp.current.cnt_studies = rs.length;
-
-        // send ajax to server
-        var params = {
-            am: 'FOREST',
-            sm: this.vpp.params.sm,
-            rs: JSON.stringify(rs),
-            hk: this.vpp.params.hk,
-            apikey: this.apikey
-        };
-        console.log(params);
-
-        // clear the response area
-
-        var base = '';
-        // var base = 'https://workspace.network-meta-analysis.com/';
-        $.post(
-            base + '/rplt/IOTOX',
-            params,
-            function(data) {
-                console.log('* get return', data);
-                vw_oclist.update_ocplots(data);
-            }, 'json'
-        )
-    },
-
     update_ocplots: function(data) {
         if (data.success) {
             // great! show images
@@ -628,8 +631,161 @@ var vw_oclist = {
     }
 };
 
+var tb_sofpma = {
+    vpp: null,
+    vpp_id: '#tb_sofpma',
+    sample: {
+        measure: 'OR',
+        baseline: 1000,
+        external_risk_calculated: 10,
+        use_internal_baseline: true,
+        rs: {
+            GA: {},
+            G3H: {},
+            G5N: {}
+        }
+    },
+
+    init: function(data) {
+        this.data = data;
+
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: this.sample,
+            methods: {
+                get_ACR: function(r) {
+                    if (this.use_internal_baseline) {
+                        return r.Ec / r.Nc * this.baseline;
+                    } else {
+                        return external_risk_calculated;
+                    }
+                },
+
+                get_CIR: function(r, obj) {
+                    // get the obj of this CIR
+                    // obj could be
+                    // sm, lower, upper
+                    if (typeof(obj)=='undefined') {
+                        obj = 'sm';
+                    }
+
+                    // calculate the CIR based on measure
+                    if (this.measure == 'OR') {
+                        var a = this.get_ACR(r) / this.baseline * r[obj];
+                        var b = 1 - this.get_ACR(r) / this.baseline;
+                        var c = a + b;
+                        var d = a / c;
+                        var e = d * this.baseline;
+                        return e;
+                    }
+                },
+
+                get_ARD: function(r, obj) {
+                    // get the obj of this CIR
+                    // obj could be
+                    // sm, lower, upper
+                    if (typeof(obj)=='undefined') {
+                        obj = 'sm';
+                    }
+                    if (this.measure == 'OR') {
+                        var a = (1 - r[obj]) * this.get_ACR(r) / this.baseline;
+                        var b = 1 - this.get_ACR(r) / this.baseline;
+                        var c = a + b;
+                        var d = a / c;
+                        var e = d * this.baseline;
+                        return e;
+                    }
+                },
+
+                get_ARD_txt: function(r, obj) {
+                    var ARD = this.get_ARD(r, obj);
+                    var txt = ' less';
+                    if (ARD < 0) {
+                        txt = ' more';
+                    }
+                    return Math.abs(ARD).toFixed(0) + txt;
+                },
+
+                get_ARDp_txt: function(r, obj) {
+                    var ARDp = 100 * this.get_ARD(r, obj) / this.baseline;
+                    var txt = ' less';
+                    if (ARDp < 0) {
+                        txt = ' more';
+                    }
+                    return Math.abs(ARDp).toFixed(1) + '%' + txt;
+                },
+
+                get_grade_label: function(g) {
+                    return jarvis.texts[g];
+                },
+
+                flip_cell: function(ae_grade, r, cell) {
+                    // first, find this ae in rs
+                    if (this.rs[ae_grade].hasOwnProperty(r.name)) {
+                        // flip this cell!
+                        this.rs[ae_grade][r.name].is_show[cell] = 
+                            !this.rs[ae_grade][r.name].is_show[cell];
+                    } else {
+                        // how can it be ???
+                    }
+                    this.$forceUpdate();
+                }
+            },
+        });
+    },
+
+    toggle_ae: function(ae_cate, ae_name, ae_grade) {
+        // first, find this ae in rs
+        if (this.vpp.rs[ae_grade].hasOwnProperty(ae_name)) {
+            // if exists, remove
+            delete this.vpp.rs[ae_grade][ae_name];
+        } else {
+            var ae = this.data.ae_rsts[ae_name][ae_grade];
+            if (ae.stus.length == 0) {
+                // this means no studies in this ae + grade 
+                return;
+            }
+            var measure = this.vpp.measure;
+        
+            // build the r for display
+            var r = {
+                name: ae_name,
+                sm: ae.result[measure].random.model.sm,
+                lower: ae.result[measure].random.model.lower,
+                upper: ae.result[measure].random.model.upper,
+                Et: ae.Et,
+                Nt: ae.Nt,
+                Ec: ae.Ec,
+                Nc: ae.Nc,
+                n_stu: ae.stus.length,
+                // for display setting
+                is_show: {
+                    // show sm / study info
+                    sm: true,
+                    // show ARD / ARD CI
+                    ARD: true
+                }
+            }
+
+            // add this to list
+            this.vpp.rs[ae_grade][ae_name] = r;
+        }
+
+        // have to force update the view
+        tb_sofpma.vpp.$forceUpdate();
+    }
+};
+
 
 var jarvis = {
+
+    texts: {
+        "GA": "All Grade",
+        "G34": "Grade 3/4",
+        "G3H": "Grade 3 or higher",
+        "G5N": "Grade 5 only"
+    },
+
     init: function() {
         var isIE = /*@cc_on!@*/false || !!document.documentMode;
 
@@ -652,7 +808,7 @@ var jarvis = {
                 {}
             ),
             $.get(
-                '/pub/graphdata/'+prj+'/OPLOTS.json',
+                '/pub/graphdata/'+prj+'/SOFTABLE_PMA.json',
                 {ver: Math.random()},
             )
         ).done(function(r1, r2) {
@@ -666,6 +822,7 @@ var jarvis = {
             console.log(data2);
 
             vw_oclist.init(data2);
+            tb_sofpma.init(data2);
 
             // ok, remove the 
             jarvis.ssmsg('Almost initialized.');
@@ -682,25 +839,9 @@ var jarvis = {
         return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
     },
 
-    update_schtab: function() {
-        // update sql
-        var cond = tb_filter.get_all_sql_conds();
-        dt_tbcore.sql.conditions = cond;
-
-        // updat rs_db
-        dt_tbcore.update_rs_db();
-
-        // update table
-        tb_schtab.update();
-
-        // update tips
-        $(document).tooltip({
-            position: {
-                my: "left top",
-                at: "right+5 top-5",
-                collision: "none"
-            }
-        });
+    toggle_ae: function(ae_cate, ae_name, ae_grade) {
+        console.log('* toggle_ae ' + ae_cate + ', ' + ae_name + ', ' + ae_grade);
+        tb_sofpma.toggle_ae(ae_cate, ae_name, ae_grade);
     },
 
     ssmsg: function(msg) {

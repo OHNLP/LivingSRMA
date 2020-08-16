@@ -28,29 +28,11 @@ resultsraw <- metabin(Et,
                       method.tau = "DL", 
                       hakn = {{ is_hakn }})
 
-# CUMULATIVE META-ANALYSIS
-# running cumulative meta-analysis
-# we will use the function metacum
-# sortvar can be indicated by an object of class meta or by an object of original data set
-resultsraw2 <- metabin(Et, 
-                       Nt, 
-                       Ec, 
-                       Nc, 
-                       data = PRI_CAT_RAWDATA, 
-                       studlab = study, 
-                       comb.random = TRUE, 
-                       comb.fixed = FALSE,
-                       sm = "{{ measure_of_effect }}",
-                       method = "MH", 
-                       method.tau = "DL")
-results.cum <- metacum(resultsraw2, sortvar = PRI_CAT_RAWDATA$year)
-
 # Merge all the results
 # The primary_ma contains all the data to produce the primary meta-analysis plot
 # The cumulative_ma contains all the data to produce the cumu plot
 all_ret <- list(
     primma = resultsraw,
-    cumuma = results.cum,
     version = list(
         jsonlite = packageVersion('jsonlite'),
         meta = packageVersion('meta')

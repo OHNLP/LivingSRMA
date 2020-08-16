@@ -59,6 +59,13 @@
     padding: 2px 3px;
     border-bottom: 1px solid #333333;
 }
+.box-menu-group {
+    margin: 0 10px;
+}
+.box-menu-group div {
+    height: 1.6em;
+    line-height: 2em;
+}
 .box-radio-group {
     margin: 0 10px;
 }
@@ -80,8 +87,8 @@
 .box-header select {
     height: 1.6em;
     line-height: 1.2em;
-    font-size: .8em;
-    margin: 4px;
+    font-size: 1em;
+    margin: 0 4px;
 }
 .box-header p {
     height: 1.6em;
