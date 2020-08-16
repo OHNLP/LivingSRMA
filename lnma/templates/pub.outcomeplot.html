@@ -54,17 +54,17 @@ a {
 }
 
 /* for this page */
-#vw_ocplots {
+#app {
     width: 100%;
     height: 100%;
 }
-#vw_ocplots_navipanel {
+#vw_oclist {
     width: 300px;
     padding: 0 5px;
     height: 100%;
     /* background-color: whitesmoke; */
 }
-#vw_ocplots_aespanel {
+#vw_oclist_aespanel {
     width: 100%;
     height: 100%;
     overflow-x: hidden;
@@ -179,9 +179,9 @@ a {
 
 <div id="wrapper">
 
-<div id="vw_ocplots" class="d-flex fx-row">
+<div id="app" class="d-flex fx-row">
 
-    <div id="vw_ocplots_navipanel">
+    <div id="vw_oclist">
         <div class="box" style="height: 100%;">
             <div class="box-header">
                 <h4>
@@ -233,7 +233,7 @@ a {
                     </div>
                 </div>
 
-                <div id="vw_ocplots_aespanel">
+                <div id="vw_oclist_aespanel">
                     <div class="oc-cate d-flex fx-col"
                         v-for="r in rs">
                         <div class="oc-cate-info d-flex fx-row"
@@ -257,11 +257,11 @@ a {
                                         v-bind:title="ae.cnt_ga + ' studies'"
                                         v-bind:ae_cate="r.ae_cate"
                                         v-bind:ae_name="ae.ae_name"
-                                        v-bind:ae_grade="'ga'"
-                                        v-on:click="show_plot">
+                                        v-bind:ae_grade="'GA'"
+                                        v-on:click="toggle_ae">
                                         {{ ae.cnt_ga }}
                                     </div>
-                                    <div class="oc-type" title="No studies available"
+                                    <div class="oc-type"
                                         v-if="ae.cnt_g3h==0">
                                         -
                                     </div>
@@ -270,11 +270,11 @@ a {
                                         v-bind:title="ae.cnt_g3h + ' studies'"
                                         v-bind:ae_cate="r.ae_cate"
                                         v-bind:ae_name="ae.ae_name"
-                                        v-bind:ae_grade="'g3h'"
-                                        v-on:click="show_plot">
+                                        v-bind:ae_grade="'G3H'"
+                                        v-on:click="toggle_ae">
                                         {{ ae.cnt_g3h }}
                                     </div>
-                                    <div class="oc-type" title="No studies available"
+                                    <div class="oc-type"
                                         v-if="ae.cnt_g5n==0">
                                         -
                                     </div>
@@ -283,8 +283,8 @@ a {
                                         v-bind:title="ae.cnt_g5n + ' studies'"
                                         v-bind:ae_cate="r.ae_cate"
                                         v-bind:ae_name="ae.ae_name"
-                                        v-bind:ae_grade="'g5n'"
-                                        v-on:click="show_plot">
+                                        v-bind:ae_grade="'G5N'"
+                                        v-on:click="toggle_ae">
                                         {{ ae.cnt_g5n }}
                                     </div>
                                 </div>
@@ -302,17 +302,17 @@ a {
         </div>
     </div>
 
-    <div id="vw_ocplots_mainpanel">
+    <div id="vw_ocplot">
         <div class="box" style="height: 100%;">
             <div class="box-header">
                 <h4>
                     <i class="fa fa-chart-bar"></i>
-                    FOREST PLOTS | 
+                    PLOTS | 
                 </h4>
                 <div class="d-flex fx-row">
                     <div class="box-radio-group d-flex fx-row">
                         <div>
-                            <i class="fa fa-ruler"></i>
+                            <i class="fa fa-cog"></i>
                             Measure of effect: 
                         </div>
                         <div class="box-radio-item">
@@ -413,76 +413,26 @@ if (isIE) {
 
 <script>
 
-var vw_ocplots = {
+{% include 'js/vw_oclist.js' %}
+
+var vw_ocplot = {
     vpp: null,
-    vpp_id: '#vw_ocplots',
+    vpp_id: '#vw_ocplot',
     apikey: '7323590e-577b-4f46-b19f-3ec401829bd6',
-
-    sample: {
-        "Pulmonary": {
-            cate_name: "Pulmonary",
-            aes: [{
-                ae_name: 'Bronchitis',
-                cnt_ga: 12,
-                cnt_g3h: 2,
-                cnt_g5n: 0
-            }, 
-            {
-                ae_name: 'Bronchospasm',
-                cnt_ga: 2,
-                cnt_g3h: 1,
-                cnt_g5n: 0
-            }]
-        },
-        "Endocrine": {
-            cate_name: "Endocrine",
-            aes: [{
-                ae_name: 'Adrenal insufficiency',
-                cnt_ga: 12,
-                cnt_g3h: 2,
-                cnt_g5n: 0
-            }, 
-            {
-                ae_name: 'Blood TSH increased',
-                cnt_ga: 2,
-                cnt_g3h: 1,
-                cnt_g5n: 0
-            }]
-        }
-    },
-
     pids: [],
-
-    texts: {
-        "ga": "All Grade",
-        "g34": "Grade 3/4",
-        "g3h": "Grade 3 or higher",
-        "g5n": "Grade 5 only"
-    },
 
     init: function(data) {
         // bind local data
         this.data = data;
 
-        // init local db
-        alasql('create table aes');
-        alasql('select * into aes from ?', [this.data.rs])
-        
-        this.rs = {},
-        this.rs_stat = {
-            cnt_cates: 0,
-            cnt_aes: 0,
-        };
-        
         this.vpp = new Vue({
             el: this.vpp_id,
             data: {
-                rs: this.rs,
-                rs_stat: this.rs_stat,
                 params: {
                     sm: 'OR',
                     hk: 'FALSE'
                 },
+
                 current: {
                     ae_cate: '',
                     ae_name: '',
@@ -499,20 +449,9 @@ var vw_ocplots = {
                 }
             },
             methods: {
-                show_plot: function(event) {
-                    var ae_cate = event.target.getAttribute('ae_cate');
-                    var ae_name = event.target.getAttribute('ae_name');
-                    var ae_grade = event.target.getAttribute('ae_grade');
-                    // add effect
-                    $('.oc-type').removeClass('oc-type-selected');
-                    $(event.target).addClass('oc-type-selected');
-
-                    // call the worker to get plots
-                    vw_ocplots.show_plot(ae_cate, ae_name, ae_grade);
-                },
 
                 get_grade_label: function(g) {
-                    return vw_ocplots.texts[g];
+                    return jarvis.texts[g];
                 },
 
                 switch_plot: function(plot) {
@@ -523,20 +462,8 @@ var vw_ocplots = {
                     // set the selected as true
                     this.current[plot] = true;
                 },
-
-                toggle_cate: function(cate) {
-                    this.rs[cate].is_close = !this.rs[cate].is_close;
-                },
-
-                toggle_all_cates: function(flag) {
-                    for (var key in this.rs) {
-                        this.rs[key].is_close = flag;
-                    }
-                }
             }
         });
-
-        this.update([]);
     },
 
     get_pid_condition: function() {
@@ -547,133 +474,77 @@ var vw_ocplots = {
             return 'pid in (' + cond + ') '
         }
     },
-    
-
-    update: function(pids) {
-        // update the pid
-        this.pids = pids;
-        var sql = 'select ae_cate, ae_name, ' +
-            '  count(distinct pid) as cnt_ga, ' +
-            '  count(case when has_G3H = true then pid else null end) as cnt_g3h, ' +
-            '  count(case when has_G5N = true then pid else null end) as cnt_g5n ' +
-            'from aes ' + 
-            'where ' +
-            this.get_pid_condition() + ' ' + 
-            'group by ae_cate, ae_name ' + 
-            'order by ae_cate asc, ae_name asc';
-        console.log(sql);
-        // init the result
-        var raw_rs = alasql(sql);
-        var rs = {};
-        var rs_stat = {
-            cnt_cates: 0,
-            cnt_aes: 0,
-        };
-        for (var i = 0; i < raw_rs.length; i++) {
-            var r = raw_rs[i];
-            if (rs.hasOwnProperty(r.ae_cate)) {
-                //
-            } else {
-                rs[r.ae_cate] = {
-                    ae_cate: r.ae_cate,
-                    is_close: false,
-                    aes: []
-                }
-                rs_stat.cnt_cates += 1;
-            }
-            // put this ae into cate
-            rs[r.ae_cate]['aes'].push({
-                ae_name: r.ae_name,
-                cnt_ga: r.cnt_ga,
-                cnt_g3h: r.cnt_g3h,
-                cnt_g5n: r.cnt_g5n
-            });
-            rs_stat.cnt_aes += 1;
-        }
-        // bind results 
-        this.raw_rs = raw_rs;
-        this.rs = rs;
-        this.rs_stat = rs_stat;
-
-        // update vpp data
-        this.vpp.rs = this.rs;
-        this.vpp.rs_stat = this.rs_stat;
-
-        // update tips
-        $(document).tooltip({
-            position: {
-                my: "left top",
-                at: "right+5 top-5",
-                collision: "none"
-            }
-        });
-    },
-
 
     show_plot: function(ae_cate, ae_name, ae_grade) {
-        console.log('* show_plot ' + ae_cate + ', ' + ae_name + ', ' + ae_grade);
-
         // set no img and try to load
         this.vpp.current.has_img = false;
-        
-        // get the studies of this ae cate+name+grade
-        var col_prefix = ae_grade.toUpperCase();
-        var sql = 'select author as study, year, ' + 
-            col_prefix + '_Et as Et, ' +
-            col_prefix + '_Ec as Ec, ' +
+
+        var sql = 'select author as study, year, ' +
+            ae_grade + '_Et as Et, ' +
+            ae_grade + '_Ec as Ec, ' +
             'GA_Nt as Nt, GA_Nc as Nc ' +
-            'from aes ' + 
-            'where ' + this.get_pid_condition() + ' ' + 
-            "  and ae_cate='" + ae_cate + "' " + 
-            "  and ae_name='" + ae_name + "' " + 
-            "  and has_" + col_prefix + " = true";
-        
-        var rs = alasql(sql);
-        console.log(rs);
+            'from aes ' +
+            'where ' + this.get_pid_condition() + ' ' +
+            "  and ae_cate='" + ae_cate + "' " +
+            "  and ae_name='" + ae_name + "' " +
+            "  and has_" + ae_grade + " = true";
 
-        // update the data in vpp
-        this.vpp.current.ae_cate = ae_cate;
-        this.vpp.current.ae_name = ae_name;
-        this.vpp.current.ae_grade = ae_grade;
-        this.vpp.current.cnt_studies = rs.length;
+         var rs = alasql(sql);
+         console.log(rs);
 
-        // send ajax to server
-        var params = {
-            am: 'FOREST',
-            sm: this.vpp.params.sm,
-            rs: JSON.stringify(rs),
-            hk: this.vpp.params.hk,
-            apikey: this.apikey
-        };
-        console.log(params);
+         // update the data in vpp
+         this.vpp.current.ae_cate = ae_cate;
+         this.vpp.current.ae_name = ae_name;
+         this.vpp.current.ae_grade = ae_grade;
+         this.vpp.current.cnt_studies = rs.length;
 
-        // clear the response area
+         // send ajax to server
+         var params = {
+             am: 'FOREST',
+             sm: this.vpp.params.sm,
+             rs: JSON.stringify(rs),
+             hk: this.vpp.params.hk,
+             apikey: this.apikey
+         };
 
-        var base = '';
-        // var base = 'https://workspace.network-meta-analysis.com/';
-        $.post(
-            base + '/rplt/IOTOX',
-            params,
-            function(data) {
-                console.log('* get return', data);
-                vw_ocplots.update_ocplots(data);
-            }, 'json'
-        )
+         var base = '';
+         // var base = 'https://workspace.network-meta-analysis.com/';
+
+         $.post(
+             base + '/rplt/IOTOX',
+             params,
+             function(data) {
+                 console.log('* get return', data);
+                 vw_ocplot._show_plot(data);
+             }, 'json'
+         );
     },
 
-    update_ocplots: function(data) {
+    _show_plot: function(data) {
         if (data.success) {
-            // great! show images
-            this.vpp.current.img = data.img;
-            this.vpp.current.has_img = true;
-        } else {
-            // update message
-        }
+             // great! show images
+             this.vpp.current.img = data.img;
+             this.vpp.current.has_img = true;
+         } else {
+             // update message
+         }
     }
+
 };
 
+var fg_prim_forest_plt = {
+
+};
 
 var jarvis = {
+
+    texts: {
+        "GA": "All Grade",
+        "G34": "Grade 3/4",
+        "G3H": "Grade 3 or higher",
+        "G5N": "Grade 5 only"
+    },
+    
     init: function() {
         var isIE = /*@cc_on!@*/false || !!document.documentMode;
 
@@ -689,6 +560,9 @@ var jarvis = {
             jarvis.ssmsg('Project information error.')
             return;
         }
+
+        // set the vw_oclist to radio button model
+        vw_oclist.select_mode = 'radio';
 
         $.when(
             $.get(
@@ -709,7 +583,8 @@ var jarvis = {
             console.log(data1);
             console.log(data2);
 
-            vw_ocplots.init(data2);
+            vw_oclist.init(data2);
+            vw_ocplot.init(data2);
 
             // ok, remove the 
             jarvis.ssmsg('Almost initialized.');
@@ -726,25 +601,9 @@ var jarvis = {
         return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
     },
 
-    update_schtab: function() {
-        // update sql
-        var cond = tb_filter.get_all_sql_conds();
-        dt_tbcore.sql.conditions = cond;
-
-        // updat rs_db
-        dt_tbcore.update_rs_db();
-
-        // update table
-        tb_schtab.update();
-
-        // update tips
-        $(document).tooltip({
-            position: {
-                my: "left top",
-                at: "right+5 top-5",
-                collision: "none"
-            }
-        });
+    toggle_ae: function(ae_cate, ae_name, ae_grade) {
+        console.log('* toggle_ae ' + ae_cate + ', ' + ae_name + ', ' + ae_grade);
+        vw_ocplot.show_plot(ae_cate, ae_name, ae_grade);
     },
 
     ssmsg: function(msg) {

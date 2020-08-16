@@ -293,7 +293,7 @@ a {
                                         v-on:click="toggle_ae">
                                         {{ ae.cnt_ga }}
                                     </div>
-                                    <div class="oc-type" title="No studies available"
+                                    <div class="oc-type"
                                         v-if="ae.cnt_g3h==0">
                                         -
                                     </div>
@@ -306,7 +306,7 @@ a {
                                         v-on:click="toggle_ae">
                                         {{ ae.cnt_g3h }}
                                     </div>
-                                    <div class="oc-type" title="No studies available"
+                                    <div class="oc-type"
                                         v-if="ae.cnt_g5n==0">
                                         -
                                     </div>
@@ -471,172 +471,7 @@ if (isIE) {
 
 <script>
 
-var vw_oclist = {
-    vpp: null,
-    vpp_id: '#vw_oclist',
-    apikey: '7323590e-577b-4f46-b19f-3ec401829bd6',
-    pids: [],
-
-    init: function(data) {
-        // bind local data
-        this.data = data;
-
-        // init local db
-        alasql('create table aes');
-        alasql('select * into aes from ?', [this.data.rs])
-        
-        this.rs = {},
-        this.rs_stat = {
-            cnt_cates: 0,
-            cnt_aes: 0,
-        };
-        
-        this.vpp = new Vue({
-            el: this.vpp_id,
-            data: {
-                rs: this.rs,
-                rs_stat: this.rs_stat,
-                params: {
-                    sm: 'OR',
-                    hk: 'FALSE'
-                },
-                current: {
-                    ae_cate: '',
-                    ae_name: '',
-                    ae_grade: '',
-                    cnt_studies: 0, 
-                    has_img: false,
-                    img: {
-                        cumuplt: {},
-                        outplt1: {}
-                    },
-                    title: '',
-                    is_prim_plot: true,
-                    is_cumu_plot: false
-                }
-            },
-            methods: {
-                toggle_ae: function(event) {
-                    var ae_cate = event.target.getAttribute('ae_cate');
-                    var ae_name = event.target.getAttribute('ae_name');
-                    var ae_grade = event.target.getAttribute('ae_grade');
-
-                    // add effect
-                    // $('.oc-type').removeClass('oc-type-selected');
-                    $(event.target).toggleClass('oc-type-selected');
-
-                    // call the worker to update everything related
-                    jarvis.toggle_ae(ae_cate, ae_name, ae_grade);
-                },
-
-                get_grade_label: function(g) {
-                    return jarvis.texts[g];
-                },
-
-                switch_plot: function(plot) {
-                    // set all to false
-                    this.current.is_cumu_plot = false;
-                    this.current.is_prim_plot = false;
-
-                    // set the selected as true
-                    this.current[plot] = true;
-                },
-
-                toggle_cate: function(cate) {
-                    this.rs[cate].is_close = !this.rs[cate].is_close;
-                },
-
-                toggle_all_cates: function(flag) {
-                    for (var key in this.rs) {
-                        this.rs[key].is_close = flag;
-                    }
-                }
-            }
-        });
-
-        this.update([]);
-    },
-
-    get_pid_condition: function() {
-        if (this.pids.length == 0) {
-            return 'pid is not null ';
-        } else {
-            var cond = this.pids.map(function(v) { return '' + v}).join(',');
-            return 'pid in (' + cond + ') '
-        }
-    },
-    
-
-    update: function(pids) {
-        // update the pid
-        this.pids = pids;
-        var sql = 'select ae_cate, ae_name, ' +
-            '  count(distinct pid) as cnt_ga, ' +
-            '  count(case when has_G3H = true then pid else null end) as cnt_g3h, ' +
-            '  count(case when has_G5N = true then pid else null end) as cnt_g5n ' +
-            'from aes ' + 
-            'where ' +
-            this.get_pid_condition() + ' ' + 
-            'group by ae_cate, ae_name ' + 
-            'order by ae_cate asc, ae_name asc';
-        console.log(sql);
-        // init the result
-        var raw_rs = alasql(sql);
-        var rs = {};
-        var rs_stat = {
-            cnt_cates: 0,
-            cnt_aes: 0,
-        };
-        for (var i = 0; i < raw_rs.length; i++) {
-            var r = raw_rs[i];
-            if (rs.hasOwnProperty(r.ae_cate)) {
-                //
-            } else {
-                rs[r.ae_cate] = {
-                    ae_cate: r.ae_cate,
-                    is_close: false,
-                    aes: []
-                }
-                rs_stat.cnt_cates += 1;
-            }
-            // put this ae into cate
-            rs[r.ae_cate]['aes'].push({
-                ae_name: r.ae_name,
-                cnt_ga: r.cnt_ga,
-                cnt_g3h: r.cnt_g3h,
-                cnt_g5n: r.cnt_g5n
-            });
-            rs_stat.cnt_aes += 1;
-        }
-        // bind results 
-        this.raw_rs = raw_rs;
-        this.rs = rs;
-        this.rs_stat = rs_stat;
-
-        // update vpp data
-        this.vpp.rs = this.rs;
-        this.vpp.rs_stat = this.rs_stat;
-
-        // update tips
-        $(document).tooltip({
-            position: {
-                my: "left top",
-                at: "right+5 top-5",
-                collision: "none"
-            }
-        });
-    },
-
-    update_ocplots: function(data) {
-        if (data.success) {
-            // great! show images
-            this.vpp.current.img = data.img;
-            this.vpp.current.has_img = true;
-        } else {
-            // update message
-        }
-    }
-};
+{% include 'js/vw_oclist.js' %}
 
 var tb_sofpma = {
     vpp: null,
