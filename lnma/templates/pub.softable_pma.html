@@ -349,6 +349,7 @@ a {
                         <div>
                             <select v-model='measure'>
                                 <option value="OR">Odds Ratio (OR)</option>
+                                <option value="RR">Risk Ratio (RR)</option>
                             </select>
                         </div>
                     </div>
@@ -683,6 +684,9 @@ var tb_sofpma = {
                         var d = a / c;
                         var e = d * this.baseline;
                         return e;
+                    } else if (this.measure == 'RR') {
+                        var a = this.get_ACR(r) * r[obj];
+                        return a;
                     }
                 },
 
@@ -700,6 +704,9 @@ var tb_sofpma = {
                         var d = a / c;
                         var e = d * this.baseline;
                         return e;
+                    } else if (this.measure == 'RR') {
+                        var a = this.get_ACR(r) * (1 - r[obj]);
+                        return a;
                     }
                 },
 
