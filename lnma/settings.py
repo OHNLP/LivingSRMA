@@ -55,7 +55,8 @@ RSCRIPT_TPL = {
 
     # for R Plots (RPLT)
     'rplt_IOTOX_FOREST': 'lnma_rplt_IOTOX_FOREST.tpl.r',
-    'rplt_IOTOX_FORESTDATA': 'lnma_rplt_IOTOX_FORESTDATA.tpl.r' 
+    'rplt_IOTOX_FORESTDATA': 'lnma_rplt_IOTOX_FORESTDATA.tpl.r',
+    'rplt_ALL_PRIM_CAT_RAW': 'lnma_rplt_ALL_PRIM_CAT_RAW.tpl.r',
 }
 
 R_BUGSNET_MEASURE2LINK = {

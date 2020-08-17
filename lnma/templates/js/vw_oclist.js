@@ -77,7 +77,7 @@ var vw_oclist = {
         // update the pid
         this.pids = pids;
         var sql = 'select ae_cate, ae_name, ' +
-            '  count(distinct pid) as cnt_ga, ' +
+            '  count(case when has_GA = true then pid else null end) as cnt_ga, ' +
             '  count(case when has_G3H = true then pid else null end) as cnt_g3h, ' +
             '  count(case when has_G5N = true then pid else null end) as cnt_g5n ' +
             'from aes ' + 

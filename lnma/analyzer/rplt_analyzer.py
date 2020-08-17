@@ -87,6 +87,18 @@ def analyze(rs, cfg):
             }
         }
 
+    elif cfg['analyzer_model'] == 'PRIM_CAT_RAW':
+        full_filename_jsonret = os.path.join(TMP_FOLDER, params['fn_jsonret'])
+        jrst = json.load(open(full_filename_jsonret))
+        ret = {
+            'submission_id': params['submission_id'],
+            'params': params,
+            'success': True,
+            'data': {
+                'primma': _meta_trans_metabin(jrst, params)
+            }
+        }
+
     else:
         ret = {
             'submission_id': params['submission_id'],
