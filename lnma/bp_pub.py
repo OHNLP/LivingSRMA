@@ -545,12 +545,12 @@ def get_ae_data(full_fn, is_getting_sms=False):
 
                 # third, check the Et Ec is 0
                 if Et == 0 and Ec == 0:
-                    print('* %s: [%s] [%s] [%s]' % (
-                        'ZERO Et and Ec'.ljust(25, ' '),
-                        ae_name.rjust(35, ' '), 
-                        grade.rjust(3, ' '), 
-                        author
-                    ))
+                    # print('* %s: [%s] [%s] [%s]' % (
+                    #     'ZERO Et and Ec'.ljust(25, ' '),
+                    #     ae_name.rjust(35, ' '), 
+                    #     grade.rjust(3, ' '), 
+                    #     author
+                    # ))
                     dft.loc[idx, 'has_%s' % grade] = False
 
         # add the AE model result
