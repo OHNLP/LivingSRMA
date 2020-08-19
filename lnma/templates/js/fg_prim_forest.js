@@ -17,6 +17,7 @@ var fg_prim_forest = {
     ],
     row_height: 15,
     row_txtmb: 3,
+    row_frstml: 20,
     css: {
         txt_bd: 'prim-frst-txt-bd',
         txt_nm: 'prim-frst-txt-nm',
@@ -162,7 +163,7 @@ var fg_prim_forest = {
         this._draw_heter();
 
         // show the plot
-        this._draw_plot();
+        this._draw_forest();
     },
 
     _draw_header: function() {
@@ -272,6 +273,37 @@ var fg_prim_forest = {
         t_heter.append('tspan').text('p').attr('class', this.css.txt_mt);
         var txt_p = (this.data.heterogeneity.p).toFixed(2) 
         t_heter.append('tspan').text('=' + txt_p);
+    },
+
+    _draw_forest: function() {
+        // first, make the scale to map values to x value
+        this.x_scale = d3.scaleLog()
+            .domain([1e-2, 1e2])
+            .range([0, this.cols[7].width]);
+
+        this.y_scale = function(i) {
+            return fg_prim_forest.row_height * (3.5 + i);
+        }
+
+        // draw the x axis
+        this.xAxis = d3.axisBottom(fg_prim_forest.x_scale)
+            .ticks(5, '~g');
+        this.svg.append('g')
+            .attr('transform', 'translate('+(this.cols[7].x + this.row_frstml)+', '+(this.row_height * (6 + this.data.stus.length))+')')
+            .call(this.xAxis);
+
+        // draw the middle line
+        var g_forest = this.svg.append('g')
+            .attr('transform', 'translate('+(this.cols[7].x + this.row_frstml)+', 0)');
+
+        g_forest.append('path')
+            .datum([ [1, -0.5], [1, this.data.stus.length + 2.5] ])
+            .attr('stroke', 'black')
+            .attr('stroke-width', 1)
+            .attr('d', d3.line()
+                .x(function(d) { console.log('x:', d); return fg_prim_forest.x_scale(d[0]); })
+                .y(function(d) { console.log('y:', d); return fg_prim_forest.y_scale(d[1]); })
+            );
     },
 
     get_txt_by_col: function(obj, idx) {
