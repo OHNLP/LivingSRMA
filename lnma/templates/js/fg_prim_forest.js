@@ -287,7 +287,8 @@ var fg_prim_forest = {
 
         // draw the x axis
         this.xAxis = d3.axisBottom(fg_prim_forest.x_scale)
-            .ticks(5, '~g');
+            .ticks(5, '~g')
+            .tickValues([1e-2,1e-1,1e0,1e1,1e2]);
         this.svg.append('g')
             .attr('transform', 'translate('+(this.cols[7].x + this.row_frstml)+', '+(this.row_height * (6 + this.data.stus.length))+')')
             .call(this.xAxis);
