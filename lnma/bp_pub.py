@@ -150,6 +150,11 @@ def oplot():
     return render_template('pub.oplot.html')
 
 
+@bp.route('/oplot_v2.html')
+def oplot_v2():
+    return render_template('pub.oplot_v2.html')
+
+
 @bp.route('/softable_pma.html')
 def softable_pma():
     return render_template('pub.softable_pma.html')

@@ -257,13 +257,13 @@ a {
                     </div>
                     <div class="oc-plot-tab-page"
                         v-bind:class="{'oc-plot-tab-page-selected': current.is_prim_plot}">
-                        <img class="oc-plot-img" alt="Forest"
-                            v-bind:src="current.img.outplt1.url">
+                        <div id="fg_prim_forest" style="width: 100%; height: 100%;">
+                            <svg id="fg_prim_forest_svg"></svg>
+                        </div>
                     </div>
                     <div class="oc-plot-tab-page"
                         v-bind:class="{'oc-plot-tab-page-selected': current.is_cumu_plot}">
-                        <img class="oc-plot-img" alt="Cumulative"
-                            v-bind:src="current.img.cumuplt.url">
+                        
                     </div>
 
                 </div>
@@ -280,10 +280,14 @@ a {
 
 </div>
 
+<!-- use third party libs -->
 <script src="/static/lib/jquery/jquery-3.4.1.min.js"></script>
 <script src="/static/lib/jquery-ui/jquery-ui.min.js"></script>
 <script src="/static/lib/vue.js/vue.min.js"></script>
 <script src="/static/lib/alasql/alasql.min.js"></script>
+<!-- D3.js -->
+<script src="/static/lib/d3/d3.min.js"></script>
+<script src="/static/lib/d3/d3-tip.min.js"></script>
 
 <script>
 var isIE = /*@cc_on!@*/false || !!document.documentMode;
@@ -344,6 +348,14 @@ var vw_ocplot = {
                     // set the selected as true
                     this.current[plot] = true;
                 },
+            },
+            updated: function() {
+                if (this.current.has_img) {
+                    console.log('* render plot')
+                    fg_prim_forest.clear();
+                    fg_prim_forest.init(vw_ocplot.data.data.primma);
+
+                }
             }
         });
     },
@@ -382,7 +394,7 @@ var vw_ocplot = {
 
          // send ajax to server
          var params = {
-             am: 'FOREST',
+             am: 'FORESTDATA',
              sm: this.vpp.params.sm,
              rs: JSON.stringify(rs),
              hk: this.vpp.params.hk,
@@ -405,8 +417,10 @@ var vw_ocplot = {
     _show_plot: function(data) {
         if (data.success) {
              // great! show images
-             this.vpp.current.img = data.img;
+             this.data = data;
              this.vpp.current.has_img = true;
+             
+             
          } else {
              // update message
          }
