@@ -4,7 +4,7 @@ var fg_cumu_forest = {
     plot_type: 'd3js',
     svg: null,
     cols: [
-        {width: 180, align: 'start',  name: 'Study', x: 0, row: 1},
+        {width: 150, align: 'start',  name: 'Study', x: 0, row: 1},
         {width: 200, align: 'middle', name: '$SM_NAME$ (95% CI)', row: 1},
         {width: 50,  align: 'end',    name: '$SM$', row: 1},
         {width: 100, align: 'end',    name: '95% CI', row: 1}

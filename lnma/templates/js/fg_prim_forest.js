@@ -4,7 +4,7 @@ var fg_prim_forest = {
     plot_type: 'd3js',
     svg: null,
     cols: [
-        {width: 150, align: 'start',  name: 'Study', x: 0, row: 2},
+        {width: 120, align: 'start',  name: 'Study', x: 0, row: 2},
         {width: 50,  align: 'end',    name: 'Events', row: 2},
         {width: 50,  align: 'end',    name: 'Total', row: 2},
         {width: 50,  align: 'end',    name: 'Events', row: 2},
