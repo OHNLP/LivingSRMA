@@ -59,7 +59,18 @@ dev.off()
 #running cumulative meta-analysis
 # we will use the function metacum
 # sortvar can be indicated by an object of class meta or by an object of original data set
-results.cum <- metacum(resultsraw, sortvar = PRI_CAT_RAWDATA$year)
+resultsraw2 <- metabin(Et, 
+                       Nt, 
+                       Ec, 
+                       Nc, 
+                       data = PRI_CAT_RAWDATA, 
+                       studlab = study, 
+                       comb.random = TRUE, 
+                       comb.fixed = FALSE,
+                       sm = "{{ measure_of_effect }}",
+                       method = "MH", 
+                       method.tau = "DL")
+results.cum <- metacum(resultsraw2, sortvar = PRI_CAT_RAWDATA$year)
 
 fig_width <- 10
 fig_height <- fig_width * (0.25 + resultsraw$k * 0.04)
