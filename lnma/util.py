@@ -311,5 +311,21 @@ def ovid_parser(txt):
     return arts
 
 
+def pred_rct(ti, ab):
+    '''Predict if a study is RCT
+    '''
+    url = 'http://localhost:8000/'
+    headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/json"
+    }
+    data = {'ti': ti, 'ab': ab}
+    data_str = json.dumps(data)
+    r = requests.post(url, data=data_str, headers=headers)
+    print(r.url)
+    j = r.json()
+    return j
+
+
 if __name__ == "__main__":
     pass

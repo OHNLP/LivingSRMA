@@ -274,8 +274,8 @@ a {
 
 </div> <!-- /#left-panel -->
 
-<div id="main-panel" style="flex-direction: column; justify-content: space-between; align-items: stretch; min-width: 600px; width: calc(100%-200px);height: 100%; background: white; padding: 0 5px; overflow-y: auto;">
-    <div id="tb_coltab" class="box" style="min-height: 80px; margin: 0 0 5px 0;">
+<div id="main-panel" style="display: flex; flex-direction: column; align-items: stretch; min-width: 600px; width: calc(100% - 200px); height: 100%; background: white; padding: 0 5px; overflow-y: auto;">
+    <div id="tb_coltab" class="box flex-container" style="flex-direction: column; width: 100%; height: auto; margin: 0 0 5px 0;">
         <div class="box-header">
             <h4>
                 <i class="fa fa-columns"></i>
@@ -294,7 +294,7 @@ a {
                 </button>
             </div>
         </div>
-        <div class="box-body flex-container" style="flex-direction: column; flex-wrap: wrap;">
+        <div class="box-body flex-container" style="flex-direction: column; ">
             <div class="attr_cate flex-container" style="width:100%; flex-direction: row; border-bottom: 1px dotted #cccccc;"
                 v-if="cate != '_SYS'"
                 v-for="trunks, cate, cidx in attr_tree">
@@ -358,7 +358,7 @@ a {
         </div>
     </div> <!-- /.box -->
 
-    <div id="tb_schtab" class="box" style="padding-bottom: 10px;">
+    <div id="tb_schtab" class="box" style="flex-grow: 1; padding-bottom: 10px; overflow-x:auto; overflow-y: auto;">
         <div class="box-header">
             <h4>
                 <i class="fa fa-table"></i>

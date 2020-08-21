@@ -56,6 +56,11 @@ var vw_oclist = {
                     for (var key in this.rs) {
                         this.rs[key].is_close = flag;
                     }
+                },
+
+                clear: function() {
+                    $('.oc-type').removeClass('oc-type-selected');
+                    jarvis.clear_all_ae();
                 }
             }
         });

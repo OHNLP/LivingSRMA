@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+
+<title>Predict RCT | System Manager</title>
+
+<link rel="icon" href="/static/img/favicon.png" type="image/png">
+<script src="https://kit.fontawesome.com/cb45cc91b0.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="/static/lib/jquery-ui/jquery-ui.min.css">
+<link rel="stylesheet" href="/static/css/mybox-0.9.1.css">
+
+
+<style>
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+}
+body {
+    font-size: 14px;
+    padding: 10px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+a {
+    color: #333333;
+    text-decoration: none;
+}
+#wrapper {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+}
+
+</style>
+</head>
+<body>
+
+
+<div id="wrapper">
+
+    <div class="box" style="width: 100%;">
+        <div class="box-header">
+            <h5>
+                <i class="fa fa-book"></i>
+                Predict RCT
+            </h5>
+        </div>
+        <div class="box-body">
+            <p>
+                Use the follwoing information to predict whether a study is a RCT.
+            </p>
+            <div style="width: 500px; padding: 10px 0;">
+                <p>Title</p>
+                <textarea id="ti" rows="3" style="width: 100%;">A randomized controlled trial of positive-affect induction to promote physical activity after percutaneous coronary intervention.</textarea>
+
+                <p>Abstract</p>
+                <textarea id="ab" rows="5" style="width: 100%;">BACKGROUND: Within 1 year after percutaneous coronary intervention, more than 20% of patients experience new adverse events. Physical activity confers a 25% reduction in mortality; however, physical activity is widely underused. Thus, there is a need for more powerful behavioral interventions to promote physical activity. Our objective was to motivate patients to achieve an increase in expenditure of 336 kcal/wk or more at 12 months as assessed by the Paffenbarger Physical Activity and Exercise Index. METHODS: Two hundred forty-two patients were recruited immediately after percutaneous coronary intervention between October 2004 and October 2006. Patients were randomized to 1 of 2 groups. The patient education (PE) control group (n = 118) (1) received an educational workbook, (2) received a pedometer, and (3) set a behavioral contract for a physical activity goal. The positive-affect/self-affirmation (PA) intervention group (n = 124) received the 3 PE control components plus (1) a PA workbook chapter, (2) bimonthly induction of PA by telephone, and (3) small mailed gifts. All patients were contacted with standardized bimonthly telephone follow-up for 12 months. RESULTS: Attrition was 4.5%, and 2.1% of patients died. Significantly more patients in the PA intervention group increased expenditure by 336 kcal/wk or more at 12 months, our main outcome, compared with the PE control group (54.9% vs 37.4%, P = .007). The PA intervention patients were 1.7 times more likely to reach the goal of a 336-kcal/wk or more increase by 12 months, controlling for demographic and psychosocial measures. In multivariate analysis, the PA intervention patients had nearly double the improvement in kilocalories per week at 12 months compared with the PE control patients (602 vs 328, P = .03).                     CONCLUSION: Patients who receive PA intervention after percutaneous coronary intervention are able to achieve a sustained and clinically significant increase in physical activity by 12 months. Trial Registration clinicaltrials.gov Identifier: NCT00248846.</textarea>
+            </div>
+            <div style="width: 500px; padding: 10px 0; text-align: center;">
+                <button onclick="jarvis.pred();">
+                    <i class="fa fa-robot"></i>
+                    Predict!
+                </button>
+            </div>
+            <div style="width: 500px; padding: 10px 0;">
+                <textarea id="json" rows="25" style="width: 100%;"></textarea>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- use third party libs -->
+<script src="/static/lib/jquery/jquery-3.4.1.min.js"></script>
+<script src="/static/lib/jquery-ui/jquery-ui.min.js"></script>
+<script src="/static/lib/vue.js/vue.min.js"></script>
+
+
+<script>
+
+var jarvis = {
+    pred: function() {
+        var ti = $('#ti').val();
+        var ab = $('#ab').val();
+
+        $('#json').val('I am working ... please wait ...');
+
+        $.post(
+            "[[ url_for('sysmgr.pred_rct_demo') ]]",
+            {ti: ti, ab: ab},
+            function(data) {
+                console.log(data);
+                var txt = JSON.stringify(data['data']);
+                $('#json').val(txt);
+            }, 'json'
+        )
+    }
+};
+
+$(document).ready(function() {
+
+});
+
+</script>
+</body>
+</html>

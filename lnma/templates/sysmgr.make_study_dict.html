@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+
+<title>Make Study Dictionary | System Manager</title>
+
+<link rel="icon" href="/static/img/favicon.png" type="image/png">
+<script src="https://kit.fontawesome.com/cb45cc91b0.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="/static/lib/jquery-ui/jquery-ui.min.css">
+<link rel="stylesheet" href="/static/css/mybox-0.9.1.css">
+
+
+<style>
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+}
+body {
+    font-size: 14px;
+    padding: 10px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+a {
+    color: #333333;
+    text-decoration: none;
+}
+#wrapper {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+}
+
+</style>
+</head>
+<body>
+
+
+<div id="wrapper">
+
+    <div class="box" style="width: 100%;">
+        <div class="box-header">
+            <h5>
+                <i class="fa fa-book"></i>
+                Study Dictionary Maker
+            </h5>
+        </div>
+        <div class="box-body">
+            <p>
+                As you can see, input the PMID list which seperated by comma. <br>
+                Then press button and wait ... and take a Coke while waiting ....
+            </p>
+            <div style="width: 500px; padding: 10px 0;">
+                <textarea id="pmids" rows="8" style="width: 100%;">29268948,28212060</textarea>
+            </div>
+            <div style="width: 500px; padding: 10px 0; text-align: center;">
+                <button onclick="jarvis.make();">
+                    <i class="fa fa-robot"></i>
+                    Make study dictionary by PMIDs from PubMed!
+                </button>
+            </div>
+            <div style="width: 500px; padding: 10px 0;">
+                <textarea id="json" rows="25" style="width: 100%;"></textarea>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- use third party libs -->
+<script src="/static/lib/jquery/jquery-3.4.1.min.js"></script>
+<script src="/static/lib/jquery-ui/jquery-ui.min.js"></script>
+<script src="/static/lib/vue.js/vue.min.js"></script>
+
+
+<script>
+
+var jarvis = {
+    make: function() {
+        var pmids = $('#pmids').val();
+
+        $('#json').val('I am working ... please wait ...');
+
+        $.post(
+            "[[ url_for('sysmgr.make_study_dict') ]]",
+            {pmids: pmids},
+            function(data) {
+                console.log(data);
+                var txt = JSON.stringify(data['data']);
+                $('#json').val(txt);
+            }, 'json'
+        )
+    }
+};
+
+$(document).ready(function() {
+
+});
+
+</script>
+</body>
+</html>

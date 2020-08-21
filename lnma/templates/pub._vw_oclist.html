@@ -24,7 +24,13 @@
             <div class="d-flex fx-col">
                 <div class="d-flex fx-row ">
                     <div class="oc-name" style="font-weight: bold;">
-                        &nbsp;
+                        <i class="fa fa-filter"></i>
+                        Filters |
+
+                        <button v-on:click="clear">
+                            <i class="fa fa-sync"></i>
+                            Reset
+                        </button>
                     </div>
                     <div style="width: 90px; text-align: center; border-bottom: 1px solid #555555;">
                         Grade

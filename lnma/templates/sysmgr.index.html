@@ -5,16 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>System Manager</title>
   <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <script src="https://kit.fontawesome.com/cb45cc91b0.js" crossorigin="anonymous"></script>
   
   <style>
-  .ui-menu { width: 150px; }
+  .ui-menu { width: 180px; }
+  .ui-menu a {
+    text-decoration: none;
+  }
   </style>
 </head>
 <body>
  
 <ul id="menu">
-  <li class="ui-state-disabled"><div>Toys (n/a)</div></li>
-  <li><div>Books</div></li>
+  <li class="ui-state-disabled"><div>System Manager</div></li>
+  <li><div>Tools</div></li>
   <li><div>Clothing</div></li>
   <li><div>Electronics</div>
     <ul>
@@ -24,11 +28,14 @@
     </ul>
   </li>
   <li><div>Movies</div></li>
-  <li><div>Music</div>
+  <li><div>Data Tools</div>
     <ul>
-      <li><div>Rock</div>
+      <li><div>PMID</div>
         <ul>
-          <li><div>Alternative</div></li>
+          <li><div><a href="[[ url_for('sysmgr.make_study_dict') ]]">
+            <i class="fa fa-book"></i>
+            Mk Stu. Dict.
+          </a></div></li>
           <li><div>Classic</div></li>
         </ul>
       </li>

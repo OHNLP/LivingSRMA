@@ -269,7 +269,7 @@ a {
                 </div>
             </div>
 
-            <div class="box-body" style="height: 100%;">
+            <div class="box-body" style="height: 100%; overflow-y: auto;">
 
                 <table class="sof-table">
                     <tr>
@@ -502,6 +502,19 @@ var tb_sofpma = {
 
         // have to force update the view
         tb_sofpma.vpp.$forceUpdate();
+    },
+
+    clear: function() {
+
+    },
+
+    clear_all: function() {
+        for (var key in tb_sofpma.vpp.rs) {
+            if (tb_sofpma.vpp.rs.hasOwnProperty(key)) {
+                tb_sofpma.vpp.rs[key] = {};
+            }
+        }
+        tb_sofpma.vpp.$forceUpdate();
     }
 };
 
@@ -571,6 +584,10 @@ var jarvis = {
     toggle_ae: function(ae_cate, ae_name, ae_grade) {
         console.log('* toggle_ae ' + ae_cate + ', ' + ae_name + ', ' + ae_grade);
         tb_sofpma.toggle_ae(ae_cate, ae_name, ae_grade);
+    },
+
+    clear_all_ae: function() {
+        tb_sofpma.clear_all();
     },
 
     ssmsg: function(msg) {
