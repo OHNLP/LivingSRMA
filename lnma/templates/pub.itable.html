@@ -572,6 +572,15 @@ var dt_tbcore = {
                   this.sql.order_by;
         console.log('* updated table using SQL:\n', sql);
         this.rs_db = alasql(sql);
+    },
+
+    count_rs_db: function() {
+        var sql = 'select count(*) as cnt_lines, '+
+            'count(distinct ' + this.t_a2c[this.attr_nm2id('PMID')] + ') as cnt_pmids ' +
+            'from rs where 1=1 and ' +
+            this.sql.conditions + ' ';
+        console.log('* count table using SQL:\n', sql);
+        return alasql(sql)[0];
     }
 };
 

@@ -180,7 +180,7 @@ def graphdata(prj, fn):
 def graphdata_itable_json(prj):
     '''Special rule for the ITABLE.json which does not exist
     '''
-    fn = 'ITABLE_ATTR_DATA.xlsx'
+    fn = 'ALL_DATA.xlsx'
     full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
 
     # get the cols

@@ -20,6 +20,12 @@ def index():
     return render_template('screener.index_v3.html')
 
 
+@bp.route('/v4')
+@login_required
+def index_v4():
+    return render_template('screener.index_v4.html')
+
+
 @bp.route('/get_papers', methods=['GET', 'POST'])
 @login_required
 def get_papers():

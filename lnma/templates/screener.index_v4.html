@@ -1,0 +1,103 @@
+{% extends '_layout_adminlte.html' %}
+
+{% block title %}
+Study Screener
+{% endblock %}
+
+{% block style %}
+<link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+<style>
+    .expanded-cell {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block page_name %}
+<i class="fas fa-map-signs"></i>
+Study Screener
+{% endblock %}
+
+{% block content %}
+
+<div class="content">
+    <div class="container-fluid">
+        <div id="vw_timeline" class="row">
+
+            <!-- The time line -->
+            <div class="timeline">
+                <!-- timeline time label -->
+                <div class="time-label">
+                    <span class="bg-red">08/20/2020</span>
+                </div>
+                <!-- /.timeline-label -->
+                <!-- timeline item -->
+                <div>
+                    <i class="fas fa-envelope bg-blue"></i>
+                    <div class="timeline-item">
+                        <span class="time"><i class="fas fa-clock"></i> 12:05</span>
+                        <h3 class="timeline-header">
+                            <a href="#">Support Team</a> g
+                        </h3>
+
+                        <div class="timeline-body">
+                            Etsy doostang zoodles disqus groupon greplin oooj voxy zoodles,
+                            weebly ning heekya handango imeem plugg dopplr jibjab, movity
+                            jajah plickers sifteo edmodo ifttt zimbra. Babblely odeo kaboodle
+                            quora plaxo ideeli hulu weebly balihoo...
+                        </div>
+                        <div class="timeline-footer">
+                            <a class="btn btn-primary btn-sm">Read more</a>
+                            <a class="btn btn-danger btn-sm">Delete</a>
+                        </div>
+                    </div>
+                </div>
+                <!-- END timeline item -->
+                <!-- timeline item -->
+                <div>
+                    <i class="fas fa-user bg-green"></i>
+                    <div class="timeline-item">
+                        <span class="time"><i class="fas fa-clock"></i> 5 mins ago</span>
+                        <h3 class="timeline-header no-border"><a href="#">Sarah Young</a> accepted your friend request
+                        </h3>
+                    </div>
+                </div>
+                <!-- END timeline item -->
+
+                <div>
+                    <i class="fas fa-clock bg-gray"></i>
+                </div>
+            </div>
+        </div>
+        <!-- /.col -->
+    </div>
+</div>
+<!-- /.timeline -->
+
+</div>
+</div>
+</div>
+
+
+{% endblock %}
+
+{% block active_nav_link %}study-timeline{% endblock %}
+
+{% block script %}
+<script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+<script src="/static/lib/d3/d3.min.js"></script>
+<script>
+
+var jarvis = {
+    init: function () {
+    },
+};
+
+$(document).ready(function () {
+    jarvis.init();
+})
+</script>
+{% endblock %}

@@ -78,8 +78,14 @@
         </h3>
 
         <div class="row">
-            <div class="col">
-                <img src="/static/img/pub.IOTOX.intro.png" alt="bg" style="width:100%;">
+            <div id="img-intro" class="col">
+                <style>
+                    #img-intro svg {
+                        width: 100%;
+                    }
+                </style>
+                <!-- <img src="/static/img/pub.IOTOX.intro.png" alt="bg" style="width:100%;"> -->
+                {% include 'svg/pub.IOTOX.intro.svg' %}
             </div>
         </div>
     </div>
@@ -359,7 +365,8 @@ function update_num_studies() {
     try {
         var rs_db = win_it.dt_tbcore.rs_db;
         var pids = rs_db.map(function(r){ return r.id });
-        num = pids.length;
+        var cnts = win_it.dt_tbcore.count_rs_db();
+        num = cnts.cnt_pmids;
 
         if (num == jarvis.last_num_itable_rs) {
             // it seems nothing to do with same number
