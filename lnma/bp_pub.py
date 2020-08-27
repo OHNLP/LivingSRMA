@@ -377,6 +377,16 @@ def get_pma(dataset, datatype='CAT_RAW', sm='OR', method='MH', random_or_fixed='
     
     return ret
 
+
+def get_nma_by_r(dataset, datatype='CAT_RAW', sm='OR', random_or_fixed='random'):
+    '''Get the NMA results by R script 
+    '''
+    ret = {
+
+    }
+    return ret
+
+
 def get_pma_by_rplt(dataset, datetype='CAT_RAW', sm='OR', method='MH', random_or_fixed='random'):
     '''Get the PMA results by R script (PRIM_CAT_RAW)
     The input dataset should follow:
