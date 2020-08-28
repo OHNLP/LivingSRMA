@@ -59,6 +59,39 @@ a {
     height: 100%;
 }
 
+/* for the simple oclist */
+
+#vw_simple_oclist {
+    width: 200px;
+    min-width: 200px;
+    padding: 0 5px;
+    height: 100%;
+}
+.ae-item {
+    display: flex;
+    align-items: center;
+    width: calc(100% - 10px);
+    height: 50px;
+    border: 1px solid #dddddd;
+    margin: 0 0 10px;
+    padding: 0 0 0 10px;
+    cursor: pointer;
+}
+.ae-item:hover {
+    background: whitesmoke;
+    font-weight: bold;
+}
+.ae-item-selected {
+    background: #c6c6c6;
+    font-weight: bold;
+}
+
+/* for the NMA table */
+
+#tb_sofnma {
+    width: calc(100% - 200px);
+}
+
 /* for the SoF table */
 .sof-table {
     width: 100%;
@@ -105,13 +138,6 @@ a {
 
 <div id="app" class="d-flex fx-row">
 
-<style>
-#vw_simple_oclist {
-    width: 300px;
-    padding: 0 5px;
-    height: 100%;
-}
-</style>
 <div id="vw_simple_oclist">
     <div class="box">
         <div class="box-header">
@@ -126,10 +152,16 @@ a {
                 </button>
             </div>
         </div>
+        <div class="box-body">
+            <div class="ae-item"
+                v-for="ae in aes">
+                {{ ae.ae_name }}
+            </div>
+        </div>
     </div>
 </div>
 
-    <div id="tb_sofpma">
+    <div id="tb_sofnma">
         <div class="box" style="height: 100%;">
             <div class="box-header">
                 <h4>
@@ -167,17 +199,13 @@ a {
                     <div class="box-menu-group d-flex fx-row">
                         <div>
                             <i class="fa fa-cog"></i>
-                            Assumed risk: 
+                            Comparator: 
                         </div>
-                        <div class="box-radio-item">
-                            <input type="radio" checked value="true"
-                                v-model="use_internal_baseline">
-                            <label for="vw_ocplots_input_sm_or">Internal</label>
-                        </div>
-                        <div class="box-radio-item">
-                            <input type="radio" value="false"
-                                v-model="use_internal_baseline">
-                            <label for="vw_ocplots_input_sm_rr">External</label>
+                        <div>
+                            <select v-model='measure'>
+                                <option value="OR">Odds Ratio (OR)</option>
+                                <option value="RR">Risk Ratio (RR)</option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -185,7 +213,19 @@ a {
 
             <div class="box-body" style="height: 100%; overflow-y: auto;">
 
-                <table class="sof-nma-table">
+                <table class="sof-table">
+                    <tr>
+                        <th>Adverse Events</th>
+                        <th>{{ comparator }}</th>
+                        <th v-for="treat in treat_list" v-if="treat!=comparator">{{ treat }}</th>
+                    </tr>
+                    <tr v-for="ae in aes">
+                        <td>{{ ae.ae_name }}</td>
+                        <td>{{ comparator }}</td>
+                        <td v-for="treat in treat_list" v-if="treat!=comparator && ae.lgtable[measure]">
+                            {{ show_sm(ae.lgtable[measure], comparator, treat) }}
+                        </td>
+                    </tr>
                 </table>
 
             </div>
@@ -214,7 +254,104 @@ var vw_simple_oclist = {
     vpp_id: '#vw_simple_oclist',
     vpp: null,
 
+    sample: {
+        aes: {
+            "fatality": {
+                ae_cate: 'default',
+                ae_name: 'Fatality',
+                treat_list: ['Suni', 'Pazo', 'Ipin', 'ApiX'],
+                treats: {
+                    "Suni": { event: 110, total: 200 },
+                    "Ipin": { event: 111, total: 220 },
+                    "Pazo": { event: 112, total: 250 },
+                    "ApiX": { event: 113, total: 270 }
+                },
+                // for each one, row is comparator, col is 
+                lgtable: {
+                    OR: {
+                        "Suni": {
+                            "Suni": {}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
+                        },
+                        "Pazo": {
+                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
+                        },
+                        "Ipin": {
+                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
+                        },
+                        "ApiX": {
+                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {}
+                        },
+                    },
+                    RR: {
+                        "Suni": {
+                            "Suni": {}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
+                        },
+                        "Pazo": {
+                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
+                        },
+                        "Ipin": {
+                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
+                        },
+                        "ApiX": {
+                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {}
+                        },
+                    }
+                }
+            },
+            "major-bleeding": {
+                ae_cate: 'default',
+                ae_name: 'Major bleeding',
+                treat_list: ['Suni', 'Pazo', 'Ipin', 'ApiX'],
+                treats: {
+                    "Suni": { event: 10, total: 200 },
+                    "Ipin": { event: 11, total: 220 },
+                    "Pazo": { event: 12, total: 250 },
+                    "ApiX": { event: 13, total: 270 }
+                },
+                // for each one, row is comparator, col is 
+                lgtable: {
+                    OR: {
+                        "Suni": {
+                            "Suni": {}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
+                        },
+                        "Pazo": {
+                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
+                        },
+                        "Ipin": {
+                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
+                        },
+                        "ApiX": {
+                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {}
+                        },
+                    },
+                    RR: {
+                        "Suni": {
+                            "Suni": {}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
+                        },
+                        "Pazo": {
+                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
+                        },
+                        "Ipin": {
+                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
+                        },
+                        "ApiX": {
+                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {}
+                        },
+                    }
+                }
+            },
+        }
+    },
+
     init: function() {
+
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: this.sample,
+            methods: {
+
+            }
+        });
 
     },
 
@@ -224,16 +361,99 @@ var vw_simple_oclist = {
 
 var tb_sofnma = {
     vpp: null,
-    vpp_id: '#tb_sofpma',
+    vpp_id: '#tb_sofnma',
     sample: {
         measure: 'OR',
         baseline: 1000,
         external_risk_calculated: 10,
         use_internal_baseline: true,
-        rs: {
-            GA: {},
-            G3H: {},
-            G5N: {}
+        comparator: 'Suni',
+        treat_list: ['Suni', 'Pazo', 'Ipin', 'ApiX'],
+        aes: {
+            "fatality": {
+                ae_cate: 'default',
+                ae_name: 'Fatality',
+                treat_list: ['Suni', 'Pazo', 'Ipin', 'ApiX'],
+                treats: {
+                    "Suni": { event: 110, total: 200 },
+                    "Ipin": { event: 111, total: 220 },
+                    "Pazo": { event: 112, total: 250 },
+                    "ApiX": { event: 113, total: 270 }
+                },
+                // for each one, row is comparator, col is 
+                lgtable: {
+                    OR: {
+                        Suni: {
+                            "Suni": {}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
+                        },
+                        "Pazo": {
+                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
+                        },
+                        "Ipin": {
+                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
+                        },
+                        "ApiX": {
+                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {}
+                        }
+                    },
+                    RR: {
+                        "Suni": {
+                            "Suni": {}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
+                        },
+                        "Pazo": {
+                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
+                        },
+                        "Ipin": {
+                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
+                        },
+                        "ApiX": {
+                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {}
+                        }
+                    }
+                }
+            },
+            "major-bleeding": {
+                ae_cate: 'default',
+                ae_name: 'Major bleeding',
+                treat_list: ['Suni', 'Pazo', 'Ipin', 'ApiX'],
+                treats: {
+                    "Suni": { event: 10, total: 200 },
+                    "Ipin": { event: 11, total: 220 },
+                    "Pazo": { event: 12, total: 250 },
+                    "ApiX": { event: 13, total: 270 }
+                },
+                // for each one, row is comparator, col is 
+                lgtable: {
+                    OR: {
+                        "Suni": {
+                            "Suni": {}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
+                        },
+                        "Pazo": {
+                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
+                        },
+                        "Ipin": {
+                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
+                        },
+                        "ApiX": {
+                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {}
+                        },
+                    },
+                    RR: {
+                        "Suni": {
+                            "Suni": {}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
+                        },
+                        "Pazo": {
+                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
+                        },
+                        "Ipin": {
+                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
+                        },
+                        "ApiX": {
+                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {}
+                        },
+                    }
+                }
+            },
         }
     },
 
@@ -272,6 +492,11 @@ var tb_sofnma = {
                         var a = this.get_ACR(r) * r[obj];
                         return a;
                     }
+                },
+
+                show_sm: function(tb, c, t) {
+                    console.log(tb);
+                    return tb[c][t].sm;
                 },
 
                 get_ARD: function(r, obj) {
@@ -389,13 +614,6 @@ var tb_sofnma = {
 
 var jarvis = {
 
-    texts: {
-        "GA": "All Grade",
-        "G34": "Grade 3/4",
-        "G3H": "Grade 3 or higher",
-        "G5N": "Grade 5 only"
-    },
-
     init: function() {
         var isIE = /*@cc_on!@*/false || !!document.documentMode;
 
@@ -411,35 +629,13 @@ var jarvis = {
             jarvis.ssmsg('Project information error.')
             return;
         }
+        // ok, remove the 
+        jarvis.ssmsg('Almost initialized.');
+        setTimeout('jarvis.ssclose();', 400);
 
-        $.when(
-            $.get(
-                '/pub/graphdata/' + prj + '/ITABLE_CFG.json',
-                {}
-            ),
-            $.get(
-                '/pub/graphdata/'+prj+'/SOFTABLE_PMA.json',
-                {ver: Math.random()},
-            )
-        ).done(function(r1, r2) {
-            var data1 = r1[0];
-            var data2 = r2[0];
-            jarvis.data1 = data1;
-            jarvis.data2 = data2;
+        vw_simple_oclist.init();
+        tb_sofnma.init();
 
-            // init the table
-            console.log(data1);
-            console.log(data2);
-
-            vw_oclist.init(data2);
-            tb_sofpma.init(data2);
-
-            // ok, remove the 
-            jarvis.ssmsg('Almost initialized.');
-            setTimeout('jarvis.ssclose();', 400);
-        });
-
-        
     },
 
     getUrlParameter: function(name) {
