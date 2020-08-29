@@ -113,6 +113,13 @@ a {
     width: 150px;
     max-width: 180px;
 }
+.sof-table .col-treat {
+    width: 100px;
+    max-width: 150px;
+}
+.sof-table .col-comarator {
+    background: #ffface;
+}
 .sof-table .col-ta-left {
     text-align: left !important;
     padding-left: 10px;
@@ -202,9 +209,11 @@ a {
                             Comparator: 
                         </div>
                         <div>
-                            <select v-model='measure'>
-                                <option value="OR">Odds Ratio (OR)</option>
-                                <option value="RR">Risk Ratio (RR)</option>
+                            <select v-model='comparator'>
+                                <option v-for="treat in treat_list"
+                                    v-bind:value="treat">
+                                    {{ treat }}
+                                </option>
                             </select>
                         </div>
                     </div>
@@ -215,15 +224,24 @@ a {
 
                 <table class="sof-table">
                     <tr>
-                        <th>Adverse Events</th>
-                        <th>{{ comparator }}</th>
-                        <th v-for="treat in treat_list" v-if="treat!=comparator">{{ treat }}</th>
+                        <th class="col-ae-name">Adverse Events</th>
+                        <th class="col-treat col-comarator">{{ comparator }}</th>
+                        <th class="col-treat" 
+                            v-for="treat in treat_list" 
+                            v-if="treat!=comparator">
+                            {{ treat }}
+                        </th>
                     </tr>
                     <tr v-for="ae in aes">
                         <td>{{ ae.ae_name }}</td>
-                        <td>{{ comparator }}</td>
-                        <td v-for="treat in treat_list" v-if="treat!=comparator && ae.lgtable[measure]">
-                            {{ show_sm(ae.lgtable[measure], comparator, treat) }}
+                        <td class="col-comarator">
+                            {{ get_ACR(ae.treats[comparator]).toFixed(0) }} per {{ baseline }} <br>
+                            Rank {{ ae.treats[comparator].rank }}
+                        </td>
+                        <td v-for="treat in treat_list" 
+                            v-if="treat!=comparator && ae.lgtable[measure]">
+                            {{ show_sm(ae.lgtable[measure], comparator, treat) }}<br>
+                            Rank {{ ae.treats[treat].rank }}
                         </td>
                     </tr>
                 </table>
@@ -261,10 +279,10 @@ var vw_simple_oclist = {
                 ae_name: 'Fatality',
                 treat_list: ['Suni', 'Pazo', 'Ipin', 'ApiX'],
                 treats: {
-                    "Suni": { event: 110, total: 200 },
-                    "Ipin": { event: 111, total: 220 },
-                    "Pazo": { event: 112, total: 250 },
-                    "ApiX": { event: 113, total: 270 }
+                    "Suni": { event: 110, total: 200, rank: 1},
+                    "Ipin": { event: 111, total: 220, rank: 2},
+                    "Pazo": { event: 112, total: 250, rank: 3},
+                    "ApiX": { event: 113, total: 270, rank: 4}
                 },
                 // for each one, row is comparator, col is 
                 lgtable: {
@@ -303,10 +321,10 @@ var vw_simple_oclist = {
                 ae_name: 'Major bleeding',
                 treat_list: ['Suni', 'Pazo', 'Ipin', 'ApiX'],
                 treats: {
-                    "Suni": { event: 10, total: 200 },
-                    "Ipin": { event: 11, total: 220 },
-                    "Pazo": { event: 12, total: 250 },
-                    "ApiX": { event: 13, total: 270 }
+                    "Suni": { event: 10, total: 200, rank: 1},
+                    "Ipin": { event: 11, total: 220, rank: 2},
+                    "Pazo": { event: 12, total: 250, rank: 3},
+                    "ApiX": { event: 13, total: 270, rank: 4}
                 },
                 // for each one, row is comparator, col is 
                 lgtable: {
@@ -375,10 +393,10 @@ var tb_sofnma = {
                 ae_name: 'Fatality',
                 treat_list: ['Suni', 'Pazo', 'Ipin', 'ApiX'],
                 treats: {
-                    "Suni": { event: 110, total: 200 },
-                    "Ipin": { event: 111, total: 220 },
-                    "Pazo": { event: 112, total: 250 },
-                    "ApiX": { event: 113, total: 270 }
+                    "Suni": { event: 110, total: 200, rank: 1},
+                    "Ipin": { event: 111, total: 220, rank: 2},
+                    "Pazo": { event: 112, total: 250, rank: 3},
+                    "ApiX": { event: 113, total: 270, rank: 4}
                 },
                 // for each one, row is comparator, col is 
                 lgtable: {
@@ -417,10 +435,10 @@ var tb_sofnma = {
                 ae_name: 'Major bleeding',
                 treat_list: ['Suni', 'Pazo', 'Ipin', 'ApiX'],
                 treats: {
-                    "Suni": { event: 10, total: 200 },
-                    "Ipin": { event: 11, total: 220 },
-                    "Pazo": { event: 12, total: 250 },
-                    "ApiX": { event: 13, total: 270 }
+                    "Suni": { event: 10, total: 200, rank: 1},
+                    "Ipin": { event: 11, total: 220, rank: 2},
+                    "Pazo": { event: 12, total: 250, rank: 3},
+                    "ApiX": { event: 13, total: 270, rank: 4}
                 },
                 // for each one, row is comparator, col is 
                 lgtable: {
@@ -466,7 +484,7 @@ var tb_sofnma = {
             methods: {
                 get_ACR: function(r) {
                     if (this.use_internal_baseline) {
-                        return r.Ec / r.Nc * this.baseline;
+                        return r.event / r.total * this.baseline;
                     } else {
                         return external_risk_calculated;
                     }
