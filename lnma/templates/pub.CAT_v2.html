@@ -52,8 +52,8 @@
                 <a class="nav-link dropdown-toggle" href="#" id="dropdown02" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">TABLES</a>
                 <div class="dropdown-menu" aria-labelledby="dropdown02">
                     <a class="dropdown-item" href="#sec-intertable">Interactive Table</a>
-                    <a class="dropdown-item" href="#sec-sof-pma">SUMMARY OF FINDINGS(SOF): PAIRWISE MA</a>
-                    <a class="dropdown-item" href="#sec-sof-nma">SUMAMRY OF FINDINGS(SOF): NETWORK MA</a>
+                    <a class="dropdown-item" href="#sec-sof-pma">Summary of Findings(SoF): Pairwise MA</a>
+                    <a class="dropdown-item" href="#sec-sof-nma">Summary of Findings(SoF): Network MA</a>
                 </div>
             </li>
 
@@ -319,6 +319,7 @@
     <h3 style="margin-bottom: 2rem;">
         SUMMARY OF FINDINGS: PAIRWISE MA
     </h3>
+    <p>A Summary of Findings (SoF) table is designed to summarize the key results of a pairwise meta-analysis and to evaluate your confidence in the estimates of effect. The table summarizes the results for patient important outcomes for patients receiving direct acting anti-coagulant (DOACs) as compared to low molecular weight heparin (LMWH).</p>
     <div class="row">
         <div class="col">
             <iframe id="ifm-ocplots" src="[[ url_for('pub.softable_pma', prj='CAT') ]]" frameborder="0" style="width: 100%; min-height: 600px;"></iframe>
@@ -334,6 +335,7 @@
     <h3 style="margin-bottom: 2rem;">
         SUMMARY OF FINDINGS: NMA
     </h3>
+    <p>A Summary of Findings (SoF) table is designed to summarize the key results of a network meta-analysis and to evaluate your confidence in the estimates of effect. The table summarizes the results for select patient important outcomes; VTE recurrence, Major Bleeding, and clinically relevant non-major bleeding [CRNMB] for each direct acting anti-coagulant (DOACs) as compared to low molecular weight heparin (LMWH).</p>
     <div class="row">
         <div class="col">
             <iframe id="ifm-ocplots" src="[[ url_for('pub.softable_nma', prj='CAT') ]]" frameborder="0" style="width: 100%; min-height: 600px;"></iframe>

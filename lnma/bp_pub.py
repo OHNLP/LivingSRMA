@@ -92,12 +92,12 @@ def CAT():
         })
         dma[dma_type][option_text]['slides'].append(filename + '$' + legend_text)
     
-    return render_template('pub.CAT.html', dma=dma, nma=nma)
+    return render_template('pub.CAT_v2.html', dma=dma, nma=nma)
 
 
 
-@bp.route('/CAT_v2.html')
-def CAT_v2():
+@bp.route('/CAT_v1.html')
+def CAT_v1():
     prj = 'CAT'
     # load the graph data
     full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, 'NMA_LIST.json')
@@ -127,7 +127,7 @@ def CAT_v2():
         })
         dma[dma_type][option_text]['slides'].append(filename + '$' + legend_text)
     
-    return render_template('pub.CAT_v2.html', dma=dma, nma=nma)
+    return render_template('pub.CAT.html', dma=dma, nma=nma)
 
 ###########################################################
 # Modules for public page
