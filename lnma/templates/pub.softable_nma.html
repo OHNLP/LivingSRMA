@@ -244,7 +244,7 @@ a {
                             v-bind:ae_name="ae.ae_name"
                             v-bind:treat="treat"
                             v-on:click="show_detail(ae.ae_name, treat)">
-                            {{ get_ARD_txt(ae.treats[treat], ae.lgtable[measure][comparator][treat].sm) }}<br>
+                            {{ get_ARD_txt(ae.treats[comparator], ae.lgtable[measure][comparator][treat].sm) }}<br>
                             <b>Rank {{ ae.treats[treat].rank }}</b>
                         </td>
                     </tr>
@@ -281,19 +281,19 @@ a {
                             {{ ae_dict[detail.ae_name]['lgtable'][measure][comparator][detail.treat].up.toFixed(2) }} )
                         </p>
                         
-                        <p>Absolute risk: <span class="txt-lg txt-fb">{{ get_CIR(ae_dict[detail.ae_name].treats[detail.treat], ae_dict[detail.ae_name]['lgtable'][measure][comparator][detail.treat].sm).toFixed(0) }} per {{ baseline }}</span><br>
-                        ({{ get_CIR(ae_dict[detail.ae_name].treats[detail.treat], ae_dict[detail.ae_name]['lgtable'][measure][comparator][detail.treat].lw).toFixed(0) }} per {{ baseline }} to 
-                        {{ get_CIR(ae_dict[detail.ae_name].treats[detail.treat], ae_dict[detail.ae_name]['lgtable'][measure][comparator][detail.treat].up).toFixed(0) }} per {{ baseline }})</p>
+                        <p>Absolute risk: <span class="txt-lg txt-fb">{{ get_CIR(ae_dict[detail.ae_name].treats[comparator], ae_dict[detail.ae_name]['lgtable'][measure][comparator][detail.treat].sm).toFixed(0) }} per {{ baseline }}</span><br>
+                        ({{ get_CIR(ae_dict[detail.ae_name].treats[comparator], ae_dict[detail.ae_name]['lgtable'][measure][comparator][detail.treat].lw).toFixed(0) }} per {{ baseline }} to 
+                        {{ get_CIR(ae_dict[detail.ae_name].treats[comparator], ae_dict[detail.ae_name]['lgtable'][measure][comparator][detail.treat].up).toFixed(0) }} per {{ baseline }})</p>
     
-                        <p>Absolute risk difference: <span class="txt-lg txt-fb">{{ get_ARD_txt(ae_dict[detail.ae_name].treats[detail.treat], ae_dict[detail.ae_name]['lgtable'][measure][comparator][detail.treat].sm) }}</span><br>
-                        ({{ get_ARD_txt(ae_dict[detail.ae_name].treats[detail.treat], ae_dict[detail.ae_name]['lgtable'][measure][comparator][detail.treat].lw) }}
+                        <p>Absolute risk difference: <span class="txt-lg txt-fb">{{ get_ARD_txt(ae_dict[detail.ae_name].treats[comparator], ae_dict[detail.ae_name]['lgtable'][measure][comparator][detail.treat].sm) }}</span><br>
+                        ({{ get_ARD_txt(ae_dict[detail.ae_name].treats[comparator], ae_dict[detail.ae_name]['lgtable'][measure][comparator][detail.treat].lw) }}
                         to
-                        {{ get_ARD_txt(ae_dict[detail.ae_name].treats[detail.treat], ae_dict[detail.ae_name]['lgtable'][measure][comparator][detail.treat].up) }})</p>
+                        {{ get_ARD_txt(ae_dict[detail.ae_name].treats[comparator], ae_dict[detail.ae_name]['lgtable'][measure][comparator][detail.treat].up) }})</p>
     
-                        <p>Absolute risk percentage: <span class="txt-lg txt-fb">{{ get_ARDp(ae_dict[detail.ae_name].treats[detail.treat], ae_dict[detail.ae_name]['lgtable'][measure][comparator][detail.treat].sm) }}</span><br>
-                        ({{ get_ARDp(ae_dict[detail.ae_name].treats[detail.treat], ae_dict[detail.ae_name]['lgtable'][measure][comparator][detail.treat].lw) }} 
+                        <p>Absolute risk percentage: <span class="txt-lg txt-fb">{{ get_ARDp(ae_dict[detail.ae_name].treats[comparator], ae_dict[detail.ae_name]['lgtable'][measure][comparator][detail.treat].sm) }}</span><br>
+                        ({{ get_ARDp(ae_dict[detail.ae_name].treats[comparator], ae_dict[detail.ae_name]['lgtable'][measure][comparator][detail.treat].lw) }} 
                         to 
-                        {{ get_ARDp(ae_dict[detail.ae_name].treats[detail.treat], ae_dict[detail.ae_name]['lgtable'][measure][comparator][detail.treat].up) }})</p>
+                        {{ get_ARDp(ae_dict[detail.ae_name].treats[comparator], ae_dict[detail.ae_name]['lgtable'][measure][comparator][detail.treat].up) }})</p>
     
                         <p>Rank: <span class="txt-lg txt-fb">{{ ae_dict[detail.ae_name].treats[detail.treat].rank }}</span></p>
                     </div>
