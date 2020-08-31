@@ -29,7 +29,9 @@ mydata <- read.csv("{{ fn_csvfile }}")
 # 
 # to meet the parameter requirement of pairwise function
 # After this pairwise function, the data will be converted to:
+#
 #   TE, seTE, studlab, treat1, treat2, event1, n1, event2, n2, incr, allstudies
+#
 # which is used in the netmeta package for calculating p socre
 # RR
 # OR

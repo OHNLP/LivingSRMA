@@ -10,9 +10,37 @@ library(jsonlite)
 
 # Load dataset csv file.
 # the `fn_csvfile` variable will be replaced with actual file name
+# The input format has been converted (by Python) from:
+#
+#   study, treat, event, total
+#
+# to:
+#
+#   study, treat1, event1, n1, treat2, event2, n2
+#
 # in the Python script.
-mydata_netmeta <- read.csv("{{ fn_csvfile }}")
+mydata <- read.csv("{{ fn_csvfile }}")
 
+# Convert to TE format
+# to meet the parameter requirement of pairwise function
+# The input format has been converted from:
+#
+#   study, treat1, event1, n1, treat2, event2, n2
+# 
+# After this pairwise function, the data will be converted to:
+#
+#   TE, seTE, studlab, treat1, treat2, event1, n1, event2, n2, incr, allstudies
+#
+# which is used in the netmeta package for calculating p socre
+# RR
+# OR
+# RD
+mydata.p <- pairwise(list(treat1, treat2),
+    list(event1, event2),
+    list(n1, n2),
+    data = mydata,
+    sm = '{{ measure_of_effect }}'
+)
 
 # Prepare data for netmeta package.
 # The netmeta package requires a specific data format with some attributes.
@@ -20,16 +48,15 @@ mydata_netmeta <- read.csv("{{ fn_csvfile }}")
 # Since current version only supports Hazard Ratio analysis, the `sm`
 # attribute is set to 'HR' as default.
 # It seems that the treatment1 (t1) is the comparator.
-nma <- netmeta(TE = mydata_netmeta$TE,
-    seTE = mydata_netmeta$seTE,
-    treat1 = mydata_netmeta$t1,
-    treat2 = mydata_netmeta$t2,
-    studlab = paste(mydata_netmeta$study),
-    data = mydata_netmeta,
-    sm = "HR",
+nma <- netmeta(TE = mydata.p$TE,
+    seTE = mydata.p$seTE,
+    treat1 = mydata.p$treat1,
+    treat2 = mydata.p$treat2,
+    studlab = paste(mydata.p$study),
+    data = mydata.p,
+    sm = '{{ measure_of_effect }}',
     comb.fixed = {{ is_fixed }},
-    comb.random = {{ is_random }},
-    reference.group = "{{ reference_treatment }}"
+    comb.random = {{ is_random }}
 )
 
 # Generate network plot.

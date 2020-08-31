@@ -53,6 +53,9 @@ RSCRIPT_TPL = {
     'pwma_SUBG_CONTD_PRE': 'lnma_pwma_SUBG_CONTD_PRE.tpl.r',
     'pwma_SUBG_CONTD_RAW': 'lnma_pwma_SUBG_CONTD_RAW.tpl.r',
 
+    # for NMA
+    'nma_freq_CAT_RAW': 'lnma_nma_freq_CAT_RAW.tpl.r',
+
     # for R Plots (RPLT)
     'rplt_IOTOX_FOREST': 'lnma_rplt_IOTOX_FOREST.tpl.r',
     'rplt_IOTOX_FORESTDATA': 'lnma_rplt_IOTOX_FORESTDATA.tpl.r',

@@ -1,0 +1,24 @@
+<div id="vw_simple_oclist">
+    <div class="box">
+        <div class="box-header">
+            <h4>
+                <i class="fa fa-list"></i>
+                Outcome List
+            </h4>
+            <div>
+                <button v-on:click="clear_all_ae">
+                    <i class="fa fa-sync"></i>
+                    Reset
+                </button>
+            </div>
+        </div>
+        <div class="box-body">
+            <div class="ae-item"
+                v-for="ae in ae_dict"
+                v-bind:ae_name="ae.ae_name"
+                v-on:click="toggle_ae">
+                {{ ae.ae_fullname }}
+            </div>
+        </div>
+    </div>
+</div>

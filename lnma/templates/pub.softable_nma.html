@@ -82,13 +82,13 @@ a {
     font-weight: bold;
 }
 .ae-item-selected {
-    background: #c6c6c6;
+    background: #ececec;
     font-weight: bold;
 }
 
 /* for the NMA table */
 
-#tb_sofnma {
+#tb_simple_sofnma {
     width: calc(100% - 200px);
 }
 
@@ -130,6 +130,9 @@ a {
 .sof-table .col-flipable:hover {
     background: whitesmoke;
 }
+.cie-table th {
+    text-align: left;
+}
 </style>
 </head>
 <body>
@@ -145,30 +148,9 @@ a {
 
 <div id="app" class="d-flex fx-row">
 
-<div id="vw_simple_oclist">
-    <div class="box">
-        <div class="box-header">
-            <h4>
-                <i class="fa fa-list"></i>
-                Outcome List
-            </h4>
-            <div>
-                <button>
-                    <i class="fa fa-sync"></i>
-                    Reset
-                </button>
-            </div>
-        </div>
-        <div class="box-body">
-            <div class="ae-item"
-                v-for="ae in aes">
-                {{ ae.ae_name }}
-            </div>
-        </div>
-    </div>
-</div>
+    {% include 'pub._vw_simple_oclist.html' %}
 
-    <div id="tb_sofnma">
+    <div id="tb_simple_sofnma">
         <div class="box" style="height: 100%;">
             <div class="box-header">
                 <h4>
@@ -225,23 +207,26 @@ a {
                 <table class="sof-table">
                     <tr>
                         <th class="col-ae-name">Adverse Events</th>
-                        <th class="col-treat col-comarator">{{ comparator }}</th>
+                        <th class="col-treat">{{ comparator }}</th>
                         <th class="col-treat" 
                             v-for="treat in treat_list" 
                             v-if="treat!=comparator">
                             {{ treat }}
                         </th>
                     </tr>
-                    <tr v-for="ae in aes">
+                    <tr v-for="ae in rs">
                         <td>{{ ae.ae_name }}</td>
                         <td class="col-comarator">
                             {{ get_ACR(ae.treats[comparator]).toFixed(0) }} per {{ baseline }} <br>
-                            Rank {{ ae.treats[comparator].rank }}
+                            <b>Rank {{ ae.treats[comparator].rank }}</b>
                         </td>
                         <td v-for="treat in treat_list" 
-                            v-if="treat!=comparator && ae.lgtable[measure]">
-                            {{ show_sm(ae.lgtable[measure], comparator, treat) }}<br>
-                            Rank {{ ae.treats[treat].rank }}
+                            v-if="treat!=comparator"
+                            v-bind:ae_name="ae.ae_name"
+                            v-bind:treat="treat"
+                            v-on:click="show_detail(ae.ae_name, treat)">
+                            {{ get_ARD_txt(ae.treats[treat], ae.lgtable[measure][comparator][treat].sm) }}<br>
+                            <b>Rank {{ ae.treats[treat].rank }}</b>
                         </td>
                     </tr>
                 </table>
@@ -249,6 +234,86 @@ a {
             </div>
 
         </div>
+
+        <div id="tb_simple_sofnma_detail" class="box"
+            v-bind:title="detail.ae_name">
+            <div class="box-header">
+                <h4>    
+                    <i class="fa fa-table"></i>
+                    {{ detail.ae_name }} - Treatment: {{ detail.treat }}, Comparator: {{ comparator }}
+                </h4>
+            </div>
+            <div class="box-body">
+
+                <div class="d-flex fx-row">
+                    <div style="width: 50%;">
+                        <p>Randomized controlled trials: <span class="txt-lg txt-fb">2</span></p>
+                        <p>Observational studies: <span class="txt-lg txt-fb">N/A</span></p>
+                        <p>Follow up: <span class="txt-lg txt-fb">N/A</span></p>
+                        <p>Number of events in arm: <span class="txt-lg txt-fb">{{ ae_dict[detail.ae_name].treats[detail.treat].event }}</span></p>
+                        <p>Total participants in arm: <span class="txt-lg txt-fb">{{ ae_dict[detail.ae_name].treats[detail.treat].total }}</span></p>
+                    </div>
+
+                    <div style="width: 50%;">
+                        <h5>Summary Measure: {{ txt(measure) }}</h5>
+                        <p>Relative effect: 
+                            <span class="txt-lg txt-fb">{{ ae_dict[detail.ae_name]['lgtable'][measure][comparator][detail.treat].sm.toFixed(2) }} </span><br>
+                            ({{ ae_dict[detail.ae_name]['lgtable'][measure][comparator][detail.treat].lw.toFixed(2) }} to 
+                            {{ ae_dict[detail.ae_name]['lgtable'][measure][comparator][detail.treat].up.toFixed(2) }} )
+                        </p>
+                        
+                        <p>Absolute risk: <span class="txt-lg txt-fb">{{ get_CIR(ae_dict[detail.ae_name].treats[detail.treat], ae_dict[detail.ae_name]['lgtable'][measure][comparator][detail.treat].sm).toFixed(0) }} per {{ baseline }}</span><br>
+                        ({{ get_CIR(ae_dict[detail.ae_name].treats[detail.treat], ae_dict[detail.ae_name]['lgtable'][measure][comparator][detail.treat].lw).toFixed(0) }} per {{ baseline }} to 
+                        {{ get_CIR(ae_dict[detail.ae_name].treats[detail.treat], ae_dict[detail.ae_name]['lgtable'][measure][comparator][detail.treat].up).toFixed(0) }} per {{ baseline }})</p>
+    
+                        <p>Absolute risk difference: <span class="txt-lg txt-fb">{{ get_ARD_txt(ae_dict[detail.ae_name].treats[detail.treat], ae_dict[detail.ae_name]['lgtable'][measure][comparator][detail.treat].sm) }}</span><br>
+                        ({{ get_ARD_txt(ae_dict[detail.ae_name].treats[detail.treat], ae_dict[detail.ae_name]['lgtable'][measure][comparator][detail.treat].lw) }}
+                        to
+                        {{ get_ARD_txt(ae_dict[detail.ae_name].treats[detail.treat], ae_dict[detail.ae_name]['lgtable'][measure][comparator][detail.treat].up) }})</p>
+    
+                        <p>Absolute risk percentage: <span class="txt-lg txt-fb">{{ get_ARDp(ae_dict[detail.ae_name].treats[detail.treat], ae_dict[detail.ae_name]['lgtable'][measure][comparator][detail.treat].sm) }}</span><br>
+                        ({{ get_ARDp(ae_dict[detail.ae_name].treats[detail.treat], ae_dict[detail.ae_name]['lgtable'][measure][comparator][detail.treat].lw) }} 
+                        to 
+                        {{ get_ARDp(ae_dict[detail.ae_name].treats[detail.treat], ae_dict[detail.ae_name]['lgtable'][measure][comparator][detail.treat].up) }})</p>
+    
+                        <p>Rank: <span class="txt-lg txt-fb">{{ ae_dict[detail.ae_name].treats[detail.treat].rank }}</span></p>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div>
+                    <p>Certainty in Evidence: {{ txt('CIE_TOT_' + ae_dict[detail.ae_name].cie) }}</p>
+                    <table class="cie-table">
+                        <tr>
+                            <th>Risk of bias</th>
+                            <td>{{ txt('CIE_VAL_' + ae_dict[detail.ae_name].cie_rob) }}</td>
+                        </tr>
+                        <tr>
+                            <th>Inconsistency</th>
+                            <td>{{ txt('CIE_VAL_' + ae_dict[detail.ae_name].cie_inc) }}</td>
+                            
+                        </tr>
+                        <tr>
+                            <th>Indirectness</th>
+                            <td>{{ txt('CIE_VAL_' + ae_dict[detail.ae_name].cie_ind) }}</td>
+                            
+                        </tr>
+                        <tr>
+                            <th>Imprecision</th>
+                            <td>{{ txt('CIE_VAL_' + ae_dict[detail.ae_name].cie_imp) }}</td>
+                            
+                        </tr>
+                        <tr>
+                            <th>Publication bias</th>
+                            <td>{{ txt('PUB_BIA_' + ae_dict[detail.ae_name].pub_bia) }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- /div#tb_simple_sofnma_detail -->
+
     </div>
 </div>
 
@@ -268,369 +333,26 @@ if (isIE) {
 
 <script>
 
-var vw_simple_oclist = {
-    vpp_id: '#vw_simple_oclist',
-    vpp: null,
-
-    sample: {
-        aes: {
-            "fatality": {
-                ae_cate: 'default',
-                ae_name: 'Fatality',
-                treat_list: ['Suni', 'Pazo', 'Ipin', 'ApiX'],
-                treats: {
-                    "Suni": { event: 110, total: 200, rank: 1},
-                    "Ipin": { event: 111, total: 220, rank: 2},
-                    "Pazo": { event: 112, total: 250, rank: 3},
-                    "ApiX": { event: 113, total: 270, rank: 4}
-                },
-                // for each one, row is comparator, col is 
-                lgtable: {
-                    OR: {
-                        "Suni": {
-                            "Suni": {}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
-                        },
-                        "Pazo": {
-                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
-                        },
-                        "Ipin": {
-                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
-                        },
-                        "ApiX": {
-                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {}
-                        },
-                    },
-                    RR: {
-                        "Suni": {
-                            "Suni": {}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
-                        },
-                        "Pazo": {
-                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
-                        },
-                        "Ipin": {
-                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
-                        },
-                        "ApiX": {
-                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {}
-                        },
-                    }
-                }
-            },
-            "major-bleeding": {
-                ae_cate: 'default',
-                ae_name: 'Major bleeding',
-                treat_list: ['Suni', 'Pazo', 'Ipin', 'ApiX'],
-                treats: {
-                    "Suni": { event: 10, total: 200, rank: 1},
-                    "Ipin": { event: 11, total: 220, rank: 2},
-                    "Pazo": { event: 12, total: 250, rank: 3},
-                    "ApiX": { event: 13, total: 270, rank: 4}
-                },
-                // for each one, row is comparator, col is 
-                lgtable: {
-                    OR: {
-                        "Suni": {
-                            "Suni": {}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
-                        },
-                        "Pazo": {
-                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
-                        },
-                        "Ipin": {
-                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
-                        },
-                        "ApiX": {
-                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {}
-                        },
-                    },
-                    RR: {
-                        "Suni": {
-                            "Suni": {}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
-                        },
-                        "Pazo": {
-                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
-                        },
-                        "Ipin": {
-                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
-                        },
-                        "ApiX": {
-                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {}
-                        },
-                    }
-                }
-            },
-        }
-    },
-
-    init: function() {
-
-        this.vpp = new Vue({
-            el: this.vpp_id,
-            data: this.sample,
-            methods: {
-
-            }
-        });
-
-    },
-
-
-};
-
-
-var tb_sofnma = {
-    vpp: null,
-    vpp_id: '#tb_sofnma',
-    sample: {
-        measure: 'OR',
-        baseline: 1000,
-        external_risk_calculated: 10,
-        use_internal_baseline: true,
-        comparator: 'Suni',
-        treat_list: ['Suni', 'Pazo', 'Ipin', 'ApiX'],
-        aes: {
-            "fatality": {
-                ae_cate: 'default',
-                ae_name: 'Fatality',
-                treat_list: ['Suni', 'Pazo', 'Ipin', 'ApiX'],
-                treats: {
-                    "Suni": { event: 110, total: 200, rank: 1},
-                    "Ipin": { event: 111, total: 220, rank: 2},
-                    "Pazo": { event: 112, total: 250, rank: 3},
-                    "ApiX": { event: 113, total: 270, rank: 4}
-                },
-                // for each one, row is comparator, col is 
-                lgtable: {
-                    OR: {
-                        Suni: {
-                            "Suni": {}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
-                        },
-                        "Pazo": {
-                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
-                        },
-                        "Ipin": {
-                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
-                        },
-                        "ApiX": {
-                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {}
-                        }
-                    },
-                    RR: {
-                        "Suni": {
-                            "Suni": {}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
-                        },
-                        "Pazo": {
-                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
-                        },
-                        "Ipin": {
-                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
-                        },
-                        "ApiX": {
-                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {}
-                        }
-                    }
-                }
-            },
-            "major-bleeding": {
-                ae_cate: 'default',
-                ae_name: 'Major bleeding',
-                treat_list: ['Suni', 'Pazo', 'Ipin', 'ApiX'],
-                treats: {
-                    "Suni": { event: 10, total: 200, rank: 1},
-                    "Ipin": { event: 11, total: 220, rank: 2},
-                    "Pazo": { event: 12, total: 250, rank: 3},
-                    "ApiX": { event: 13, total: 270, rank: 4}
-                },
-                // for each one, row is comparator, col is 
-                lgtable: {
-                    OR: {
-                        "Suni": {
-                            "Suni": {}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
-                        },
-                        "Pazo": {
-                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
-                        },
-                        "Ipin": {
-                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
-                        },
-                        "ApiX": {
-                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {}
-                        },
-                    },
-                    RR: {
-                        "Suni": {
-                            "Suni": {}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
-                        },
-                        "Pazo": {
-                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
-                        },
-                        "Ipin": {
-                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {}, "ApiX": {sm: 1.1, lw: 0.4, up: 1.2}
-                        },
-                        "ApiX": {
-                            "Suni": {sm: 1.1, lw: 0.4, up: 1.2}, "Pazo": {sm: 1.1, lw: 0.4, up: 1.2}, "Ipin": {sm: 1.1, lw: 0.4, up: 1.2}, "ApiX": {}
-                        },
-                    }
-                }
-            },
-        }
-    },
-
-    init: function(data) {
-        this.data = data;
-
-        this.vpp = new Vue({
-            el: this.vpp_id,
-            data: this.sample,
-            methods: {
-                get_ACR: function(r) {
-                    if (this.use_internal_baseline) {
-                        return r.event / r.total * this.baseline;
-                    } else {
-                        return external_risk_calculated;
-                    }
-                },
-
-                get_CIR: function(r, obj) {
-                    // get the obj of this CIR
-                    // obj could be
-                    // sm, lower, upper
-                    if (typeof(obj)=='undefined') {
-                        obj = 'sm';
-                    }
-
-                    // calculate the CIR based on measure
-                    if (this.measure == 'OR') {
-                        var a = this.get_ACR(r) / this.baseline * r[obj];
-                        var b = 1 - this.get_ACR(r) / this.baseline;
-                        var c = a + b;
-                        var d = a / c;
-                        var e = d * this.baseline;
-                        return e;
-                    } else if (this.measure == 'RR') {
-                        var a = this.get_ACR(r) * r[obj];
-                        return a;
-                    }
-                },
-
-                show_sm: function(tb, c, t) {
-                    console.log(tb);
-                    return tb[c][t].sm;
-                },
-
-                get_ARD: function(r, obj) {
-                    // get the obj of this CIR
-                    // obj could be
-                    // sm, lower, upper
-                    if (typeof(obj)=='undefined') {
-                        obj = 'sm';
-                    }
-                    if (this.measure == 'OR') {
-                        var a = (1 - r[obj]) * this.get_ACR(r) / this.baseline;
-                        var b = 1 - this.get_ACR(r) / this.baseline;
-                        var c = a + b;
-                        var d = a / c;
-                        var e = d * this.baseline;
-                        return e;
-                    } else if (this.measure == 'RR') {
-                        var a = this.get_ACR(r) * (1 - r[obj]);
-                        return a;
-                    }
-                },
-
-                get_ARD_txt: function(r, obj) {
-                    var ARD = this.get_ARD(r, obj);
-                    var txt = ' less';
-                    if (ARD < 0) {
-                        txt = ' more';
-                    }
-                    return Math.abs(ARD).toFixed(0) + txt;
-                },
-
-                get_ARDp_txt: function(r, obj) {
-                    var ARDp = 100 * this.get_ARD(r, obj) / this.baseline;
-                    var txt = ' less';
-                    if (ARDp < 0) {
-                        txt = ' more';
-                    }
-                    return Math.abs(ARDp).toFixed(1) + '%' + txt;
-                },
-
-                get_grade_label: function(g) {
-                    return jarvis.texts[g];
-                },
-
-                flip_cell: function(ae_grade, r, cell) {
-                    // first, find this ae in rs
-                    if (this.rs[ae_grade].hasOwnProperty(r.name)) {
-                        // flip this cell!
-                        this.rs[ae_grade][r.name].is_show[cell] = 
-                            !this.rs[ae_grade][r.name].is_show[cell];
-                    } else {
-                        // how can it be ???
-                    }
-                    this.$forceUpdate();
-                }
-            },
-        });
-    },
-
-    toggle_ae: function(ae_cate, ae_name, ae_grade) {
-        // first, find this ae in rs
-        if (this.vpp.rs[ae_grade].hasOwnProperty(ae_name)) {
-            // if exists, remove
-            delete this.vpp.rs[ae_grade][ae_name];
-        } else {
-            var ae = this.data.ae_rsts[ae_name][ae_grade];
-            if (ae.stus.length == 0) {
-                // this means no studies in this ae + grade 
-                return;
-            }
-            var measure = this.vpp.measure;
-        
-            // build the r for display
-            var r = {
-                name: ae_name,
-                sm: ae.result[measure].random.model.sm,
-                lower: ae.result[measure].random.model.lower,
-                upper: ae.result[measure].random.model.upper,
-                Et: ae.Et,
-                Nt: ae.Nt,
-                Ec: ae.Ec,
-                Nc: ae.Nc,
-                n_stu: ae.stus.length,
-                // for display setting
-                is_show: {
-                    // show sm / study info
-                    sm: true,
-                    // show ARD / ARD CI
-                    ARD: true
-                }
-            }
-
-            // add this to list
-            this.vpp.rs[ae_grade][ae_name] = r;
-        }
-
-        // have to force update the view
-        tb_sofpma.vpp.$forceUpdate();
-    },
-
-    clear: function() {
-
-    },
-
-    clear_all: function() {
-        for (var key in tb_sofpma.vpp.rs) {
-            if (tb_sofpma.vpp.rs.hasOwnProperty(key)) {
-                tb_sofpma.vpp.rs[key] = {};
-            }
-        }
-        tb_sofpma.vpp.$forceUpdate();
-    }
-};
+{% include 'js/vw_simple_oclist.js' %}
+{% include 'js/tb_simple_sofnma.js' %}
 
 
 var jarvis = {
+    txt: {
+        'OR': 'Odds Ratio (OR)',
+        'RR': 'Risk Ratio (RR)',
+        'CIE_TOT_4': 'High',
+        'CIE_TOT_3': 'Moderate',
+        'CIE_TOT_2': 'Low',
+        'CIE_TOT_1': 'Very Low',
+        'CIE_VAL_4': 'Very very serious',
+        'CIE_VAL_3': 'Very serious',
+        'CIE_VAL_2': 'Serious',
+        'CIE_VAL_1': 'No serious',
+        'PUB_BIA_2': 'Strongly suspected',
+        'PUB_BIA_1': 'Undetected',
+        'PUB_BIA_0': 'Not applicable'
+    },
 
     init: function() {
         var isIE = /*@cc_on!@*/false || !!document.documentMode;
@@ -647,12 +369,21 @@ var jarvis = {
             jarvis.ssmsg('Project information error.')
             return;
         }
-        // ok, remove the 
-        jarvis.ssmsg('Almost initialized.');
-        setTimeout('jarvis.ssclose();', 400);
 
-        vw_simple_oclist.init();
-        tb_sofnma.init();
+        $.get(
+            './graphdata/' + prj + '/SOFTABLE_NMA.json',
+            // { ver: Math.random() },
+            { ver: Math.random(), use_cache: 'yes' },
+            function(data) {
+                vw_simple_oclist.init(data);
+                tb_simple_sofnma.init(data);
+
+                // ok, remove the start screen
+                jarvis.ssmsg('Almost initialized.');
+                setTimeout('jarvis.ssclose();', 400);
+
+            }, 'json'
+        );
 
     },
 
@@ -663,13 +394,13 @@ var jarvis = {
         return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
     },
 
-    toggle_ae: function(ae_cate, ae_name, ae_grade) {
-        console.log('* toggle_ae ' + ae_cate + ', ' + ae_name + ', ' + ae_grade);
-        tb_sofpma.toggle_ae(ae_cate, ae_name, ae_grade);
+    toggle_ae: function(ae_name) {
+        console.log('* toggle_ae '+ ae_name);
+        tb_simple_sofnma.toggle_ae(ae_name);
     },
 
     clear_all_ae: function() {
-        tb_sofpma.clear_all();
+        tb_sofpma.clear_all_ae();
     },
 
     ssmsg: function(msg) {

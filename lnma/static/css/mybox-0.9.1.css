@@ -192,3 +192,20 @@
     min-height: 20px;
     padding: 5px 0 5px 0;
 }
+/* font sizes */
+.txt-sm {
+    font-size: 0.9em;
+}
+.txt-nm {
+    font-size: 1em;
+}
+.txt-lg {
+    font-size: 1.4em;
+}
+.txt-xl {
+    font-size: 1.8em;
+}
+/* font bold */
+.txt-fb {
+    font-weight: bold;
+}
