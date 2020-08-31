@@ -20,6 +20,7 @@ var tb_simple_sofpma = {
                     cie: { ae_name: data.ae_list[0].ae_names[0] }
                 },
                 ae_dict: data.ae_dict,
+                ae_list: data.ae_list,
                 rs: {}
             },
             methods: {

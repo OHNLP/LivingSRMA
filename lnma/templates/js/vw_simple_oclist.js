@@ -102,7 +102,8 @@ var vw_simple_oclist = {
             el: this.vpp_id,
             data: {
                 select_mode: this.select_mode,
-                ae_dict: this.data.ae_dict
+                ae_dict: this.data.ae_dict,
+                ae_list: this.data.ae_list
             },
             methods: {
                 toggle_ae: function(event) {

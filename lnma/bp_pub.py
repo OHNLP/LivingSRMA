@@ -997,8 +997,12 @@ def get_ae_nma_data(full_fn, backend='freq'):
     '''
     # load data
     xls = pd.ExcelFile(full_fn)
-
+    
     # build AE Category data
+    # The sheets:
+    # 1. Adverse events
+    # 2. Certainty
+    # 3  all the aes
     first_sheet_name = xls.sheet_names[0]
     dft = xls.parse(first_sheet_name)
 
@@ -1064,7 +1068,7 @@ def get_ae_nma_data(full_fn, backend='freq'):
     ae_dfts = []
     ae_rsts = {}
 
-    for sheet_name in xls.sheet_names[1:]:
+    for sheet_name in xls.sheet_names[2:]:
         ae_name = sheet_name
         # the first row is used as column name, but replaced with `cols` from A to D
         dft = xls.parse(sheet_name, usecols='A:D', names=cols)

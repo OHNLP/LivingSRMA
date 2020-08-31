@@ -302,7 +302,11 @@ a {
                 <hr>
 
                 <div>
-                    <p>Certainty in Evidence: {{ txt('CIE_TOT_' + ae_dict[detail.ae_name].cie) }}</p>
+                    <p>Certainty in Evidence: 
+                        <b class="txt-lg">
+                            {{ txt('CIE_TOT_' + ae_dict[detail.ae_name].cie) }}
+                        </b>
+                    </p>
                     <table class="cie-table">
                         <tr>
                             <th>Risk of bias</th>
