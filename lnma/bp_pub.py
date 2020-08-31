@@ -319,7 +319,14 @@ def graphdata_softable_nma_json(prj):
             fn_json
         )
     full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
-    ret = get_ae_nma_data(full_fn)
+    
+    backend = 'freq'
+    if prj == 'RCC':
+        backend = 'freq'
+    elif prj == 'CAT':
+        backend = 'bayes'
+
+    ret = get_ae_nma_data(full_fn, backend=backend)
 
     # cache the result
     json.dump(ret, open(full_fn_json, 'w'))
@@ -985,7 +992,9 @@ def get_ae_pma_data_simple(full_fn):
     return ret
 
 
-def get_ae_nma_data(full_fn):
+def get_ae_nma_data(full_fn, backend='freq'):
+    '''
+    '''
     # load data
     xls = pd.ExcelFile(full_fn)
 
@@ -1100,13 +1109,15 @@ def get_ae_nma_data(full_fn):
             # make a config dictionary for calcuating
             cfg = {
                 # for init analyzer
-                "backend": "freq",
+                "backend": backend,
                 "input_format": "ET",
                 "data_type": 'CAT_RAW',
 
                 # for R script
                 "measure_of_effect": sm,
-                "fixed_or_random": 'random'
+                "fixed_or_random": 'fixed',
+                "reference_treatment": treat_list[0],
+                "which_is_better": 'big'
             }
 
             # get the league table
@@ -1129,10 +1140,17 @@ def get_ae_nma_data(full_fn):
                     ae_dict[ae_name]['lgtable'][sm][lgt_r][lgt_c] = lgt_cell
 
             # get the rank data
-            psranks = sorted(ret_nma['data']['psrank']['rs'], key=lambda v: v['value'])
-            for i, r in enumerate(psranks):
+            if backend == 'freq':
+                rank_name = 'psrank'
+            elif backend == 'bayes':
+                rank_name = 'tmrank'
+
+            # get the output rank
+            ranks = sorted(ret_nma['data'][rank_name]['rs'], key=lambda v: v['value'])
+            for i, r in enumerate(ranks):
                 ae_dict[ae_name]['treats'][r['treat']]['rank'] = i+1
-                ae_dict[ae_name]['treats'][r['treat']]['pscore'] = r['value']
+                ae_dict[ae_name]['treats'][r['treat']]['score'] = r['value']
+
             # bind the raw results
             # ae_dict[ae_name]['lgtable'][sm]['raw_rst'] = ret_nma
 

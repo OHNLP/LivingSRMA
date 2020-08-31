@@ -20,6 +20,10 @@ from .rpadapter import _netmeta_trans_league_r
 from .rpadapter import _netmeta_trans_forest
 from .rpadapter import _netmeta_trans_pscore
 
+from .rpadapter import _bugsnet_trans_netplt
+from .rpadapter import _bugsnet_trans_league
+from .rpadapter import _bugsnet_trans_rksucra
+
 
 def analyze(rs, cfg):
     '''
@@ -54,10 +58,10 @@ def analyze(rs, cfg):
 
     # get result from other analyzer
     if cfg['backend'] == 'bayes':
-        # ret = analyze_by_netmeta(rs, params)
-        ret = {
-
-        }
+        if cfg['input_format'] == 'ET':
+            ret = analyze_raw_by_bugsnet(rs, params)
+        else:
+            ret = {}
 
     elif cfg['backend'] == 'freq':
         if cfg['input_format'] == 'ET':
@@ -71,6 +75,74 @@ def analyze(rs, cfg):
         ret = {
 
         }
+    return ret
+
+
+def analyze_raw_by_bugsnet(rs, params):
+    '''
+    Bayesian NMA
+    
+    The input `rs` must be in the following format:
+
+        study, treat, event, total
+
+    Or:
+
+        study, treat, event, total, follow-up time
+
+    The input params must include:
+
+        measure_of_effect
+        reference_treatment
+        which_is_better
+    '''
+    # prepare the r script
+    subtype = params['subtype']
+
+    full_filename_rscript = os.path.join(TMP_FOLDER, params['fn_rscript'])
+    full_filename_csvfile = os.path.join(TMP_FOLDER, params['fn_csvfile'])
+    full_filename_jsonret = os.path.join(TMP_FOLDER, params['fn_jsonret'])
+    
+    r_params = {
+        # these three are for netmeta (netrank)
+        'is_fixed': 'TRUE' if params['fixed_or_random'] == 'fixed' else 'FALSE',
+        'is_random': 'TRUE' if params['fixed_or_random'] == 'random' else 'FALSE',
+
+        # the followings are for BUGSnet
+        'measure_of_effect_to_link': R_BUGSNET_MEASURE2LINK[params['measure_of_effect']],
+        'model_param_time_column': 'time = "time",' if params['measure_of_effect'] == 'hr' else '',
+        'sucra_largerbetter': 'TRUE' if params['which_is_better'] == 'big' else 'FALSE',
+    }
+    r_params.update(params)
+
+    # output data
+    df = pd.DataFrame(rs)
+    df.to_csv(full_filename_csvfile, index=False)
+
+    # generate an R script for producing the results
+    gen_rscript(
+        RSCRIPT_TPL_FOLDER, 
+        RSCRIPT_TPL[subtype], 
+        params['fn_rscript'], 
+        r_params
+    )
+
+    # run the R script
+    run_rscript(params['fn_rscript'])
+
+    # transform the output json to front end format
+    jrst = json.load(open(full_filename_jsonret))
+    ret = {
+        'submission_id': params['submission_id'],
+        'params': params,
+        'success': True,
+        'data': {
+            'netplt': _bugsnet_trans_netplt(jrst['network_char']['comparison'], params),
+            'league': _bugsnet_trans_league(jrst['league'], params),
+            'tmrank': _bugsnet_trans_rksucra(jrst['sucraplot'], params)
+        }
+    }
+
     return ret
 
 
@@ -90,6 +162,7 @@ def analyze_raw_by_netmeta(rs, params):
 
         measure_of_effect
         reference_treatment
+        which_is_better
     '''
     
     # prepare the r script
@@ -103,7 +176,7 @@ def analyze_raw_by_netmeta(rs, params):
     # prepare the other parameters used in R script
     r_params = {
         'is_fixed': 'TRUE' if params['fixed_or_random'] == 'fixed' else 'FALSE',
-        'is_random': 'TRUE' if params['fixed_or_random'] == 'random' else 'FALSE'
+        'is_random': 'TRUE' if params['fixed_or_random'] == 'random' else 'FALSE',
     }
     r_params.update(params)
 

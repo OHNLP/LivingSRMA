@@ -216,6 +216,27 @@ a {
 .sof-table .col-flipable:hover {
     background: whitesmoke;
 }
+.cie-table th {
+    text-align: left;
+    padding: 3px 5px;
+}
+.cell-treat {
+    background: white;
+    cursor: pointer;
+}
+.cell-treat:hover {
+    background: #efefef;
+}
+.cie-bene-4 { background: rgb(55, 86, 35); color: white; }
+.cie-bene-3 { background: rgb(84, 130, 53); color: white; }
+.cie-bene-2 { background: rgb(169, 208, 142); color: black; }
+.cie-bene-1 { background: rgb(198, 224, 180); color: black; }
+.cie-harm-4 { background: rgb(150, 0, 0); color: white; }
+.cie-harm-3 { background: rgb(220, 0, 0); color: white; }
+.cie-harm-2 { background: rgb(255, 50, 50); color: black; }
+.cie-harm-1 { background: rgb(255, 125, 125); color: black; }
+.cie-nner-2 { background: rgb(202, 183, 10); color: black; }
+.cie-nner-1 { background: rgb(250, 248, 133); color: black; }
 </style>
 </head>
 <body>
@@ -268,7 +289,7 @@ a {
                         </div>
                     </div>
 
-                    <div class="box-menu-group d-flex fx-row">
+                    <!-- <div class="box-menu-group d-flex fx-row">
                         <div>
                             <i class="fa fa-cog"></i>
                             Assumed risk: 
@@ -283,7 +304,8 @@ a {
                                 v-model="use_internal_baseline">
                             <label for="vw_ocplots_input_sm_rr">External</label>
                         </div>
-                    </div>
+                    </div> -->
+
                 </div>
             </div>
 
@@ -335,7 +357,8 @@ a {
                             RD(%): {{ get_ARDp_txt(r) }}<br>
                             ({{ get_ARDp_txt(r, 'lower')}} to {{ get_ARDp_txt(r, 'upper')}})
                         </td>
-                        <td>
+                        <td v-bind:class="get_cieclr(r.sm, r.ae.cie)"
+                            v-on:click="show_cie_detail(r.ae_name)">
                             {{ txt('CIE_TOT_' + r.ae.cie) }}
                         </td>
                         <td>
@@ -346,6 +369,45 @@ a {
 
             </div>
 
+        </div>
+
+
+        <div id="tb_simple_sofpma_cie_detail" class="box"
+            v-bind:title="'Certainty in Evidence'">
+            <div class="box-header">
+                <h4>
+                    Certainty in Evidence: 
+                    <b class="txt-lg"
+                        style="padding: 3px 5px"
+                        v-bind:class="get_cieclr(ae_dict[detail.cie.ae_name].result.OR.random.model.sm, ae_dict[detail.cie.ae_name].cie)">
+                        {{ txt('CIE_TOT_' + ae_dict[detail.cie.ae_name].cie) }}
+                    </b>
+                </h4>
+            </div>
+            <div class="box-bod">
+                <table class="cie-table">
+                    <tr>
+                        <th>Risk of bias</th>
+                        <td>{{ txt('CIE_VAL_' + ae_dict[detail.cie.ae_name].cie_rob) }}</td>
+                    </tr>
+                    <tr>
+                        <th>Inconsistency</th>
+                        <td>{{ txt('CIE_VAL_' + ae_dict[detail.cie.ae_name].cie_inc) }}</td>
+                    </tr>
+                    <tr>
+                        <th>Indirectness</th>
+                        <td>{{ txt('CIE_VAL_' + ae_dict[detail.cie.ae_name].cie_ind) }}</td>
+                    </tr>
+                    <tr>
+                        <th>Imprecision</th>
+                        <td>{{ txt('CIE_VAL_' + ae_dict[detail.cie.ae_name].cie_imp) }}</td>
+                    </tr>
+                    <tr>
+                        <th>Publication bias</th>
+                        <td>{{ txt('PUB_BIA_' + ae_dict[detail.cie.ae_name].pub_bia) }}</td>
+                    </tr>
+                </table>
+            </div>
         </div>
     </div>
 </div>

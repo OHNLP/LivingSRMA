@@ -47,7 +47,7 @@ def _bugsnet_trans_league(arr, params):
         'cols': cols,
         'tabledata': [ tb[r] for r in tb ],
         'backend': 'bugsnet',
-        'fig_fn': params['fn_leaguet'],
+        'fig_fn': params['fn_leaguet'] if 'fn_leaguet' in params else "",
         'min_max': [min(all_stats), max(all_stats)]
     }
 

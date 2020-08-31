@@ -4,20 +4,24 @@
 var tb_simple_sofpma = {
     vpp: null,
     vpp_id: '#tb_simple_sofpma',
-    sample: {
-        measure: 'OR',
-        baseline: 1000,
-        external_risk_calculated: 10,
-        use_internal_baseline: true,
-        rs: {}
-    },
 
     init: function(data) {
         this.data = data;
 
         this.vpp = new Vue({
             el: this.vpp_id,
-            data: this.sample,
+            data: {
+                measure: 'OR',
+                baseline: 1000,
+                external_risk_calculated: 10,
+                use_internal_baseline: true,
+        
+                detail: {
+                    cie: { ae_name: data.ae_list[0].ae_names[0] }
+                },
+                ae_dict: data.ae_dict,
+                rs: {}
+            },
             methods: {
                 get_ACR: function(r) {
                     if (this.use_internal_baseline) {
@@ -106,6 +110,22 @@ var tb_simple_sofpma = {
 
                 txt: function(t) {
                     return jarvis.txt[t];
+                },
+
+                get_cieclr: function(sm, cie) {
+                    if (sm < 1) {
+                        return 'cie-bene-' + cie;
+                    } else if (sm > 1) {
+                        return 'cie-harm-' + cie;
+                    } else {
+                        return 'cie-nnor-' + cie;
+                    }
+                },
+
+                show_cie_detail: function(ae_name) {
+                    this.detail.cie.ae_name = ae_name;
+
+                    tb_simple_sofpma.show_cie_detail(ae_name);
                 }
             },
         });
@@ -165,5 +185,11 @@ var tb_simple_sofpma = {
             }
         }
         tb_simple_sofpma.vpp.$forceUpdate();
+    },
+
+    show_cie_detail: function(ae_name) {
+        $(this.vpp_id + '_cie_detail').dialog({
+            width: 400
+        });
     }
 };

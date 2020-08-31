@@ -55,6 +55,7 @@ RSCRIPT_TPL = {
 
     # for NMA
     'nma_freq_CAT_RAW': 'lnma_nma_freq_CAT_RAW.tpl.r',
+    'nma_bayes_CAT_RAW': 'lnma_nma_bayes_CAT_RAW.tpl.r',
 
     # for R Plots (RPLT)
     'rplt_IOTOX_FOREST': 'lnma_rplt_IOTOX_FOREST.tpl.r',
