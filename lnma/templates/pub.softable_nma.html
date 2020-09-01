@@ -139,7 +139,7 @@ a {
     cursor: pointer;
 }
 .cell-treat:hover {
-    background: #efefef;
+    /* background: #efefef; */
 }
 .cie-bene-4 { background: rgb(55, 86, 35); color: white; }
 .cie-bene-3 { background: rgb(84, 130, 53); color: white; }
@@ -243,6 +243,7 @@ a {
                             v-if="treat!=comparator"
                             v-bind:ae_name="ae.ae_name"
                             v-bind:treat="treat"
+                            v-bind:class="get_bg_color_class(ae.lgtable[measure][comparator][treat].sm, ae.cetable[comparator][treat].cie)"
                             v-on:click="show_detail(ae.ae_name, treat)">
                             {{ get_ARD_txt(ae.treats[comparator], ae.lgtable[measure][comparator][treat].sm) }}<br>
                             <b>Rank {{ ae.treats[treat].rank }}</b>
@@ -266,7 +267,7 @@ a {
 
                 <div class="d-flex fx-row">
                     <div style="width: 50%;">
-                        <p>Randomized controlled trials: <span class="txt-lg txt-fb">2</span></p>
+                        <p>Randomized controlled trials: <span class="txt-lg txt-fb">{{ ae_dict[detail.ae_name].treats[detail.treat].n_stus }}</span></p>
                         <!-- <p>Observational studies: <span class="txt-lg txt-fb">N/A</span></p> -->
                         <!-- <p>Follow up: <span class="txt-lg txt-fb">N/A</span></p> -->
                         <p>Number of events in arm: <span class="txt-lg txt-fb">{{ ae_dict[detail.ae_name].treats[detail.treat].event }}</span></p>
@@ -304,32 +305,32 @@ a {
                 <div>
                     <p>Certainty in Evidence: 
                         <b class="txt-lg">
-                            {{ txt('CIE_TOT_' + ae_dict[detail.ae_name].cie) }}
+                            {{ txt('CIE_TOT_' + ae_dict[detail.ae_name].cetable[comparator][detail.treat].cie) }}
                         </b>
                     </p>
                     <table class="cie-table">
                         <tr>
                             <th>Risk of bias</th>
-                            <td>{{ txt('CIE_VAL_' + ae_dict[detail.ae_name].cie_rob) }}</td>
+                            <td>{{ txt('CIE_VAL_' + ae_dict[detail.ae_name].cetable[comparator][detail.treat].cie_rob) }}</td>
                         </tr>
                         <tr>
                             <th>Inconsistency</th>
-                            <td>{{ txt('CIE_VAL_' + ae_dict[detail.ae_name].cie_inc) }}</td>
+                            <td>{{ txt('CIE_VAL_' + ae_dict[detail.ae_name].cetable[comparator][detail.treat].cie_inc) }}</td>
                             
                         </tr>
                         <tr>
                             <th>Indirectness</th>
-                            <td>{{ txt('CIE_VAL_' + ae_dict[detail.ae_name].cie_ind) }}</td>
+                            <td>{{ txt('CIE_VAL_' + ae_dict[detail.ae_name].cetable[comparator][detail.treat].cie_ind) }}</td>
                             
                         </tr>
                         <tr>
                             <th>Imprecision</th>
-                            <td>{{ txt('CIE_VAL_' + ae_dict[detail.ae_name].cie_imp) }}</td>
+                            <td>{{ txt('CIE_VAL_' + ae_dict[detail.ae_name].cetable[comparator][detail.treat].cie_imp) }}</td>
                             
                         </tr>
                         <tr>
                             <th>Publication bias</th>
-                            <td>{{ txt('PUB_BIA_' + ae_dict[detail.ae_name].pub_bia) }}</td>
+                            <td>{{ txt('PUB_BIA_' + ae_dict[detail.ae_name].cetable[comparator][detail.treat].pub_bia) }}</td>
                         </tr>
                     </table>
                 </div>
@@ -346,6 +347,7 @@ a {
 <script src="/static/lib/jquery-ui/jquery-ui.min.js"></script>
 <script src="/static/lib/vue.js/vue.min.js"></script>
 <script src="/static/lib/alasql/alasql.min.js"></script>
+<script src="/static/lib/d3/d3.min.js"></script>
 
 <script>
 var isIE = /*@cc_on!@*/false || !!document.documentMode;
@@ -376,6 +378,7 @@ var jarvis = {
         'PUB_BIA_1': 'Undetected',
         'PUB_BIA_0': 'Not applicable'
     },
+    default_comparator: null,
 
     init: function() {
         var isIE = /*@cc_on!@*/false || !!document.documentMode;
@@ -388,9 +391,15 @@ var jarvis = {
 
         // OK, 
         var prj = jarvis.getUrlParameter('prj');
-        if (prj == null) {
+        if (prj == null || prj == '') {
             jarvis.ssmsg('Project information error.')
             return;
+        }
+
+        // set default_comparator
+        this.default_comparator = jarvis.getUrlParameter('dc');
+        if (this.default_comparator == null || this.default_comparator == '') {
+            this.default_comparator == null;
         }
 
         $.get(
@@ -398,7 +407,13 @@ var jarvis = {
             // { ver: Math.random() },
             { ver: Math.random(), use_cache: 'yes' },
             function(data) {
+                // init the oc list
                 vw_simple_oclist.init(data);
+
+                // set the default_comparator
+                tb_simple_sofnma.default_comparator = jarvis.default_comparator;
+
+                // init the NMA table
                 tb_simple_sofnma.init(data);
 
                 // ok, remove the start screen
@@ -423,7 +438,7 @@ var jarvis = {
     },
 
     clear_all_ae: function() {
-        tb_sofpma.clear_all_ae();
+        tb_simple_sofnma.clear_all_ae();
     },
 
     ssmsg: function(msg) {

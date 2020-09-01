@@ -5,6 +5,11 @@
 var tb_simple_sofnma = {
     vpp: null,
     vpp_id: '#tb_simple_sofnma',
+    default_comparator: null,
+    color_scale: d3.scaleLinear()
+        .domain([0, 1, 3])
+        .range(['#78b787', 'white', '#ff0000']),
+
     sample: {
         measure: 'OR',
         baseline: 1000,
@@ -18,10 +23,10 @@ var tb_simple_sofnma = {
                 ae_name: 'Fatality',
                 treat_list: ['Suni', 'Pazo', 'Ipin', 'ApiX'],
                 treats: {
-                    "Suni": { event: 110, total: 200, rank: 1},
-                    "Ipin": { event: 111, total: 220, rank: 2},
-                    "Pazo": { event: 112, total: 250, rank: 3},
-                    "ApiX": { event: 113, total: 270, rank: 4}
+                    "Suni": { event: 110, total: 200, rank: 1, n_stus: 1 },
+                    "Ipin": { event: 111, total: 220, rank: 2, n_stus: 1 },
+                    "Pazo": { event: 112, total: 250, rank: 3, n_stus: 1 },
+                    "ApiX": { event: 113, total: 270, rank: 4, n_stus: 1 }
                 },
                 // for each one, row is comparator, col is 
                 lgtable: {
@@ -60,10 +65,10 @@ var tb_simple_sofnma = {
                 ae_name: 'Major bleeding',
                 treat_list: ['Suni', 'Pazo', 'Ipin', 'ApiX'],
                 treats: {
-                    "Suni": { event: 10, total: 200, rank: 1},
-                    "Ipin": { event: 11, total: 220, rank: 2},
-                    "Pazo": { event: 12, total: 250, rank: 3},
-                    "ApiX": { event: 13, total: 270, rank: 4}
+                    "Suni": { event: 110, total: 200, rank: 1, n_stus: 1 },
+                    "Ipin": { event: 111, total: 220, rank: 2, n_stus: 1 },
+                    "Pazo": { event: 112, total: 250, rank: 3, n_stus: 1 },
+                    "ApiX": { event: 113, total: 270, rank: 4, n_stus: 1 }
                 },
                 // for each one, row is comparator, col is 
                 lgtable: {
@@ -106,7 +111,9 @@ var tb_simple_sofnma = {
         // get all treats
         var default_ae_name = data.ae_list[0]['ae_names'][0];
         var treat_list = data.ae_dict[default_ae_name]['treat_list'];
-        var default_comparator = treat_list[0];
+        if (this.default_comparator == null || this.default_comparator == '') {
+            this.default_comparator = treat_list[0];
+        }
         var default_treat = treat_list[1];
 
         this.vpp = new Vue({
@@ -121,7 +128,7 @@ var tb_simple_sofnma = {
                     treat: default_treat
                 },
 
-                comparator: default_comparator,
+                comparator: this.default_comparator,
                 treat_list: treat_list,
                 ae_dict: this.data.ae_dict,
                 rs: {}
@@ -200,6 +207,16 @@ var tb_simple_sofnma = {
 
                 get_grade_label: function(g) {
                     return jarvis.texts[g];
+                },
+
+                get_bg_color_class: function(sm, cie) {
+                    if (sm < 1) {
+                        return 'cie-bene-' + cie;
+                    } else if (sm > 1) {
+                        return 'cie-harm-' + cie;
+                    } else {
+                        return 'cie-nner-' + cie;
+                    }
                 },
 
                 flip_cell: function(ae_grade, r, cell) {

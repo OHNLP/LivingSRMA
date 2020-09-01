@@ -992,8 +992,14 @@ def get_ae_pma_data_simple(full_fn):
     return ret
 
 
-def get_ae_nma_data(full_fn, backend='freq'):
+def get_ae_nma_data(full_fn, backend):
     '''
+    Get the SoF Table NMA data
+
+    the backend supports:
+
+    - bayes
+    - freq
     '''
     # load data
     xls = pd.ExcelFile(full_fn)
@@ -1011,12 +1017,6 @@ def get_ae_nma_data(full_fn, backend='freq'):
     ae_dict = {}
     ae_list = []
 
-    cie_cols = [
-        'risk of bias',
-        'inconsistency',
-        'indirectness',
-        'imprecision',
-    ]
     ae_item = {}
     for idx, row in dft.iterrows():
         ae_cate = row['category']
@@ -1040,27 +1040,42 @@ def get_ae_nma_data(full_fn, backend='freq'):
         # put current row in to ae_item
         ae_item['ae_names'].append(ae_name)
 
-        # calc the Certainty in Evidence
-        cie = calc_cie(row[cie_cols].tolist())
-
         # put current row in to ae_dict
         ae_dict[ae_name] = {
             "ae_cate": ae_cate,
             "ae_name": ae_name,
             "ae_fullname": ae_fullname,
-            "cie": cie,
-            "cie_rob": row[cie_cols[0]],
-            "cie_inc": row[cie_cols[1]],
-            "cie_ind": row[cie_cols[2]],
-            "cie_imp": row[cie_cols[3]],
-            "pub_bia": row['publication bias']
+            "cetable": {}
         }
-
-        # get the result of CIE
         
-
     # put the last ae_item
     ae_list.append(ae_item)
+    cols_certs = [
+        'ae_cate', 'ae_name', 'comparator', 'treatment', 
+        'cie_rob', 'cie_inc', 'cie_ind', 'cie_imp', 'pub_bia'
+    ]
+
+    # get the certainty for each combination of each ae
+    sheet_name_2 = xls.sheet_names[1]
+    dft = xls.parse(sheet_name_2, usecols='A:I', names=cols_certs)
+    for idx, row in dft.iterrows():
+        ae_cate = row['ae_cate']
+        ae_name = row['ae_name']
+        comparator = row['comparator']
+        treatment = row['treatment']
+
+        if comparator not in ae_dict[ae_name]['cetable']:
+            ae_dict[ae_name]['cetable'][comparator] = { comparator: {} }
+
+        # put the CIE values in 
+        ae_dict[ae_name]['cetable'][comparator][treatment] = {}
+
+        for col in cols_certs[4:]:
+            ae_dict[ae_name]['cetable'][comparator][treatment][col] = row[col]
+
+        # calc the cie of this row
+        ae_dict[ae_name]['cetable'][comparator][treatment]['cie'] = calc_cie(row[cols_certs[4:8]].tolist())
+
 
     # extract the results
     cols = ['study', 'treat', 'event', 'total']
@@ -1103,6 +1118,13 @@ def get_ae_nma_data(full_fn, backend='freq'):
                 "total": int(row['total']),
                 "rank": 0
             }
+        # count how many studies for each treatment
+        dftt = dft.groupby('treat')[['study']].count()
+        for idx, row in dftt.iterrows():
+            treat = idx
+            treats[treat]['n_stus'] = int(row['study'])
+        
+        # update the treats list 
         ae_dict[ae_name]['treats'] = treats
 
         # now get the league table
