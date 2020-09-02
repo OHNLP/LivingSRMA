@@ -35,14 +35,23 @@ curl "$URL_BASE/graph_v1.html" -o "$FOLDER_BASE/pub/graph_v1.html"
 curl "$URL_BASE/graph_v2.html" -o "$FOLDER_BASE/pub/graph_v2.html"
 curl "$URL_BASE/graph_v2_1.html" -o "$FOLDER_BASE/pub/graph_v2_1.html"
 curl "$URL_BASE/graph_v3.html" -o "$FOLDER_BASE/pub/graph_v3.html"
+curl "$URL_BASE/softable_pma.html" -o "$FOLDER_BASE/pub/softable_pma.html"
+curl "$URL_BASE/softable_nma.html" -o "$FOLDER_BASE/pub/softable_nma.html"
 echo "* downloaed shared module for project $PRJ"
 
 
-# get the RCC related
+# get the project page
 mkdir -p $FOLDER_BASE/pub/graphdata/$PRJ
 curl "$URL_BASE/$PRJ.html" -o "$FOLDER_BASE/$PRJ.html"
-curl "$URL_BASE/graphdata/$PRJ/ITABLE.json" -o "$FOLDER_BASE/pub/graphdata/$PRJ/ITABLE.json"
 echo "* downloaed $PRJ.html"
+
+# get the data files
+curl "$URL_BASE/graphdata/$PRJ/ITABLE.json" -o "$FOLDER_BASE/pub/graphdata/$PRJ/ITABLE.json"
+curl "$URL_BASE/graphdata/$PRJ/ITABLE_CFG.json" -o "$FOLDER_BASE/pub/graphdata/$PRJ/ITABLE_CFG.json"
+curl "$URL_BASE/graphdata/$PRJ/PRISMA.json" -o "$FOLDER_BASE/pub/graphdata/$PRJ/PRISMA.json"
+curl "$URL_BASE/graphdata/$PRJ/SOFTABLE_PMA.json" -o "$FOLDER_BASE/pub/graphdata/$PRJ/SOFTABLE_PMA.json"
+curl "$URL_BASE/graphdata/$PRJ/SOFTABLE_NMA.json" -o "$FOLDER_BASE/pub/graphdata/$PRJ/SOFTABLE_NMA.json"
+echo "* download the data jsons"
 
 
 # copy libs
