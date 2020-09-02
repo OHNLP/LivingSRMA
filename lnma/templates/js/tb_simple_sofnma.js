@@ -136,7 +136,7 @@ var tb_simple_sofnma = {
             methods: {
                 get_ACR: function(r) {
                     if (this.use_internal_baseline) {
-                        return r.event / r.total * this.baseline;
+                        return r.event / r.total;
                     } else {
                         return external_risk_calculated;
                     }
@@ -148,12 +148,12 @@ var tb_simple_sofnma = {
                     // sm, lower, upper
                     // calculate the CIR based on measure
                     if (this.measure == 'OR') {
-                        var a = this.get_ACR(r) / this.baseline * v;
-                        var b = 1 - this.get_ACR(r) / this.baseline;
+                        var a = this.get_ACR(r) * v;
+                        var b = 1 - this.get_ACR(r);
                         var c = a + b;
                         var d = a / c;
                         var e = d * this.baseline;
-                        return e;
+                        return d;
                     } else if (this.measure == 'RR') {
                         var a = this.get_ACR(r) * v;
                         return a;
@@ -170,12 +170,10 @@ var tb_simple_sofnma = {
                     // v could be OR/RR's
                     // sm, lower, upper
                     if (this.measure == 'OR') {
-                        var a = (1 - v) * this.get_ACR(r) / this.baseline;
-                        var b = 1 - this.get_ACR(r) / this.baseline;
-                        var c = a + b;
-                        var d = a / c;
-                        var e = d * this.baseline;
-                        return e;
+                        var ACR = this.get_ACR(r);
+                        var CIR = this.get_CIR(r, v);
+                        var ARD = ACR - CIR;
+                        return ARD;
                     } else if (this.measure == 'RR') {
                         var a = this.get_ACR(r) * (1 - v);
                         return a;
@@ -188,16 +186,16 @@ var tb_simple_sofnma = {
                     if (ARD < 0) {
                         txt = ' more';
                     }
-                    return Math.abs(ARD).toFixed(0) + txt;
+                    return Math.abs(Math.round(ARD * this.baseline)) + txt;
                 },
 
                 get_ARDp: function(r, v) {
-                    var ARDp = 100 * this.get_ARD(r, v) / this.baseline;
+                    var ARDp = 100 * this.get_ARD(r, v);
                     return Math.abs(ARDp).toFixed(1) + '%';
                 },
 
                 get_ARDp_txt: function(r, v) {
-                    var ARDp = 100 * this.get_ARD(r, v) / this.baseline;
+                    var ARDp = 100 * this.get_ARD(r, v);
                     var txt = ' less';
                     if (ARDp < 0) {
                         txt = ' more';
@@ -229,6 +227,16 @@ var tb_simple_sofnma = {
                         // how can it be ???
                     }
                     this.$forceUpdate();
+                },
+
+                get_cieclr: function(sm, cie) {
+                    if (sm < 1) {
+                        return 'cie-bene-' + cie;
+                    } else if (sm > 1) {
+                        return 'cie-harm-' + cie;
+                    } else {
+                        return 'cie-nnor-' + cie;
+                    }
                 },
 
                 show_detail: function(ae_name, treat) {

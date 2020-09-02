@@ -358,7 +358,7 @@ a {
                             RD(%): {{ get_ARDp_txt(r) }}<br>
                             ({{ get_ARDp_txt(r, 'lower')}} to {{ get_ARDp_txt(r, 'upper')}})
                         </td>
-                        <td v-bind:class="get_cieclr(r.sm, r.ae.cie)"
+                        <td v-bind:class="get_cieclr(r.ae.result[measure].random.model.sm, r.ae.cie)"
                             v-on:click="show_cie_detail(r.ae_name)">
                             {{ txt('CIE_TOT_' + r.ae.cie) }}
                         </td>
@@ -441,7 +441,7 @@ var jarvis = {
         'CIE_TOT_3': 'Moderate',
         'CIE_TOT_2': 'Low',
         'CIE_TOT_1': 'Very Low',
-        'CIE_VAL_4': 'Very very serious',
+        'CIE_VAL_4': 'Very serious',
         'CIE_VAL_3': 'Very serious',
         'CIE_VAL_2': 'Serious',
         'CIE_VAL_1': 'No serious',

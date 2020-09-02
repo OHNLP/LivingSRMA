@@ -64,8 +64,8 @@ var tb_simple_sofpma = {
                     }
                     var val = r.ae.result[this.measure].random.model[obj];
                     if (this.measure == 'OR') {
-                        var a = (1 - val) * this.get_ACR(r) / this.baseline;
-                        var b = 1 - this.get_ACR(r) / this.baseline;
+                        var a = (1 - val) * this.get_ACR(r);
+                        var b = 1 - this.get_ACR(r);
                         var c = a + b;
                         var d = a / c;
                         var e = d * this.baseline;
@@ -77,6 +77,8 @@ var tb_simple_sofpma = {
                 },
 
                 get_ARD: function(r, obj) {
+                    // obj could be
+                    // sm, lower, upper
                     if (typeof(obj)=='undefined') {
                         obj = 'sm';
                     }
@@ -102,7 +104,7 @@ var tb_simple_sofpma = {
                 },
 
                 get_ARDp_txt: function(r, obj) {
-                    var ARDp = 100 * this.get_ARD(r, obj) / this.baseline;
+                    var ARDp = 100 * this.get_ARD(r, obj);
                     var txt = ' less';
                     if (ARDp < 0) {
                         txt = ' more';
@@ -168,14 +170,18 @@ var tb_simple_sofpma = {
                 ae: ae,
                 ae_name: ae.ae_name,
                 ae_fullname: ae.ae_fullname,
-                sm: ae.result[measure].random.model.sm,
-                lower: ae.result[measure].random.model.lower,
-                upper: ae.result[measure].random.model.upper,
                 Et: ae.Et,
                 Nt: ae.Nt,
                 Ec: ae.Ec,
                 Nc: ae.Nc,
                 n_stu: ae.stus.length,
+                which_ACR: {
+                    use_internal: true,
+                    use_external: false,
+                    use_internal_avg: true,
+                    use_internal_min: false,
+                    use_internal_max: false
+                },
                 // for display setting
                 is_show: {
                     // show sm / study info

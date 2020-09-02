@@ -107,7 +107,6 @@ a {
     padding: 3px 0;
     border-bottom: 1px solid #e6e6e6;
     border-right: 1px solid #e6e6e6;
-    cursor: default;
 }
 .sof-table .col-ae-name {
     width: 150px;
@@ -235,7 +234,7 @@ a {
                     <tr v-for="ae in rs">
                         <td>{{ ae.ae_name }}</td>
                         <td class="col-comarator">
-                            {{ get_ACR(ae.treats[comparator]).toFixed(0) }} per {{ baseline }} <br>
+                            {{ Math.round(get_ACR(ae.treats[comparator]) * baseline) }} per {{ baseline }} <br>
                             <b>Rank {{ ae.treats[comparator].rank }}</b>
                         </td>
                         <td class="cell-treat"
@@ -260,7 +259,7 @@ a {
             <div class="box-header">
                 <h4>    
                     <i class="fa fa-table"></i>
-                    {{ detail.ae_name }} - Treatment: {{ detail.treat }}, Comparator: {{ comparator }}
+                    {{ detail.ae_name }} - Treatment: <b class="txt-lg">{{ detail.treat }}</b>, Comparator: <b class="txt-lg">{{ comparator }}</b>
                 </h4>
             </div>
             <div class="box-body">
@@ -282,9 +281,9 @@ a {
                             {{ ae_dict[detail.ae_name]['lgtable'][measure][comparator][detail.treat].up.toFixed(2) }} )
                         </p>
                         
-                        <p>Absolute risk: <span class="txt-lg txt-fb">{{ get_CIR(ae_dict[detail.ae_name].treats[comparator], ae_dict[detail.ae_name]['lgtable'][measure][comparator][detail.treat].sm).toFixed(0) }} per {{ baseline }}</span><br>
-                        ({{ get_CIR(ae_dict[detail.ae_name].treats[comparator], ae_dict[detail.ae_name]['lgtable'][measure][comparator][detail.treat].lw).toFixed(0) }} per {{ baseline }} to 
-                        {{ get_CIR(ae_dict[detail.ae_name].treats[comparator], ae_dict[detail.ae_name]['lgtable'][measure][comparator][detail.treat].up).toFixed(0) }} per {{ baseline }})</p>
+                        <p>Absolute risk: <span class="txt-lg txt-fb">{{ Math.round(get_CIR(ae_dict[detail.ae_name].treats[comparator], ae_dict[detail.ae_name]['lgtable'][measure][comparator][detail.treat].sm) * baseline) }} per {{ baseline }}</span><br>
+                        ({{ Math.round(get_CIR(ae_dict[detail.ae_name].treats[comparator], ae_dict[detail.ae_name]['lgtable'][measure][comparator][detail.treat].lw) * baseline) }} per {{ baseline }} to 
+                        {{ Math.round(get_CIR(ae_dict[detail.ae_name].treats[comparator], ae_dict[detail.ae_name]['lgtable'][measure][comparator][detail.treat].up) * baseline) }} per {{ baseline }})</p>
     
                         <p>Absolute risk difference: <span class="txt-lg txt-fb">{{ get_ARD_txt(ae_dict[detail.ae_name].treats[comparator], ae_dict[detail.ae_name]['lgtable'][measure][comparator][detail.treat].sm) }}</span><br>
                         ({{ get_ARD_txt(ae_dict[detail.ae_name].treats[comparator], ae_dict[detail.ae_name]['lgtable'][measure][comparator][detail.treat].lw) }}
@@ -304,7 +303,8 @@ a {
 
                 <div>
                     <p>Certainty in Evidence: 
-                        <b class="txt-lg">
+                        <b class="txt-lg" style="padding: 0 5px;"
+                            v-bind:class="get_cieclr(ae_dict[detail.ae_name].lgtable[measure][comparator][detail.treat].sm, ae_dict[detail.ae_name].cetable[comparator][detail.treat].cie)">
                             {{ txt('CIE_TOT_' + ae_dict[detail.ae_name].cetable[comparator][detail.treat].cie) }}
                         </b>
                     </p>
@@ -370,7 +370,7 @@ var jarvis = {
         'CIE_TOT_3': 'Moderate',
         'CIE_TOT_2': 'Low',
         'CIE_TOT_1': 'Very Low',
-        'CIE_VAL_4': 'Very very serious',
+        'CIE_VAL_4': 'Very serious',
         'CIE_VAL_3': 'Very serious',
         'CIE_VAL_2': 'Serious',
         'CIE_VAL_1': 'No serious',
