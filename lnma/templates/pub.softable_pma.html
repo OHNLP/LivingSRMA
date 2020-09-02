@@ -330,8 +330,9 @@ a {
 
                         <td v-if="r.is_show['sm']" class="col-flipable"
                             v-on:click="flip_cell(r, 'sm')">
-                            {{ measure }} {{ r.sm.toFixed(2) }}<br>
-                            ({{ r.lower.toFixed(2) }} to {{ r.upper.toFixed(2) }})
+                            {{ measure }} {{ r.ae.result[measure].random.model.sm.toFixed(2) }}<br>
+                            ({{ r.ae.result[measure].random.model.lower.toFixed(2) }} to 
+                            {{ r.ae.result[measure].random.model.upper.toFixed(2) }})
                         </td>
                         <td v-else class="col-ta-left col-flipable"
                             v-on:click="flip_cell(r, 'sm')">
@@ -341,10 +342,10 @@ a {
                         </td>
 
                         <td>
-                            {{ get_CIR(r).toFixed(0) }} per {{ baseline }}
+                            {{ Math.round(get_CIR(r) * baseline) }} per {{ baseline }}
                         </td>
                         <td>
-                            {{ get_ACR(r).toFixed(0) }} per {{ baseline }}
+                            {{ Math.round(get_ACR(r) * baseline) }} per {{ baseline }}
                         </td>
                         <td v-if="r.is_show['ARD']" class="col-flipable"
                             v-on:click="flip_cell(r, 'ARD')">

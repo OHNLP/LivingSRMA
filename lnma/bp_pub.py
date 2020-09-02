@@ -407,7 +407,7 @@ def get_attr_pack_from_itable(full_fn):
     return { 'attr_dict': attr_dict, 'attr_tree': attr_tree }
 
 
-def get_pma(dataset, datatype='CAT_RAW', sm='OR', method='MH', random_or_fixed='random', ):
+def get_pma(dataset, datatype='CAT_RAW', sm='RR', method='MH', random_or_fixed='random', ):
     '''Get the PMA results
     The input dataset should follow:
 
@@ -935,6 +935,7 @@ def get_ae_pma_data_simple(full_fn):
                 # get the pma result
                 try:
                     pma_r = get_pma(ds, datatype="CAT_RAW", sm=sm, random_or_fixed='random')
+                    # pma_r = get_pma_by_rplt(ds, datatype="CAT_RAW", sm=sm, random_or_fixed='random')
                     # validate the result, if isNaN, just set None
                     if np.isnan(pma_r['model']['sm']):
                         pma_r = None
