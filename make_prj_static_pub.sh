@@ -71,5 +71,5 @@ cp -r ./lnma/static/img $FOLDER_BASE/static/
 echo '* copied all images'
 
 # copy data
-cp -r ./instance/pubdata/* $FOLDER_BASE/pub/graphdata/
+# cp -r ./instance/pubdata/* $FOLDER_BASE/pub/graphdata/
 echo '* copied all graph data'
