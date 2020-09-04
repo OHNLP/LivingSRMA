@@ -182,7 +182,7 @@ var tb_simple_sofnma = {
 
                 get_ARD_txt: function(r, v) {
                     var ARD = this.get_ARD(r, v);
-                    var txt = ' less';
+                    var txt = ' fewer';
                     if (ARD < 0) {
                         txt = ' more';
                     }
@@ -196,7 +196,7 @@ var tb_simple_sofnma = {
 
                 get_ARDp_txt: function(r, v) {
                     var ARDp = 100 * this.get_ARD(r, v);
-                    var txt = ' less';
+                    var txt = ' fewer';
                     if (ARDp < 0) {
                         txt = ' more';
                     }

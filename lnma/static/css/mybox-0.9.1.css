@@ -66,6 +66,13 @@
     height: 1.6em;
     line-height: 2em;
 }
+.box-menu-link {
+    text-decoration: underline;
+    cursor: pointer !important;
+}
+.box-menu-link:hover {
+    font-weight: bold;
+}
 .box-radio-group {
     margin: 0 10px;
 }

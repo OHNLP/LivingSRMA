@@ -96,7 +96,7 @@ var tb_simple_sofpma = {
 
                 get_ARD_txt: function(r, obj) {
                     var ARD = this.get_ARD(r, obj);
-                    var txt = ' less';
+                    var txt = ' fewer';
                     if (ARD < 0) {
                         txt = ' more';
                     }
@@ -105,7 +105,7 @@ var tb_simple_sofpma = {
 
                 get_ARDp_txt: function(r, obj) {
                     var ARDp = 100 * this.get_ARD(r, obj);
-                    var txt = ' less';
+                    var txt = ' fewer';
                     if (ARDp < 0) {
                         txt = ' more';
                     }
@@ -145,8 +145,11 @@ var tb_simple_sofpma = {
 
                 show_cie_detail: function(ae_name) {
                     this.detail.cie.ae_name = ae_name;
-
                     tb_simple_sofpma.show_cie_detail(ae_name);
+                },
+
+                show_ctrl_options: function(ae_name) {
+                    tb_simple_sofpma.show_ctrl_options(ae_name);
                 }
             },
         });
@@ -184,10 +187,12 @@ var tb_simple_sofpma = {
                 },
                 // for display setting
                 is_show: {
-                    // show sm / study info
+                    // show sm, study info
                     sm: true,
-                    // show ARD / ARD CI
-                    ARD: true
+                    // show ARD, or ARD CI
+                    ARD: true,
+                    // show CIR, or CIR CI
+                    CIR: true
                 }
             }
 
@@ -215,6 +220,14 @@ var tb_simple_sofpma = {
     show_cie_detail: function(ae_name) {
         $(this.vpp_id + '_cie_detail').dialog({
             width: 400
+        });
+    },
+
+    show_ctrl_options: function(ae_name) {
+        $(this.vpp_id + '_ctrl_select').dialog({
+            width: 300,
+            my: 'left', 
+            at: 'right'
         });
     }
 };

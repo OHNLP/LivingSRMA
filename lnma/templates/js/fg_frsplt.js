@@ -62,7 +62,7 @@ var fg_frsplt = {
         this.svg.selectAll("*").remove();
 
         // resize the svg height
-        var new_height = (data.vals.length + 2) * this.line_height + this.base_y;
+        var new_height = (data.vals.length + 1) * this.line_height + this.base_y;
         this.svg.attr('height', new_height);
 
         // update x_scale

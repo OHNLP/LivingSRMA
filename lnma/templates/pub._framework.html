@@ -2,14 +2,26 @@
     LIvE FRAMEWORK
 </h3>
 <div class="row">
-    <div class="col">
-        <p>Proposed model for living network meta-analysis system consists of five layers: application layer, shared module layer, core service layer, middleware layer, and storage layer respectively. In the application layer, there are 6 applications to provide the graphical user interface (GUI) to different users.  Each application is designed for a specific task, such as monitoring the latest updates in studies (Study Watcher), selecting studies for further analysis (Study Screener), annotating outcomes from study texts (Data Collector), and conducting the  meta-analysis (pairwise or network meta-analysis) on selected studies (Data Analyzer); To support these functions, applications are built upon customized GUI modules and third party frontend packages, which are listed in the shared module layer; In the core service layer, the user operations in each application are sent to the meta-analysis application programming interface (API) and processed by specific service module, which is used to execute commands or packages in the middleware layer. For example, the outcome analysis service in the project management converts the requests from the data analyzer application by researchers to R script by Python network packages, then this service gets the results of the R script and saves into database; In the storage layer, all the data used in the system, including the structured meta data of projects and studies, semi-structured user annotation data, and free-text data of study PDF files, will be formatted as defined in our meta-analysis data standard and be saved in different place according to its characteristics.</p>
+<div class="col">
+<p>
+To create living, interactive systematic reviews (LISRs), we built a living interactive evidence synthesis (LIvE) platform, which is undergoing constant updates to fully implement LIvE framework. Each LISR created using LIvE platform is linked to an independent webpage which is automatically updated as new data is added or new changes are implemented.
 
-    </div>
+As shown in the figure, LIvE framework consists of five major components to cover the entire process of living systematic reviews. To complete a LISR, the five components (i.e.., the automated search, the scanner, the extractor, the analyzer, and the tabulator) enable the raw data collection, screening, information extraction, data analysis, and interactive visualization of the analysis results, respectively. 
 
-    <div class="col" style="text-align: center;">
-        <!-- <img style="width:100%;" src="/static/img/lisr-architecture.png"> -->
-        <!-- <img src="./static/img/arch.png" style="width:100%;" alt="The system architecture"> -->
-        {% include 'svg/live_framework.svg' %}
-    </div>
+Moreover, LIvE framework has three pathways to further improve the flexibility and efficiency: conventional pathway, semi-automated human-in-the-loop pathway, and artificial intelligence (AI) powered pathway. Each pathway shares the same data structure to be compatible with different technical implementations and interchangeability, while has its own characteristics. The data can enter or leave the pipeline at each component and move across pathways allowing the flexible use of platform for specific tasks such as data-analysis or creating summary of findings (SoF) tables.
+
+The conventional pathway allows the data collection outside the LIvE platform and subsequently the structured data can be uploaded to the platform to maintain the LISR. The human-in-the-loop pathway allows the process to be fully completed in LIvE platform and facilitates the process by automated execution of a defined search strategy, web-assisted rule-based screening of new citations and data extraction on an interactive graphical user interface and automated data analysis. The AI-powered pathway, which is currently under development, will allow near-automation of this process including screening, data extraction and analysis. 
+
+A key strength of LIvE platform is the interactive features (e.g., interactive PRISMA, interactive table of results, dynamic pairwise and network meta-analysis output, and SoF tables) regardless of the pathway used to maintain LISR in LIvE platform. 
+<!-- In addition, the analyzer and the tabulator components can also be used as stand-alone software to perform instant pairwise or network meta-analysis and generate SoF tables for conventional systematic reviews and meta-analysis publications.  -->
+
+</p>
+
+</div>
+
+<div class="col" style="text-align: center;">
+<!-- <img style="width:100%;" src="/static/img/lisr-architecture.png"> -->
+<!-- <img src="./static/img/arch.png" style="width:100%;" alt="The system architecture"> -->
+{% include 'svg/live_framework.svg' %}
+</div>
 </div><!-- /.row -->

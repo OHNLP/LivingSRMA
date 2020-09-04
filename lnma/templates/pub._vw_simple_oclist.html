@@ -12,13 +12,13 @@
                 </button>
             </div>
         </div>
-        <div class="box-body"
-            v-if="ae_list.length == 1">
+        <div class="box-body">
             <div class="ae-item"
-                v-for="ae_name in ae_list[0].ae_names"
-                v-bind:ae_name="ae_name"
-                v-on:click="toggle_ae">
-                {{ ae_dict[ae_name].ae_fullname }}
+                v-for="ae in ae_list"
+                v-bind:ae_name="ae.ae_name"
+                v-bind:class="{'ae-item-selected':ae.is_checked}"
+                v-on:click="toggle_ae(ae)">
+                {{ ae_dict[ae.ae_name].ae_fullname }}
             </div>
         </div>
     </div>

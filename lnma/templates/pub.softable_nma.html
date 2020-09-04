@@ -38,6 +38,9 @@ a {
     height: 100%;
 }
 #start-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     z-index: 9999;
@@ -89,7 +92,7 @@ a {
 /* for the NMA table */
 
 #tb_simple_sofnma {
-    width: calc(100% - 200px);
+    width: 100%;
 }
 
 /* for the SoF table */
@@ -110,7 +113,11 @@ a {
 }
 .sof-table .col-ae-name {
     width: 150px;
-    max-width: 180px;
+    max-width: 200px;
+    cursor: pointer;
+}
+.sof-table .col-ae-name:hover {
+    background: whitesmoke;
 }
 .sof-table .col-treat {
     width: 100px;
@@ -150,6 +157,13 @@ a {
 .cie-harm-1 { background: rgb(255, 125, 125); color: black; }
 .cie-nner-2 { background: rgb(202, 183, 10); color: black; }
 .cie-nner-1 { background: rgb(250, 248, 133); color: black; }
+
+
+.legend-table td { padding: 5px 10px; font-size: 14px; }
+
+.dlg-sm h4 { margin: 5px 0; }
+.dlg-sm p { margin: 0; }
+.dlg-sm hr { border: 0; border-bottom: 1px solid #ececec; }
 </style>
 </head>
 <body>
@@ -160,6 +174,32 @@ a {
     </h1>
     <div id="ss-msg">Loading data and initializing ...</div>
 </div>
+
+<div id="color_guide" style="display: none;" title="Color guide">
+<table class="legend-table">
+    <tr>
+        <td class="cie-bene-4">High certainty benefit</td>
+        <td class="cie-harm-4">High certainty harm</td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td class="cie-bene-3">Moderate certainty benefit</td>
+        <td class="cie-harm-3">Moderate certainty harm</td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td class="cie-bene-2">Low certainty benefit</td>
+        <td class="cie-harm-2">Low certainty harm</td>
+        <td class="cie-nner-2">Low certainty neither harm nor benefit</td>
+    </tr>
+    <tr>
+        <td class="cie-bene-1">Very low certainty benefit</td>
+        <td class="cie-harm-1">Very low certainty harm</td>
+        <td class="cie-nner-1">Very low certainty neither nor benefit</td>
+    </tr>
+</table>
+</div>
+<!-- /div#legend -->
 
 <div id="wrapper">
 
@@ -174,6 +214,22 @@ a {
                     <i class="fa fa-table"></i>
                 </h4>
                 <div class="d-flex fx-row">
+
+                    <div class="box-menu-group d-flex fx-row">
+                        <div style="color: red;">
+                            <i class="fa fa-cog"></i>
+                            <b>Comparator: </b>
+                        </div>
+                        <div>
+                            <select v-model='comparator'>
+                                <option v-for="treat in treat_list"
+                                    v-bind:value="treat">
+                                    {{ treat }}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
                     <div class="box-menu-group d-flex fx-row">
                         <div>
                             <i class="fa fa-cog"></i>
@@ -203,17 +259,9 @@ a {
                     </div>
 
                     <div class="box-menu-group d-flex fx-row">
-                        <div>
-                            <i class="fa fa-cog"></i>
-                            Comparator: 
-                        </div>
-                        <div>
-                            <select v-model='comparator'>
-                                <option v-for="treat in treat_list"
-                                    v-bind:value="treat">
-                                    {{ treat }}
-                                </option>
-                            </select>
+                        <div class="box-menu-link" onclick="jarvis.show_color_guide();">
+                            <i class="fa fa-paint-brush"></i>
+                            Color guide
                         </div>
                     </div>
                 </div>
@@ -232,7 +280,7 @@ a {
                         </th>
                     </tr>
                     <tr v-for="ae in rs">
-                        <td>{{ ae.ae_name }}</td>
+                        <td class="col-ae-name">{{ ae.ae_name }}</td>
                         <td class="col-comarator">
                             {{ Math.round(get_ACR(ae.treats[comparator]) * baseline) }} per {{ baseline }} <br>
                             <b>Rank {{ ae.treats[comparator].rank }}</b>
@@ -290,10 +338,10 @@ a {
                         to
                         {{ get_ARD_txt(ae_dict[detail.ae_name].treats[comparator], ae_dict[detail.ae_name]['lgtable'][measure][comparator][detail.treat].up) }})</p>
     
-                        <p>Absolute risk percentage: <span class="txt-lg txt-fb">{{ get_ARDp(ae_dict[detail.ae_name].treats[comparator], ae_dict[detail.ae_name]['lgtable'][measure][comparator][detail.treat].sm) }}</span><br>
-                        ({{ get_ARDp(ae_dict[detail.ae_name].treats[comparator], ae_dict[detail.ae_name]['lgtable'][measure][comparator][detail.treat].lw) }} 
+                        <p>Absolute risk percentage: <span class="txt-lg txt-fb">{{ get_ARDp_txt(ae_dict[detail.ae_name].treats[comparator], ae_dict[detail.ae_name]['lgtable'][measure][comparator][detail.treat].sm) }}</span><br>
+                        ({{ get_ARDp_txt(ae_dict[detail.ae_name].treats[comparator], ae_dict[detail.ae_name]['lgtable'][measure][comparator][detail.treat].lw) }} 
                         to 
-                        {{ get_ARDp(ae_dict[detail.ae_name].treats[comparator], ae_dict[detail.ae_name]['lgtable'][measure][comparator][detail.treat].up) }})</p>
+                        {{ get_ARDp_txt(ae_dict[detail.ae_name].treats[comparator], ae_dict[detail.ae_name]['lgtable'][measure][comparator][detail.treat].up) }})</p>
     
                         <p>Rank: <span class="txt-lg txt-fb">{{ ae_dict[detail.ae_name].treats[detail.treat].rank }}</span></p>
                     </div>
@@ -416,6 +464,9 @@ var jarvis = {
                 // init the NMA table
                 tb_simple_sofnma.init(data);
 
+                // show the first one
+                vw_simple_oclist.toggle_ae(data.ae_list[0].ae_names[0]);
+
                 // ok, remove the start screen
                 jarvis.ssmsg('Almost initialized.');
                 setTimeout('jarvis.ssclose();', 400);
@@ -447,6 +498,12 @@ var jarvis = {
 
     ssclose: function() {
         $('#start-screen').hide();
+    },
+
+    show_color_guide: function() {
+        $('#color_guide').dialog({
+            width: 650
+        });
     }
 };
 
