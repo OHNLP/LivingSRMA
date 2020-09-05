@@ -19,13 +19,16 @@ echo "* created FOLDER_BASE: $FOLDER_BASE"
 
 # check sub folders
 mkdir -p $FOLDER_BASE/pub
-mkdir -p $FOLDER_BASE/static/lib
+mkdir -p $FOLDER_BASE/static
 mkdir -p $FOLDER_BASE/pub/graphdata
 echo "* checked output folders in $FOLDER_BASE"
 
-# get the index
-curl "$URL_BASE/subindex/$PRJ" -o "$FOLDER_BASE/index.html"
+# copy static content
+cp -r ./lnma/static/* $FOLDER_BASE/static/
+echo '* copied all static content'
 
+# get the sub index for this project
+curl "$URL_BASE/subindex/$PRJ" -o "$FOLDER_BASE/index.html"
 
 # get the shared module
 curl "$URL_BASE/prisma.html" -o "$FOLDER_BASE/pub/prisma.html"
@@ -37,13 +40,17 @@ curl "$URL_BASE/graph_v2_1.html" -o "$FOLDER_BASE/pub/graph_v2_1.html"
 curl "$URL_BASE/graph_v3.html" -o "$FOLDER_BASE/pub/graph_v3.html"
 curl "$URL_BASE/softable_pma.html" -o "$FOLDER_BASE/pub/softable_pma.html"
 curl "$URL_BASE/softable_nma.html" -o "$FOLDER_BASE/pub/softable_nma.html"
+curl "$URL_BASE/softable_nma.html" -o "$FOLDER_BASE/pub/softable_nma.html"
 echo "* downloaed shared module for project $PRJ"
-
 
 # get the project page
 mkdir -p $FOLDER_BASE/pub/graphdata/$PRJ
 curl "$URL_BASE/$PRJ.html" -o "$FOLDER_BASE/$PRJ.html"
 echo "* downloaed $PRJ.html"
+
+# copy pubdata
+cp -r ./instance/pubdata/$PRJ/* $FOLDER_BASE/pub/graphdata/$PRJ/
+echo '* copied all graph data'
 
 # get the data files
 curl "$URL_BASE/graphdata/$PRJ/ITABLE.json" -o "$FOLDER_BASE/pub/graphdata/$PRJ/ITABLE.json"
@@ -53,23 +60,4 @@ curl "$URL_BASE/graphdata/$PRJ/SOFTABLE_PMA.json" -o "$FOLDER_BASE/pub/graphdata
 curl "$URL_BASE/graphdata/$PRJ/SOFTABLE_NMA.json" -o "$FOLDER_BASE/pub/graphdata/$PRJ/SOFTABLE_NMA.json"
 echo "* download the data jsons"
 
-
-# copy libs
-cp -r ./lnma/static/lib/alasql $FOLDER_BASE/static/lib/
-cp -r ./lnma/static/lib/d3 $FOLDER_BASE/static/lib/
-cp -r ./lnma/static/lib/echarts $FOLDER_BASE/static/lib/
-cp -r ./lnma/static/lib/element-ui $FOLDER_BASE/static/lib/
-cp -r ./lnma/static/lib/file-saver $FOLDER_BASE/static/lib/
-cp -r ./lnma/static/lib/font-awesome $FOLDER_BASE/static/lib/
-cp -r ./lnma/static/lib/jquery $FOLDER_BASE/static/lib/
-cp -r ./lnma/static/lib/jquery-ui $FOLDER_BASE/static/lib/
-cp -r ./lnma/static/lib/vue.js $FOLDER_BASE/static/lib/
-echo '* copied all packages'
-
-# copy image
-cp -r ./lnma/static/img $FOLDER_BASE/static/
-echo '* copied all images'
-
-# copy data
-# cp -r ./instance/pubdata/* $FOLDER_BASE/pub/graphdata/
-echo '* copied all graph data'
+echo "* completed $PRJ static website" 

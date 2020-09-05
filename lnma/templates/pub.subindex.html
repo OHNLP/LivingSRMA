@@ -37,7 +37,11 @@
             </li>
             
             <li class="nav-item">
-                <a class="nav-link" href="#sec-methods">METHODS</a>
+                <a class="nav-link" href="#sec-framework">LIvE FRAMEWORK</a>
+            </li>
+            
+            <li class="nav-item">
+                <a class="nav-link" href="#sec-arch">SYSTEM ARCHITECTURE</a>
             </li>
             
             <li class="nav-item">
@@ -48,25 +52,32 @@
     </div>
 </nav>
 
-<div id="sec-concept" style="position: absolute; top: 0;"></div>
+<div id="sec-concept" style="position: absolute; top: 0;">
+</div>
+
 <div class="container" style="margin-top: 3rem; margin-bottom:2rem;">
     {% include "pub._concept.html" %}
 </div>
 
 
-<br id="sec-methods">
-<div class="container-fluid bg-dark2" style="color: white; padding: 4rem 0; margin: 3rem auto;">
+<br id="sec-framework">
+<div class="container-fluid bg-dark2" style="color: white; padding: 3rem 0; margin: 3rem auto;">
     <div class="container white-h3" style=" padding: 2rem auto;">
         <style>
             .white-h3 h3 {
                 color: white;
             }
         </style>
-        {% include "pub._methods.html" %}
+        {% include "pub._framework.html" %}
     </div>
 </div>
 
 
+<br id="sec-arch">
+<div class="container" style="padding: 2rem 0; margin: 2rem auto;">
+    <div class="container">
+    {% include "pub._methods.html" %}
+    </div>
 </div>
 
 <hr class="featurette-divider">
