@@ -164,6 +164,8 @@ a {
 .dlg-sm h4 { margin: 5px 0; }
 .dlg-sm p { margin: 0; }
 .dlg-sm hr { border: 0; border-bottom: 1px solid #ececec; }
+
+.red { color: red; }
 </style>
 </head>
 <body>
@@ -195,7 +197,7 @@ a {
     <tr>
         <td class="cie-bene-1">Very low certainty benefit</td>
         <td class="cie-harm-1">Very low certainty harm</td>
-        <td class="cie-nner-1">Very low certainty neither nor benefit</td>
+        <td class="cie-nner-1">Very low certainty neither harm nor benefit</td>
     </tr>
 </table>
 </div>
@@ -216,7 +218,7 @@ a {
                 <div class="d-flex fx-row">
 
                     <div class="box-menu-group d-flex fx-row">
-                        <div style="color: red;">
+                        <div class="red">
                             <i class="fa fa-cog"></i>
                             <b>Comparator: </b>
                         </div>
@@ -272,7 +274,7 @@ a {
                 <table class="sof-table">
                     <tr>
                         <th class="col-ae-name">Outcome</th>
-                        <th class="col-treat">Comparator: {{ comparator }}</th>
+                        <th class="col-treat">Comparator: <b class="red">{{ comparator }}</b></th>
                         <th class="col-treat" 
                             v-for="treat in treat_list" 
                             v-if="treat!=comparator">
