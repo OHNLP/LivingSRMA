@@ -567,8 +567,8 @@ var dt_tbcore = {
     },
 
     update_rs_db: function() {
-        var sql = this.sql.base + ' ' +
-                  this.sql.conditions + ' ' +
+        var sql = this.sql.base + ' \n' +
+                  this.sql.conditions + ' \n' +
                   this.sql.order_by;
         console.log('* updated table using SQL:\n', sql);
         this.rs_db = alasql(sql);
@@ -741,9 +741,13 @@ var jarvis = {
                     function(data) {
                         console.log(data);
                         dt_tbcore.init(data.rs, data.attrs);
+                        console.log('* inited dt_tbcore');
                         tb_filter.init();
+                        console.log('* inited tb_filter');
                         tb_coltab.init();
+                        console.log('* inited tb_coltab');
                         tb_schtab.init();
+                        console.log('* inited tb_schtab');
                         jarvis.update_schtab();
 
                         // clsoe the start-screen

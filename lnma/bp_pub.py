@@ -28,12 +28,12 @@ bp = Blueprint("pub", __name__, url_prefix="/pub")
 
 @bp.route('/')
 def index():
-    return render_template('pub.index.html')
+    return render_template('pub/pub.index.html')
 
 
 @bp.route('/blankindex')
 def blankindex():
-    return render_template('pub.blankindex.html')
+    return render_template('pub/pub.blankindex.html')
 
 
 @bp.route('/subindex/<prj>')
@@ -42,13 +42,13 @@ def subindex(prj):
         'CAT': { 'prj': 'CAT', 'title': 'Cancer Associated Thrombosis'},
         'RCC': { 'prj': 'RCC', 'title': 'Metastatic Renal Cell Cancer'},
     }[prj]
-    return render_template('pub.subindex.html', prj_data=prj_data)
+    return render_template('pub/pub.subindex.html', prj_data=prj_data)
 
 
 @bp.route('/IOTOX.html')
 def IOTOX():
     prj = 'IOTOX'
-    return render_template('pub.IOTOX.html')
+    return render_template('pub/pub.IOTOX.html')
 
 
 @bp.route('/RCC.html')
@@ -58,7 +58,7 @@ def RCC():
     full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, 'NMA_LIST.json')
     nma = json.load(open(full_fn))
 
-    return render_template('pub.RCC.html', nma=nma)
+    return render_template('pub/pub.RCC.html', nma=nma)
 
 
 @bp.route('/CAT.html')
@@ -92,7 +92,7 @@ def CAT():
         })
         dma[dma_type][option_text]['slides'].append(filename + '$' + legend_text)
     
-    return render_template('pub.CAT_v2.html', dma=dma, nma=nma)
+    return render_template('pub/pub.CAT_v2.html', dma=dma, nma=nma)
 
 
 
@@ -127,7 +127,7 @@ def CAT_v1():
         })
         dma[dma_type][option_text]['slides'].append(filename + '$' + legend_text)
     
-    return render_template('pub.CAT.html', dma=dma, nma=nma)
+    return render_template('pub/pub.CAT.html', dma=dma, nma=nma)
 
 ###########################################################
 # Modules for public page
@@ -135,7 +135,7 @@ def CAT_v1():
 
 @bp.route('/prisma.html')
 def prisma():
-    return render_template('pub.prisma.html')
+    return render_template('pub/pub.prisma.html')
 
 
 @bp.route('/prisma_IOTOX.html')
@@ -143,67 +143,67 @@ def prisma_IOTOX():
     '''A special PRISMA for IOTOX project
     The looking is different from others
     '''
-    return render_template('pub.prisma_IOTOX.html')
+    return render_template('pub/pub.prisma_IOTOX.html')
 
 
 @bp.route('/itable.html')
 def itable():
-    return render_template('pub.itable.html')
+    return render_template('pub/pub.itable.html')
 
 
 @bp.route('/slide.html')
 def slide():
-    return render_template('pub.slide.html')
+    return render_template('pub/pub.slide.html')
 
 
 @bp.route('/graph_v1.html')
 def graph_v1():
-    return render_template('pub.graph_v1.html')
+    return render_template('pub/pub.graph_v1.html')
 
 
 @bp.route('/graph_v2.html')
 def graph_v2():
-    return render_template('pub.graph_v2.html')
+    return render_template('pub/pub.graph_v2.html')
 
 
 @bp.route('/graph_v2_1.html')
 def graph_v2_1():
-    return render_template('pub.graph_v2_1.html')
+    return render_template('pub/pub.graph_v2_1.html')
 
 
 @bp.route('/graph_v2_2.html')
 def graph_v2_2():
-    return render_template('pub.graph_v2_2.html')
+    return render_template('pub/pub.graph_v2_2.html')
 
 
 @bp.route('/graph_v3.html')
 def graph_v3():
-    return render_template('pub.graph_v3.html')
+    return render_template('pub/pub.graph_v3.html')
 
 
 @bp.route('/oplot.html')
 def oplot():
-    return render_template('pub.oplot.html')
+    return render_template('pub/pub.oplot.html')
 
 
 @bp.route('/oplot_v2.html')
 def oplot_v2():
-    return render_template('pub.oplot_v2.html')
+    return render_template('pub/pub.oplot_v2.html')
 
 
 @bp.route('/softable_pma.html')
 def softable_pma():
     prj = request.args.get('prj')
     if prj == 'IOTOX':
-        fn = 'pub.softable_pma_IOTOX.html'
+        fn = 'pub/pub.softable_pma_IOTOX.html'
     else:
-        fn = 'pub.softable_pma.html'
+        fn = 'pub/pub.softable_pma.html'
     return render_template(fn)
 
 
 @bp.route('/softable_nma.html')
 def softable_nma():
-    return render_template('pub.softable_nma.html')
+    return render_template('pub/pub.softable_nma.html')
 
 ###########################################################
 # Data services
@@ -225,11 +225,40 @@ def graphdata_img(prj, fn):
     return send_from_directory(full_path, fn)
 
 
+@bp.route('/graphdata/<prj>/ITABLE_CFG.json')
+def graphdata_itable_cfg_json(prj):
+    full_fn_itable_cfg_json = os.path.join(
+        current_app.instance_path, PATH_PUBDATA, prj, 'ITABLE_CFG.json')
+
+    # just send the ITABLE_CFG.json if exists
+    if os.path.exists(full_fn_itable_cfg_json):
+        return send_from_directory(
+            os.path.join(current_app.instance_path, PATH_PUBDATA, prj),
+            'ITABLE_CFG.json'
+        )
+
+    fn = 'ITABLE_FILTERS.xlsx'
+    full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
+
+    # get the filters
+    filters = get_filters_from_itable(full_fn)
+
+    ret = {
+        "cols": {
+            "fixed": [],
+            "default": []
+        },
+        "filters": filters
+    }
+
+    return jsonify(ret)
+
+
 @bp.route('/graphdata/<prj>/ITABLE.json')
 def graphdata_itable_json(prj):
     '''Special rule for the ITABLE.json which does not exist
     '''
-    fn = 'ALL_DATA.xlsx'
+    fn = 'ITABLE_ATTR_DATA.xlsx'
     full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
 
     # get the cols
@@ -357,6 +386,74 @@ def graphdata_oplots(prj):
 ###########################################################
 # Other utils
 ###########################################################
+
+def get_filters_from_itable(full_fn):
+    '''Get the filters from ITABLE_FILTERS.xlsx
+    In this file, there should be only one tab: Filters
+    
+    The format of this file should follow:
+
+    label1,    label2,     ...
+    col_name1, col_name2,  ...
+    flt_type1, flt_type2,  ...
+    option1_1, option_2_1, ...
+    option1_2, option_2_2, ...
+
+    Each column represents one filter.
+    The first row is the label displayed on the UI.
+    The second row is the column name.
+    The third row is the filter type: radio, select.
+    From this row, all rows are the options for this filter.
+
+    All of the options must be the text in the column in the itable.
+    '''
+    # load the data file
+    xls = pd.ExcelFile(full_fn)
+    # load the Filters tab
+    sheet_name = 'Filters'
+    dft = xls.parse(sheet_name)
+
+    # build Filters data
+    ft_list = []
+    for col in dft.columns:
+        display_name = col
+        tmp = dft[col].tolist()
+        # the first line of dft is the column name / attribute name
+        ft_attr = tmp[0]
+        # the second line of dft is the filter type: radio or select
+        ft_type = tmp[1].strip().lower()
+        # get those rows not NaN, which means containing option
+        ft_opts = dft[col][~dft[col].isna()].tolist()[2:]
+        # set the default option
+        ft_item = {
+            'display_name': display_name,
+            'type': ft_type,
+            'attr': ft_attr,
+            'value': 0,
+            'values': [{
+                "display_name": "All",
+                "value": 0,
+                "sql_cond": "{$col} is not NULL",
+                "default": True
+            }]
+        }
+        # build ae_name dict
+        for i, ft_opt in enumerate(ft_opts):
+            # remove the white space
+            ft_opt = ft_opt.strip()
+            ft_item['values'].append({
+                "display_name": ft_opt,
+                "value": i+1,
+                "sql_cond": "{$col} like '%%%s%%'" % ft_opt,
+                "default": False
+            })
+
+        ft_list.append(ft_item)
+            
+        print('* parsed ft_attr %s with %s options' % (ft_attr, len(ft_opts)))
+    print('* created ft_list %s filters' % (len(ft_list)))
+
+    return ft_list
 
 def get_attr_pack_from_itable(full_fn):
     # read data, hope it is xlsx format ...
@@ -1190,6 +1287,8 @@ def get_ae_nma_data(full_fn, backend):
     }
 
     return ret
+
+
 
 
 def calc_cie(vals):

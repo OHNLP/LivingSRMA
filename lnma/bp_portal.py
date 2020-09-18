@@ -14,4 +14,13 @@ bp = Blueprint("portal", __name__, url_prefix="/portal")
 @bp.route('/')
 @login_required
 def index():
-    return render_template('portal.index.html')
+    return render_template('portal/portal.index.html')
+
+
+@bp.route('/upload', methods=['GET', 'POST'])
+@login_required
+def upload():
+    if request.method == 'GET':
+        return render_template('portal/portal.upload.html')
+
+    # handle the POST request
