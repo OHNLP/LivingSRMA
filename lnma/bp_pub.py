@@ -17,6 +17,7 @@ import pandas as pd
 import numpy as np
 
 from .analyzer import rplt_analyzer
+from .analyzer import pwma_analyzer_v2 as pwma_analyzer
 from .analyzer import nma_analyzer
 
 import PythonMeta as PMA
@@ -201,6 +202,11 @@ def softable_pma():
     return render_template(fn)
 
 
+@bp.route('/softable_pma_v2.html')
+def softable_pma_v2():
+    return render_template('pub/pub.softable_pma_v2.html')
+
+
 @bp.route('/softable_nma.html')
 def softable_nma():
     return render_template('pub/pub.softable_nma.html')
@@ -237,11 +243,16 @@ def graphdata_itable_cfg_json(prj):
             'ITABLE_CFG.json'
         )
 
-    fn = 'ITABLE_FILTERS.xlsx'
+    # just load the existing filters
+    fn = 'ITABLE_FILTERS.json'
     full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
-
-    # get the filters
-    filters = get_filters_from_itable(full_fn)
+    if os.path.exists(full_fn):
+        filters = json.load(open(full_fn))['filters']
+    else:
+        # get the filters from the excel file
+        fn = 'ITABLE_FILTERS.xlsx'
+        full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
+        filters = get_filters_from_itable(full_fn)
 
     ret = {
         "cols": {
@@ -316,14 +327,21 @@ def graphdata_softable_pma_json(prj):
     The second tab is Adverse events
     From third tab all the events
     '''
-    if prj == 'IOTOX':
-        fn = 'ALL_DATA.xlsx'
-        full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
-        ret = get_ae_pma_data(full_fn, is_getting_sms=True)
-    else:
+    v = request.args.get('v')
+    ret = {}
+    if v is None or v == '' or v == '1':
+        if prj == 'IOTOX':
+            fn = 'ALL_DATA.xlsx'
+            full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
+            ret = get_ae_pma_data(full_fn, is_getting_sms=True)
+        else:
+            fn = 'SOFTABLE_PMA_DATA.xlsx'
+            full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
+            ret = get_ae_pma_data_simple(full_fn)
+    elif v == '2':
         fn = 'SOFTABLE_PMA_DATA.xlsx'
         full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
-        ret = get_ae_pma_data_simple(full_fn)
+        ret = get_oc_pma_data(full_fn)
 
     return jsonify(ret)
 
@@ -504,7 +522,7 @@ def get_attr_pack_from_itable(full_fn):
     return { 'attr_dict': attr_dict, 'attr_tree': attr_tree }
 
 
-def get_pma(dataset, datatype='CAT_RAW', sm='RR', method='MH', random_or_fixed='random', ):
+def get_pma_by_py(dataset, datatype='CAT_RAW', sm='RR', method='MH', fixed_or_random='random', ):
     '''Get the PMA results
     The input dataset should follow:
 
@@ -520,7 +538,7 @@ def get_pma(dataset, datatype='CAT_RAW', sm='RR', method='MH', random_or_fixed='
     '''
     meta = PMA.Meta()
     meta.datatype = 'CATE' if datatype == 'CAT_RAW' else 'CATE'
-    meta.models = random_or_fixed.capitalize()
+    meta.models = fixed_or_random.capitalize()
     meta.algorithm = method
     meta.effect = sm
     rs = meta.meta(dataset)
@@ -557,16 +575,87 @@ def get_pma(dataset, datatype='CAT_RAW', sm='RR', method='MH', random_or_fixed='
     return ret
 
 
-def get_nma_by_r(dataset, datatype='CAT_RAW', sm='OR', random_or_fixed='random'):
+def get_nma_by_r(dataset, datatype='CAT_RAW', 
+    sm='OR', method='MH', fixed_or_random='random'):
     '''Get the NMA results by R script 
+    
+    The data type must be in ['CAT_PRE', 'CAT_RAW]
     '''
-    ret = {
+    ret = {}
+    
+    if datatype == 'CAT_PRE':
+        ret = get_pma_by_r_CAT_PRE(dataset, sm, method, fixed_or_random)
+    elif datatype == 'CAT_RAW':
+        ret = get_pma_by_r_CAT_RAW(dataset, sm, method, fixed_or_random)
 
+    return ret
+
+def get_pma_by_r_CAT_PRE(dataset, 
+    sm='HR', fixed_or_random='random'):
+    '''Get the PMA results by R script (PRIM_CAT_RPE)
+    The input dataset should follow:
+
+    [TE, lowerci, upperci, Name 1],
+    [TE, lowerci, upperci, Name 2], ...
+
+    for example:
+
+    dataset = [
+        [0.5, 0.4, 0.9, 'A'], 
+        [0.3, 0.2, 0.4, 'B']
+    ]
+    '''
+    rs = []
+    for d in dataset:
+        rs.append({
+            'study': d[3],
+            'TE': d[0],
+            'lowerci': d[1],
+            'upperci': d[2]
+        })
+    cfg = {
+        'prj': 'ALL',
+        'analyzer_model': 'PRIM_CAT_PRE',
+        'fixed_or_random': fixed_or_random,
+        'measure_of_effect': sm,
+        'is_hakn': 'FALSE'
     }
+    # use R to get the results
+    rst = pwma_analyzer.analyze(rs, cfg)
+
+    ret = {
+        "model": {
+            'measure': sm,
+            'sm': rst['data']['primma']['model'][fixed_or_random]['sm'],
+            'lower': rst['data']['primma']['model'][fixed_or_random]['lower'],
+            'upper': rst['data']['primma']['model'][fixed_or_random]['upper'],
+            'total': 0,
+            # 'i2': rst['data']['primma']['heterogeneity']['i2'],
+            # 'tau2': rst['data']['primma']['heterogeneity']['tau2'],
+            # 'q_tval': 0,
+            # 'q_pval': rst['data']['primma']['heterogeneity']['p'],
+            # 'z_tval': 0,
+            # 'z_pval': 0
+        },
+        'stus': []
+    }
+
+    for i in range(len(rst['data']['primma']['stus'])):
+        r = rst['data']['primma']['stus'][i]
+        ret['stus'].append({
+            'name': r['name'],
+            'sm': r['sm'],
+            'lower': r['lower'],
+            'upper': r['upper'],
+            'total': 0,
+            'w': r['w.%s' % fixed_or_random],
+        })
+
     return ret
 
 
-def get_pma_by_rplt(dataset, datetype='CAT_RAW', sm='OR', method='MH', random_or_fixed='random'):
+def get_pma_by_r_CAT_RAW(dataset,
+    sm='OR', method='MH', fixed_or_random='random'):
     '''Get the PMA results by R script (PRIM_CAT_RAW)
     The input dataset should follow:
 
@@ -593,6 +682,7 @@ def get_pma_by_rplt(dataset, datetype='CAT_RAW', sm='OR', method='MH', random_or
     cfg = {
         'prj': 'ALL',
         'analyzer_model': 'PRIM_CAT_RAW',
+        'fixed_or_random': fixed_or_random,
         'measure_of_effect': sm,
         'is_hakn': 'FALSE'
     }
@@ -602,9 +692,9 @@ def get_pma_by_rplt(dataset, datetype='CAT_RAW', sm='OR', method='MH', random_or
     ret = {
         "model": {
             'measure': sm,
-            'sm': rst['data']['primma']['model'][random_or_fixed]['sm'],
-            'lower': rst['data']['primma']['model'][random_or_fixed]['lower'],
-            'upper': rst['data']['primma']['model'][random_or_fixed]['lower'],
+            'sm': rst['data']['primma']['model'][fixed_or_random]['sm'],
+            'lower': rst['data']['primma']['model'][fixed_or_random]['lower'],
+            'upper': rst['data']['primma']['model'][fixed_or_random]['lower'],
             'total': 0,
             'i2': rst['data']['primma']['heterogeneity']['i2'],
             'tau2': rst['data']['primma']['heterogeneity']['tau2'],
@@ -624,7 +714,7 @@ def get_pma_by_rplt(dataset, datetype='CAT_RAW', sm='OR', method='MH', random_or
             'lower': r['lower'],
             'upper': r['upper'],
             'total': r['Nt'],
-            'w': r['w.%s' % random_or_fixed],
+            'w': r['w.%s' % fixed_or_random],
         })
 
     return ret
@@ -823,7 +913,7 @@ def get_ae_pma_data(full_fn, is_getting_sms=False):
             for sm in sms:
                 # get the pma result
                 try:
-                    pma_r = get_pma(ds, datatype="CAT_RAW", sm=sm, random_or_fixed='random')
+                    pma_r = get_pma_by_py(ds, datatype="CAT_RAW", sm=sm, fixed_or_random='random')
                     # validate the result, if isNaN, just set None
                     if np.isnan(pma_r['model']['sm']):
                         pma_r = None
@@ -838,7 +928,7 @@ def get_ae_pma_data(full_fn, is_getting_sms=False):
                     pma_r = None
 
                 # use R script to calculate the OR/RR
-                # pma_r = get_pma_by_rplt(ds, datetype="CAT_RAW", sm=sm, random_or_fixed='random')
+                # pma_r = get_pma_by_rplt(ds, datetype="CAT_RAW", sm=sm, fixed_or_random='random')
 
                 ae_rsts[ae_name][grade]['result'][sm] = {
                     'random': pma_r,
@@ -1031,8 +1121,8 @@ def get_ae_pma_data_simple(full_fn):
             for sm in sms:
                 # get the pma result
                 try:
-                    pma_r = get_pma(ds, datatype="CAT_RAW", sm=sm, random_or_fixed='random')
-                    # pma_r = get_pma_by_rplt(ds, datatype="CAT_RAW", sm=sm, random_or_fixed='random')
+                    pma_r = get_pma_by_py(ds, datatype="CAT_RAW", sm=sm, fixed_or_random='random')
+                    # pma_r = get_pma_by_rplt(ds, datatype="CAT_RAW", sm=sm, fixed_or_random='random')
                     # validate the result, if isNaN, just set None
                     if np.isnan(pma_r['model']['sm']):
                         pma_r = None
@@ -1046,7 +1136,7 @@ def get_ae_pma_data_simple(full_fn):
                     pma_r = None
 
                 # use R script to calculate the OR/RR
-                # pma_r = get_pma_by_rplt(ds, datetype="CAT_RAW", sm=sm, random_or_fixed='random')
+                # pma_r = get_pma_by_rplt(ds, datetype="CAT_RAW", sm=sm, fixed_or_random='random')
 
                 ae_rsts[ae_name]['result'][sm] = {
                     'random': pma_r,
@@ -1288,6 +1378,253 @@ def get_ae_nma_data(full_fn, backend):
 
     return ret
 
+
+def get_oc_pma_data(full_fn):
+    ''' The OC data for PMA
+    Support different types of data and 
+    '''
+    # load data
+    xls = pd.ExcelFile(full_fn)
+
+    # build OC Category data
+    oc_tab_name = 'Outcomes'
+    dft = xls.parse(oc_tab_name)
+    dft = dft[~dft['name'].isna()]
+    oc_dict = {}
+    oc_list = []
+
+    # define the columns for basic information of outcome
+    cie_cols = [
+        'risk of bias',
+        'inconsistency',
+        'indirectness',
+        'imprecision',
+    ]
+    col_pub_bia = 'publication bias'
+    col_importance = 'importance'
+
+    oc_item = {}
+    oc_names = []
+    for idx, row in dft.iterrows():
+        oc_cate = row['category']
+        oc_name = row['name']
+        oc_fullname = row['full name']
+        oc_names.append(oc_name)
+
+        # create a new outcome item to hold all the data
+        if oc_item == {}:
+            oc_item = {
+                "oc_cate": oc_cate,
+                "oc_names": []
+            }
+        elif oc_cate != oc_item['oc_cate']:
+            # append the oc_cate and add a new one
+            oc_list.append(oc_item)
+            oc_item = {
+                "oc_cate": oc_cate,
+                "oc_names": []
+            }
+        
+        # put current row in to oc_item
+        oc_item['oc_names'].append(oc_name)
+
+        # calc the Certainty in Evidence
+        cie = calc_cie(row[cie_cols].tolist())
+
+        # put current row in to ae_dict
+        oc_dict[oc_name] = {
+            "oc_cate": oc_cate,
+            "oc_measures": row['measure'].split(','),
+            "oc_datatype": row['data type'],
+            "oc_name": oc_name,
+            "oc_fullname": oc_fullname,
+            "cie": cie,
+            "cie_rob": row[cie_cols[0]],
+            "cie_inc": row[cie_cols[1]],
+            "cie_ind": row[cie_cols[2]],
+            "cie_imp": row[cie_cols[3]],
+            "pub_bia": row['publication bias'],
+            "importance": row[col_importance]
+        }
+
+    # put the last ae_item
+    oc_list.append(oc_item)
+    print('* created oc_dict %s terms' % (len(oc_dict)))
+
+    # build OC details by the data type
+    cols_dict = {
+        'raw': ['A:H', ['study', 'year', 'Et', 'Nt', 'Ec', 'Nc', 'treatment', 'control']],
+        'pre': ['A:H', ['study', 'year', 'TE', 'lowerci', 'upperci', 'treatment', 'control', 'survival in control']]
+    }
+    oc_dfts = []
+    oc_rsts = {}
+
+    # add detailed OC
+    # each sheet_name is an outcome data
+    for oc_name in oc_names:
+        oc_item = oc_dict[oc_name]
+        sheet_name = oc_name
+
+        # get the data depends on the data type
+        usecols = cols_dict[oc_item['oc_datatype']][0]
+        namecols = cols_dict[oc_item['oc_datatype']][1]
+        dft = xls.parse(sheet_name, usecols=usecols, names=namecols)
+        
+        # remove those empty lines based on study name
+        # the study name MUST be different
+        dft = dft[~dft.study.isna()]
+
+        # empty data???
+        if len(dft) == 0: 
+            print('* %s: [%s]' % (
+                'EMPTY AE Tab'.ljust(25, ' '),
+                oc_name.rjust(35, ' ')
+            ))
+            continue
+        
+        # add outcome name on each lines of this data tab
+        oc_cate = oc_item['oc_cate']
+        oc_fullname = oc_item['oc_fullname']
+        oc_datatype = oc_item['oc_datatype']
+        dft.loc[:, 'oc_cate'] = oc_cate
+        dft.loc[:, 'oc_name'] = oc_name
+        dft.loc[:, 'oc_fullname'] = oc_fullname
+
+        # add ae info
+        oc_rsts[oc_name] = {
+            'stus': [],
+            # Et, Nt, Ec, Nc are for raw data
+            'Et': 0,
+            'Nt': 0,
+            'Ec': 0,
+            'Nc': 0,
+            # TE, lowerci, upperci are for pre data
+            'TE': 0,
+            'lowerci': 0,
+            'upperci': 0,
+            # survival in control
+            'survival_in_control': 0,
+            # result is for the model
+            'result': {}
+        }
+
+        # copy oc_dict info to oc_rsts
+        for k in oc_dict[oc_name]:
+            oc_rsts[oc_name][k] = oc_dict[oc_name][k]
+            
+        # fill the effective number of studies
+        oc_rsts[oc_name]['stus'] = dft['study'].values.tolist()
+
+        # ok, use the existing data to calcuate number
+        # for the total, depends on the data type
+        # prepare the dataset for Pairwise MA
+        ds = []
+        if oc_datatype == 'raw':
+            oc_rsts[oc_name]['Et'] = int(dft['Et'].sum())
+            oc_rsts[oc_name]['Nt'] = int(dft['Nt'].sum())
+            oc_rsts[oc_name]['Ec'] = int(dft['Ec'].sum())
+            oc_rsts[oc_name]['Nc'] = int(dft['Nc'].sum())
+
+            for idx, r in dft.iterrows():
+                Et = r['Et']
+                Nt = r['Nt']
+                Ec = r['Ec']
+                Nc = r['Nc']
+                study = r['study']
+
+                # a data fix for PythonMeta
+                if Et == 0: Et = 0.4
+                if Ec == 0: Ec = 0.4
+
+                # convert data to PythonMeta Format
+                ds.append([ Et, Nt, Ec, Nc, study ])
+
+        elif oc_datatype == 'pre':
+            oc_rsts[oc_name]['TE'] = float(dft['TE'].mean())
+            oc_rsts[oc_name]['lowerci'] = float(dft['lowerci'].mean())
+            oc_rsts[oc_name]['upperci'] = float(dft['upperci'].mean())
+
+            # get survival in control
+            survival_in_control = []
+            for idx, r in dft.iterrows():
+                TE = r['TE']
+                lowerci = r['lowerci']
+                upperci = r['upperci']
+                study = r['study']
+                try:
+                    # only those with values can be added
+                    _srvc = float(r['survival in control'])
+                    survival_in_control.append(_srvc)
+                except:
+                    pass
+
+                # convert data to PythonMeta Format
+                ds.append([ TE, lowerci, upperci, study ])
+            
+            # update the survival_in_control for this oc
+            if len(survival_in_control) > 0:
+                oc_rsts[oc_name]['survival_in_control'] = sum(survival_in_control) / len(survival_in_control)
+            else:
+                oc_rsts[oc_name]['survival_in_control'] = 0
+        
+
+        # for each sm, get the PMA result
+        sms = oc_item['oc_measures']
+        for sm in sms:
+            # get the pma result
+            try:
+                pma_r = None
+                if sm in ['OR', 'RR', 'RD']:
+                    pma_r = get_pma_by_py(ds, datatype="CAT_RAW", 
+                        sm=sm, fixed_or_random='random')
+                    # pma_r = get_pma_by_r_CAT_RAW(ds, 
+                    #     sm=sm, fixed_or_random='random')
+                    # validate the result, if isNaN, just set None
+                    if np.isnan(pma_r['model']['sm']):
+                        pma_r = None
+
+                elif sm in ['HR']:
+                    pma_r = get_pma_by_r_CAT_PRE(ds, sm=sm)
+                
+            except Exception as err:
+                print('* %s: [%s] [%s]' % (
+                    'ISSUE Data cause error'.ljust(25, ' '),
+                    oc_name.rjust(35, ' '), 
+                    ds
+                ))
+                pma_r = None
+
+            # if sm in ['OR', 'RR', 'RD']:
+            #     pma_r = get_pma_by_py(ds, datatype="CAT_RAW", sm=sm, fixed_or_random='random')
+            #     # pma_r = get_pma_by_rplt(ds, datatype="CAT_RAW", sm=sm, fixed_or_random='random')
+            #     # validate the result, if isNaN, just set None
+            #     if np.isnan(pma_r['model']['sm']):
+            #         pma_r = None
+
+            # elif sm in ['HR']:
+            #     pma_r = get_pma_by_r_CAT_PRE(ds, sm=sm)
+
+            # output the results
+            oc_rsts[oc_name]['result'][sm] = {
+                'random': pma_r
+            }
+        
+        # add to aes list
+        oc_dfts.append(dft)
+
+    # convert all small AE dft to a big one df_aes
+    df_ocs = pd.concat(oc_dfts)
+
+    # fix data type
+    df_ocs['year'] = df_ocs['year'].astype('int')
+    
+    # build the return object
+    ret = {
+        'oc_list': oc_list,
+        'oc_dict': oc_rsts
+    }
+
+    return ret
 
 
 

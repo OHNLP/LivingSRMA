@@ -53,6 +53,9 @@ RSCRIPT_TPL = {
     'pwma_SUBG_CONTD_PRE': 'lnma_pwma_SUBG_CONTD_PRE.tpl.r',
     'pwma_SUBG_CONTD_RAW': 'lnma_pwma_SUBG_CONTD_RAW.tpl.r',
 
+    # for PWMA v2
+    'pwma_v2_PRIM_CAT_PRE': 'lnma_pwma_v2_PRIM_CAT_PRE.tpl.r',
+
     # for NMA
     'nma_freq_CAT_RAW': 'lnma_nma_freq_CAT_RAW.tpl.r',
     'nma_bayes_CAT_RAW': 'lnma_nma_bayes_CAT_RAW.tpl.r',

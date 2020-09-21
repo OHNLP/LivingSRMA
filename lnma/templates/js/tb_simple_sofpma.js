@@ -5,13 +5,21 @@ var tb_simple_sofpma = {
     vpp: null,
     vpp_id: '#tb_simple_sofpma',
 
+    default_measure: 'OR',
+    measure_list: [
+        { abbr: 'OR', name: 'Odds Ratio (OR)' },
+        { abbr: 'RR', name: 'Risk Ratio (RR)' },
+        { abbr: 'HR', name: 'Hazard Ratio (RR)' },
+    ],
+
     init: function(data) {
         this.data = data;
 
         this.vpp = new Vue({
             el: this.vpp_id,
             data: {
-                measure: 'OR',
+                measure: this.default_measure,
+                measure_list: this.measure_list,
                 baseline: 1000,
                 external_risk_calculated: 10,
                 use_internal_baseline: true,

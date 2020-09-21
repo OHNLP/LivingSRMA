@@ -392,6 +392,10 @@ var vw_ocplot = {
         });
     },
 
+    update: function(pids) {
+        this.pids = pids;
+    },
+
     get_pid_condition: function() {
         if (this.pids.length == 0) {
             return 'pid is not null ';
@@ -457,7 +461,6 @@ var vw_ocplot = {
     }
 
 };
-
 
 
 var jarvis = {

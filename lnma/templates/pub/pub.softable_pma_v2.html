@@ -62,7 +62,6 @@ a {
     height: 100%;
 }
 
-
 /* for the simple oclist */
 
 #vw_simple_oclist {
@@ -71,7 +70,7 @@ a {
     padding: 0 5px;
     height: 100%;
 }
-.ae-item {
+.oc-item {
     display: flex;
     align-items: center;
     width: calc(100% - 10px);
@@ -81,11 +80,11 @@ a {
     padding: 0 0 0 10px;
     cursor: pointer;
 }
-.ae-item:hover {
+.oc-item:hover {
     background: whitesmoke;
     font-weight: bold;
 }
-.ae-item-selected {
+.oc-item-selected {
     background: #ececec;
     font-weight: bold;
 }
@@ -145,7 +144,6 @@ a {
     display: none;
 }
 .oc-item {
-    width: 100%;
     border-left: 1px solid #aaaaaa;
 }
 .oc-item-info {
@@ -204,12 +202,12 @@ a {
     border-right: 1px solid #e6e6e6;
     cursor: default;
 }
-.sof-table .col-ae-name {
+.sof-table .col-oc-name {
     width: 150px;
     max-width: 200px;
     cursor: pointer;
 }
-.sof-table .col-ae-name:hover {
+.sof-table .col-oc-name:hover {
     background: whitesmoke;
 }
 .sof-table .col-ta-left {
@@ -290,7 +288,7 @@ a {
 
 <div id="app" class="d-flex fx-row">
 
-    {% include 'pub/pub._vw_simple_oclist.html' %}
+    <!-- {% include 'pub/pub._vw_simple_oclist_v2.html' %} -->
 
     <div id="tb_simple_sofpma">
         <div class="box" style="width: 100%; height: 100%;">
@@ -330,28 +328,24 @@ a {
                     </div>
 
                     <div class="box-menu-group d-flex fx-row">
+                        <div>
+                            <i class="fa fa-cog"></i>
+                            Show survival data: 
+                        </div>
+                        <div>
+                            <select v-model="show_survival">
+                                <option value="yes">Yes</option>
+                                <option value="no">No</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="box-menu-group d-flex fx-row">
                         <div class="box-menu-link" onclick="jarvis.show_color_guide();">
                             <i class="fa fa-paint-brush"></i>
                             Color guide
                         </div>
                     </div>
-
-                    <!-- <div class="box-menu-group d-flex fx-row">
-                        <div>
-                            <i class="fa fa-cog"></i>
-                            Assumed risk: 
-                        </div>
-                        <div class="box-radio-item">
-                            <input type="radio" checked value="true"
-                                v-model="use_internal_baseline">
-                            <label for="vw_ocplots_input_sm_or">Internal</label>
-                        </div>
-                        <div class="box-radio-item">
-                            <input type="radio" value="false"
-                                v-model="use_internal_baseline">
-                            <label for="vw_ocplots_input_sm_rr">External</label>
-                        </div>
-                    </div> -->
 
                 </div>
             </div>
@@ -360,9 +354,10 @@ a {
 
                 <table class="sof-table">
                     <tr>
-                        <th class="col-ae-name" rowspan="2">Outcome</th>
+                        <th class="col-oc-name" rowspan="2">Outcome</th>
                         <th rowspan="2">Relative</th>
-                        <th colspan="3">Absolute</th>
+                        <th colspan="6" v-if="show_survival=='yes'">Absolute</th>
+                        <th colspan="3" v-else>Absolute</th>
                         <th rowspan="2">Certainty in <br>Evidence</th>
                         <th rowspan="2">Importance</th>
                     </tr>
@@ -370,18 +365,22 @@ a {
                         <th>Intervention</th>
                         <th>Control</th>
                         <th>Risk Difference</th>
+                        <th v-if="show_survival=='yes'">Survival in Intervention</th>
+                        <th v-if="show_survival=='yes'">Survival in Control</th>
+                        <th v-if="show_survival=='yes'">Survival Difference</th>
                     </tr>
 
-                    <tr v-for="r, ae_name in rs">
-                        <td class="col-ae-name">
-                            {{ r.ae_fullname }}
+                    <tr v-for="r, oc_name in rs">
+                        <td class="col-oc-name"
+                            v-on:click="show_ctrl_options(r.oc_name)">
+                            {{ r.oc_fullname }}
                         </td>
 
                         <td v-if="r.is_show['sm']" class="col-flipable"
                             v-on:click="flip_cell(r, 'sm')">
-                            {{ measure }} {{ r.ae.result[measure].random.model.sm.toFixed(2) }}<br>
-                            ({{ r.ae.result[measure].random.model.lower.toFixed(2) }} to 
-                            {{ r.ae.result[measure].random.model.upper.toFixed(2) }})
+                            {{ get_a_measure(r) }} {{ r.oc.result[get_a_measure(r)].random.model.sm.toFixed(2) }}<br>
+                            ({{ r.oc.result[get_a_measure(r)].random.model.lower.toFixed(2) }} to 
+                            {{ r.oc.result[get_a_measure(r)].random.model.upper.toFixed(2) }})
                         </td>
                         <td v-else class="col-ta-left col-flipable"
                             v-on:click="flip_cell(r, 'sm')">
@@ -415,12 +414,23 @@ a {
                             RD(%): {{ get_ARDp_txt(r) }}<br>
                             CI: {{ get_ARDp_txt(r, 'lower')}} to {{ get_ARDp_txt(r, 'upper')}}
                         </td>
-                        <td v-bind:class="get_cieclr(r.ae.result[measure].random.model.sm, r.ae.cie)"
-                            v-on:click="show_cie_detail(r.ae_name)">
-                            {{ txt('CIE_TOT_' + r.ae.cie) }}
+
+                        <td v-if="show_survival=='yes'">
+                            {{ get_SRVI_txt(r, 'sm') }}
+                        </td>
+
+                        <td v-if="show_survival=='yes'">
+                            {{ get_SRVC_txt(r) }}
+                        </td>
+
+                        <td v-if="show_survival=='yes'">Survival</td>
+
+                        <td v-bind:class="get_cieclr(r.oc.result[get_a_measure(r)].random.model.sm, r.oc.cie)"
+                            v-on:click="show_cie_detail(r.oc_name)">
+                            {{ txt('CIE_TOT_' + r.oc.cie) }}
                         </td>
                         <td>
-                            {{ r.ae.importance }}
+                            {{ r.oc.importance }}
                         </td>
                     </tr>
                 </table>
@@ -438,8 +448,8 @@ a {
                     Certainty in Evidence: 
                     <b class="txt-lg"
                         style="padding: 3px 5px"
-                        v-bind:class="get_cieclr(ae_dict[detail.cie.ae_name].result.OR.random.model.sm, ae_dict[detail.cie.ae_name].cie)">
-                        {{ txt('CIE_TOT_' + ae_dict[detail.cie.ae_name].cie) }}
+                        v-bind:class="get_cieclr(oc_dict[detail.cie.oc_name].result[get_a_measure(rs[detail.cie.oc_name])].random.model.sm, oc_dict[detail.cie.oc_name].cie)">
+                        {{ txt('CIE_TOT_' + oc_dict[detail.cie.oc_name].cie) }}
                     </b>
                 </h4>
             </div>
@@ -447,23 +457,23 @@ a {
                 <table class="cie-table">
                     <tr>
                         <th>Risk of bias</th>
-                        <td>{{ txt('CIE_VAL_' + ae_dict[detail.cie.ae_name].cie_rob) }}</td>
+                        <td>{{ txt('CIE_VAL_' + oc_dict[detail.cie.oc_name].cie_rob) }}</td>
                     </tr>
                     <tr>
                         <th>Inconsistency</th>
-                        <td>{{ txt('CIE_VAL_' + ae_dict[detail.cie.ae_name].cie_inc) }}</td>
+                        <td>{{ txt('CIE_VAL_' + oc_dict[detail.cie.oc_name].cie_inc) }}</td>
                     </tr>
                     <tr>
                         <th>Indirectness</th>
-                        <td>{{ txt('CIE_VAL_' + ae_dict[detail.cie.ae_name].cie_ind) }}</td>
+                        <td>{{ txt('CIE_VAL_' + oc_dict[detail.cie.oc_name].cie_ind) }}</td>
                     </tr>
                     <tr>
                         <th>Imprecision</th>
-                        <td>{{ txt('CIE_VAL_' + ae_dict[detail.cie.ae_name].cie_imp) }}</td>
+                        <td>{{ txt('CIE_VAL_' + oc_dict[detail.cie.oc_name].cie_imp) }}</td>
                     </tr>
                     <tr>
                         <th>Publication bias</th>
-                        <td>{{ txt('PUB_BIA_' + ae_dict[detail.cie.ae_name].pub_bia) }}</td>
+                        <td>{{ txt('PUB_BIA_' + oc_dict[detail.cie.oc_name].pub_bia) }}</td>
                     </tr>
                 </table>
             </div>
@@ -472,12 +482,27 @@ a {
         <div id="tb_simple_sofpma_ctrl_select" class="box dlg-sm" title="Assumed Baseline Risk">
             <div class="box-body">
                 <h4>Assumed (Baseline) Risk?</h4>
-                <p><input type="radio" name="ipt_which_ctrl"> External: <input type="text" style="border:0; border-bottom: 1px solid #ececec; text-indent: 1em; padding: 3px 0;"></p>
+                <p>
+                    <input type="radio" name="ipt_which_ctrl" value="external" 
+                    v-model="rs[set_ctrl_oc_name].which_ACR.use_which_val"> 
+                    External
+                    <input type="text"
+                        v-bind:disabled="rs[set_ctrl_oc_name].which_ACR.use_which_val == 'internal'"
+                        v-model="rs[set_ctrl_oc_name].which_ACR.external_val">
+                </p>
                 <hr>
-                <p><input type="radio" name="ipt_which_ctrl"> Internal:</p>
-                <p>&nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" name="ipt_ctrl"> Mean
-                   &nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" name="ipt_ctrl"> High risk
-                   &nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" name="ipt_ctrl"> Low risk</p>
+                <div v-if="rs[set_ctrl_oc_name].which_ACR.has_internal">
+                    <p>
+                        <input type="radio" name="ipt_which_ctrl" value="internal"
+                            v-model="rs[set_ctrl_oc_name].which_ACR.use_which_val">
+                        Internal
+                    </p>
+                    <!-- <p>&nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" name="ipt_ctrl"> Mean
+                       &nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" name="ipt_ctrl"> High risk
+                       &nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" name="ipt_ctrl"> Low risk</p> -->
+                    <p></p>
+                </div>
+                <div v-else>&nbsp;</div>
             </div>
         </div>
     </div>
@@ -500,8 +525,8 @@ if (isIE) {
 
 <script>
 
-{% include 'js/vw_simple_oclist.js' %}
-{% include 'js/tb_simple_sofpma.js' %}
+{% include 'js/vw_simple_oclist_v2.js' %}
+{% include 'js/tb_simple_sofpma_v2.js' %}
 
 
 var jarvis = {
@@ -521,15 +546,15 @@ var jarvis = {
         'PUB_BIA_0': 'Not applicable'
     },
 
+    // for the PMA table
+    default_measure: '',
+    measure_list: [],
+
     measure_dict: {
         OR: { abbr: 'OR', name: 'Odds Ratio (OR)' },
         RR: { abbr: 'RR', name: 'Risk Ratio (RR)' },
         HR: { abbr: 'HR', name: 'Hazard Ratio (RR)' },
     },
-
-    // for the PMA table
-    default_measure: '',
-    measure_list: [],
 
     init: function() {
         var isIE = /*@cc_on!@*/false || !!document.documentMode;
@@ -567,13 +592,13 @@ var jarvis = {
 
         $.get(
             '/pub/graphdata/'+prj+'/SOFTABLE_PMA.json',
-            {ver: Math.random()},
+            {v: 2, ver: Math.random()},
             function(data) {
                 vw_simple_oclist.init(data);
                 tb_simple_sofpma.init(data);
 
                 // show the first one
-                vw_simple_oclist.toggle_ae(data.ae_list[0].ae_names[0]);
+                // vw_simple_oclist.toggle_oc(data.oc_list[0].oc_names[0]);
 
                 // ok, remove the 
                 jarvis.ssmsg('Almost initialized.');
@@ -591,13 +616,13 @@ var jarvis = {
         return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
     },
 
-    toggle_ae: function(ae_name) {
-        console.log('* toggle_ae '+ ae_name);
-        tb_simple_sofpma.toggle_ae(ae_name);
+    toggle_oc: function(oc_name) {
+        console.log('* toggle_oc '+ oc_name);
+        tb_simple_sofpma.toggle_oc(oc_name);
     },
 
-    clear_all_ae: function() {
-        tb_simple_sofpma.clear_all_ae();
+    clear_all_oc: function() {
+        tb_simple_sofpma.clear_all_oc();
     },
 
     ssmsg: function(msg) {

@@ -250,4 +250,16 @@ The only thing we need to do is upgrade:
 ```bash
 (py37lnma) $ flask db upgrade
 ```
-# Others
+# Update log
+
+## 2020-09-20
+
+To support different types of measure of effects in SoF PMA, the followings are added:
+
+1. URL parameter `msrs` for softable_pma and default values;
+2. `tb_simple_sofpma` add `default_measure` and `measure_list` to hold the measures for rending;
+3. Setting measures before init the `tb_simple_sofpma`.
+
+And for the external base:
+
+1. the data structure has to be changed to support HR.

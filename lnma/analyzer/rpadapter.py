@@ -770,3 +770,44 @@ def _meta_trans_metacum(j, params):
         })
 
     return ret
+
+
+def _meta_trans_metagen(j, params):
+    '''Convert the metagen result for PWMA
+    In RCC project, this can be used for SoF table PWMA
+    '''
+    data = j['primma']
+    # first, put the basic values
+    ret = {
+        'model': {
+            'random': {
+                'name': 'Random effects model',
+                'TE': data['TE.random'][0],
+                'seTE': data['seTE.random'][0],
+                'sm': round(np.e ** data['TE.random'][0], 3),
+                'lower': round(np.e ** data['lower.random'][0], 3),
+                'upper': round(np.e ** data['upper.random'][0], 3)
+            }
+        },
+        'heterogeneity': {
+            'i2': data['I2'][0],
+            'tau2': data['tau2'][0],
+            'p': data['pval.Q'][0]
+        },
+        'stus': []
+    }
+    # second, add all the studies
+    stus = data['studlab']
+    for i, stu in enumerate(stus):
+        ret['stus'].append({
+            'name': stu,
+            'TE': data['TE'][i],
+            'seTE': data['seTE'][i],
+            'sm': round(np.e ** data['TE'][i], 3),
+            'lower': round(np.e ** data['lower'][i], 3),
+            'upper': round(np.e ** data['upper'][i], 3),
+            'w.random': round(data['w.random'][i] / np.sum(data['w.random']), 4),
+            'w.fixed': round(data['w.fixed'][i] / np.sum(data['w.fixed']), 4)
+        })
+
+    return ret

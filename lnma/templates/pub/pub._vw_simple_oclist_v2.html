@@ -1,0 +1,25 @@
+<div id="vw_simple_oclist">
+    <div class="box">
+        <div class="box-header">
+            <h4>
+                <i class="fa fa-list"></i>
+                Outcome List
+            </h4>
+            <div>
+                <button v-on:click="clear_all_oc">
+                    <i class="fa fa-sync"></i>
+                    Reset
+                </button>
+            </div>
+        </div>
+        <div class="box-body">
+            <div class="oc-item"
+                v-for="oc in oc_list"
+                v-bind:oc_name="oc.oc_name"
+                v-bind:class="{'oc-item-selected':oc.is_checked}"
+                v-on:click="toggle_oc(oc)">
+                {{ oc_dict[oc.oc_name].oc_fullname }}
+            </div>
+        </div>
+    </div>
+</div>
