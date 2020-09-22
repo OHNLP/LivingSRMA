@@ -211,6 +211,12 @@ def softable_pma_v2():
 def softable_nma():
     return render_template('pub/pub.softable_nma.html')
 
+
+@bp.route('/softable_nma_v2.html')
+def softable_nma_v2():
+    return render_template('pub/pub.softable_nma_v2.html')
+
+
 ###########################################################
 # Data services
 ###########################################################
@@ -346,7 +352,6 @@ def graphdata_softable_pma_json(prj):
     return jsonify(ret)
 
 
-
 @bp.route('/graphdata/<prj>/SOFTABLE_NMA.json')
 def graphdata_softable_nma_json(prj):
     '''Special rule for the SoF Table NMA which does not exist
@@ -359,24 +364,34 @@ def graphdata_softable_nma_json(prj):
     fn_json = 'SOFTABLE_NMA.json'
     full_fn_json = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn_json)
 
+    # get parameters
     use_cache = request.args.get('use_cache')
+    v = request.args.get('v')
+
     if use_cache == 'yes':
         return send_from_directory(
             os.path.join(current_app.instance_path, PATH_PUBDATA, prj),
             fn_json
         )
     full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
-    
+
     backend = 'freq'
     if prj == 'RCC':
         backend = 'freq'
     elif prj == 'CAT':
         backend = 'bayes'
 
-    ret = get_ae_nma_data(full_fn, backend=backend)
-
-    # cache the result
-    json.dump(ret, open(full_fn_json, 'w'))
+    ret = {}
+    if v is None or v == '' or v == '1':
+        ret = get_ae_nma_data(full_fn, backend=backend)
+        # cache the result
+        json.dump(ret, open(full_fn_json, 'w'))
+    elif v == '2':
+        fn = 'SOFTABLE_NMA_DATA.xlsx'
+        full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
+        ret = get_oc_nma_data(full_fn, backend=backend)
+        # cache the result
+        json.dump(ret, open(full_fn_json, 'w'))
 
     return jsonify(ret)
 
@@ -574,21 +589,6 @@ def get_pma_by_py(dataset, datatype='CAT_RAW', sm='RR', method='MH', fixed_or_ra
     
     return ret
 
-
-def get_nma_by_r(dataset, datatype='CAT_RAW', 
-    sm='OR', method='MH', fixed_or_random='random'):
-    '''Get the NMA results by R script 
-    
-    The data type must be in ['CAT_PRE', 'CAT_RAW]
-    '''
-    ret = {}
-    
-    if datatype == 'CAT_PRE':
-        ret = get_pma_by_r_CAT_PRE(dataset, sm, method, fixed_or_random)
-    elif datatype == 'CAT_RAW':
-        ret = get_pma_by_r_CAT_RAW(dataset, sm, method, fixed_or_random)
-
-    return ret
 
 def get_pma_by_r_CAT_PRE(dataset, 
     sm='HR', fixed_or_random='random'):
@@ -1180,6 +1180,259 @@ def get_ae_pma_data_simple(full_fn):
     return ret
 
 
+def get_nma_by_r(dataset, datatype='CAT_RAW', 
+    sm='OR', method='MH', fixed_or_random='random'):
+    '''Get the NMA results by R script 
+    
+    The data type must be in ['CAT_PRE', 'CAT_RAW]
+    '''
+    ret = {}
+    
+    if datatype == 'CAT_PRE':
+        ret = get_pma_by_r_CAT_PRE(dataset, sm, method, fixed_or_random)
+    elif datatype == 'CAT_RAW':
+        ret = {}
+
+    return ret
+
+
+def get_oc_nma_data(full_fn, backend):
+    '''
+    Get the SoF Table NMA data
+
+    The backend supports:
+
+    - bayes
+    - freq
+    '''
+    xls = pd.ExcelFile(full_fn)
+    
+    # build OC Category data
+    oc_tab_name = 'Outcomes'
+    oc_tab_cert = 'Certainty'
+
+    dft = xls.parse(oc_tab_name)
+    dft = dft[~dft['name'].isna()]
+
+    # define the columns for basic information of outcome
+    cols_certs = [
+        'oc_cate', 'oc_name', 'comparator', 'treatment', 
+        'cie_rob', 'cie_inc', 'cie_ind', 'cie_imp', 'pub_bia'
+    ]
+
+    # build oc category
+    oc_dict = {}
+    oc_list = []
+    oc_item = {}
+    oc_names = []
+    for idx, row in dft.iterrows():
+        oc_cate = row['category']
+        oc_name = row['name']
+        oc_fullname = row['full name']
+        oc_names.append(oc_name)
+
+        # create a new outcome item to hold all the data
+        if oc_item == {}:
+            oc_item = {
+                "oc_cate": oc_cate,
+                "oc_names": []
+            }
+        elif oc_cate != oc_item['oc_cate']:
+            # append the oc_cate and add a new one
+            oc_list.append(oc_item)
+            oc_item = {
+                "oc_cate": oc_cate,
+                "oc_names": []
+            }
+        
+        # put current row in to oc_item
+        oc_item['oc_names'].append(oc_name)
+
+        # put current row in to ae_dict
+        oc_dict[oc_name] = {
+            "oc_cate": oc_cate,
+            "oc_measures": row['measure'].split(','),
+            "oc_datatype": row['data type'],
+            "oc_name": oc_name,
+            "oc_fullname": oc_fullname
+        }
+
+    # put the last ae_item
+    oc_list.append(oc_item)
+    print('* created oc_dict %s terms' % (len(oc_dict)))
+
+    # build certainty?
+    if oc_tab_cert in xls.sheet_names:
+        dft = xls.parse(oc_tab_cert, usecols='A:I', names=cols_certs)
+        for idx, row in dft.iterrows():
+            oc_cate = row['oc_cate']
+            oc_name = row['oc_name']
+            comparator = row['comparator']
+            treatment = row['treatment']
+
+    # build OC details by the data type
+    cols_dict = {
+        'raw': ['A:D', ['study', 'treat', 'event', 'total' ]],
+        'pre': ['A:H', ['study', 't1', 't2', 'sm', 'lowerci', 'upperci', 
+                        'survival in t1', 'survival in t2']]
+    }
+    oc_dfts = []
+    oc_rsts = {}
+
+    # add detailed OC
+    # create an all_treats for holding the data
+    all_treat_list = []
+    for oc_name in oc_names:
+        oc = oc_dict[oc_name]
+        oc_datatype = oc['oc_datatype']
+        oc_measures = oc['oc_measures']
+        sheet_name = oc_name
+
+        # get the data
+        usecols = cols_dict[oc_datatype][0]
+        namecols = cols_dict[oc_datatype][1]
+        dft = xls.parse(sheet_name, usecols=usecols, names=namecols)
+
+        # remove those empty lines based on study name
+        # the study name MUST be different
+        dft = dft[~dft.study.isna()]
+        rs = json.loads(dft.to_json(orient='table', index=False))['data']
+
+        # empty data???
+        if len(dft) == 0: 
+            print('* %s: [%s]' % (
+                'EMPTY OC Tab'.ljust(25, ' '),
+                oc_name.rjust(35, ' ')
+            ))
+            continue
+
+        # build detail for the treatments of this oc
+        treats = {}
+        treat_list = []
+        if oc_datatype == 'raw':
+            # treat column contains all the treatments
+            treat_list = dft['treat'].unique().tolist()
+
+            # get the total number of each treat
+            dftt = dft.groupby('treat')[['event', 'total']].sum()
+            for idx, row in dftt.iterrows():
+                treat = idx
+                treats[treat] = {
+                    "event": int(row['event']),
+                    "total": int(row['total']),
+                    "rank": 0
+                }
+
+            # count how many studies for each treatment
+            dftt = dft.groupby('treat')[['study']].count()
+            for idx, row in dftt.iterrows():
+                treat = idx
+                treats[treat]['n_stus'] = int(row['study'])
+
+        elif oc_datatype == 'pre':
+            # need to get all the treats from t1 and t2
+            treat_list = list(set(dft['t1'].unique().tolist() + dft['t2'].unique().tolist()))
+
+            # due to the missing data, we need to count each treatment line by line
+            for idx, row in dft.iterrows():
+                t1 = row['t1']
+                t2 = row['t2']
+
+                # init the t1 and t2 with 0
+                if t1 not in treats: 
+                    treats[t1] = {
+                        'survival_in_control': 0,
+                        'n_stus': 0,
+                        'rank': 0
+                    }
+                if t2 not in treats: 
+                    treats[t2] = {
+                        'survival_in_control': 0,
+                        'n_stus': 0,
+                        'rank': 0
+                    }
+
+                # count the survival when value is float for t1
+                try:
+                    treats[t1]['survival_in_control'] += float(row['survival in t1'])
+                    treats[t1]['n_stus'] += 1
+                except:
+                    if row['survival in t1'] == 'NR':
+                        pass
+            
+                # count the survival when value is float for t2
+                try:
+                    treats[t2]['survival_in_control'] += float(row['survival in t2'])
+                    treats[t2]['n_stus'] += 1
+                except:
+                    if row['survival in t2'] == 'NR':
+                        pass
+
+        # update treats
+        all_treat_list += treat_list
+
+        # after gathering all the treats, bind to oc_dict
+        oc_dict[oc_name]['treats'] = treats
+
+        # now get the league table
+        oc_dict[oc_name]['lgtable'] = {}
+        for sm in oc_measures:
+            # init this measure with a blank table
+            oc_dict[oc_name]['lgtable'][sm] = {}
+
+            # make a config dict for get the league table
+            cfg = {
+                # for init analyzer
+                "backend": backend,
+                "data_type": {'pre': 'CAT_PRE', 'raw': 'CAT_RAW'}[oc_datatype],
+                "measure_of_effect": sm,
+                "fixed_or_random": "random",
+                # just use the first one as 
+                "reference_treatment": treat_list[0],
+                "which_is_better": "big"
+            }
+            
+            # invoke analyzer
+            ret_nma = nma_analyzer.analyze(rs, cfg)
+
+            # convert nma result to page format
+            lgt_cols = ret_nma['data']['league']['cols']
+            for lgt_rs in ret_nma['data']['league']['tabledata']:
+                lgt_r = lgt_rs['row']
+                # create a new comparator row
+                oc_dict[oc_name]['lgtable'][sm][lgt_r] = {}
+
+                for j, lgt_c in enumerate(lgt_cols):
+                    lgt_cell = {
+                        "sm": lgt_rs['stat'][j],
+                        'lw': lgt_rs['lci'][j],
+                        'up': lgt_rs['uci'][j]
+                    }
+                    # create a new treat col
+                    oc_dict[oc_name]['lgtable'][sm][lgt_r][lgt_c] = lgt_cell
+
+            # get the rank data
+            if backend == 'freq':
+                rank_name = 'psrank'
+            elif backend == 'bayes':
+                rank_name = 'tmrank'
+
+            # get the output rank
+            ranks = sorted(ret_nma['data'][rank_name]['rs'], key=lambda v: v['value'])
+            for i, r in enumerate(ranks):
+                oc_dict[oc_name]['treats'][r['treat']]['rank'] = i+1
+                oc_dict[oc_name]['treats'][r['treat']]['score'] = r['value']
+
+    # return object
+    ret = {
+        'oc_dict': oc_dict,
+        'oc_list': oc_list,
+        'treat_list': list(set(all_treat_list))
+    }
+
+    return ret
+
+
 def get_ae_nma_data(full_fn, backend):
     '''
     Get the SoF Table NMA data
@@ -1238,13 +1491,13 @@ def get_ae_nma_data(full_fn, backend):
         
     # put the last ae_item
     ae_list.append(ae_item)
+
+    # get the certainty for each combination of each ae
+    sheet_name_2 = xls.sheet_names[1]
     cols_certs = [
         'ae_cate', 'ae_name', 'comparator', 'treatment', 
         'cie_rob', 'cie_inc', 'cie_ind', 'cie_imp', 'pub_bia'
     ]
-
-    # get the certainty for each combination of each ae
-    sheet_name_2 = xls.sheet_names[1]
     dft = xls.parse(sheet_name_2, usecols='A:I', names=cols_certs)
     for idx, row in dft.iterrows():
         ae_cate = row['ae_cate']
@@ -1287,7 +1540,7 @@ def get_ae_nma_data(full_fn, backend):
 
         if len(dft) == 0: 
             print('* %s: [%s]' % (
-                'EMPTY AE Tab'.ljust(25, ' '),
+                'EMPTY OC Tab'.ljust(25, ' '),
                 ae_name.rjust(35, ' ')
             ))
             continue
@@ -1390,8 +1643,6 @@ def get_oc_pma_data(full_fn):
     oc_tab_name = 'Outcomes'
     dft = xls.parse(oc_tab_name)
     dft = dft[~dft['name'].isna()]
-    oc_dict = {}
-    oc_list = []
 
     # define the columns for basic information of outcome
     cie_cols = [
@@ -1403,6 +1654,9 @@ def get_oc_pma_data(full_fn):
     col_pub_bia = 'publication bias'
     col_importance = 'importance'
 
+    # build oc category
+    oc_dict = {}
+    oc_list = []
     oc_item = {}
     oc_names = []
     for idx, row in dft.iterrows():

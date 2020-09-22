@@ -56,6 +56,8 @@ def analyze(rs, cfg):
     for key in cfg:
         params[key] = cfg[key]
 
+    print(params)
+
     # get result from other analyzer
     if cfg['backend'] == 'bayes':
         if cfg['input_format'] == 'ET':
@@ -64,17 +66,17 @@ def analyze(rs, cfg):
             ret = {}
 
     elif cfg['backend'] == 'freq':
-        if cfg['input_format'] == 'ET':
-            ret = analyze_raw_by_netmeta(rs, params)
+        if cfg['data_type'] == 'ET':
+            ret = analyze_raw_by_freq(rs, params)
+        elif cfg['data_type'] == 'CAT_RAW':
+            ret = analyze_raw_by_freq(rs, params)
+        elif cfg['data_type'] == 'CAT_PRE':
+            ret = analyze_pre_by_freq(rs, params)
         else:
-            ret = {
-
-            }
-
+            ret = {}
     else:
-        ret = {
+        ret = {}
 
-        }
     return ret
 
 
@@ -146,7 +148,7 @@ def analyze_raw_by_bugsnet(rs, params):
     return ret
 
 
-def analyze_raw_by_netmeta(rs, params):
+def analyze_raw_by_freq(rs, params):
     '''
     Frequentist NMA
     
@@ -206,6 +208,70 @@ def analyze_raw_by_netmeta(rs, params):
     # output the rs2 as csv
     df2 = pd.DataFrame(rs2)
     df2.to_csv(full_filename_csvfile, index=False)
+
+    # generate an R script for producing the results
+    gen_rscript(
+        RSCRIPT_TPL_FOLDER, 
+        RSCRIPT_TPL[subtype], 
+        params['fn_rscript'], 
+        r_params
+    )
+
+    # run the R script
+    run_rscript(params['fn_rscript'])
+
+    # transform the output json to front end format
+    jrst = json.load(open(full_filename_jsonret))
+    rs_sucra = []
+
+    ret = {
+        'submission_id': params['submission_id'],
+        'params': params,
+        'success': True,
+        'data': {
+            'netplt': _netmeta_trans_netplt(jrst['mynetplt'], params),
+            'league': _netmeta_trans_league_r(jrst['myleaguetb'], params),
+            'psrank': _netmeta_trans_pscore(jrst, params)
+        }
+    }
+
+    return ret
+
+
+def analyze_pre_by_freq(rs, params):
+    '''
+    Frequentist NMA for pre-calculated data
+    
+    The input `rs` must be in the following format:
+
+        study, t1, t2, sm, lowerci, upperci
+
+    The input params must include:
+
+        measure_of_effect
+        reference_treatment
+        which_is_better
+    '''
+
+    # prepare the r script
+    subtype = params['subtype']
+
+    # prepare the file names
+    full_filename_rscript = os.path.join(TMP_FOLDER, params['fn_rscript'])
+    full_filename_csvfile = os.path.join(TMP_FOLDER, params['fn_csvfile'])
+    full_filename_jsonret = os.path.join(TMP_FOLDER, params['fn_jsonret'])
+
+    # prepare the other parameters used in R script
+    r_params = {
+        'is_fixed': 'TRUE' if params['fixed_or_random'] == 'fixed' else 'FALSE',
+        'is_random': 'TRUE' if params['fixed_or_random'] == 'random' else 'FALSE',
+        'small_values_are': 'bad' if params['which_is_better'] == 'big' else 'good',
+    }
+    r_params.update(params)
+
+    # convert to dataframe
+    df = pd.DataFrame(rs)
+    df.to_csv(full_filename_csvfile, index=False)
 
     # generate an R script for producing the results
     gen_rscript(

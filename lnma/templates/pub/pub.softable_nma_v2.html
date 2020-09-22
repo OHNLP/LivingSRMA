@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+
+<title>Summary of Findings: NMA</title>
+
+<link rel="icon" href="/static/img/favicon.png" type="image/png">
+<script src="https://kit.fontawesome.com/cb45cc91b0.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="/static/lib/jquery-ui/jquery-ui.min.css">
+<link rel="stylesheet" href="/static/css/mybox-0.9.1.css">
+
+<style>
+html, body {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+}
+body {
+    font-size: 12px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+a {
+    color: #333333;
+    text-decoration: none;
+}
+#wrapper {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+}
+#start-screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+#ss-msg {
+    width: 100%;
+    padding: 10px 0;
+    text-align: center;
+}
+
+/* for this page */
+#app {
+    width: 100%;
+    height: 100%;
+}
+
+/* for the simple oclist */
+
+#vw_simple_oclist {
+    width: 200px;
+    min-width: 200px;
+    padding: 0 5px;
+    height: 100%;
+}
+.oc-item {
+    display: flex;
+    align-items: center;
+    width: calc(100% - 10px);
+    height: 50px;
+    border: 1px solid #dddddd;
+    margin: 0 0 10px;
+    padding: 0 0 0 10px;
+    cursor: pointer;
+}
+.oc-item:hover {
+    background: whitesmoke;
+    font-weight: bold;
+}
+.oc-item-selected {
+    background: #ececec;
+    font-weight: bold;
+}
+
+/* for the NMA table */
+
+#tb_simple_sofnma {
+    width: 100%;
+}
+
+/* for the SoF table */
+.sof-table {
+    width: 100%;
+}
+.sof-table th {
+    text-align: center;
+    background: whitesmoke;
+    padding: 5px 0;
+}
+.sof-table td {
+    text-align: center;
+    line-height: 1.45em;
+    padding: 3px 0;
+    border-bottom: 1px solid #e6e6e6;
+    border-right: 1px solid #e6e6e6;
+}
+.sof-table .col-oc-name {
+    width: 150px;
+    max-width: 200px;
+    cursor: pointer;
+}
+.sof-table .col-oc-name:hover {
+    background: whitesmoke;
+}
+.sof-table .col-treat {
+    width: 100px;
+    max-width: 150px;
+}
+.sof-table .col-comarator {
+    background: #ffface;
+}
+.sof-table .col-ta-left {
+    text-align: left !important;
+    padding-left: 10px;
+}
+.sof-table .col-flipable {
+    cursor: pointer;
+}
+.sof-table .col-flipable:hover {
+    background: whitesmoke;
+}
+.cie-table th {
+    text-align: left;
+    padding: 3px 5px;
+}
+.cell-treat {
+    background: white;
+    cursor: pointer;
+}
+.cell-treat:hover {
+    /* background: #efefef; */
+}
+.cie-bene-4 { background: rgb(55, 86, 35); color: white; }
+.cie-bene-3 { background: rgb(84, 130, 53); color: white; }
+.cie-bene-2 { background: rgb(169, 208, 142); color: black; }
+.cie-bene-1 { background: rgb(198, 224, 180); color: black; }
+.cie-harm-4 { background: rgb(150, 0, 0); color: white; }
+.cie-harm-3 { background: rgb(220, 0, 0); color: white; }
+.cie-harm-2 { background: rgb(255, 50, 50); color: black; }
+.cie-harm-1 { background: rgb(255, 125, 125); color: black; }
+.cie-nner-2 { background: rgb(202, 183, 10); color: black; }
+.cie-nner-1 { background: rgb(250, 248, 133); color: black; }
+
+
+.legend-table td { padding: 5px 10px; font-size: 14px; }
+
+.dlg-sm h4 { margin: 5px 0; }
+.dlg-sm p { margin: 0; }
+.dlg-sm hr { border: 0; border-bottom: 1px solid #ececec; }
+
+.red { color: red; }
+</style>
+</head>
+<body>
+<div id="start-screen">
+    <h1>
+        <i class="fa fa-table"></i>
+        Summary of Findings: Network Meta-Analysis
+    </h1>
+    <div id="ss-msg">Loading data and initializing ...</div>
+</div>
+
+<div id="color_guide" style="display: none;" title="Color guide">
+<table class="legend-table">
+    <tr>
+        <td class="cie-bene-4">High certainty benefit</td>
+        <td class="cie-harm-4">High certainty harm</td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td class="cie-bene-3">Moderate certainty benefit</td>
+        <td class="cie-harm-3">Moderate certainty harm</td>
+        <td>&nbsp;</td>
+    </tr>
+    <tr>
+        <td class="cie-bene-2">Low certainty benefit</td>
+        <td class="cie-harm-2">Low certainty harm</td>
+        <td class="cie-nner-2">Low certainty neither harm nor benefit</td>
+    </tr>
+    <tr>
+        <td class="cie-bene-1">Very low certainty benefit</td>
+        <td class="cie-harm-1">Very low certainty harm</td>
+        <td class="cie-nner-1">Very low certainty neither harm nor benefit</td>
+    </tr>
+</table>
+</div>
+<!-- /div#legend -->
+
+<div id="wrapper">
+
+<div id="app" class="d-flex fx-row">
+
+
+    <div id="tb_simple_sofnma">
+        <div class="box" style="height: 100%;">
+            <div class="box-header">
+                <h4>
+                    <i class="fa fa-table"></i>
+                </h4>
+                <div class="d-flex fx-row">
+
+                    <div class="box-menu-group d-flex fx-row">
+                        <div class="red">
+                            <i class="fa fa-cog"></i>
+                            <b>Comparator: </b>
+                        </div>
+                        <div>
+                            <select v-model='comparator'>
+                                <option v-for="treat in treat_list"
+                                    v-bind:value="treat">
+                                    {{ treat }}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="box-menu-group d-flex fx-row">
+                        <div>
+                            <i class="fa fa-cog"></i>
+                            Measure of effect: 
+                        </div>
+                        <div>
+                            <select v-model='measure'>
+                                <option value="OR">Odds Ratio (OR)</option>
+                                <option value="RR">Risk Ratio (RR)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="box-menu-group d-flex fx-row">
+                        <div>
+                            <i class="fa fa-cog"></i>
+                            Display risks per: 
+                        </div>
+                        <div>
+                            <select v-model="baseline">
+                                <option value="100">100</option>
+                                <option value="1000">1000</option>
+                                <option value="10000">10,000</option>
+                                <option value="100000">100,000</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="box-menu-group d-flex fx-row">
+                        <div class="box-menu-link" onclick="jarvis.show_color_guide();">
+                            <i class="fa fa-paint-brush"></i>
+                            Color guide
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="box-body" style="height: 100%; overflow-y: auto;">
+
+                <table class="sof-table">
+                    <tr>
+                        <th class="col-oc-name">Outcome</th>
+                        <th class="col-treat">Comparator: <b class="red">{{ comparator }}</b></th>
+                        <th class="col-treat" 
+                            v-for="treat in treat_list" 
+                            v-if="treat!=comparator">
+                            {{ treat }}
+                        </th>
+                    </tr>
+                    <tr v-for="oc in rs">
+                        <td class="col-oc-name">{{ oc.oc_name }}</td>
+                        <td class="col-comarator">
+                            {{ Math.round(get_ACR(oc.treats[comparator]) * baseline) }} per {{ baseline }} <br>
+                            <b>Rank {{ oc.treats[comparator].rank }}</b>
+                        </td>
+                        <td class="cell-treat"
+                            v-for="treat in treat_list" 
+                            v-if="treat!=comparator"
+                            v-bind:oc_name="oc.oc_name"
+                            v-bind:treat="treat"
+                            v-bind:class="get_bg_color_class(oc.lgtable[measure][comparator][treat].sm, oc.cetable[comparator][treat].cie)"
+                            v-on:click="show_detail(oc.oc_name, treat)">
+                            {{ get_ARD_txt(oc.treats[comparator], oc.lgtable[measure][comparator][treat].sm) }}<br>
+                            <b>Rank {{ oc.treats[treat].rank }}</b>
+                        </td>
+                    </tr>
+                </table>
+
+            </div>
+
+        </div>
+
+        <div id="tb_simple_sofnma_detail" class="box"
+            v-bind:title="detail.oc_name">
+            <div class="box-header">
+                <h4>    
+                    <i class="fa fa-table"></i>
+                    {{ detail.oc_name }} - Treatment: <b class="txt-lg">{{ detail.treat }}</b>, Comparator: <b class="txt-lg">{{ comparator }}</b>
+                </h4>
+            </div>
+            <div class="box-body">
+
+                <div class="d-flex fx-row">
+                    <div style="width: 50%;">
+                        <p>Randomized controlled trials: <span class="txt-lg txt-fb">{{ oc_dict[detail.oc_name].treats[detail.treat].n_stus }}</span></p>
+                        <!-- <p>Observational studies: <span class="txt-lg txt-fb">N/A</span></p> -->
+                        <!-- <p>Follow up: <span class="txt-lg txt-fb">N/A</span></p> -->
+                        <p>Number of events in arm: <span class="txt-lg txt-fb">{{ oc_dict[detail.oc_name].treats[detail.treat].event }}</span></p>
+                        <p>Total participants in arm: <span class="txt-lg txt-fb">{{ oc_dict[detail.oc_name].treats[detail.treat].total }}</span></p>
+                    </div>
+
+                    <div style="width: 50%;">
+                        <h5>Summary Measure: {{ txt(measure) }}</h5>
+                        <p>Relative effect: 
+                            <span class="txt-lg txt-fb">{{ oc_dict[detail.oc_name]['lgtable'][measure][comparator][detail.treat].sm.toFixed(2) }} </span><br>
+                            ({{ oc_dict[detail.oc_name]['lgtable'][measure][comparator][detail.treat].lw.toFixed(2) }} to 
+                            {{ oc_dict[detail.oc_name]['lgtable'][measure][comparator][detail.treat].up.toFixed(2) }} )
+                        </p>
+                        
+                        <p>Absolute risk: <span class="txt-lg txt-fb">{{ Math.round(get_CIR(oc_dict[detail.oc_name].treats[comparator], oc_dict[detail.oc_name]['lgtable'][measure][comparator][detail.treat].sm) * baseline) }} per {{ baseline }}</span><br>
+                        ({{ Math.round(get_CIR(oc_dict[detail.oc_name].treats[comparator], oc_dict[detail.oc_name]['lgtable'][measure][comparator][detail.treat].lw) * baseline) }} per {{ baseline }} to 
+                        {{ Math.round(get_CIR(oc_dict[detail.oc_name].treats[comparator], oc_dict[detail.oc_name]['lgtable'][measure][comparator][detail.treat].up) * baseline) }} per {{ baseline }})</p>
+    
+                        <p>Absolute risk difference: <span class="txt-lg txt-fb">{{ get_ARD_txt(oc_dict[detail.oc_name].treats[comparator], oc_dict[detail.oc_name]['lgtable'][measure][comparator][detail.treat].sm) }}</span><br>
+                        ({{ get_ARD_txt(oc_dict[detail.oc_name].treats[comparator], oc_dict[detail.oc_name]['lgtable'][measure][comparator][detail.treat].lw) }}
+                        to
+                        {{ get_ARD_txt(oc_dict[detail.oc_name].treats[comparator], oc_dict[detail.oc_name]['lgtable'][measure][comparator][detail.treat].up) }})</p>
+    
+                        <p>Absolute risk percentage: <span class="txt-lg txt-fb">{{ get_ARDp_txt(oc_dict[detail.oc_name].treats[comparator], oc_dict[detail.oc_name]['lgtable'][measure][comparator][detail.treat].sm) }}</span><br>
+                        ({{ get_ARDp_txt(oc_dict[detail.oc_name].treats[comparator], oc_dict[detail.oc_name]['lgtable'][measure][comparator][detail.treat].lw) }} 
+                        to 
+                        {{ get_ARDp_txt(oc_dict[detail.oc_name].treats[comparator], oc_dict[detail.oc_name]['lgtable'][measure][comparator][detail.treat].up) }})</p>
+    
+                        <p>Rank: <span class="txt-lg txt-fb">{{ oc_dict[detail.oc_name].treats[detail.treat].rank }}</span></p>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div>
+                    <p>Certainty in Evidence: 
+                        <b class="txt-lg" style="padding: 0 5px;"
+                            v-bind:class="get_cieclr(oc_dict[detail.oc_name].lgtable[measure][comparator][detail.treat].sm, oc_dict[detail.oc_name].cetable[comparator][detail.treat].cie)">
+                            {{ txt('CIE_TOT_' + oc_dict[detail.oc_name].cetable[comparator][detail.treat].cie) }}
+                        </b>
+                    </p>
+                    <table class="cie-table">
+                        <tr>
+                            <th>Risk of bias</th>
+                            <td>{{ txt('CIE_VAL_' + oc_dict[detail.oc_name].cetable[comparator][detail.treat].cie_rob) }}</td>
+                        </tr>
+                        <tr>
+                            <th>Inconsistency</th>
+                            <td>{{ txt('CIE_VAL_' + oc_dict[detail.oc_name].cetable[comparator][detail.treat].cie_inc) }}</td>
+                            
+                        </tr>
+                        <tr>
+                            <th>Indirectness</th>
+                            <td>{{ txt('CIE_VAL_' + oc_dict[detail.oc_name].cetable[comparator][detail.treat].cie_ind) }}</td>
+                            
+                        </tr>
+                        <tr>
+                            <th>Imprecision</th>
+                            <td>{{ txt('CIE_VAL_' + oc_dict[detail.oc_name].cetable[comparator][detail.treat].cie_imp) }}</td>
+                            
+                        </tr>
+                        <tr>
+                            <th>Publication bias</th>
+                            <td>{{ txt('PUB_BIA_' + oc_dict[detail.oc_name].cetable[comparator][detail.treat].pub_bia) }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <!-- /div#tb_simple_sofnma_detail -->
+
+    </div>
+</div>
+
+</div>
+
+<script src="/static/lib/jquery/jquery-3.4.1.min.js"></script>
+<script src="/static/lib/jquery-ui/jquery-ui.min.js"></script>
+<script src="/static/lib/vue.js/vue.min.js"></script>
+<script src="/static/lib/alasql/alasql.min.js"></script>
+<script src="/static/lib/d3/d3.min.js"></script>
+
+<script>
+var isIE = /*@cc_on!@*/false || !!document.documentMode;
+if (isIE) {
+    document.getElementById('ss-msg').innerHTML = 'The functions used in this website require advanced web technologies, which are <b>NOT</b> supported by Internet Explorer<br>Try using Google Chrome, Apple Safari, Mozilla Firefox or other modern browsers.';
+}
+</script>
+
+<script>
+
+{% include 'js/vw_simple_oclist_v2.js' %}
+{% include 'js/tb_simple_sofnma_v2.js' %}
+
+var jarvis = {
+    txt: {
+        'OR': 'Odds Ratio (OR)',
+        'RR': 'Risk Ratio (RR)',
+        'CIE_TOT_4': 'High',
+        'CIE_TOT_3': 'Moderate',
+        'CIE_TOT_2': 'Low',
+        'CIE_TOT_1': 'Very Low',
+        'CIE_VAL_4': 'Very serious',
+        'CIE_VAL_3': 'Very serious',
+        'CIE_VAL_2': 'Serious',
+        'CIE_VAL_1': 'No serious',
+        'PUB_BIA_2': 'Strongly suspected',
+        'PUB_BIA_1': 'Undetected',
+        'PUB_BIA_0': 'Not applicable'
+    },
+    default_comparator: null,
+
+    init: function() {
+        var isIE = /*@cc_on!@*/false || !!document.documentMode;
+
+        console.log('* User is using IE:', isIE);
+        if (isIE) {
+            jarvis.ssmsg('The functions used in this website require advanced web technologies, which are <b>NOT</b> supported by Internet Explorer<br>Try using Google Chrome, Apple Safari, Mozilla Firefox or other modern browsers.')
+            return;
+        }
+
+        // OK, 
+        var prj = jarvis.getUrlParameter('prj');
+        if (prj == null || prj == '') {
+            jarvis.ssmsg('Project information error.')
+            return;
+        }
+
+        // set default_comparator
+        this.default_comparator = jarvis.getUrlParameter('dc');
+        if (this.default_comparator == null || this.default_comparator == '') {
+            this.default_comparator == null;
+        }
+
+        $.get(
+            './graphdata/' + prj + '/SOFTABLE_NMA.json',
+            // { ver: Math.random() },
+            { v: 2, ver: Math.random(), use_cache: 'yes', prj: prj },
+            function(data) {
+                // init the oc list
+                vw_simple_oclist.init(data);
+
+                // set the default_comparator
+                tb_simple_sofnma.default_comparator = jarvis.default_comparator;
+
+                // init the NMA table
+                tb_simple_sofnma.init(data);
+
+                // show the first one
+                vw_simple_oclist.toggle_oc(data.oc_list[0].oc_names[0]);
+
+                // ok, remove the start screen
+                jarvis.ssmsg('Almost initialized.');
+                setTimeout('jarvis.ssclose();', 400);
+
+            }, 'json'
+        );
+
+    },
+
+    getUrlParameter: function(name) {
+        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+        var results = regex.exec(location.search);
+        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    },
+
+    toggle_oc: function(oc_name) {
+        console.log('* toggle_oc '+ oc_name);
+        tb_simple_sofnma.toggle_oc(oc_name);
+    },
+
+    clear_all_oc: function() {
+        tb_simple_sofnma.clear_all_oc();
+    },
+
+    ssmsg: function(msg) {
+        $('#ss-msg').html(msg);
+    },
+
+    ssclose: function() {
+        $('#start-screen').hide();
+    },
+
+    show_color_guide: function() {
+        $('#color_guide').dialog({
+            width: 680
+        });
+    }
+};
+
+$(document).ready(function() {
+    jarvis.init();
+})
+</script>
+</body>
