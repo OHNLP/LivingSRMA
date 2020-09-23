@@ -553,7 +553,7 @@ var jarvis = {
     measure_dict: {
         OR: { abbr: 'OR', name: 'Odds Ratio (OR)' },
         RR: { abbr: 'RR', name: 'Risk Ratio (RR)' },
-        HR: { abbr: 'HR', name: 'Hazard Ratio (RR)' },
+        HR: { abbr: 'HR', name: 'Hazard Ratio (HR)' },
     },
 
     init: function() {
@@ -584,9 +584,9 @@ var jarvis = {
         this.default_measure = msrs[0];
         this.measure_list = msrs.map(function(v) {
             return jarvis.measure_dict[v];
-        })
+        });
         
-        // set the SoF PMA
+        // set the measures in SoF PMA
         tb_simple_sofpma.default_measure = this.default_measure;
         tb_simple_sofpma.measure_list = this.measure_list;
 

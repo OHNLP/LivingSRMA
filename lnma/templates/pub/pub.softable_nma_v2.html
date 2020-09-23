@@ -123,7 +123,7 @@ a {
     width: 100px;
     max-width: 150px;
 }
-.sof-table .col-comarator {
+.sof-table .col-comparator {
     background: #ffface;
 }
 .sof-table .col-ta-left {
@@ -166,6 +166,7 @@ a {
 .dlg-sm hr { border: 0; border-bottom: 1px solid #ececec; }
 
 .red { color: red; }
+.grey { color: grey; }
 </style>
 </head>
 <body>
@@ -238,8 +239,10 @@ a {
                         </div>
                         <div>
                             <select v-model='measure'>
-                                <option value="OR">Odds Ratio (OR)</option>
-                                <option value="RR">Risk Ratio (RR)</option>
+                                <option v-for="m in measure_list"
+                                    v-bind:value="m.abbr">
+                                    {{ m.name }}
+                                </option>
                             </select>
                         </div>
                     </div>
@@ -255,6 +258,19 @@ a {
                                 <option value="1000">1000</option>
                                 <option value="10000">10,000</option>
                                 <option value="100000">100,000</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="box-menu-group d-flex fx-row">
+                        <div>
+                            <i class="fa fa-cog"></i>
+                            Show survival data: 
+                        </div>
+                        <div>
+                            <select v-model="show_survival">
+                                <option value="yes">Yes</option>
+                                <option value="no">No</option>
                             </select>
                         </div>
                     </div>
@@ -280,21 +296,36 @@ a {
                             {{ treat }}
                         </th>
                     </tr>
-                    <tr v-for="oc in rs">
-                        <td class="col-oc-name">{{ oc.oc_name }}</td>
-                        <td class="col-comarator">
-                            {{ Math.round(get_ACR(oc.treats[comparator]) * baseline) }} per {{ baseline }} <br>
-                            <b>Rank {{ oc.treats[comparator].rank }}</b>
+                    <tr v-for="r, oc_name in rs">
+                        <td class="col-oc-name">
+                            {{ oc_name }}<br>
+                            <span class="grey">( {{ get_a_measure(r) }} )</span>
                         </td>
+
+                        <td class="col-comparator"
+                            v-if="show_survival == 'yes'">
+                            {{ get_SRVC_txt(r, comparator) }} <br>
+                            <b>{{ get_rank_txt(r, comparator) }}</b>
+                        </td>
+                        <td class="col-comparator"
+                            v-else>
+                            {{ get_ACR_txt(r, comparator) }} <br>
+                            <b>{{ get_rank_txt(r, comparator) }}</b>
+                        </td>
+
                         <td class="cell-treat"
                             v-for="treat in treat_list" 
                             v-if="treat!=comparator"
-                            v-bind:oc_name="oc.oc_name"
-                            v-bind:treat="treat"
-                            v-bind:class="get_bg_color_class(oc.lgtable[measure][comparator][treat].sm, oc.cetable[comparator][treat].cie)"
-                            v-on:click="show_detail(oc.oc_name, treat)">
-                            {{ get_ARD_txt(oc.treats[comparator], oc.lgtable[measure][comparator][treat].sm) }}<br>
-                            <b>Rank {{ oc.treats[treat].rank }}</b>
+                            v-bind:oc_name="oc_name"
+                            v-bind:class="get_bg_color_class2(r, comparator, treat)"
+                            v-bind:treat="treat">
+                            <span v-if="show_survival == 'yes'">
+                                {{ get_SRVD_txt(r, comparator, treat, 'sm') }}<br>
+                            </span>
+                            <span v-else>
+                                {{ get_ARD_txt(r, comparator, treat, 'sm') }}<br>
+                            </span>
+                            <b>{{ get_rank_txt(r, treat) }}</b>
                         </td>
                     </tr>
                 </table>
@@ -303,89 +334,7 @@ a {
 
         </div>
 
-        <div id="tb_simple_sofnma_detail" class="box"
-            v-bind:title="detail.oc_name">
-            <div class="box-header">
-                <h4>    
-                    <i class="fa fa-table"></i>
-                    {{ detail.oc_name }} - Treatment: <b class="txt-lg">{{ detail.treat }}</b>, Comparator: <b class="txt-lg">{{ comparator }}</b>
-                </h4>
-            </div>
-            <div class="box-body">
-
-                <div class="d-flex fx-row">
-                    <div style="width: 50%;">
-                        <p>Randomized controlled trials: <span class="txt-lg txt-fb">{{ oc_dict[detail.oc_name].treats[detail.treat].n_stus }}</span></p>
-                        <!-- <p>Observational studies: <span class="txt-lg txt-fb">N/A</span></p> -->
-                        <!-- <p>Follow up: <span class="txt-lg txt-fb">N/A</span></p> -->
-                        <p>Number of events in arm: <span class="txt-lg txt-fb">{{ oc_dict[detail.oc_name].treats[detail.treat].event }}</span></p>
-                        <p>Total participants in arm: <span class="txt-lg txt-fb">{{ oc_dict[detail.oc_name].treats[detail.treat].total }}</span></p>
-                    </div>
-
-                    <div style="width: 50%;">
-                        <h5>Summary Measure: {{ txt(measure) }}</h5>
-                        <p>Relative effect: 
-                            <span class="txt-lg txt-fb">{{ oc_dict[detail.oc_name]['lgtable'][measure][comparator][detail.treat].sm.toFixed(2) }} </span><br>
-                            ({{ oc_dict[detail.oc_name]['lgtable'][measure][comparator][detail.treat].lw.toFixed(2) }} to 
-                            {{ oc_dict[detail.oc_name]['lgtable'][measure][comparator][detail.treat].up.toFixed(2) }} )
-                        </p>
-                        
-                        <p>Absolute risk: <span class="txt-lg txt-fb">{{ Math.round(get_CIR(oc_dict[detail.oc_name].treats[comparator], oc_dict[detail.oc_name]['lgtable'][measure][comparator][detail.treat].sm) * baseline) }} per {{ baseline }}</span><br>
-                        ({{ Math.round(get_CIR(oc_dict[detail.oc_name].treats[comparator], oc_dict[detail.oc_name]['lgtable'][measure][comparator][detail.treat].lw) * baseline) }} per {{ baseline }} to 
-                        {{ Math.round(get_CIR(oc_dict[detail.oc_name].treats[comparator], oc_dict[detail.oc_name]['lgtable'][measure][comparator][detail.treat].up) * baseline) }} per {{ baseline }})</p>
-    
-                        <p>Absolute risk difference: <span class="txt-lg txt-fb">{{ get_ARD_txt(oc_dict[detail.oc_name].treats[comparator], oc_dict[detail.oc_name]['lgtable'][measure][comparator][detail.treat].sm) }}</span><br>
-                        ({{ get_ARD_txt(oc_dict[detail.oc_name].treats[comparator], oc_dict[detail.oc_name]['lgtable'][measure][comparator][detail.treat].lw) }}
-                        to
-                        {{ get_ARD_txt(oc_dict[detail.oc_name].treats[comparator], oc_dict[detail.oc_name]['lgtable'][measure][comparator][detail.treat].up) }})</p>
-    
-                        <p>Absolute risk percentage: <span class="txt-lg txt-fb">{{ get_ARDp_txt(oc_dict[detail.oc_name].treats[comparator], oc_dict[detail.oc_name]['lgtable'][measure][comparator][detail.treat].sm) }}</span><br>
-                        ({{ get_ARDp_txt(oc_dict[detail.oc_name].treats[comparator], oc_dict[detail.oc_name]['lgtable'][measure][comparator][detail.treat].lw) }} 
-                        to 
-                        {{ get_ARDp_txt(oc_dict[detail.oc_name].treats[comparator], oc_dict[detail.oc_name]['lgtable'][measure][comparator][detail.treat].up) }})</p>
-    
-                        <p>Rank: <span class="txt-lg txt-fb">{{ oc_dict[detail.oc_name].treats[detail.treat].rank }}</span></p>
-                    </div>
-                </div>
-
-                <hr>
-
-                <div>
-                    <p>Certainty in Evidence: 
-                        <b class="txt-lg" style="padding: 0 5px;"
-                            v-bind:class="get_cieclr(oc_dict[detail.oc_name].lgtable[measure][comparator][detail.treat].sm, oc_dict[detail.oc_name].cetable[comparator][detail.treat].cie)">
-                            {{ txt('CIE_TOT_' + oc_dict[detail.oc_name].cetable[comparator][detail.treat].cie) }}
-                        </b>
-                    </p>
-                    <table class="cie-table">
-                        <tr>
-                            <th>Risk of bias</th>
-                            <td>{{ txt('CIE_VAL_' + oc_dict[detail.oc_name].cetable[comparator][detail.treat].cie_rob) }}</td>
-                        </tr>
-                        <tr>
-                            <th>Inconsistency</th>
-                            <td>{{ txt('CIE_VAL_' + oc_dict[detail.oc_name].cetable[comparator][detail.treat].cie_inc) }}</td>
-                            
-                        </tr>
-                        <tr>
-                            <th>Indirectness</th>
-                            <td>{{ txt('CIE_VAL_' + oc_dict[detail.oc_name].cetable[comparator][detail.treat].cie_ind) }}</td>
-                            
-                        </tr>
-                        <tr>
-                            <th>Imprecision</th>
-                            <td>{{ txt('CIE_VAL_' + oc_dict[detail.oc_name].cetable[comparator][detail.treat].cie_imp) }}</td>
-                            
-                        </tr>
-                        <tr>
-                            <th>Publication bias</th>
-                            <td>{{ txt('PUB_BIA_' + oc_dict[detail.oc_name].cetable[comparator][detail.treat].pub_bia) }}</td>
-                        </tr>
-                    </table>
-                </div>
-            </div>
-        </div>
-        <!-- /div#tb_simple_sofnma_detail -->
+        
 
     </div>
 </div>
@@ -426,6 +375,16 @@ var jarvis = {
         'PUB_BIA_1': 'Undetected',
         'PUB_BIA_0': 'Not applicable'
     },
+
+    // for the PMA table
+    default_measure: '',
+    measure_list: [],
+
+    measure_dict: {
+        OR: { abbr: 'OR', name: 'Odds Ratio (OR)' },
+        RR: { abbr: 'RR', name: 'Risk Ratio (RR)' },
+        HR: { abbr: 'HR', name: 'Hazard Ratio (HR)' },
+    },
     default_comparator: null,
 
     init: function() {
@@ -444,6 +403,24 @@ var jarvis = {
             return;
         }
 
+        // set the measures
+        // the msrs should be a comma seperated string:
+        // e.g., OR,RR
+        // HR,OR
+        var msrs = jarvis.getUrlParameter('msrs');
+        if (msrs == null || msrs == '') {
+            msrs = 'OR,RR,HR';
+        }
+        msrs = msrs.split(',')
+        this.default_measure = msrs[0];
+        this.measure_list = msrs.map(function(v) {
+            return jarvis.measure_dict[v];
+        });
+        
+        // set the measures in SoF PMA
+        tb_simple_sofnma.default_measure = this.default_measure;
+        tb_simple_sofnma.measure_list = this.measure_list;
+
         // set default_comparator
         this.default_comparator = jarvis.getUrlParameter('dc');
         if (this.default_comparator == null || this.default_comparator == '') {
@@ -456,7 +433,7 @@ var jarvis = {
             { v: 2, ver: Math.random(), use_cache: 'yes', prj: prj },
             function(data) {
                 // init the oc list
-                vw_simple_oclist.init(data);
+                // vw_simple_oclist.init(data);
 
                 // set the default_comparator
                 tb_simple_sofnma.default_comparator = jarvis.default_comparator;
@@ -465,7 +442,7 @@ var jarvis = {
                 tb_simple_sofnma.init(data);
 
                 // show the first one
-                vw_simple_oclist.toggle_oc(data.oc_list[0].oc_names[0]);
+                // vw_simple_oclist.toggle_oc(data.oc_list[0].oc_names[0]);
 
                 // ok, remove the start screen
                 jarvis.ssmsg('Almost initialized.');

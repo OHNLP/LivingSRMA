@@ -1320,6 +1320,9 @@ def get_oc_nma_data(full_fn, backend):
                 treats[treat] = {
                     "event": int(row['event']),
                     "total": int(row['total']),
+                    'has_survival_data': False,
+                    'survival_in_control': 0,
+                    "n_stus": 0,
                     "rank": 0
                 }
 
@@ -1354,19 +1357,26 @@ def get_oc_nma_data(full_fn, backend):
 
                 # count the survival when value is float for t1
                 try:
-                    treats[t1]['survival_in_control'] += float(row['survival in t1'])
                     treats[t1]['n_stus'] += 1
+                    treats[t1]['survival_in_control'] += float(row['survival in t1'])
                 except:
                     if row['survival in t1'] == 'NR':
                         pass
             
                 # count the survival when value is float for t2
                 try:
-                    treats[t2]['survival_in_control'] += float(row['survival in t2'])
                     treats[t2]['n_stus'] += 1
+                    treats[t2]['survival_in_control'] += float(row['survival in t2'])
                 except:
                     if row['survival in t2'] == 'NR':
                         pass
+            
+            # need to update the survival in control
+            for t in treats:
+                treats[t]['has_survival_data'] = treats[t]['survival_in_control'] != 0
+                treats[t]['survival_in_control'] = {
+                    "avg": treats[t]['survival_in_control'] / treats[t]['n_stus']
+                }
 
         # update treats
         all_treat_list += treat_list
