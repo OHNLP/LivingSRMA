@@ -56,7 +56,7 @@ var tb_simple_sofpma = {
 
                 get_SRVC_txt: function(r) {
                     if (r.has_survival_data) {
-                        return this.get_SRVC(r).toFixed(2) + ' months';
+                        return this.get_SRVC(r).toFixed(2) + ' (mo)';
                     } else {
                         return 'NA';
                     }
@@ -77,10 +77,37 @@ var tb_simple_sofpma = {
                     // sm, lower, upper
                     if (r.has_survival_data) {
                         var srvi = this.get_SRVI(r, obj);
-                        return srvi.toFixed(2) + ' months';
+                        return srvi.toFixed(2) + ' (mo)';
                     } else {
                         return 'NA';
                     }
+                },
+
+                get_SRVD: function(r, obj) {
+                    var SRVC = this.get_SRVC(r);
+                    var SRVI = this.get_SRVI(r, obj);
+                    
+                    if (SRVC == null) { return null; }
+                    if (SRVI == null) { return null; }
+
+                    var SRVD = SRVC - SRVI;
+                    return SRVD;
+                },
+
+                get_SRVD_txt: function(r, obj) {
+                    var SRVD = this.get_SRVD(r, obj);
+                    if (SRVD == null) {
+                        return 'NA';
+                    }
+                    var txt = '';
+                    if (SRVD < 0) {
+                        txt = ' more';
+                    } else if (SRVD > 0) {
+                        txt = ' fewer';
+                    } else {
+                        txt = '';
+                    }
+                    return Math.abs(SRVD).toFixed(1) + ' (mo)' + txt;
                 },
 
                 // calc the ACR, CIR, ARD

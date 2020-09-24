@@ -355,7 +355,7 @@ def _netmeta_trans_league_r(arr, params):
                 else:
                     # values should be in the first match groups
                     ps = ret[0]
-                    print('* found match %s @ [%s, %s]' % (ret, i, j))
+                    # print('* found match %s @ [%s, %s]' % (ret, i, j))
                     v = float(ps[0])
                     l = float(ps[1])
                     u = float(ps[2])

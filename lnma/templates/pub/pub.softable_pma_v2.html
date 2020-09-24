@@ -373,7 +373,7 @@ a {
                     <tr v-for="r, oc_name in rs">
                         <td class="col-oc-name"
                             v-on:click="show_ctrl_options(r.oc_name)">
-                            {{ r.oc_fullname }}
+                            {{ r.oc_name }}
                         </td>
 
                         <td v-if="r.is_show['sm']" class="col-flipable"
@@ -423,7 +423,9 @@ a {
                             {{ get_SRVC_txt(r) }}
                         </td>
 
-                        <td v-if="show_survival=='yes'">Survival</td>
+                        <td v-if="show_survival=='yes'">
+                            {{ get_SRVD_txt(r, 'sm') }}
+                        </td>
 
                         <td v-bind:class="get_cieclr(r.oc.result[get_a_measure(r)].random.model.sm, r.oc.cie)"
                             v-on:click="show_cie_detail(r.oc_name)">
@@ -533,6 +535,7 @@ var jarvis = {
     txt: {
         'OR': 'Odds Ratio (OR)',
         'RR': 'Risk Ratio (RR)',
+        'HR': 'Hazard Ratio (HR)',
         'CIE_TOT_4': 'High',
         'CIE_TOT_3': 'Moderate',
         'CIE_TOT_2': 'Low',

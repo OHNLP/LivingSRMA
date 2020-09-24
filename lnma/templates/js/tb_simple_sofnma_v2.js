@@ -228,6 +228,92 @@ var tb_simple_sofnma = {
                 },
 
                 /***********************************************
+                 * Measure of Effects Related
+                 ***********************************************/
+
+                
+                /**
+                 * Get the effect of a measure of outcome
+                 * @date 2020-09-23
+                 * @param {any} oc_name
+                 * @param {any} m measure name, e.g., OR, RR, HR
+                 * @param {any} c comparator
+                 * @param {any} t treatment
+                 * @param {any} obj sm/lw/up
+                 * @returns {any}
+                 */
+                get_effect: function(oc_name, m, c, t, obj) {
+                    var r = this.rs[oc_name];
+
+                    if (!r.oc.lgtable.hasOwnProperty(m)) {
+                        // this oc doesn't have this measure
+                        return null;
+                    }
+
+                    if (!r.oc.lgtable[m].hasOwnProperty(c)) { 
+                        // this oc doesn't have this c
+                        return null;
+                    }
+
+                    if (!r.oc.lgtable[m][c].hasOwnProperty(t)) { 
+                        // this oc doesn't have this t
+                        return null;
+                    }
+
+                    var e =  r.oc.lgtable[m][c][t][obj];
+                    return e;
+                },
+
+                get_effect_txt: function(oc_name, m, c, t, obj) {
+                    var e = this.get_effect(oc_name, m, c, t, obj);
+
+                    if (e == null) {
+                        return 'NA';
+                    }
+
+                    return e.toFixed(2);
+                },
+
+                /**
+                 * Get the treat obj of outcome
+                 * @date 2020-09-23
+                 * @param {any} oc_name
+                 * @param {any} t treatment name
+                 * @returns {any}
+                 */
+                get_treat: function(oc_name, t) {
+                    var r = this.rs[oc_name];
+                    if (!r.oc.treats.hasOwnProperty(t)) {
+                        return null;
+                    }
+                    return r.oc.treats[t];
+                },
+
+                get_treat_attr_txt: function(oc_name, t, a) {
+                    var treat = this.get_treat(oc_name, t);
+                    if (treat == null) {
+                        return 'NA';
+                    }
+                    return treat[a];
+                },
+
+                get_n_stus: function(oc_name, t) {
+                    var r = this.rs[oc_name];
+                    if (!r.oc.treats.hasOwnProperty(t)) {
+                        return null;
+                    }
+                    return r.oc.treats[t].n_stus;
+                },
+
+                get_n_stus_text: function(oc_name, t) {
+                    var n_stus = this.get_n_stus(oc_name, t);
+                    if (n_stus == null) {
+                        return 'NA';
+                    }
+                    return n_stus;
+                },
+
+                /***********************************************
                  * Survival Related
                  ***********************************************/
 
@@ -250,7 +336,7 @@ var tb_simple_sofnma = {
                     if (SRVC == null) {
                         return 'NA';
                     }
-                    return SRVC.toFixed(1) + ' months';
+                    return SRVC.toFixed(1) + ' (mo)';
                 },
 
                 get_SRVI: function(r, c, t, obj) {
@@ -311,34 +397,37 @@ var tb_simple_sofnma = {
                  * Certainty in evidence Related
                  ***********************************************/
 
-                get_cie: function(oc_name, comparator, treatment) {
-                    return 0;
-                    // return oc_dict[oc_name].cetable[comparator][treatment].cie);
+                get_cet: function(oc_name, c, t) {
+                    var r = this.rs[oc_name];
+                    if (!r.oc.cetable.hasOwnProperty(c)) {
+                        return null;
+                    }
+                    if (!r.oc.cetable[c].hasOwnProperty(t)) {
+                        return null;
+                    }
+                    return r.oc.cetable[c][t];
                 },
 
-                get_cie_rob: function(oc_name, comparator, treatment) {
-                    return 0;
-                    // return oc_dict[oc_name].cetable[comparator][treatment].cie_rob);
+                get_cet_attr_val: function(oc_name, c, t, a) {
+                    var cet = this.get_cet(oc_name, c, t);
+                    if (cet == null) {
+                        return 0;
+                    }
+                    return cet[a];
                 },
 
-                get_cie_inc: function(oc_name, comparator, treatment) {
-                    return 0;
-                    // return oc_dict[oc_name].cetable[comparator][treatment].cie_inc);
-                },
-
-                get_cie_ind: function(oc_name, comparator, treatment) {
-                    return 0;
-                    // return oc_dict[oc_name].cetable[comparator][treatment].cie_ind);
-                },
-
-                get_cie_imp: function(oc_name, comparator, treatment) {
-                    return 0;
-                    // return oc_dict[oc_name].cetable[comparator][treatment].cie_imp);
-                },
-
-                get_pub_bia: function(oc_name, comparator, treatment) {
-                    return 0;
-                    // return oc_dict[oc_name].cetable[comparator][treatment].pub_bia);
+                get_cet_attr_txt: function(oc_name, c, t, a) {
+                    var cet_val = this.get_cet_attr_val(oc_name, c, t, a);
+                    if (cet_val == 0) {
+                        return 'NA';
+                    }
+                    if (a == 'cie') {
+                        return jarvis.txt['CIE_TOT_' + cet_val];
+                    } else if (a == 'pub_bia') {
+                        return jarvis.txt['PUB_BIA_' + cet_val];
+                    } else {
+                        return jarvis.txt['CIE_VAL_' + cet_val];
+                    }
                 },
 
                 // for UI
@@ -365,13 +454,13 @@ var tb_simple_sofnma = {
                             return '';
                         }
                     }
-
+                    
                     if (v < 1) {
-                        return 'cie-bene-2';
+                        return 'cie-bene-' + cie;
                     } else if ( v > 1) {
-                        return 'cie-harm-2';
+                        return 'cie-harm-' + cie;
                     } else {
-                        return 'cie-nner-2';
+                        return 'cie-nner-' + cie;
                     }
                 },
 
@@ -410,8 +499,7 @@ var tb_simple_sofnma = {
                 show_detail: function(oc_name, treat) {
                     this.detail.oc_name = oc_name;
                     this.detail.treat = treat;
-
-                    tb_simple_sofnma.show_detail(oc_name, treat, this.comparator);
+                    tb_simple_sofnma.show_detail();
                 },
 
                 txt: function(t) {
@@ -436,7 +524,7 @@ var tb_simple_sofnma = {
         tb_simple_sofnma.vpp.$forceUpdate();
     },
 
-    show_detail: function(oc_name, treat, comparator) {
+    show_detail: function() {
         $(this.vpp_id + '_detail').dialog({
             width: 600
         });

@@ -158,6 +158,10 @@ a {
 .cie-nner-2 { background: rgb(202, 183, 10); color: black; }
 .cie-nner-1 { background: rgb(250, 248, 133); color: black; }
 
+/* for test data without real values */
+.cie-bene-0 { background: rgb(169, 208, 142); color: black; }
+.cie-harm-0 { background: rgb(255, 50, 50); color: black; }
+.cie-nner-0 { background: rgb(202, 183, 10); color: black; }
 
 .legend-table td { padding: 5px 10px; font-size: 14px; }
 
@@ -316,9 +320,8 @@ a {
                         <td class="cell-treat"
                             v-for="treat in treat_list" 
                             v-if="treat!=comparator"
-                            v-bind:oc_name="oc_name"
-                            v-bind:class="get_bg_color_class2(r, comparator, treat)"
-                            v-bind:treat="treat">
+                            v-bind:class="get_bg_color_class2(r, comparator, treat, get_cet_attr_val(r.oc.oc_name, comparator, treat, 'cie') )"
+                            v-on:click="show_detail(r.oc.oc_name, treat)">
                             <span v-if="show_survival == 'yes'">
                                 {{ get_SRVD_txt(r, comparator, treat, 'sm') }}<br>
                             </span>
@@ -334,7 +337,113 @@ a {
 
         </div>
 
-        
+        <div id="tb_simple_sofnma_detail" class="box" title="Outcome detail">
+            <div class="box-header">
+                <h4>    
+                    <i class="fa fa-table"></i>
+                    <b class="txt-lg">{{ rs[detail.oc_name].oc.oc_fullname }}</b>
+                    Treatment: <b class="txt-lg">{{ detail.treat }}</b>, Comparator: <b class="txt-lg">{{ comparator }}</b>
+                </h4>
+            </div>
+            <div class="box-body">
+                <div class="d-flex fx-row">
+                    <div style="width: 50%;">
+                        <h5>Summary of data</h5>
+                        <p>Randomized controlled trials: <span class="txt-lg txt-fb">{{ get_n_stus_text(detail.oc_name, detail.treat) }}</span></p>
+                        <!-- <p>Observational studies: <span class="txt-lg txt-fb">N/A</span></p> -->
+                        <!-- <p>Follow up: <span class="txt-lg txt-fb">N/A</span></p> -->
+                        <div v-if="oc_dict[detail.oc_name].oc_datatype == 'raw'">
+                            <p>Number of events in arm: <span class="txt-lg txt-fb">{{ get_treat_attr_txt(detail.oc_name, detail.treat, 'event') }}</span></p>
+                            <p>Total participants in arm: <span class="txt-lg txt-fb">{{ get_treat_attr_txt(detail.oc_name, detail.treat, 'total') }}</span></p>
+                        </div>
+                        <div v-else-if="get_SRVC(rs[detail.oc_name], comparator) != null">
+                            <p>
+                                Survival in comparator: 
+                                <span class="txt-lg txt-fb">{{ get_SRVC_txt(rs[detail.oc_name], comparator) }} </span>
+                            </p>
+                            <p>
+                                Survival in intervention:
+                                <span class="txt-lg txt-fb">{{ get_SRVI_txt(rs[detail.oc_name], comparator, detail.treat, 'sm') }} </span><br>
+                                ({{ get_SRVI_txt(rs[detail.oc_name], comparator, detail.treat, 'up') }} to 
+                                {{ get_SRVI_txt(rs[detail.oc_name], comparator, detail.treat, 'lw') }})
+                            </p>
+                            <p>
+                                Survival difference:
+                                <span class="txt-lg txt-fb">{{ get_SRVD_txt(rs[detail.oc_name], comparator, detail.treat, 'sm') }} </span><br>
+                                ({{ get_SRVD_txt(rs[detail.oc_name], comparator, detail.treat, 'up') }} to 
+                                {{ get_SRVD_txt(rs[detail.oc_name], comparator, detail.treat, 'lw') }})
+                            </p>
+                        </div>
+                        <div v-else>
+                            &nbsp;
+                        </div>
+                        
+                    </div>
+
+                    <div style="width: 50%;">
+                        <h5>Summary measure: {{ txt(get_a_measure(rs[detail.oc_name])) }}</h5>
+                        <p>
+                            Relative effect: 
+                            <span class="txt-lg txt-fb">{{ get_effect_txt(detail.oc_name, get_a_measure(rs[detail.oc_name]), comparator, detail.treat, 'sm') }} </span>
+                            ({{ get_effect_txt(detail.oc_name, get_a_measure(rs[detail.oc_name]), comparator, detail.treat, 'lw') }} to 
+                            {{ get_effect_txt(detail.oc_name, get_a_measure(rs[detail.oc_name]), comparator, detail.treat, 'up') }})
+                        </p>
+                        <p>
+                            Absolute risk: 
+                            <span class="txt-lg txt-fb">{{ get_CIR_txt(rs[detail.oc_name], comparator, detail.treat, 'sm') }}</span><br>
+                            ({{ get_CIR_txt(rs[detail.oc_name], comparator, detail.treat, 'lw') }} to 
+                            {{ get_CIR_txt(rs[detail.oc_name], comparator, detail.treat, 'up') }})
+                        </p>
+                        <p>
+                            Absolute risk difference: 
+                            <span class="txt-lg txt-fb">{{ get_ARD_txt(rs[detail.oc_name], comparator, detail.treat, 'sm') }}</span><br>
+                            ({{ get_ARD_txt(rs[detail.oc_name], comparator, detail.treat, 'lw') }} to 
+                            {{ get_ARD_txt(rs[detail.oc_name], comparator, detail.treat, 'up') }})
+                        </p>
+                        <p>
+                            Absolute risk percentage:
+                            <span class="txt-lg txt-fb">{{ get_ARDp_txt(rs[detail.oc_name], comparator, detail.treat, 'sm') }}</span><br>
+                            ({{ get_ARDp_txt(rs[detail.oc_name], comparator, detail.treat, 'lw') }} to 
+                            {{ get_ARDp_txt(rs[detail.oc_name], comparator, detail.treat, 'up') }})
+                        </p>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div>
+                    <p>Certainty in Evidence: 
+                        <b class="txt-lg" style="padding: 0 5px;">
+                            {{ get_cet_attr_txt(detail.oc_name, comparator, detail.treat, 'cie') }}
+                        </b>
+                    </p>
+                    <table class="cie-table">
+                        <tr>
+                            <th>Risk of bias</th>
+                            <td>{{ get_cet_attr_txt(detail.oc_name, comparator, detail.treat, 'cie_rob') }}</td>
+                        </tr>
+                        <tr>
+                            <th>Inconsistency</th>
+                            <td>{{ get_cet_attr_txt(detail.oc_name, comparator, detail.treat, 'cie_inc') }}</td>
+                        </tr>
+                        <tr>
+                            <th>Indirectness</th>
+                            <td>{{ get_cet_attr_txt(detail.oc_name, comparator, detail.treat, 'cie_ind') }}</td>
+                        </tr>
+                        <tr>
+                            <th>Imprecision</th>
+                            <td>{{ get_cet_attr_txt(detail.oc_name, comparator, detail.treat, 'cie_imp') }}</td>
+                        </tr>
+                        <tr>
+                            <th>Publication</th>
+                            <td>{{ get_cet_attr_txt(detail.oc_name, comparator, detail.treat, 'pub_bia') }}</td>
+                        </tr>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+        <!-- /#tb_simple_sofnma_detail -->
 
     </div>
 </div>
@@ -363,6 +472,7 @@ var jarvis = {
     txt: {
         'OR': 'Odds Ratio (OR)',
         'RR': 'Risk Ratio (RR)',
+        'HR': 'Hazard Ratio (HR)',
         'CIE_TOT_4': 'High',
         'CIE_TOT_3': 'Moderate',
         'CIE_TOT_2': 'Low',
@@ -432,6 +542,7 @@ var jarvis = {
             // { ver: Math.random() },
             { v: 2, ver: Math.random(), use_cache: 'yes', prj: prj },
             function(data) {
+                console.log(data);
                 // init the oc list
                 // vw_simple_oclist.init(data);
 
@@ -479,7 +590,7 @@ var jarvis = {
 
     show_color_guide: function() {
         $('#color_guide').dialog({
-            width: 680
+            width: 720
         });
     }
 };

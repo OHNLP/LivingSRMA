@@ -1180,22 +1180,6 @@ def get_ae_pma_data_simple(full_fn):
     return ret
 
 
-def get_nma_by_r(dataset, datatype='CAT_RAW', 
-    sm='OR', method='MH', fixed_or_random='random'):
-    '''Get the NMA results by R script 
-    
-    The data type must be in ['CAT_PRE', 'CAT_RAW]
-    '''
-    ret = {}
-    
-    if datatype == 'CAT_PRE':
-        ret = get_pma_by_r_CAT_PRE(dataset, sm, method, fixed_or_random)
-    elif datatype == 'CAT_RAW':
-        ret = {}
-
-    return ret
-
-
 def get_oc_nma_data(full_fn, backend):
     '''
     Get the SoF Table NMA data
@@ -1254,7 +1238,10 @@ def get_oc_nma_data(full_fn, backend):
             "oc_measures": row['measure'].split(','),
             "oc_datatype": row['data type'],
             "oc_name": oc_name,
-            "oc_fullname": oc_fullname
+            "oc_fullname": oc_fullname,
+            "cetable": {},
+            "lgtable": {},
+            "treats": {}
         }
 
     # put the last ae_item
@@ -1269,6 +1256,24 @@ def get_oc_nma_data(full_fn, backend):
             oc_name = row['oc_name']
             comparator = row['comparator']
             treatment = row['treatment']
+
+            if comparator not in oc_dict[oc_name]['cetable']:
+                oc_dict[oc_name]['cetable'][comparator] = { comparator: {} }
+
+            # put the comparator vs treatment {} in 
+            oc_dict[oc_name]['cetable'][comparator][treatment] = {}
+
+            # put the values of each column
+            for col in cols_certs[4:]:
+                try:
+                    oc_dict[oc_name]['cetable'][comparator][treatment][col] = int(row[col])
+                except:
+                    oc_dict[oc_name]['cetable'][comparator][treatment][col] = 0
+
+            # calc the cie of this row
+            oc_dict[oc_name]['cetable'][comparator][treatment]['cie'] = \
+                calc_cie(row[cols_certs[4:8]].tolist())
+
 
     # build OC details by the data type
     cols_dict = {
@@ -1428,7 +1433,13 @@ def get_oc_nma_data(full_fn, backend):
                 rank_name = 'tmrank'
 
             # get the output rank
-            ranks = sorted(ret_nma['data'][rank_name]['rs'], key=lambda v: v['value'])
+            # 9/23/2020: add reverse, the higher value, the higher rank
+            reverse = True
+            if sm in ['HR']:
+                reverse = False
+            ranks = sorted(ret_nma['data'][rank_name]['rs'], 
+                key=lambda v: v['value'],
+                reverse=reverse)
             for i, r in enumerate(ranks):
                 oc_dict[oc_name]['treats'][r['treat']]['rank'] = i+1
                 oc_dict[oc_name]['treats'][r['treat']]['score'] = r['value']
@@ -1651,18 +1662,15 @@ def get_oc_pma_data(full_fn):
 
     # build OC Category data
     oc_tab_name = 'Outcomes'
-    dft = xls.parse(oc_tab_name)
-    dft = dft[~dft['name'].isna()]
 
     # define the columns for basic information of outcome
-    cie_cols = [
-        'risk of bias',
-        'inconsistency',
-        'indirectness',
-        'imprecision',
+    cols_outcome = [
+        'oc_cate', 'oc_measures', 'oc_datatype', 'oc_name', 'oc_fullname',
+        'cie_rob', 'cie_inc', 'cie_ind', 'cie_imp', 'pub_bia', 
+        'importance', 'treatment', 'control'
     ]
-    col_pub_bia = 'publication bias'
-    col_importance = 'importance'
+    dft = xls.parse(oc_tab_name, usecols='A:M', names=cols_outcome)
+    dft = dft[~dft['oc_name'].isna()]
 
     # build oc category
     oc_dict = {}
@@ -1670,9 +1678,9 @@ def get_oc_pma_data(full_fn):
     oc_item = {}
     oc_names = []
     for idx, row in dft.iterrows():
-        oc_cate = row['category']
-        oc_name = row['name']
-        oc_fullname = row['full name']
+        oc_cate = row['oc_cate']
+        oc_name = row['oc_name']
+        oc_fullname = row['oc_fullname']
         oc_names.append(oc_name)
 
         # create a new outcome item to hold all the data
@@ -1693,23 +1701,25 @@ def get_oc_pma_data(full_fn):
         oc_item['oc_names'].append(oc_name)
 
         # calc the Certainty in Evidence
-        cie = calc_cie(row[cie_cols].tolist())
+        cie = calc_cie(row[cols_outcome[5:9]].tolist())
 
         # put current row in to ae_dict
         oc_dict[oc_name] = {
             "oc_cate": oc_cate,
-            "oc_measures": row['measure'].split(','),
-            "oc_datatype": row['data type'],
+            "oc_measures": row['oc_measures'].split(','),
+            "oc_datatype": row['oc_datatype'],
             "oc_name": oc_name,
             "oc_fullname": oc_fullname,
             "cie": cie,
-            "cie_rob": row[cie_cols[0]],
-            "cie_inc": row[cie_cols[1]],
-            "cie_ind": row[cie_cols[2]],
-            "cie_imp": row[cie_cols[3]],
-            "pub_bia": row['publication bias'],
-            "importance": row[col_importance]
         }
+
+        # put the cie columns
+        # 'cie_rob', 'cie_inc', 'cie_ind', 'cie_imp', 'pub_bia', 'importance'
+        for col in cols_outcome[5:11]:
+            try:
+                oc_dict[oc_name][col] = int(row[col])
+            except:
+                oc_dict[oc_name][col] = 0
 
     # put the last ae_item
     oc_list.append(oc_item)
@@ -1880,6 +1890,7 @@ def get_oc_pma_data(full_fn):
     df_ocs = pd.concat(oc_dfts)
 
     # fix data type
+    df_ocs['year'] = df_ocs['year'].fillna(0)
     df_ocs['year'] = df_ocs['year'].astype('int')
     
     # build the return object
