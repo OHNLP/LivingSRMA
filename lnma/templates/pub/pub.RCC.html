@@ -86,14 +86,21 @@
         </h3>
 
         <div class="row">
-            <div class="col-md-6">
+
+            <div class="col">
+                <img width="100%" src="[[ url_for('pub.graphdata', prj='RCC', fn='CONCEPT_IMAGE.svg') ]]" />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
                 <p>The landscape of treatment options in first line treatment of metastatic renal cell cancer is rapidly changing. Three large randomized controlled trials studying different combinations of checkpoint inhibitors and anti-angiogenesis therapy were conducted in the same time period and several other are under way. JAVELIN Renal 101 and IMmotion151 showed that avelumab plus axitinib (AA) and atezolizumab plus bevacizumab (AB), respectively, improved PFS whereas KEYNOTE-426 showed that Pembrolizumab plus axitinib (PA) improved both PFS and OS when compared to sunitinib. Similarly, as indicated by a press release April 20th, 2020, CheckMate 9ER, a pivotal Phase 3 trial evaluating nivolumab in combination cabozantinib compared to sunitinib met its primary endpoint of progression-free survival (PFS) at final analysis, as well as the secondary endpoints of overall survival (OS) at a pre-specified interim analysis, and objective response rate (ORR). Confronted with this evidence, it is a challenging task to decide amongst several frontline options in patients with previously untreated mRCC. Direct comparisons between different combinations of check point inhibitors and anti-angiogenesis therapy were not assessed in head-to-head trials. Therefore, we conducted a network meta-analysis (NMA), which allows for comparing all treatments with each other, even if randomized controlled trials are not available for some treatment comparisons.</p>
             </div>
-
+            <!-- 
             <div class="col-md-6">
-                <img src="/static/img/rcc-drugs.png" alt="bg" style="width:90%;">
-                
+                <img src="/static/img/rcc-drugs.png" alt="bg" style="width:90%;">    
             </div>
+            -->
         </div>
     </div>
 
@@ -198,7 +205,7 @@
 <div class="container" style="margin-top: 3.5rem;">
     <div class="row">
         <div class="col">
-            <h4 style="margin-bottom: 2rem;">[[ item['name'] ]]</h3>
+            <h4>[[ item['name'] ]]</h3>
         </div>
         <div class="col d-flex justify-content-end">
             <div style="padding: .5rem; margin-right: 1rem;">
@@ -218,13 +225,13 @@
     </div>
 </div>
 
-<div class="container" style="margin-bottom: 3rem; max-width: 1160px;">
+<div class="container" style="margin-top: 0; margin-bottom: 3rem; max-width: 1200px;">
     <div class="row">
         <div class="col">
 
             <p style="text-indent: .6rem;">How to use this figure? <a href="javascript:;" data-toggle="modal" data-target="#exampleModalCenter3">Video demonstration</a></p>
 
-            <iframe id="iframe-nma-[[ item['sname'] ]]" src="" frameborder="0" style="width: 100%; min-height: 810px; overflow: hidden;" scrolling="no" ></iframe>
+            <iframe id="iframe-nma-[[ item['sname'] ]]" src="" frameborder="0" style="width: 100%; min-height: 930px; overflow: hidden;" scrolling="no" ></iframe>
         </div>
     </div>
 </div>
@@ -304,22 +311,23 @@ The HR for 1,2 , The OR for the last one!
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 
 <script>
-function switch_data(tag, trt, display_name) {
+function switch_data(tag, treat, display_name) {
     if (typeof(display_name) == 'undefined') {
-        display_name = trt;
+        display_name = treat;
     }
     var prj = 'RCC';
-    var fn = 'GRAPH-' + tag + '-' + trt + '.json';
-    var url = "[[ url_for('pub.graph_v3') ]]";
-    url += '?prj=' + prj + '&fn=' + fn;
+    var oc = tag;
+    var url = "[[ url_for('pub.graph_RCC') ]]";
+    url += '?prj=' + prj + '&oc=' + oc + '&tr=' + treat;
     $('#iframe-nma-' + tag).attr('src', url);
     $('#refname-' + tag).html(display_name);
 }
 
 $(document).ready(function() {
-    switch_data('PFS', 'Suni');
     switch_data('OS', 'Suni');
-    switch_data('AES', 'Suni');
+    switch_data('PFS', 'Suni');
+    switch_data('TRAE_3_OR_HIGHER', 'Suni');
+    switch_data('TRAE_ALL_GRADE', 'Suni');
 });
 </script>
 </body>

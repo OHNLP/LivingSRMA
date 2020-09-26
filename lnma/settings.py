@@ -2,6 +2,7 @@ import os
 import pathlib
 
 TMP_FOLDER = '/dev/shm/lnma'
+PATH_PUBDATA = 'pubdata'
 
 RSCRIPT_TPL_FOLDER = os.path.join(
     os.path.join(pathlib.Path(__file__).parent.absolute(), 'analyzer'),
@@ -97,4 +98,13 @@ DIS_TEXT = {
         "MD": "Mean Difference",
         "SMD": "Standardized Mean Difference"
     }
+}
+
+PUBWEB_DATAFILES = {
+    'concept_image':      'CONCEPT_IMAGE.svg',
+    'itable_attr_data':   'ITABLE_ATTR_DATA.xlsx',
+    'itable_filters':     'ITABLE_FILTERS.xlsx',
+    'softable_pma_data':  'SOFTABLE_PMA_DATA.xlsx',
+    'softable_nma_data':  'SOFTABLE_NMA_DATA.xlsx',
+    'all_data':           'ALL_DATA.xlsx',
 }

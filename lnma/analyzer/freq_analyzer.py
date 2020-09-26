@@ -98,9 +98,17 @@ def analyze_by_netmeta(rs, params):
     # output data
     df = pd.DataFrame(rs)
     
-    # check the columns
+    # check the columns and convert to TE seTE format
     if 'TE' not in df.columns:
-        df['TE'] = np.log(df['hr'])
+        if 'sm' in df.columns:
+            df['TE'] = np.log(df['sm'])
+        elif 'hr' in df.columns:
+            df['TE'] = np.log(df['hr'])
+        elif 'or' in df.columns:
+            df['TE'] = np.log(df['or'])
+        elif 'rr' in df.columns:
+            df['TE'] = np.log(df['rr'])
+
         print('* fixed TE column with hr')
 
     if 'seTE' not in df.columns:

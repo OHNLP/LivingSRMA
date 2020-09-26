@@ -19,6 +19,10 @@ import numpy as np
 from .analyzer import rplt_analyzer
 from .analyzer import pwma_analyzer_v2 as pwma_analyzer
 from .analyzer import nma_analyzer
+from .analyzer import freq_analyzer
+from .analyzer import bayes_analyzer
+
+from lnma import settings
 
 import PythonMeta as PMA
 
@@ -182,6 +186,11 @@ def graph_v3():
     return render_template('pub/pub.graph_v3.html')
 
 
+@bp.route('/graph_RCC.html')
+def graph_RCC():
+    return render_template('pub/pub.graph_RCC.html')
+
+
 @bp.route('/oplot.html')
 def oplot():
     return render_template('pub/pub.oplot.html')
@@ -323,6 +332,134 @@ def graphdata_itable_json(prj):
     json.dump(ret, open(full_output_fn, 'w'))
     return jsonify(ret)
 
+
+@bp.route('/graphdata/<prj>/GRAPH.json')
+def graphdata_graph_json(prj):
+    '''Special rule for the graphs.
+    Generate a GRAPH.json for this project.
+    And, it will also generate a set of outcome seperate file
+    '''
+
+    fn = 'SOFTABLE_NMA_DATA.xlsx'
+    full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
+
+    # hold all the outcomes
+    fn_json = 'GRAPH.json'
+    full_fn_json = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn_json)
+    # hold one outcome
+    fn_oc_json = 'GRAPH_%s.json'
+    full_oc_fn_json = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn_oc_json)
+    # hold the outcome list 
+    fn_nma_list_json = 'NMA_LIST.json'
+    full_nma_list_json = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn_nma_list_json)
+
+    # use cache to haste the loading
+    use_cache = request.args.get('use_cache')
+    if use_cache == 'yes':
+        return send_from_directory(
+            os.path.join(current_app.instance_path, PATH_PUBDATA, prj),
+            fn_json
+        )
+
+    # get all
+    xls = pd.ExcelFile(full_fn)
+    # build OC Category data
+    oc_tab_name = 'Outcomes'
+
+    # load data
+    dft = xls.parse(oc_tab_name)
+    dft = dft[~dft['name'].isna()]
+
+    # build oc category
+    oc_dict = {}
+    oc_names = []
+    for idx, row in dft.iterrows():
+        oc = {
+            "oc_name": row['name'],
+            "oc_fullname": row['full name'],
+            "oc_measures": row['measure'].split(','),
+            "oc_datatype": row['data type'],
+            "treat_list": []
+        }
+        oc_dict[oc['oc_name']] = oc
+        oc_names.append(oc['oc_name'])
+
+    # get all NMA
+    ret = {
+        'oc_dict': oc_dict,
+        'oc_names': oc_names,
+        'graph_dict': {}
+    }
+    for oc_name in oc_names:
+        oc = oc_dict[oc_name]
+        sheet_name = oc_name
+
+        # get measure
+        measure = oc['oc_measures'][0]
+        dft = xls.parse(sheet_name)
+
+        # remove those empty lines based on study name
+        # the study name MUST be different
+        dft = dft[~dft.study.isna()]
+
+        # get treat list
+        if oc['oc_datatype'] == 'pre':
+            treat_list = list(set(dft['t1'].unique().tolist() + dft['t2'].unique().tolist()))
+            input_format = settings.INPUT_FORMATS_HRLU
+        elif oc['oc_datatype'] == 'raw':
+            treat_list = dft['treat'].unique().tolist()
+            input_format = settings.INPUT_FORMATS_ET
+
+        # update the oc in oc_dict
+        oc_dict[oc_name]['treat_list'] = treat_list
+
+        # get config
+        analysis_method = "freq"
+        reference_treatment = treat_list[0]
+        fixed_or_random = "random"
+        which_is_better = "small"
+        cfg = {
+            "input_format": input_format,
+            "reference_treatment": reference_treatment,
+            "measure_of_effect": measure,
+            "fixed_or_random": fixed_or_random,
+            "which_is_better": which_is_better
+        }
+
+        # get the rs for this oc
+        rs = json.loads(dft.to_json(orient='table', index=False))['data']
+
+        # calc!
+        analysis_ret = freq_analyzer.analyze(rs, cfg)
+
+        # put in result
+        ret['graph_dict'][oc_name] = analysis_ret
+
+    # now save all the results
+    # FIRST of all, save the GRAPH.json
+    json.dump(ret, open(full_fn_json, 'w'))
+
+    # then, dump each oc
+    for oc_name in ret['oc_names']:
+        # use upper and underscore to convert name to id
+        oc_name_id = oc_name.upper().replace(' ', '_')
+        full_oc_fn_json_name = full_oc_fn_json % oc_name_id
+        # dump!
+        json.dump(ret['graph_dict'][oc_name], open(full_oc_fn_json_name, 'w'))
+        
+    # generate a NMA_LIST.json for pub
+    nma_list = { 'nma': [] }
+    for oc_name in ret['oc_names']:
+        oc = oc_dict[oc_name]
+        # save to nma list
+        nma_list['nma'].append({
+            'name': oc['oc_fullname'],
+            'sname': oc['oc_name'].upper().replace(' ', '_'),
+            'treats': oc['treat_list']
+        })
+    json.dump(nma_list, open(full_nma_list_json, 'w'), indent=4)
+
+    return jsonify(ret)
 
 
 @bp.route('/graphdata/<prj>/SOFTABLE_PMA.json')
@@ -1251,6 +1388,10 @@ def get_oc_nma_data(full_fn, backend):
     # build certainty?
     if oc_tab_cert in xls.sheet_names:
         dft = xls.parse(oc_tab_cert, usecols='A:I', names=cols_certs)
+
+        # there maybe nan 
+        dft = dft[~dft['oc_name'].isna()]
+
         for idx, row in dft.iterrows():
             oc_cate = row['oc_cate']
             oc_name = row['oc_name']

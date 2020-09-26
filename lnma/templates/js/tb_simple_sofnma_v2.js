@@ -51,6 +51,7 @@ var tb_simple_sofnma = {
                 treat_list: treat_list,
                 oc_dict: this.data.oc_dict,
                 oc_list: this.data.oc_list,
+                set_ctrl_oc_name: default_oc_name,
                 rs: rs
             },
             methods: {
@@ -502,6 +503,11 @@ var tb_simple_sofnma = {
                     tb_simple_sofnma.show_detail();
                 },
 
+                show_ctrl_options: function(oc_name) {
+                    this.set_ctrl_oc_name = oc_name;
+                    tb_simple_sofnma.show_ctrl_options();
+                },
+
                 txt: function(t) {
                     return jarvis.txt[t];
                 }
@@ -527,6 +533,14 @@ var tb_simple_sofnma = {
     show_detail: function() {
         $(this.vpp_id + '_detail').dialog({
             width: 600
+        });
+    },
+
+    show_ctrl_options: function() {
+        $(this.vpp_id + '_ctrl_select').dialog({
+            width: 300,
+            my: 'left', 
+            at: 'right'
         });
     },
 

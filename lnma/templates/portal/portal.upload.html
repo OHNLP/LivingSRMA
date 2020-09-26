@@ -1,11 +1,16 @@
 {% extends '_layout_adminlte.html' %}
 
 {% block title %}
-Upload
+Data File Upload
 {% endblock %}
 
 {% block style %}
 
+{% endblock %}
+
+{% block page_name %}
+<i class="fas fa-upload"></i>
+Data File Upload
 {% endblock %}
 
 {% block content %}
@@ -30,19 +35,112 @@ Upload
 <div class="content">
     <div class="container-fluid">
         <div class="row">
-            <div class="col-lg-6">
-                <p class="lead">Upload data files.</p>
-                
+            <div class="col">
+                <p class="lead">Upload data files for the public site. Select project and file type, then upload!</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-10">
+
+                <form method='POST' action="[[ url_for('portal.upload') ]]" enctype="multipart/form-data">
+                    <div class="form-group row">
+                        <label for="input_project" class="col-sm-2 col-form-label">Project</label>
+                        <div class="col-sm-10">
+                            <select id="input_project" name="input_project" class="form-control">
+                                <option value="RCC">RCC | Metastatic Renal Cell Cancer | First line treatment of metastatic Renal Cell Carcinoma( mRCC): A Living, Interactive Systematic Review (LISR) and Network Meta-Analysis (LNMA)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <fieldset class="form-group">
+                        <div class="row">
+                            <legend class="col-form-label col-sm-2 pt-0">Data File Type</legend>
+                            <div class="col-sm-10">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="input_filetype" id="input_opt_concept_image" value="concept_image" checked>
+                                    <label class="form-check-label" for="input_opt_concept_image">
+                                        <span class="font-weight-bold">Concept Image</span><br>
+                                        An image file (.png or .svg), that will be shown at the first section of the public website.
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="input_filetype" id="input_opt_itable_attr_data" value="itable_attr_data">
+                                    <label class="form-check-label" for="input_opt_itable_attr_data">
+                                        <span class="font-weight-bold">Interactive Table | Studies</span>
+                                        <a href="javascript:void(0);" onclick="download_file('itable_attr_data')">download current file</a><br>
+                                        An excel file (.xlsx), with "Studies" tab.
+                                    </label>
+                                </div>
+                                <div class="form-check disabled">
+                                    <input class="form-check-input" type="radio" name="input_filetype" id="input_opt_itable_filters" value="itable_filters">
+                                    <label class="form-check-label" for="input_opt_itable_filters">
+                                        <span class="font-weight-bold">Interactive Table | Filters</span><br>
+                                        An excel file (.xlsx), with "Filters" tab.
+                                    </label>
+                                </div>
+                                <div class="form-check disabled">
+                                    <input class="form-check-input" type="radio" name="input_filetype" id="input_opt_softable_pma_data" value="softable_pma_data">
+                                    <label class="form-check-label" for="input_opt_softable_pma_data">
+                                        <span class="font-weight-bold">SoF Table Pairwise MA Data</span><br>
+                                        An excel file (.xlsx), with "Outcomes", and all the results of outcomes.
+                                    </label>
+                                </div>
+                                <div class="form-check disabled">
+                                    <input class="form-check-input" type="radio" name="input_filetype" id="input_opt_softable_nma_data" value="softable_nma_data">
+                                    <label class="form-check-label" for="input_opt_softable_nma_data">
+                                        <span class="font-weight-bold">SoF Table Network MA Data</span><br>
+                                        An excel file (.xlsx), with tabs of "Outcomes", "Certainty", and all the results of outcomes.
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <div class="form-group row">
+                        <label for="input_datafile" class="col-sm-2 col-form-label">Data File</label>
+                        <div class="col-sm-10">
+                            <input type="file" class="form-control-file" id="input_datafile" name="input_datafile">
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <div class="col-sm-10">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa fa-upload"></i>
+                                Upload
+                            </button>
+                        </div>
+                    </div>
+
+                </form>
+
             </div>
         </div>
     </div>
 </div>
 {% endblock %}
 
-{% block active_nav_link %}upload{% endblock %}
+{% block active_nav_link %}portal-upload{% endblock %}
 
 {% block script %}
 <script>
+function download_file(data_file_type) {
+    var prj = $('#input_project').val();
+    var fn = data_file_type
 
+    switch (data_file_type) {
+        case 'concept_image':
+            fn = fn.toUpperCase() + '.svg';
+            break;
+        default:
+            fn = fn.toUpperCase() + '.xlsx';
+            break;
+    }
+
+    var url = '/pub/graphdata/' + prj + '/' + fn;
+
+    window.open(url, "_blank");
+}
 </script>
 {% endblock %}
