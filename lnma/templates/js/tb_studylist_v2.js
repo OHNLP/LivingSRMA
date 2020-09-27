@@ -3,42 +3,49 @@ var tb_studylist = {
     vpp_id: '#tb-studylist',
     data: {},
     width: 400,
-    
     all_rs: [],
 
-    load: function(data) {
-        this.prisma = data.prisma;
-        this.all_rs = data.studylist;
-        // load data of these pmids:
-        var pmids = [];
-        for (let i = 0; i < data.studylist.length; i++) {
-            var item = data.studylist[i];
-            if (item.pid_type == 'pmid') {
-                pmids.push(item.pmid);
+    load: function() {
+        // load data of these pids:
+        var pids = [];
+        for (var pmid in this.data.paper_dict) {
+            if (this.data.paper_dict.hasOwnProperty(pmid)) {
+                console.log(this.data.paper_dict[pmid])
+                if (!this.data.paper_dict[pmid].hasOwnProperty('title')) {
+                    // the info of this paper is not yet
+                    pids.push(pmid);
+                }
             }
         }
-        // var pmids = this.unpack(this.all_rs.slice(0, 11), 'pmid');
-        this.get_summary_of_search_results(pmids, function(dt) {
+        console.log('* need to load these pids', pids);
+        this.get_summary_of_search_results(pids, function(dt) {
             tb_studylist.parse_summary_results(dt);
-            tb_studylist.init();
-            tb_studylist.update_study_list({stage:'f2'});
+            tb_studylist.set_stage('f2');
         });
         
     },
     
-    init: function() {
+    init: function(data, stage) {
+        // bind data
+        this.data = data;
+
+        if (typeof(stage) == 'undefined') {
+            stage = 'f2';
+        }
+
+        // init the UI
         this.vpp = new Vue({
             el: this.vpp_id,
             data: {
                 total: this.all_rs.length,
                 pn: 0,
                 tp: 1,
-                stage: {text: 'Final number in qualitative synthesis', number: this.all_rs.length},
+                prisma: this.data.prisma,
+                stage: stage,
                 url: jarvis.url,
                 studies: this.all_rs
             },
             methods: {
-
                 prev_page: function() {
                     if (this.pn > 0) {
                         this.pn -= 1;
@@ -58,6 +65,10 @@ var tb_studylist = {
                         );
                     }
                 },
+
+                show_study_by_pmid: function(pmid) {
+
+                }
             }
         });
     },
@@ -74,9 +85,21 @@ var tb_studylist = {
         this.vpp.studies = [];
     },
 
-    set_stage: function(stage, studies) {
+    set_stage: function(stage) {
+        // set the stage
         this.vpp.stage = stage;
+
+        // put the papers in this stage
+        var studies = [];
+        for (var i = 0; i < this.data.prisma[stage].study_list.length; i++) {
+            var nct8 = this.data.prisma[stage].study_list[i];
+            var latest_pmid = this.data.study_dict[nct8].latest_pmid;
+            var paper = this.data.paper_dict[latest_pmid];
+            studies.push(paper);
+        }
         this.vpp.studies = studies;
+        this.vpp.total = studies.length;
+        console.log('* set vpp studies', studies);
     },
 
     get_summary_of_search_results: function(ids, callback) {
@@ -87,27 +110,11 @@ var tb_studylist = {
         );
     },
 
-    update_study_list: function(stage) {
-        this.vpp.stage = this.prisma[stage.stage];
-        // filter the studies
-        var studies = [];
-        for (let i = 0; i < this.all_rs.length; i++) {
-            var study = this.all_rs[i];
-            if (study[stage.stage] == 1) {
-                studies.push(study);
-            } else {
-                
-            }
-        }
-        this.vpp.studies = studies;
-    },
-
     parse_summary_results: function(data) {
         var xml = $(data);
         var docsums = xml.find('DocSum');
-        var studies = [];
         
-        for (let i = 0; i < docsums.length; i++) {
+        for (var i = 0; i < docsums.length; i++) {
             var docsum_xml = $(docsums[i]);
 
             // get PMID
@@ -119,7 +126,7 @@ var tb_studylist = {
             // get authors
             var authors = [];
             var authors_elems = docsum_xml.find('Item[Name="Author"]');
-            for (let j = 0; j < authors_elems.length; j++) {
+            for (var j = 0; j < authors_elems.length; j++) {
                 var elem = authors_elems[j];
                 authors.push(elem.textContent);
             }
@@ -131,15 +138,10 @@ var tb_studylist = {
             var date = docsum_xml.find('Item[Name="PubDate"]')[0].textContent;
 
             // update the record
-            for (let j = 0; j < this.all_rs.length; j++) {
-                if (pmid == this.all_rs[j].pmid) {
-                    this.all_rs[j].title = title;
-                    this.all_rs[j].date = date;
-                    this.all_rs[j].journal = journal;
-                    this.all_rs[j].authors = authors.join(', ');
-                }
-                
-            }
+            this.data.paper_dict[pmid].title = title;
+            this.data.paper_dict[pmid].date = date;
+            this.data.paper_dict[pmid].journal = journal;
+            this.data.paper_dict[pmid].authors = authors.join(', ');
         }
     }
 }

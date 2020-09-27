@@ -23,6 +23,7 @@ from .analyzer import freq_analyzer
 from .analyzer import bayes_analyzer
 
 from lnma import settings
+from lnma import util
 
 import PythonMeta as PMA
 
@@ -62,8 +63,34 @@ def RCC():
     # load the graph data
     full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, 'NMA_LIST.json')
     nma = json.load(open(full_fn))
+    
+    # load the dma data
+    full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, 'PWMA_DATA.xlsx')
+    df = pd.read_excel(full_fn)
+    pwma = OrderedDict()
+    for idx, row in df.iterrows():
+        pwma_type = row['type']
+        option_text = row['option_text']
+        legend_text = row['legend_text']
+        filename = row['filename']
+        if pwma_type not in pwma: 
+            pwma[pwma_type] = {
+                '_default_option': option_text
+            }
+        if option_text not in pwma[pwma_type]: 
+            pwma[pwma_type][option_text] = {
+                'text': option_text,
+                'slides': [],
+                'fns': []
+            }
+        # add this img
+        pwma[pwma_type][option_text]['fns'].append({
+            'fn': filename,
+            'txt': legend_text
+        })
+        pwma[pwma_type][option_text]['slides'].append(filename + '$' + legend_text)
 
-    return render_template('pub/pub.RCC.html', nma=nma)
+    return render_template('pub/pub.RCC.html', nma=nma, pwma=pwma)
 
 
 @bp.route('/CAT.html')
@@ -141,6 +168,11 @@ def CAT_v1():
 @bp.route('/prisma.html')
 def prisma():
     return render_template('pub/pub.prisma.html')
+
+
+@bp.route('/prisma_v2.html')
+def prisma_v2():
+    return render_template('pub/pub.prisma_v2.html')
 
 
 @bp.route('/prisma_IOTOX.html')
@@ -552,6 +584,153 @@ def graphdata_oplots(prj):
     ret = get_ae_pma_data(full_fn, is_getting_sms=False)
 
     return jsonify(ret)
+
+
+@bp.route('/graphdata/<prj>/PRISMA.json')
+def graphdata_prisma_json(prj):
+    '''Special rule for the PRISMA.json
+
+    This JSON file is for the PRISMA plot
+    '''
+
+    fn = 'PRISMA_DATA.xlsx'
+    full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
+
+    # hold all the outcomes
+    fn_json = 'PRISMA.json'
+    full_fn_json = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn_json)
+    
+    # there are two tables for this 
+    tab_name_prisma = 'PRISMA'
+    tab_name_studies = 'studies'
+
+    # load the xls
+    xls = pd.ExcelFile(full_fn)
+
+    # read the prisma, we need to read this tab two times
+    dft = xls.parse(tab_name_prisma, nrows=4)
+
+    # first, get the basic info
+    prisma = {}
+    stage_list = dft.columns.tolist()
+    for col in dft.columns:
+        # col should be b1, b2, b3 ... f1, f2
+        stage = col.strip()
+        text = dft.loc[0, col]
+        n_pmids = dft.loc[1, col]
+        if np.isnan(n_pmids):
+            n_pmids = None
+        detail = dft.loc[2, col]
+        if type(detail) != str:
+            detail = None
+        
+        # create the basic 
+        prisma[stage] = {
+            'stage': stage,
+            'n_pmids': n_pmids,
+            'n_nct8s': 0,
+            'text': text,
+            'detail': detail,
+            'study_list': []
+        }
+
+    # the study dict is NCT based
+    study_dict = {}
+    # the paper dict is PMID based
+    paper_dict = {}
+    # then, get the nct and pmids, skip the text, number and detail rows
+    dft = xls.parse(tab_name_prisma, skiprows=[1,2,3])
+    for col in dft.columns:
+        stage = col
+        study_ids = dft[col][~dft[col].isna()].tolist()
+        if prisma[stage]['n_pmids'] is None:
+            prisma[stage]['n_pmids'] = len(study_ids)
+            
+        # update the studies
+        for study_id in study_ids:
+            # the pmid is a number, but we need it as a string
+            study_id = str(study_id)
+            # tmp is NCT8,PMID format, e.g., NCT12345678,321908734
+            tmp = study_id.split(',')
+            nct8 = tmp[0].strip()
+            pmid = tmp[1]
+            try:
+                # some pid are saved as a float number????
+                # like 27918762.0???
+                pmid = '%s' % int(float(pmid))
+            except:
+                pass
+                
+            # append this nct8 to this stage
+            if nct8 not in prisma[stage]['study_list']:
+                prisma[stage]['study_list'].append(nct8)
+
+            # create a new in the study_dict for this nct
+            if nct8 not in study_dict:
+                study_dict[nct8] = {
+                    'nct8': nct8, 'latest_pmid': pmid, 'pmids': [pmid]
+                }
+            else:
+                # this item is already there, yeah~
+                study_dict[nct8]['latest_pmid'] = pmid
+                study_dict[nct8]['pmids'].append(pmid)
+            
+            # create a new item in paper_dict for this pmid
+            if pmid not in paper_dict:
+                paper_dict[pmid] = {
+                    'nct8': nct8, 'pmid': pmid
+                }
+            else:
+                # what???
+                pass
+
+        # update the number of ncts
+        prisma[stage]['n_nct8s'] = len(prisma[stage]['study_list'])
+
+
+    # second, read more studies from second tab
+    try:
+        # the second tab is optional
+        cols = ['study_id', 'title', 'date', 'journal', 'authors']
+        dft = xls.parse(tab_name_studies, usecols='A:E', names=cols)
+        for idx, row in dft.iterrows():
+            study_id = row['study_id'].strip()
+            is_nct8 = False
+            if study_id.startswith('NCT'):
+                is_nct8 = True
+            else:
+                # sometimes the value is weird ...
+                try:
+                    study_id = '%s' % int(float(study_id))
+                except:
+                    pass
+
+            # update the study info
+            if is_nct8:
+                if study_id in study_dict:
+                    for col in cols:
+                        study_dict[study_id][col] = str(row[col])
+                else:
+                    pass
+            else:
+                if study_id in paper_dict:
+                    for col in cols:
+                        paper_dict[study_id][col] = str(row[col])
+                else:
+                    pass
+    except Exception as err:
+        # nothing, just ignore this error
+        print(err)
+
+    # reat the studies
+    ret = {
+        "prisma": prisma,
+        "study_dict": study_dict,
+        "paper_dict": paper_dict
+    }
+
+    return jsonify(ret)
+
 
 ###########################################################
 # Other utils

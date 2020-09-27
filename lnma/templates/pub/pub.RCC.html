@@ -55,7 +55,16 @@
             </li>
 
             <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">OUTCOMES</a>
+                <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">PAIRWISE MA</a>
+                <div class="dropdown-menu" aria-labelledby="dropdown01">
+                    {% for tp in pwma %}
+                    <a class="dropdown-item" href="#sec-pwma-[[ tp[:4] ]]">[[ tp ]]</a>
+                    {% endfor %}
+                </div>
+            </li>
+
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">NMA</a>
                 <div class="dropdown-menu" aria-labelledby="dropdown01">
                 {% for item in nma['nma'] %}
                     <a class="dropdown-item" href="#sec-nma-[[ item['sname'] ]]">[[ item['name'] ]]</a>
@@ -68,6 +77,15 @@
                 <div class="dropdown-menu" aria-labelledby="dropdown02">
                     <a class="dropdown-item" href="#sec-sof-pma">Summary of Findings: Pairwise MA</a>
                     <a class="dropdown-item" href="#sec-sof-nma">Summary of Findings: Network MA</a>
+                </div>
+            </li>
+
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="dropdown0xx" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">EVIDENCE MAPS</a>
+                <div class="dropdown-menu" aria-labelledby="dropdown0xx">
+                    <a class="dropdown-item" href="#sec-evmap-de">Direct Estimates</a>
+                    <a class="dropdown-item" href="#sec-evmap-crem">Comparison of Different Random Effects Methods</a>
+                    <a class="dropdown-item" href="#sec-evmap-ne">Network Estimates</a>
                 </div>
             </li>
 
@@ -119,7 +137,7 @@
         </div>
     </div>
     <div class="row">
-        <iframe src="[[ url_for('pub.prisma', prj='RCC') ]]" frameborder="0" style="width: 100%; min-height: 830px;"></iframe>
+        <iframe src="[[ url_for('pub.prisma_v2', prj='RCC') ]]" frameborder="0" style="width: 100%; min-height: 830px;"></iframe>
     </div>
 </div>
 
@@ -154,7 +172,7 @@
     <p>How to use this table? <a href="javascript:;" data-toggle="modal" data-target="#exampleModalCenter2">Video demonstration</a></p>
 
     <div class="row">
-        <iframe src="[[ url_for('pub.itable', prj='RCC') ]]" frameborder="0" style="width: 100%; min-height: 680px;"></iframe>
+        <iframe src="[[ url_for('pub.itable', prj='RCC') ]]" frameborder="0" style="width: 100%; min-height: 880px;"></iframe>
     </div>
 </div>
 
@@ -200,6 +218,62 @@
     </div>
 </div>
 
+
+
+<br id="sec-pwma-oucome">
+<!-- to reduce the spacing between this section and next, adding -3.5rem bottom -->
+<div class="container" style="margin-bottom: -3.5rem;">
+    <h3>
+        PAIRWISE META-ANALYSIS
+    </h3>
+    <p>
+        Results are summarized as forest plots for primary analysis, sensitivity analysis and subgroup analysis.<br>
+        Users can use dropdown (select outcome) to select the outcome of interest.
+    </p>
+</div>
+
+{% for tp in pwma %}
+<br id="sec-pwma-[[ tp[:4] ]]">
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <h4 style="margin-bottom: 2rem;">[[ tp ]]</h4>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-4">
+            <div class="dropdown">
+                <button class="btn btn-primary bg-dark bd-dark dropdown-toggle" type="button" id="dropdownMenuButton-pwma-[[ tp[:4] ]]" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  Select outcome
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton-pwma-[[ tp[:4] ]]">
+                    {% for option_text in pwma[tp] %}
+                    {% if not option_text.startswith('_') %}
+                    <a class="dropdown-item" href="javascript:switch_pwma_data('[[ tp[:4] ]]', '[[ "|".join(pwma[tp][option_text]['slides']) ]]', '[[ option_text ]]');">[[ option_text ]]</a>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col-8 d-flex justify-content-end">
+            <div style="padding: .5rem; margin-right: 1rem;">
+                <span id="optext-pwma-[[ tp[:4] ]]" style="font-weight: bold;"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <iframe id="iframe-pwma-[[ tp[:4] ]]" class="auto-height" 
+                src="" scrolling="no" frameborder="0"
+                style="width: 100%; min-height: 400px;"></iframe>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+
+
 {% for item in nma['nma'] %}
 <br id="sec-nma-[[ item['sname'] ]]">
 <div class="container" style="margin-top: 3.5rem;">
@@ -217,7 +291,7 @@
                 </button>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton3">
                     {% for it in item['treats'] %}
-                    <a class="dropdown-item" href="javascript:switch_data('[[ item['sname'] ]]', '[[ it ]]');">[[ it ]]</a>
+                    <a class="dropdown-item" href="javascript:switch_nma_data('[[ item['sname'] ]]', '[[ it ]]');">[[ it ]]</a>
                     {% endfor %}
                 </div>
             </div>
@@ -311,7 +385,16 @@ The HR for 1,2 , The OR for the last one!
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 
 <script>
-function switch_data(tag, treat, display_name) {
+var prj = 'RCC';
+
+function resizeIFrameToFitContent( id ) {
+    var iFrame = document.getElementById(id);
+    iFrame.height = iFrame.contentWindow.document.body.scrollHeight;
+    // console.log('* ' + id + ': ' + iFrame.height);
+}
+
+
+function switch_nma_data(tag, treat, display_name) {
     if (typeof(display_name) == 'undefined') {
         display_name = treat;
     }
@@ -323,11 +406,38 @@ function switch_data(tag, treat, display_name) {
     $('#refname-' + tag).html(display_name);
 }
 
+
+function switch_pwma_data(tag, slides, display_name) {
+    if (typeof(display_name) == 'undefined') {
+        display_name = '';
+    }
+    var url = '[[ url_for("pub.slide") ]]';
+    url += '?prj=' + prj;
+    url += '&slides=' + slides;
+    $('#iframe-pwma-' + tag).attr('src', url);
+    $('#optext-pwma-' + tag).html(display_name);
+}
+
 $(document).ready(function() {
-    switch_data('OS', 'Suni');
-    switch_data('PFS', 'Suni');
-    switch_data('TRAE_3_OR_HIGHER', 'Suni');
-    switch_data('TRAE_ALL_GRADE', 'Suni');
+    {% for tp in pwma %}
+    switch_pwma_data(
+        '[[ tp[:4] ]]', 
+        '[[ "|".join(pwma[tp][pwma[tp]["_default_option"]]["slides"]) ]]', 
+        '[[ pwma[tp]["_default_option"] ]]'
+    );
+    // resize the iframe to fit content
+    $('#iframe-pwma-[[ tp[:4] ]]').on('load', function() {
+        // console.log('* loaded iframe#' + 'iframe-pwma-[[ tp[:4] ]]');
+        resizeIFrameToFitContent('iframe-pwma-[[ tp[:4] ]]');
+        setTimeout("resizeIFrameToFitContent('iframe-pwma-[[ tp[:4] ]]');", 300);
+        setTimeout("resizeIFrameToFitContent('iframe-pwma-[[ tp[:4] ]]');", 900);
+    });
+    {% endfor %}
+
+    switch_nma_data('OS', 'Suni');
+    switch_nma_data('PFS', 'Suni');
+    switch_nma_data('TRAE_3_OR_HIGHER', 'Suni');
+    switch_nma_data('TRAE_ALL_GRADE', 'Suni');
 });
 </script>
 </body>

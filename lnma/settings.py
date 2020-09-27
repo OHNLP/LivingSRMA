@@ -107,4 +107,5 @@ PUBWEB_DATAFILES = {
     'softable_pma_data':  'SOFTABLE_PMA_DATA.xlsx',
     'softable_nma_data':  'SOFTABLE_NMA_DATA.xlsx',
     'all_data':           'ALL_DATA.xlsx',
+    'prisma_data':        'PRISMA_DATA.xlsx'
 }
