@@ -66,8 +66,8 @@
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">NMA</a>
                 <div class="dropdown-menu" aria-labelledby="dropdown01">
-                {% for item in nma['nma'] %}
-                    <a class="dropdown-item" href="#sec-nma-[[ item['sname'] ]]">[[ item['name'] ]]</a>
+                {% for tp in nma %}
+                    <a class="dropdown-item" href="#sec-nma-[[ tp[:4] ]]">[[ tp ]]</a>
                 {% endfor %}
                 </div>
             </li>
@@ -289,7 +289,7 @@
 
 {% for tp in nma %}
 <br id="sec-nma-[[ tp[:4] ]]">
-<div class="container mt-0" style="">
+<div class="container mt-3">
     <div class="row">
         <div class="col">
             <h4 style="margin-bottom: 2rem;">[[ tp ]]</h4>
