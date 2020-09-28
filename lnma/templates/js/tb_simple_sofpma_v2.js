@@ -50,13 +50,13 @@ var tb_simple_sofpma = {
                     if (r.has_survival_data) {
                         return r.oc.survival_in_control;
                     } else {
-                        return 'NA';
+                        return null;
                     }
                 },
 
                 get_SRVC_txt: function(r) {
                     if (r.has_survival_data) {
-                        return this.get_SRVC(r).toFixed(2) + ' (mo)';
+                        return this.get_SRVC(r).toFixed(1) + ' (mo)';
                     } else {
                         return 'NA';
                     }
@@ -68,7 +68,7 @@ var tb_simple_sofpma = {
                         var srvi = (1 / hr) * r.oc.survival_in_control;
                         return srvi;
                     } else {
-                        return 'NA';
+                        return null;
                     }
                 },
 
@@ -77,7 +77,7 @@ var tb_simple_sofpma = {
                     // sm, lower, upper
                     if (r.has_survival_data) {
                         var srvi = this.get_SRVI(r, obj);
-                        return srvi.toFixed(2) + ' (mo)';
+                        return srvi.toFixed(1) + ' (mo)';
                     } else {
                         return 'NA';
                     }
@@ -270,7 +270,7 @@ var tb_simple_sofpma = {
                 // the default value
                 use_which_val: oc['oc_datatype'] == 'raw'? 'internal':'external',
                 // the external value
-                external_val: tb_simple_sofpma.default_external_base,
+                external_val: oc['external_val'],
                 // decide which internal to use
                 use_internal_avg: true,
                 use_internal_min: false,

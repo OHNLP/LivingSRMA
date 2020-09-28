@@ -351,6 +351,24 @@ a {
 
 <div id="main-pane">
     <div class="pane-row">
+        <i class="fa fa-cog"></i>&nbsp;
+        Select comparator: 
+        <div id="fm_ref_treat_selector" class="box">
+            <div class="box-body">
+
+                <select id="ref_treat" v-model="ref_treat" v-on:change="change_treat">
+                    <option v-bind:value="t"
+                        v-for="t in treats">
+                        {{ t }}
+                    </option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <!-- .pane-row -->
+
+
+    <div class="pane-row">
         <div class="box" style="width: auto; padding-right: 10px; display: none;" id="tb-nma-league">
             <div class="box-header">
                 <h4>
@@ -400,6 +418,7 @@ a {
 
     
     </div>
+    <!-- .pane-row -->
         
 
     <div class="pane-row">
@@ -450,7 +469,8 @@ a {
             </div>
         </div><!-- .box P-Score plot -->
 
-    </div><!-- .pane-row -->
+    </div>
+    <!-- .pane-row -->
 
 </div>
 
@@ -493,7 +513,34 @@ if (isIE) {
 
 {% include "js/fig_saver.js" %}
 
+var fm_ref_treat_selector = {
+    vpp: null,
+    vpp_id: '#fm_ref_treat_selector',
+
+    init: function(t) {
+
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                ref_treat: t,
+                treats: [t]
+            },
+            methods: {
+                change_treat: function() {
+                    console.log('this.ref_treat: ' + this.ref_treat);
+                    jarvis.set_comparator(this.ref_treat);
+                }
+            }
+        });
+    },
+
+    draw: function(data) {
+        this.vpp.treats = data;
+    }
+}
+
 var jarvis = {
+
     getUrlParameter: function(name) {
         name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
         var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
@@ -530,6 +577,8 @@ var jarvis = {
         var oc_fullname = this.all_data.oc_dict[oc_name].oc_fullname;
         // $('#tb-nma-league-name').html(oc_fullname);
 
+        fm_ref_treat_selector.draw(data.league.cols);
+
         // update the network plot
         fg_netplt.draw(data.netplt);
 
@@ -562,6 +611,7 @@ var jarvis = {
             return;
         }
 
+
         fg_netplt.init();
         fg_frsplt.init();
         
@@ -582,6 +632,9 @@ var jarvis = {
 
         this.default_oc_name = oc;
         this.default_treat = treat;
+
+        // set the ref treatment
+        fm_ref_treat_selector.init(this.default_treat);
 
         jarvis.ssmsg('Loading data ...');
 

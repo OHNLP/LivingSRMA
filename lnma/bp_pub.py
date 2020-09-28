@@ -2034,11 +2034,12 @@ def get_oc_pma_data(full_fn):
 
     # define the columns for basic information of outcome
     cols_outcome = [
-        'oc_cate', 'oc_measures', 'oc_datatype', 'oc_name', 'oc_fullname',
+        'oc_cate', 'oc_rtitle', 'oc_iisof',
+        'oc_measures', 'oc_datatype', 'oc_name', 'oc_fullname',
         'cie_rob', 'cie_inc', 'cie_ind', 'cie_imp', 'pub_bia', 
         'importance', 'treatment', 'control'
     ]
-    dft = xls.parse(oc_tab_name, usecols='A:M', names=cols_outcome)
+    dft = xls.parse(oc_tab_name, usecols='A:O', names=cols_outcome)
     dft = dft[~dft['oc_name'].isna()]
 
     # build oc category
@@ -2070,7 +2071,7 @@ def get_oc_pma_data(full_fn):
         oc_item['oc_names'].append(oc_name)
 
         # calc the Certainty in Evidence
-        cie = calc_cie(row[cols_outcome[5:9]].tolist())
+        cie = calc_cie(row[['cie_rob', 'cie_inc', 'cie_ind', 'cie_imp']].tolist())
 
         # put current row in to ae_dict
         oc_dict[oc_name] = {
@@ -2084,7 +2085,7 @@ def get_oc_pma_data(full_fn):
 
         # put the cie columns
         # 'cie_rob', 'cie_inc', 'cie_ind', 'cie_imp', 'pub_bia', 'importance'
-        for col in cols_outcome[5:11]:
+        for col in ['cie_rob', 'cie_inc', 'cie_ind', 'cie_imp', 'pub_bia', 'importance']:
             try:
                 oc_dict[oc_name][col] = int(row[col])
             except:
@@ -2097,7 +2098,7 @@ def get_oc_pma_data(full_fn):
     # build OC details by the data type
     cols_dict = {
         'raw': ['A:H', ['study', 'year', 'Et', 'Nt', 'Ec', 'Nc', 'treatment', 'control']],
-        'pre': ['A:H', ['study', 'year', 'TE', 'lowerci', 'upperci', 'treatment', 'control', 'survival in control']]
+        'pre': ['A:J', ['study', 'year', 'TE', 'lowerci', 'upperci', 'treatment', 'control', 'survival in control', 'Ec', 'Et']]
     }
     oc_dfts = []
     oc_rsts = {}
@@ -2145,6 +2146,8 @@ def get_oc_pma_data(full_fn):
             'TE': 0,
             'lowerci': 0,
             'upperci': 0,
+            # external base for 1000
+            'external_val': 100,
             # survival in control
             'survival_in_control': 0,
             # result is for the model
@@ -2186,6 +2189,7 @@ def get_oc_pma_data(full_fn):
             oc_rsts[oc_name]['TE'] = float(dft['TE'].mean())
             oc_rsts[oc_name]['lowerci'] = float(dft['lowerci'].mean())
             oc_rsts[oc_name]['upperci'] = float(dft['upperci'].mean())
+            oc_rsts[oc_name]['external_val'] = int(dft['Ec'].mean())
 
             # get survival in control
             survival_in_control = []
@@ -2236,16 +2240,6 @@ def get_oc_pma_data(full_fn):
                     ds
                 ))
                 pma_r = None
-
-            # if sm in ['OR', 'RR', 'RD']:
-            #     pma_r = get_pma_by_py(ds, datatype="CAT_RAW", sm=sm, fixed_or_random='random')
-            #     # pma_r = get_pma_by_rplt(ds, datatype="CAT_RAW", sm=sm, fixed_or_random='random')
-            #     # validate the result, if isNaN, just set None
-            #     if np.isnan(pma_r['model']['sm']):
-            #         pma_r = None
-
-            # elif sm in ['HR']:
-            #     pma_r = get_pma_by_r_CAT_PRE(ds, sm=sm)
 
             # output the results
             oc_rsts[oc_name]['result'][sm] = {
