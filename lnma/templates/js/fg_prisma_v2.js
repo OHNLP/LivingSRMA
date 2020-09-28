@@ -4,9 +4,9 @@ var fg_prisma = {
     
     init: function(data) {
         this.data = data;
-        // set n_nct8s as number of each stage
+        // set n_ctids as number of each stage
         for (var stage in this.data.prisma) {
-            this.data.prisma[stage].number = this.data.prisma[stage].n_nct8s;
+            this.data.prisma[stage].number = this.data.prisma[stage].n_ctids;
         }
 
         this.vpp = new Vue({

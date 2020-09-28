@@ -514,20 +514,20 @@ var jarvis = {
         this.all_data = data;
 
         // draw the first oc as default
-        // var oc_name = this.all_data.oc_names[0];
-        this.draw_oc(data.data);
+        var oc_name = this.default_oc_name;
+        this.draw_oc(oc_name);
 
         // set comparator
         this.set_comparator(this.default_treat);
     },
 
-    draw_oc: function(data) {
+    draw_oc: function(oc_name) {
         // bind current data to this oc
-        // var data = this.all_data.graph_dict[oc_name].data;
+        var data = this.all_data.graph_dict[oc_name].data;
         this.data = data;
 
         // show the name
-        // var oc_fullname = this.all_data.oc_dict[oc_name].oc_fullname;
+        var oc_fullname = this.all_data.oc_dict[oc_name].oc_fullname;
         // $('#tb-nma-league-name').html(oc_fullname);
 
         // update the network plot
@@ -586,7 +586,7 @@ var jarvis = {
         jarvis.ssmsg('Loading data ...');
 
         $.get(
-            "/pub/graphdata/" + prj + "/GRAPH_"+ oc +".json",
+            "/pub/graphdata/" + prj + "/GRAPH.json",
             {ver: Math.random(), use_cache: 'yes'},
             function(data) {
                 jarvis.draw(data);

@@ -1,5 +1,6 @@
 import os
 import json
+import uuid
 from collections import OrderedDict
 
 from flask import request
@@ -398,6 +399,37 @@ def graphdata_graph_json(prj):
     # build OC Category data
     oc_tab_name = 'Outcomes'
 
+    ######################################
+    # Build the NMA_LIST.json
+    ######################################
+    nma = OrderedDict()
+    # read the first tab again
+    dft = xls.parse(oc_tab_name)
+    dft = dft[~dft['name'].isna()]
+
+    for idx, row in dft.iterrows():
+        nma_type = row['analysis title']
+        oc_name = row['name']
+        oc_fullname = row['full name']
+        
+        if nma_type not in nma: 
+            nma[nma_type] = {
+                '_default_oc': oc_name,
+                'oc_names': []
+            }
+        
+        # add this img
+        nma[nma_type]['oc_names'].append({
+            'oc_name': oc_name,
+            'oc_fullname': oc_fullname
+        })
+
+    json.dump(nma, open(full_nma_list_json, 'w'), indent=4)
+    print('* saved NMA_LIST.json')
+
+    ######################################
+    # Build the GRAPH.json
+    ######################################
     # load data
     dft = xls.parse(oc_tab_name)
     dft = dft[~dft['name'].isna()]
@@ -471,25 +503,28 @@ def graphdata_graph_json(prj):
     # FIRST of all, save the GRAPH.json
     json.dump(ret, open(full_fn_json, 'w'))
 
+    ######################################
+    # Build the GRAPH-outcome.json
+    ######################################
     # then, dump each oc
-    for oc_name in ret['oc_names']:
-        # use upper and underscore to convert name to id
-        oc_name_id = oc_name.upper().replace(' ', '_')
-        full_oc_fn_json_name = full_oc_fn_json % oc_name_id
-        # dump!
-        json.dump(ret['graph_dict'][oc_name], open(full_oc_fn_json_name, 'w'))
+    # for oc_name in ret['oc_names']:
+    #     # use upper and underscore to convert name to id
+    #     oc_name_id = oc_name.upper().replace(' ', '_')
+    #     full_oc_fn_json_name = full_oc_fn_json % oc_name_id
+    #     # dump!
+    #     json.dump(ret['graph_dict'][oc_name], open(full_oc_fn_json_name, 'w'))
         
     # generate a NMA_LIST.json for pub
-    nma_list = { 'nma': [] }
-    for oc_name in ret['oc_names']:
-        oc = oc_dict[oc_name]
-        # save to nma list
-        nma_list['nma'].append({
-            'name': oc['oc_fullname'],
-            'sname': oc['oc_name'].upper().replace(' ', '_'),
-            'treats': oc['treat_list']
-        })
-    json.dump(nma_list, open(full_nma_list_json, 'w'), indent=4)
+    # nma_list = { 'nma': [] }
+    # for oc_name in ret['oc_names']:
+    #     oc = oc_dict[oc_name]
+    #     # save to nma list
+    #     nma_list['nma'].append({
+    #         'name': oc['oc_fullname'],
+    #         'sname': oc['oc_name'].upper().replace(' ', '_'),
+    #         'treats': oc['treat_list']
+    #     })
+    # json.dump(nma_list, open(full_nma_list_json, 'w'), indent=4)
 
     return jsonify(ret)
 
@@ -628,7 +663,7 @@ def graphdata_prisma_json(prj):
         prisma[stage] = {
             'stage': stage,
             'n_pmids': n_pmids,
-            'n_nct8s': 0,
+            'n_ctids': 0,
             'text': text,
             'detail': detail,
             'study_list': []
@@ -650,10 +685,19 @@ def graphdata_prisma_json(prj):
         for study_id in study_ids:
             # the pmid is a number, but we need it as a string
             study_id = str(study_id)
-            # tmp is NCT8,PMID format, e.g., NCT12345678,321908734
+            # tmp is ctid,PMID format, e.g., NCT12345678,321908734
             tmp = study_id.split(',')
-            nct8 = tmp[0].strip()
-            pmid = tmp[1]
+
+            if len(tmp) == 1:
+                # only pmid ???
+                ctid = tmp[0]
+                pmid = tmp[0]
+            elif len(tmp) == 2:
+                ctid = tmp[0].strip()
+                pmid = tmp[1]
+            else:
+                continue
+
             try:
                 # some pid are saved as a float number????
                 # like 27918762.0???
@@ -661,31 +705,31 @@ def graphdata_prisma_json(prj):
             except:
                 pass
                 
-            # append this nct8 to this stage
-            if nct8 not in prisma[stage]['study_list']:
-                prisma[stage]['study_list'].append(nct8)
+            # append this ctid to this stage
+            if ctid not in prisma[stage]['study_list']:
+                prisma[stage]['study_list'].append(ctid)
 
             # create a new in the study_dict for this nct
-            if nct8 not in study_dict:
-                study_dict[nct8] = {
-                    'nct8': nct8, 'latest_pmid': pmid, 'pmids': [pmid]
+            if ctid not in study_dict:
+                study_dict[ctid] = {
+                    'ctid': ctid, 'latest_pmid': pmid, 'pmids': [pmid]
                 }
             else:
                 # this item is already there, yeah~
-                study_dict[nct8]['latest_pmid'] = pmid
-                study_dict[nct8]['pmids'].append(pmid)
+                study_dict[ctid]['latest_pmid'] = pmid
+                study_dict[ctid]['pmids'].append(pmid)
             
             # create a new item in paper_dict for this pmid
             if pmid not in paper_dict:
                 paper_dict[pmid] = {
-                    'nct8': nct8, 'pmid': pmid
+                    'ctid': ctid, 'pmid': pmid
                 }
             else:
                 # what???
                 pass
 
         # update the number of ncts
-        prisma[stage]['n_nct8s'] = len(prisma[stage]['study_list'])
+        prisma[stage]['n_ctids'] = len(prisma[stage]['study_list'])
 
 
     # second, read more studies from second tab
@@ -695,9 +739,9 @@ def graphdata_prisma_json(prj):
         dft = xls.parse(tab_name_studies, usecols='A:E', names=cols)
         for idx, row in dft.iterrows():
             study_id = row['study_id'].strip()
-            is_nct8 = False
+            is_ctid = False
             if study_id.startswith('NCT'):
-                is_nct8 = True
+                is_ctid = True
             else:
                 # sometimes the value is weird ...
                 try:
@@ -706,7 +750,7 @@ def graphdata_prisma_json(prj):
                     pass
 
             # update the study info
-            if is_nct8:
+            if is_ctid:
                 if study_id in study_dict:
                     for col in cols:
                         study_dict[study_id][col] = str(row[col])
@@ -1513,12 +1557,9 @@ def get_oc_nma_data(full_fn, backend):
 
     dft = xls.parse(oc_tab_name)
     dft = dft[~dft['name'].isna()]
-
-    # define the columns for basic information of outcome
-    cols_certs = [
-        'oc_cate', 'oc_name', 'comparator', 'treatment', 
-        'cie_rob', 'cie_inc', 'cie_ind', 'cie_imp', 'pub_bia'
-    ]
+    
+    # only include those 
+    dft = dft[dft['included in sof'] == 'yes']
 
     # build oc category
     oc_dict = {}
@@ -1564,9 +1605,17 @@ def get_oc_nma_data(full_fn, backend):
     oc_list.append(oc_item)
     print('* created oc_dict %s terms' % (len(oc_dict)))
 
+    # define the columns for basic information of outcome
+    cols_range = 'A:K'
+    cols_certs = [
+        'oc_cate', 'oc_name', 'comparator', 'treatment', 
+        'cie_rob', 'cie_inc', 'cie_ind', 'cie_imp', 'pub_bia',
+        'cie_coh', 'cie_trs'
+    ]
+
     # build certainty?
     if oc_tab_cert in xls.sheet_names:
-        dft = xls.parse(oc_tab_cert, usecols='A:I', names=cols_certs)
+        dft = xls.parse(oc_tab_cert, usecols=cols_range, names=cols_certs)
 
         # there maybe nan 
         dft = dft[~dft['oc_name'].isna()]

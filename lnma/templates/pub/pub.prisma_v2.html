@@ -529,7 +529,7 @@ a {
             Study List | 
         </h4>
         <div>
-            <p>{{ prisma[stage].text }} (n = {{ prisma[stage].n_nct8s }})</p>
+            <p>{{ prisma[stage].text }} (n = {{ prisma[stage].n_ctids }})</p>
         </div>
     </div>
 
@@ -555,8 +555,8 @@ a {
                     
                 <a class="study-pmid" target="_blank" title="Show in PubMed" 
                     v-bind:href="url.pubmed.view_pmid + r.pmid">{{ r.pmid }}</a>
-                <a class="study-pmid" target="_blank" title="Show in ClinicalTrials.gov" 
-                    v-bind:href="url.ctgov.view_ct + r.nct8">{{ r.nct8 }}</a>
+                <a class="study-pmid" target="_blank" title="Show clinical trial detail" 
+                    v-bind:href="url.ctgov.view_ct + r.ctid">{{ r.ctid }}</a>
             </div>
 
         </div>

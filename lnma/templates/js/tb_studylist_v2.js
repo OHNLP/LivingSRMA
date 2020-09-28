@@ -92,8 +92,8 @@ var tb_studylist = {
         // put the papers in this stage
         var studies = [];
         for (var i = 0; i < this.data.prisma[stage].study_list.length; i++) {
-            var nct8 = this.data.prisma[stage].study_list[i];
-            var latest_pmid = this.data.study_dict[nct8].latest_pmid;
+            var ctid = this.data.prisma[stage].study_list[i];
+            var latest_pmid = this.data.study_dict[ctid].latest_pmid;
             var paper = this.data.paper_dict[latest_pmid];
             studies.push(paper);
         }
