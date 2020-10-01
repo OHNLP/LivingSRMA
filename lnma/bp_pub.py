@@ -285,11 +285,11 @@ def graphdata_itable_cfg_json(prj):
         current_app.instance_path, PATH_PUBDATA, prj, 'ITABLE_CFG.json')
 
     # just send the ITABLE_CFG.json if exists
-    if os.path.exists(full_fn_itable_cfg_json):
-        return send_from_directory(
-            os.path.join(current_app.instance_path, PATH_PUBDATA, prj),
-            'ITABLE_CFG.json'
-        )
+    # if os.path.exists(full_fn_itable_cfg_json):
+    #     return send_from_directory(
+    #         os.path.join(current_app.instance_path, PATH_PUBDATA, prj),
+    #         'ITABLE_CFG.json'
+    #     )
 
     # just load the existing filters
     fn = 'ITABLE_FILTERS.json'
@@ -665,6 +665,7 @@ def get_filters_from_itable(full_fn):
     label1,    label2,     ...
     col_name1, col_name2,  ...
     flt_type1, flt_type2,  ...
+    def_opt_1, def_opt_2,  ...
     option1_1, option_2_1, ...
     option1_2, option_2_2, ...
 
@@ -672,6 +673,7 @@ def get_filters_from_itable(full_fn):
     The first row is the label displayed on the UI.
     The second row is the column name.
     The third row is the filter type: radio, select.
+    The 4th row is the default label name
     From this row, all rows are the options for this filter.
 
     All of the options must be the text in the column in the itable.
@@ -684,7 +686,7 @@ def get_filters_from_itable(full_fn):
 
     # build Filters data
     ft_list = []
-    for col in dft.columns:
+    for col in dft.columns[1:]:
         display_name = col
         tmp = dft[col].tolist()
         # the first line of dft is the column name / attribute name
@@ -692,7 +694,10 @@ def get_filters_from_itable(full_fn):
         # the second line of dft is the filter type: radio or select
         ft_type = tmp[1].strip().lower()
         # get those rows not NaN, which means containing option
-        ft_opts = dft[col][~dft[col].isna()].tolist()[2:]
+        ft_opts = dft[col][~dft[col].isna()].tolist()[3:]
+        # get the default label
+        ft_def_opt_label = tmp[2].strip()
+
         # set the default option
         ft_item = {
             'display_name': display_name,
@@ -700,7 +705,7 @@ def get_filters_from_itable(full_fn):
             'attr': ft_attr,
             'value': 0,
             'values': [{
-                "display_name": "All",
+                "display_name": ft_def_opt_label,
                 "value": 0,
                 "sql_cond": "{$col} is not NULL",
                 "default": True

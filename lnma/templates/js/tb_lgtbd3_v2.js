@@ -134,6 +134,17 @@ var tb_lgtbd3 = {
     },
 
     draw: function(data) {
+        // need to decide which is better here
+        // the which is better may be provided by the 
+        if (typeof(fm_config)!='undefined') {
+            // which means we can get the config value from configure
+            if (fm_config.vpp.cfgs.which_is_better.selected == 'small') {
+                this.color_scale = this.color_scale_lb;
+            } else {
+                this.color_scale = this.color_scale_hb;
+            }
+        }
+
         // bind and transform data
         this.data = data;
         this.conv_table2list();
