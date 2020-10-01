@@ -427,7 +427,7 @@ a {
                             {{ get_SRVD_txt(r, 'sm') }}
                         </td>
 
-                        <td v-bind:class="get_cieclr(r.oc.result[get_a_measure(r)].random.model.sm, r.oc.cie)"
+                        <td v-bind:class="get_cieclr(r.oc.param.which_is_better, r.oc.result[get_a_measure(r)].random.model.sm, r.oc.cie)"
                             v-on:click="show_cie_detail(r.oc_name)">
                             {{ txt('CIE_TOT_' + r.oc.cie) }}
                         </td>

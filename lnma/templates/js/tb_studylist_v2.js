@@ -95,7 +95,13 @@ var tb_studylist = {
             var ctid = this.data.prisma[stage].study_list[i];
             var latest_pmid = this.data.study_dict[ctid].latest_pmid;
             var paper = this.data.paper_dict[latest_pmid];
-            studies.push(paper);
+
+            if (paper.hasOwnProperty('title')) {
+                // this paper is a real PMID data or we put data in xls
+                studies.push(paper);
+            } else {
+                studies.push(this.data.study_dict[ctid]);
+            }
         }
         this.vpp.studies = studies;
         this.vpp.total = studies.length;

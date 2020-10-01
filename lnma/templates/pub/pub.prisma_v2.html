@@ -343,27 +343,27 @@ a {
 
         <div class="ss-box" style="left: 15px; top: 10px; cursor: default;">
             <div class="ss-info">{{ vals.b1.text }}</div>
-            <div class="ss-number">(n = {{ fmt_num(vals.b1.number) }})</div>
+            <div class="ss-number">(n = {{ fmt_num(vals.b1.n_pmids) }})</div>
         </div>
 
         <div class="ss-box" style="left: 190px; top: 10px; cursor: default;">
             <div class="ss-info">{{ vals.b2.text }}</div>
-            <div class="ss-number">(n = {{ fmt_num(vals.b2.number) }})</div>
+            <div class="ss-number">(n = {{ fmt_num(vals.b2.n_pmids) }})</div>
         </div>
 
         <div class="ss-box" style="left: 15px; top: 110px; width: 300px !important; cursor: default;">
             <div class="ss-info">{{ vals.b3.text }}</div>
-            <div class="ss-number">(n = {{ fmt_num(vals.b3.number) }})</div>
+            <div class="ss-number">(n = {{ fmt_num(vals.b3.n_pmids) }})</div>
         </div>
         
         <div class="ss-box" style="left: 85px; top: 195px; cursor: default;">
             <div class="ss-info">{{ vals.b4.text }}</div>
-            <div class="ss-number">(n = {{ fmt_num(vals.b4.number) }})</div>
+            <div class="ss-number">(n = {{ fmt_num(vals.b4.n_pmids) }})</div>
         </div>
 
         <div class="ss-box" style="left: 85px; top: 300px; cursor: default;">
             <div class="ss-info">{{ vals.b5.text }}</div>
-            <div class="ss-number">(n = {{ fmt_num(vals.b5.number) }})</div>
+            <div class="ss-number">(n = {{ fmt_num(vals.b5.n_pmids) }})</div>
         </div>
 
         <div class="ss-box ss-box2 ss-box-stage" style="left: 85px; top: 400px;" v-on:click="update_study_list('b6')">
@@ -379,12 +379,12 @@ a {
         <!-- Exclude Part -->
         <div class="ss-box" style="left: 255px; top: 230px; width: 100px; cursor: default;">
             <div class="ss-info">{{ vals.e1.text }}</div>
-            <div class="ss-number">(n = {{ fmt_num(vals.e1.number) }})</div>
+            <div class="ss-number">(n = {{ fmt_num(vals.e1.n_pmids) }})</div>
         </div>
 
         <div class="ss-box ss-box2 ss-box-stage" style="left: 255px; top: 330px; width: 100px;" v-on:click="show_excluded_studies('e2')">
             <div class="ss-info">{{ vals.e2.text }}</div>
-            <div class="ss-number">(n = {{ fmt_num(vals.e2.number) }})</div>
+            <div class="ss-number">(n = {{ fmt_num(vals.e2.n_pmids) }})</div>
         </div>
 
         <div class="ss-box ss-box2 ss-box-stage" style="left: 255px; top: 430px; width: 100px;" v-on:click="update_study_list('e3')">
@@ -424,14 +424,16 @@ a {
 
         <!-- Merge Part -->
 
-        <div class="ss-box ss-box2 ss-box3 ss-box-stage" style="left: 236px; top: 635px; " v-on:click="update_study_list('f1')">
+        <div class="ss-box ss-box2 ss-box3 ss-box-stage" style="left: 236px; top: 625px; " v-on:click="update_study_list('f1')">
             <div class="ss-info">{{ vals.f1.text }}</div>
             <div class="ss-number">(n = {{ fmt_num(vals.f1.number) }})</div>
+            <div class="ss-info">({{ fmt_num(vals.f1.n_pmids) }} references)</div>
         </div>
 
         <div class="ss-box ss-box2 ss-box3 ss-box-stage" style="left: 235px; top: 745px;" v-on:click="update_study_list('f2')">
             <div class="ss-info">{{ vals.f2.text }}</div>
             <div class="ss-number">(n = {{ fmt_num(vals.f2.number) }})</div>
+            <div class="ss-info">({{ fmt_num(vals.f2.n_pmids) }} references)</div>
         </div>
 
         <!-- Legend Part -->
@@ -507,8 +509,8 @@ a {
         </div>
 
         <!-- Arrows for Merge -->
-        <div class="ss-arrow" style="width: 295px; height: 40px; left: 155px; top: 570px; border-bottom: 5px solid black; border-left: 5px solid black; border-right: 5px solid black; position: relative; z-index:1;">
-            <div style="position: absolute; left: 145px; bottom: -35px;">
+        <div class="ss-arrow" style="width: 282px; height: 40px; left: 166px; top: 564px; border-bottom: 5px solid black; border-left: 5px solid black; border-right: 5px solid black; position: relative; z-index:1;">
+            <div style="position: absolute; left: 135px; bottom: -35px;">
                 <i class="fa fa-long-arrow-alt-down"></i>
             </div>
         </div>

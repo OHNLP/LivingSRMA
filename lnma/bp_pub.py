@@ -393,138 +393,9 @@ def graphdata_graph_json(prj):
             os.path.join(current_app.instance_path, PATH_PUBDATA, prj),
             fn_json
         )
-
-    # get all
-    xls = pd.ExcelFile(full_fn)
-    # build OC Category data
-    oc_tab_name = 'Outcomes'
-
-    ######################################
-    # Build the NMA_LIST.json
-    ######################################
-    nma = OrderedDict()
-    # read the first tab again
-    dft = xls.parse(oc_tab_name)
-    dft = dft[~dft['name'].isna()]
-
-    for idx, row in dft.iterrows():
-        nma_type = row['analysis title']
-        oc_name = row['name']
-        oc_fullname = row['full name']
-        
-        if nma_type not in nma: 
-            nma[nma_type] = {
-                '_default_oc': oc_name,
-                'oc_names': []
-            }
-        
-        # add this img
-        nma[nma_type]['oc_names'].append({
-            'oc_name': oc_name,
-            'oc_fullname': oc_fullname
-        })
-
-    json.dump(nma, open(full_nma_list_json, 'w'), indent=4)
-    print('* saved NMA_LIST.json')
-
-    ######################################
-    # Build the GRAPH.json
-    ######################################
-    # load data
-    dft = xls.parse(oc_tab_name)
-    dft = dft[~dft['name'].isna()]
-
-    # build oc category
-    oc_dict = {}
-    oc_names = []
-    for idx, row in dft.iterrows():
-        oc = {
-            "oc_name": row['name'],
-            "oc_fullname": row['full name'],
-            "oc_measures": row['measure'].split(','),
-            "oc_datatype": row['data type'],
-            "treat_list": []
-        }
-        oc_dict[oc['oc_name']] = oc
-        oc_names.append(oc['oc_name'])
-
-    # get all NMA
-    ret = {
-        'oc_dict': oc_dict,
-        'oc_names': oc_names,
-        'graph_dict': {}
-    }
-    for oc_name in oc_names:
-        oc = oc_dict[oc_name]
-        sheet_name = oc_name
-
-        # get measure
-        measure = oc['oc_measures'][0]
-        dft = xls.parse(sheet_name)
-
-        # remove those empty lines based on study name
-        # the study name MUST be different
-        dft = dft[~dft.study.isna()]
-
-        # get treat list
-        if oc['oc_datatype'] == 'pre':
-            treat_list = list(set(dft['t1'].unique().tolist() + dft['t2'].unique().tolist()))
-            input_format = settings.INPUT_FORMATS_HRLU
-        elif oc['oc_datatype'] == 'raw':
-            treat_list = dft['treat'].unique().tolist()
-            input_format = settings.INPUT_FORMATS_ET
-
-        # update the oc in oc_dict
-        oc_dict[oc_name]['treat_list'] = treat_list
-
-        # get config
-        analysis_method = "freq"
-        reference_treatment = treat_list[0]
-        fixed_or_random = "random"
-        which_is_better = "small"
-        cfg = {
-            "input_format": input_format,
-            "reference_treatment": reference_treatment,
-            "measure_of_effect": measure,
-            "fixed_or_random": fixed_or_random,
-            "which_is_better": which_is_better
-        }
-
-        # get the rs for this oc
-        rs = json.loads(dft.to_json(orient='table', index=False))['data']
-
-        # calc!
-        analysis_ret = freq_analyzer.analyze(rs, cfg)
-
-        # put in result
-        ret['graph_dict'][oc_name] = analysis_ret
-
-    # now save all the results
-    # FIRST of all, save the GRAPH.json
-    json.dump(ret, open(full_fn_json, 'w'))
-
-    ######################################
-    # Build the GRAPH-outcome.json
-    ######################################
-    # then, dump each oc
-    # for oc_name in ret['oc_names']:
-    #     # use upper and underscore to convert name to id
-    #     oc_name_id = oc_name.upper().replace(' ', '_')
-    #     full_oc_fn_json_name = full_oc_fn_json % oc_name_id
-    #     # dump!
-    #     json.dump(ret['graph_dict'][oc_name], open(full_oc_fn_json_name, 'w'))
-        
-    # generate a NMA_LIST.json for pub
-    # nma_list = { 'nma': [] }
-    # for oc_name in ret['oc_names']:
-    #     oc = oc_dict[oc_name]
-    #     # save to nma list
-    #     nma_list['nma'].append({
-    #         'name': oc['oc_fullname'],
-    #         'sname': oc['oc_name'].upper().replace(' ', '_'),
-    #         'treats': oc['treat_list']
-    #     })
-    # json.dump(nma_list, open(full_nma_list_json, 'w'), indent=4)
+    
+    # get the graph json data
+    ret = get_oc_graph_data(full_fn, full_nma_list_json, full_fn_json)
 
     return jsonify(ret)
 
@@ -565,6 +436,8 @@ def graphdata_softable_nma_json(prj):
     From third tab all the events
     '''
     fn = 'SOFTABLE_NMA_DATA.xlsx'
+    full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
+
     fn_json = 'SOFTABLE_NMA.json'
     full_fn_json = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn_json)
 
@@ -591,14 +464,11 @@ def graphdata_softable_nma_json(prj):
         # cache the result
         json.dump(ret, open(full_fn_json, 'w'))
     elif v == '2':
-        fn = 'SOFTABLE_NMA_DATA.xlsx'
-        full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
         ret = get_oc_nma_data(full_fn, backend=backend)
         # cache the result
         json.dump(ret, open(full_fn_json, 'w'))
 
     return jsonify(ret)
-
 
 
 @bp.route('/graphdata/<prj>/OPLOTS.json')
@@ -666,7 +536,8 @@ def graphdata_prisma_json(prj):
             'n_ctids': 0,
             'text': text,
             'detail': detail,
-            'study_list': []
+            'study_list': [],
+            'paper_list': []
         }
 
     # the study dict is NCT based
@@ -678,8 +549,6 @@ def graphdata_prisma_json(prj):
     for col in dft.columns:
         stage = col
         study_ids = dft[col][~dft[col].isna()].tolist()
-        if prisma[stage]['n_pmids'] is None:
-            prisma[stage]['n_pmids'] = len(study_ids)
             
         # update the studies
         for study_id in study_ids:
@@ -694,7 +563,7 @@ def graphdata_prisma_json(prj):
                 pmid = tmp[0]
             elif len(tmp) == 2:
                 ctid = tmp[0].strip()
-                pmid = tmp[1]
+                pmid = tmp[1].strip()
             else:
                 continue
 
@@ -712,12 +581,16 @@ def graphdata_prisma_json(prj):
             # create a new in the study_dict for this nct
             if ctid not in study_dict:
                 study_dict[ctid] = {
-                    'ctid': ctid, 'latest_pmid': pmid, 'pmids': [pmid]
+                    'ctid': ctid, 'latest_pmid': None, 'pmids': [],
                 }
-            else:
-                # this item is already there, yeah~
-                study_dict[ctid]['latest_pmid'] = pmid
-                study_dict[ctid]['pmids'].append(pmid)
+
+            # append this pmid to this stage
+            if pmid not in prisma[stage]['paper_list']:
+                prisma[stage]['paper_list'].append(pmid)
+            
+            # update the pmid information of this clinical trial
+            study_dict[ctid]['latest_pmid'] = pmid
+            study_dict[ctid]['pmids'].append(pmid)
             
             # create a new item in paper_dict for this pmid
             if pmid not in paper_dict:
@@ -727,6 +600,9 @@ def graphdata_prisma_json(prj):
             else:
                 # what???
                 pass
+        
+        if prisma[stage]['n_pmids'] is None:
+            prisma[stage]['n_pmids'] = len(prisma[stage]['paper_list'])
 
         # update the number of ncts
         prisma[stage]['n_ctids'] = len(prisma[stage]['study_list'])
@@ -738,7 +614,7 @@ def graphdata_prisma_json(prj):
         cols = ['study_id', 'title', 'date', 'journal', 'authors']
         dft = xls.parse(tab_name_studies, usecols='A:E', names=cols)
         for idx, row in dft.iterrows():
-            study_id = row['study_id'].strip()
+            study_id = ('%s'%row['study_id']).strip()
             is_ctid = False
             if study_id.startswith('NCT'):
                 is_ctid = True
@@ -1540,6 +1416,147 @@ def get_ae_pma_data_simple(full_fn):
     return ret
 
 
+def get_oc_graph_data(full_fn, full_nma_list_json, full_fn_json):
+    # get all
+    xls = pd.ExcelFile(full_fn)
+    # build OC Category data
+    oc_tab_name = 'Outcomes'
+
+    ######################################
+    # Build the NMA_LIST.json
+    ######################################
+    nma = OrderedDict()
+    # read the first tab again
+    dft = xls.parse(oc_tab_name)
+    dft = dft[~dft['name'].isna()]
+
+    for idx, row in dft.iterrows():
+        nma_type = row['analysis title']
+        oc_name = row['name']
+        oc_fullname = row['full name']
+        
+        if nma_type not in nma: 
+            nma[nma_type] = {
+                '_default_oc': oc_name,
+                'oc_names': []
+            }
+        
+        # add this img
+        nma[nma_type]['oc_names'].append({
+            'oc_name': oc_name,
+            'oc_fullname': oc_fullname
+        })
+
+    json.dump(nma, open(full_nma_list_json, 'w'), indent=4)
+    print('* saved NMA_LIST.json')
+
+    ######################################
+    # Build the GRAPH.json
+    ######################################
+    # load data
+    dft = xls.parse(oc_tab_name)
+    dft = dft[~dft['name'].isna()]
+
+    # build oc category
+    oc_dict = {}
+    oc_names = []
+    for idx, row in dft.iterrows():
+        oc = {
+            "oc_name": row['name'],
+            "oc_fullname": row['full name'],
+            "oc_measures": row['measure'].split(','),
+            "oc_datatype": row['data type'],
+            "param": {
+                "analysis_method": row["method"],
+                "fixed_or_random": row["fixed_or_random"],
+                "which_is_better": row["which_is_better"]
+            },
+            "treat_list": []
+        }
+        oc_dict[oc['oc_name']] = oc
+        oc_names.append(oc['oc_name'])
+
+    # get all NMA
+    ret = {
+        'oc_dict': oc_dict,
+        'oc_names': oc_names,
+        'graph_dict': {}
+    }
+    for oc_name in oc_names:
+        oc = oc_dict[oc_name]
+        sheet_name = oc_name
+
+        # get measure
+        measure = oc['oc_measures'][0]
+        dft = xls.parse(sheet_name)
+
+        # remove those empty lines based on study name
+        # the study name MUST be different
+        dft = dft[~dft.study.isna()]
+
+        # get treat list
+        if oc['oc_datatype'] == 'pre':
+            treat_list = list(set(dft['t1'].unique().tolist() + dft['t2'].unique().tolist()))
+            input_format = settings.INPUT_FORMATS_HRLU
+        elif oc['oc_datatype'] == 'raw':
+            treat_list = dft['treat'].unique().tolist()
+            input_format = settings.INPUT_FORMATS_ET
+
+        # update the oc in oc_dict
+        oc_dict[oc_name]['treat_list'] = treat_list
+
+        # get config
+        analysis_method = oc['param']['analysis_method']
+        reference_treatment = treat_list[0]
+        fixed_or_random = oc['param']['fixed_or_random']
+        which_is_better = "small" if oc['param']['which_is_better'] == 'lower' else "big"
+        cfg = {
+            "input_format": input_format,
+            "reference_treatment": reference_treatment,
+            "measure_of_effect": measure,
+            "fixed_or_random": fixed_or_random,
+            "which_is_better": which_is_better
+        }
+
+        # get the rs for this oc
+        rs = json.loads(dft.to_json(orient='table', index=False))['data']
+
+        # calc!
+        analysis_ret = freq_analyzer.analyze(rs, cfg)
+
+        # put in result
+        ret['graph_dict'][oc_name] = analysis_ret
+
+    # now save all the results
+    # FIRST of all, save the GRAPH.json
+    json.dump(ret, open(full_fn_json, 'w'))
+
+    ######################################
+    # Build the GRAPH-outcome.json
+    ######################################
+    # then, dump each oc
+    # for oc_name in ret['oc_names']:
+    #     # use upper and underscore to convert name to id
+    #     oc_name_id = oc_name.upper().replace(' ', '_')
+    #     full_oc_fn_json_name = full_oc_fn_json % oc_name_id
+    #     # dump!
+    #     json.dump(ret['graph_dict'][oc_name], open(full_oc_fn_json_name, 'w'))
+        
+    # generate a NMA_LIST.json for pub
+    # nma_list = { 'nma': [] }
+    # for oc_name in ret['oc_names']:
+    #     oc = oc_dict[oc_name]
+    #     # save to nma list
+    #     nma_list['nma'].append({
+    #         'name': oc['oc_fullname'],
+    #         'sname': oc['oc_name'].upper().replace(' ', '_'),
+    #         'treats': oc['treat_list']
+    #     })
+    # json.dump(nma_list, open(full_nma_list_json, 'w'), indent=4)
+
+    return ret
+
+
 def get_oc_nma_data(full_fn, backend):
     '''
     Get the SoF Table NMA data
@@ -1596,6 +1613,11 @@ def get_oc_nma_data(full_fn, backend):
             "oc_datatype": row['data type'],
             "oc_name": oc_name,
             "oc_fullname": oc_fullname,
+            "param": {
+                "analysis_method": row["method"],
+                "fixed_or_random": row["fixed_or_random"],
+                "which_is_better": row["which_is_better"]
+            },
             "cetable": {},
             "lgtable": {},
             "treats": {}
@@ -1613,7 +1635,7 @@ def get_oc_nma_data(full_fn, backend):
         'cie_coh', 'cie_trs'
     ]
 
-    # build certainty?
+    # build certainty
     if oc_tab_cert in xls.sheet_names:
         dft = xls.parse(oc_tab_cert, usecols=cols_range, names=cols_certs)
 
@@ -1647,8 +1669,9 @@ def get_oc_nma_data(full_fn, backend):
     # build OC details by the data type
     cols_dict = {
         'raw': ['A:D', ['study', 'treat', 'event', 'total' ]],
-        'pre': ['A:H', ['study', 't1', 't2', 'sm', 'lowerci', 'upperci', 
-                        'survival in t1', 'survival in t2']]
+        'pre': ['A:L', ['study', 't1', 't2', 'sm', 'lowerci', 'upperci', 
+                        'survival in t1', 'survival in t2',
+                        'Ec_t1', 'Et_t1', 'Ec_t2', 'Et_t2']]
     }
     oc_dfts = []
     oc_rsts = {}
@@ -2035,11 +2058,12 @@ def get_oc_pma_data(full_fn):
     # define the columns for basic information of outcome
     cols_outcome = [
         'oc_cate', 'oc_rtitle', 'oc_iisof',
-        'oc_measures', 'oc_datatype', 'oc_name', 'oc_fullname',
+        'oc_measures', 'fixed_or_random', 'which_is_better',
+        'oc_datatype', 'oc_name', 'oc_fullname',
         'cie_rob', 'cie_inc', 'cie_ind', 'cie_imp', 'pub_bia', 
         'importance', 'treatment', 'control'
     ]
-    dft = xls.parse(oc_tab_name, usecols='A:O', names=cols_outcome)
+    dft = xls.parse(oc_tab_name, usecols='A:Q', names=cols_outcome)
     dft = dft[~dft['oc_name'].isna()]
 
     # build oc category
@@ -2080,16 +2104,22 @@ def get_oc_pma_data(full_fn):
             "oc_datatype": row['oc_datatype'],
             "oc_name": oc_name,
             "oc_fullname": oc_fullname,
+            "param": {
+                "fixed_or_random": row["fixed_or_random"],
+                "which_is_better": row["which_is_better"]
+            },
             "cie": cie,
         }
 
         # put the cie columns
         # 'cie_rob', 'cie_inc', 'cie_ind', 'cie_imp', 'pub_bia', 'importance'
-        for col in ['cie_rob', 'cie_inc', 'cie_ind', 'cie_imp', 'pub_bia', 'importance']:
+        for col in ['cie_rob', 'cie_inc', 'cie_ind', 'cie_imp', 'pub_bia']:
             try:
                 oc_dict[oc_name][col] = int(row[col])
             except:
                 oc_dict[oc_name][col] = 0
+        
+        oc_dict[oc_name]['importance'] = row['importance']
 
     # put the last ae_item
     oc_list.append(oc_item)

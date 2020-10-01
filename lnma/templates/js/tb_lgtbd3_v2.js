@@ -31,23 +31,33 @@ var tb_lgtbd3 = {
     color_ctc: '#DFDFDF',
     color_border: 'whitesmoke',
     color_scale: d3.scaleLinear()
-        .domain([0, 1, 3])
-        .range(['#78b787', 'white', '#ff0000']),
+        .domain([0, 1, 2])
+        .range(['#78b787', 'white', '#fb6464']),
+    color_scale_lb: d3.scaleLinear()
+            .domain([0, 1, 2])
+            .range(['#78b787', 'white', '#fb6464']),
+    color_scale_hb: d3.scaleLinear()
+            .domain([0, 1, 2])
+            .range(['#fb6464', 'white', '#78b787']),
     color_scale_range: [0, 0.9, 1, 1.1, 2],
     color_scale2: function(hr, lower, upper) {
         // there are 4 cases:
         if (hr > 1) {
             if (lower > 1 && upper > 1) {
-                return this.color_scale(hr>this.color_scale_range[3]?hr:this.color_scale_range[3]);
+                // return this.color_scale(hr>this.color_scale_range[3]?hr:this.color_scale_range[3]);
+                return this.color_scale(2);
             } else {
-                return this.color_scale(this.color_scale_range[3]);
+                // return this.color_scale(this.color_scale_range[3]);
+                return "#fb64642b";
             }
 
         } else if (hr < 1) {
             if (lower < 1 && upper < 1) {
-                return this.color_scale(hr<this.color_scale_range[1]?hr:this.color_scale_range[1]);
+                // return this.color_scale(hr<this.color_scale_range[1]?hr:this.color_scale_range[1]);
+                return this.color_scale(0);
             } else {
-                return this.color_scale(this.color_scale_range[1]);
+                // return this.color_scale(this.color_scale_range[1]);
+                return "#78b78745";
             }
         } else {
             return this.color_scale(this.color_scale_range[2])

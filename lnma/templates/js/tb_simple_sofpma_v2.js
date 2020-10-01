@@ -216,13 +216,23 @@ var tb_simple_sofpma = {
                     return jarvis.txt[t];
                 },
 
-                get_cieclr: function(sm, cie) {
-                    if (sm < 1) {
-                        return 'cie-bene-' + cie;
-                    } else if (sm > 1) {
-                        return 'cie-harm-' + cie;
+                get_cieclr: function(which_is_better, sm, cie) {
+                    if (which_is_better == 'lower') {
+                        if (sm < 1) {
+                            return 'cie-bene-' + cie;
+                        } else if (sm > 1) {
+                            return 'cie-harm-' + cie;
+                        } else {
+                            return 'cie-nnor-' + cie;
+                        }
                     } else {
-                        return 'cie-nnor-' + cie;
+                        if (sm > 1) {
+                            return 'cie-bene-' + cie;
+                        } else if (sm < 1) {
+                            return 'cie-harm-' + cie;
+                        } else {
+                            return 'cie-nnor-' + cie;
+                        }
                     }
                 },
 

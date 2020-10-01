@@ -15,6 +15,7 @@
 <link rel="icon" href="/static/img/favicon.png" type="image/png">
 <link rel="stylesheet" href="/static/lib/font-awesome/css/all.css">
 <link rel="stylesheet" href="/static/lib/jquery-ui/jquery-ui.min.css">
+<link rel="stylesheet" href="/static/css/mybox-0.9.1.css">
 <style>
 html, body {
     width: 100%;
@@ -29,126 +30,6 @@ body {
 a {
     color: #333333;
     text-decoration: none;
-}
-.flex-container {
-    display: flex;
-    justify-content: flex-start;
-    width: 100%;
-    height: 100%;
-}
-.box {
-    display: flex;
-    flex-direction: column;
-}
-.box-header {
-    width: 100%;
-    padding: 3px 0;
-    display: flex;
-    align-items: center;
-}
-.box-header a {
-    font-size: .8em;
-}
-.box-header h4 {
-    padding: 0;
-    margin: 0;
-    font-size: .95em;
-    height: 1.6em;
-    line-height: 1.6em;
-    margin: 3px 0;
-}
-.box-header button, .box-footer button {
-    height: 1.6em;
-    line-height: 1em;
-    font-size: .8em;
-    margin: 3px;
-}
-.box-header select {
-    height: 1.6em;
-    line-height: 1.2em;
-    font-size: .8em;
-    margin: 3px;
-}
-.box-header span {
-    font-size: 1em;
-}
-.box-header a {
-    padding: 1px 3px;
-    margin: 0 5px;
-    height: 1.6em;
-    line-height: 1.6em;
-}
-.box-header a:hover {
-    text-decoration: underline;
-
-}
-.box-body {
-    width: 100%;
-}
-.box-bodyitem {
-    padding: 0 0 3px 0;
-}
-.box-bodyitem-hl {
-    display: flex;
-    flex-direction: row;
-}
-.box-bodyitem-label {
-    width: 54%;
-    font-size: .9em;
-    line-height: 1.8em;
-}
-.box-bodyitem-value {
-    width: 45%;
-}
-.box-bodyitem select {
-    width: 100%;
-}
-.box-p {
-    width: 100%;
-    padding: 0;
-    margin: 0;
-    font-size: .9em;
-}
-.box-p-fixlen {    
-    white-space: nowrap;
-    text-overflow:ellipsis;
-    overflow: hidden;
-}
-.box-footer {
-    width: 100%;
-    min-height: 20px;
-    padding: 5px 0 5px 0;
-    border-bottom: 1px dotted #CCCCCC;
-}
-
-/* element ui css */
-.el-table td, .el-table th {
-    padding: 0;
-    font-size: .9em;
-}
-.el-table .cell {
-    padding: 0;
-}
-.el-table, .el-table thead {
-    color: #333333;
-}
-.el-table::before {
-    background-color: white;
-}
-/* for this page */
-.footer {
-    width: 100%;
-    display: flex;
-    align-items: flex-end;
-    font-size: .75em;
-}
-.footer div {
-    height: 35px;
-    line-height: 4em;
-}
-.footer-link a {
-    padding: 0 5px;
-    color: #999999;
 }
 #main-pane {
     width: 100%;
@@ -350,21 +231,9 @@ a {
 <div class="flex-container" style="width:100%; height:100%;">
 
 <div id="main-pane">
-    <div class="pane-row">
-        <i class="fa fa-cog"></i>&nbsp;
-        Select comparator: 
-        <div id="fm_ref_treat_selector" class="box">
-            <div class="box-body">
-
-                <select id="ref_treat" v-model="ref_treat" v-on:change="change_treat">
-                    <option v-bind:value="t"
-                        v-for="t in treats">
-                        {{ t }}
-                    </option>
-                </select>
-            </div>
-        </div>
-    </div>
+    <!-- <div class="pane-row">
+        
+    </div> -->
     <!-- .pane-row -->
 
 
@@ -441,6 +310,22 @@ a {
                     <span class="fa fa-align-left"></span>
                     FOREST PLOT
                 </h4>
+                <div class="d-flex fx-row">
+                    <div id="fm_ref_treat_selector" class="box-menu-group d-flex fx-row">
+                        <div>
+                            <i class="fa fa-cog"></i>&nbsp;
+                            Select comparator: 
+                        </div>
+                        <div>
+                            <select id="ref_treat" v-model="ref_treat" v-on:change="change_treat">
+                                <option v-bind:value="t"
+                                    v-for="t in treats">
+                                    {{ t }}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
             </div>
             <!-- /.box-header -->
             <div class="box-body">
@@ -577,6 +462,14 @@ var jarvis = {
         var oc_fullname = this.all_data.oc_dict[oc_name].oc_fullname;
         // $('#tb-nma-league-name').html(oc_fullname);
 
+        // set the color_scale according to the outcome
+        this.default_is_lb = this.all_data.oc_dict[oc_name].param.which_is_better == 'lower'? true : false;
+        if (this.default_is_lb) {
+            tb_lgtbd3.color_scale = tb_lgtbd3.color_scale_lb;
+        } else {
+            tb_lgtbd3.color_scale = tb_lgtbd3.color_scale_hb;
+        }
+
         fm_ref_treat_selector.draw(data.league.cols);
 
         // update the network plot
@@ -611,6 +504,19 @@ var jarvis = {
             return;
         }
 
+        // get filename
+        var prj = jarvis.getUrlParameter('prj');
+        var oc = jarvis.getUrlParameter('oc');
+        var treat = jarvis.getUrlParameter('tr');
+        var is_lower_better = jarvis.getUrlParameter('lb');
+
+        this.default_oc_name = oc;
+        this.default_treat = treat;
+
+        this.default_is_lb = true;
+        if (is_lower_better == 'no') {
+            this.default_is_lb = false;
+        }
 
         fg_netplt.init();
         fg_frsplt.init();
@@ -618,20 +524,19 @@ var jarvis = {
         // increase the table size
         tb_lgtbd3.width_cell = 78;
         tb_lgtbd3.height_cell = 38;
+        if (this.default_is_lb) {
+            tb_lgtbd3.color_scale = tb_lgtbd3.color_scale_lb;
+        } else {
+            tb_lgtbd3.color_scale = tb_lgtbd3.color_scale_hb;
+        }
         tb_lgtbd3.init();
+
+        // init the rank table
         tb_ranktb.init();
         
         fg_pscplt.width = 350;
         fg_pscplt.height = 270;
         fg_pscplt.init();
-
-        // get filename
-        var prj = jarvis.getUrlParameter('prj');
-        var oc = jarvis.getUrlParameter('oc');
-        var treat = jarvis.getUrlParameter('tr');
-
-        this.default_oc_name = oc;
-        this.default_treat = treat;
 
         // set the ref treatment
         fm_ref_treat_selector.init(this.default_treat);

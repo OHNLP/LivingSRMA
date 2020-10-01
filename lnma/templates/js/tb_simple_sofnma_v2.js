@@ -456,12 +456,22 @@ var tb_simple_sofnma = {
                         }
                     }
                     
-                    if (v < 1) {
-                        return 'cie-bene-' + cie;
-                    } else if ( v > 1) {
-                        return 'cie-harm-' + cie;
+                    if (r.oc.param.which_is_better == 'lower') {
+                        if (v < 1) {
+                            return 'cie-bene-' + cie;
+                        } else if ( v > 1) {
+                            return 'cie-harm-' + cie;
+                        } else {
+                            return 'cie-nner-' + cie;
+                        }
                     } else {
-                        return 'cie-nner-' + cie;
+                        if (v > 1) {
+                            return 'cie-bene-' + cie;
+                        } else if ( v < 1) {
+                            return 'cie-harm-' + cie;
+                        } else {
+                            return 'cie-nner-' + cie;
+                        }
                     }
                 },
 
