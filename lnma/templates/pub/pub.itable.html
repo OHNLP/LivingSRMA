@@ -589,7 +589,7 @@ var tb_coltab = {
     vpp_id: '#tb_coltab',
     cols: {
         fixed: ['NCT', 'TRIAL REG #', 'TRIAL', 'PUBMED ID', 'PMID', 'AUTHOR', 'YEAR'],
-        default: ['PHASE', 'ORIGINAL/FOLLOW UP', 'NUMBER OF ARMS', 'TREATMENT ARM', 'CONTROL ARM']
+        default: ['PHASE', 'ORIGINAL/FOLLOW UP', 'TREATMENT ARM', 'CONTROL ARM']
     },
 
     reset_cols: function() {
@@ -717,7 +717,7 @@ var jarvis = {
 
         $.get(
             '/pub/graphdata/' + prj + '/ITABLE_CFG.json',
-            {ver: Math.random() },
+            { ver: Math.random() },
             function(cfg_data) {
                 // update the filters
                 tb_filter.filters = tb_filter.filters.concat(cfg_data.filters);
