@@ -7,8 +7,8 @@ var tb_simple_sofnma = {
     vpp_id: '#tb_simple_sofnma',
 
     default_comparator: null,
-    default_external_val: 10,
-    default_external_base: 100,
+    default_external_val: 100,
+    default_external_base: 1000,
     default_measure: '',
     measure_list: [],
 
