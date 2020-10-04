@@ -179,6 +179,7 @@ def analyze_raw_by_freq(rs, params):
     r_params = {
         'is_fixed': 'TRUE' if params['fixed_or_random'] == 'fixed' else 'FALSE',
         'is_random': 'TRUE' if params['fixed_or_random'] == 'random' else 'FALSE',
+        'small_values_are': 'good' if params['which_is_better'] == 'small' else 'bad'
     }
     r_params.update(params)
 

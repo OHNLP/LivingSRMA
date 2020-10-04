@@ -5,6 +5,7 @@ var tb_simple_sofpma = {
     vpp: null,
     vpp_id: '#tb_simple_sofpma',
 
+    default_external_val: 10,
     default_external_base: 100,
     default_measure: '',
     measure_list: [],
@@ -25,7 +26,7 @@ var tb_simple_sofpma = {
             data: {
                 measure: this.default_measure,
                 measure_list: this.measure_list,
-                baseline: 1000,
+                baseline: this.default_external_base,
                 show_survival: 'yes',
                 set_ctrl_oc_name: data.oc_list[0].oc_names[0],
                 detail: {
@@ -113,10 +114,24 @@ var tb_simple_sofpma = {
                 // calc the ACR, CIR, ARD
                 get_ACR: function(r) {
                     if (r.which_ACR.use_which_val == 'internal') {
-                        return r.Ec / r.Nc;
+                        if (r.oc.oc_datatype == 'raw') {
+                            return r.Ec / r.Nc;
+                        } else {
+                            return r.oc.internal_val / 1000;
+                        }
                     }
                     if (r.which_ACR.use_which_val == 'external') {
                         return r.which_ACR.external_val / this.baseline;
+                    }
+                },
+
+                get_ACR_txt: function(r) {
+                    var ACR = this.get_ACR(r);
+                    if (ACR == null) {
+                        // it means no available data for this treat
+                        return 'NA';
+                    } else {
+                        return Math.round(ACR * this.baseline) + ' per ' + this.baseline;
                     }
                 },
 
@@ -276,9 +291,9 @@ var tb_simple_sofpma = {
             which_ACR: {
                 // internal is available only when data type is raw
                 // pre data won't have this option
-                has_internal: oc['oc_datatype'] == 'raw',
+                has_internal: oc['has_internal_val'],
                 // the default value
-                use_which_val: oc['oc_datatype'] == 'raw'? 'internal':'external',
+                use_which_val: oc['has_internal_val']?'internal':'external',
                 // the external value
                 external_val: oc['external_val'],
                 // decide which internal to use

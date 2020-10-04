@@ -7,6 +7,7 @@ var tb_simple_sofnma = {
     vpp_id: '#tb_simple_sofnma',
 
     default_comparator: null,
+    default_external_val: 10,
     default_external_base: 100,
     default_measure: '',
     measure_list: [],
@@ -39,8 +40,7 @@ var tb_simple_sofnma = {
             data: {
                 measure: this.default_measure,
                 measure_list: this.measure_list,
-                baseline: 1000,
-                external_risk_calculated: 10,
+                baseline: this.default_external_base,
                 show_survival: 'no',
                 survival_value_type: 'avg',
                 detail: {
@@ -67,11 +67,12 @@ var tb_simple_sofnma = {
                 },
 
                 get_rank: function(r, t) {
-                    if (!r.oc.treats.hasOwnProperty(t)) {
+                    if (r.oc.treats.hasOwnProperty(t)) {
+                        var measure = this.get_a_measure(r);
+                        return r.oc.rktable[measure][t].rank;
+                    } else {
                         // this treat is not available in this study
                         return null;
-                    } else {
-                        return r.oc.treats[t].rank;
                     }
                 },
 
@@ -92,14 +93,45 @@ var tb_simple_sofnma = {
                         return null;
                     }
 
-                    if (r.which_ACR.use_which_val == 'internal') {
-                        // which means it's raw data with
-                        return r.oc.treats[t].event / r.oc.treats[t].total;
+                    if (r.oc.treats[t].which_ACR.use_which_val == 'internal') {
+                        if (r.oc.treats.hasOwnProperty(t)) {
+                            if (r.oc.treats[t].has_internal_val) {
+
+                                if (r.oc.oc_datatype == 'raw') {
+                                    return r.oc.treats[t].event / r.oc.treats[t].total; 
+                                } else {
+                                    return r.oc.treats[t].internal_val / 1000;
+                                }
+
+                            } else {
+                                return 0.1;
+                            }
+
+                        } else {
+                            return null;
+                        }
+
+                    } else {
+                        return r.oc.treats[t].which_ACR.external_val / this.baseline;
                     }
-                    if (r.which_ACR.use_which_val == 'external') {
-                        // which means it's raw or pre
-                        return r.which_ACR.external_val / this.baseline;
-                    }
+
+                    // if (r.which_ACR.use_which_val == 'internal') {
+                    //     // which means it's raw data with
+                    //     return r.oc.treats[t].event / r.oc.treats[t].total;
+                    // }
+                    // if (r.which_ACR.use_which_val == 'external') {
+                    //     // which means it's raw or pre
+                    //     if (r.oc.treats.hasOwnProperty(t)) {
+                    //         if (r.oc.treats[t].has_external_val) {
+                    //             return r.oc.treats[t].external_val / 1000;
+                    //         } else {
+                    //             return r.which_ACR.external_val / this.baseline;
+                    //         }
+                    //     } else {
+                    //         return null;
+                    //     }
+                    //     // return r.which_ACR.external_val / this.baseline;
+                    // }
                 },
 
                 get_ACR_txt: function(r, t) {
@@ -557,21 +589,34 @@ var tb_simple_sofnma = {
     make_oc_r: function(oc_name) {
         var oc = this.data.oc_dict[oc_name];
 
-        var r = {
-            oc: oc,
-            which_ACR: {
-                // internal is available only when data type is raw
-                // pre data won't have this option
-                has_internal: oc['oc_datatype'] == 'raw',
+        for (var t in oc.treats) {
+            oc.treats[t]['which_ACR'] = {
                 // the default value
-                use_which_val: oc['oc_datatype'] == 'raw'? 'internal':'external',
+                use_which_val: oc.treats[t].has_internal_val? 'internal':'external',
                 // the external value
-                external_val: tb_simple_sofnma.default_external_base,
+                external_val: tb_simple_sofnma.default_external_val,
                 // decide which internal to use
                 use_internal_avg: true,
                 use_internal_min: false,
                 use_internal_max: false
-            },
+            };
+        }
+
+        var r = {
+            oc: oc,
+            // which_ACR: {
+            //     // internal is available only when data type is raw
+            //     // pre data won't have this option
+            //     has_internal: oc['oc_datatype'] == 'raw',
+            //     // the default value
+            //     use_which_val: oc['oc_datatype'] == 'raw'? 'internal':'external',
+            //     // the external value
+            //     external_val: tb_simple_sofnma.default_external_base,
+            //     // decide which internal to use
+            //     use_internal_avg: true,
+            //     use_internal_min: false,
+            //     use_internal_max: false
+            // },
             // for display setting
             is_show: {
                 // show sm, study info

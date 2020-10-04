@@ -29,6 +29,7 @@ from lnma import util
 import PythonMeta as PMA
 
 PATH_PUBDATA = 'pubdata'
+DEFAULT_EXTERNAL_VAL = 0
 
 bp = Blueprint("pub", __name__, url_prefix="/pub")
 
@@ -652,6 +653,25 @@ def graphdata_prisma_json(prj):
     return jsonify(ret)
 
 
+@bp.route('/graphdata/<prj>/EVMAP.json')
+def graphdata_evmap_json(prj):
+    '''Special rule for the EVMAP.json
+
+    This JSON file is for the evidence map plot
+    '''
+
+    fn = 'EVMAP_DATA.xlsx'
+    full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
+
+    # hold all the outcomes
+    fn_json = 'EVMAP.json'
+    full_fn_json = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn_json)
+
+    ret = {}
+
+    return jsonify(ret)
+
+    
 ###########################################################
 # Other utils
 ###########################################################
@@ -1576,6 +1596,7 @@ def get_oc_nma_data(full_fn, backend):
     # build OC Category data
     oc_tab_name = 'Outcomes'
     oc_tab_cert = 'Certainty'
+    oc_tab_treats = 'Treatments'
 
     dft = xls.parse(oc_tab_name)
     dft = dft[~dft['name'].isna()]
@@ -1625,6 +1646,7 @@ def get_oc_nma_data(full_fn, backend):
             },
             "cetable": {},
             "lgtable": {},
+            "rktable": {},
             "treats": {}
         }
 
@@ -1723,6 +1745,7 @@ def get_oc_nma_data(full_fn, backend):
                     "event": int(row['event']),
                     "total": int(row['total']),
                     'has_survival_data': False,
+                    'has_internal_val': True,
                     'survival_in_control': 0,
                     "n_stus": 0,
                     "rank": 0
@@ -1748,13 +1771,17 @@ def get_oc_nma_data(full_fn, backend):
                     treats[t1] = {
                         'survival_in_control': 0,
                         'n_stus': 0,
-                        'rank': 0
+                        'rank': 0,
+                        'internal_val_et': 0,
+                        'internal_val_ec': 0,
                     }
                 if t2 not in treats: 
                     treats[t2] = {
                         'survival_in_control': 0,
                         'n_stus': 0,
-                        'rank': 0
+                        'rank': 0,
+                        'internal_val_et': 0,
+                        'internal_val_ec': 0,
                     }
 
                 # count the survival when value is float for t1
@@ -1772,13 +1799,37 @@ def get_oc_nma_data(full_fn, backend):
                 except:
                     if row['survival in t2'] == 'NR':
                         pass
+
+                # count the Ec and Et of t1
+                try: 
+                    treats[t1]['internal_val_ec'] += int(row['Ec_t1']) * 1000 / int(row['Et_t1'])
+                    treats[t1]['internal_val_et'] += 1000
+                except:
+                    if row['Ec_t1'] in ['NA', 'NR']:
+                        pass
+                    
+                # count the Ec and Et of t2
+                try: 
+                    treats[t2]['internal_val_ec'] += int(row['Ec_t2']) * 1000 / int(row['Et_t2'])
+                    treats[t2]['internal_val_et'] += 1000
+                except:
+                    if row['Ec_t2'] in ['NA', 'NR']:
+                        pass
             
             # need to update the survival in control
             for t in treats:
+                # update the survival data
                 treats[t]['has_survival_data'] = treats[t]['survival_in_control'] != 0
                 treats[t]['survival_in_control'] = {
                     "avg": treats[t]['survival_in_control'] / treats[t]['n_stus']
                 }
+
+                # update the external base data
+                treats[t]['has_internal_val'] = treats[t]['internal_val_et'] != 0
+                if treats[t]['has_internal_val']:
+                    treats[t]['internal_val'] = int(1000 * treats[t]['internal_val_ec'] / treats[t]['internal_val_et'])
+                else:
+                    treats[t]['internal_val'] = 100
 
         # update treats
         all_treat_list += treat_list
@@ -1788,9 +1839,13 @@ def get_oc_nma_data(full_fn, backend):
 
         # now get the league table
         oc_dict[oc_name]['lgtable'] = {}
+
         for sm in oc_measures:
             # init this measure with a blank table
             oc_dict[oc_name]['lgtable'][sm] = {}
+
+            # init this measure with a blank table for rank
+            oc_dict[oc_name]['rktable'][sm] = {}
 
             # make a config dict for get the league table
             cfg = {
@@ -1801,7 +1856,7 @@ def get_oc_nma_data(full_fn, backend):
                 "fixed_or_random": "random",
                 # just use the first one as 
                 "reference_treatment": treat_list[0],
-                "which_is_better": "big"
+                "which_is_better": 'big' if oc_dict[oc_name]['param']["which_is_better"] == 'higher' else 'small'
             }
             
             # invoke analyzer
@@ -1832,20 +1887,37 @@ def get_oc_nma_data(full_fn, backend):
             # get the output rank
             # 9/23/2020: add reverse, the higher value, the higher rank
             reverse = True
-            if sm in ['HR']:
-                reverse = False
+            # # 10/3/2020: add reverse according to the which_is_better column
+            # if oc_dict[oc_name]['param']['which_is_better'] == 'lower':
+            #     reverse = False
+            # else:
+            #     reverse = True
+            # if sm in ['HR']:
+            #     reverse = False
+            print('* for %s, which is better: %s, %s' % (oc_name, oc_dict[oc_name]['param']['which_is_better'], reverse))
+            
             ranks = sorted(ret_nma['data'][rank_name]['rs'], 
                 key=lambda v: v['value'],
                 reverse=reverse)
             for i, r in enumerate(ranks):
                 oc_dict[oc_name]['treats'][r['treat']]['rank'] = i+1
                 oc_dict[oc_name]['treats'][r['treat']]['score'] = r['value']
+                # put the ranks in the sm
+                oc_dict[oc_name]['rktable'][sm][r['treat']] = {
+                    'rank': i + 1,
+                    'score': r['value']
+                }
+
+    # get the list of all the treatments
+    dft = xls.parse(oc_tab_treats)
+    dft = dft[~dft['treats'].isna()]
+    treat_list = dft['treats'].tolist()
 
     # return object
     ret = {
         'oc_dict': oc_dict,
         'oc_list': oc_list,
-        'treat_list': list(set(all_treat_list))
+        'treat_list': treat_list
     }
 
     return ret
@@ -2182,7 +2254,7 @@ def get_oc_pma_data(full_fn):
             'lowerci': 0,
             'upperci': 0,
             # external base for 1000
-            'external_val': 100,
+            'external_val': DEFAULT_EXTERNAL_VAL,
             # survival in control
             'survival_in_control': 0,
             # result is for the model
@@ -2219,12 +2291,31 @@ def get_oc_pma_data(full_fn):
 
                 # convert data to PythonMeta Format
                 ds.append([ Et, Nt, Ec, Nc, study ])
+            oc_rsts[oc_name]['has_internal_val'] = True
 
         elif oc_datatype == 'pre':
             oc_rsts[oc_name]['TE'] = float(dft['TE'].mean())
             oc_rsts[oc_name]['lowerci'] = float(dft['lowerci'].mean())
             oc_rsts[oc_name]['upperci'] = float(dft['upperci'].mean())
-            oc_rsts[oc_name]['external_val'] = int(dft['Ec'].mean())
+            
+            # set the internal value for this outcome
+            oc_rsts[oc_name]['internal_val_ec'] = 0
+            oc_rsts[oc_name]['internal_val_et'] = 0
+            for idx, row in dft.iterrows():
+                try: 
+                    oc_rsts[oc_name]['internal_val_ec'] += int(row['Ec']) * 1000 / int(row['Et'])
+                    oc_rsts[oc_name]['internal_val_et'] += 1000
+                except:
+                    if row['Ec'] in ['NA', 'NR']:
+                        pass
+
+            oc_rsts[oc_name]['has_internal_val'] = oc_rsts[oc_name]['internal_val_et'] != 0
+            if oc_rsts[oc_name]['has_internal_val']:
+                oc_rsts[oc_name]['internal_val'] = int(1000 * oc_rsts[oc_name]['internal_val_ec'] / oc_rsts[oc_name]['internal_val_et'])
+            else:
+                treats[t]['internal_val'] = None
+
+            # oc_rsts[oc_name]['external_val'] = int(dft['Ec'].mean())
 
             # get survival in control
             survival_in_control = []

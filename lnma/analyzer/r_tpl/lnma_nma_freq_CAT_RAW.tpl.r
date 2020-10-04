@@ -80,7 +80,10 @@ myleaguetb <- netleague(nma, bracket="(", digits=2)
 ## Placebo        0.0000
 # But the format of output variable is different.
 # The format will be parsed with help of `nma$trts` variable
-myrank = netrank(nma)
+# small.values can be:
+# good 
+# bad
+myrank = netrank(nma, small.values='{{ small_values_are }}')
 
 # Merge all the results.
 # The network characteristic table shows the data in `nma`.

@@ -493,7 +493,7 @@ a {
                         v-model="rs[set_ctrl_oc_name].which_ACR.external_val">
                 </p>
                 <hr>
-                <div v-if="rs[set_ctrl_oc_name].which_ACR.has_internal">
+                <div v-if="rs[set_ctrl_oc_name].oc.has_internal_val">
                     <p>
                         <input type="radio" name="ipt_which_ctrl" value="internal"
                             v-model="rs[set_ctrl_oc_name].which_ACR.use_which_val">
@@ -504,7 +504,9 @@ a {
                        &nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" name="ipt_ctrl"> Low risk</p> -->
                     <p></p>
                 </div>
-                <div v-else>&nbsp;</div>
+                <div v-else>
+                    Internal data not available.
+                </div>
             </div>
         </div>
     </div>
