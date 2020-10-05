@@ -41,12 +41,15 @@
             <li class="nav-item active">
                 <a class="nav-link" href="./">HOME <span class="sr-only">(current)</span></a>
             </li>
+
             <li class="nav-item">
                 <a class="nav-link" href="#sec-intro">INTRODUCTION</a>
             </li>
+
             <li class="nav-item">
                 <a class="nav-link" href="#sec-studysel">PRISMA</a>
             </li>
+
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="dropdown02" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">TABLES</a>
                 <div class="dropdown-menu" aria-labelledby="dropdown02">
@@ -80,13 +83,8 @@
                 </div>
             </li>
 
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="dropdown0xx" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">EVIDENCE MAPS</a>
-                <div class="dropdown-menu" aria-labelledby="dropdown0xx">
-                    <a class="dropdown-item" href="#sec-evmap-de">Direct Estimates</a>
-                    <a class="dropdown-item" href="#sec-evmap-crem">Comparison of Different Random Effects Methods</a>
-                    <a class="dropdown-item" href="#sec-evmap-ne">Network Estimates</a>
-                </div>
+            <li class="nav-item">
+                <a class="nav-link" href="#sec-evmap">EVIDENCE MAP</a>
             </li>
 
             <li class="nav-item">
@@ -373,6 +371,45 @@
     </div>
 </div>
 
+
+<br id="sec-evmap">
+<div class="container">
+    <h3>
+        EVIDENCE MAP
+    </h3>
+    <div class="row">
+        <div class="col-4">
+            <div class="dropdown">
+                <button class="btn btn-primary bg-dark bd-dark dropdown-toggle" type="button" id="dropdownMenuButton-evmap" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fa fa-clipboard"></i>
+                    Select comparator
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton-evmap">
+                    {% for tr in evmap['treat_list'] %}
+                    <a class="dropdown-item" href="javascript:switch_evmap_data('[[ tr ]]');">[[ tr ]]</a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col-8 d-flex justify-content-end">
+            <div class="outcome-name" style="padding: .5rem; margin-right: 1rem;">
+                <span id="optext-evmap" style="font-weight: bold;">
+                    [[ evmap['treat_list'][0] ]]
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <iframe id="iframe-evmap" src="[[ url_for('pub.evmap', prj='RCC', dc=evmap['treat_list'][0]) ]]" frameborder="0" style="width: 100%; min-height: 600px;"></iframe>
+        </div>
+    </div>
+
+</div>
+<!-- /#sec-evmap -->
+
+
 <br id="sec-pubs">
 <div class="container" style="margin-top: 3rem; margin-bottom:2rem;">
     <h3 style="margin-bottom: 2rem;">
@@ -437,8 +474,25 @@ function switch_pwma_data(tag, slides, display_name) {
     var url = '[[ url_for("pub.slide") ]]';
     url += '?prj=' + prj;
     url += '&slides=' + slides;
+
+    if (tag == 'Subg') {
+        // special rule for Subg plots
+        url += '&pt=25'
+    }
     $('#iframe-pwma-' + tag).attr('src', url);
     $('#optext-pwma-' + tag).html(display_name);
+}
+
+function switch_evmap_data(treat) {
+    // var url = '[[ url_for("pub.evmap") ]]';
+    // url += '?prj=' + prj;
+    // url += '&dc=' + treat;
+    // $('#iframe-evmap').attr('src', url);
+
+    var win_evmap = $('#iframe-evmap')[0].contentWindow;
+    win_evmap.fg_evmap.draw(treat);
+
+    $('#optext-evmap').html(treat);
 }
 
 $(document).ready(function() {
@@ -471,6 +525,8 @@ $(document).ready(function() {
         setTimeout("resizeIFrameToFitContent('iframe-nma-[[ tp[:4] ]]');", 900);
     {% endfor %}
 
+    // show the evmap
+    switch_evmap_data('[[ evmap["treat_list"][0] ]]');
 });
 </script>
 </body>

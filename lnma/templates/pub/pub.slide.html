@@ -31,7 +31,7 @@ Project Editor
 {% endblock %}
 
 {% block main %}
-<div class="container-fluid">
+<div id="main" class="container-fluid">
     <div class="row">
         <div class="col">
             <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
@@ -71,6 +71,8 @@ var jarvis = {
          * slides is a string defined as follows:
          * filename.png$a sentence for legend|filename.png$xxx
          */
+        var pt = jarvis.getUrlParameter('pt');
+
         var slides = jarvis.getUrlParameter('slides');
         var slides = slides.split('|');
 
@@ -105,6 +107,13 @@ var jarvis = {
 
         // start the loop
         $('.carousel').carousel('cycle');
+
+        if (pt == '' || pt == null) {
+
+        } else {
+            // $('#main').css('padding-top', pt + 'px');
+            $('.carousel-caption').css('top', '-10px');
+        }
     }
 };
 $(document).ready(function() {

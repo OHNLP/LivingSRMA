@@ -92,7 +92,11 @@ def RCC():
         })
         pwma[pwma_type][option_text]['slides'].append(filename + '$' + legend_text)
 
-    return render_template('pub/pub.RCC.html', nma=nma, pwma=pwma)
+    # load the evmap data
+    full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, 'EVMAP.json')
+    evmap = json.load(open(full_fn))
+
+    return render_template('pub/pub.RCC.html', nma=nma, pwma=pwma, evmap=evmap)
 
 
 @bp.route('/CAT.html')
@@ -258,6 +262,11 @@ def softable_nma():
 @bp.route('/softable_nma_v2.html')
 def softable_nma_v2():
     return render_template('pub/pub.softable_nma_v2.html')
+
+
+@bp.route('/evmap.html')
+def evmap():
+    return render_template('pub/pub.evmap.html')
 
 
 ###########################################################
@@ -667,7 +676,67 @@ def graphdata_evmap_json(prj):
     fn_json = 'EVMAP.json'
     full_fn_json = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn_json)
 
-    ret = {}
+    # first, load all the treatment names
+    tab_name_treatments = 'Treatments'
+
+    # load the xls
+    xls = pd.ExcelFile(full_fn)
+
+    # read the treatments
+    dft = xls.parse(tab_name_treatments)
+    tmp = dft['treats'].tolist()
+
+    # load each treat
+    cols = ['treatment', 'comparator', 'outcome', 'certainty', 'effect']
+    treat_list = []
+    data = {}
+    for treat in tmp:
+        treat = treat.strip()
+        tab_name = treat
+
+        # add this treat
+        treat_list.append(treat)
+
+        # load the data of this comparator
+        dft = xls.parse(tab_name, usecols='A:E', names=cols)
+        rs = []
+        for idx, row in dft.iterrows():
+            t = row['treatment'].strip()
+            oc = row['outcome'].strip()
+            cert = row['certainty']
+            effect = row['effect']
+
+            if np.isnan(cert):
+                c = 0
+                e = 0
+                effect = None
+            else:
+                c = int(cert)
+                e = {
+                    'significant benefit': 3,
+                    'no significant effect': 2,
+                    'significant harm': 1
+                }.get(effect.strip().lower(), 0)
+            
+            r = {
+                't': t,
+                'oc': oc,
+                'c': c,
+                'e': e,
+                'e_txt': effect
+            }
+            rs.append(r)
+
+        # bind this rs to data
+        data[treat] = rs
+
+    ret = {
+        "treat_list": treat_list,
+        "data": data
+    }
+
+    # cache the data
+    json.dump(ret, open(full_fn_json, 'w'))
 
     return jsonify(ret)
 
