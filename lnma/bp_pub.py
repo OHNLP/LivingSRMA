@@ -432,7 +432,7 @@ def graphdata_softable_pma_json(prj):
     elif v == '2':
         fn = 'SOFTABLE_PMA_DATA.xlsx'
         full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
-        ret = get_oc_pma_data(full_fn)
+        ret = get_sof_pma_data(full_fn)
 
     return jsonify(ret)
 
@@ -474,7 +474,7 @@ def graphdata_softable_nma_json(prj):
         # cache the result
         json.dump(ret, open(full_fn_json, 'w'))
     elif v == '2':
-        ret = get_oc_nma_data(full_fn, backend=backend)
+        ret = get_sof_nma_data(full_fn, backend=backend)
         # cache the result
         json.dump(ret, open(full_fn_json, 'w'))
 
@@ -670,12 +670,141 @@ def graphdata_evmap_json(prj):
     '''
 
     fn = 'EVMAP_DATA.xlsx'
+    # fn = 'SOFTABLE_NMA_DATA.xlsx'
     full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
 
     # hold all the outcomes
     fn_json = 'EVMAP.json'
     full_fn_json = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn_json)
 
+    ret = get_evmap_data(full_fn)
+
+    # cache the data
+    json.dump(ret, open(full_fn_json, 'w'))
+
+    return jsonify(ret)
+
+
+def get_evmap_data(full_fn):
+    return get_evmap_data_v1(full_fn)
+    # return get_evmap_data_v2(full_fn)
+
+    
+def get_evmap_data_v2(full_fn):
+    '''
+    fn = 'SOFTABLE_NMA_DATA.xlsx
+    '''
+    # first, load all the treatment names
+    tab_name_outcomes = 'Outcomes'
+    tab_name_certainty = 'Certainty'
+    tab_name_treatments = 'Treatments'
+
+    # load the xls
+    xls = pd.ExcelFile(full_fn)
+
+    # read the outcomes for evmap
+    dft = xls.parse(tab_name_outcomes)
+
+    # select those included in es
+    dft = dft[dft['included in em']=='yes']
+
+    # build oc category
+    oc_dict = {}
+    oc_names = []
+    for idx, row in dft.iterrows():
+        oc = {
+            "oc_name": row['name'],
+            "oc_fullname": row['full name'],
+            "oc_measures": row['measure'].split(','),
+            "oc_datatype": row['data type'],
+            "param": {
+                "analysis_method": row["method"],
+                "fixed_or_random": row["fixed_or_random"],
+                "which_is_better": row["which_is_better"]
+            },
+            # certainy and effect table
+            "cetable": {}
+        }
+        oc_dict[oc['oc_name']] = oc
+        oc_names.append(oc['oc_name'])
+
+    # build treats list
+    dft = xls.parse(tab_name_treatments)
+    treat_list = dft['treats'].tolist()
+
+    # build certainty dict
+    cols_range = 'A:K'
+    cols_certs = [
+        'oc_cate', 'oc_name', 'comparator', 'treatment', 
+        'cie_rob', 'cie_inc', 'cie_ind', 'cie_imp', 'pub_bia',
+        'cie_coh', 'cie_trs'
+    ]
+    cols_calc_cert = [
+        'cie_rob', 'cie_inc', 'cie_ind', 'cie_imp', 'cie_coh', 'cie_trs'
+    ]
+    dft = xls.parse(tab_name_certainty, usecols=cols_range, names=cols_certs)
+    # there maybe nan 
+    dft = dft[~dft['oc_name'].isna()]
+    # parse the data build cert dict
+    for idx, row in dft.iterrows():
+        oc_cate = row['oc_cate']
+        oc_name = row['oc_name']
+        comparator = row['comparator']
+        treatment = row['treatment']
+
+        if comparator not in oc_dict[oc_name]['cetable']:
+            oc_dict[oc_name]['cetable'][comparator] = { comparator: {} }
+
+        # put the comparator vs treatment {} in 
+        oc_dict[oc_name]['cetable'][comparator][treatment] = {}
+
+        # put the values of each column
+        for col in cols_certs[4:]:
+            try:
+                oc_dict[oc_name]['cetable'][comparator][treatment][col] = int(row[col])
+            except:
+                oc_dict[oc_name]['cetable'][comparator][treatment][col] = 0
+
+        # calc the cie of this row
+        oc_dict[oc_name]['cetable'][comparator][treatment]['cie'] = \
+            calc_cie(row[cols_calc_cert].tolist())
+
+    # init the evmap data
+    data = {}
+
+    for comparator in treat_list:
+        data[comparator] = []
+        for treatment in treat_list:
+            # nothing to comparator with self
+            if treatment == comparator: continue
+
+            for oc_name in oc_names:
+                # get the cer
+                if comparator in oc_dict[oc_name]['cetable'] and \
+                    treatment in oc_dict[oc_name]['cetable'][comparator] and \
+                    'cie' in oc_dict[oc_name]['cetable'][comparator][treatment]:
+                    c = oc_dict[oc_name]['cetable'][comparator][treatment]['cie']
+                    e_txt = "no significant effect"
+                else:
+                    c = 0
+                    e_txt = 'na'
+
+                data[comparator].append({
+                    "c": c, "e": get_effect_val(e_txt), "e_txt": e_txt, 
+                    "oc": oc_name, "t": treatment
+                })
+    ret = {
+        "treat_list": treat_list,
+        "data": data
+    }
+
+    return ret
+
+
+def get_evmap_data_v1(full_fn):
+    '''
+    fn = 'EVMAP_DATA.xlsx'
+    '''
     # first, load all the treatment names
     tab_name_treatments = 'Treatments'
 
@@ -735,12 +864,9 @@ def graphdata_evmap_json(prj):
         "data": data
     }
 
-    # cache the data
-    json.dump(ret, open(full_fn_json, 'w'))
+    return ret
 
-    return jsonify(ret)
 
-    
 ###########################################################
 # Other utils
 ###########################################################
@@ -1651,7 +1777,7 @@ def get_oc_graph_data(full_fn, full_nma_list_json, full_fn_json):
     return ret
 
 
-def get_oc_nma_data(full_fn, backend):
+def get_sof_nma_data(full_fn, backend):
     '''
     Get the SoF Table NMA data
 
@@ -2191,7 +2317,7 @@ def get_ae_nma_data(full_fn, backend):
     return ret
 
 
-def get_oc_pma_data(full_fn):
+def get_sof_pma_data(full_fn):
     ''' The OC data for PMA
     Support different types of data and 
     '''
@@ -2462,12 +2588,31 @@ def get_oc_pma_data(full_fn):
 
 
 def calc_cie(vals):
-    v = sum(vals)
-    if v == 4:
+    '''Calculate the certainty
+    '''
+    vs = np.array(vals)
+    # remove those 0
+    vs = vs[vs!=0]
+
+    # use non-zero values
+    v = sum(vs)
+    l = len(vs)
+
+    # get the result
+    if v <= l:
         return 4
-    if v == 5:
+    if v == (l+1):
         return 3
-    if v == 6:
+    if v == (l+2):
         return 2
     else:
         return 1
+
+
+def get_effect_val(e_txt):
+    return {
+        'significant benefit': 3,
+        'no significant effect': 2,
+        'significant harm': 1,
+        'na': 0
+    }.get(e_txt.strip().lower(), 0)
