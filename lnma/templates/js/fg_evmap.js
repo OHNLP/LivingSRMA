@@ -3,7 +3,8 @@ var fg_evmap = {
     cfg: {
         height: 600,
         margin_left: 180,
-        margin_top: 40,
+        margin_right: 20,
+        margin_top: 20,
         color: {
             0: '',
             1: 'red',
@@ -69,11 +70,12 @@ var fg_evmap = {
         ];
           
         this.plot_layout = {
-            title: 'Comparator: ' + treat,
+            title: '',
             hovermode: 'closest',
-            showlegend: true,
+            showlegend: false,
             margin: {
                 l: this.cfg.margin_left,
+                r: this.cfg.margin_right,
                 t: this.cfg.margin_top
             },
             xaxis: {
