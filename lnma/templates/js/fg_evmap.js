@@ -28,26 +28,46 @@ var fg_evmap = {
 
     draw: function(treat) {
         this.treat = treat;
+        var comparator = treat;
+        var comparator_fullname = this.data.treat_dict[comparator].tr_fullname;
         var xs = [];
         var ys = [];
         var ss = [];
         var cs = [];
         var txts = [];
 
-        for (var i = 0; i<this.data.data[treat].length; i++) {
-            var d = this.data.data[treat][i];
+        for (var i = 0; i<this.data.data[comparator].length; i++) {
+            var d = this.data.data[comparator][i];
             var x = d.oc;
             var y = d.t;
+            var y_fullname = this.data.treat_dict[y].tr_fullname;
             var s = d.c * 12;
             var c = this.cfg.color[d.e];
-            var txt = 'Treatment: ' + y + '<br>' + 
-                'Comparator: ' + treat + '<br>' + 
+            var sm = this.data.oc_dict[x].oc_measures[0];
+            var sm_val = null;
+            var sm_low = null;
+            var sm_upp = null;
+            var has_sm = false;
+            if (this.data.oc_dict[x].lgtable[sm].hasOwnProperty(comparator)) {
+                if (this.data.oc_dict[x].lgtable[sm][comparator].hasOwnProperty(y)) {
+                    has_sm = true;
+                    sm_val = this.data.oc_dict[x].lgtable[sm][comparator][y].sm;
+                    sm_low = this.data.oc_dict[x].lgtable[sm][comparator][y].lw;
+                    sm_upp = this.data.oc_dict[x].lgtable[sm][comparator][y].up;
+                }
+            }
+
+            var txt = 'Outcome: ' + this.data.oc_dict[x].oc_fullname + '<br>' +
+                'Comparator: ' + comparator_fullname + '<br>' + 
+                'Treatment: ' + y_fullname + '<br>' + 
                 'Certainty: ' + this.cfg.cert2txt[d.c] + '<br>' + 
                 'Effect: ' + d.e_txt;
-
+            if (has_sm) {
+                txt += "<br>" + sm + ': ' + sm_val.toFixed(2) + ' (' + sm_low.toFixed(2)+  ', ' + sm_upp.toFixed(2) + ')';
+            }
             // append to list
             xs.push(x);
-            ys.push(y);
+            ys.push(y_fullname);
             ss.push(s);
             cs.push(c);
             txts.push(txt);

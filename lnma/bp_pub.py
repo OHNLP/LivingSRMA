@@ -670,24 +670,32 @@ def graphdata_evmap_json(prj):
     '''
 
     fn = 'EVMAP_DATA.xlsx'
-    # fn = 'SOFTABLE_NMA_DATA.xlsx'
+    fn = 'SOFTABLE_NMA_DATA.xlsx'
     full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
 
     # hold all the outcomes
     fn_json = 'EVMAP.json'
     full_fn_json = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn_json)
 
+    use_cache = request.args.get('use_cache')
+    if use_cache == 'yes':
+        return send_from_directory(
+            os.path.join(current_app.instance_path, PATH_PUBDATA, prj),
+            fn_json
+        )
+
+    # no cache
     ret = get_evmap_data(full_fn)
 
-    # cache the data
+    # cache the latest data
     json.dump(ret, open(full_fn_json, 'w'))
 
     return jsonify(ret)
 
 
 def get_evmap_data(full_fn):
-    return get_evmap_data_v1(full_fn)
-    # return get_evmap_data_v2(full_fn)
+    # return get_evmap_data_v1(full_fn)
+    return get_evmap_data_v2(full_fn)
 
     
 def get_evmap_data_v2(full_fn):
@@ -723,14 +731,28 @@ def get_evmap_data_v2(full_fn):
                 "which_is_better": row["which_is_better"]
             },
             # certainy and effect table
-            "cetable": {}
+            "cetable": {},
+            "lgtable": {}
         }
         oc_dict[oc['oc_name']] = oc
         oc_names.append(oc['oc_name'])
 
     # build treats list
     dft = xls.parse(tab_name_treatments)
-    treat_list = dft['treats'].tolist()
+
+    # build treat dictionary
+    treat_list = []
+    treat_dict = {}
+    for idx, row in dft.iterrows():
+        tr_name = row['treats'].strip()
+        tr_fullname = row['full name']
+
+        # add this treat
+        treat_list.append(tr_name)
+        treat_dict[tr_name] = {
+            'tr_name': tr_name,
+            'tr_fullname': tr_fullname
+        }
 
     # build certainty dict
     cols_range = 'A:K'
@@ -769,9 +791,57 @@ def get_evmap_data_v2(full_fn):
         oc_dict[oc_name]['cetable'][comparator][treatment]['cie'] = \
             calc_cie(row[cols_calc_cert].tolist())
 
+    # now get the NMA results
+    cols_dict = {
+        'raw': ['A:D', ['study', 'treat', 'event', 'total' ]],
+        'pre': ['A:L', ['study', 't1', 't2', 'sm', 'lowerci', 'upperci', 
+                        'survival in t1', 'survival in t2',
+                        'Ec_t1', 'Et_t1', 'Ec_t2', 'Et_t2']]
+    }
+    
+    for oc_name in oc_names:
+        oc = oc_dict[oc_name]
+        sheet_name = oc_name
+
+        # get the data
+        usecols = cols_dict[oc['oc_datatype']][0]
+        namecols = cols_dict[oc['oc_datatype']][1]
+        dft = xls.parse(sheet_name, usecols=usecols, names=namecols)
+
+        # remove those empty lines based on study name
+        # the study name MUST be different
+        dft = dft[~dft.study.isna()]
+        # get the records
+        rs = json.loads(dft.to_json(orient='table', index=False))['data']
+
+        # summary of mesure, only use the first?
+        sm = oc['oc_measures'][0]
+        cfg = {
+            # for init analyzer
+            "backend": oc['param']['analysis_method'],
+            "data_type": {'pre': 'CAT_PRE', 'raw': 'CAT_RAW'}[oc['oc_datatype']],
+            "measure_of_effect": sm,
+            "fixed_or_random": oc['param']['fixed_or_random'],
+            # just use the first one as 
+            "reference_treatment": treat_list[0],
+            "which_is_better": 'big' if oc['param']["which_is_better"] == 'higher' else 'small'
+        }
+        # invoke analyzer
+        ret_nma = nma_analyzer.analyze(rs, cfg)
+
+        # get formatted lgtable data
+        lgtable_sm = _conv_nmarst_league_to_lgtable(ret_nma)
+        oc_dict[oc_name]['lgtable'][sm] = lgtable_sm
+
+
     # init the evmap data
     data = {}
-
+    effects = {
+        3: 'significant benefit',
+        2: 'no significant effect',
+        1: 'significant harm',
+        0: 'na'
+    }
     for comparator in treat_list:
         data[comparator] = []
         for treatment in treat_list:
@@ -779,22 +849,52 @@ def get_evmap_data_v2(full_fn):
             if treatment == comparator: continue
 
             for oc_name in oc_names:
-                # get the cer
-                if comparator in oc_dict[oc_name]['cetable'] and \
-                    treatment in oc_dict[oc_name]['cetable'][comparator] and \
-                    'cie' in oc_dict[oc_name]['cetable'][comparator][treatment]:
-                    c = oc_dict[oc_name]['cetable'][comparator][treatment]['cie']
+                oc = oc_dict[oc_name]
+                sm = oc['oc_measures'][0]
+                # get the certainty
+                if comparator in oc['cetable'] and \
+                    treatment in oc['cetable'][comparator] and \
+                    'cie' in oc['cetable'][comparator][treatment]:
+                    c = oc['cetable'][comparator][treatment]['cie']
                     e_txt = "no significant effect"
                 else:
                     c = 0
                     e_txt = 'na'
 
+                # get the effect
+                if comparator in oc['lgtable'][sm] and \
+                    treatment in oc['lgtable'][sm][comparator]:
+                    if oc['lgtable'][sm][comparator][treatment]['sm'] == 1:
+                        e = 2
+                    elif oc['lgtable'][sm][comparator][treatment]['lw'] < 1 \
+                        and oc['lgtable'][sm][comparator][treatment]['up'] > 1:
+                        e = 2
+                    elif oc['lgtable'][sm][comparator][treatment]['sm'] > 1:
+                        if oc['param']["which_is_better"] == 'higher':
+                            e = 3
+                        else:
+                            e = 1
+                    elif oc['lgtable'][sm][comparator][treatment]['sm'] < 1:
+                        if oc['param']["which_is_better"] == 'higher':
+                            e = 1
+                        else:
+                            e = 3
+                    else:
+                        e = 0
+                else:
+                    e = 0
+
+                e_txt = effects[e]
+
+                # update the table data
                 data[comparator].append({
-                    "c": c, "e": get_effect_val(e_txt), "e_txt": e_txt, 
+                    "c": c, "e": e, "e_txt": e_txt, 
                     "oc": oc_name, "t": treatment
                 })
     ret = {
         "treat_list": treat_list,
+        "treat_dict": treat_dict,
+        "oc_dict": oc_dict,
         "data": data
     }
 
@@ -1649,6 +1749,11 @@ def get_oc_graph_data(full_fn, full_nma_list_json, full_fn_json):
     # read the first tab again
     dft = xls.parse(oc_tab_name)
     dft = dft[~dft['name'].isna()]
+    print('* found %s outcome records' % (len(dft)))
+
+    # only use those yes
+    dft = dft[dft['included in plots']=='yes']
+    print('* kept %s outcome records' % (len(dft)))
 
     for idx, row in dft.iterrows():
         nma_type = row['analysis title']
@@ -1903,19 +2008,16 @@ def get_sof_nma_data(full_fn, backend):
     all_treat_list = []
     for oc_name in oc_names:
         oc = oc_dict[oc_name]
-        oc_datatype = oc['oc_datatype']
-        oc_measures = oc['oc_measures']
         sheet_name = oc_name
 
         # get the data
-        usecols = cols_dict[oc_datatype][0]
-        namecols = cols_dict[oc_datatype][1]
+        usecols = cols_dict[oc['oc_datatype']][0]
+        namecols = cols_dict[oc['oc_datatype']][1]
         dft = xls.parse(sheet_name, usecols=usecols, names=namecols)
 
         # remove those empty lines based on study name
         # the study name MUST be different
         dft = dft[~dft.study.isna()]
-        rs = json.loads(dft.to_json(orient='table', index=False))['data']
 
         # empty data???
         if len(dft) == 0: 
@@ -1928,7 +2030,7 @@ def get_sof_nma_data(full_fn, backend):
         # build detail for the treatments of this oc
         treats = {}
         treat_list = []
-        if oc_datatype == 'raw':
+        if oc['oc_datatype'] == 'raw':
             # treat column contains all the treatments
             treat_list = dft['treat'].unique().tolist()
 
@@ -1952,7 +2054,7 @@ def get_sof_nma_data(full_fn, backend):
                 treat = idx
                 treats[treat]['n_stus'] = int(row['study'])
 
-        elif oc_datatype == 'pre':
+        elif oc['oc_datatype'] == 'pre':
             # need to get all the treats from t1 and t2
             treat_list = list(set(dft['t1'].unique().tolist() + dft['t2'].unique().tolist()))
 
@@ -2035,7 +2137,10 @@ def get_sof_nma_data(full_fn, backend):
         # now get the league table
         oc_dict[oc_name]['lgtable'] = {}
 
-        for sm in oc_measures:
+        # get the records
+        rs = json.loads(dft.to_json(orient='table', index=False))['data']
+
+        for sm in oc['oc_measures']:
             # init this measure with a blank table
             oc_dict[oc_name]['lgtable'][sm] = {}
 
@@ -2045,33 +2150,21 @@ def get_sof_nma_data(full_fn, backend):
             # make a config dict for get the league table
             cfg = {
                 # for init analyzer
-                "backend": backend,
-                "data_type": {'pre': 'CAT_PRE', 'raw': 'CAT_RAW'}[oc_datatype],
+                "backend": oc['param']['analysis_method'],
+                "data_type": {'pre': 'CAT_PRE', 'raw': 'CAT_RAW'}[oc['oc_datatype']],
                 "measure_of_effect": sm,
-                "fixed_or_random": "random",
+                "fixed_or_random": oc['param']['fixed_or_random'],
                 # just use the first one as 
                 "reference_treatment": treat_list[0],
-                "which_is_better": 'big' if oc_dict[oc_name]['param']["which_is_better"] == 'higher' else 'small'
+                "which_is_better": 'big' if oc['param']["which_is_better"] == 'higher' else 'small'
             }
             
             # invoke analyzer
             ret_nma = nma_analyzer.analyze(rs, cfg)
 
             # convert nma result to page format
-            lgt_cols = ret_nma['data']['league']['cols']
-            for lgt_rs in ret_nma['data']['league']['tabledata']:
-                lgt_r = lgt_rs['row']
-                # create a new comparator row
-                oc_dict[oc_name]['lgtable'][sm][lgt_r] = {}
-
-                for j, lgt_c in enumerate(lgt_cols):
-                    lgt_cell = {
-                        "sm": lgt_rs['stat'][j],
-                        'lw': lgt_rs['lci'][j],
-                        'up': lgt_rs['uci'][j]
-                    }
-                    # create a new treat col
-                    oc_dict[oc_name]['lgtable'][sm][lgt_r][lgt_c] = lgt_cell
+            tmp_lgtable_sm = _conv_nmarst_league_to_lgtable(ret_nma)
+            oc_dict[oc_name]['lgtable'][sm] = tmp_lgtable_sm
 
             # get the rank data
             if backend == 'freq':
@@ -2616,3 +2709,25 @@ def get_effect_val(e_txt):
         'significant harm': 1,
         'na': 0
     }.get(e_txt.strip().lower(), 0)
+
+
+def _conv_nmarst_league_to_lgtable(ret_nma):
+    '''Convert analyzer result to lgtable format
+    '''
+    lgt_cols = ret_nma['data']['league']['cols']
+    tmp_lgtable_sm = {}
+    for lgt_rs in ret_nma['data']['league']['tabledata']:
+        lgt_r = lgt_rs['row']
+        # create a new comparator row
+        tmp_lgtable_sm[lgt_r] = {}
+
+        for j, lgt_c in enumerate(lgt_cols):
+            lgt_cell = {
+                "sm": lgt_rs['stat'][j],
+                'lw': lgt_rs['lci'][j],
+                'up': lgt_rs['uci'][j]
+            }
+            # create a new treat col
+            tmp_lgtable_sm[lgt_r][lgt_c] = lgt_cell
+
+    return tmp_lgtable_sm
