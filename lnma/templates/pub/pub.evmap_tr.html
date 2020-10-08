@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+
+<title>Evidence Map</title>
+<link rel="icon" href="/static/img/favicon.png" type="image/png">
+<link rel="stylesheet" href="/static/lib/font-awesome/css/all.css">
+<link rel="stylesheet" href="/static/lib/jquery-ui/jquery-ui.min.css">
+<link rel="stylesheet" href="/static/css/mybox-0.9.1.css">
+<style>
+html, body {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+}
+body {
+    font-size: 14px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+a {
+    color: #333333;
+    text-decoration: none;
+}
+#main-pane {
+    width: 100%;
+    height: 100%;
+    padding: 5px;
+    background-color: #FFFFFF;
+    display: flex;
+    flex-direction: column;
+}
+#main-pane .box {
+    margin: 0 5px 0 0;
+}
+.pane-row {
+    display: flex;
+    flex-direction: row;
+}
+#start-screen {
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+#ss-msg {
+    width: 100%;
+    padding: 10px 0;
+    text-align: center;
+}
+</style>
+</head>
+<body>
+<div id="start-screen">
+    <h1>
+        <i class="fa fa-chart-bar"></i>
+        Evidence Map
+    </h1>
+    <div id="ss-msg">Initializing graphs ...</div>
+</div>
+
+<div class="flex-container" style="width:100%; height:100%;">
+
+<div id="main-pane">
+
+    <div class="pane-row">
+        <div class="box" style="width: 100%;">
+            <div class="box-body d-flex">
+                <div id="fg_evmap" style="width:calc(100% - 200px); height: 600px;"></div>
+                <div id="fg_evmap_legend" style="width:200px; padding-top: 20px;">
+                    {% include 'svg/EVMAP_LEGEND.svg' %}
+                </div>
+            </div>
+        </div>
+        <!-- .box league table -->
+
+    </div>
+    <!-- .pane-row -->
+
+</div>
+
+</div><!-- .flex-container -->
+
+<!-- use third party libs -->
+<!-- jQuery -->
+<script src="/static/lib/jquery/jquery-3.4.1.min.js"></script>
+<!-- Plotly -->
+<!-- <script src="https://cdn.plot.ly/plotly-1.2.0.min.js"></script> -->
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<!-- NumJS -->
+<script src="/static/lib/numjs/numjs.min.js"></script>
+
+<!-- for IE -->
+<script>
+var isIE = /*@cc_on!@*/false || !!document.documentMode;
+if (isIE) {
+    document.getElementById('ss-msg').innerHTML = 'The functions used in this website require advanced web technologies, which are <b>NOT</b> supported by Internet Explorer<br>Try using Google Chrome, Apple Safari, Mozilla Firefox or other modern browsers.';
+}
+</script>
+
+<!-- My Scripts -->
+<script>
+
+{% include "js/fg_evmap_tr.js" %}
+
+var jarvis = {
+
+    getUrlParameter: function(name) {
+        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+        var results = regex.exec(location.search);
+        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    },
+
+    ssmsg: function(msg) {
+        $('#ss-msg').html(msg);
+    },
+
+    ssclose: function() {
+        $('#start-screen').hide();
+    },
+
+    draw: function(data) {
+        // bind all the data to this
+        this.all_data = data;
+        
+        // draw the bubble plot
+        fg_evmap.init(data, this.default_treatment);
+    },
+    
+    init: function() {
+        var isIE = /*@cc_on!@*/false || !!document.documentMode;
+
+        console.log('* User is using IE:', isIE);
+        if (isIE) {
+            jarvis.ssmsg('The functions used in this website require advanced web technologies, which are <b>NOT</b> supported by Internet Explorer<br>Try using Google Chrome, Apple Safari, Mozilla Firefox or other modern browsers.')
+            return;
+        }
+
+        // get filename
+        var prj = jarvis.getUrlParameter('prj');
+        var default_treatment = jarvis.getUrlParameter('tr');
+        this.default_treatment = default_treatment;
+
+        jarvis.ssmsg('Loading data ...');
+
+        $.get(
+            "/pub/graphdata/" + prj + "/EVMAP.json",
+            {ver: Math.random(), use_cache: 'yes'},
+            function(data) {
+                jarvis.draw(data);
+                jarvis.ssmsg('Data loaded!');
+                setTimeout('jarvis.ssclose();', 300);
+            }, 'json'
+        );
+    }
+};
+
+$(document).ready(function() {
+    jarvis.init();
+})
+
+</script>
+</body>
+</html>

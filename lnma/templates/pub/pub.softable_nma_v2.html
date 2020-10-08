@@ -103,6 +103,7 @@ a {
     text-align: center;
     background: whitesmoke;
     padding: 5px 0;
+    background: #c3c3c3;
 }
 .sof-table td {
     text-align: center;
@@ -115,6 +116,7 @@ a {
     width: 150px;
     max-width: 200px;
     cursor: pointer;
+    background: #f1f1f1;
 }
 .sof-table .col-oc-name:hover {
     background: whitesmoke;
@@ -124,7 +126,7 @@ a {
     max-width: 150px;
 }
 .sof-table .col-comparator {
-    background: #ffface;
+    background: white;
 }
 .sof-table .col-ta-left {
     text-align: left !important;
@@ -148,15 +150,15 @@ a {
     /* background: #efefef; */
 }
 .cie-bene-4 { background: rgb(55, 86, 35); color: white; }
-.cie-bene-3 { background: rgb(84, 130, 53); color: white; }
-.cie-bene-2 { background: rgb(169, 208, 142); color: black; }
-.cie-bene-1 { background: rgb(198, 224, 180); color: black; }
+.cie-bene-3 { background: rgb(169, 208, 142); color: black; }
+.cie-bene-2 { background: rgb(226, 239, 218); color: black; }
+.cie-bene-1 { background: rgb(255, 242, 204); color: black; }
 .cie-harm-4 { background: rgb(150, 0, 0); color: white; }
-.cie-harm-3 { background: rgb(220, 0, 0); color: white; }
-.cie-harm-2 { background: rgb(255, 50, 50); color: black; }
-.cie-harm-1 { background: rgb(255, 125, 125); color: black; }
-.cie-nner-2 { background: rgb(202, 183, 10); color: black; }
-.cie-nner-1 { background: rgb(250, 248, 133); color: black; }
+.cie-harm-3 { background: rgb(255, 103, 91); color: black; }
+.cie-harm-2 { background: rgb(255, 199, 193); color: black; }
+.cie-harm-1 { background: rgb(255, 242, 204); color: black; }
+.cie-nner-2 { background: rgb(191, 191, 191); color: black; }
+.cie-nner-1 { background: rgb(255, 242, 204); color: black; }
 
 /* for test data without real values */
 .cie-bene-0 { background: rgb(169, 208, 142); color: black; }
@@ -304,7 +306,7 @@ a {
                     <tr v-for="r, oc_name in rs">
                         <td class="col-oc-name"
                             v-on:click="show_ctrl_options(r.oc.oc_name)">
-                            {{ r.oc.oc_fullname }}<br>
+                            <b>{{ r.oc.oc_fullname }}</b><br>
                             <span class="grey">( {{ get_a_measure(r) }} )</span>
                         </td>
 

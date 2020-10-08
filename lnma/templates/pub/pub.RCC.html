@@ -385,7 +385,7 @@
             <div class="dropdown">
                 <button class="btn btn-primary bg-dark bd-dark dropdown-toggle" type="button" id="dropdownMenuButton-evmap" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <i class="fa fa-clipboard"></i>
-                    Select comparator
+                    Select treatment
                 </button>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton-evmap">
                     {% for tr in evmap['treat_list'] %}
@@ -405,7 +405,7 @@
 
     <div class="row">
         <div class="col">
-            <iframe id="iframe-evmap" src="[[ url_for('pub.evmap', prj='RCC', dc=evmap['treat_list'][0]) ]]" frameborder="0" style="width: 100%; min-height: 600px;"></iframe>
+            <iframe id="iframe-evmap" src="[[ url_for('pub.evmap_tr', prj='RCC', tr=evmap['treat_list'][0]) ]]" frameborder="0" style="width: 100%; min-height: 600px;"></iframe>
         </div>
     </div>
 
@@ -530,7 +530,7 @@ $(document).ready(function() {
     {% endfor %}
 
     // show the evmap
-    switch_evmap_data('[[ evmap["treat_list"][0] ]]');
+    switch_evmap_data('[[ evmap["treat_list"][0] ]]', "[[ evmap['treat_dict'][evmap['treat_list'][0]]['tr_fullname'] ]]");
 });
 </script>
 </body>
