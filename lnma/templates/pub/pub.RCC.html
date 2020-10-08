@@ -377,6 +377,9 @@
     <h3>
         EVIDENCE MAP
     </h3>
+    <p>
+        Evidence map is a visual depiction of evidence which presents synthesized data in user friendly illustration (figures or graphs) facilitating evidence based clinical guidelines, policies and decisions, and identifying evidence gaps that warrant future research.
+    </p>
     <div class="row">
         <div class="col-4">
             <div class="dropdown">
@@ -386,7 +389,7 @@
                 </button>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton-evmap">
                     {% for tr in evmap['treat_list'] %}
-                    <a class="dropdown-item" href="javascript:switch_evmap_data('[[ tr ]]');">[[ tr ]]</a>
+                    <a class="dropdown-item" href="javascript:switch_evmap_data('[[ tr ]]', '[[ evmap['treat_dict'][tr]['tr_fullname'] ]]');">[[ evmap['treat_dict'][tr]['tr_fullname'] ]]</a>
                     {% endfor %}
                 </div>
             </div>
@@ -394,7 +397,7 @@
         <div class="col-8 d-flex justify-content-end">
             <div class="outcome-name" style="padding: .5rem; margin-right: 1rem;">
                 <span id="optext-evmap" style="font-weight: bold;">
-                    [[ evmap['treat_list'][0] ]]
+                    [[ evmap['treat_dict'][evmap['treat_list'][0]]['tr_fullname'] ]]
                 </span>
             </div>
         </div>
@@ -483,7 +486,7 @@ function switch_pwma_data(tag, slides, display_name) {
     $('#optext-pwma-' + tag).html(display_name);
 }
 
-function switch_evmap_data(treat) {
+function switch_evmap_data(treat, treat_fullname) {
     // var url = '[[ url_for("pub.evmap") ]]';
     // url += '?prj=' + prj;
     // url += '&dc=' + treat;
@@ -492,7 +495,8 @@ function switch_evmap_data(treat) {
     var win_evmap = $('#iframe-evmap')[0].contentWindow;
     win_evmap.fg_evmap.draw(treat);
 
-    $('#optext-evmap').html(treat);
+    // update the display name
+    $('#optext-evmap').html(treat_fullname);
 }
 
 $(document).ready(function() {
