@@ -8,4 +8,4 @@ else
     echo "* prepare the standalone webpage for $PRJ"
 fi
 
-scp -r instance/pubdata/$PRJ lnmasrv:/home/m210842/sites/lnma/instance/pubdata/$PRJ
+scp -r instance/pubdata/$PRJ/* lnmasrv:/home/m210842/sites/lnma/instance/pubdata/$PRJ/

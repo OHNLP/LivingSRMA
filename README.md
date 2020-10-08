@@ -252,6 +252,10 @@ The only thing we need to do is upgrade:
 ```
 # Update log
 
+## 2020-10-07
+
+Fixed a lot of things. Add a reverse parser for the dev site on development server for checking detailed log data.
+
 ## 2020-09-20
 
 To support different types of measure of effects in SoF PMA, the followings are added:
@@ -263,3 +267,4 @@ To support different types of measure of effects in SoF PMA, the followings are 
 And for the external base:
 
 1. the data structure has to be changed to support HR.
+2. a lot -_-|||
