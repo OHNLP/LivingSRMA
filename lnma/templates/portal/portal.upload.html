@@ -1,7 +1,7 @@
 {% extends '_layout_adminlte.html' %}
 
 {% block title %}
-Data File Upload
+Data Upload / Build
 {% endblock %}
 
 {% block style %}
@@ -10,7 +10,7 @@ Data File Upload
 
 {% block page_name %}
 <i class="fas fa-upload"></i>
-Data File Upload
+Data Upload / Build
 {% endblock %}
 
 {% block content %}
@@ -19,12 +19,16 @@ Data File Upload
     <div class="container-fluid">
         <div class="row mb-2">
             <div class="col-sm-6">
-                <h1 class="m-0 text-dark">Data File Upload</h1>
+                <h1 class="m-0 text-dark">
+                    Upload Raw Data Files
+                </h1>
             </div><!-- /.col -->
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
                     <li class="breadcrumb-item"><a href="[[ url_for('portal.index') ]]">Home</a></li>
-                    <li class="breadcrumb-item active">Data File Upload</li>
+                    <li class="breadcrumb-item active">
+                        Data Upload and Build
+                    </li>
                 </ol>
             </div><!-- /.col -->
         </div><!-- /.row -->
@@ -96,17 +100,17 @@ Data File Upload
                                 <div class="form-check disabled">
                                     <input class="form-check-input" type="radio" name="input_filetype" id="input_opt_softable_nma_data" value="softable_nma_data">
                                     <label class="form-check-label" for="input_opt_softable_nma_data">
-                                        <span class="font-weight-bold">SoF Table Network MA Data</span><br>
-                                        An excel file (.xlsx), with tabs of "Outcomes", "Certainty", and all the results of outcomes.
+                                        <span class="font-weight-bold">SoF Table Network MA Data / Network MA Graph Data / Evidence Map Data</span><br>
+                                        An excel file (.xlsx), with tabs of "Outcomes", "Certainty", "Treatments" and all the results of outcomes.
                                     </label>
                                 </div>
-                                <div class="form-check disabled">
+                                <!-- <div class="form-check disabled">
                                     <input class="form-check-input" type="radio" name="input_filetype" id="input_opt_evmap_data" value="evmap_data">
                                     <label class="form-check-label" for="input_opt_evmap_data">
                                         <span class="font-weight-bold">Evidence Map Data</span><br>
                                         An excel file (.xlsx), with tabs of "Outcomes", "Certainty", and all the results of outcomes.
                                     </label>
-                                </div>
+                                </div> -->
                             </div>
                         </div>
                     </fieldset>
@@ -128,6 +132,17 @@ Data File Upload
                     </div>
 
                 </form>
+
+                <hr>
+
+                <h2>Build JSON Data Files</h2>
+
+                <p>
+                    The public sites require JSON format data files, which contain the analysis results of our uploaded data files.
+                    To provide instant response for good user experience, all the JSON format data files are generated in advance. 
+                    Once a new data file is uploaded, press the corresponding button to generate the JSON file.
+                </p>
+
 
             </div>
         </div>

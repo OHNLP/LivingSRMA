@@ -10,7 +10,11 @@ var tb_studylist = {
         var pids = [];
         for (var pmid in this.data.paper_dict) {
             if (this.data.paper_dict.hasOwnProperty(pmid)) {
-                console.log(this.data.paper_dict[pmid])
+                // console.log(this.data.paper_dict[pmid])
+                if (pmid.substring(0, 6).toUpperCase() == 'NOPMID') {
+                    // it is a no pmid paper, skip
+                    continue;
+                }
                 if (!this.data.paper_dict[pmid].hasOwnProperty('title')) {
                     // the info of this paper is not yet
                     pids.push(pmid);
@@ -86,6 +90,29 @@ var tb_studylist = {
     },
 
     set_stage: function(stage) {
+        // set the stage
+        this.vpp.stage = stage;
+
+        // put the papers in this stage
+        var studies = [];
+        for (var i = 0; i < this.data.prisma[stage].paper_list.length; i++) {
+            var pmid = this.data.prisma[stage].paper_list[i];
+            var paper = this.data.paper_dict[pmid];
+            var ctid = paper.ctid;
+
+            if (paper.hasOwnProperty('title')) {
+                // this paper is a real PMID data or we put data in xls
+                studies.push(paper);
+            } else {
+                studies.push(this.data.study_dict[ctid]);
+            }
+        }
+        this.vpp.studies = studies;
+        this.vpp.total = studies.length;
+        console.log('* set vpp studies', studies);
+    },
+
+    set_stage_to_nct_latest: function(stage) {
         // set the stage
         this.vpp.stage = stage;
 
