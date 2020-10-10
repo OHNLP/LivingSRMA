@@ -325,6 +325,9 @@ def graphdata_itable_cfg_json(prj):
         "filters": filters
     }
 
+    # make a cache
+    json.dump(ret, open(full_fn_itable_cfg_json, 'w'))
+
     return jsonify(ret)
 
 
@@ -334,6 +337,9 @@ def graphdata_itable_json(prj):
     '''
     fn = 'ITABLE_ATTR_DATA.xlsx'
     full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
+
+    output_fn = 'ITABLE.json'
+    full_output_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, output_fn)
 
     # get the cols
     attr_pack = get_attr_pack_from_itable(full_fn)
@@ -375,9 +381,10 @@ def graphdata_itable_json(prj):
         'rs': rs,
         'attrs': attrs
     }
-    # make a copy of this json
-    full_output_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, 'ITABLE.json')
+
+    # make a cache of this json
     json.dump(ret, open(full_output_fn, 'w'))
+
     return jsonify(ret)
 
 
@@ -409,8 +416,15 @@ def graphdata_graph_json(prj):
             fn_json
         )
     
+    nma = get_nma_list_data(full_fn)
+    # cache the NMA list
+    json.dump(nma, open(full_nma_list_json, 'w'))
+
     # get the graph json data
-    ret = get_oc_graph_data(full_fn, full_nma_list_json, full_fn_json)
+    ret = get_oc_graph_data(full_fn)
+
+    # save the GRAPH.json
+    json.dump(ret, open(full_fn_json, 'w'))
 
     return jsonify(ret)
 
@@ -423,8 +437,14 @@ def graphdata_softable_pma_json(prj):
     The second tab is Adverse events
     From third tab all the events
     '''
+    fn_json = 'SOFTABLE_PMA.json'
+    full_fn_json = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn_json)
+
+    # get the version of this file
+    # v1 is for IOTOX, v2 for others
     v = request.args.get('v')
     ret = {}
+
     if v is None or v == '' or v == '1':
         if prj == 'IOTOX':
             fn = 'ALL_DATA.xlsx'
@@ -438,6 +458,9 @@ def graphdata_softable_pma_json(prj):
         fn = 'SOFTABLE_PMA_DATA.xlsx'
         full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
         ret = get_sof_pma_data(full_fn)
+
+    # cache the data
+    json.dump(ret, open(full_fn_json, 'w'))
 
     return jsonify(ret)
 
@@ -697,6 +720,10 @@ def graphdata_evmap_json(prj):
 
     return jsonify(ret)
 
+
+###########################################################
+# Other utils
+###########################################################
 
 def get_evmap_data(full_fn):
     # return get_evmap_data_v1(full_fn)
@@ -971,10 +998,6 @@ def get_evmap_data_v1(full_fn):
 
     return ret
 
-
-###########################################################
-# Other utils
-###########################################################
 
 def get_filters_from_itable(full_fn):
     '''Get the filters from ITABLE_FILTERS.xlsx
@@ -1741,7 +1764,7 @@ def get_ae_pma_data_simple(full_fn):
     return ret
 
 
-def get_oc_graph_data(full_fn, full_nma_list_json, full_fn_json):
+def get_nma_list_data(full_fn):
     # get all
     xls = pd.ExcelFile(full_fn)
     # build OC Category data
@@ -1777,13 +1800,19 @@ def get_oc_graph_data(full_fn, full_nma_list_json, full_fn_json):
             'oc_fullname': oc_fullname
         })
 
-    json.dump(nma, open(full_nma_list_json, 'w'), indent=4)
-    print('* saved NMA_LIST.json')
+    return nma
+
+
+def get_oc_graph_data(full_fn):
+    # get all
+    xls = pd.ExcelFile(full_fn)
 
     ######################################
     # Build the GRAPH.json
     ######################################
-    # load data
+
+    # build OC Category data
+    oc_tab_name = 'Outcomes'
     dft = xls.parse(oc_tab_name)
     dft = dft[~dft['name'].isna()]
 
@@ -1856,10 +1885,6 @@ def get_oc_graph_data(full_fn, full_nma_list_json, full_fn_json):
 
         # put in result
         ret['graph_dict'][oc_name] = analysis_ret
-
-    # now save all the results
-    # FIRST of all, save the GRAPH.json
-    json.dump(ret, open(full_fn_json, 'w'))
 
     ######################################
     # Build the GRAPH-outcome.json

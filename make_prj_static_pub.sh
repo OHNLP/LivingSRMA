@@ -32,15 +32,20 @@ curl "$URL_BASE/subindex/$PRJ" -o "$FOLDER_BASE/index.html"
 
 # get the shared module
 curl "$URL_BASE/prisma.html" -o "$FOLDER_BASE/pub/prisma.html"
+curl "$URL_BASE/prisma_v2.html" -o "$FOLDER_BASE/pub/prisma_v2.html"
 curl "$URL_BASE/itable.html" -o "$FOLDER_BASE/pub/itable.html"
 curl "$URL_BASE/slide.html" -o "$FOLDER_BASE/pub/slide.html"
 curl "$URL_BASE/graph_v1.html" -o "$FOLDER_BASE/pub/graph_v1.html"
 curl "$URL_BASE/graph_v2.html" -o "$FOLDER_BASE/pub/graph_v2.html"
 curl "$URL_BASE/graph_v2_1.html" -o "$FOLDER_BASE/pub/graph_v2_1.html"
 curl "$URL_BASE/graph_v3.html" -o "$FOLDER_BASE/pub/graph_v3.html"
+curl "$URL_BASE/graph_RCC.html" -o "$FOLDER_BASE/pub/graph_RCC.html"
 curl "$URL_BASE/softable_pma.html" -o "$FOLDER_BASE/pub/softable_pma.html"
 curl "$URL_BASE/softable_nma.html" -o "$FOLDER_BASE/pub/softable_nma.html"
-curl "$URL_BASE/softable_nma.html" -o "$FOLDER_BASE/pub/softable_nma.html"
+curl "$URL_BASE/softable_pma_v2.html" -o "$FOLDER_BASE/pub/softable_pma_v2.html"
+curl "$URL_BASE/softable_nma_v2.html" -o "$FOLDER_BASE/pub/softable_nma_v2.html"
+curl "$URL_BASE/evmap.html" -o "$FOLDER_BASE/pub/evmap.html"
+curl "$URL_BASE/evmap_tr.html" -o "$FOLDER_BASE/pub/evmap_tr.html"
 echo "* downloaed shared module for project $PRJ"
 
 # get the project page
@@ -53,11 +58,12 @@ cp -r ./instance/pubdata/$PRJ/* $FOLDER_BASE/pub/graphdata/$PRJ/
 echo '* copied all graph data'
 
 # get the data files
-curl "$URL_BASE/graphdata/$PRJ/ITABLE.json" -o "$FOLDER_BASE/pub/graphdata/$PRJ/ITABLE.json"
-curl "$URL_BASE/graphdata/$PRJ/ITABLE_CFG.json" -o "$FOLDER_BASE/pub/graphdata/$PRJ/ITABLE_CFG.json"
-curl "$URL_BASE/graphdata/$PRJ/PRISMA.json" -o "$FOLDER_BASE/pub/graphdata/$PRJ/PRISMA.json"
-curl "$URL_BASE/graphdata/$PRJ/SOFTABLE_PMA.json" -o "$FOLDER_BASE/pub/graphdata/$PRJ/SOFTABLE_PMA.json"
-curl "$URL_BASE/graphdata/$PRJ/SOFTABLE_NMA.json" -o "$FOLDER_BASE/pub/graphdata/$PRJ/SOFTABLE_NMA.json"
-echo "* download the data jsons"
+# curl "$URL_BASE/graphdata/$PRJ/ITABLE.json" -o "$FOLDER_BASE/pub/graphdata/$PRJ/ITABLE.json"
+# curl "$URL_BASE/graphdata/$PRJ/ITABLE_CFG.json" -o "$FOLDER_BASE/pub/graphdata/$PRJ/ITABLE_CFG.json"
+# curl "$URL_BASE/graphdata/$PRJ/PRISMA.json" -o "$FOLDER_BASE/pub/graphdata/$PRJ/PRISMA.json"
+# curl "$URL_BASE/graphdata/$PRJ/SOFTABLE_PMA.json" -o "$FOLDER_BASE/pub/graphdata/$PRJ/SOFTABLE_PMA.json"
+# curl "$URL_BASE/graphdata/$PRJ/SOFTABLE_NMA.json" -o "$FOLDER_BASE/pub/graphdata/$PRJ/SOFTABLE_NMA.json"
+# curl "$URL_BASE/graphdata/$PRJ/EVMAP.json" -o "$FOLDER_BASE/pub/graphdata/$PRJ/EVMAP.json"
+# echo "* download the data jsons"
 
 echo "* completed $PRJ static website" 
