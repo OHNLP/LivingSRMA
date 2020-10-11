@@ -22,7 +22,6 @@ from lnma.analyzer import freq_analyzer
 from lnma.analyzer import bayes_analyzer
 from lnma.analyzer import pwma_analyzer
 
-
 PATH_PUBDATA = 'pubdata'
 
 bp = Blueprint("analyzer", __name__, url_prefix="/analyzer")
