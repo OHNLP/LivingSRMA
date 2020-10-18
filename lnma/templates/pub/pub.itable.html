@@ -171,6 +171,12 @@ a {
 .chk-group:hover {
     background: lightgrey;
 }
+/* for the table */
+.url_pubmed {
+    color: #0263b9;
+    cursor: pointer;
+}
+/* for the start screen */
 #start-screen {
     width: 100%;
     height: 100%;
@@ -411,8 +417,13 @@ a {
                         <td class="sct-td"
                             v-for="col, idx in cols"
                             v-bind:title="attrs[idx].name + ': ' + r[col]"
-                            v-bind:class="get_td_cls(idx, r[col])"
-                            v-html="r[col]">
+                            v-bind:class="get_td_cls(idx, r[col])">
+                            <span v-if="attrs[idx].attr_id=='_|PUBMED ID' || attrs[idx].attr_id=='_|PMID'">
+                                <a class="url_pubmed" target="_blank" v-bind:href="url.pubmed + r[col]">
+                                    {{ r[col] }}
+                                </a>
+                            </span>
+                            <span v-else>{{ r[col] }}</span>
                         </td>
                     </tr>
                 </tbody><!-- /.sct-body -->
@@ -651,6 +662,9 @@ var tb_schtab = {
         this.vpp = new Vue({
             el: this.vpp_id,
             data: {
+                url: {
+                    pubmed: 'https://pubmed.ncbi.nlm.nih.gov/'
+                },
                 attrs: dt_tbcore.attrs,
                 cols: dt_tbcore.cols,
                 rs: dt_tbcore.rs_db

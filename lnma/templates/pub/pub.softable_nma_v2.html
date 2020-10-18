@@ -226,7 +226,7 @@ a {
                     <div class="box-menu-group d-flex fx-row">
                         <div class="red">
                             <i class="fa fa-cog"></i>
-                            <b>Comparator: </b>
+                            <b>Reference treatment: </b>
                         </div>
                         <div>
                             <select v-model='comparator'>
@@ -295,7 +295,7 @@ a {
                 <table class="sof-table">
                     <tr>
                         <th class="col-oc-name">Outcome</th>
-                        <th class="col-treat">Comparator: <b class="red">{{ comparator }}</b></th>
+                        <th class="col-treat">Reference treatment: <br><b class="red">{{ comparator }}</b></th>
                         <th class="col-treat" 
                             v-for="treat in treat_list" 
                             v-if="treat!=comparator">

@@ -362,7 +362,7 @@
         The Summary of Findings (SoF) table is designed to display multiple comparisons in an interactive manner. All possible combinations in network meta-analysis can be compared using this framework. Users can interactively select or deselect SoF for a given clinical outcome by clicking the outcome of interest from the left-hand panel. Users can also enter any baseline risk for an outcome, to visualize the absolute risk differences due to treatment. Clicking on any of the colored boxes displays details of that effect estimate as well as its associated certainty of evidence assessment.
     </p>
     <p>
-        <b>Choose comparator (reference treatment), measure of effect, and denominator for absolute effect</b>
+        <b>Choose reference treatment, measure of effect, and denominator for absolute effect</b>
     </p>
     <div class="row">
         <div class="col">
@@ -405,7 +405,7 @@
 
     <div class="row">
         <div class="col">
-            <iframe id="iframe-evmap" src="[[ url_for('pub.evmap_tr', prj='RCC', tr=evmap['treat_list'][0]) ]]" frameborder="0" style="width: 100%; min-height: 600px;"></iframe>
+            <iframe id="iframe-evmap" src="[[ url_for('pub.evmap_tr_v2', prj='RCC', tr=evmap['treat_list'][0]) ]]" frameborder="0" style="width: 100%; min-height: 600px;"></iframe>
         </div>
     </div>
 

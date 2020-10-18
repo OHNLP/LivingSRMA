@@ -274,6 +274,11 @@ def evmap_tr():
     return render_template('pub/pub.evmap_tr.html')
 
 
+@bp.route('/evmap_tr_v2.html')
+def evmap_tr_v2():
+    return render_template('pub/pub.evmap_tr_v2.html')
+
+
 ###########################################################
 # Data services
 ###########################################################
