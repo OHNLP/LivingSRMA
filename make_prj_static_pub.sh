@@ -46,6 +46,7 @@ curl "$URL_BASE/softable_pma_v2.html" -o "$FOLDER_BASE/pub/softable_pma_v2.html"
 curl "$URL_BASE/softable_nma_v2.html" -o "$FOLDER_BASE/pub/softable_nma_v2.html"
 curl "$URL_BASE/evmap.html" -o "$FOLDER_BASE/pub/evmap.html"
 curl "$URL_BASE/evmap_tr.html" -o "$FOLDER_BASE/pub/evmap_tr.html"
+curl "$URL_BASE/evmap_tr_v2.html" -o "$FOLDER_BASE/pub/evmap_tr_v2.html"
 echo "* downloaed shared module for project $PRJ"
 
 # get the project page
