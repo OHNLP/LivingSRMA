@@ -105,7 +105,7 @@ class Paper(db.Model):
 
     paper_id = db.Column(db.String(48), primary_key=True, nullable=False)
     pid = db.Column(db.String(64), index=False)
-    pid_type = db.Column(db.String(8), index=False)
+    pid_type = db.Column(db.String(32), index=False)
     project_id = db.Column(db.String(48), index=False)
     title = db.Column(db.Text, index=False)
     abstract = db.Column(db.Text, index=False)
@@ -116,6 +116,7 @@ class Paper(db.Model):
     ss_st = db.Column(db.String(8), index=False)
     ss_pr = db.Column(db.String(8), index=False)
     ss_rs = db.Column(db.String(8), index=False)
+    ss_ex = db.Column(db.JSON, index=False)
     date_created = db.Column(db.DateTime, index=False)
     date_updated = db.Column(db.DateTime, index=False)
     is_deleted = db.Column(db.String(8), index=False)

@@ -237,12 +237,21 @@ To copy the table schema from local server to the development server, we use fla
 On the dev side, we need to follow the tutorial on https://flask-migrate.readthedocs.io/en/latest/
 
 ```bash
+$ export FLASK_APP=lnma
 $ flask db init
 $ flask db migrate -m "Initial migration."
 $ flask db upgrade
 ```
 
 After the first time, we only need to run migrate and upgrade in the future.
+
+When modified the `model.py` in the development env, run the following:
+
+```bash
+$ export FLASK_APP=lnma
+$ flask db migrate
+$ flask db upgrade
+```
 
 On the server side, we don't need to init the migration folder.
 The only thing we need to do is upgrade:

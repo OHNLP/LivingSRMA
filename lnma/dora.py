@@ -88,15 +88,14 @@ def is_existed_project(project_id):
         return True
 
 
-def is_existed_paper(project_id, pid, pid_type='pmid'):
+def is_existed_paper(project_id, pid):
     '''Check if a pid exists
 
     By default check the pmid
     '''
     paper = Paper.query.filter(and_(
         Paper.project_id == project_id,
-        Paper.pid == pid,
-        Paper.pid_type == pid_type
+        Paper.pid == pid
     )).first()
 
     if paper is None:
@@ -108,7 +107,7 @@ def is_existed_paper(project_id, pid, pid_type='pmid'):
 def create_paper(project_id, pid, 
     pid_type='pmid', title=None, abstract=None,
     pub_date=None, authors=None, journal=None, meta={},
-    ss_st=None, ss_pr=None, ss_rs=None):
+    ss_st=None, ss_pr=None, ss_rs=None, ss_ex=None):
     """Create a paper object, 
 
     By default, the pmid. 
@@ -126,6 +125,7 @@ def create_paper(project_id, pid,
     ss_st = ss_state.SS_ST_AUTO_OTHER if ss_st is None else ss_st
     ss_pr = ss_state.SS_PR_NA if ss_pr is None else ss_pr
     ss_rs = ss_state.SS_RS_NA if ss_rs is None else ss_rs
+    ss_ex = {} if ss_ex is None else ss_ex
     date_created = datetime.datetime.now()
     date_updated = datetime.datetime.now()
     is_deleted = IS_DELETED_NO
@@ -144,6 +144,7 @@ def create_paper(project_id, pid,
         ss_st = ss_st,
         ss_pr = ss_pr,
         ss_rs = ss_rs,
+        ss_ex = ss_ex,
         date_created = date_created,
         date_updated = date_updated,
         is_deleted = is_deleted
@@ -157,7 +158,8 @@ def create_paper(project_id, pid,
 
 def create_paper_if_not_exist(project_id, pid, 
     pid_type='pmid', title=None, abstract=None,
-    pub_date=None, authors=None, journal=None, ss_st=None, ss_pr=None, ss_rs=None):
+    pub_date=None, authors=None, journal=None, 
+    ss_st=None, ss_pr=None, ss_rs=None, ss_ex=None):
     '''A wrapper function for create_paper and is_existed_paper
     '''
     
@@ -167,7 +169,7 @@ def create_paper_if_not_exist(project_id, pid,
         p = create_paper(project_id, pid, 
             pid_type=pid_type, title=title, 
             pub_date=pub_date, authors=authors, journal=journal, 
-            ss_st=ss_st, ss_pr=ss_pr, ss_rs=ss_rs)
+            ss_st=ss_st, ss_pr=ss_pr, ss_rs=ss_rs, ss_ex=None)
         return p
 
 
@@ -293,7 +295,6 @@ def get_papers_by_stage(project_id, stage):
         papers = []
 
     return papers
-
 
 
 def set_paper_pr_rs(paper_id, pr=None, rs=None):
