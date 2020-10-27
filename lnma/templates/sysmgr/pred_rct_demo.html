@@ -70,8 +70,8 @@ a {
                     Predict!
                 </button>
             </div>
-            <div style="width: 500px; padding: 10px 0;">
-                <textarea id="json" rows="25" style="width: 100%;"></textarea>
+            <div style="width: 100%; padding: 10px 0;">
+                <pre id="json" rows="25" style="width: 100%;"></pre>
             </div>
         </div>
     </div>
@@ -98,8 +98,8 @@ var jarvis = {
             {ti: ti, ab: ab},
             function(data) {
                 console.log(data);
-                var txt = JSON.stringify(data['data']);
-                $('#json').val(txt);
+                var txt = JSON.stringify(data['data'], null, 2);
+                $('#json').html(txt);
             }, 'json'
         )
     }

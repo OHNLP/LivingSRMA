@@ -28,7 +28,7 @@ bp = Blueprint("sysmgr", __name__, url_prefix="/sysmgr")
 @bp.route('/')
 @login_required
 def index():
-    return render_template('sysmgr.index.html')
+    return render_template('sysmgr/index.html')
 
 
 @bp.route('/make_study_dict', methods=['GET', 'POST'])
@@ -73,7 +73,7 @@ def make_study_dict():
 @login_required
 def pred_rct_demo():
     if request.method == 'GET':
-        return render_template('sysmgr.pred_rct_demo.html')
+        return render_template('sysmgr/pred_rct_demo.html')
 
     ti = request.form.get('ti')
     ab = request.form.get('ab')

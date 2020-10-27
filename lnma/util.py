@@ -234,7 +234,6 @@ def e_fetch(ids, db='pubmed'):
     return ret
 
 
-
 def pred_rct(ti, ab):
     '''Predict if a study is RCT
     '''

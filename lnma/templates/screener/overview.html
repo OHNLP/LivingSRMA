@@ -104,7 +104,7 @@ Screener Overview
                     Paper List
                 </h5>
 
-                <table id="tbjs_paperlist">
+                <table id="tbjs_paperlist" class="display compact hover" style="width: 100%;">
 
                 </table>
             </div>
@@ -125,9 +125,9 @@ Screener Overview
 
 {% block script %}
 <script src="/static/lib/d3/d3.min.js"></script>
-
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.22/css/dataTables.bootstrap4.min.css">
 <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
+<script src="https://unpkg.com/dayjs@1.8.21/dayjs.min.js"></script>
 
 <script>
 
@@ -170,25 +170,37 @@ var vw_screener = {
 var tbjs_paperlist = {
     table_id: '#tbjs_paperlist',
     table: null,
+
+    cfg: {
+        number_of_rows: 25
+    },
+
     columns: [
         {
             "title": '',
-            "className": 'details-control',
-            orderable: false,
+            "width": 25,
+            "className": 'details-control dt-center',
+            "orderable": false,
             "data": null,
             "defaultContent": '<i class="fa fa-plus"></i>'
         },
-        { title: 'Journal', data: 'journal' },
-        { title: 'Title', data: 'title' },
+        { 
+            title: 'Date', 
+            width: 90,
+            data: 'date_created_norm' 
+        },
+        { 
+            title: 'Title', 
+            data: 'title' 
+        },
         {
             title: '',
             className: 'operate-control',
+            width: 120,
             orderable: false,
             data: null,
-            defaultContent: '<button class="btn btn-danger btn-sm">Exclude by title/abs</button> ' + 
-                '<button class="btn btn-primary btn-sm">Include by title/abs</button> '
-                // '<button class="btn btn-primary btn-sm">+ SR</button> ' + 
-                // '<button class="btn btn-success btn-sm">+ SR+MA</button>'
+            defaultContent: '<button class="btn btn-danger btn-sm">Exclude</button> ' + 
+                '<button class="btn btn-primary btn-sm">Include</button> '
         }
     ],
     sample: [
@@ -207,8 +219,22 @@ var tbjs_paperlist = {
         });
     },
 
-    update: function(data) {
+    _create_columns: function(stage) {
+
+    },
+
+    _preprocessing: function(data) {
+        for (var i = 0; i < data.length; i++) {
+            var d = data[i];
+            d['date_created_norm'] = dayjs(d.date_created).format('YYYY-MM-DD') + ' ' +
+                '<span class="badge badge-pill badge-info"><i class="fa fa-bong"></i> RCT</span>';
+        }
+
         this.data = data;
+    },
+
+    update: function(data) {
+        this._preprocessing(data);
         
         if (this.table != null) {
             this.table = null;
@@ -217,8 +243,12 @@ var tbjs_paperlist = {
         // update the table
         this.table = $(this.table_id).DataTable({
             responsive: true,
+            pageLength: this.cfg.number_of_rows,
             data: data,
-            columns: this.columns
+            columns: this.columns,
+            order: [
+                [1, 'desc']
+            ]
         });
 
         // update the open/close details event
@@ -245,8 +275,11 @@ var tbjs_paperlist = {
         return '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+
             '<tr>'+
                 '<td>Actions:</td>'+
-                '<td><button class="btn btn-primary">Proceed to Full Text</button> '+
-                '<button class="btn btn-primary">Check Later</button>'+
+                '<td>'+
+                '<button class="btn btn-danger btn-sm">Exclude</button> '+
+                '<button class="btn btn-primary btn-sm">Proceed to Full Text</button> '+
+                ' | ' +
+                '<button class="btn btn-default btn-sm">Check Later</button>'+
                 '</td>'+
             '</tr>'+
             '<tr>'+
