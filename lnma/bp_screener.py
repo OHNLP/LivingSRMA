@@ -56,6 +56,18 @@ def get_papers_by_stage():
     return jsonify(ret)
 
 
+@bp.route('/get_stat')
+@login_required
+def get_stat():
+    project_id = request.args.get('project_id')
+    rst = dora.get_screener_stat(project_id)
+    ret = {
+        'success': True,
+        'stat': rst
+    }
+    return jsonify(ret)
+
+
 @bp.route('/get_prisma')
 @login_required
 def get_prisma():

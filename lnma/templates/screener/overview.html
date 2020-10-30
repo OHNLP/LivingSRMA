@@ -30,7 +30,7 @@ Screener Overview
 <div class="content">
     <div class="container-fluid">
         <div class="row">
-            <div style="width: 220px;">
+            <div id="ui_category_stat" style="width: 220px;">
                 <h5>
                     <i class="far fa-file-alt"></i>
                     All Papers
@@ -38,15 +38,15 @@ Screener Overview
                 <div class="list-group">
                     <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                         All papers
-                        <span class="badge badge-primary badge-pill">2000</span>
+                        <span class="badge badge-primary badge-pill">{{ stat.cnt_all }}</span>
                     </button>
                     <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                         Unscreened papers
-                        <span class="badge badge-primary badge-pill">100</span>
+                        <span class="badge badge-primary badge-pill">{{ stat.cnt_unscreened }}</span>
                     </button>
                     <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                         Decided papers
-                        <span class="badge badge-primary badge-pill">1900</span>
+                        <span class="badge badge-primary badge-pill">{{ stat.cnt_decided }}</span>
                     </button>
                 </div>
 
@@ -57,11 +57,7 @@ Screener Overview
                 <div class="list-group">
                     <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                         Full Text Review
-                        <span class="badge badge-secondary badge-pill">14</span>
-                    </button>
-                    <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                        Included in MA
-                        <span class="badge badge-secondary badge-pill">14</span>
+                        <span class="badge badge-secondary badge-pill">&nbsp;</span>
                     </button>
                 </div>
 
@@ -72,11 +68,11 @@ Screener Overview
                 <div class="list-group">
                     <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                         Included in SR
-                        <span class="badge badge-secondary badge-pill">14</span>
+                        <span class="badge badge-secondary badge-pill">{{ stat.cnt_included_sr }}</span>
                     </button>
                     <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                         Included in MA
-                        <span class="badge badge-secondary badge-pill">14</span>
+                        <span class="badge badge-secondary badge-pill">{{ stat.cnt_included_srma }}</span>
                     </button>
                 </div>
 
@@ -87,11 +83,15 @@ Screener Overview
                 <div class="list-group">
                     <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                         By RCT Classifier
-                        <span class="badge badge-secondary badge-pill">14</span>
+                        <span class="badge badge-secondary badge-pill">{{ stat.cnt_excluded_by_rct_classifier }}</span>
                     </button>
                     <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
                         By Title / Abstract
-                        <span class="badge badge-secondary badge-pill">14</span>
+                        <span class="badge badge-secondary badge-pill">{{ stat.cnt_excluded_by_title_abstract }}</span>
+                    </button>
+                    <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        By Full Text
+                        <span class="badge badge-secondary badge-pill">{{ stat.cnt_excluded_by_fulltext }}</span>
                     </button>
                 </div>
             </div>
@@ -133,13 +133,15 @@ Screener Overview
 
 var jarvis = {
     init: function () {
+        ui_category_stat.load();
         tbjs_paperlist.load();
     },
 };
 
-var vw_screener = {
+var srv_screener = {
 
     api_url: {
+        get_stat: '[[ url_for("screener.get_stat") ]]',
         get_all_papers: '[[ url_for("screener.get_papers") ]]',
         get_papers_by_stage: '[[ url_for("screener.get_papers_by_stage") ]]',
         exclude_ta: '[[ url_for("screener.sspr_exclude_papers_ta") ]]',
@@ -147,6 +149,18 @@ var vw_screener = {
         set_needchkft: '[[ url_for("screener.sspr_set_papers_needchkft") ]]',
         include_sr: '[[ url_for("screener.sspr_include_papers_sr") ]]',
         include_srma: '[[ url_for("screener.sspr_include_papers_srma") ]]',
+    },
+
+    get_stat: function(callback) {
+        var url = this.api_url.get_stat;
+        var project_id = Cookies.get('project_id');
+
+        $.get(
+            url,
+            {project_id: project_id, ver: Math.random()},
+            callback, 
+            'json'
+        )
     },
 
     get_papers: function(stage, callback) {
@@ -166,6 +180,33 @@ var vw_screener = {
         )
     }
 };
+
+var ui_category_stat = {
+    vpp_id: '#ui_category_stat',
+    vpp: null,
+
+    load: function() {
+        // load data from backend by srv_screener
+        srv_screener.get_stat(function(data){
+            ui_category_stat.init(data.stat);
+        });
+    },
+
+    init: function(data) {
+        this.data = data;
+        console.log('* initing ui_category_stat', data);
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                stat: data
+            },
+            methods: {
+
+            }
+        });        
+    }
+};
+
 
 var tbjs_paperlist = {
     table_id: '#tbjs_paperlist',
@@ -214,7 +255,7 @@ var tbjs_paperlist = {
     },
 
     load: function() {
-        vw_screener.get_papers('all', function(data) {
+        srv_screener.get_papers('all', function(data) {
             tbjs_paperlist.update(data.papers);
         });
     },

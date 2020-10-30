@@ -310,7 +310,53 @@ def set_paper_pr_rs(paper_id, pr=None, rs=None):
     return paper
 
 
+def get_screener_stat(project_id):
+    '''Get the statistics of the project for the screener
+    '''
+    sql = """
+    select project_id,
+        count(*) as cnt_all,
+        count(case when ss_st in ('a10', 'a11', 'a12') and ss_pr = 'na' and ss_rs = 'na' then paper_id else null end) as cnt_unscreened,
+        
+        count(case when ss_rs = 'e2' then paper_id else null end) as cnt_excluded_by_title_abstract,
+        count(case when ss_rs = 'e21' then paper_id else null end) as cnt_excluded_by_rct_classifier,
+        count(case when ss_rs = 'e3' then paper_id else null end) as cnt_excluded_by_fulltext,
+
+        count(case when ss_rs = 'f1' then paper_id else null end) as cnt_included_only_sr,
+        count(case when ss_rs in ('f1', 'f3') then paper_id else null end) as cnt_included_sr,
+        count(case when ss_rs = 'f3' then paper_id else null end) as cnt_included_srma,
+
+        count(case when ss_rs != 'na' then paper_id else null end) as cnt_decided
+    
+    from papers
+    where project_id = '{project_id}'
+        and is_deleted = 'no'
+    group by project_id
+    """.format(project_id=project_id)
+    r = db.session.execute(sql).fetchone()
+
+    # put the values in result data
+    attrs = [
+        'cnt_all',
+        'cnt_unscreened',
+        'cnt_excluded_by_title_abstract',
+        'cnt_excluded_by_rct_classifier',
+        'cnt_excluded_by_fulltext',
+        'cnt_included_only_sr',
+        'cnt_included_sr',
+        'cnt_included_srma',
+        'cnt_decided'
+    ]
+    result = {}
+    for attr in attrs:
+        result[attr] = r[attr]
+
+    return result
+
+
 def get_prisma(project_id):
+    '''Get the statistics of the project for the PRISMA
+    '''
     stages = [
         { "stage": "b1", "text": "Records retrieved from database search" },
         { "stage": "b2", "text": "Records identified through other sources" },

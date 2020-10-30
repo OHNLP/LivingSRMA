@@ -17,12 +17,15 @@ SS_PR_UPDATE_EXIST      = 'p40'
 # SS_PR_CHECKED_SRMA      = 'p90'
 SS_PR_NA                = 'na'
 
-# for study screening result
+# for study screening result of excluded
 SS_RS_EXCLUDED_NOTFOUND = 'e00'
 SS_RS_EXCLUDED_DUP      = 'e1'
 SS_RS_EXCLUDED_TITLE    = 'e2'
+SS_RS_EXCLUDED_RCT      = 'e21'
 SS_RS_EXCLUDED_FULLTEXT = 'e3'
 SS_RS_EXCLUDED_UPDATE   = 'e4'
+
+# for study screening result of included
 SS_RS_INCLUDED_ONLY_SR  = 'f1'
 SS_RS_INCLUDED_ONLY_MA  = 'f2'
 SS_RS_INCLUDED_SRMA     = 'f3'
