@@ -179,9 +179,36 @@ def get_papers(project_id):
     )).order_by(Paper.date_created.desc()).all()
 
     return papers
-
+    
 
 def get_papers_by_stage(project_id, stage):
+    print('* get_papers_by_stage [%s]' % stage)
+    if stage == ss_state.SS_STAGE_UNSCREENED:
+        papers = Paper.query.filter(and_(
+            Paper.project_id == project_id,
+            Paper.ss_st.in_([
+                ss_state.SS_ST_AUTO_EMAIL,
+                ss_state.SS_ST_AUTO_SEARCH,
+                ss_state.SS_ST_AUTO_OTHER
+            ]),
+            Paper.ss_pr == ss_state.SS_PR_NA,
+            Paper.ss_rs == ss_state.SS_RS_NA
+        )).order_by(Paper.date_created.desc()).all()
+
+    elif stage == ss_state.SS_STAGE_ALL_OF_THEM:
+        papers = Paper.query.filter(
+            Paper.project_id == project_id
+        ).order_by(Paper.date_created.desc()).all()
+
+    else:
+        papers = []
+        
+    return papers
+
+
+def get_papers_by_stage_v1(project_id, stage):
+    '''Deprecated.
+    '''
     if stage == 'a1':
         papers = Paper.query.filter(and_(
             Paper.project_id == project_id,
@@ -310,23 +337,55 @@ def set_paper_pr_rs(paper_id, pr=None, rs=None):
     return paper
 
 
-def get_screener_stat(project_id):
+def get_screener_stat_by_stage(project_id, stage):
+    '''Get the statistics on specified type
+    '''
+    ss_cond = ''
+    if stage not in ss_state.SS_STAGE_CONDITIONS:
+        return None
+
+    # get condition for this type, e.g., 
+    ss_cond = ss_state.SS_STAGE_CONDITIONS[stage]
+
+    # get the stat on the given type
+    sql = """
+    select project_id,
+        count(case when {ss_cond} then paper_id else null end) as {stage}
+    from papers
+    where project_id = '{project_id}'
+    group by project_id
+    """.format(project_id=project_id, ss_cond=ss_cond, stage=stage)
+    r = db.session.execute(sql).fetchone()
+    
+    if r == None: 
+        result = {
+            stage: None
+        }
+    else:
+        result = {
+            stage: r[stage]
+        }
+
+    return result
+
+
+def get_screener_stat_by_project_id(project_id):
     '''Get the statistics of the project for the screener
     '''
     sql = """
     select project_id,
-        count(*) as cnt_all,
-        count(case when ss_st in ('a10', 'a11', 'a12') and ss_pr = 'na' and ss_rs = 'na' then paper_id else null end) as cnt_unscreened,
+        count(*) as all_of_them,
+        count(case when ss_st in ('a10', 'a11', 'a12') and ss_pr = 'na' and ss_rs = 'na' then paper_id else null end) as unscreened,
         
-        count(case when ss_rs = 'e2' then paper_id else null end) as cnt_excluded_by_title_abstract,
-        count(case when ss_rs = 'e21' then paper_id else null end) as cnt_excluded_by_rct_classifier,
-        count(case when ss_rs = 'e3' then paper_id else null end) as cnt_excluded_by_fulltext,
+        count(case when ss_rs = 'e2' then paper_id else null end) as excluded_by_title_abstract,
+        count(case when ss_rs = 'e21' then paper_id else null end) as excluded_by_rct_classifier,
+        count(case when ss_rs = 'e3' then paper_id else null end) as excluded_by_fulltext,
 
-        count(case when ss_rs = 'f1' then paper_id else null end) as cnt_included_only_sr,
-        count(case when ss_rs in ('f1', 'f3') then paper_id else null end) as cnt_included_sr,
-        count(case when ss_rs = 'f3' then paper_id else null end) as cnt_included_srma,
+        count(case when ss_rs = 'f1' then paper_id else null end) as included_only_sr,
+        count(case when ss_rs in ('f1', 'f3') then paper_id else null end) as included_sr,
+        count(case when ss_rs = 'f3' then paper_id else null end) as included_srma,
 
-        count(case when ss_rs != 'na' then paper_id else null end) as cnt_decided
+        count(case when ss_rs != 'na' then paper_id else null end) as decided
     
     from papers
     where project_id = '{project_id}'
@@ -337,15 +396,15 @@ def get_screener_stat(project_id):
 
     # put the values in result data
     attrs = [
-        'cnt_all',
-        'cnt_unscreened',
-        'cnt_excluded_by_title_abstract',
-        'cnt_excluded_by_rct_classifier',
-        'cnt_excluded_by_fulltext',
-        'cnt_included_only_sr',
-        'cnt_included_sr',
-        'cnt_included_srma',
-        'cnt_decided'
+        'all_of_them',
+        'unscreened',
+        'excluded_by_title_abstract',
+        'excluded_by_rct_classifier',
+        'excluded_by_fulltext',
+        'included_only_sr',
+        'included_sr',
+        'included_srma',
+        'decided'
     ]
     result = {}
     for attr in attrs:

@@ -26,10 +26,10 @@ def overview():
     return render_template('screener/overview.html')
 
 
-@bp.route('/get_papers', methods=['GET', 'POST'])
+@bp.route('/get_papers')
 @login_required
 def get_papers():
-    project_id = request.form.get('project_id')
+    project_id = request.args.get('project_id')
     papers = dora.get_papers(project_id)
 
     json_papers = [ p.as_dict() for p in papers ]
@@ -41,11 +41,11 @@ def get_papers():
     return jsonify(ret)
 
 
-@bp.route('/get_papers_by_stage', methods=['GET', 'POST'])
+@bp.route('/get_papers_by_stage')
 @login_required
 def get_papers_by_stage():
-    project_id = request.form.get('project_id')
-    stage = request.form.get('stage')
+    project_id = request.args.get('project_id')
+    stage = request.args.get('stage')
     papers = dora.get_papers_by_stage(project_id, stage)
     json_papers = [ p.as_dict() for p in papers ]
 
@@ -60,7 +60,7 @@ def get_papers_by_stage():
 @login_required
 def get_stat():
     project_id = request.args.get('project_id')
-    rst = dora.get_screener_stat(project_id)
+    rst = dora.get_screener_stat_by_project_id(project_id)
     ret = {
         'success': True,
         'stat': rst

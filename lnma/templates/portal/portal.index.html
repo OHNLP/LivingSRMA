@@ -30,11 +30,7 @@ Dashboard
 <div class="content">
     <div class="container-fluid">
         <div class="row">
-            <div class="col-lg-6">
-                <p class="lead">Below is an example form built entirely with Bootstrap’s form controls. Each required form group has a
-                    validation state that can be triggered by attempting to submit the form without completing it.</p>
-                
-            </div>
+            
         </div>
     </div>
 </div>
@@ -44,6 +40,34 @@ Dashboard
 
 {% block script %}
 <script>
+var tb_project_stat_list = {
+    vpp_id: '#tb_project_stat_list',
+    vpp_data: {},
+    data_url: "[[ url_for('portal.api_list_stat') ]]",
 
+    load: function() {
+        $.get(
+            this.data_url,
+            { ver: Math.random() },
+            function(data) {
+                tb_project_stat_list.init(data);
+            }
+        );
+    },
+
+    init: function(data) {
+        this.data = data;
+
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                projects: data.projects
+            },
+            methods: {
+                
+            }
+        });
+    }
+};
 </script>
 {% endblock %}

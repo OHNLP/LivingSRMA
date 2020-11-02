@@ -1,3 +1,4 @@
+from lnma import ss_state
 import os
 
 from flask import request
@@ -7,6 +8,7 @@ from flask import render_template
 from flask import Blueprint
 from flask import current_app
 from flask import url_for
+from flask.json import jsonify
 
 from flask_login import login_required
 from flask_login import current_user
@@ -30,6 +32,29 @@ def allowed_file(filename):
 @login_required
 def index():
     return render_template('portal/portal.index.html')
+
+
+@bp.route('/api/list_stat')
+@login_required
+def api_list_stat():
+    projects = dora.list_projects_by_owner_uid(current_user.uid)
+
+    data = {
+        'projects': []
+    }
+    for project in projects:
+        p = project.as_dict()
+        project_id = p['project_id']
+
+        # get the stat on this project
+        stat = dora.get_screener_stat_by_ss_type(project_id, ss_state.SS_TYPE_UNSCREENED)
+        p['stat'] = stat
+
+        # add this project object
+        data['projects'].append(p)
+
+    # put the project data
+    return jsonify(data)
 
 
 @bp.route('/upload', methods=['GET', 'POST'])

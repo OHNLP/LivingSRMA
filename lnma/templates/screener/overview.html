@@ -36,17 +36,17 @@ Screener Overview
                     All Papers
                 </h5>
                 <div class="list-group">
-                    <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                    <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" v-on:click="show_stage('all_of_them')">
                         All papers
-                        <span class="badge badge-primary badge-pill">{{ stat.cnt_all }}</span>
+                        <span class="badge badge-primary badge-pill">{{ stat.all_of_them }}</span>
                     </button>
-                    <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                    <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" v-on:click="show_stage('unscreened')">
                         Unscreened papers
-                        <span class="badge badge-primary badge-pill">{{ stat.cnt_unscreened }}</span>
+                        <span class="badge badge-primary badge-pill">{{ stat.unscreened }}</span>
                     </button>
-                    <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                    <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" v-on:click="show_stage('decided')">
                         Decided papers
-                        <span class="badge badge-primary badge-pill">{{ stat.cnt_decided }}</span>
+                        <span class="badge badge-primary badge-pill">{{ stat.decided }}</span>
                     </button>
                 </div>
 
@@ -55,7 +55,7 @@ Screener Overview
                     Further Check
                 </h5>
                 <div class="list-group">
-                    <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                    <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" v-on:click="show_stage('unscreened')">
                         Full Text Review
                         <span class="badge badge-secondary badge-pill">&nbsp;</span>
                     </button>
@@ -66,13 +66,13 @@ Screener Overview
                     Included Papers
                 </h5>
                 <div class="list-group">
-                    <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                    <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" v-on:click="show_stage('included_sr')">
                         Included in SR
-                        <span class="badge badge-secondary badge-pill">{{ stat.cnt_included_sr }}</span>
+                        <span class="badge badge-secondary badge-pill">{{ stat.included_sr }}</span>
                     </button>
-                    <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                    <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" v-on:click="show_stage('included_srma')">
                         Included in MA
-                        <span class="badge badge-secondary badge-pill">{{ stat.cnt_included_srma }}</span>
+                        <span class="badge badge-secondary badge-pill">{{ stat.included_srma }}</span>
                     </button>
                 </div>
 
@@ -81,17 +81,17 @@ Screener Overview
                     Excluded Papers
                 </h5>
                 <div class="list-group">
-                    <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                    <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" v-on:click="show_stage('excluded_by_rct_classifier')">
                         By RCT Classifier
-                        <span class="badge badge-secondary badge-pill">{{ stat.cnt_excluded_by_rct_classifier }}</span>
+                        <span class="badge badge-secondary badge-pill">{{ stat.excluded_by_rct_classifier }}</span>
                     </button>
-                    <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                    <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" v-on:click="show_stage('excluded_by_title_abstract')">
                         By Title / Abstract
-                        <span class="badge badge-secondary badge-pill">{{ stat.cnt_excluded_by_title_abstract }}</span>
+                        <span class="badge badge-secondary badge-pill">{{ stat.excluded_by_title_abstract }}</span>
                     </button>
-                    <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                    <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" v-on:click="show_stage('excluded_by_fulltext')">
                         By Full Text
-                        <span class="badge badge-secondary badge-pill">{{ stat.cnt_excluded_by_fulltext }}</span>
+                        <span class="badge badge-secondary badge-pill">{{ stat.excluded_by_fulltext }}</span>
                     </button>
                 </div>
             </div>
@@ -101,7 +101,8 @@ Screener Overview
 
                 <h5>
                     <i class="far fa-file-alt"></i>
-                    Paper List
+                    Paper List | 
+                    <span id="tbjs_paperlist_title"></span>
                 </h5>
 
                 <table id="tbjs_paperlist" class="display compact hover" style="width: 100%;">
@@ -131,18 +132,10 @@ Screener Overview
 
 <script>
 
-var jarvis = {
-    init: function () {
-        ui_category_stat.load();
-        tbjs_paperlist.load();
-    },
-};
-
 var srv_screener = {
 
     api_url: {
         get_stat: '[[ url_for("screener.get_stat") ]]',
-        get_all_papers: '[[ url_for("screener.get_papers") ]]',
         get_papers_by_stage: '[[ url_for("screener.get_papers_by_stage") ]]',
         exclude_ta: '[[ url_for("screener.sspr_exclude_papers_ta") ]]',
         exclude_ft: '[[ url_for("screener.sspr_exclude_papers_ft") ]]',
@@ -150,6 +143,28 @@ var srv_screener = {
         include_sr: '[[ url_for("screener.sspr_include_papers_sr") ]]',
         include_srma: '[[ url_for("screener.sspr_include_papers_srma") ]]',
     },
+
+    stage: {
+        all_of_them: { title: 'All papers' },
+        unscreened: { title: 'Unscreened papers' },
+        excluded_by_title_abstract: { title: 'Excluded after checking title and abstract' },
+        excluded_by_rct_classifier: { title: 'Excluded by RCT classifier' },
+        excluded_by_fulltext: { title: 'Excluded after checking fulltext' },
+        included_only_sr: { title: 'Included only in SR' },
+        included_sr: { title: 'Included in SR' },
+        included_srma: { title: 'Included in Both SR and MA' },
+        decided: { title: 'Decided papers' },
+    },
+
+    STAGE_ALL_OF_THEM: 'all_of_them',
+    STAGE_UNSCREENED: 'unscreened',
+    STAGE_EXCLUDED_BY_TITLE_ABSTRACT: 'excluded_by_title_abstract',
+    STAGE_EXCLUDED_BY_RCT_CLASSIFIER: 'excluded_by_rct_classifier',
+    STAGE_EXCLUDED_BY_FULLTEXT: 'excluded_by_fulltext',
+    STAGE_INCLUDED_ONLY_SR: 'included_only_sr',
+    STAGE_INCLUDED_SR: 'included_sr',
+    STAGE_INCLUDED_SRMA: 'included_srma',
+    STAGE_DECIDED: 'decided',
 
     get_stat: function(callback) {
         var url = this.api_url.get_stat;
@@ -165,17 +180,26 @@ var srv_screener = {
 
     get_papers: function(stage, callback) {
         var project_id = Cookies.get('project_id');
-        var url = '';
-        if (stage == 'all') {
-            url = this.api_url.get_all_papers;
-        } else {
-            url = this.api_url.get_papers_by_stage;
-        }
+        var url = this.api_url.get_papers_by_stage;
 
-        $.post(
+        $.get(
             url,
             {project_id: project_id, stage: stage},
             callback, 
+            'json'
+        )
+    },
+
+    exclude_by_ta: function(paper_id, callback) {
+        // send request to backend
+        var project_id = Cookies.get('project_id');
+        var paper_ids = [paper_id].join(',');
+        
+        var url = this.api_url.exclude_ta;
+        $.post(
+            url,
+            {paper_ids: paper_ids, project_id: project_id},
+            callback,
             'json'
         )
     }
@@ -201,7 +225,12 @@ var ui_category_stat = {
                 stat: data
             },
             methods: {
+                show_stage: function(stage) {
+                    console.log('* show ' + stage);
 
+                    // update paper list
+                    tbjs_paperlist.load_by_stage(stage);
+                }
             }
         });        
     }
@@ -251,41 +280,11 @@ var tbjs_paperlist = {
     ],
 
     init: function() {
-
-    },
-
-    load: function() {
-        srv_screener.get_papers('all', function(data) {
-            tbjs_paperlist.update(data.papers);
-        });
-    },
-
-    _create_columns: function(stage) {
-
-    },
-
-    _preprocessing: function(data) {
-        for (var i = 0; i < data.length; i++) {
-            var d = data[i];
-            d['date_created_norm'] = dayjs(d.date_created).format('YYYY-MM-DD') + ' ' +
-                '<span class="badge badge-pill badge-info"><i class="fa fa-bong"></i> RCT</span>';
-        }
-
-        this.data = data;
-    },
-
-    update: function(data) {
-        this._preprocessing(data);
-        
-        if (this.table != null) {
-            this.table = null;
-        }
-
-        // update the table
+        // init the datatable obj
         this.table = $(this.table_id).DataTable({
             responsive: true,
             pageLength: this.cfg.number_of_rows,
-            data: data,
+            data: [],
             columns: this.columns,
             order: [
                 [1, 'desc']
@@ -312,8 +311,59 @@ var tbjs_paperlist = {
         });
     },
 
+    load: function() {
+        srv_screener.get_papers(
+            srv_screener.stage.STAGE_UNSCREENED,
+            function(data) {
+                tbjs_paperlist.update(data.papers);
+            }
+        );
+    },
+
+    load_by_stage: function(stage) {
+        // update header title
+        $('#tbjs_paperlist_title').html(
+            srv_screener.stage[stage].title
+        );
+
+        // get data
+        srv_screener.get_papers(
+            stage,
+            function(data) {
+                tbjs_paperlist.update(data.papers);
+            }
+        );
+    },
+
+    _create_columns: function(stage) {
+
+    },
+
+    _preprocessing: function(data) {
+        for (var i = 0; i < data.length; i++) {
+            var d = data[i];
+            d['date_created_norm'] = dayjs(d.date_created).format('YYYY-MM-DD') + ' ' +
+                '<span class="badge badge-pill badge-info"><i class="fa fa-bong"></i> RCT</span>';
+        }
+
+        this.data = data;
+    },
+
+    update: function(data) {
+        this._preprocessing(data);
+        
+        // remove the old data
+        this.table.clear();
+
+        // put new data
+        this.table.rows.add(data);
+
+        // render
+        this.table.draw();
+    },
+
     _get_expand_html: function(d) {
-        return '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+
+        return '<table id="tb-rowext-'+d.paper_id+'" cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+
             '<tr>'+
                 '<td>Actions:</td>'+
                 '<td>'+
@@ -332,7 +382,26 @@ var tbjs_paperlist = {
                 '<td>'+d.abstract+'</td>'+
             '</tr>'+
         '</table>';
+    },
+
+    /**
+     * the functions related to screening
+     */
+    exclude_by_ta: function(paper_id) {
+
     }
+};
+
+var jarvis = {
+    init: function () {
+        tbjs_paperlist.init();
+
+        // load stats
+        ui_category_stat.load();
+
+        // load unscreened papers by default
+        tbjs_paperlist.load_by_stage(srv_screener.STAGE_UNSCREENED);
+    },
 };
 
 $(document).ready(function () {
