@@ -81,10 +81,10 @@ Screener Overview
                     Excluded Papers
                 </h5>
                 <div class="list-group">
-                    <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" v-on:click="show_stage('excluded_by_rct_classifier')">
+                    <!-- <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" v-on:click="show_stage('excluded_by_rct_classifier')">
                         By RCT Classifier
                         <span class="badge badge-secondary badge-pill">{{ stat.excluded_by_rct_classifier }}</span>
-                    </button>
+                    </button> -->
                     <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" v-on:click="show_stage('excluded_by_title_abstract')">
                         By Title / Abstract
                         <span class="badge badge-secondary badge-pill">{{ stat.excluded_by_title_abstract }}</span>
@@ -343,10 +343,18 @@ var tbjs_paperlist = {
         for (var i = 0; i < data.length; i++) {
             var d = data[i];
             d['date_created_norm'] = dayjs(d.date_created).format('YYYY-MM-DD') + ' ' +
-                '<span class="badge badge-pill badge-info"><i class="fa fa-bong"></i> RCT</span>';
+                '<span class="badge badge-pill badge-info"><i class="fa fa-bong"></i> RCT</span>' + 
+                '<span style="width:1px" id="tb-row-'+d.paper_id+'"><span>';
         }
 
         this.data = data;
+    },
+
+    remove_paper_from_tbjs: function(paper_id) {
+        this.table.row($('#tb-row-' + paper_id)
+            .parents('tr'))
+            .remove()
+            .draw();
     },
 
     update: function(data) {
@@ -367,10 +375,10 @@ var tbjs_paperlist = {
             '<tr>'+
                 '<td>Actions:</td>'+
                 '<td>'+
-                '<button class="btn btn-danger btn-sm">Exclude</button> '+
+                '<button class="btn btn-danger btn-sm" onclick="tbjs_paperlist.exclude_by_ta(\''+d.paper_id+'\')">Exclude</button> '+
                 '<button class="btn btn-primary btn-sm">Proceed to Full Text</button> '+
                 ' | ' +
-                '<button class="btn btn-default btn-sm">Check Later</button>'+
+                '<button class="btn btn-default btn-sm" onclick="tbjs_paperlist.remove_paper_from_tbjs(\''+d.paper_id+'\')">Check Later</button>'+
                 '</td>'+
             '</tr>'+
             '<tr>'+
@@ -388,7 +396,12 @@ var tbjs_paperlist = {
      * the functions related to screening
      */
     exclude_by_ta: function(paper_id) {
+        // exclude from server
 
+        // remove from the list
+        this.remove_paper_from_tbjs(paper_id);
+
+        // update the count number
     }
 };
 

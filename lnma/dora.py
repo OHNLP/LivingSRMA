@@ -200,6 +200,12 @@ def get_papers_by_stage(project_id, stage):
             Paper.project_id == project_id
         ).order_by(Paper.date_created.desc()).all()
 
+    elif stage == ss_state.SS_STAGE_EXCLUDED_BY_TITLE_ABSTRACT:
+        papers = Paper.query.filter(and_(
+            Paper.project_id == project_id,
+            Paper.ss_rs == ss_state.SS_RS_EXCLUDED_TITLE
+        )).order_by(Paper.date_created.desc()).all()
+
     else:
         papers = []
         
