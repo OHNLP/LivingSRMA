@@ -153,6 +153,7 @@ Then install packages for LNMA (for whole system). The `dmetar` package is requi
 ```bash
 $ sudo R
 
+> install.packages('meta')
 > install.packages('netmeta')
 > install.packages('jsonlite')
 > install.packages("rjags")
@@ -185,6 +186,12 @@ $ chmod 755 Miniconda3-latest-Linux-x86_64.sh
 $ ./Miniconda3-latest-Linux-x86_64.sh
 ```
 
+May need to install mysql lib first:
+
+```bash
+$ sudo apt-get install libmysqlclient-dev
+```
+
 ```bash
 (py37lnma) $ pip install mysqlclient
 ```
@@ -193,6 +200,51 @@ $ ./Miniconda3-latest-Linux-x86_64.sh
 ## Other
 
 # Folder Structure
+
+## $PROJECT_FOLDER/instance
+After install the packages, an instance folder is needed for the flask web app (`$PROJECR_FOLDER` is where the lnma code is).
+In addition, the a `pubdata` folder is needed for each NMA project.
+
+```bash
+cd $PROJECT_FOLDER
+mkdir instance
+mkdir instance/pubdata
+cd instance
+vim config.py
+```
+
+The content of the config.py could be as follows.
+The password for the watcher is not blank, ask adminstrator.
+
+```
+DEBUG = True
+SECRET_KEY = b'9s8@js-7sJx8-hXs73-&62hx-2aNxh'
+DB_SERVER = 'localhost'
+
+# Flask-SQLAlchemy
+SQLALCHEMY_DATABASE_URI = 'mysql://lnma:LNMA_password_12#$@127.0.0.1:3306/lnma'
+SQLALCHEMY_ECHO = False
+SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+# FILE STORAGE
+PATH_FILE_STORAGE = '/data/lnma'
+
+#
+TMP_FOLDER = '/dev/shm/lnma'
+UPLOAD_FOLDER = '/dev/shm/lnma'
+UPLOAD_FOLDER_PDFS = '/dev/shm/lnma'
+
+# For watcher settings
+WATCHER_EMAIL_USERNAME = 'lisrbot2020@gmail.com'
+WATCHER_EMAIL_PASSWORD = ''
+```
+
+## /dev/shm/lnma
+LNMA use shm folder to make full use of the memory and improve the R/W performance:
+
+```bash
+mkdir /dev/shm/lnma
+```
 
 # Data Structure
 
