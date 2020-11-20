@@ -37,7 +37,7 @@ def run():
     # define the parse for argument
     parser = argparse.ArgumentParser('LNMA Scheduler for Watchers')
     parser.add_argument("-loop", type=str, 
-        choices=['yes', 'no'],
+        choices=['yes', 'no'], default='no',
         help="Run watcher in loop mode or not")
     parser.add_argument("--act", type=str, 
         choices=['check_email', 'check_pubmed', 'all'],

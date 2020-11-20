@@ -104,6 +104,8 @@ def _check_update_by_project(project):
         }
     }
 
+    logger.info('parsing %s emails ...' % len(all_inbox_messages))
+
     # check all the mails and summarize the information
     for i in tqdm(range(1, len(all_inbox_messages)+1)):
         # get the latest one first
