@@ -2683,9 +2683,10 @@ def get_sof_pma_data(full_fn):
                     pma_r = get_pma_by_r_CAT_PRE(ds, sm=sm)
                 
             except Exception as err:
-                print('* %s: [%s] [%s]' % (
+                print('* %s: [%s] measure [%s], data [%s]' % (
                     'ISSUE Data cause error'.ljust(25, ' '),
                     oc_name.rjust(35, ' '), 
+                    sm,
                     ds
                 ))
                 pma_r = None
