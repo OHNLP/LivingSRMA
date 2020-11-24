@@ -2,7 +2,9 @@
 import re
 import json
 import time
+import datetime
 import requests
+
 try:
     import xml.etree.cElementTree as ET
 except ImportError:
@@ -245,9 +247,14 @@ def pred_rct(ti, ab):
     data = {'ti': ti, 'ab': ab}
     data_str = json.dumps(data)
     r = requests.post(url, data=data_str, headers=headers)
-    print(r.url)
     j = r.json()
     return j
+
+
+def get_today_date_str():
+    '''Get the today date string
+    '''
+    return datetime.datetime.today().strftime('%Y-%m-%d')
 
 
 if __name__ == "__main__":

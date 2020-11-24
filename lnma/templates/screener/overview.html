@@ -17,6 +17,22 @@ td.details-control {
 tr.shown td.details-control {
     cursor: pointer;
 }
+
+/* for highlight */
+.keyword-exclusion {
+    color: rgb(250, 89, 89);
+    background: rgb(255, 205, 205);
+    /* padding: 2px 3px; */
+    /* border-radius: 3px; */
+    cursor: pointer;
+}
+.keyword-inclusion {
+    color: rgb(1, 56, 1);
+    background: rgb(223, 245, 223);
+    /* padding: 2px 3px; */
+    /* border-radius: 3px; */
+    cursor: pointer;
+}
 </style>
 {% endblock %}
 
@@ -55,9 +71,9 @@ Screener Overview
                     Further Check
                 </h5>
                 <div class="list-group">
-                    <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" v-on:click="show_stage('unscreened')">
+                    <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" v-on:click="show_stage('passed_title_not_fulltext')">
                         Full Text Review
-                        <span class="badge badge-secondary badge-pill">&nbsp;</span>
+                        <span class="badge badge-secondary badge-pill">{{ stat.passed_title_not_fulltext }}</span>
                     </button>
                 </div>
 
@@ -85,9 +101,13 @@ Screener Overview
                         By RCT Classifier
                         <span class="badge badge-secondary badge-pill">{{ stat.excluded_by_rct_classifier }}</span>
                     </button> -->
-                    <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" v-on:click="show_stage('excluded_by_title_abstract')">
-                        By Title / Abstract
-                        <span class="badge badge-secondary badge-pill">{{ stat.excluded_by_title_abstract }}</span>
+                    <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" v-on:click="show_stage('excluded_by_title')">
+                        By Title
+                        <span class="badge badge-secondary badge-pill">{{ stat.excluded_by_title }}</span>
+                    </button>
+                    <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" v-on:click="show_stage('excluded_by_abstract')">
+                        By Abstract
+                        <span class="badge badge-secondary badge-pill">{{ stat.excluded_by_abstract }}</span>
                     </button>
                     <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" v-on:click="show_stage('excluded_by_fulltext')">
                         By Full Text
@@ -129,6 +149,7 @@ Screener Overview
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.22/css/dataTables.bootstrap4.min.css">
 <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
 <script src="https://unpkg.com/dayjs@1.8.21/dayjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js"></script>
 
 <script>
 
@@ -137,27 +158,42 @@ var srv_screener = {
     api_url: {
         get_stat: '[[ url_for("screener.get_stat") ]]',
         get_papers_by_stage: '[[ url_for("screener.get_papers_by_stage") ]]',
-        exclude_ta: '[[ url_for("screener.sspr_exclude_papers_ta") ]]',
-        exclude_ft: '[[ url_for("screener.sspr_exclude_papers_ft") ]]',
+
+        // for screening
+        set_unscreened: '[[ url_for("screener.sspr_set_papers_unscreened") ]]',
         set_needchkft: '[[ url_for("screener.sspr_set_papers_needchkft") ]]',
+        exclude_ta: '[[ url_for("screener.sspr_exclude_papers_ta") ]]',
+        exclude_tt: '[[ url_for("screener.sspr_exclude_papers_tt") ]]',
+        exclude_ab: '[[ url_for("screener.sspr_exclude_papers_ab") ]]',
+        exclude_ft: '[[ url_for("screener.sspr_exclude_papers_ft") ]]',
         include_sr: '[[ url_for("screener.sspr_include_papers_sr") ]]',
         include_srma: '[[ url_for("screener.sspr_include_papers_srma") ]]',
     },
 
     stage: {
+        // view stage
         all_of_them: { title: 'All papers' },
+        decided: { title: 'Decided papers' },
+
+        // main stages
         unscreened: { title: 'Unscreened papers' },
-        excluded_by_title_abstract: { title: 'Excluded after checking title and abstract' },
-        excluded_by_rct_classifier: { title: 'Excluded by RCT classifier' },
+        passed_title_not_fulltext: { title: 'Full-text review' },
+        excluded_by_title: { title: 'Excluded after checking title' },
+        excluded_by_abstract: { title: 'Excluded after checking abstract' },
         excluded_by_fulltext: { title: 'Excluded after checking fulltext' },
-        included_only_sr: { title: 'Included only in SR' },
         included_sr: { title: 'Included in SR' },
         included_srma: { title: 'Included in Both SR and MA' },
-        decided: { title: 'Decided papers' },
+        
+        // extended stages
+        included_only_sr: { title: 'Included only in SR' },
+        excluded_by_title_abstract: { title: 'Excluded after checking title and abstract' },
+        excluded_by_rct_classifier: { title: 'Excluded by RCT classifier' },
     },
 
     STAGE_ALL_OF_THEM: 'all_of_them',
     STAGE_UNSCREENED: 'unscreened',
+    STAGE_EXCLUDED_BY_TITLE: 'excluded_by_title',
+    STAGE_EXCLUDED_BY_ABSTRACT: 'excluded_by_abstract',
     STAGE_EXCLUDED_BY_TITLE_ABSTRACT: 'excluded_by_title_abstract',
     STAGE_EXCLUDED_BY_RCT_CLASSIFIER: 'excluded_by_rct_classifier',
     STAGE_EXCLUDED_BY_FULLTEXT: 'excluded_by_fulltext',
@@ -175,7 +211,7 @@ var srv_screener = {
             {project_id: project_id, ver: Math.random()},
             callback, 
             'json'
-        )
+        );
     },
 
     get_papers: function(stage, callback) {
@@ -187,22 +223,110 @@ var srv_screener = {
             {project_id: project_id, stage: stage},
             callback, 
             'json'
-        )
+        );
     },
 
-    exclude_by_ta: function(paper_id, callback) {
+    ///////////////////////////////////////////////////////////////////////////
+    // the functions related to screening
+    ///////////////////////////////////////////////////////////////////////////
+
+    set_unscreened: function(paper_id, callback) {
         // send request to backend
         var project_id = Cookies.get('project_id');
         var paper_ids = [paper_id].join(',');
         
-        var url = this.api_url.exclude_ta;
+        var url = this.api_url.set_unscreened;
         $.post(
             url,
             {paper_ids: paper_ids, project_id: project_id},
             callback,
             'json'
-        )
-    }
+        );
+    },
+
+    set_needchkft: function(paper_id, callback) {
+        // send request to backend
+        var project_id = Cookies.get('project_id');
+        var paper_ids = [paper_id].join(',');
+        
+        var url = this.api_url.set_needchkft;
+        $.post(
+            url,
+            {paper_ids: paper_ids, project_id: project_id},
+            callback,
+            'json'
+        );
+    },
+
+    exclude_by_tt: function(paper_id, callback) {
+        // send request to backend
+        var project_id = Cookies.get('project_id');
+        var paper_ids = [paper_id].join(',');
+        
+        var url = this.api_url.exclude_tt;
+        $.post(
+            url,
+            {paper_ids: paper_ids, project_id: project_id},
+            callback,
+            'json'
+        );
+    },
+
+    exclude_by_ab: function(paper_id, callback) {
+        // send request to backend
+        var project_id = Cookies.get('project_id');
+        var paper_ids = [paper_id].join(',');
+        
+        var url = this.api_url.exclude_ab;
+        $.post(
+            url,
+            {paper_ids: paper_ids, project_id: project_id},
+            callback,
+            'json'
+        );
+    },
+
+    exclude_by_ft: function(paper_id, reason, callback) {
+        // send request to backend
+        var project_id = Cookies.get('project_id');
+        var paper_ids = [paper_id].join(',');
+        
+        var url = this.api_url.exclude_ft;
+        $.post(
+            url,
+            {paper_ids: paper_ids, project_id: project_id, reason: reason},
+            callback,
+            'json'
+        );
+    },
+
+    include_in_sr: function(paper_id, callback) {
+        // send request to backend
+        var project_id = Cookies.get('project_id');
+        var paper_ids = [paper_id].join(',');
+        
+        var url = this.api_url.include_sr;
+        $.post(
+            url,
+            {paper_ids: paper_ids, project_id: project_id},
+            callback,
+            'json'
+        );
+    },
+
+    include_in_srma: function(paper_id, callback) {
+        // send request to backend
+        var project_id = Cookies.get('project_id');
+        var paper_ids = [paper_id].join(',');
+        
+        var url = this.api_url.include_srma;
+        $.post(
+            url,
+            {paper_ids: paper_ids, project_id: project_id},
+            callback,
+            'json'
+        );
+    },
 };
 
 var ui_category_stat = {
@@ -233,6 +357,12 @@ var ui_category_stat = {
                 }
             }
         });        
+    },
+
+    update: function() {
+        srv_screener.get_stat(function(data){
+            ui_category_stat.vpp.stat = data.stat;
+        });
     }
 };
 
@@ -243,6 +373,42 @@ var tbjs_paperlist = {
 
     cfg: {
         number_of_rows: 25
+    },
+
+    // by default, show unscreened stage
+    stage: srv_screener.STAGE_UNSCREENED,
+
+    // keywords for highlight
+    keywords: {
+        inclusion: [
+            'immune check point inhibitor',
+            'ICI',
+            'atezolizumab',
+            'avelumab',
+            'cemiplimab',
+            'durvalumab',
+            'ipilimumab',
+            'nivolumab',
+            'pembrolizumab',
+            'tremelimumab',
+            'PD1',
+            'PDL1',
+            'CTLA4',
+            'phase 2',
+            'phase2',
+            'phase 3',
+            'phase3'
+        ],
+        exclusion: [
+            'animals',
+            'phase1',
+            'phase 1',
+            'non-randomized',
+            'nonrandomized',
+            'systematic review',
+            'meta-analysis',
+            'meta analysis'
+        ]
     },
 
     columns: [
@@ -256,21 +422,25 @@ var tbjs_paperlist = {
         },
         { 
             title: 'Date', 
-            width: 90,
+            width: 80,
             data: 'date_created_norm' 
         },
         { 
+            title: 'RCT', 
+            width: 50,
+            data: 'pred_is_rct' 
+        },
+        { 
             title: 'Title', 
-            data: 'title' 
+            data: 'title',
+            className: 'col-title',
         },
         {
             title: '',
             className: 'operate-control',
-            width: 120,
+            width: 190,
             orderable: false,
-            data: null,
-            defaultContent: '<button class="btn btn-danger btn-sm">Exclude</button> ' + 
-                '<button class="btn btn-primary btn-sm">Include</button> '
+            data: 'basic_actions'
         }
     ],
     sample: [
@@ -304,11 +474,59 @@ var tbjs_paperlist = {
             }
             else {
                 // Open this row
-                row.child( tbjs_paperlist._get_expand_html(row.data()) ).show();
+                var row_html = tbjs_paperlist._get_expand_html_by_stage(row.data());
+                row.child(row_html).show();
                 tr.addClass('shown');
                 $(this).html('<i class="fa fa-minus"></i>')
+
+                // trigger the highlight
+                tbjs_paperlist._mark_element('#tb-rowext-abstract-' + row.data().paper_id);
             }
         });
+
+        // add highlight event to the title
+        this.table.on('draw', function () {
+            console.log( 'Redraw occurred at: '+new Date().getTime() );
+
+            // in the title column
+            // mark the inclusion keywords
+            $(".col-title").mark(
+                tbjs_paperlist.keywords.inclusion,
+                {
+                    className: 'keyword-inclusion',
+                    separateWordSearch: false
+                }
+            );
+
+            // mark the exclusion keywords
+            $(".col-title").mark(
+                tbjs_paperlist.keywords.exclusion,
+                {
+                    className: 'keyword-exclusion',
+                    separateWordSearch: false
+                }
+            );
+        });
+    },
+
+    _mark_element: function(elem) {
+        // mark the inclusion keywords
+        $(elem).mark(
+            tbjs_paperlist.keywords.inclusion,
+            {
+                className: 'keyword-inclusion',
+                separateWordSearch: false
+            }
+        );
+
+        // mark the exclusion keywords
+        $(elem).mark(
+            tbjs_paperlist.keywords.exclusion,
+            {
+                className: 'keyword-exclusion',
+                separateWordSearch: false
+            }
+        );
     },
 
     load: function() {
@@ -321,6 +539,9 @@ var tbjs_paperlist = {
     },
 
     load_by_stage: function(stage) {
+        // set stage
+        this.stage = stage;
+
         // update header title
         $('#tbjs_paperlist_title').html(
             srv_screener.stage[stage].title
@@ -339,25 +560,8 @@ var tbjs_paperlist = {
 
     },
 
-    _preprocessing: function(data) {
-        for (var i = 0; i < data.length; i++) {
-            var d = data[i];
-            d['date_created_norm'] = dayjs(d.date_created).format('YYYY-MM-DD') + ' ' +
-                '<span class="badge badge-pill badge-info"><i class="fa fa-bong"></i> RCT</span>' + 
-                '<span style="width:1px" id="tb-row-'+d.paper_id+'"><span>';
-        }
-
-        this.data = data;
-    },
-
-    remove_paper_from_tbjs: function(paper_id) {
-        this.table.row($('#tb-row-' + paper_id)
-            .parents('tr'))
-            .remove()
-            .draw();
-    },
-
     update: function(data) {
+        // add more columns to data
         this._preprocessing(data);
         
         // remove the old data
@@ -370,38 +574,363 @@ var tbjs_paperlist = {
         this.table.draw();
     },
 
-    _get_expand_html: function(d) {
-        return '<table id="tb-rowext-'+d.paper_id+'" cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+
+    _preprocessing: function(data) {
+        for (var i = 0; i < data.length; i++) {
+            var d = data[i];
+
+            // add the pred_is_rct column
+            var html_rct_label = '<span class="badge badge-pill badge-info"><i class="fa fa-bong"></i> RCT</span>';
+            d['pred_is_rct'] = '-';
+            
+            if (d.meta.pred[0].is_rct) {
+                d['pred_is_rct'] = html_rct_label;
+            } else {
+                d['pred_is_rct'] = '-';
+            }
+            
+            // add the date_created_norm column
+            d['date_created_norm'] = dayjs(d.date_created).format('YYYY-MM-DD') + ' ' +
+                '<span style="width:1px" id="tb-row-'+d.paper_id+'"><span>';
+
+            // add the basic buttons column
+            d['basic_actions'] = this._get_basic_actions_by_stage(d);
+        }
+
+        this.data = data;
+    },
+
+    remove_paper_from_tbjs: function(paper_id) {
+        this.table.row($('#tb-row-' + paper_id)
+            .parents('tr'))
+            .remove()
+            .draw();
+    },
+
+    _get_basic_actions_by_stage: function(d) {
+        var stage = this.stage;
+        var func_name = '_get_basic_actions_by_stage_' + stage;
+        var html = this[func_name](d);
+        return html;
+    },
+
+    _get_basic_actions_by_stage_all_of_them: function(d) {
+        var html = '';
+        return html;
+    },
+
+    _get_basic_actions_by_stage_unscreened: function(d) {
+        var html = '';
+        html = '<button class="btn btn-danger btn-sm" title="Exclude this study by title" onclick="tbjs_paperlist.exclude_by_tt(\''+d.paper_id+'\')">Exclude By Title</button>';
+
+        return html;
+    },
+    
+    _get_basic_actions_by_stage_passed_title_not_fulltext: function(d) {
+        var html = '';
+        return html;
+    },
+
+    _get_basic_actions_by_stage_included_sr: function(d) {
+        var html = '';
+        return html;
+    },
+
+    _get_basic_actions_by_stage_included_srma: function(d) {
+        var html = '';
+        return html;
+    },
+
+    _get_basic_actions_by_stage_excluded_by_title: function(d) {
+        var html = '';
+        return html;
+    },
+
+    _get_basic_actions_by_stage_excluded_by_abstract: function(d) {
+        var html = '';
+        return html;
+    },
+
+    _get_basic_actions_by_stage_excluded_by_fulltext: function(d) {
+        var html = '';
+        return html;
+    },
+
+    _get_basic_actions_by_stage_decided: function(d) {
+        var html = '';
+        return html;
+    },
+
+    /**
+     * Get the expand html for specified stage
+     */
+    _get_expand_html_by_stage: function(d) {
+        var stage = this.stage;
+        var func_name = '_get_expand_html_by_stage_' + stage;
+        var func = this[func_name];
+
+        // the html is always a table
+        // content of this table is decided by the stage
+        // and for each stage, the main differences are the buttons
+        var html = '<table id="tb-rowext-'+d.paper_id+'" cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">'+
+            this[func_name](d) +
+        '</table>'
+        return html;
+    },
+
+    _get_expand_html_by_stage_all_of_them: function(d) {
+        var html = '';
+        return html;
+    },
+    
+    _get_expand_html_by_stage_unscreened: function(d) {
+        var html = 
             '<tr>'+
                 '<td>Actions:</td>'+
                 '<td>'+
-                '<button class="btn btn-danger btn-sm" onclick="tbjs_paperlist.exclude_by_ta(\''+d.paper_id+'\')">Exclude</button> '+
-                '<button class="btn btn-primary btn-sm">Proceed to Full Text</button> '+
+                '<button class="btn btn-secondary btn-sm" onclick="tbjs_paperlist.set_needchkft(\''+d.paper_id+'\')">Proceed to Full-Text Review</button> '+
+                '<button class="btn btn-primary btn-sm" onclick="tbjs_paperlist.include_in_sr(\''+d.paper_id+'\')">Include in SR</button> '+
+                
+                '<button class="btn btn-danger btn-sm" onclick="tbjs_paperlist.exclude_by_ab(\''+d.paper_id+'\')">Exclude by Abstract</button> '+
                 ' | ' +
                 '<button class="btn btn-default btn-sm" onclick="tbjs_paperlist.remove_paper_from_tbjs(\''+d.paper_id+'\')">Check Later</button>'+
                 '</td>'+
             '</tr>'+
+            this.__get_tr_authors(d) +
+            this.__get_tr_abstract(d);
+
+        return html;
+    },
+    
+    _get_expand_html_by_stage_passed_title_not_fulltext: function(d) {
+        var html = 
             '<tr>'+
-                '<td>Detail:</td>'+
-                '<td>'+d.authors+'</td>'+
+                '<td>Actions:</td>'+
+                '<td class="d-flex flex-row">'+
+                '<div class="mr-2"><button class="btn btn-primary btn-sm" onclick="tbjs_paperlist.include_in_sr(\''+d.paper_id+'\')">Include in SR</button></div>'+
+                this.__get_select_fulltext_exclusion_reasons(d) +
+                '<div class="ml-2"><button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_unscreened(\''+d.paper_id+'\')">Send Back to Unscreened</button></div>'+
+                '<div class="ml-2"><button class="btn btn-default btn-sm" onclick="tbjs_paperlist.remove_paper_from_tbjs(\''+d.paper_id+'\')">Check Later</button></div>'+
+                '</td>'+
             '</tr>'+
-            '<tr>'+
-                '<td>Abstract:</td>'+
-                '<td>'+d.abstract+'</td>'+
-            '</tr>'+
-        '</table>';
+            this.__get_tr_authors(d) +
+            this.__get_tr_abstract(d);
+
+        return html;
     },
 
-    /**
-     * the functions related to screening
-     */
-    exclude_by_ta: function(paper_id) {
+    _get_expand_html_by_stage_included_sr: function(d) {
+        var html = 
+            '<tr>'+
+                '<td>Actions:</td>'+
+                '<td>'+
+                '<button class="btn btn-primary btn-sm" onclick="tbjs_paperlist.include_in_srma(\''+d.paper_id+'\')">Include in MA</button> '+
+                '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_unscreened(\''+d.paper_id+'\')">Send Back to Unscreened</button> '+
+                '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_needchkft(\''+d.paper_id+'\')">Send Back to Full-Text Review</button> '+
+                ' | ' +
+                '<button class="btn btn-default btn-sm" onclick="tbjs_paperlist.remove_paper_from_tbjs(\''+d.paper_id+'\')">Check Later</button>'+
+                '</td>'+
+            '</tr>'+
+            this.__get_tr_authors(d) +
+            this.__get_tr_abstract(d);
+
+        return html;
+    },
+
+    _get_expand_html_by_stage_included_srma: function(d) {
+        var html = 
+            '<tr>'+
+                '<td>Actions:</td>'+
+                '<td>'+
+                '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.include_in_sr(\''+d.paper_id+'\')">Send Back to SR</button> '+
+                ' | ' +
+                '<button class="btn btn-default btn-sm" onclick="tbjs_paperlist.remove_paper_from_tbjs(\''+d.paper_id+'\')">Check Later</button>'+
+                '</td>'+
+            '</tr>'+
+            this.__get_tr_authors(d) +
+            this.__get_tr_abstract(d);
+
+        return html;
+    },
+
+    _get_expand_html_by_stage_excluded_by_title: function(d) {
+        var html = 
+            '<tr>'+
+                '<td>Actions:</td>'+
+                '<td>'+
+                '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_unscreened(\''+d.paper_id+'\')">Send Back to Unscreened</button> '+
+                ' | ' +
+                '<button class="btn btn-default btn-sm" onclick="tbjs_paperlist.remove_paper_from_tbjs(\''+d.paper_id+'\')">Check Later</button>'+
+                '</td>'+
+            '</tr>'+
+            this.__get_tr_authors(d) +
+            this.__get_tr_abstract(d);
+
+        return html;
+    },
+
+    _get_expand_html_by_stage_excluded_by_abstract: function(d) {
+        var html = 
+            '<tr>'+
+                '<td>Actions:</td>'+
+                '<td>'+
+                '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_unscreened(\''+d.paper_id+'\')">Send Back to Unscreened</button> '+
+                ' | ' +
+                '<button class="btn btn-default btn-sm" onclick="tbjs_paperlist.remove_paper_from_tbjs(\''+d.paper_id+'\')">Check Later</button>'+
+                '</td>'+
+            '</tr>'+
+            this.__get_tr_authors(d) +
+            this.__get_tr_abstract(d);
+
+        return html;
+    },
+
+    _get_expand_html_by_stage_excluded_by_fulltext: function(d) {
+        var html = 
+            '<tr>'+
+                '<td>Actions:</td>'+
+                '<td>'+
+                '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_needchkft(\''+d.paper_id+'\')">Send Back to Full-Text Review</button> '+
+                '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_unscreened(\''+d.paper_id+'\')">Send Back to Unscreened</button> '+
+                ' | ' +
+                '<button class="btn btn-default btn-sm" onclick="tbjs_paperlist.remove_paper_from_tbjs(\''+d.paper_id+'\')">Check Later</button>'+
+                '</td>'+
+            '</tr>'+
+            this.__get_tr_authors(d) +
+            this.__get_tr_abstract(d);
+
+        return html;
+    },
+
+    _get_expand_html_by_stage_decided: function(d) {
+        var html = 
+            '<tr>'+
+                '<td>Actions:</td>'+
+                '<td>'+
+                '' +
+                '</td>'+
+            '</tr>'+
+            this.__get_tr_authors(d) +
+            this.__get_tr_abstract(d);
+
+        return html;
+    },
+
+    __get_select_fulltext_exclusion_reasons: function(d) {
+        var html = [
+            '<div class="dropdown">',
+            '<button class="btn btn-danger dropdown-toggle btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">',
+                'Exclude by Full-Text Review',
+            '</button>',
+            '<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">',
+                '<a class="dropdown-item" href="javascript:void();" onclick="tbjs_paperlist.exclude_by_ft(\''+d.paper_id+'\', \'Conference Abstracts\')">Conference Abstracts</a>',
+                '<a class="dropdown-item" href="javascript:void();" onclick="tbjs_paperlist.exclude_by_ft(\''+d.paper_id+'\', \'Editorials, Commentaries, Case Reports\')">Editorials, Commentaries, Case Reports</a>',
+                '<a class="dropdown-item" href="javascript:void();" onclick="tbjs_paperlist.exclude_by_ft(\''+d.paper_id+'\', \'Non-Randomized Studies\')">Non-Randomized Studies</a>',
+                '<a class="dropdown-item" href="javascript:void();" onclick="tbjs_paperlist.exclude_by_ft(\''+d.paper_id+'\', \'Cohort Studies\')">Cohort Studies</a>',
+                '<a class="dropdown-item" href="javascript:void();" onclick="tbjs_paperlist.exclude_by_ft(\''+d.paper_id+'\', \'Narrative Reviews\')">Narrative Reviews</a>',
+                '<a class="dropdown-item" href="javascript:void();" onclick="tbjs_paperlist.exclude_by_ft(\''+d.paper_id+'\', \'Systematic Reviews and Meta-Analyses\')">Systematic Reviews and Meta-Analyses</a>',
+                '<a class="dropdown-item" href="javascript:void();" onclick="tbjs_paperlist.exclude_by_ft(\''+d.paper_id+'\', \'Subgroup Analysis/Exploratory Analysis/Sub-Study\')">Subgroup Analysis/Exploratory Analysis/Sub-Study</a>',
+                '<a class="dropdown-item" href="javascript:void();" onclick="tbjs_paperlist.exclude_by_ft(\''+d.paper_id+'\', \'ICI in the control arm\')">ICI in the control arm</a>',
+ 
+                '<div class="dropdown-divider"></div>',
+                '<a class="dropdown-item" href="javascript:void();">Add a new reason</a>',
+            '</div>',
+            '</div>',
+        ].join('');
+        return html;
+    },
+
+    __get_tr_authors: function(d) {
+        return '<tr>'+
+            '<td>Authors:</td>'+
+            '<td>'+d.authors+'</td>'+
+        '</tr>';
+    },
+
+    __get_tr_abstract: function(d) {
+        return '<tr>'+
+            '<td>Abstract:</td>'+
+            '<td id="tb-rowext-abstract-'+d.paper_id+'">'+d.abstract+'</td>'+
+        '</tr>';
+    },
+
+    ///////////////////////////////////////////////////////////////////////////
+    // the functions related to screening
+    ///////////////////////////////////////////////////////////////////////////
+    exclude_by_tt: function(paper_id) {
         // exclude from server
+        srv_screener.exclude_by_tt(paper_id, function() {
+            // update the count number
+            ui_category_stat.update();
+        });
 
         // remove from the list
         this.remove_paper_from_tbjs(paper_id);
+    },
 
-        // update the count number
+    exclude_by_ab: function(paper_id) {
+        // exclude from server
+        srv_screener.exclude_by_ab(paper_id, function() {
+            // update the count number
+            ui_category_stat.update();
+        });
+
+        // remove from the list
+        this.remove_paper_from_tbjs(paper_id);
+    },
+
+    exclude_by_ft: function(paper_id, reason) {
+        // exclude from server
+        srv_screener.exclude_by_ft(paper_id, reason, function() {
+            // update the count number
+            ui_category_stat.update();
+        });
+
+        // remove from the list
+        this.remove_paper_from_tbjs(paper_id);
+    },
+
+    include_in_sr: function(paper_id) {
+        // mark include in server
+        srv_screener.include_in_sr(paper_id, function() {
+            // update the count number
+            ui_category_stat.update();
+        });
+
+        // remove from the list
+        this.remove_paper_from_tbjs(paper_id);
+    },
+
+    include_in_srma: function(paper_id) {
+        // mark include in server
+        srv_screener.include_in_srma(paper_id, function() {
+            // update the count number
+            ui_category_stat.update();
+        });
+
+        // remove from the list
+        this.remove_paper_from_tbjs(paper_id);
+    },
+    
+    set_unscreened: function(paper_id) {
+        // mark include in server
+        srv_screener.set_unscreened(paper_id, function() {
+            // update the count number
+            ui_category_stat.update();
+        });
+
+        // remove from the list
+        this.remove_paper_from_tbjs(paper_id);
+    },
+    
+    set_needchkft: function(paper_id) {
+        // mark include in server
+        srv_screener.set_needchkft(paper_id, function() {
+            // update the count number
+            ui_category_stat.update();
+        });
+
+        // remove from the list
+        this.remove_paper_from_tbjs(paper_id);
     }
 };
 

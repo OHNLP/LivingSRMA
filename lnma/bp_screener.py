@@ -11,6 +11,7 @@ from flask_login import current_user
 from lnma import dora
 from lnma.models import *
 from lnma import ss_state
+from lnma.util import get_today_date_str
 
 bp = Blueprint("screener", __name__, url_prefix="/screener")
 
@@ -88,41 +89,28 @@ def sspr_exclude_all():
     return ''
 
 
-@bp.route('/sspr/exclude_papers_ta', methods=['GET', 'POST'])
+@bp.route('/sspr/set_papers_unscreened', methods=['GET', 'POST'])
 @login_required
-def sspr_exclude_papers_ta():
+def sspr_set_papers_unscreened():
     project_id = request.form.get('project_id')
     paper_ids = request.form.get('paper_ids')
     paper_ids = paper_ids.split(',')
-    print(paper_ids)
 
     papers = []
-    for paper_id in paper_ids:
-        p = dora.set_paper_pr_rs(paper_id, 
-            pr=ss_state.SS_PR_CHECKED_TITLE, 
-            rs=ss_state.SS_RS_EXCLUDED_TITLE)
-        papers.append(p.as_dict())
-
-    ret = {
-        'success': True,
-        'papers': papers
+    
+    # create a dict for the details
+    # this stage is not a decision stage
+    detail_dict = {
+        'date_decided': None,
+        'reason': None,
+        'decision': None
     }
-    return jsonify(ret)
-
-
-@bp.route('/sspr/exclude_papers_ft', methods=['GET', 'POST'])
-@login_required
-def sspr_exclude_papers_ft():
-    project_id = request.form.get('project_id')
-    paper_ids = request.form.get('paper_ids')
-    paper_ids = paper_ids.split(',')
-    print(paper_ids)
-
-    papers = []
     for paper_id in paper_ids:
-        p = dora.set_paper_pr_rs(paper_id, 
-            pr=ss_state.SS_PR_CHECKED_FULLTEXT, 
-            rs=ss_state.SS_RS_EXCLUDED_FULLTEXT)
+        p = dora.set_paper_pr_rs_with_details(
+            paper_id,
+            pr=ss_state.SS_PR_NA, 
+            rs=ss_state.SS_RS_NA,
+            detail_dict=detail_dict)
         papers.append(p.as_dict())
 
     ret = {
@@ -138,13 +126,141 @@ def sspr_set_papers_needchkft():
     project_id = request.form.get('project_id')
     paper_ids = request.form.get('paper_ids')
     paper_ids = paper_ids.split(',')
-    print(paper_ids)
+
+    papers = []
+    
+    # create a dict for the details
+    # this stage is not a decision stage
+    detail_dict = {
+        'date_decided': None,
+        'reason': None,
+        'decision': None
+    }
+    for paper_id in paper_ids:
+        p = dora.set_paper_pr_rs_with_details(
+            paper_id,
+            pr=ss_state.SS_PR_PASSED_TITLE, 
+            rs=ss_state.SS_RS_NA,
+            detail_dict=detail_dict)
+        papers.append(p.as_dict())
+
+    ret = {
+        'success': True,
+        'papers': papers
+    }
+    return jsonify(ret)
+
+
+@bp.route('/sspr/exclude_papers_ta', methods=['GET', 'POST'])
+@login_required
+def sspr_exclude_papers_ta():
+    '''Deprecated. Use specified reason instead.
+    '''
+    project_id = request.form.get('project_id')
+    paper_ids = request.form.get('paper_ids')
+    paper_ids = paper_ids.split(',')
 
     papers = []
     for paper_id in paper_ids:
-        p = dora.set_paper_pr_rs(paper_id,
-            pr=ss_state.SS_PR_CHECKED_TITLE, 
-            rs=ss_state.SS_RS_NA)
+        p = dora.set_paper_pr_rs(paper_id, 
+            pr=ss_state.SS_PR_PASSED_TITLE, 
+            rs=ss_state.SS_RS_EXCLUDED_TITLE)
+        papers.append(p.as_dict())
+
+    ret = {
+        'success': True,
+        'papers': papers
+    }
+    return jsonify(ret)
+
+
+@bp.route('/sspr/exclude_papers_tt', methods=['GET', 'POST'])
+@login_required
+def sspr_exclude_papers_tt():
+    project_id = request.form.get('project_id')
+    paper_ids = request.form.get('paper_ids')
+    reason = ""
+    paper_ids = paper_ids.split(',')
+
+    papers = []
+
+    # create a dict for the details
+    detail_dict = {
+        'date_decided': get_today_date_str(),
+        'reason': reason,
+        'decision': ss_state.SS_STAGE_EXCLUDED_BY_TITLE
+    }
+    for paper_id in paper_ids:
+        p = dora.set_paper_pr_rs_with_details(
+            paper_id, 
+            pr=ss_state.SS_PR_PASSED_TITLE, 
+            rs=ss_state.SS_RS_EXCLUDED_TITLE,
+            detail_dict=detail_dict)
+        papers.append(p.as_dict())
+
+    ret = {
+        'success': True,
+        'papers': papers
+    }
+    return jsonify(ret)
+
+
+@bp.route('/sspr/exclude_papers_ab', methods=['GET', 'POST'])
+@login_required
+def sspr_exclude_papers_ab():
+    project_id = request.form.get('project_id')
+    paper_ids = request.form.get('paper_ids')
+    reason = ""
+    paper_ids = paper_ids.split(',')
+
+    papers = []
+
+    # create a dict for the details
+    detail_dict = {
+        'date_decided': get_today_date_str(),
+        'reason': reason,
+        'decision': ss_state.SS_STAGE_EXCLUDED_BY_ABSTRACT
+    }
+
+    for paper_id in paper_ids:
+        p = dora.set_paper_pr_rs_with_details(
+            paper_id, 
+            pr=ss_state.SS_PR_PASSED_TITLE, 
+            rs=ss_state.SS_RS_EXCLUDED_ABSTRACT,
+            detail_dict=detail_dict)
+        papers.append(p.as_dict())
+
+    ret = {
+        'success': True,
+        'papers': papers
+    }
+    return jsonify(ret)
+
+
+@bp.route('/sspr/exclude_papers_ft', methods=['GET', 'POST'])
+@login_required
+def sspr_exclude_papers_ft():
+    project_id = request.form.get('project_id')
+    paper_ids = request.form.get('paper_ids')
+    # need to provide reason for ex ft
+    reason = request.form.get('reason')
+    paper_ids = paper_ids.split(',')
+    
+    papers = []
+    
+    # create a dict for the details
+    detail_dict = {
+        'date_decided': get_today_date_str(),
+        'reason': reason,
+        'decision': ss_state.SS_STAGE_EXCLUDED_BY_FULLTEXT
+    }
+
+    for paper_id in paper_ids:
+        p = dora.set_paper_pr_rs_with_details(
+            paper_id, 
+            pr=ss_state.SS_PR_CHECKED_FULLTEXT, 
+            rs=ss_state.SS_RS_EXCLUDED_FULLTEXT,
+            detail_dict=detail_dict)
         papers.append(p.as_dict())
 
     ret = {
@@ -159,12 +275,24 @@ def sspr_set_papers_needchkft():
 def sspr_include_papers_sr():
     project_id = request.form.get('project_id')
     paper_ids = request.form.get('paper_ids')
+    reason = ""
     paper_ids = paper_ids.split(',')
-    print(paper_ids)
 
     papers = []
+    
+    # create a dict for the details
+    detail_dict = {
+        'date_decided': get_today_date_str(),
+        'reason': reason,
+        'decision': ss_state.SS_STAGE_INCLUDED_SR
+    }
+
     for paper_id in paper_ids:
-        p = dora.set_paper_pr_rs(paper_id, rs='f1')
+        p = dora.set_paper_pr_rs_with_details(
+            paper_id, 
+            pr=ss_state.SS_PR_CHECKED_SR,
+            rs=ss_state.SS_RS_INCLUDED_ONLY_SR,
+            detail_dict=detail_dict)
         papers.append(p.as_dict())
 
     ret = {
@@ -179,12 +307,24 @@ def sspr_include_papers_sr():
 def sspr_include_papers_srma():
     project_id = request.form.get('project_id')
     paper_ids = request.form.get('paper_ids')
+    reason = ""
     paper_ids = paper_ids.split(',')
-    print(paper_ids)
 
     papers = []
+
+    # create a dict for the details
+    detail_dict = {
+        'date_decided': get_today_date_str(),
+        'reason': reason,
+        'decision': ss_state.SS_STAGE_INCLUDED_SR
+    }
+
     for paper_id in paper_ids:
-        p = dora.set_paper_pr_rs(paper_id, rs='f3')
+        p = dora.set_paper_pr_rs_with_details(
+            paper_id,
+            pr=ss_state.SS_PR_CHECKED_SRMA,
+            rs=ss_state.SS_RS_INCLUDED_SRMA,
+            detail_dict=detail_dict)
         papers.append(p.as_dict())
 
     ret = {

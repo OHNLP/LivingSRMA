@@ -2,11 +2,14 @@ import uuid
 import datetime
 
 from sqlalchemy import and_, or_, not_
+from sqlalchemy.orm.attributes import flag_modified
 
 from lnma import ss_state
 from .models import *
 
 from . import db
+
+from lnma.util import pred_rct
 
 IS_DELETED_YES = 'yes'
 IS_DELETED_NO = 'no'
@@ -156,6 +159,23 @@ def create_paper(project_id, pid,
     return paper
     
 
+def update_paper_rct_result(project_id, pid):
+    '''Update the RCT detection result
+    '''
+    paper = get_paper(project_id, pid)
+
+    # TODO catch exception
+    pred = pred_rct(paper.title, paper.abstract)
+    paper.meta['pred'] = pred['pred']
+    flag_modified(paper, "meta")
+    
+    # commit this
+    db.session.add(paper)
+    db.session.commit()
+
+    return pred
+
+
 def create_paper_if_not_exist(project_id, pid, 
     pid_type='pmid', title=None, abstract=None,
     pub_date=None, authors=None, journal=None, 
@@ -173,6 +193,15 @@ def create_paper_if_not_exist(project_id, pid,
         return p
 
 
+def get_paper(project_id, pid):
+    paper = Paper.query.filter(and_(
+        Paper.project_id == project_id,
+        Paper.pid == pid
+    )).first()
+
+    return paper
+
+
 def get_papers(project_id):
     papers = Paper.query.filter(and_(
         Paper.project_id == project_id
@@ -182,8 +211,15 @@ def get_papers(project_id):
     
 
 def get_papers_by_stage(project_id, stage):
+    '''Get all papers of specified stage
+    '''
     print('* get_papers_by_stage [%s]' % stage)
-    if stage == ss_state.SS_STAGE_UNSCREENED:
+    if stage == ss_state.SS_STAGE_ALL_OF_THEM:
+        papers = Paper.query.filter(
+            Paper.project_id == project_id
+        ).order_by(Paper.date_created.desc()).all()
+
+    elif stage == ss_state.SS_STAGE_UNSCREENED:
         papers = Paper.query.filter(and_(
             Paper.project_id == project_id,
             Paper.ss_st.in_([
@@ -195,18 +231,59 @@ def get_papers_by_stage(project_id, stage):
             Paper.ss_rs == ss_state.SS_RS_NA
         )).order_by(Paper.date_created.desc()).all()
 
-    elif stage == ss_state.SS_STAGE_ALL_OF_THEM:
+    elif stage == ss_state.SS_STAGE_DECIDED:
         papers = Paper.query.filter(
-            Paper.project_id == project_id
+            Paper.ss_rs != ss_state.SS_RS_NA
         ).order_by(Paper.date_created.desc()).all()
 
+    elif stage == ss_state.SS_STATE_PASSED_TITLE_NOT_FULLTEXT:
+        papers = Paper.query.filter(and_(
+            Paper.ss_pr == ss_state.SS_PR_PASSED_TITLE,
+            Paper.ss_rs == ss_state.SS_RS_NA
+        )).order_by(Paper.date_created.desc()).all()
+
+    elif stage == ss_state.SS_STAGE_INCLUDED_SR:
+        papers = Paper.query.filter(and_(
+            Paper.ss_rs.in_([
+                ss_state.SS_RS_INCLUDED_ONLY_SR,
+                ss_state.SS_RS_INCLUDED_SRMA
+            ]),
+        )).order_by(Paper.date_created.desc()).all()
+
+    elif stage == ss_state.SS_STAGE_INCLUDED_SRMA:
+        papers = Paper.query.filter(and_(
+            Paper.ss_rs == ss_state.SS_RS_INCLUDED_SRMA
+        )).order_by(Paper.date_created.desc()).all()
+
     elif stage == ss_state.SS_STAGE_EXCLUDED_BY_TITLE_ABSTRACT:
+        papers = Paper.query.filter(and_(
+            Paper.project_id == project_id,
+            Paper.ss_rs.in_([
+                ss_state.SS_RS_EXCLUDED_TITLE,
+                ss_state.SS_RS_EXCLUDED_ABSTRACT
+            ])
+        )).order_by(Paper.date_created.desc()).all()
+
+    elif stage == ss_state.SS_STAGE_EXCLUDED_BY_TITLE:
         papers = Paper.query.filter(and_(
             Paper.project_id == project_id,
             Paper.ss_rs == ss_state.SS_RS_EXCLUDED_TITLE
         )).order_by(Paper.date_created.desc()).all()
 
+    elif stage == ss_state.SS_STAGE_EXCLUDED_BY_ABSTRACT:
+        papers = Paper.query.filter(and_(
+            Paper.project_id == project_id,
+            Paper.ss_rs == ss_state.SS_RS_EXCLUDED_ABSTRACT
+        )).order_by(Paper.date_created.desc()).all()
+
+    elif stage == ss_state.SS_STAGE_EXCLUDED_BY_FULLTEXT:
+        papers = Paper.query.filter(and_(
+            Paper.project_id == project_id,
+            Paper.ss_rs == ss_state.SS_RS_EXCLUDED_FULLTEXT
+        )).order_by(Paper.date_created.desc()).all()
+
     else:
+        print('* NOT found specified stage [%s]' % stage)
         papers = []
         
     return papers
@@ -233,7 +310,7 @@ def get_papers_by_stage_v1(project_id, stage):
     elif stage == 'a1_p2_na':
         papers = Paper.query.filter(and_(
             Paper.project_id == project_id,
-            Paper.ss_pr == ss_state.SS_PR_CHECKED_TITLE,
+            Paper.ss_pr == ss_state.SS_PR_PASSED_TITLE,
             Paper.ss_rs == ss_state.SS_RS_NA
         )).order_by(Paper.date_created.desc()).all()
     elif stage == 'a2':
@@ -338,8 +415,43 @@ def set_paper_pr_rs(paper_id, pr=None, rs=None):
     if pr is not None: paper.ss_pr = pr
     if rs is not None: paper.ss_rs = rs
 
+    # automatic update the date_updated
+    paper.date_updated = datetime.datetime.now()
+
+    db.session.add(paper)
     db.session.commit()
 
+    return paper
+
+
+def set_paper_pr_rs_with_details(paper_id, pr=None, rs=None, detail_dict=None):
+    '''Set the pr and rs state with more detail
+
+    The detail is a dict that will be added/overwrite the paper.
+    '''
+    paper = Paper.query.filter_by(
+        paper_id=paper_id
+    ).first()
+    
+    if pr is not None: paper.ss_pr = pr
+    if rs is not None: paper.ss_rs = rs
+    if detail_dict is not None:
+        for key in detail_dict:
+            if detail_dict[key] is None:
+                # which means remove this key
+                if key in paper.ss_ex:
+                    del paper.ss_ex[key]
+                else:
+                    pass
+            else:
+                paper.ss_ex[key] = detail_dict[key]
+        flag_modified(paper, "ss_ex")
+
+    # automatic update the date_updated
+    paper.date_updated = datetime.datetime.now()
+
+    db.session.add(paper)
+    db.session.commit()
     return paper
 
 
@@ -382,8 +494,12 @@ def get_screener_stat_by_project_id(project_id):
     select project_id,
         count(*) as all_of_them,
         count(case when ss_st in ('a10', 'a11', 'a12') and ss_pr = 'na' and ss_rs = 'na' then paper_id else null end) as unscreened,
+
+        count(case when ss_pr = 'p20' and ss_rs = 'na' then paper_id else null end) as passed_title_not_fulltext,
         
-        count(case when ss_rs = 'e2' then paper_id else null end) as excluded_by_title_abstract,
+        count(case when ss_rs = 'e2' then paper_id else null end) as excluded_by_title,
+        count(case when ss_rs = 'e22' then paper_id else null end) as excluded_by_abstract,
+        count(case when ss_rs in ('e2', 'e22') then paper_id else null end) as excluded_by_title_abstract,
         count(case when ss_rs = 'e21' then paper_id else null end) as excluded_by_rct_classifier,
         count(case when ss_rs = 'e3' then paper_id else null end) as excluded_by_fulltext,
 
@@ -404,6 +520,9 @@ def get_screener_stat_by_project_id(project_id):
     attrs = [
         'all_of_them',
         'unscreened',
+        'passed_title_not_fulltext',
+        'excluded_by_title',
+        'excluded_by_abstract',
         'excluded_by_title_abstract',
         'excluded_by_rct_classifier',
         'excluded_by_fulltext',

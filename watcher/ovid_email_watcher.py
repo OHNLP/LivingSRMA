@@ -30,6 +30,9 @@ from lnma.models import *
 from lnma import dora
 from lnma import ss_state
 
+# for the RCT 
+from lnma.util import pred_rct
+
 # app for using LNMA functions and tables
 app = create_app()
 db.init_app(app)
@@ -130,6 +133,7 @@ def _check_update_by_project(project):
 
             # put these papers in update list
             prj_update['papers'] += papers
+            
         else:
             # skip this email?
             pass
@@ -142,13 +146,31 @@ def _check_update_by_project(project):
         cnt['ovid_update'], len(prj_update['papers']), project.keystr, cnt['other']
     ))
 
+    # reduce the duplicate paper in the updates
+    unique_pid_dict = {}
+    for paper in prj_update['papers']:
+        pid = paper['UI']
+        if pid in unique_pid_dict:
+            pass
+        else:
+            unique_pid_dict[pid] = paper
+
+    unique_papers = unique_pid_dict.values()
+    logger.info('removed the duplicate records %s -> %s' % (
+        len(prj_update['papers']),
+        len(unique_papers)
+    ))
+    
+    # update the prj_update
+    prj_update['papers'] = unique_papers
+
     # create or update
-    prj_updates = _update_papers_in_project(prj_update)
+    prj_updated = _update_papers_in_project(prj_update)
 
     # updated, generate a report for this run
     logger.info('done check email for project [%s]!' % project.keystr)
 
-    return prj_updates
+    return prj_updated
 
 
 def _update_papers_in_project(prj_update):
@@ -216,6 +238,11 @@ def _update_papers_in_project(prj_update):
             title, abstract, pub_date, authors, journal, {'paper': paper},
             ss_state.SS_ST_AUTO_EMAIL, None, None, None
         )
+        
+        # update the RCT info
+        dora.update_paper_rct_result(paper_db.project_id, paper_db.pid)
+
+        # 
         prj_update['cnt']['created'].append(pid)
 
     logger.info('done %s papers for project [%s], existed: %s, created: %s' % (\
