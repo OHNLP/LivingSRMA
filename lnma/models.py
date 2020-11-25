@@ -2,6 +2,8 @@ from . import db
 from werkzeug.security import generate_password_hash
 from werkzeug.security import check_password_hash
 
+from sqlalchemy.dialects.mysql import LONGTEXT
+
 
 # for the relationship between project and user
 rel_project_users = db.Table(
@@ -108,7 +110,7 @@ class Paper(db.Model):
     pid_type = db.Column(db.String(32), index=False)
     project_id = db.Column(db.String(48), index=False)
     title = db.Column(db.Text, index=False)
-    abstract = db.Column(db.String(4294000000), index=False)
+    abstract = db.Column(LONGTEXT, index=False)
     pub_date = db.Column(db.String(32), index=False)
     authors = db.Column(db.Text, index=False)
     journal = db.Column(db.String(128), index=False)
