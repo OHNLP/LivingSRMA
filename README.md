@@ -246,6 +246,31 @@ LNMA use shm folder to make full use of the memory and improve the R/W performan
 mkdir /dev/shm/lnma
 ```
 
+# RCT identifier
+
+First, create a venv for RCT identifier:
+
+```bash
+conda create rctpy36 python=3.6
+conda activate rctpy36
+```
+
+Then, install the package and upgrade the Keras to 2.1.6 to fix a bug.
+
+```bash
+(rctpy36) pip install -U https://github.com/ijmarshall/robotsearch/archive/master.zip
+(rctpy36) pip install Keras==2.1.6
+```
+
+Last, install the web api package and wsgi server. The server script could found in the repo.
+
+```bash
+(rctpy36) pip install uvicorn
+(rctpy36) pip install fastapi
+
+(rctpy36) ./run.sh
+```
+
 # Data Structure
 
 ## Table `papers`
