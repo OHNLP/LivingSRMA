@@ -48,7 +48,7 @@ def get_papers_by_stage():
     project_id = request.args.get('project_id')
     stage = request.args.get('stage')
     papers = dora.get_papers_by_stage(project_id, stage)
-    json_papers = [ p.as_dict() for p in papers ]
+    json_papers = [ p.as_simple_dict() for p in papers ]
 
     ret = {
         'success': True,
