@@ -108,6 +108,7 @@ class Paper(db.Model):
     paper_id = db.Column(db.String(48), primary_key=True, nullable=False)
     pid = db.Column(db.String(64), index=False)
     pid_type = db.Column(db.String(32), index=False)
+    seq_num = db.Column(db.Integer, index=False)
     project_id = db.Column(db.String(48), index=False)
     title = db.Column(db.Text, index=False)
     abstract = db.Column(LONGTEXT, index=False)

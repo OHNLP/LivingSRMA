@@ -17,6 +17,9 @@ td.details-control {
 tr.shown td.details-control {
     cursor: pointer;
 }
+.col-title {
+    cursor: pointer;
+}
 
 /* for highlight */
 .keyword-exclusion {
@@ -533,6 +536,30 @@ var tbjs_paperlist = {
                 tbjs_paperlist._mark_element('#tb-rowext-abstract-' + row.data().paper_id);
             }
         });
+
+        // update the click title event
+        $(this.table_id + ' tbody').on('click', 'td.col-title', function() {
+            var tr = $(this).closest('tr');
+            var row = tbjs_paperlist.table.row( tr );
+    
+            if ( row.child.isShown() ) {
+                // This row is already open - close it
+                row.child.hide();
+                tr.removeClass('shown');
+                tr.find('td.details-control').html('<i class="fa fa-plus"></i>')
+            }
+            else {
+                // Open this row
+                var row_html = tbjs_paperlist._get_expand_html_by_stage(row.data());
+                row.child(row_html).show();
+                tr.addClass('shown');
+                tr.find('td.details-control').html('<i class="fa fa-minus"></i>')
+
+                // trigger the highlight
+                tbjs_paperlist._mark_element('#tb-rowext-abstract-' + row.data().paper_id);
+            }
+        });
+
 
         // add highlight event to the title
         this.table.on('draw', function () {
