@@ -20,7 +20,9 @@ tr.shown td.details-control {
 .col-title {
     cursor: pointer;
 }
-
+.col-seq {
+    text-indent: .5em;
+}
 /* for highlight */
 .keyword-exclusion {
     color: rgb(250, 89, 89);
@@ -39,6 +41,10 @@ tr.shown td.details-control {
     padding: 0;
     margin: 0;
     cursor: pointer;
+}
+.search-highlight {
+    text-decoration: underline;
+    background-color: rgb(230, 195, 132);
 }
 </style>
 {% endblock %}
@@ -156,7 +162,7 @@ Screener Overview
 <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
 <script src="https://unpkg.com/dayjs@1.8.21/dayjs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js"></script>
-
+<script src="https://cdn.datatables.net/plug-ins/1.10.13/features/mark.js/datatables.mark.js"></script>
 <script>
 
 var srv_screener = {
@@ -460,11 +466,17 @@ var tbjs_paperlist = {
 
     columns: [
         {
-            "title": '',
-            "width": 25,
-            "className": 'details-control dt-center',
-            "orderable": false,
-            "data": 'first_column'
+            title: '#',
+            className: 'col-seq',
+            orderable: true,
+            data: 'seq_num'
+        },
+        {
+            title: '',
+            width: 25,
+            className: 'details-control dt-center',
+            orderable: false,
+            data: 'first_column'
         },
         { 
             title: 'Date', 
@@ -511,6 +523,12 @@ var tbjs_paperlist = {
             // bind the row attributes
             createdRow: function(row, data, dataIndex) {
                 $(row).attr('id', 'tb-row-' + data.paper_id);
+            },
+
+            // show the color for highlight
+            mark: {
+                element: 'span',
+                className: 'search-highlight'
             }
         });
 

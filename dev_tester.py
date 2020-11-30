@@ -44,5 +44,4 @@ def test_pred():
     
 
 if __name__ == "__main__":
-    
-    test_pred()
+    print("* Now you have the app and db to access the env")

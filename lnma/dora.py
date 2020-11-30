@@ -45,6 +45,13 @@ def create_project(owner_uid, title, keystr=None, abstract="", settings={}):
     return project
 
 
+def get_all_projects():
+    '''Get all projects for test
+    '''
+    projects = Project.query.all()
+    return projects
+
+
 def get_project(project_id):
     project = Project.query.filter(and_(
         Project.project_id == project_id
@@ -110,7 +117,7 @@ def is_existed_paper(project_id, pid):
 def create_paper(project_id, pid, 
     pid_type='pmid', title=None, abstract=None,
     pub_date=None, authors=None, journal=None, meta={},
-    ss_st=None, ss_pr=None, ss_rs=None, ss_ex=None):
+    ss_st=None, ss_pr=None, ss_rs=None, ss_ex=None, seq_num=None):
     """Create a paper object, 
 
     By default, the pmid. 
@@ -132,6 +139,11 @@ def create_paper(project_id, pid,
     date_created = datetime.datetime.now()
     date_updated = datetime.datetime.now()
     is_deleted = IS_DELETED_NO
+    if seq_num is None:
+        # need to get the current max number
+        max_cur_seq = get_current_max_seq_num(project_id)
+        # increase one bit
+        seq_num = max_cur_seq + 1
 
     paper = Paper(
         paper_id = paper_id,
@@ -150,7 +162,8 @@ def create_paper(project_id, pid,
         ss_ex = ss_ex,
         date_created = date_created,
         date_updated = date_updated,
-        is_deleted = is_deleted
+        is_deleted = is_deleted,
+        seq_num = seq_num
     )
 
     db.session.add(paper)
@@ -179,7 +192,7 @@ def update_paper_rct_result(project_id, pid):
 def create_paper_if_not_exist(project_id, pid, 
     pid_type='pmid', title=None, abstract=None,
     pub_date=None, authors=None, journal=None, 
-    ss_st=None, ss_pr=None, ss_rs=None, ss_ex=None):
+    ss_st=None, ss_pr=None, ss_rs=None, ss_ex=None, seq_num=None):
     '''A wrapper function for create_paper and is_existed_paper
     '''
     
@@ -189,7 +202,7 @@ def create_paper_if_not_exist(project_id, pid,
         p = create_paper(project_id, pid, 
             pid_type=pid_type, title=title, 
             pub_date=pub_date, authors=authors, journal=journal, 
-            ss_st=ss_st, ss_pr=ss_pr, ss_rs=ss_rs, ss_ex=None)
+            ss_st=ss_st, ss_pr=ss_pr, ss_rs=ss_rs, ss_ex=None, seq_num=seq_num)
         return p
 
 
@@ -197,6 +210,23 @@ def get_paper(project_id, pid):
     paper = Paper.query.filter(and_(
         Paper.project_id == project_id,
         Paper.pid == pid
+    )).first()
+
+    return paper
+
+
+def get_paper_by_id(paper_id):
+    paper = Paper.query.filter(and_(
+        Paper.paper_id == paper_id
+    )).first()
+
+    return paper
+
+
+def get_paper_by_seq(project_id, seq_num):
+    paper = Paper.query.filter(and_(
+        Paper.project_id == project_id,
+        Paper.seq_num == seq_num
     )).first()
 
     return paper
@@ -536,6 +566,26 @@ def get_screener_stat_by_project_id(project_id):
         result[attr] = r[attr]
 
     return result
+
+
+def get_current_max_seq_num(project_id):
+    '''Get the max seq number
+    '''
+    sql = """
+    select max(seq_num) as max_cur_seq
+    from papers
+    where project_id = '{project_id}';
+    """.format(project_id=project_id)
+
+    r = db.session.execute(sql).fetchone()
+
+    # the max_cur_seq should be an integer
+    # but it also can be None
+    max_cur_seq = r['max_cur_seq']
+    if max_cur_seq is None:
+        max_cur_seq = 0
+
+    return max_cur_seq
 
 
 def get_prisma(project_id):
