@@ -33,7 +33,7 @@ def get_papers():
     project_id = request.args.get('project_id')
     papers = dora.get_papers(project_id)
 
-    json_papers = [ p.as_dict() for p in papers ]
+    json_papers = [ p.as_simple_dict() for p in papers ]
 
     ret = {
         'success': True,
@@ -111,7 +111,7 @@ def sspr_set_papers_unscreened():
             pr=ss_state.SS_PR_NA, 
             rs=ss_state.SS_RS_NA,
             detail_dict=detail_dict)
-        papers.append(p.as_dict())
+        papers.append(p.as_simple_dict())
 
     ret = {
         'success': True,
@@ -142,7 +142,7 @@ def sspr_set_papers_needchkft():
             pr=ss_state.SS_PR_PASSED_TITLE, 
             rs=ss_state.SS_RS_NA,
             detail_dict=detail_dict)
-        papers.append(p.as_dict())
+        papers.append(p.as_simple_dict())
 
     ret = {
         'success': True,
@@ -165,7 +165,7 @@ def sspr_exclude_papers_ta():
         p = dora.set_paper_pr_rs(paper_id, 
             pr=ss_state.SS_PR_PASSED_TITLE, 
             rs=ss_state.SS_RS_EXCLUDED_TITLE)
-        papers.append(p.as_dict())
+        papers.append(p.as_simple_dict())
 
     ret = {
         'success': True,
@@ -196,7 +196,7 @@ def sspr_exclude_papers_tt():
             pr=ss_state.SS_PR_PASSED_TITLE, 
             rs=ss_state.SS_RS_EXCLUDED_TITLE,
             detail_dict=detail_dict)
-        papers.append(p.as_dict())
+        papers.append(p.as_simple_dict())
 
     ret = {
         'success': True,
@@ -228,7 +228,7 @@ def sspr_exclude_papers_ab():
             pr=ss_state.SS_PR_PASSED_TITLE, 
             rs=ss_state.SS_RS_EXCLUDED_ABSTRACT,
             detail_dict=detail_dict)
-        papers.append(p.as_dict())
+        papers.append(p.as_simple_dict())
 
     ret = {
         'success': True,
@@ -261,7 +261,7 @@ def sspr_exclude_papers_ft():
             pr=ss_state.SS_PR_CHECKED_FULLTEXT, 
             rs=ss_state.SS_RS_EXCLUDED_FULLTEXT,
             detail_dict=detail_dict)
-        papers.append(p.as_dict())
+        papers.append(p.as_simple_dict())
 
     ret = {
         'success': True,
@@ -275,7 +275,7 @@ def sspr_exclude_papers_ft():
 def sspr_include_papers_sr():
     project_id = request.form.get('project_id')
     paper_ids = request.form.get('paper_ids')
-    reason = ""
+    reason = request.form.get('reason')
     paper_ids = paper_ids.split(',')
 
     papers = []
@@ -293,7 +293,7 @@ def sspr_include_papers_sr():
             pr=ss_state.SS_PR_CHECKED_SR,
             rs=ss_state.SS_RS_INCLUDED_ONLY_SR,
             detail_dict=detail_dict)
-        papers.append(p.as_dict())
+        papers.append(p.as_simple_dict())
 
     ret = {
         'success': True,
@@ -325,7 +325,7 @@ def sspr_include_papers_srma():
             pr=ss_state.SS_PR_CHECKED_SRMA,
             rs=ss_state.SS_RS_INCLUDED_SRMA,
             detail_dict=detail_dict)
-        papers.append(p.as_dict())
+        papers.append(p.as_simple_dict())
 
     ret = {
         'success': True,
@@ -333,4 +333,82 @@ def sspr_include_papers_srma():
     }
     return jsonify(ret)
 
+
+@bp.route('/sspr/set_label_ckl', methods=['GET', 'POST'])
+@login_required
+def sspr_set_label_ckl():
+    project_id = request.form.get('project_id')
+    paper_ids = request.form.get('paper_ids')
+    paper_ids = paper_ids.split(',')
+    
+    papers = []
+
+    for paper_id in paper_ids:
+        p = set_label_check_later(paper_id)
+        papers.append(p.as_simple_dict())
+
+    ret = {
+        'success': True,
+        'papers': papers
+    }
+    return jsonify(ret)
+
+
+@bp.route('/sspr/unset_label_ckl', methods=['GET', 'POST'])
+@login_required
+def sspr_unset_label_ckl():
+    project_id = request.form.get('project_id')
+    paper_ids = request.form.get('paper_ids')
+    paper_ids = paper_ids.split(',')
+    
+    papers = []
+
+    for paper_id in paper_ids:
+        p = unset_label_check_later(paper_id)
+        papers.append(p.as_simple_dict())
+
+    ret = {
+        'success': True,
+        'papers': papers
+    }
+    return jsonify(ret)
+
+
+@bp.route('/sspr/set_rct_feedback', methods=['GET', 'POST'])
+@login_required
+def sspr_set_rct_feedback():
+    project_id = request.form.get('project_id')
+    paper_ids = request.form.get('paper_ids')
+    paper_ids = paper_ids.split(',')
+    
+    feedback = request.form.get('feedback')
+    papers = []
+
+    for paper_id in paper_ids:
+        paper = dora.set_rct_user_feedback(paper_id, feedback)
+        papers.append(paper.as_simple_dict())
+
+    ret = {
+        'success': True,
+        'papers': papers
+    }
+    return jsonify(ret)
+
+
+###############################################################################
+# Internal functions for screener
+###############################################################################
+
+def set_label_check_later(paper_id):
+    '''Set the "check later" label for study
+    '''
+    paper = dora.set_paper_ss_label(paper_id, ss_state.SS_LABEL_CKL)
+    return paper
+
+
+def unset_label_check_later(paper_id):
+    '''Unset the "check later" label for study
+    '''
+    paper = dora.unset_paper_ss_label(paper_id, ss_state.SS_LABEL_CKL)
+    return paper
 

@@ -139,11 +139,17 @@ class Paper(db.Model):
 
         if 'pred' in full_dict['meta']:
             is_rct = full_dict['meta']['pred'][0]['is_rct']
+            usr_fb = full_dict['meta']['pred'][0].get('usr_fb', '')
             
             # remove other values, just keep the is_rct
             full_dict['meta']['pred'][0] = {
-                'is_rct': is_rct
+                'is_rct': is_rct,
+                'usr_fb': usr_fb
             }
+
+        # remove the abstract to reduce file size
+        # this require the frontend to reload this paper information
+        # full_dict['abstract'] = ''
 
         return full_dict
 

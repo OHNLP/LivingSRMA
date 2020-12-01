@@ -50,3 +50,6 @@ SS_STAGE_DECIDED = 'decided'
 SS_STAGE_CONDITIONS = {
     'unscreened': "ss_st in ('a10', 'a11', 'a12') and ss_pr = 'na' and ss_rs = 'na'"
 }
+
+# for labels
+SS_LABEL_CKL = 'CKL'

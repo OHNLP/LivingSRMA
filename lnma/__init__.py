@@ -4,6 +4,7 @@ from flask import Flask
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_compress import Compress
 
 db = SQLAlchemy()
 
@@ -11,6 +12,9 @@ def create_app(test_config=None):
     """Create and configure an instance of the Flask application."""
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_pyfile('config.py')
+
+    # Compress the request to reduce file size
+    Compress(app)
 
     # print(app.config)
     # bind db
