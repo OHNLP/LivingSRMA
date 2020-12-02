@@ -23,10 +23,23 @@ from lnma import ss_state
 
 bp = Blueprint("importer", __name__, url_prefix="/importer")
 
-@bp.route('/')
+
+@bp.route('/by_pmid_list')
 @login_required
-def index():
-    return render_template('importer.index.html')
+def by_pmid_list():
+    return render_template('importer/by_pmid_list.html')
+
+
+@bp.route('/by_pubmed_csv')
+@login_required
+def by_pubmed_csv():
+    return render_template('importer/by_pubmed_csv.html')
+
+
+@bp.route('/by_endnote_xml')
+@login_required
+def by_endnote_xml():
+    return render_template('importer/by_endnote_xml.html')
 
 
 @bp.route('/upload_pmids', methods=['GET', 'POST'])
@@ -171,4 +184,13 @@ def upload_pubmedcsv():
                 'msg': 'PAPER CREATED'
             })
 
+    return jsonify(ret)
+
+
+@bp.route('/upload_endnote_xml', methods=['GET', 'POST'])
+@login_required
+def upload_endnote_xml():
+    ret = {
+        "success": True
+    }
     return jsonify(ret)

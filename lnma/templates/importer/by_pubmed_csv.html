@@ -1,0 +1,216 @@
+{% extends '_layout_adminlte.html' %}
+
+{% block title %}
+Study Importer
+{% endblock %}
+
+{% block style %}
+<style>
+.result-item {
+    padding: 1px 0;
+}
+</style>
+{% endblock %}
+
+{% block page_name %}
+<i class="nav-icon fas fa-file-upload"></i> 
+Study Importer
+{% endblock %}
+
+{% block active_nav_link %}importer-pubmed-csv{% endblock %}
+
+{% block content %}
+
+<div class="content">
+    <div class="container-fluid">
+
+        <div id="vw_uploader_pmidlist" class="row">
+            <div class="col-md-5">
+                <h5>Import Studies by PMID List</h5>
+                <p class="card-text">Input the PMID in the following area, one PMID per line.</p>
+                <div>
+                    <div class="form-group">
+                        <textarea class="form-control" id="input_pmids" 
+                        name="pmids" rows="10"
+                        v-model="pmids"></textarea>
+                    </div>
+                    <button class="btn btn-primary"
+                        v-bind:disabled="btn_import.disabled"
+                        v-on:click="import_studies">
+                        <i class="fa fa-upload"></i>
+                        Import these PMIDs
+                    </button>
+                    
+                </div>
+            </div>
+
+            <div class="col-md-7">
+                <h5 v-if="results.length!=0">Results ({{ results.length }} studies)</h5>
+                <div>
+                    <div class="result-item row"
+                        v-for="r, i in results">
+                        <div class="col-1"><i class="far fa-file-alt"></i> {{ i + 1 }}</div>
+                        <div class="col-2" style="text-align: center;">{{ r.pmid }}</div>
+                        <div class="col-9" v-if="r.success" style="background-color: aquamarine;">{{ r.msg }}</div>
+                        <div class="col-9" v-else style="background-color: lightcoral;">{{ r.msg }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <hr>
+
+        <div id="vw_uploader_pubmedcsv" class="row">
+            <div class="col-md-5">
+                <h5>Import Studies by PubMed Exported CSV File</h5>
+                <p class="card-text">Select the CSV file exported from PubMed.</p>
+                <form id="upload_csvfile" method="post" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <input type="file" class="form-control-file" name="input_csvfile" id="input_csvfile">
+                    </div>
+                </form>
+                <div>                    
+                    <button class="btn btn-primary"
+                        v-bind:disabled="btn_import.disabled"
+                        v-on:click="import_studies">
+                        <i class="fa fa-upload"></i>
+                        Import this CSV File
+                    </button>
+                </div>
+            </div>
+
+            <div class="col-md-7">
+                <h5 v-if="results.length!=0">Results ({{ results.length }} studies)</h5>
+                <div>
+                    <div class="result-item row"
+                        v-for="r, i in results">
+                        <div class="col-1"><i class="far fa-file-alt"></i> {{ i + 1 }}</div>
+                        <div class="col-2" style="text-align: center;">{{ r.pmid }}</div>
+                        <div class="col-9" v-if="r.success" style="background-color: aquamarine;">{{ r.msg }}</div>
+                        <div class="col-9" v-else style="background-color: lightcoral;">{{ r.msg }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block script %}
+<script>
+
+
+var vw_uploader_pmidlist = {
+    vpp: null,
+    vpp_id: '#vw_uploader_pmidlist',
+    api_url: "[[ url_for('importer.upload_pmids') ]]",
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                pmids: '',
+                results: [],
+                btn_import: {
+                    disabled: false
+                }
+            },
+            methods: {
+                import_studies: function() {
+                    vw_uploader_pmidlist.import_studies(this.pmids);
+                }
+            }
+        });
+    },
+
+    import_studies: function(pmids) {
+        var project_id = Cookies.get('project_id');
+        if (project_id == undefined) {
+            alert('Set working project first.');
+            return;
+        }
+        this.vpp.btn_import.disabled = true;
+        $.post(
+            this.api_url,
+            {project_id:project_id, pmids:pmids},
+            function(data) {
+                console.log(data);
+                vw_uploader_pmidlist.vpp.btn_import.disabled = false;
+                vw_uploader_pmidlist.vpp.results = data.rs;
+            }, 'json'
+        )
+    }
+}
+
+var vw_uploader_pubmedcsv = {
+    vpp: null,
+    vpp_id: '#vw_uploader_pubmedcsv',
+    api_url: "[[ url_for('importer.upload_pubmedcsv') ]]",
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                results: [],
+                btn_import: {
+                    disabled: false
+                }
+            },
+            methods: {
+                import_studies: function() {
+                    vw_uploader_pubmedcsv.import_studies();
+                }
+            }
+        });
+    },
+
+    import_studies: function() {
+        var project_id = Cookies.get('project_id');
+        if (project_id == undefined) {
+            alert('Set working project first.');
+            return;
+        }
+        // update UI
+        this.vpp.btn_import.disabled = true;
+
+        // create form for upload
+        if ($('#input_csvfile').val() == '') {
+            return;
+        }
+        var form_data = new FormData($('#upload_csvfile')[0]);
+        form_data.append('project_id', project_id);
+
+        // send request
+        $.ajax({
+            type: 'POST',
+            url: this.api_url,
+            data: form_data,
+            contentType: false,
+            cache: false,
+            processData: false,
+            success: function(data) {
+                console.log(data);
+                vw_uploader_pubmedcsv.vpp.results = data.rs;
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.error(textStatus, errorThrown);
+            }
+        });
+    }
+};
+
+var jarvis = {
+    init: function() {
+        vw_uploader_pmidlist.init();
+        vw_uploader_pubmedcsv.init();
+    }
+};
+$(document).ready(function() {
+    jarvis.init();
+})
+</script>
+{% endblock %}

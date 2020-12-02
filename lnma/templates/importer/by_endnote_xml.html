@@ -1,7 +1,7 @@
 {% extends '_layout_adminlte.html' %}
 
 {% block title %}
-Study Importer
+Study Importer | By Endnote XML
 {% endblock %}
 
 {% block style %}
@@ -14,8 +14,10 @@ Study Importer
 
 {% block page_name %}
 <i class="nav-icon fas fa-file-upload"></i> 
-Study Importer
+Study Importer | By Endnote XML
 {% endblock %}
+
+{% block active_nav_link %}importer-endnote-xml{% endblock %}
 
 {% block content %}
 
@@ -24,48 +26,11 @@ Study Importer
 
         <div id="vw_uploader_pmidlist" class="row">
             <div class="col-md-5">
-                <h5>Import Studies by PMID List</h5>
-                <p class="card-text">Input the PMID in the following area, one PMID per line.</p>
-                <div>
+                <h5>Import Studies by Endnote XML File</h5>
+                <p class="card-text">Select the XML file exported from Endnote.</p>
+                <form id="upload_xmlfile" method="post" enctype="multipart/form-data">
                     <div class="form-group">
-                        <textarea class="form-control" id="input_pmids" 
-                        name="pmids" rows="10"
-                        v-model="pmids"></textarea>
-                    </div>
-                    <button class="btn btn-primary"
-                        v-bind:disabled="btn_import.disabled"
-                        v-on:click="import_studies">
-                        <i class="fa fa-upload"></i>
-                        Import these PMIDs
-                    </button>
-                    
-                </div>
-            </div>
-
-            <div class="col-md-7">
-                <h5 v-if="results.length!=0">Results ({{ results.length }} studies)</h5>
-                <div>
-                    <div class="result-item row"
-                        v-for="r, i in results">
-                        <div class="col-1"><i class="far fa-file-alt"></i> {{ i + 1 }}</div>
-                        <div class="col-2" style="text-align: center;">{{ r.pmid }}</div>
-                        <div class="col-9" v-if="r.success" style="background-color: aquamarine;">{{ r.msg }}</div>
-                        <div class="col-9" v-else style="background-color: lightcoral;">{{ r.msg }}</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-
-        <hr>
-
-        <div id="vw_uploader_pubmedcsv" class="row">
-            <div class="col-md-5">
-                <h5>Import Studies by PubMed Exported CSV File</h5>
-                <p class="card-text">Select the CSV file exported from PubMed.</p>
-                <form id="upload_csvfile" method="post" enctype="multipart/form-data">
-                    <div class="form-group">
-                        <input type="file" class="form-control-file" name="input_csvfile" id="input_csvfile">
+                        <input type="file" class="form-control-file" name="input_xmlfile" id="input_xmlfile">
                     </div>
                 </form>
                 <div>                    
@@ -73,7 +38,7 @@ Study Importer
                         v-bind:disabled="btn_import.disabled"
                         v-on:click="import_studies">
                         <i class="fa fa-upload"></i>
-                        Import this CSV File
+                        Import this xml File
                     </button>
                 </div>
             </div>
@@ -97,8 +62,6 @@ Study Importer
 
 
 {% endblock %}
-
-{% block active_nav_link %}importer{% endblock %}
 
 {% block script %}
 <script>
@@ -146,10 +109,10 @@ var vw_uploader_pmidlist = {
     }
 }
 
-var vw_uploader_pubmedcsv = {
+var vw_uploader_endnote_xml = {
     vpp: null,
-    vpp_id: '#vw_uploader_pubmedcsv',
-    api_url: "[[ url_for('importer.upload_pubmedcsv') ]]",
+    vpp_id: '#vw_uploader_endnote_xml',
+    api_url: "[[ url_for('importer.upload_endnote_xml') ]]",
 
     init: function() {
         this.vpp = new Vue({
@@ -162,7 +125,7 @@ var vw_uploader_pubmedcsv = {
             },
             methods: {
                 import_studies: function() {
-                    vw_uploader_pubmedcsv.import_studies();
+                    vw_uploader_endnote_xml.import_studies();
                 }
             }
         });
@@ -178,10 +141,10 @@ var vw_uploader_pubmedcsv = {
         this.vpp.btn_import.disabled = true;
 
         // create form for upload
-        if ($('#input_csvfile').val() == '') {
+        if ($('#input_xmlfile').val() == '') {
             return;
         }
-        var form_data = new FormData($('#upload_csvfile')[0]);
+        var form_data = new FormData($('#upload_xmlfile')[0]);
         form_data.append('project_id', project_id);
 
         // send request
@@ -194,7 +157,7 @@ var vw_uploader_pubmedcsv = {
             processData: false,
             success: function(data) {
                 console.log(data);
-                vw_uploader_pubmedcsv.vpp.results = data.rs;
+                vw_uploader_endnote_xml.vpp.results = data.rs;
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 console.error(textStatus, errorThrown);
@@ -206,7 +169,7 @@ var vw_uploader_pubmedcsv = {
 var jarvis = {
     init: function() {
         vw_uploader_pmidlist.init();
-        vw_uploader_pubmedcsv.init();
+        vw_uploader_endnote_xml.init();
     }
 };
 $(document).ready(function() {

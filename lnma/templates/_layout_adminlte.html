@@ -216,12 +216,33 @@ label {
           </li>
 
           <li class="nav-item">
-            <a id="nav-link-importer" href="[[ url_for('importer.index') ]]" class="nav-link">
+            <a id="nav-link-importer" href="#" class="nav-link">
               <i class="nav-icon fas fa-file-upload"></i>
               <p>
                 Study Importer
+                <i class="fas fa-angle-left right"></i>
               </p>
             </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a id="nav-link-importer-pmid-list" href="[[ url_for('importer.by_pmid_list') ]]" class="nav-link">
+                  <i class="fa fa-list nav-icon"></i>
+                  <p>Import by PMID List</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a id="nav-link-importer-pubmed-csv" href="[[ url_for('importer.by_pubmed_csv') ]]" class="nav-link">
+                  <i class="fa fa-file-csv nav-icon"></i>
+                  <p>Import by PubMed CSV</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a id="nav-link-importer-endnote-xml" href="[[ url_for('importer.by_endnote_xml') ]]" class="nav-link">
+                  <i class="fa fa-clipboard nav-icon"></i>
+                  <p>Import by EndNote XML</p>
+                </a>
+              </li>
+            </ul>
           </li>
 
           <!-- <li class="nav-item">
@@ -373,7 +394,11 @@ label {
 <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 <script>
 var ACTIVE_NAV_LINK = '{% block active_nav_link %}{% endblock %}';
-$('#nav-link-' + ACTIVE_NAV_LINK).addClass('active');
+var __active_nav_links = ACTIVE_NAV_LINK.split(',');
+for (var i = 0; i < __active_nav_links.length; i++) {
+    var active_nav_link = __active_nav_links[i];
+    $('#nav-link-' + active_nav_link).addClass('active');    
+}
 function toast(msg, type) {
     if (typeof(type) == 'undefined') {
       type = 'info';
