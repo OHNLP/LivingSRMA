@@ -12,6 +12,12 @@ except ImportError:
 
 from sqlalchemy.ext.declarative import DeclarativeMeta
 
+import logging
+from pprint import pprint
+logger = logging.getLogger("lnma.util")
+logger.setLevel(logging.INFO)
+logging.basicConfig(level=logging.WARNING, format='%(asctime)s [%(name)s] [%(levelname)s] %(message)s')
+
 
 # PubMed related functions
 PUBMED_URL = {
@@ -236,6 +242,65 @@ def e_fetch(ids, db='pubmed'):
     return ret
 
 
+def parse_endnote_exported_xml(full_fn):
+    '''Parse the file from endnote export
+    '''
+    try:
+        tree = ET.parse(full_fn)
+        root = tree.getroot()
+    except Exception as err:
+        logger.error('ERROR when parsing %s, %s' % (full_fn, err))
+        return None
+
+    papers = []
+    for record in root.find('records').findall('record'):
+        paper = {
+            'pid': '',
+            'pid_type': '',
+            'title': '',
+            'authors': '',
+            'abstract': '',
+            'pub_date': '',
+            'pub_type': '',
+            'journal': '',
+        }
+
+        for node in record.iter():
+            if node.tag == 'F':
+                c = node.attrib['C']
+
+                if c == 'UI':
+                    # update the pid
+                    paper['pid'] = paper['pid'] if node.find('D') is None else node.find('D').text 
+                elif c == 'ST':
+                    # update the title
+                    paper['pid_type'] = paper['pid_type'] if node.find('D') is None else node.find('D').text
+                elif c == 'TI':
+                    # update the title
+                    paper['title'] = paper['title'] if node.find('D') is None else node.find('D').text
+                elif c == 'AU':
+                    # update the authors
+                    paper['authors'] = ', '.join([ _.text for _ in node.findall('D') ])
+                elif c == 'AB':
+                    # update the abstract
+                    paper['abstract'] = paper['abstract'] if node.find('D') is None else node.find('D').text
+                elif c == 'SO':
+                    # update the journal
+                    paper['journal'] = paper['journal'] if node.find('D') is None else node.find('D').text
+                elif c == 'YR':
+                    # update the pub_date
+                    paper['pub_date'] = paper['pub_date'] if node.find('D') is None else node.find('D').text
+                elif c == 'PT':
+                    # update the pub_type
+                    paper['pub_type'] = paper['pub_type'] if node.find('D') is None else node.find('D').text
+                else:
+                    pass
+        
+        papers.append(paper)
+
+    return papers
+
+
 def pred_rct(ti, ab):
     '''Predict if a study is RCT
     '''
@@ -258,4 +323,5 @@ def get_today_date_str():
 
 
 if __name__ == "__main__":
-    pass
+    papers = parse_endnote_exported_xml('/home/hehuan/Downloads/cites.xml')
+    pprint(papers)
