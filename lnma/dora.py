@@ -601,14 +601,24 @@ def get_screener_stat_by_project_id(project_id):
         count(case when ss_pr = 'p20' and ss_rs = 'na' and json_contains_path(ss_ex->'$.label', 'one', '$.CKL') then paper_id else null end) as passed_title_not_fulltext_ckl,
         
         count(case when ss_rs = 'e2' then paper_id else null end) as excluded_by_title,
+        count(case when ss_rs = 'e2' and json_contains_path(ss_ex->'$.label', 'one', '$.CKL') then paper_id else null end) as excluded_by_title_ckl,
+
         count(case when ss_rs = 'e22' then paper_id else null end) as excluded_by_abstract,
+        count(case when ss_rs = 'e22' and json_contains_path(ss_ex->'$.label', 'one', '$.CKL') then paper_id else null end) as excluded_by_abstract_ckl,
+
         count(case when ss_rs in ('e2', 'e22') then paper_id else null end) as excluded_by_title_abstract,
         count(case when ss_rs = 'e21' then paper_id else null end) as excluded_by_rct_classifier,
+
         count(case when ss_rs = 'e3' then paper_id else null end) as excluded_by_fulltext,
+        count(case when ss_rs = 'e3' and json_contains_path(ss_ex->'$.label', 'one', '$.CKL') then paper_id else null end) as excluded_by_fulltext_ckl,
 
         count(case when ss_rs = 'f1' then paper_id else null end) as included_only_sr,
+
         count(case when ss_rs in ('f1', 'f3') then paper_id else null end) as included_sr,
+        count(case when ss_rs in ('f1', 'f3') and json_contains_path(ss_ex->'$.label', 'one', '$.CKL') then paper_id else null end) as included_sr_ckl,
+
         count(case when ss_rs = 'f3' then paper_id else null end) as included_srma,
+        count(case when ss_rs = 'f3' and json_contains_path(ss_ex->'$.label', 'one', '$.CKL') then paper_id else null end) as included_srma_ckl,
 
         count(case when ss_rs != 'na' then paper_id else null end) as decided
     
@@ -629,13 +639,25 @@ def get_screener_stat_by_project_id(project_id):
         'passed_title_not_fulltext_ckl',
 
         'excluded_by_title',
+        'excluded_by_title_ckl',
+
         'excluded_by_abstract',
+        'excluded_by_abstract_ckl',
+
         'excluded_by_title_abstract',
         'excluded_by_rct_classifier',
+
         'excluded_by_fulltext',
+        'excluded_by_fulltext_ckl',
+
         'included_only_sr',
+
         'included_sr',
+        'included_sr_ckl',
+
         'included_srma',
+        'included_srma_ckl',
+
         'decided'
     ]
     result = {}

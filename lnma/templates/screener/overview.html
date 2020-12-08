@@ -8,6 +8,9 @@ Screener Overview
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.min.css">
 
 <style>
+#ui_category_stat {
+    width: 240px;
+}
 #tbjs_paperlist {
     width: 100%;
 }
@@ -45,6 +48,11 @@ tr.shown td.details-control {
     margin: 0;
     cursor: pointer;
 }
+.keyword-rct-id {
+    color: #925f01;
+    background-color: bisque;
+    font-size: .95em;
+}
 .search-highlight {
     text-decoration: underline;
     background-color: rgb(230, 195, 132);
@@ -63,7 +71,7 @@ tr.shown td.details-control {
     border-right: 1px solid #111111;
 }
 .exclusion-reason {
-    width: 180px;
+    width: 150px;
 }
 </style>
 {% endblock %}
@@ -78,7 +86,7 @@ Screener Overview
 <div class="content">
     <div class="container-fluid">
         <div class="row">
-            <div id="ui_category_stat" style="width: 220px;">
+            <div id="ui_category_stat">
                 <h5>
                     <i class="far fa-file-alt"></i>
                     All References
@@ -90,11 +98,13 @@ Screener Overview
                     </button> -->
                     <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" v-on:click="show_stage('unscreened')">
                         Unscreened
-                        <span class="badge badge-unscreened badge-pill">{{ stat.unscreened }}</span>
-                        <span class="badge badge-secondary badge-ckl">{{ stat.unscreened_ckl }}</span>
+                        <span>
+                            <span class="badge badge-unscreened badge-pill">{{ stat.unscreened }}</span>
+                            <span class="badge badge-secondary badge-ckl">{{ stat.unscreened_ckl }}</span>
+                        </span>
                     </button>
                     <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" v-on:click="show_stage('decided')">
-                        Decided References
+                        Decided
                         <span class="badge badge-secondary badge-pill">{{ stat.decided }}</span>
                     </button>
                 </div>
@@ -106,8 +116,10 @@ Screener Overview
                 <div class="list-group">
                     <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" v-on:click="show_stage('passed_title_not_fulltext')">
                         Full Text Review
-                        <span class="badge badge-secondary badge-pill">{{ stat.passed_title_not_fulltext }}</span>
-                        <span class="badge badge-primary badge-ckl">{{ stat.passed_title_not_fulltext_ckl }}</span>
+                        <span>
+                            <span class="badge badge-secondary badge-pill">{{ stat.passed_title_not_fulltext }}</span>
+                            <span class="badge badge-primary badge-ckl">{{ stat.passed_title_not_fulltext_ckl }}</span>
+                        </span>
                     </button>
                 </div>
 
@@ -118,11 +130,17 @@ Screener Overview
                 <div class="list-group">
                     <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" v-on:click="show_stage('included_sr')">
                         Included in SR
-                        <span class="badge badge-primary badge-pill">{{ stat.included_sr }}</span>
+                        <span>
+                            <span class="badge badge-primary badge-pill">{{ stat.included_sr }}</span>
+                            <span class="badge badge-secondary badge-ckl">{{ stat.included_sr_ckl }}</span>
+                        </span>
                     </button>
                     <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" v-on:click="show_stage('included_srma')">
-                        Included in SR and MA
-                        <span class="badge badge-primary badge-pill">{{ stat.included_srma }}</span>
+                        Included in SR &amp; MA
+                        <span>
+                            <span class="badge badge-primary badge-pill">{{ stat.included_srma }}</span>
+                            <span class="badge badge-secondary badge-ckl">{{ stat.included_srma_ckl }}</span>
+                        </span>
                     </button>
                 </div>
 
@@ -137,21 +155,30 @@ Screener Overview
                     </button> -->
                     <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" v-on:click="show_stage('excluded_by_title')">
                         By Title
-                        <span class="badge badge-secondary badge-pill">{{ stat.excluded_by_title }}</span>
+                        <span>
+                            <span class="badge badge-secondary badge-pill">{{ stat.excluded_by_title }}</span>
+                            <span class="badge badge-secondary badge-ckl">{{ stat.excluded_by_title_ckl }}</span>
+                        </span>
                     </button>
                     <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" v-on:click="show_stage('excluded_by_abstract')">
                         By Abstract
-                        <span class="badge badge-secondary badge-pill">{{ stat.excluded_by_abstract }}</span>
+                        <span>
+                            <span class="badge badge-secondary badge-pill">{{ stat.excluded_by_abstract }}</span>
+                            <span class="badge badge-secondary badge-ckl">{{ stat.excluded_by_abstract_ckl }}</span>
+                        </span>
                     </button>
                     <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" v-on:click="show_stage('excluded_by_fulltext')">
                         By Full Text
-                        <span class="badge badge-secondary badge-pill">{{ stat.excluded_by_fulltext }}</span>
+                        <span>
+                            <span class="badge badge-secondary badge-pill">{{ stat.excluded_by_fulltext }}</span>
+                            <span class="badge badge-secondary badge-ckl">{{ stat.excluded_by_fulltext_ckl }}</span>
+                        </span>
                     </button>
                 </div>
             </div>
             <!-- / left pane -->
 
-            <div style="width: calc(100% - 230px); margin-left: 10px;">
+            <div style="width: calc(100% - 250px); margin-left: 10px;">
                 <h5>
                     <i class="far fa-file-alt"></i>
                     Reference List | 
@@ -602,6 +629,8 @@ var tbjs_paperlist = {
         ]
     },
 
+    regex_RCT_ID: /NCT\d{8}/gmi,
+
     columns: [
         // column 0
         {
@@ -772,7 +801,7 @@ var tbjs_paperlist = {
 
         // add highlight event to the title
         this.table.on('draw', function () {
-            console.log( 'Redraw occurred at: '+new Date().getTime() );
+            // console.log( 'Redraw occurred at: '+new Date().getTime() );
 
             // in the title column
             // mark the inclusion keywords
@@ -823,6 +852,15 @@ var tbjs_paperlist = {
                 separateWordSearch: false
             }
         );
+
+        // mark the NCT keywords
+        $(elem).markRegExp(
+            this.regex_RCT_ID, 
+            {
+                className: 'badge badge-pill keyword-rct-id',
+                separateWordSearch: false
+            }
+        );
     },
 
     load: function() {
@@ -842,6 +880,11 @@ var tbjs_paperlist = {
         $('#tbjs_paperlist_title').html(
             srv_screener.stage[stage].title
         );
+
+        // empty the search filter input box
+        $(this.table_id + '_filter input').val('');
+        // reset the search filter
+        this.table.search('');
 
         // get data
         srv_screener.get_papers(
@@ -1042,11 +1085,7 @@ var tbjs_paperlist = {
     },
     
     _get_expand_html_by_stage_unscreened: function(d) {
-        var _html_btn_ckl = '<button class="btn btn-default btn-sm" onclick="tbjs_paperlist.set_label_check_later(\''+d.paper_id+'\')"><i class="far fa-clock"></i> Check Later</button>';
-        if (srv_screener.has_label_ckl(d)) {
-            _html_btn_ckl = '<button class="btn btn-default btn-sm" onclick="tbjs_paperlist.unset_label_check_later(\''+d.paper_id+'\')"><i class="far fa-clock"></i> Has Checked</button>';
-        }
-
+        var _html_btn_ckl = this.__get_btn_check_later(d);
         var html = 
             '<tr>'+
                 '<td>Actions:</td>'+
@@ -1069,19 +1108,21 @@ var tbjs_paperlist = {
     },
     
     _get_expand_html_by_stage_passed_title_not_fulltext: function(d) {
-        var _html_btn_ckl = '<button class="btn btn-default btn-sm" onclick="tbjs_paperlist.set_label_check_later(\''+d.paper_id+'\')"><i class="far fa-clock"></i> Check Later</button>';
-        if (srv_screener.has_label_ckl(d)) {
-            _html_btn_ckl = '<button class="btn btn-default btn-sm" onclick="tbjs_paperlist.unset_label_check_later(\''+d.paper_id+'\')"><i class="far fa-clock"></i> Has Checked</button>';
-        }
-
+        var _html_btn_ckl = this.__get_btn_check_later(d);
         var html = 
             '<tr>'+
                 '<td>Actions:</td>'+
                 '<td class="d-flex flex-row">'+
-                '<div class="mr-2"><button class="btn btn-primary btn-sm" onclick="tbjs_paperlist.include_in_sr(\''+d.paper_id+'\', \'Through Full Text Review\')">Include in SR</button></div>'+
+                '<div><button class="btn btn-primary btn-sm" onclick="tbjs_paperlist.include_in_sr(\''+d.paper_id+'\', \'Through Full Text Review\')">Include in SR</button></div>'+
                 this.__get_select_fulltext_exclusion_reasons(d) +
                 '<div class="ml-2"><button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_unscreened(\''+d.paper_id+'\')">Send Back to Unscreened</button></div>'+
                 '<div class="ml-2">' + _html_btn_ckl + '</div>' + 
+
+                '<div class="ml-2">' +
+                    '<span class="mr-2">|</span>' + 
+                    this.__get_div_rct_yes_no(d) + 
+                '</div>' +
+
                 '</td>' +
             '</tr>'+
 
@@ -1128,6 +1169,8 @@ var tbjs_paperlist = {
     },
 
     _get_expand_html_by_stage_included_sr: function(d) {
+        var _html_btn_ckl = this.__get_btn_check_later(d);
+
         var html = 
             '<tr>'+
                 '<td>Actions:</td>'+
@@ -1135,9 +1178,10 @@ var tbjs_paperlist = {
                 '<button class="btn btn-primary btn-sm" onclick="tbjs_paperlist.include_in_srma(\''+d.paper_id+'\')">Include in MA</button> '+
                 '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_needchkft(\''+d.paper_id+'\')">Send Back to Full-Text Review</button> '+
                 '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_unscreened(\''+d.paper_id+'\')">Send Back to Unscreened</button> '+
-                // ' | ' +
-                // '<button class="btn btn-default btn-sm" onclick="tbjs_paperlist.remove_paper_from_tbjs(\''+d.paper_id+'\')">Check Later</button>'+
-                
+                ' | ' +
+                _html_btn_ckl + 
+                ' | ' +
+                this.__get_div_rct_yes_no(d) + 
                 '</td>'+
             '</tr>'+
             this.__get_tr_info(d) + 
@@ -1148,6 +1192,7 @@ var tbjs_paperlist = {
     },
 
     _get_expand_html_by_stage_included_srma: function(d) {
+        var _html_btn_ckl = this.__get_btn_check_later(d);
         var html = 
             '<tr>'+
                 '<td>Actions:</td>'+
@@ -1155,8 +1200,10 @@ var tbjs_paperlist = {
                 '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.include_in_sr(\''+d.paper_id+'\', \'Back from MA\')">Send Back to SR</button> '+
                 '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_needchkft(\''+d.paper_id+'\')">Send Back to Full-Text Review</button> '+
                 '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_unscreened(\''+d.paper_id+'\')">Send Back to Unscreened</button> '+
-                // ' | ' +
-                // '<button class="btn btn-default btn-sm" onclick="tbjs_paperlist.remove_paper_from_tbjs(\''+d.paper_id+'\')">Check Later</button>'+
+                ' | ' +
+                _html_btn_ckl + 
+                ' | ' +
+                this.__get_div_rct_yes_no(d) + 
                 '</td>'+
             '</tr>'+
             this.__get_tr_info(d) + 
@@ -1167,13 +1214,17 @@ var tbjs_paperlist = {
     },
 
     _get_expand_html_by_stage_excluded_by_title: function(d) {
+        var _html_btn_ckl = this.__get_btn_check_later(d);
+
         var html = 
             '<tr>'+
                 '<td>Actions:</td>'+
                 '<td>'+
                 '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_unscreened(\''+d.paper_id+'\')">Send Back to Unscreened</button> '+
-                // ' | ' +
-                // '<button class="btn btn-default btn-sm" onclick="tbjs_paperlist.remove_paper_from_tbjs(\''+d.paper_id+'\')">Check Later</button>'+
+                ' | ' +
+                _html_btn_ckl + 
+                ' | ' +
+                this.__get_div_rct_yes_no(d) + 
                 '</td>'+
             '</tr>'+
             this.__get_tr_info(d) + 
@@ -1184,13 +1235,17 @@ var tbjs_paperlist = {
     },
 
     _get_expand_html_by_stage_excluded_by_abstract: function(d) {
+        var _html_btn_ckl = this.__get_btn_check_later(d);
+
         var html = 
             '<tr>'+
                 '<td>Actions:</td>'+
                 '<td>'+
                 '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_unscreened(\''+d.paper_id+'\')">Send Back to Unscreened</button> '+
-                // ' | ' +
-                // '<button class="btn btn-default btn-sm" onclick="tbjs_paperlist.remove_paper_from_tbjs(\''+d.paper_id+'\')">Check Later</button>'+
+                ' | ' +
+                _html_btn_ckl + 
+                ' | ' +
+                this.__get_div_rct_yes_no(d) + 
                 '</td>'+
             '</tr>'+
             this.__get_tr_info(d) + 
@@ -1201,14 +1256,18 @@ var tbjs_paperlist = {
     },
 
     _get_expand_html_by_stage_excluded_by_fulltext: function(d) {
+        var _html_btn_ckl = this.__get_btn_check_later(d);
+
         var html = 
             '<tr>'+
                 '<td>Actions:</td>'+
                 '<td>'+
                 '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_needchkft(\''+d.paper_id+'\')">Send Back to Full-Text Review</button> '+
                 '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_unscreened(\''+d.paper_id+'\')">Send Back to Unscreened</button> '+
-                // ' | ' +
-                // '<button class="btn btn-default btn-sm" onclick="tbjs_paperlist.remove_paper_from_tbjs(\''+d.paper_id+'\')">Check Later</button>'+
+                ' | ' +
+                _html_btn_ckl + 
+                ' | ' +
+                this.__get_div_rct_yes_no(d) + 
                 '</td>'+
             '</tr>'+
             this.__get_tr_info(d) + 
@@ -1224,6 +1283,8 @@ var tbjs_paperlist = {
                 '<td>Actions:</td>'+
                 '<td>'+
                 '' +
+                ' | ' +
+                this.__get_div_rct_yes_no(d) + 
                 '</td>'+
             '</tr>'+
             this.__get_tr_info(d) + 
@@ -1284,6 +1345,15 @@ var tbjs_paperlist = {
         return html;
     },
 
+    __get_btn_check_later: function(d) {
+        var html = '<button class="btn btn-default btn-sm" onclick="tbjs_paperlist.set_label_check_later(\''+d.paper_id+'\')"><i class="far fa-clock"></i> Check Later</button>';
+        if (srv_screener.has_label_ckl(d)) {
+            html = '<button class="btn btn-default btn-sm" onclick="tbjs_paperlist.unset_label_check_later(\''+d.paper_id+'\')"><i class="far fa-clock"></i> Has Checked</button>';
+        }
+
+        return html;
+    },
+
     __get_div_rct_yes_no: function(d) {
         var usr_fb = '';
         if (d.meta.pred[0].hasOwnProperty(srv_screener.ATTR_PRED_RCT_USR_FB)) {
@@ -1291,8 +1361,8 @@ var tbjs_paperlist = {
         }
         var html = [
             '<label class="mr-2">This study is <span id="tb-row-rct-feedback-'+d.paper_id+'">'+usr_fb+'</span></label>', 
-            '<button class="btn btn-default btn-sm" onclick="tbjs_paperlist.set_rct_feedback(\''+d.paper_id+'\', 1)">RCT, it\'s a RCT</button> ',
-            '<button class="btn btn-default btn-sm" onclick="tbjs_paperlist.set_rct_feedback(\''+d.paper_id+'\', 0)">NOT, it\'s NOT</button>',
+            '<button class="btn btn-default btn-sm" onclick="tbjs_paperlist.set_rct_feedback(\''+d.paper_id+'\', 1)">It\'s a RCT</button> ',
+            '<button class="btn btn-default btn-sm" onclick="tbjs_paperlist.set_rct_feedback(\''+d.paper_id+'\', 0)">It\'s not a RCT</button>',
         ].join('');
 
         return html;
