@@ -5,6 +5,8 @@ import time
 import datetime
 import requests
 
+from tqdm import tqdm
+
 try:
     import xml.etree.cElementTree as ET
 except ImportError:
@@ -242,8 +244,8 @@ def e_fetch(ids, db='pubmed'):
     return ret
 
 
-def parse_endnote_exported_xml(full_fn):
-    '''Parse the file from endnote export
+def parse_ovid_exported_xml(full_fn):
+    '''Parse the file from ovid export
     '''
     try:
         tree = ET.parse(full_fn)
@@ -301,6 +303,71 @@ def parse_endnote_exported_xml(full_fn):
     return papers
 
 
+def parse_endnote_exported_xml(full_fn):
+    '''Parse the file from endnote export
+    '''
+    try:
+        tree = ET.parse(full_fn)
+        root = tree.getroot()
+    except Exception as err:
+        logger.error('ERROR when parsing %s, %s' % (full_fn, err))
+        return None
+
+    papers = []
+    for record in tqdm(root.find('records').findall('record')):
+        paper = {
+            'pid': '',
+            'pid_type': '',
+            'title': '',
+            'authors': [],
+            'abstract': '',
+            'pub_date': [],
+            'pub_type': '',
+            'journal': [],
+        }
+
+        for node in record.iter():
+            # print(node.tag)
+            if node.tag == 'accession-num':
+                paper['pid'] = ''.join(node.itertext())
+            elif node.tag == 'remote-database-name':
+                paper['pid_type'] = ''.join(node.itertext())
+            elif node.tag == 'title':
+                paper['title'] = ''.join(node.itertext())
+            elif node.tag == 'author':
+                paper['authors'].append(''.join(node.itertext()))
+
+            # the journal information
+            elif node.tag == 'full-title':
+                paper['journal'].append(''.join(node.itertext()))
+            elif node.tag == 'pages':
+                paper['journal'].append('p. ' + ''.join(node.itertext()))
+            elif node.tag == 'volume':
+                paper['journal'].append('vol. ' + ''.join(node.itertext()))
+            elif node.tag == 'number':
+                paper['journal'].append('(%s)' % ''.join(node.itertext()))
+
+            # the abstract
+            elif node.tag == 'abstract':
+                paper['abstract'] = ''.join(node.itertext())
+            elif node.tag == 'pub-dates':
+                paper['pub_date'].append( ' '.join(node.itertext()) )
+            elif node.tag == 'dates':
+                year = node.find('year')
+                if year:
+                    paper['pub_date'].append( ' '.join(node.find('year').itertext()) )
+            elif node.tag == 'work-type':
+                paper['pub_type'] = ''.join(node.itertext())
+
+        # update the authors
+        paper['authors'] = ', '.join(paper['authors'])
+        paper['pub_date'] = ' '.join(paper['pub_date'])
+        paper['journal'] = '; '.join(paper['journal'])
+        papers.append(paper)
+
+    return papers
+
+
 def pred_rct(ti, ab):
     '''Predict if a study is RCT
     '''
@@ -323,5 +390,9 @@ def get_today_date_str():
 
 
 if __name__ == "__main__":
-    papers = parse_endnote_exported_xml('/home/hehuan/Downloads/cites.xml')
-    pprint(papers)
+    fn = '/home/hehuan/Downloads/endnote_test.xml'
+    fn = '/home/hehuan/Downloads/endnote_test_large.xml'
+    papers = parse_endnote_exported_xml(fn)
+    # pprint(papers)
+    json.dump(papers, open('%s.json' % fn, 'w'), indent=2)
+    print('* done!')
