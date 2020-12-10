@@ -20,6 +20,7 @@ from werkzeug.utils import secure_filename
 from lnma import dora
 from lnma import util
 from lnma import ss_state
+from tqdm import tqdm
 
 bp = Blueprint("importer", __name__, url_prefix="/importer")
 
@@ -86,7 +87,7 @@ def upload_pmids():
         
         # first check if pmid exists
         is_existed = False
-        is_existed = dora.is_existed_paper(project_id, pmid)
+        is_existed, _paper = dora.is_existed_paper(project_id, pmid)
 
         if is_existed:
             # that's possible!
@@ -165,7 +166,7 @@ def upload_pubmedcsv():
         authors = row['Authors']
         journal = row['Journal/Book']
 
-        p = dora.create_paper_if_not_exist(
+        _, p = dora.create_paper_if_not_exist(
             project_id, pmid, 'pmid',
             title, pub_date, authors, journal, 
             ss_state.SS_ST_AUTO_OTHER
@@ -190,7 +191,64 @@ def upload_pubmedcsv():
 @bp.route('/upload_endnote_xml', methods=['GET', 'POST'])
 @login_required
 def upload_endnote_xml():
+    if request.method == 'GET':
+        return redirect(url_for('importer.by_endnote_xml'))
+
+    # save tmp file
+    if 'input_file' not in request.files:
+        return jsonify({'success': False, 'msg':'No file is uploaded'})
+
+    file_obj = request.files['input_file']
+    if file_obj.filename == '':
+        return jsonify({'success': False, 'msg':'No selected file'})
+
+    # save the upload file
+    if file_obj and util.allowed_file_format(file_obj.filename):
+        # TODO may rename the filename in the future to avoid conflict names
+        fn = secure_filename(file_obj.filename)
+        full_fn = os.path.join(current_app.config['UPLOAD_FOLDER_IMPORTS'], fn)
+        file_obj.save(full_fn)
+    else:
+        return jsonify({'success': False, 'msg': 'Not supported file format'})
+
+    # get the project_id
+    project_id = request.form.get('project_id')
+
+    # get the study list from the uploaded file
+    papers = util.parse_endnote_exported_xml(full_fn)
+    if papers is None:
+        # which means something wrong with the file
+        return jsonify({'success': False, 'msg': 'Not supported file format'})
+
+    else:
+        # now create the paper in db
+        cnt = {
+            'total': len(papers),
+            'existed': 0,
+            'created': 0,
+        }
+        for p in tqdm(papers):
+            is_exist, paper = dora.create_paper_if_not_exist(
+                project_id, p['pid'], 
+                util.shorten_pid_type(p['pid_type']),
+                p['title'],
+                p['abstract'],
+                p['pub_date'],
+                p['authors'],
+                p['journal'],
+                ss_state.SS_ST_IMPORT_ENDNOTE_XML,
+                ss_state.SS_PR_NA,
+                ss_state.SS_RS_NA,
+                None,
+                None,
+            )
+            if is_exist:
+                cnt['existed'] += 1
+            else:
+                cnt['created'] += 1
+
     ret = {
-        "success": True
+        "success": True,
+        "cnt": cnt
     }
     return jsonify(ret)

@@ -29,13 +29,19 @@ bp = Blueprint("analyzer", __name__, url_prefix="/analyzer")
 @bp.route('/')
 @login_required
 def index():
-    return render_template('analyzer.index.html')
+    return render_template('analyzer/index.html')
+
+
+@bp.route('/nma')
+@login_required
+def nma():
+    return render_template('analyzer/nma.html')
 
 
 @bp.route('/pwma')
 @login_required
 def pwma():
-    return render_template('analyzer.pwma.html')
+    return render_template('analyzer/pwma.html')
     
 
 @bp.route('/read_file', methods=['GET', 'POST'])
@@ -102,7 +108,7 @@ def analyze():
 @login_required
 def graphdata_maker():
     if request.method == 'GET':
-        return render_template('analyzer.graphdata_maker.html')
+        return render_template('analyzer/graphdata_maker.html')
     
     # save uploaded file
     if 'file' not in request.files:

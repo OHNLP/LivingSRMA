@@ -109,9 +109,9 @@ def is_existed_paper(project_id, pid):
     )).first()
 
     if paper is None:
-        return False
+        return False, None
     else:
-        return True
+        return True, paper
 
 
 def create_paper(project_id, pid, 
@@ -198,15 +198,15 @@ def create_paper_if_not_exist(project_id, pid,
     ss_st=None, ss_pr=None, ss_rs=None, ss_ex=None, seq_num=None):
     '''A wrapper function for create_paper and is_existed_paper
     '''
-    
-    if is_existed_paper(project_id, pid, pid_type):
-        return None
+    is_existed, paper = is_existed_paper(project_id, pid)
+    if is_existed:
+        return is_existed, paper
     else:
         p = create_paper(project_id, pid, 
             pid_type=pid_type, title=title, 
             pub_date=pub_date, authors=authors, journal=journal, 
             ss_st=ss_st, ss_pr=ss_pr, ss_rs=ss_rs, ss_ex=None, seq_num=seq_num)
-        return p
+        return is_existed, p
 
 
 def get_paper(project_id, pid):

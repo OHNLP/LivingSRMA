@@ -15,7 +15,7 @@ bp = Blueprint("project", __name__, url_prefix="/project")
 @bp.route('/')
 @login_required
 def index():
-    return render_template('project.index.html')
+    return render_template('project/index.html')
 
 
 @bp.route('/create', methods=['GET', 'POST'])
@@ -46,7 +46,7 @@ def create():
 @login_required
 def list():
     if request.method == 'GET':
-        return render_template('project.list.html')
+        return render_template('project/list.html')
 
     projects = dora.list_projects_by_owner_uid(current_user.uid)
 
@@ -54,7 +54,7 @@ def list():
 @bp.route('/editor')
 @login_required
 def editor():
-    return render_template('project.editor.html')
+    return render_template('project/editor.html')
 
 
 ###############################################################

@@ -20,6 +20,7 @@ logger = logging.getLogger("lnma.util")
 logger.setLevel(logging.INFO)
 logging.basicConfig(level=logging.WARNING, format='%(asctime)s [%(name)s] [%(levelname)s] %(message)s')
 
+from . import settings
 
 # PubMed related functions
 PUBMED_URL = {
@@ -58,7 +59,7 @@ def is_valid_pmid(pmid):
     return True
 
 
-def allowed_file_format(fn, exts=['csv', 'xls', 'xlsx']):
+def allowed_file_format(fn, exts=['csv', 'xls', 'xlsx', 'xml']):
     return '.' in fn and \
         fn.rsplit('.', 1)[1].lower() in exts
 
@@ -387,6 +388,23 @@ def get_today_date_str():
     '''Get the today date string
     '''
     return datetime.datetime.today().strftime('%Y-%m-%d')
+
+
+def shorten_pid_type(pid_type):
+    '''make a short pid type for input
+
+    The PID type sometimes is too long for saving, make a shorter version
+    from the original text
+    '''
+    if pid_type is None:
+        return settings.PID_TYPE_NONE_TYPE
+
+    # clean the leading and last blank space
+    pid_type = pid_type.strip()
+    if len(pid_type) == 0:
+        return settings.PID_TYPE_NONE_TYPE
+    else:
+        return pid_type[0:settings.PID_TYPE_MAX_LENGTH]
 
 
 if __name__ == "__main__":

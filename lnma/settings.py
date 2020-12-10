@@ -109,3 +109,7 @@ PUBWEB_DATAFILES = {
     'all_data':           'ALL_DATA.xlsx',
     'prisma_data':        'PRISMA_DATA.xlsx'
 }
+
+# the maximum length of pid_type
+PID_TYPE_MAX_LENGTH = 32
+PID_TYPE_NONE_TYPE = 'UNKNOWN'

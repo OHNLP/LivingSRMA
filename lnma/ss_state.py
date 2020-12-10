@@ -1,10 +1,13 @@
 # for study screening import
-SS_ST_BATCH_SEARCH      = 'b10'
-SS_ST_BATCH_OTHER       = 'b12'
-SS_ST_AUTO_SEARCH       = 'a10'
-SS_ST_AUTO_EMAIL        = 'a11'
-SS_ST_AUTO_OTHER        = 'a12'
-SS_ST_NA                = 'na'
+SS_ST_BATCH_SEARCH       = 'b10'
+SS_ST_BATCH_OTHER        = 'b12'
+SS_ST_AUTO_SEARCH        = 'a10'
+SS_ST_AUTO_EMAIL         = 'a11'
+SS_ST_AUTO_OTHER         = 'a12'
+SS_ST_IMPORT_ENDNOTE_XML = 'a13'
+SS_ST_IMPORT_OVID_XML    = 'a14'
+SS_ST_IMPORT_SIMPLE_CSV  = 'a15'
+SS_ST_NA                 = 'na'
 
 # for study screening process
 SS_PR_LOADED_META       = 'p10'

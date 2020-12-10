@@ -195,7 +195,8 @@ def _update_papers_in_project(prj_update):
     new_papers = []
     for paper in tqdm(papers):
         pid = paper['UI']
-        if dora.is_existed_paper(project_id, pid):
+        is_existed, _paper = dora.is_existed_paper(project_id, pid)
+        if is_existed:
             prj_update['cnt']['existed'].append(pid)
         else:
             new_papers.append(paper)

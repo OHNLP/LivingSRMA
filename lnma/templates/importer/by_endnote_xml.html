@@ -24,13 +24,13 @@ Study Importer | By Endnote XML
 <div class="content">
     <div class="container-fluid">
 
-        <div id="vw_uploader_pmidlist" class="row">
+        <div id="vw_uploader_endnote_xml" class="row">
             <div class="col-md-5">
-                <h5>Import Studies by Endnote XML File</h5>
-                <p class="card-text">Select the XML file exported from Endnote.</p>
-                <form id="upload_xmlfile" method="post" enctype="multipart/form-data">
+                <h5>Import Studies by EndNote XML File</h5>
+                <p class="card-text">Select the XML file exported from EndNote.</p>
+                <form id="upload_file" method="post" enctype="multipart/form-data">
                     <div class="form-group">
-                        <input type="file" class="form-control-file" name="input_xmlfile" id="input_xmlfile">
+                        <input type="file" class="form-control-file" name="input_file" id="input_file">
                     </div>
                 </form>
                 <div>                    
@@ -38,23 +38,15 @@ Study Importer | By Endnote XML
                         v-bind:disabled="btn_import.disabled"
                         v-on:click="import_studies">
                         <i class="fa fa-upload"></i>
-                        Import this xml File
+                        Import this XML file
                     </button>
+                </div>
+
+                <div>
+
                 </div>
             </div>
 
-            <div class="col-md-7">
-                <h5 v-if="results.length!=0">Results ({{ results.length }} studies)</h5>
-                <div>
-                    <div class="result-item row"
-                        v-for="r, i in results">
-                        <div class="col-1"><i class="far fa-file-alt"></i> {{ i + 1 }}</div>
-                        <div class="col-2" style="text-align: center;">{{ r.pmid }}</div>
-                        <div class="col-9" v-if="r.success" style="background-color: aquamarine;">{{ r.msg }}</div>
-                        <div class="col-9" v-else style="background-color: lightcoral;">{{ r.msg }}</div>
-                    </div>
-                </div>
-            </div>
         </div>
 
     </div>
@@ -67,48 +59,6 @@ Study Importer | By Endnote XML
 <script>
 
 
-var vw_uploader_pmidlist = {
-    vpp: null,
-    vpp_id: '#vw_uploader_pmidlist',
-    api_url: "[[ url_for('importer.upload_pmids') ]]",
-
-    init: function() {
-        this.vpp = new Vue({
-            el: this.vpp_id,
-            data: {
-                pmids: '',
-                results: [],
-                btn_import: {
-                    disabled: false
-                }
-            },
-            methods: {
-                import_studies: function() {
-                    vw_uploader_pmidlist.import_studies(this.pmids);
-                }
-            }
-        });
-    },
-
-    import_studies: function(pmids) {
-        var project_id = Cookies.get('project_id');
-        if (project_id == undefined) {
-            alert('Set working project first.');
-            return;
-        }
-        this.vpp.btn_import.disabled = true;
-        $.post(
-            this.api_url,
-            {project_id:project_id, pmids:pmids},
-            function(data) {
-                console.log(data);
-                vw_uploader_pmidlist.vpp.btn_import.disabled = false;
-                vw_uploader_pmidlist.vpp.results = data.rs;
-            }, 'json'
-        )
-    }
-}
-
 var vw_uploader_endnote_xml = {
     vpp: null,
     vpp_id: '#vw_uploader_endnote_xml',
@@ -118,7 +68,7 @@ var vw_uploader_endnote_xml = {
         this.vpp = new Vue({
             el: this.vpp_id,
             data: {
-                results: [],
+                results: {},
                 btn_import: {
                     disabled: false
                 }
@@ -141,10 +91,10 @@ var vw_uploader_endnote_xml = {
         this.vpp.btn_import.disabled = true;
 
         // create form for upload
-        if ($('#input_xmlfile').val() == '') {
+        if ($('#input_file').val() == '') {
             return;
         }
-        var form_data = new FormData($('#upload_xmlfile')[0]);
+        var form_data = new FormData($('#upload_file')[0]);
         form_data.append('project_id', project_id);
 
         // send request
@@ -157,7 +107,7 @@ var vw_uploader_endnote_xml = {
             processData: false,
             success: function(data) {
                 console.log(data);
-                vw_uploader_endnote_xml.vpp.results = data.rs;
+                vw_uploader_endnote_xml.vpp.results = data;
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 console.error(textStatus, errorThrown);
@@ -168,7 +118,6 @@ var vw_uploader_endnote_xml = {
 
 var jarvis = {
     init: function() {
-        vw_uploader_pmidlist.init();
         vw_uploader_endnote_xml.init();
     }
 };
