@@ -71,6 +71,18 @@ Then, edit config file:
 $ sudo vim /etc/nginx/sites-enabled/default
 ```
 
+The default POST size is 1M which not enough for uploading large PDF and XML.
+Edit the server setting to increase the maximum upload size.
+Currently, the max file size is 60M.
+This file size is decided according to the memory and storage of the server.
+Basically, we do NOT encourage to upload a large file which takes long time to transfer. 
+
+A better way is to split the file into small files and upload one by one.
+
+```
+client_max_body_size 60M;
+```
+
 Then, add ssl related configs in server:
 
 ```bash

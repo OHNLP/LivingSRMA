@@ -43,10 +43,17 @@ Study Importer | By Endnote XML
             <div class="col-md-3" style="min-width: 150px;">
                 <h5>Import Studies by EndNote XML File</h5>
                 <p class="card-text">
+                    Please make sure:
+
                     <ol>
                         <li>XML file exported by Endnote.</li>
                         <li>The "Output style" is "Show All Fields".</li>
                     </ol>
+                    In addition, the maximum upload file size is 50MB, don't upload too large file at once. Split them into smaller files and upload one by one.
+
+                </p>
+                <p>
+                    Attention: Do NOT close this page before all studies are imported, otherwise the importing will be interrupted.
                 </p>
 
                 <form id="upload_file" method="post" enctype="multipart/form-data">
@@ -195,6 +202,9 @@ var vw_uploader_endnote_xml = {
                     created: 0
                 },
                 btn_import: {
+                    disabled: false
+                },
+                select_default_stage: {
                     disabled: false
                 }
             },
