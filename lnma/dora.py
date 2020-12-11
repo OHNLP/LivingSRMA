@@ -21,7 +21,10 @@ def create_project(owner_uid, title, keystr=None, abstract="", settings={}):
     """
     # create a project
     project_id = str(uuid.uuid1())
-    keystr = str(uuid.uuid1()).split('-')[0].upper() if keystr is None else keystr
+    if keystr is None or keystr.strip() == '':
+        keystr = str(uuid.uuid1()).split('-')[0].upper()
+    else:
+        pass
     date_created = datetime.datetime.now()
     date_updated = datetime.datetime.now()
     is_deleted = IS_DELETED_NO
