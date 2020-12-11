@@ -111,7 +111,7 @@ def upload_pmids():
         journal = paper['source']
 
         paper = dora.create_paper(project_id, pmid, 'pmid',
-            title, pub_date, authors, journal, ss_state.SS_ST_AUTO_OTHER
+            title, pub_date, authors, journal, None, ss_state.SS_ST_AUTO_OTHER
         )
 
         ret['rs'].append({
@@ -173,7 +173,7 @@ def upload_pubmedcsv():
 
         _, p = dora.create_paper_if_not_exist(
             project_id, pmid, 'pmid',
-            title, pub_date, authors, journal, 
+            title, pub_date, authors, journal, None,
             ss_state.SS_ST_AUTO_OTHER
         )
 
@@ -272,6 +272,7 @@ def save_papers():
             util.check_paper_pub_date(p['pub_date']),
             p['authors'],
             util.check_paper_journal(p['journal']),
+            None,
             ss_state.SS_ST_IMPORT_ENDNOTE_XML,
             ss_pr,
             ss_rs,
@@ -354,6 +355,7 @@ def upload_endnote_xml_and_save_papers():
                 util.check_paper_pub_date(p['pub_date']),
                 p['authors'],
                 util.check_paper_journal(p['journal']),
+                None,
                 ss_state.SS_ST_IMPORT_ENDNOTE_XML,
                 ss_state.SS_PR_NA,
                 ss_state.SS_RS_NA,

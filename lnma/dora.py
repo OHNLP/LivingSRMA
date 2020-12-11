@@ -119,7 +119,7 @@ def is_existed_paper(project_id, pid):
 
 def create_paper(project_id, pid, 
     pid_type='pmid', title=None, abstract=None,
-    pub_date=None, authors=None, journal=None, meta={},
+    pub_date=None, authors=None, journal=None, meta=None,
     ss_st=None, ss_pr=None, ss_rs=None, ss_ex=None, seq_num=None):
     """Create a paper object, 
 
@@ -204,7 +204,7 @@ def _update_paper_rct_result(paper):
 
 def create_paper_if_not_exist(project_id, pid, 
     pid_type=None, title=None, abstract=None,
-    pub_date=None, authors=None, journal=None, 
+    pub_date=None, authors=None, journal=None, meta=None,
     ss_st=None, ss_pr=None, ss_rs=None, ss_ex=None, seq_num=None):
     '''A wrapper function for create_paper and is_existed_paper
     '''
@@ -214,20 +214,20 @@ def create_paper_if_not_exist(project_id, pid,
     else:
         p = create_paper(project_id, pid, 
             pid_type=pid_type, title=title, 
-            pub_date=pub_date, authors=authors, journal=journal, 
+            pub_date=pub_date, authors=authors, journal=journal, meta=meta,
             ss_st=ss_st, ss_pr=ss_pr, ss_rs=ss_rs, ss_ex=ss_ex, seq_num=seq_num)
         return is_existed, p
 
 
 def create_paper_if_not_exist_and_predict_rct(project_id, pid, 
     pid_type=None, title=None, abstract=None,
-    pub_date=None, authors=None, journal=None, 
+    pub_date=None, authors=None, journal=None, meta=None,
     ss_st=None, ss_pr=None, ss_rs=None, ss_ex=None, seq_num=None):
     '''A wrapper function for create_paper and is_existed_paper
     '''
     is_existed, paper = create_paper_if_not_exist(project_id, pid,
             pid_type=pid_type, title=title, 
-            pub_date=pub_date, authors=authors, journal=journal, 
+            pub_date=pub_date, authors=authors, journal=journal, meta=meta,
             ss_st=ss_st, ss_pr=ss_pr, ss_rs=ss_rs, ss_ex=ss_ex, seq_num=seq_num)
 
     if is_existed:
