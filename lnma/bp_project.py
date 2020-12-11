@@ -22,7 +22,7 @@ def index():
 @login_required
 def create():
     if request.method == 'GET':
-        return render_template('project.create.html')
+        return render_template('project/create.html')
 
     query = request.form.get('query')
 
