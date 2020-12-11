@@ -412,3 +412,15 @@ def unset_label_check_later(paper_id):
     paper = dora.unset_paper_ss_label(paper_id, ss_state.SS_LABEL_CKL)
     return paper
 
+
+def create_pr_rs_details(reason, decision):
+    """
+    Create detail_dict
+    """
+    detail_dict = {
+        'date_decided': get_today_date_str(),
+        'reason': reason,
+        'decision': decision
+    }
+
+    return detail_dict

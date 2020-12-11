@@ -362,9 +362,17 @@ def parse_endnote_exported_xml(full_fn):
 
         # update the authors
         paper['authors'] = ', '.join(paper['authors'])
-        paper['pub_date'] = ' '.join(paper['pub_date'])
-        paper['journal'] = '; '.join(paper['journal'])
-        papers.append(paper)
+        paper['pub_date'] = check_paper_pub_date(' '.join(paper['pub_date']))
+        paper['journal'] = check_paper_journal('; '.join(paper['journal']))
+        paper['pid_type'] = check_paper_pid_type(paper['pid_type'])
+
+        # if the pid is empty, just ignore this study
+        paper['pid'] = check_paper_pid(paper['pid'])
+        
+        if paper['pid'] == '':
+            pass
+        else:
+            papers.append(paper)
 
     return papers
 
@@ -390,7 +398,7 @@ def get_today_date_str():
     return datetime.datetime.today().strftime('%Y-%m-%d')
 
 
-def shorten_pid_type(pid_type):
+def check_paper_pid_type(pid_type):
     '''make a short pid type for input
 
     The PID type sometimes is too long for saving, make a shorter version
@@ -405,6 +413,45 @@ def shorten_pid_type(pid_type):
         return settings.PID_TYPE_NONE_TYPE
     else:
         return pid_type[0:settings.PID_TYPE_MAX_LENGTH]
+
+
+def check_paper_pid(pid):
+    '''check the paper pid for valid input
+    '''
+    if pid is None:
+        return ''
+
+    pid = pid.strip()
+    if len(pid) == 0:
+        return ''
+    else:
+        return pid[0:settings.PAPER_PID_MAX_LENGTH]
+
+
+def check_paper_pub_date(pub_date):
+    '''check the paper pub date for valid input
+    '''
+    if pub_date is None:
+        return ''
+
+    pub_date = pub_date.strip()
+    if len(pub_date) == 0:
+        return ''
+    else:
+        return pub_date[0:settings.PAPER_PUB_DATE_MAX_LENGTH]
+
+
+def check_paper_journal(journal):
+    '''check the paper journal for valid input
+    '''
+    if journal is None:
+        return ''
+
+    journal = journal.strip()
+    if len(journal) == 0:
+        return ''
+    else:
+        return journal[0:settings.PAPER_JOURNAL_MAX_LENGTH]
 
 
 if __name__ == "__main__":

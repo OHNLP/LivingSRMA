@@ -179,7 +179,14 @@ def update_paper_rct_result(project_id, pid):
     '''Update the RCT detection result
     '''
     paper = get_paper(project_id, pid)
+    paper = _update_paper_rct_result(paper)
 
+    return paper
+
+
+def _update_paper_rct_result(paper):
+    '''The internal function of updating RCT result
+    '''
     # TODO catch exception
     pred = pred_rct(paper.title, paper.abstract)
     paper.meta['pred'] = pred['pred']
@@ -189,11 +196,11 @@ def update_paper_rct_result(project_id, pid):
     db.session.add(paper)
     db.session.commit()
 
-    return pred
+    return paper
 
 
 def create_paper_if_not_exist(project_id, pid, 
-    pid_type='pmid', title=None, abstract=None,
+    pid_type=None, title=None, abstract=None,
     pub_date=None, authors=None, journal=None, 
     ss_st=None, ss_pr=None, ss_rs=None, ss_ex=None, seq_num=None):
     '''A wrapper function for create_paper and is_existed_paper
@@ -205,8 +212,28 @@ def create_paper_if_not_exist(project_id, pid,
         p = create_paper(project_id, pid, 
             pid_type=pid_type, title=title, 
             pub_date=pub_date, authors=authors, journal=journal, 
-            ss_st=ss_st, ss_pr=ss_pr, ss_rs=ss_rs, ss_ex=None, seq_num=seq_num)
+            ss_st=ss_st, ss_pr=ss_pr, ss_rs=ss_rs, ss_ex=ss_ex, seq_num=seq_num)
         return is_existed, p
+
+
+def create_paper_if_not_exist_and_predict_rct(project_id, pid, 
+    pid_type=None, title=None, abstract=None,
+    pub_date=None, authors=None, journal=None, 
+    ss_st=None, ss_pr=None, ss_rs=None, ss_ex=None, seq_num=None):
+    '''A wrapper function for create_paper and is_existed_paper
+    '''
+    is_existed, paper = create_paper_if_not_exist(project_id, pid,
+            pid_type=pid_type, title=title, 
+            pub_date=pub_date, authors=authors, journal=journal, 
+            ss_st=ss_st, ss_pr=ss_pr, ss_rs=ss_rs, ss_ex=ss_ex, seq_num=seq_num)
+
+    if is_existed:
+        # nothing to do for a existing paper
+        return is_existed, paper
+    else:
+        # update the RCT for this paper by the internal function
+        paper = _update_paper_rct_result(paper)
+        return is_existed, paper
 
 
 def get_paper(project_id, pid):
@@ -255,11 +282,15 @@ def get_papers_by_stage(project_id, stage):
     elif stage == ss_state.SS_STAGE_UNSCREENED:
         papers = Paper.query.filter(and_(
             Paper.project_id == project_id,
-            Paper.ss_st.in_([
-                ss_state.SS_ST_AUTO_EMAIL,
-                ss_state.SS_ST_AUTO_SEARCH,
-                ss_state.SS_ST_AUTO_OTHER
-            ]),
+            # 2020-12-10 how the study is imported doesn't matter for unscreened
+            # Paper.ss_st.in_([
+            #     ss_state.SS_ST_AUTO_EMAIL,
+            #     ss_state.SS_ST_AUTO_SEARCH,
+            #     ss_state.SS_ST_AUTO_OTHER,
+            #     ss_state.SS_ST_IMPORT_ENDNOTE_XML,
+            #     ss_state.SS_ST_IMPORT_OVID_XML,
+            #     ss_state.SS_ST_IMPORT_SIMPLE_CSV
+            # ]),
             Paper.ss_pr == ss_state.SS_PR_NA,
             Paper.ss_rs == ss_state.SS_RS_NA
         )).order_by(Paper.date_updated.desc()).all()
@@ -594,8 +625,8 @@ def get_screener_stat_by_project_id(project_id):
     sql = """
     select project_id,
         count(*) as all_of_them,
-        count(case when ss_st in ('a10', 'a11', 'a12') and ss_pr = 'na' and ss_rs = 'na' then paper_id else null end) as unscreened,
-        count(case when ss_st in ('a10', 'a11', 'a12') and ss_pr = 'na' and ss_rs = 'na' and json_contains_path(ss_ex->'$.label', 'one', '$.CKL') then paper_id else null end) as unscreened_ckl,
+        count(case when ss_pr = 'na' and ss_rs = 'na' then paper_id else null end) as unscreened,
+        count(case when ss_pr = 'na' and ss_rs = 'na' and json_contains_path(ss_ex->'$.label', 'one', '$.CKL') then paper_id else null end) as unscreened_ckl,
 
         count(case when ss_pr = 'p20' and ss_rs = 'na' then paper_id else null end) as passed_title_not_fulltext,
         count(case when ss_pr = 'p20' and ss_rs = 'na' and json_contains_path(ss_ex->'$.label', 'one', '$.CKL') then paper_id else null end) as passed_title_not_fulltext_ckl,
@@ -662,7 +693,11 @@ def get_screener_stat_by_project_id(project_id):
     ]
     result = {}
     for attr in attrs:
-        result[attr] = r[attr]
+        try:
+            result[attr] = r[attr]
+        except Exception as err:
+            
+            result[attr] = 0
 
     return result
 

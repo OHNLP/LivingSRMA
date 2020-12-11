@@ -110,6 +110,10 @@ PUBWEB_DATAFILES = {
     'prisma_data':        'PRISMA_DATA.xlsx'
 }
 
-# the maximum length of pid_type
+# the maximum length
 PID_TYPE_MAX_LENGTH = 32
 PID_TYPE_NONE_TYPE = 'UNKNOWN'
+
+PAPER_PID_MAX_LENGTH = 64
+PAPER_PUB_DATE_MAX_LENGTH = 32
+PAPER_JOURNAL_MAX_LENGTH = 128

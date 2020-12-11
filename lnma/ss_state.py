@@ -51,7 +51,21 @@ SS_STAGE_DECIDED = 'decided'
 
 # for screener
 SS_STAGE_CONDITIONS = {
-    'unscreened': "ss_st in ('a10', 'a11', 'a12') and ss_pr = 'na' and ss_rs = 'na'"
+    'unscreened': "ss_pr = 'na' and ss_rs = 'na'"
+}
+
+# for stage -> pr + rs
+SS_STAGE_TO_PR_AND_RS = {
+    SS_STAGE_UNSCREENED: (SS_PR_NA, SS_RS_NA),
+    
+    SS_STATE_PASSED_TITLE_NOT_FULLTEXT: (SS_PR_PASSED_TITLE, SS_RS_NA),
+
+    SS_STAGE_EXCLUDED_BY_TITLE: (SS_PR_NA, SS_RS_EXCLUDED_TITLE),
+    SS_STAGE_EXCLUDED_BY_ABSTRACT: (SS_PR_NA, SS_RS_EXCLUDED_ABSTRACT),
+    SS_STAGE_EXCLUDED_BY_FULLTEXT: (SS_PR_NA, SS_RS_EXCLUDED_FULLTEXT),
+
+    SS_STAGE_INCLUDED_SR: (SS_PR_CHECKED_FULLTEXT, SS_RS_INCLUDED_ONLY_SR),
+    SS_STAGE_INCLUDED_SRMA: (SS_PR_CHECKED_FULLTEXT, SS_RS_INCLUDED_SRMA)
 }
 
 # for labels

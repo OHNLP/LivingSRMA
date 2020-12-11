@@ -20,7 +20,12 @@ from werkzeug.utils import secure_filename
 from lnma import dora
 from lnma import util
 from lnma import ss_state
+
+from lnma.bp_screener import create_pr_rs_details
+
 from tqdm import tqdm
+
+import json
 
 bp = Blueprint("importer", __name__, url_prefix="/importer")
 
@@ -40,7 +45,7 @@ def by_pubmed_csv():
 @bp.route('/by_endnote_xml')
 @login_required
 def by_endnote_xml():
-    return render_template('importer/by_endnote_xml.html')
+    return render_template('importer/by_endnote_xml.html', ss=ss_state)
 
 
 @bp.route('/upload_pmids', methods=['GET', 'POST'])
@@ -216,6 +221,118 @@ def upload_endnote_xml():
 
     # get the study list from the uploaded file
     papers = util.parse_endnote_exported_xml(full_fn)
+
+    if papers is None:
+        # which means something wrong with the file
+        return jsonify({'success': False, 'msg': 'Not supported file format'})
+
+    ret = {
+        "success": True,
+        "papers": papers
+    }
+
+    return jsonify(ret)
+
+
+@bp.route('/save_papers', methods=['GET', 'POST'])
+@login_required
+def save_papers():
+    if request.method == 'GET':
+        return redirect(url_for('importer.by_endnote_xml'))
+
+    # get the project_id
+    project_id = request.form.get('project_id')
+    # get the papers
+    papers = json.loads(request.form.get('papers'))
+    # get the default stage
+    stage = request.form.get('stage')
+
+    # convert stage to pr and rs
+    ss_pr, ss_rs = ss_state.SS_STAGE_TO_PR_AND_RS[stage]
+    ss_ex = create_pr_rs_details('User specified', stage)
+
+    ret = {
+        "success": True,
+        "cnt": {
+            'total': len(papers),
+            'existed': 0,
+            'created': 0,
+        },
+        "papers": [],
+    }
+
+    for p in papers:
+    # for p in tqdm(papers):
+        is_exist, paper = dora.create_paper_if_not_exist_and_predict_rct(
+            project_id, 
+            p['pid'], 
+            p['pid_type'],
+            p['title'],
+            p['abstract'],
+            util.check_paper_pub_date(p['pub_date']),
+            p['authors'],
+            util.check_paper_journal(p['journal']),
+            ss_state.SS_ST_IMPORT_ENDNOTE_XML,
+            ss_pr,
+            ss_rs,
+            ss_ex,
+            None,
+        )
+        
+        # create a return obj
+        _p = {
+            'result': 'existed',
+            'success': False,
+            'seq': p['seq']
+        }
+        if is_exist:
+            ret['cnt']['existed'] += 1
+            _p = {
+                'result': 'existed',
+                'success': False,
+                'seq': p['seq']
+            }
+        else:
+            ret['cnt']['created'] += 1
+            _p = {
+                'result': 'created',
+                'success': False,
+                'seq': p['seq']
+            }
+
+        ret['papers'].append(_p)
+
+    return jsonify(ret)
+
+
+@bp.route('/upload_endnote_xml_and_save_papers', methods=['GET', 'POST'])
+@login_required
+def upload_endnote_xml_and_save_papers():
+    if request.method == 'GET':
+        return redirect(url_for('importer.by_endnote_xml'))
+
+    # save tmp file
+    if 'input_file' not in request.files:
+        return jsonify({'success': False, 'msg':'No file is uploaded'})
+
+    file_obj = request.files['input_file']
+    if file_obj.filename == '':
+        return jsonify({'success': False, 'msg':'No selected file'})
+
+    # save the upload file
+    if file_obj and util.allowed_file_format(file_obj.filename):
+        # TODO may rename the filename in the future to avoid conflict names
+        fn = secure_filename(file_obj.filename)
+        full_fn = os.path.join(current_app.config['UPLOAD_FOLDER_IMPORTS'], fn)
+        file_obj.save(full_fn)
+    else:
+        return jsonify({'success': False, 'msg': 'Not supported file format'})
+
+    # get the project_id
+    project_id = request.form.get('project_id')
+
+    # get the study list from the uploaded file
+    papers = util.parse_endnote_exported_xml(full_fn)
     if papers is None:
         # which means something wrong with the file
         return jsonify({'success': False, 'msg': 'Not supported file format'})
@@ -228,14 +345,15 @@ def upload_endnote_xml():
             'created': 0,
         }
         for p in tqdm(papers):
-            is_exist, paper = dora.create_paper_if_not_exist(
-                project_id, p['pid'], 
-                util.shorten_pid_type(p['pid_type']),
+            is_exist, paper = dora.create_paper_if_not_exist_and_predict_rct(
+                project_id, 
+                p['pid'], 
+                p['pid_type'],
                 p['title'],
                 p['abstract'],
-                p['pub_date'],
+                util.check_paper_pub_date(p['pub_date']),
                 p['authors'],
-                p['journal'],
+                util.check_paper_journal(p['journal']),
                 ss_state.SS_ST_IMPORT_ENDNOTE_XML,
                 ss_state.SS_PR_NA,
                 ss_state.SS_RS_NA,

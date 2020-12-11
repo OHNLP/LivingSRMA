@@ -107,15 +107,15 @@ class Paper(db.Model):
     __table_args__ = {'extend_existing': True}
 
     paper_id = db.Column(db.String(48), primary_key=True, nullable=False)
-    pid = db.Column(db.String(64), index=False)
+    pid = db.Column(db.String(settings.PAPER_PID_MAX_LENGTH), index=False)
     pid_type = db.Column(db.String(settings.PID_TYPE_MAX_LENGTH), index=False)
     seq_num = db.Column(db.Integer, index=False)
     project_id = db.Column(db.String(48), index=False)
     title = db.Column(db.Text, index=False)
     abstract = db.Column(LONGTEXT, index=False)
-    pub_date = db.Column(db.String(32), index=False)
+    pub_date = db.Column(db.String(settings.PAPER_PUB_DATE_MAX_LENGTH), index=False)
     authors = db.Column(db.Text, index=False)
-    journal = db.Column(db.String(128), index=False)
+    journal = db.Column(db.String(settings.PAPER_JOURNAL_MAX_LENGTH), index=False)
     meta = db.Column(db.JSON, index=False)
     ss_st = db.Column(db.String(8), index=False)
     ss_pr = db.Column(db.String(8), index=False)
