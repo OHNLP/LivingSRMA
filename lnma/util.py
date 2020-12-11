@@ -398,6 +398,16 @@ def get_today_date_str():
     return datetime.datetime.today().strftime('%Y-%m-%d')
 
 
+def get_nct_number(s):
+    '''Get the NCT8 number from study
+    '''
+    return re.findall('NCT\d{8}', s, re.MULTILINE)
+
+
+###############################################################################
+# Check the input field to avoid invaild input values
+###############################################################################
+
 def check_paper_pid_type(pid_type):
     '''make a short pid type for input
 
