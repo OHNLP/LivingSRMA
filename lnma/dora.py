@@ -10,6 +10,7 @@ from .models import *
 from . import db
 
 from lnma.util import pred_rct
+from lnma.util import get_nct_number
 
 IS_DELETED_YES = 'yes'
 IS_DELETED_NO = 'no'
@@ -134,14 +135,30 @@ def create_paper(project_id, pid,
     pub_date = '' if pub_date is None else pub_date
     authors = '' if authors is None else authors
     journal = '' if journal is None else journal
-    meta = {} if meta is None else meta
+    
+    # the meta will contain more information
+    all_rct_ids = get_nct_number(abstract)
+    rct_id = '' if len(all_rct_ids) == 0 else all_rct_ids[0]
+    _meta = {
+        'rct_id': rct_id,
+        'all_rct_ids': all_rct_ids
+    }
+    if meta is None:
+        pass
+    else:
+        # copy the data in the meta to overwrite the default one
+        for k in meta:
+            _meta[k] = meta[k]
+
     ss_st = ss_state.SS_ST_AUTO_OTHER if ss_st is None else ss_st
     ss_pr = ss_state.SS_PR_NA if ss_pr is None else ss_pr
     ss_rs = ss_state.SS_RS_NA if ss_rs is None else ss_rs
+
     # ss_ex is an extend attribute for each record
     ss_ex = {
         'label': {}
     } if ss_ex is None else ss_ex
+
     date_created = datetime.datetime.now()
     date_updated = datetime.datetime.now()
     is_deleted = IS_DELETED_NO
@@ -161,7 +178,7 @@ def create_paper(project_id, pid,
         pub_date = pub_date,
         authors = authors,
         journal = journal,
-        meta = meta,
+        meta = _meta,
         ss_st = ss_st,
         ss_pr = ss_pr,
         ss_rs = ss_rs,
@@ -472,6 +489,24 @@ def get_papers_by_stage_v1(project_id, stage):
         papers = []
 
     return papers
+
+
+def set_paper_rct_id(paper_id, rct_id):
+    '''Set the main rct_id for study
+    '''
+    paper = Paper.query.filter_by(
+        paper_id=paper_id
+    ).first()
+
+    paper.meta['rct_id'] = rct_id
+    flag_modified(paper, "meta")
+
+    # automatic update the date_updated
+    paper.date_updated = datetime.datetime.now()
+    
+    db.session.add(paper)
+    db.session.commit()
+    return paper
 
 
 def set_paper_pr_rs(paper_id, pr=None, rs=None):
