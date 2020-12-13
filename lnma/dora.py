@@ -230,7 +230,7 @@ def create_paper_if_not_exist(project_id, pid,
         return is_existed, paper
     else:
         p = create_paper(project_id, pid, 
-            pid_type=pid_type, title=title, 
+            pid_type=pid_type, title=title, abstract=abstract,
             pub_date=pub_date, authors=authors, journal=journal, meta=meta,
             ss_st=ss_st, ss_pr=ss_pr, ss_rs=ss_rs, ss_ex=ss_ex, seq_num=seq_num)
         return is_existed, p
@@ -243,7 +243,7 @@ def create_paper_if_not_exist_and_predict_rct(project_id, pid,
     '''A wrapper function for create_paper and is_existed_paper
     '''
     is_existed, paper = create_paper_if_not_exist(project_id, pid,
-            pid_type=pid_type, title=title, 
+            pid_type=pid_type, title=title, abstract=abstract,
             pub_date=pub_date, authors=authors, journal=journal, meta=meta,
             ss_st=ss_st, ss_pr=ss_pr, ss_rs=ss_rs, ss_ex=ss_ex, seq_num=seq_num)
 

@@ -351,6 +351,8 @@ def parse_endnote_exported_xml(full_fn):
             # the abstract
             elif node.tag == 'abstract':
                 paper['abstract'] = ''.join(node.itertext())
+                print('* found abstract: %s' % paper['abstract'])
+                
             elif node.tag == 'pub-dates':
                 paper['pub_date'].append( ' '.join(node.itertext()) )
             elif node.tag == 'dates':
@@ -467,6 +469,7 @@ def check_paper_journal(journal):
 if __name__ == "__main__":
     fn = '/home/hehuan/Downloads/endnote_test.xml'
     fn = '/home/hehuan/Downloads/endnote_test_large.xml'
+    fn = '/home/hehuan/Downloads/endnote_test_RCC.xml'
     papers = parse_endnote_exported_xml(fn)
     # pprint(papers)
     json.dump(papers, open('%s.json' % fn, 'w'), indent=2)
