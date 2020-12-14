@@ -797,6 +797,39 @@ def get_screener_stat_by_project_id(project_id):
     return result
 
 
+def get_screener_stat_only_unscreened_by_project_id(project_id):
+    '''Get the statistics of the project for the screener
+    '''
+    sql = """
+    select project_id,
+        count(*) as all_of_them,
+        count(case when ss_pr = 'na' and ss_rs = 'na' then paper_id else null end) as unscreened,
+        count(case when ss_pr = 'na' and ss_rs = 'na' and json_contains_path(ss_ex->'$.label', 'one', '$.CKL') then paper_id else null end) as unscreened_ckl
+    
+    from papers
+    where project_id = '{project_id}'
+        and is_deleted = 'no'
+    group by project_id
+    """.format(project_id=project_id)
+    r = db.session.execute(sql).fetchone()
+
+    # put the values in result data
+    attrs = [
+        'all_of_them',
+        'unscreened',
+        'unscreened_ckl'
+    ]
+    result = {}
+    for attr in attrs:
+        try:
+            result[attr] = r[attr]
+        except Exception as err:
+            
+            result[attr] = 0
+
+    return result
+
+
 def get_current_max_seq_num(project_id):
     '''Get the max seq number
     '''

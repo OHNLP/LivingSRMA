@@ -54,25 +54,21 @@ Dashboard
                                 Unscreened
                                 <span>
 
-                                    <span class="badge badge-primary badge-pill">
+                                    <span class="badge badge-primary badge-pill" title="Unscreened studies">
                                         [[ project_info_dict[project.project_id]['stat']['unscreened'] ]]
                                     </span>
-                                    <span class="badge badge-ckl badge-pill">
+                                    <span class="badge badge-ckl badge-pill" title="Unscreened studies with [Check Later] label">
                                         [[ project_info_dict[project.project_id]['stat']['unscreened_ckl'] ]]
                                     </span>
 
                                 </span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                All Decided
+                                All studies
                                 <span>
 
                                     <span class="badge badge-primary badge-pill">
-                                        [[ project_info_dict[project.project_id]['stat']['decided'] ]]
-                                    </span>
-
-                                    <span class="badge badge-ckl badge-pill">
-                                        [[ project_info_dict[project.project_id]['stat']['decided_ckl'] ]]
+                                        [[ project_info_dict[project.project_id]['stat']['all_of_them'] ]]
                                     </span>
 
                                 </span>

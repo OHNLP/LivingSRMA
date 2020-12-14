@@ -37,7 +37,7 @@ def index():
     project_info_dict = {}
     for project in projects:
         project_id = project.project_id
-        rst = dora.get_screener_stat_by_project_id(project_id)
+        rst = dora.get_screener_stat_only_unscreened_by_project_id(project_id)
         project_info_dict[project_id] = {
             'stat': rst
         }
