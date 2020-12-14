@@ -82,13 +82,68 @@ def get_user(uid):
     return user
 
 
-def list_projects_by_owner_uid(owner_uid):
+def count_projects(uid=None):
+    '''
+    Count how many projects a user has
+    '''
+
+    if uid is None:
+        cnt = Project.query.count()
+    else:
+        cnt = Project.query.filter_by(
+            Project.related_users.any(
+                uid=uid
+            )
+        ).count()
+
+    return cnt
+    
+
+def list_projects_by_uid(owner_uid):
     projects = Project.query.filter(Project.related_users.any(uid=owner_uid)).all()
     return projects
 
 
-def list_projects_by_uid(uid):
-    projects = db.session.query()
+def delete_project(project_id):
+    '''
+    Delete a project (and related relations with users)
+    '''
+    p = Project.query.filter_by(
+        project_id=project_id
+    ).first()
+
+    if p is None:
+        return False
+
+    db.session.delete(p)
+    db.session.commit()
+
+    return True
+
+
+def delete_project_and_papers(project_id):
+    '''
+    Delete a project and related papers
+    '''
+    prj = Project.query.filter_by(
+        project_id=project_id
+    ).first()
+
+    if prj is None:
+        return False
+
+    # first, delete those papers
+    Paper.query.filter_by(
+        project_id=project_id
+    ).delete()
+
+    # second, delete the project
+    db.session.delete(prj)
+
+    # commit
+    db.session.commit()
+
+    return True
 
 
 def is_existed_project(project_id):
@@ -689,7 +744,8 @@ def get_screener_stat_by_project_id(project_id):
         count(case when ss_rs = 'f3' then paper_id else null end) as included_srma,
         count(case when ss_rs = 'f3' and json_contains_path(ss_ex->'$.label', 'one', '$.CKL') then paper_id else null end) as included_srma_ckl,
 
-        count(case when ss_rs != 'na' then paper_id else null end) as decided
+        count(case when ss_rs != 'na' then paper_id else null end) as decided,
+        count(case when ss_rs != 'na' and json_contains_path(ss_ex->'$.label', 'one', '$.CKL') then paper_id else null end) as decided_ckl
     
     from papers
     where project_id = '{project_id}'
@@ -727,7 +783,8 @@ def get_screener_stat_by_project_id(project_id):
         'included_srma',
         'included_srma_ckl',
 
-        'decided'
+        'decided',
+        'decided_ckl'
     ]
     result = {}
     for attr in attrs:

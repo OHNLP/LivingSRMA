@@ -1,0 +1,117 @@
+{% extends '_layout_adminlte.html' %}
+
+{% block title %}
+Dashboard
+{% endblock %}
+
+{% block style %}
+<style>
+
+/* badge */
+.badge-ckl {
+    color: #fff;
+    background-color: #b88d17;
+}
+
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Content Header (Page header) -->
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0 text-dark">My Dashboard</h1>
+            </div><!-- /.col -->
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="[[ url_for('portal.index') ]]">Home</a></li>
+                    <li class="breadcrumb-item active">Dashboard</li>
+                </ol>
+            </div><!-- /.col -->
+        </div><!-- /.row -->
+    </div><!-- /.container-fluid -->
+</div>
+<!-- /.content-header -->
+
+<div class="content">
+    <div class="container-fluid">
+        {% if projects is none %}
+        <div class="row">
+            <p>No project</p>
+        </div>
+        {% else %}
+        <div class="row">
+            {% for project in projects %}
+            <div class="col-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5>[[ project.title ]]</h5>
+                        <p class="card-subtitle mb-2 text-muted">Last updated: </p>
+                        <ul class="list-group list-group-flush mb-2">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Unscreened
+                                <span>
+
+                                    <span class="badge badge-primary badge-pill">
+                                        [[ project_info_dict[project.project_id]['stat']['unscreened'] ]]
+                                    </span>
+                                    <span class="badge badge-ckl badge-pill">
+                                        [[ project_info_dict[project.project_id]['stat']['unscreened_ckl'] ]]
+                                    </span>
+
+                                </span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                All Decided
+                                <span>
+
+                                    <span class="badge badge-primary badge-pill">
+                                        [[ project_info_dict[project.project_id]['stat']['decided'] ]]
+                                    </span>
+
+                                    <span class="badge badge-ckl badge-pill">
+                                        [[ project_info_dict[project.project_id]['stat']['decided_ckl'] ]]
+                                    </span>
+
+                                </span>
+                            </li>
+                        </ul>
+                        <button class="btn btn-primary" onclick="jarvis.goto_screener('[[ project.project_id ]]', '[[ project.title ]]')">
+                            <i class="nav-icon fas fa-filter"></i>
+                            Screen studies
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block active_nav_link %}dashboard{% endblock %}
+
+{% block script %}
+<script>
+var jarvis = {
+    goto_screener: function(project_id, title) {
+        Cookies.set('project_id', project_id);
+        Cookies.set('project_title', title);
+
+        location.href = '[[ url_for("screener.overview") ]]';
+    },
+
+    init: function() {
+
+    }
+};
+
+$(document).ready(function() {
+    jarvis.init();
+});
+</script>
+{% endblock %}

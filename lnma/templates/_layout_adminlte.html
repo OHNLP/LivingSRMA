@@ -382,8 +382,8 @@ label {
 <!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
 <!-- Bootstrap 4 -->
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
 <!-- AdminLTE App -->
 <script src="/static/lib/adminlte3/js/adminlte.min.js"></script>
 <!-- AdminLTE for this App -->
@@ -392,13 +392,17 @@ label {
 <script src="https://cdn.jsdelivr.net/npm/vue@2.6.11"></script>
 <!-- Toastr -->
 <script src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
 <script>
+
 var ACTIVE_NAV_LINK = '{% block active_nav_link %}{% endblock %}';
 var __active_nav_links = ACTIVE_NAV_LINK.split(',');
+
 for (var i = 0; i < __active_nav_links.length; i++) {
     var active_nav_link = __active_nav_links[i];
     $('#nav-link-' + active_nav_link).addClass('active');    
 }
+
 function toast(msg, type) {
     if (typeof(type) == 'undefined') {
       type = 'info';
@@ -408,6 +412,7 @@ function toast(msg, type) {
     }
     toastr[type](msg);
 }
+
 {% with messages = get_flashed_messages(with_categories=true) %}
   <!-- Categories: success (green), info (blue), warning (yellow), danger (red) -->
   {% if messages %}
@@ -417,6 +422,7 @@ function toast(msg, type) {
   {% endif %}
 {% endwith %}
 </script>
+
 {% block script %}
 {% endblock %}
 </body>

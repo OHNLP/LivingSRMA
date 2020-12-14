@@ -4,6 +4,7 @@ from flask import render_template
 from flask import Blueprint
 from flask import jsonify
 from flask import current_app
+from flask import redirect
 
 from flask_login import login_required
 from flask_login import current_user
@@ -39,7 +40,7 @@ def create():
 
     flash('Project is created!')
 
-    return 'OK!'
+    return redirect(url_for('project.list'))
 
 
 @bp.route('/list', methods=['GET', 'POST'])
@@ -48,7 +49,7 @@ def list():
     if request.method == 'GET':
         return render_template('project/list.html')
 
-    projects = dora.list_projects_by_owner_uid(current_user.uid)
+    projects = dora.list_projects_by_uid(current_user.uid)
 
 
 @bp.route('/editor')
@@ -64,7 +65,7 @@ def editor():
 @bp.route('/api/list')
 @login_required
 def api_list():
-    projects = dora.list_projects_by_owner_uid(current_user.uid)
+    projects = dora.list_projects_by_uid(current_user.uid)
 
     ret = {
         'success': True,
@@ -77,7 +78,7 @@ def api_list():
 @bp.route('/api/get_project')
 @login_required
 def api_get_project():
-    projects = dora.list_projects_by_owner_uid(current_user.uid)
+    projects = dora.list_projects_by_uid(current_user.uid)
 
     ret = {
         'success': True,
@@ -85,3 +86,25 @@ def api_get_project():
     }
 
     return jsonify(ret)
+
+
+@bp.route('/api/add_user_to_project', methods=['GET', 'POST'])
+@login_required
+def api_add_user_to_project():
+    if request.method == 'GET'
+        return redirect(url_for('project.list'))
+
+    to_add_uid = request.form.get('uid', None)
+    project_id = request.form.get('project_id', None)
+    current_user_uid = current_user.uid
+
+    # TODO validate the project is belong to current user
+
+    # add the to_add_uid
+    to_add_user, project = dora.add_user_to_project(to_add_uid, project_id)
+
+    # TODO check the result
+    
+    flash("Added %s to Project [%s]" % (user.uid, project.title))
+
+    return redirect(url_for('project.list'))

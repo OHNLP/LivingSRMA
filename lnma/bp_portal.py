@@ -31,13 +31,28 @@ def allowed_file(filename):
 @bp.route('/')
 @login_required
 def index():
-    return render_template('portal/portal.index.html')
+    projects = dora.list_projects_by_uid(current_user.uid)
+
+    # get the stats for each project
+    project_info_dict = {}
+    for project in projects:
+        project_id = project.project_id
+        rst = dora.get_screener_stat_by_project_id(project_id)
+        project_info_dict[project_id] = {
+            'stat': rst
+        }
+
+    return render_template(
+        'portal/index.html', 
+        projects=projects,
+        project_info_dict=project_info_dict
+    )
 
 
 @bp.route('/api/list_stat')
 @login_required
 def api_list_stat():
-    projects = dora.list_projects_by_owner_uid(current_user.uid)
+    projects = dora.list_projects_by_uid(current_user.uid)
 
     data = {
         'projects': []
