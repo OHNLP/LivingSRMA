@@ -91,7 +91,7 @@ def api_get_project():
 @bp.route('/api/add_user_to_project', methods=['GET', 'POST'])
 @login_required
 def api_add_user_to_project():
-    if request.method == 'GET'
+    if request.method == 'GET':
         return redirect(url_for('project.list'))
 
     to_add_uid = request.form.get('uid', None)
