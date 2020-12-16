@@ -64,8 +64,23 @@ class User:
 
     
     @command
-    def assign_project(self):
+    @argument("uid", type=str, description="The uid of the user")
+    @argument("keystr", type=str, description="The unique project keystr")
+    def assign_project(self, uid:str, keystr:str):
         """
         Assign user to a project
         """
-        cprint('* not implemented yet', 'white', 'red')
+        is_in, user, project = dora.add_user_to_project_by_keystr_if_not_in(uid, keystr)
+
+        if is_in is None:
+            cprint('* wrong user [%s] or project [%s]' % (
+                uid, keystr
+            ), 'white', 'on_red')
+        elif is_in:
+            cprint('* existed user [%s] in project [%s | %s]' % (
+                uid, project.keystr, project.title
+            ), 'red')
+        else:
+            cprint('* added user [%s] to project [%s | %s]' % (
+                uid, project.keystr, project.title
+            ), 'green')

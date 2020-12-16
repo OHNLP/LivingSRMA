@@ -123,25 +123,34 @@ def create_user_if_not_exist(uid, first_name, last_name, passowrd, role='user'):
         return is_existed, user
 
 
-def add_user_to_project_by_keystr(uid, keystr):
+def add_user_to_project_by_keystr_if_not_in(uid, keystr):
     '''
     Add user to a project by the keystr
     '''
     project = get_project_by_keystr(keystr)
-    return add_user_to_project(uid, project.project_id)
+    if project is None:
+        return None, None, None
+        
+    return add_user_to_project_if_not_in(uid, project.project_id)
 
 
-def add_user_to_project(uid, project_id):
+def add_user_to_project_if_not_in(uid, project_id):
     project = get_project(project_id)
-    ret = project.is_user_in(uid)
-    if ret[0]:
-        user = ret[1]
+    if project is None:
+        return None, None, None
+
+    is_in, user = project.is_user_in(uid)
+    if is_in:
+        pass
     else:
         user = User.query.get(uid)
+        if user is None:
+            return None, None, project
+
         project.related_users.append(user)
         db.session.commit()
 
-    return (user, project)
+    return (is_in, user, project)
 
 
 def get_user(uid):
@@ -152,7 +161,7 @@ def get_user(uid):
 def list_all_users():
     users = User.query.all()
     return users
-    
+
 
 def count_projects(uid=None):
     '''
