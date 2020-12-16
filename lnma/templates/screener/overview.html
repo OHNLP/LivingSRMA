@@ -270,6 +270,7 @@ var srv_screener = {
 
     api_url: {
         get_stat: '[[ url_for("screener.get_stat") ]]',
+        get_paper_by_id: '[[ url_for("screener.get_paper_by_id") ]]',
         get_papers_by_stage: '[[ url_for("screener.get_papers_by_stage") ]]',
 
         // for screening
@@ -376,6 +377,18 @@ var srv_screener = {
         $.get(
             url,
             {project_id: project_id, ver: Math.random()},
+            callback, 
+            'json'
+        );
+    },
+
+    get_paper_by_id: function(paper_id, callback) {
+        var project_id = Cookies.get('project_id');
+        var url = this.api_url.get_paper_by_id;
+
+        $.get(
+            url,
+            {project_id: project_id, paper_id: paper_id},
             callback, 
             'json'
         );
@@ -767,6 +780,7 @@ var tbjs_paperlist = {
                 // Open this row
                 var row_html = tbjs_paperlist._get_expand_html_by_stage(row.data());
                 row.child(row_html).show();
+                tbjs_paperlist.update_paper_detail(row.data());
                 tr.addClass('shown');
                 $(this).html('<i class="fa fa-minus"></i>')
 
@@ -790,6 +804,7 @@ var tbjs_paperlist = {
                 // Open this row
                 var row_html = tbjs_paperlist._get_expand_html_by_stage(row.data());
                 row.child(row_html).show();
+                tbjs_paperlist.update_paper_detail(row.data());
                 tr.addClass('shown');
                 tr.find('td.details-control').html('<i class="fa fa-minus"></i>')
 
@@ -861,6 +876,16 @@ var tbjs_paperlist = {
                 separateWordSearch: false
             }
         );
+    },
+
+    update_paper_detail: function(d) {
+        // send a request to get more information
+        srv_screener.get_paper_by_id(d.paper_id, function(data) {
+            // update the abstract
+            $('#tb-rowext-abstract-' + data.paper.paper_id).html(data.paper.abstract);
+            // trigger the highlight
+            tbjs_paperlist._mark_element('#tb-rowext-abstract-' + data.paper.paper_id);
+        });
     },
 
     load: function() {
@@ -1389,7 +1414,8 @@ var tbjs_paperlist = {
     __get_tr_abstract: function(d) {
         return '<tr>'+
             '<td>Abstract:</td>'+
-            '<td id="tb-rowext-abstract-'+d.paper_id+'">'+d.abstract+'</td>'+
+            '<td id="tb-rowext-abstract-'+d.paper_id+'">...</td>'+
+            // '<td id="tb-rowext-abstract-'+d.paper_id+'">'+d.abstract+'</td>'+
         '</tr>';
     },
 

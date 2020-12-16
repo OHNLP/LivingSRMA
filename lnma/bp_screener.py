@@ -27,13 +27,31 @@ def overview():
     return render_template('screener/overview.html')
 
 
+@bp.route('/get_paper_by_id')
+@login_required
+def get_paper_by_id():
+    paper_id = request.args.get('paper_id')
+    paper = dora.get_paper_by_id(paper_id)
+
+    if paper is None:
+        json_paper = None
+    else:
+        json_paper = paper.as_dict()
+
+    ret = {
+        'success': True,
+        'paper': json_paper
+    }
+    return jsonify(ret)
+
+
 @bp.route('/get_papers')
 @login_required
 def get_papers():
     project_id = request.args.get('project_id')
     papers = dora.get_papers(project_id)
 
-    json_papers = [ p.as_simple_dict() for p in papers ]
+    json_papers = [ p.as_very_simple_dict() for p in papers ]
 
     ret = {
         'success': True,
@@ -48,7 +66,7 @@ def get_papers_by_stage():
     project_id = request.args.get('project_id')
     stage = request.args.get('stage')
     papers = dora.get_papers_by_stage(project_id, stage)
-    json_papers = [ p.as_simple_dict() for p in papers ]
+    json_papers = [ p.as_very_simple_dict() for p in papers ]
 
     ret = {
         'success': True,

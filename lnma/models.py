@@ -155,6 +155,17 @@ class Paper(db.Model):
         return full_dict
 
 
+    def as_very_simple_dict(self):
+        '''Return the simple data of this paper
+
+        Reduce the object size by remove the abstract
+        '''
+        simple_dict = self.as_simple_dict()
+        simple_dict['abstract'] = ''
+
+        return simple_dict
+
+
     def __repr__(self):
         return '<Paper {0}: {1} {2}>'.format(self.paper_id, self.pub_date, self.title)
 
