@@ -31,12 +31,11 @@ class Project:
         '''
         projects = dora.list_all_projects()
         table = PrettyTable([
-            'Keystr', 'Title', 'Date Created', 'Owner', 'Members'
+            'Keystr', 'Title', 'Date Created', 'Members'
         ])
         for project in projects:
             table.add_row([
                 project.keystr, project.title, project.date_created, 
-                project.owner_uid,
                 ','.join(map(lambda u: u.first_name, project.related_users))
             ])
         print(table)
