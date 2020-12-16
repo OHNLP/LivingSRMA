@@ -1,6 +1,8 @@
 import uuid
 import datetime
 
+from werkzeug.security import generate_password_hash
+
 from sqlalchemy import and_, or_, not_
 from sqlalchemy.orm.attributes import flag_modified
 
@@ -49,19 +51,84 @@ def create_project(owner_uid, title, keystr=None, abstract="", settings={}):
     return project
 
 
-def get_all_projects():
-    '''Get all projects for test
-    '''
-    projects = Project.query.all()
-    return projects
-
-
 def get_project(project_id):
     project = Project.query.filter(and_(
         Project.project_id == project_id
     )).first()
 
     return project
+
+
+def get_project_by_keystr(keystr):
+    project = Project.query.filter(and_(
+        Project.keystr == keystr
+    )).first()
+
+    return project
+
+
+def list_all_projects():
+    '''Get all projects for test
+    '''
+    projects = Project.query.all()
+    return projects
+
+
+def create_user(uid, first_name, last_name, passowrd, role='user'):
+    '''
+    Create a user in this database
+    '''
+    user = User(
+        uid = uid,
+        password = generate_password_hash(passowrd),
+        first_name = first_name,
+        last_name = last_name,
+        role = role,
+        is_deleted = IS_DELETED_NO
+    )
+    db.session.add(user)
+    db.session.commit()
+
+    return user
+
+
+def is_existed_user(uid):
+    '''
+    Check whether the specified user exists
+    '''
+    user = get_user(uid)
+
+    if user is None:
+        return False, None
+    else:
+        return True, user
+
+
+def create_user_if_not_exist(uid, first_name, last_name, passowrd, role='user'):
+    '''
+    Create a user in this database if not existed
+    '''
+    is_existed, user = is_existed_user(uid)
+
+    if is_existed:
+        return is_existed, user
+    else:
+        user = create_user(
+            uid = uid, 
+            first_name = first_name,
+            last_name = last_name,
+            passowrd = passowrd,
+            role = role
+        )
+        return is_existed, user
+
+
+def add_user_to_project_by_keystr(uid, keystr):
+    '''
+    Add user to a project by the keystr
+    '''
+    project = get_project_by_keystr(keystr)
+    return add_user_to_project(uid, project.project_id)
 
 
 def add_user_to_project(uid, project_id):
@@ -81,6 +148,11 @@ def get_user(uid):
     user = User.query.filter(User.uid == uid).first()
     return user
 
+
+def list_all_users():
+    users = User.query.all()
+    return users
+    
 
 def count_projects(uid=None):
     '''

@@ -1,6 +1,8 @@
 import sys
 sys.path.append('..')
 
+import asyncio
+
 import typing
 from termcolor import cprint
 from nubia import command, argument, context

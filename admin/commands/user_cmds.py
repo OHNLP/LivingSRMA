@@ -1,0 +1,71 @@
+import sys
+sys.path.append('..')
+
+import typing
+from termcolor import cprint
+from nubia import command, argument, context
+from prettytable import PrettyTable
+
+# app settings
+from lnma import db, create_app
+from lnma.models import *
+from lnma import dora
+from lnma import ss_state
+
+# app for using LNMA functions and tables
+app = create_app()
+db.init_app(app)
+app.app_context().push()
+
+
+@command
+class User:
+    """
+    User related commands
+    """
+
+    @command
+    def list(self):
+        '''
+        List the users in the system
+        '''
+        users = dora.list_all_users()
+        table = PrettyTable([
+            'First Name', 'Last Name', 'Email/uid'
+        ])
+        for user in users:
+            table.add_row([
+                user.first_name, user.last_name, user.uid
+            ])
+        print(table)
+
+
+    @command
+    @argument("email", type=str, description="The email address of this user")
+    @argument("first_name", type=str, description="The first name of this user")
+    @argument("last_name", type=str, description="The last name of this user")
+    @argument("password", type=str, description="The raw password")
+    async def create(self, email:str, first_name:str, last_name:str, password:str):
+        """
+        Create a new user if not exists
+        """
+        is_exist, user = dora.create_user_if_not_exist(
+            email, 
+            first_name,
+            last_name,
+            password
+        )
+        if is_exist:
+            cprint('* existed user [%s] (%s %s), skipped' % (
+                user.uid, user.first_name, user.last_name), 'red')
+        else:
+            cprint('* created user [%s] (%s %s)' % (
+                user.uid, user.first_name, user.last_name), 'green')
+
+    
+    @command
+    def assign_project(self):
+        """
+        Assign user to a project
+        """
+        cprint('* not implemented yet', 'white', 'red')
