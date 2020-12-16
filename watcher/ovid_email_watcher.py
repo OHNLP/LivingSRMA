@@ -42,6 +42,7 @@ app.app_context().push()
 WATCHER_EMAIL_USERNAME = app.config['WATCHER_EMAIL_USERNAME']
 WATCHER_EMAIL_PASSWORD = app.config['WATCHER_EMAIL_PASSWORD']
 
+PAPER_EMAIL_KEY = '_UPDATE'
 
 def check_updates():
     '''Check the updates of all projects
@@ -70,6 +71,62 @@ def check_update_by_prj_keystr(prj_keystr):
 
     ret = _check_update_by_project(project)
     return ret
+
+
+def _get_all_paper_emails_from_inbox():
+    '''
+    Get all paper emails from in the inbox
+    '''
+    # first, open the imbox
+    myimbox = Imbox('imap.gmail.com',
+        username=WATCHER_EMAIL_USERNAME,
+        password=WATCHER_EMAIL_PASSWORD,
+        ssl=True,
+        ssl_context=None,
+        starttls=False)
+
+    # get all the mails
+    all_inbox_messages = myimbox.messages()
+    logger.info('found %s emails in total!' % len(all_inbox_messages))
+
+    # check the latest mails
+    cnt = {
+        'paper': 0,
+        'other': 0
+    }
+
+    emails = []
+    # check all the mails and summarize the information
+    for i in tqdm(range(1, len(all_inbox_messages)+1)):
+        # get the latest one first
+        uid, mail = all_inbox_messages[-i]
+
+        # check the email date, ignore old emails
+        # TODO: also check the title
+
+        # check this email belong to which project or not
+        if PAPER_EMAIL_KEY in mail.subject:
+            
+            cnt['paper'] += 1
+            # check the content of this email
+            content = ''.join(mail.body['plain'])
+
+            paper_email = {
+                'subject': mail.subject,
+                'content': content
+            }
+            
+            emails.append(paper_email)
+        else:
+            # skip this email?
+            cnt['other'] += 1
+            pass
+
+    logger.info('found %s paper email, %s other emails' % (
+        cnt['paper'], cnt['other']
+    ))
+
+    return emails
 
 
 def _check_update_by_project(project):
@@ -149,11 +206,15 @@ def _check_update_by_project(project):
     # reduce the duplicate paper in the updates
     unique_pid_dict = {}
     for paper in prj_update['papers']:
-        pid = paper['UI']
-        if pid in unique_pid_dict:
-            pass
+        if 'UI' in paper:
+            pid = paper['UI']
+            if pid in unique_pid_dict:
+                pass
+            else:
+                unique_pid_dict[pid] = paper
         else:
-            unique_pid_dict[pid] = paper
+            # if no UI in paper, this is not a paper
+            pass
 
     unique_papers = unique_pid_dict.values()
     logger.info('removed the duplicate records %s -> %s' % (
@@ -194,12 +255,16 @@ def _update_papers_in_project(prj_update):
 
     new_papers = []
     for paper in tqdm(papers):
-        pid = paper['UI']
-        is_existed, _paper = dora.is_existed_paper(project_id, pid)
-        if is_existed:
-            prj_update['cnt']['existed'].append(pid)
+        if 'UI' in paper:
+            pid = paper['UI']
+            is_existed, _paper = dora.is_existed_paper(project_id, pid)
+            if is_existed:
+                prj_update['cnt']['existed'].append(pid)
+            else:
+                new_papers.append(paper)
         else:
-            new_papers.append(paper)
+            # UI not in paper, which means this is not a paper?
+            pass
 
     if len(new_papers) == 0:
         # no new papers!
@@ -258,7 +323,7 @@ def _update_papers_in_project(prj_update):
 def ovid_parser(txt):
     '''Parse the email content from OVID 
     '''
-    open('tmp.txt', 'w').write(txt)
+    # open('tmp.txt', 'w').write(txt)
 
     lines = txt.split('\n')
     ptn_attr = r'^\s*([A-Z]{2})\s+-\s(.*)'
