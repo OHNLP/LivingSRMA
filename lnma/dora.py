@@ -74,13 +74,13 @@ def list_all_projects():
     return projects
 
 
-def create_user(uid, first_name, last_name, passowrd, role='user'):
+def create_user(uid, first_name, last_name, password, role='user'):
     '''
     Create a user in this database
     '''
     user = User(
         uid = uid,
-        password = generate_password_hash(passowrd),
+        password = generate_password_hash(password),
         first_name = first_name,
         last_name = last_name,
         role = role,
@@ -91,6 +91,20 @@ def create_user(uid, first_name, last_name, passowrd, role='user'):
 
     return user
 
+
+def reset_user_password(uid, password):
+    '''
+    Reset user password
+    '''
+    user = User.query.get(uid)
+
+    if user is None:
+        return False, None
+    else:
+        user.password = generate_password_hash(password)
+        db.session.commit()
+        return True, user
+        
 
 def is_existed_user(uid):
     '''
@@ -104,7 +118,7 @@ def is_existed_user(uid):
         return True, user
 
 
-def create_user_if_not_exist(uid, first_name, last_name, passowrd, role='user'):
+def create_user_if_not_exist(uid, first_name, last_name, password, role='user'):
     '''
     Create a user in this database if not existed
     '''
@@ -117,7 +131,7 @@ def create_user_if_not_exist(uid, first_name, last_name, passowrd, role='user'):
             uid = uid, 
             first_name = first_name,
             last_name = last_name,
-            passowrd = passowrd,
+            password = password,
             role = role
         )
         return is_existed, user
@@ -130,7 +144,7 @@ def add_user_to_project_by_keystr_if_not_in(uid, keystr):
     project = get_project_by_keystr(keystr)
     if project is None:
         return None, None, None
-        
+
     return add_user_to_project_if_not_in(uid, project.project_id)
 
 

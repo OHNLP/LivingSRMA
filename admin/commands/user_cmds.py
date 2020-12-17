@@ -62,6 +62,23 @@ class User:
             cprint('* created user [%s] (%s %s)' % (
                 user.uid, user.first_name, user.last_name), 'green')
 
+
+    @command
+    @argument("email", type=str, description="The email address of this user")
+    @argument("password", type=str, description="The raw password")
+    async def pswd(self, email:str, password:str):
+        """
+        Reset password for a user
+        """
+        is_exist, user = dora.is_existed_user(email)
+        if is_exist:
+            dora.reset_user_password(email, password)
+            cprint('* reseted password for user [%s]' % (
+                user.uid), 'green')
+        else:
+            cprint('* not found user [%s]' % (
+                user.uid), 'red')
+
     
     @command
     @argument("uid", type=str, description="The uid of the user")
