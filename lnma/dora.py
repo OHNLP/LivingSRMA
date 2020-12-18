@@ -424,10 +424,25 @@ def get_paper_by_id(paper_id):
 
 
 def get_paper_by_seq(project_id, seq_num):
+    '''
+    Get a paper by the project_id and its seq_num
+    '''
     paper = Paper.query.filter(and_(
         Paper.project_id == project_id,
         Paper.seq_num == seq_num
     )).first()
+
+    return paper
+
+
+def get_paper_by_keystr_and_seq(keystr, seq_num):
+    '''
+    Get a paper detail by the keystr and its seq_num
+    '''
+    project = get_project_by_keystr(keystr)
+    if project is None:
+        return None
+    paper = get_paper_by_seq(project.project_id, seq_num)
 
     return paper
 
