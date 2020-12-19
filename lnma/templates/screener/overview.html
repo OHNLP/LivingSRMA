@@ -1393,8 +1393,19 @@ var tbjs_paperlist = {
         return html;
     },
 
-    __get_div_rct_id: function(d) {
+    __get_span_rct_id: function(d) {
+        var html = [];
+        if (d.meta.rct_id == '') {
+            html = [
+                '<a href="javascript:void(0);" click="" title="Click to update the NCT number for this study">Add NCT Number</a>'
+            ].join('');
+        } else {
+            html = [
+                d.meta.rct_id
+            ].join('');
+        }
 
+        return html;
     },
 
     __get_tr_authors: function(d) {
@@ -1408,6 +1419,7 @@ var tbjs_paperlist = {
         return '<tr>'+
             '<td>Information:</td>'+
             '<td id="tb-rowext-info-'+d.paper_id+'">' +
+                this.__get_span_rct_id(d) + ' | ' +
                 '<a target="_blank" href="' + jarvis.create_src_url(d) + '"><span>' + d.pid_type + ': ' + d.pid + '</span></a> | ' +
                 '<span>' + d.journal + '</span> | ' + 
                 '<span>' + d.pub_date + '</span>' + 

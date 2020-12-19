@@ -4,9 +4,9 @@ SS_ST_BATCH_OTHER        = 'b12'
 SS_ST_AUTO_SEARCH        = 'a10'
 SS_ST_AUTO_EMAIL         = 'a11'
 SS_ST_AUTO_OTHER         = 'a12'
-SS_ST_IMPORT_ENDNOTE_XML = 'a13'
-SS_ST_IMPORT_OVID_XML    = 'a14'
-SS_ST_IMPORT_SIMPLE_CSV  = 'a15'
+SS_ST_IMPORT_ENDNOTE_XML = 'a21'
+SS_ST_IMPORT_OVID_XML    = 'a22'
+SS_ST_IMPORT_SIMPLE_CSV  = 'a23'
 SS_ST_NA                 = 'na'
 
 # for study screening process
