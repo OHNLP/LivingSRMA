@@ -285,7 +285,47 @@ Last, install the web api package and wsgi server. The server script could found
 
 # Data Structure
 
+## Table `projects` and the `setting`
+
+The `setting` attribute for each project contains the unstructured information such as inclusion/exclusion criterias, exclusion reason, tags, and querys, etc.
+The details are as follows:
+
+```bash
+{
+   "criterias": {                  # the criteria
+      "inclusion": "",             # string, the inclusion criteria
+      "exclusion": ""              # string, the exclusion criteria
+   },
+   "exclusion_reasons": [          # a list of strings for the reasons
+      "", ...
+   ],
+   "tags": [                       # a list of strings for the tags
+      "", ...
+   ]
+}
+```
+
 ## Table `papers`
+
+### Attr `meta`
+
+The meta data and the extra information of a study is saved in the `meta` attribute.
+The details of `meta` include:
+
+```bash
+{
+   "pred": [{                      # a list of prediction results
+      "is_rct": true/false,        # boolean, indicates it is a RCT or not
+      "model": "",
+      "preds": {}
+   }, ...],
+   "rct_id": "",                   # the main RCT number
+   "all_rct_ids": "",              # all RCT numbers
+   "tags": []                      # tags
+}
+```
+
+### The screening stage (ss) state design
 
 The `ss_st`, `ss_pr`, and `ss_rs` columns indicate which state a study is during screening.
 
@@ -295,25 +335,38 @@ The `ss_st`, `ss_pr`, and `ss_rs` columns indicate which state a study is during
    - b12: other manual way, 
    - a10: automatic way, 
    - a11: auto search
+   - a12: other
+   - a21: import from endnote xml
+   - a22: import from ovid xml
+   - a23: import from simple csv
+   - na : empty
 
 - Screening State (ss) Process (pr): for study screening, indicating which process the study is in: 
-   - p30: loaded meta info, 
-   - p40: checked unique, 
-   - p50: checked title, 
-   - p60: checked full text, 
-   - p70: checked sr, 
+   - p10: loaded meta info
+   - p20: passed the title check
+   - p30: loaded meta info
+   - p40: updated extist
+   - p50: checked title
+   - p60: checked full text
+   - p70: checked sr
    - p80: checked ma
+   - p90: checked srma
 
 - Screening State (ss) Result (rs): for study screening, indicating what result for the study: 
-   - e11: excluded for duplicate, 
-   - e12: excluded for title, 
-   - e13: excluded for full text, 
-   - e14: excluded for updates, 
+   - e00: excluded for not found
+   - e1 : excluded due to dup
+   - e2:  excluded for title, 
+   - e21: excluded due to rct identifier
+   - e22: excluded due to the abstract
+   - e3: excluded for full text, 
+   - e4: excluded for updates, 
    - f1: included in sr, 
    - f2: included in ma, 
    - f3: included in sr and ma
 
-# Usage
+### ss_stages
+
+By combining the ss state, each study could be assigned a stage (category).
 
 ## Database migration
 

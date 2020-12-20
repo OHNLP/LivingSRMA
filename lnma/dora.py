@@ -252,6 +252,27 @@ def is_existed_project(project_id):
         return True
 
 
+def set_project_tags(project_id, tags):
+    '''
+    Set the tag list for a project
+    '''
+    project = get_project(project_id)
+    if project is None:
+        return False, None
+
+    if 'tags' not in project.settings:
+        project.settings['tags'] = []
+
+    project.settings['tags'] = tags
+    flag_modified(project, "settings")
+
+    # commit this
+    db.session.add(project)
+    db.session.commit()
+
+    return True, project
+
+
 def is_existed_paper(project_id, pid):
     '''Check if a pid exists
 

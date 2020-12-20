@@ -17,48 +17,152 @@ Project Editor
 <div class="content">
     <div class="container-fluid">
         <div class="row">
-            <div class="col-lg-6">
-                <p class="lead">Project Settings:</p>
-                <div>
-                    <div class="form-group">
-                        <label for="input_title">Project Title</label>
-                        <input type="text" class="form-control" id="input_title" name="title"
-                            placeholder="The lung cancer meta-analysis">
-                        <small id="input_title_help" class="form-text text-muted">
-                            The project title must be at least 8 characters long, contain letters and numbers, no special characters.
-                        </small>
+            <div class="col">
+                <ul class="nav nav-tabs" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active"
+                            id="basic_info_tab"
+                            data-toggle="tab"
+                            role="tab" 
+                            href="#basic_info_panel"
+                            aria-controls="basic_info_panel" 
+                            aria-selected="true">
+                            <i class="fa fa-credit-card"></i>
+                            Basic Information
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" 
+                            id="ie_criteria_info_tab"
+                            data-toggle="tab"
+                            role="tab" 
+                            href="#ie_criteria_info_panel"
+                            aria-controls="ie_criteria_info_panel" 
+                            aria-selected="true">
+                            <i class="fa fa-align-left"></i>
+                            Inclusion / Exclusion Criterias
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link"
+                            id="ex_reason_info_tab"
+                            data-toggle="tab"
+                            role="tab" 
+                            href="#ex_reason_info_panel"
+                            aria-controls="ex_reason_info_panel" 
+                            aria-selected="true">
+                            <i class="fa fa-paragraph"></i>
+                            Exclusion Reasons
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link"
+                            id="tag_info_tab"
+                            data-toggle="tab"
+                            role="tab" 
+                            href="#tag_info_panel"
+                            aria-controls="tag_info_panel" 
+                            aria-selected="true">
+                            <i class="fa fa-tags"></i>
+                            Tags
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col tab-content" id="myTabContent">
+
+                <div class="tab-pane fade show active" id="basic_info_panel" role="tabpanel" aria-labelledby="basic_info_tab">
+                    
+                    <p class="lead">Project basic information</p>
+                    <div>
+                        <div class="form-group">
+                            <label for="input_title">Project Title</label>
+                            <input type="text" class="form-control" id="input_title" name="title"
+                                placeholder="The lung cancer meta-analysis">
+                            <small id="input_title_help" class="form-text text-muted">
+                                The project title must be at least 8 characters long, contain letters and numbers, no special characters.
+                            </small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="input_keystr">Short Identifier</label>
+                            <input type="text" class="form-control" id="input_keystr" name="title"
+                                placeholder="CAT">
+                            <small id="input_keystr_help" class="form-text text-muted">
+                                The project short identifier is used for checking updates in email or other data sources. It must be at least 3 characters long, contain upper case letters and numbers
+                            </small>
+                        </div>
+                    
+                        <div class="form-group">
+                            <label for="input_query">Query</label>
+                            <textarea class="form-control" id="input_query" name="query" rows="2"></textarea>
+                            <small id="input_query_help" class="form-text text-muted">
+                                The query for automatic search in PubMed
+                            </small>
+                        </div>
+                    
+                        <div class="form-group">
+                            <label for="input_abstract">Project Abstract (Optional)</label>
+                            <textarea class="form-control" id="input_abstract" name="abstract" rows="3"></textarea>
+                            <small id="input_abstract_help" class="form-text text-muted">
+                                Describe this project.
+                            </small>
+                        </div>
+                    
+                        <button type="submit" class="btn btn-primary">
+                            <i class="far fa-save"></i>
+                            Save Project
+                        </button>
                     </div>
 
-                    <div class="form-group">
-                        <label for="input_keystr">Short Identifier</label>
-                        <input type="text" class="form-control" id="input_keystr" name="title"
-                            placeholder="CAT">
-                        <small id="input_keystr_help" class="form-text text-muted">
-                            The project short identifier is used for checking updates in email or other data sources. It must be at least 3 characters long, contain upper case letters and numbers
-                        </small>
-                    </div>
-                
-                    <div class="form-group">
-                        <label for="input_query">Query</label>
-                        <textarea class="form-control" id="input_query" name="query" rows="2"></textarea>
-                        <small id="input_query_help" class="form-text text-muted">
-                            The query for automatic search in PubMed
-                        </small>
-                    </div>
-                
-                    <div class="form-group">
-                        <label for="input_abstract">Project Abstract (Optional)</label>
-                        <textarea class="form-control" id="input_abstract" name="abstract" rows="3"></textarea>
-                        <small id="input_abstract_help" class="form-text text-muted">
-                            Describe this project.
-                        </small>
-                    </div>
-                
-                    <button type="submit" class="btn btn-primary">
-                        <i class="far fa-save"></i>
-                        Save Project
-                    </button>
+
                 </div>
+                <!-- /#basic_info_panel -->
+                
+                <div class="tab-pane fade" id="ie_criteria_info_panel" role="tabpanel" aria-labelledby="ie_criteria_info_tab">
+                    <p class="lead">The inclusion / exclusion criterias</p>
+
+                </div>
+                <!-- /#ie_criteria_info_panel -->
+                
+                <div class="tab-pane fade" id="ex_reason_info_panel" role="tabpanel" aria-labelledby="ex_reason_info_tab">
+                    <p class="lead">The exclusion reasons</p>
+
+                </div>
+                <!-- /#ie_criteria_info_panel -->
+
+                <div class="tab-pane fade" id="tag_info_panel" role="tabpanel" aria-labelledby="tag_info_tab">
+
+                    <p class="lead">The tags</p>
+                    <p>
+                        The tags will be used to label studies in the screener. 
+                        In the following text box, input the tags for this project.
+                        <br>
+                        One tag per line. 
+                    </p>
+                    <form method="POST" action="[[ url_for('project.api_set_tags') ]]">
+                        <div class="row">
+                            <div class="col-3">
+                                <div class="form-group">
+                                    <textarea class="form-control"  
+                                        id="form_textarea_tags" 
+                                        name="form_textarea_tags" 
+                                        rows="15">[[ form_textarea_tags ]]</textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa fa-save"></i>
+                            Save tags
+                        </button>
+                    </form>
+
+                </div>
+                <!-- /#tag_info_panel -->
             </div>
         </div>
     </div>

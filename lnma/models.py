@@ -96,6 +96,14 @@ class Project(db.Model):
                 return (True, u)
         return (False, None)
 
+    def get_tags_text(self):
+        if 'tags' in self.settings:
+            txt = '\n'.join(self.settings['tags'])
+        else:
+            txt = ''
+
+        return txt
+
     def __repr__(self):
         return '<Project {0}: {1}>'.format(self.project_id, self.title)
 

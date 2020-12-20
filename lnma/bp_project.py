@@ -41,22 +41,34 @@ def create():
 
     flash('Project is created!')
 
-    return redirect(url_for('project.list'))
+    return redirect(url_for('project.mylist'))
 
 
-@bp.route('/list', methods=['GET', 'POST'])
+@bp.route('/mylist', methods=['GET', 'POST'])
 @login_required
-def list():
+def mylist():
     if request.method == 'GET':
         return render_template('project/list.html')
-
     projects = dora.list_projects_by_uid(current_user.uid)
 
 
 @bp.route('/editor')
 @login_required
 def editor():
-    return render_template('project/editor.html')
+    project_id = request.cookies.get('project_id')
+    if project_id is None or project_id == '':
+        flash('Set working project first')
+        return redirect(url_for('project.mylist'))
+
+    project = dora.get_project(project_id)
+
+    # preprocessing the tags
+    form_textarea_tags = project.get_tags_text()
+
+    return render_template('project/editor.html', 
+        project=project,
+        form_textarea_tags=form_textarea_tags
+    )
 
 
 ###############################################################
@@ -93,7 +105,7 @@ def api_get_project():
 @login_required
 def api_add_user_to_project():
     if request.method == 'GET':
-        return redirect(url_for('project.list'))
+        return redirect(url_for('project.mylist'))
 
     to_add_uid = request.form.get('uid', None)
     project_id = request.form.get('project_id', None)
@@ -106,6 +118,35 @@ def api_add_user_to_project():
 
     # TODO check the result
     
-    flash("Added %s to Project [%s]" % (user.uid, project.title))
+    flash("Added %s to Project [%s]" % (to_add_user.uid, project.title))
 
-    return redirect(url_for('project.list'))
+    return redirect(url_for('project.mylist'))
+
+
+@bp.route('/api/set_tags', methods=['GET', 'POST'])
+@login_required
+def api_set_tags():
+    if request.method == 'GET':
+        return redirect(url_for('project_editor'))
+        
+    project_id = request.cookies.get('project_id')
+    if project_id is None or project_id == '':
+        flash('Set working project first')
+        return redirect(url_for('project.mylist'))
+
+    raw_tags = request.form.get('form_textarea_tags')
+
+    # remove blank
+    tags = raw_tags.strip()
+
+    # split
+    tags = tags.split()
+
+    # remove duplicate
+    tags = list(set(tags))
+
+    # update
+    is_success, project = dora.set_project_tags(project_id, tags)
+
+    flash('Saved %s tags!' % (len(tags)) )
+    return redirect(url_for('project.editor'))
