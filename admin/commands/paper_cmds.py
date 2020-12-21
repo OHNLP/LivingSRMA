@@ -62,6 +62,8 @@ class Paper:
         txt_is_rct = colored('NO', 'red')
         if paper.meta['pred'][0]['is_rct']:
             txt_is_rct = colored('YES', 'white', 'on_green')
+
+        # the txt of rct_id
         txt_rct_id = ''
         if paper.meta['rct_id'] != '':
             txt_rct_id = colored(paper.meta['rct_id'], 'white', 'on_green')
@@ -71,6 +73,17 @@ class Paper:
             "Is RCT: %s | # RCT: %s" % (
                 txt_is_rct, txt_rct_id
             )
+        ])
+
+
+        # the text of tags
+        txt_tags = ''
+        if 'tags' in paper.meta:
+            txt_tags = ' | '.join(paper.meta['tags'])
+
+        table.add_row([
+            'Tags',
+            txt_tags
         ])
 
         # the second row is the authors, limit the width the display

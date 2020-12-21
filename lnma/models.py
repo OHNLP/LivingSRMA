@@ -84,8 +84,8 @@ class Project(db.Model):
             'owner_uid': self.owner_uid,
             'title': self.title,
             'abstract': self.abstract,
-            'date_created': self.date_created,
-            'date_updated': self.date_updated,
+            'date_created': self.date_created.strftime('%Y-%m-%d'),
+            'date_updated': self.date_updated.strftime('%Y-%m-%d'),
             'settings': self.settings,
             'related_users': [ u.as_dict() for u in self.related_users ]
         }

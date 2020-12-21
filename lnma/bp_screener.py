@@ -1,9 +1,13 @@
+import json
+
 from flask import request
 from flask import flash
 from flask import render_template
 from flask import Blueprint
 from flask import current_app
 from flask import jsonify
+from flask import redirect
+from flask import url_for
 
 from flask_login import login_required
 from flask_login import current_user
@@ -24,7 +28,17 @@ def index():
 @bp.route('/overview')
 @login_required
 def overview():
-    return render_template('screener/overview.html')
+    project_id = request.cookies.get('project_id')
+
+    if project_id is None:
+        return redirect(url_for('project.mylist'))
+
+    project = dora.get_project(project_id)
+
+    return render_template(
+        'screener/overview.html',
+        project_json=json.dumps(project.as_dict())
+    )
 
 
 @bp.route('/get_paper_by_id')
@@ -95,6 +109,20 @@ def get_prisma():
     ret = {
         'success': True,
         'prisma': prisma
+    }
+    return jsonify(ret)
+
+
+@bp.route('/add_tag', methods=['GET', 'POST'])
+@login_required
+def add_tag():
+    paper_id = request.form.get('paper_id')
+    tag = request.form.get('tag')
+    is_success, paper = dora.add_paper_tag(paper_id, tag)
+
+    ret = {
+        'success': True,
+        'paper': paper.as_very_simple_dict()
     }
     return jsonify(ret)
 

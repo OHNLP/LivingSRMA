@@ -273,6 +273,28 @@ def set_project_tags(project_id, tags):
     return True, project
 
 
+def add_paper_tag(paper_id, tag):
+    '''
+    Add a tag to a paper
+    '''
+    paper = get_paper_by_id(paper_id)
+    
+    # add tags key if not exist
+    if 'tags' not in paper.meta:
+        paper.meta['tags'] = []
+
+    # add tag
+    if tag not in paper.meta['tags']:
+        paper.meta['tags'].append(tag)
+        flag_modified(paper, 'meta')
+        db.session.add(paper)
+        db.session.commit()
+    else:
+        pass
+
+    return True, paper
+
+
 def is_existed_paper(project_id, pid):
     '''Check if a pid exists
 
@@ -312,6 +334,7 @@ def create_paper(project_id, pid,
     rct_id = '' if len(all_rct_ids) == 0 else all_rct_ids[0]
     _meta = {
         'rct_id': rct_id,
+        'tags': [],
         'all_rct_ids': all_rct_ids
     }
     if meta is None:

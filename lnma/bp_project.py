@@ -140,13 +140,19 @@ def api_set_tags():
     tags = raw_tags.strip()
 
     # split
-    tags = tags.split()
+    tags = tags.split('\n')
 
-    # remove duplicate
-    tags = list(set(tags))
+    # remove empty
+    tags_cleaned = []
+    for tag in tags:
+        tag = tag.strip()
+        if tag == '':
+            pass
+        else:
+            tags_cleaned.append(tag)
 
     # update
-    is_success, project = dora.set_project_tags(project_id, tags)
+    is_success, project = dora.set_project_tags(project_id, tags_cleaned)
 
-    flash('Saved %s tags!' % (len(tags)) )
+    flash('Saved %s tags!' % (len(tags_cleaned)) )
     return redirect(url_for('project.editor'))

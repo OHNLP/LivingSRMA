@@ -58,6 +58,15 @@ tr.shown td.details-control {
     background-color: rgb(230, 195, 132);
 }
 /* badge */
+.tr-tags .badge-tag {
+    padding: 9px 7px;
+    font-size: .8em;
+}
+.badge-tag {
+    cursor: pointer;
+    color: #674624;
+    background-color: bisque;
+}
 .badge-ckl {
     color: #fff;
     background-color: #b88d17;
@@ -287,7 +296,12 @@ var srv_screener = {
         set_label_ckl: '[[ url_for("screener.sspr_set_label_ckl") ]]',
         unset_label_ckl: '[[ url_for("screener.sspr_unset_label_ckl") ]]',
         set_rct_feedback: '[[ url_for("screener.sspr_set_rct_feedback") ]]',
+
+        // for tag
+        add_tag: '[[ url_for("screener.add_tag") ]]'
     },
+
+    project: [[ project_json|safe ]],
 
     stage: {
         // view stage
@@ -409,6 +423,19 @@ var srv_screener = {
     ///////////////////////////////////////////////////////////////////////////
     // the functions related to screening
     ///////////////////////////////////////////////////////////////////////////
+
+    add_tag: function(paper_id, tag, callback) {
+        // send request to backend
+        var project_id = Cookies.get('project_id');
+        
+        var url = this.api_url.add_tag;
+        $.post(
+            url,
+            {paper_id: paper_id, tag: tag},
+            callback,
+            'json'
+        );  
+    },
 
     set_unscreened: function(paper_id, callback) {
         // send request to backend
@@ -699,6 +726,15 @@ var tbjs_paperlist = {
             data: 'decision_reason',
             visible: false,
             searchable: false
+        },
+
+        // hidden columns for filtering
+        // hidden column 7
+        {
+            title: '',
+            data: 'tags',
+            visible: false,
+            searchable: false
         }
     ],
 
@@ -955,6 +991,9 @@ var tbjs_paperlist = {
 
             // add the decision reason column for sort
             d['decision_reason'] = this._update_attr_decision_reason(d);
+
+            // add the tags column for filter
+            d['tags'] = this._update_attr_tags(d);
         }
 
         this.data = data;
@@ -1015,6 +1054,21 @@ var tbjs_paperlist = {
             ret = d.ss_ex.reason;
         }
         return ret;
+    },
+
+    _update_attr_tags: function(d) {
+        var ret = [];
+
+        // the tags 
+        if (d.meta.hasOwnProperty('tags')) {
+            for (var i = 0; i < d.meta.tags.length; i++) {
+                var tag = d.meta.tags[i];
+                ret.push(tag);
+            }
+        }
+
+        // combine the tags by | sym
+        return ret.join('|');
     },
 
     ///////////////////////////////////////////////////////////////////////////
@@ -1125,6 +1179,7 @@ var tbjs_paperlist = {
                 this.__get_div_rct_yes_no(d) + 
                 '</td>'+
             '</tr>'+
+            this.__get_tr_tags(d) +
             this.__get_tr_info(d) + 
             this.__get_tr_authors(d) +
             this.__get_tr_abstract(d);
@@ -1150,6 +1205,8 @@ var tbjs_paperlist = {
 
                 '</td>' +
             '</tr>'+
+
+            this.__get_tr_tags(d) +
 
             '<tr>' +
                 '<td>Files: </td>' +
@@ -1209,6 +1266,7 @@ var tbjs_paperlist = {
                 this.__get_div_rct_yes_no(d) + 
                 '</td>'+
             '</tr>'+
+            this.__get_tr_tags(d) +
             this.__get_tr_info(d) + 
             this.__get_tr_authors(d) +
             this.__get_tr_abstract(d);
@@ -1231,6 +1289,7 @@ var tbjs_paperlist = {
                 this.__get_div_rct_yes_no(d) + 
                 '</td>'+
             '</tr>'+
+            this.__get_tr_tags(d) +
             this.__get_tr_info(d) + 
             this.__get_tr_authors(d) +
             this.__get_tr_abstract(d);
@@ -1252,6 +1311,7 @@ var tbjs_paperlist = {
                 this.__get_div_rct_yes_no(d) + 
                 '</td>'+
             '</tr>'+
+            this.__get_tr_tags(d) +
             this.__get_tr_info(d) + 
             this.__get_tr_authors(d) +
             this.__get_tr_abstract(d);
@@ -1273,6 +1333,7 @@ var tbjs_paperlist = {
                 this.__get_div_rct_yes_no(d) + 
                 '</td>'+
             '</tr>'+
+            this.__get_tr_tags(d) +
             this.__get_tr_info(d) + 
             this.__get_tr_authors(d) +
             this.__get_tr_abstract(d);
@@ -1295,6 +1356,7 @@ var tbjs_paperlist = {
                 this.__get_div_rct_yes_no(d) + 
                 '</td>'+
             '</tr>'+
+            this.__get_tr_tags(d) +
             this.__get_tr_info(d) + 
             this.__get_tr_authors(d) +
             this.__get_tr_abstract(d);
@@ -1312,6 +1374,7 @@ var tbjs_paperlist = {
                 this.__get_div_rct_yes_no(d) + 
                 '</td>'+
             '</tr>'+
+            this.__get_tr_tags(d) +
             this.__get_tr_info(d) + 
             this.__get_tr_authors(d) +
             this.__get_tr_abstract(d);
@@ -1435,9 +1498,80 @@ var tbjs_paperlist = {
         '</tr>';
     },
 
+    __get_tr_tags: function(d) {
+        return '<tr>'+
+            '<td>Tags:</td>'+
+            '<td class="d-flex flex-row">' + 
+                this.__get_dropdown_tags(d) + 
+                '<div id="tb-rowext-tags-'+d.paper_id+'" class="tr-tags">' +
+                    this.__get_div_tags(d) + 
+                '</div>' +
+            '</td>' + 
+        '</tr>';
+    },
+
+    __get_div_tags: function(d) {
+        var html_tags = [ '<div>' ];
+        if (d.meta.hasOwnProperty('tags')) {
+            for (var i = 0; i < d.meta.tags.length; i++) {
+                var tag = d.meta.tags[i];
+                html_tags.push(
+                    '<span class="badge badge-tag ml-2">'+
+                        '<i class="fa fa-tag"></i> ' + 
+                        tag +
+                    '</span>'
+                    // '<div class="alert alert-secondary">'+tag+'</div>'
+                )
+            }
+        }
+        // the close of the spans
+        html_tags.push('</div>');
+
+        // convert to string
+        html_tags = html_tags.join('');
+    
+        return html_tags;
+    },
+
+    __get_dropdown_tags: function(d) {
+        var html_options_tags = '';
+
+        // create a option list of tags
+        for (var i = 0; i < srv_screener.project.settings.tags.length; i++) {
+            var tag = srv_screener.project.settings.tags[i];
+            html_options_tags += '<a class="dropdown-item" href="javascript:void(0);" onclick="tbjs_paperlist.add_tag(\''+d.paper_id+'\', \'' + tag + '\')">' + tag + '</a>'
+        }
+
+        var html = [
+            '<div class="dropdown">',
+            '<button class="btn btn-default dropdown-toggle btn-sm" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">',
+                'Add Tag',
+            '</button>',
+            '<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">',
+                html_options_tags,
+                '<div class="dropdown-divider"></div>',
+                '<a class="dropdown-item" href="javascript:void();">Add a new tag</a>',
+            '</div>',
+            '</div>',
+        ].join('');
+
+        return html;
+    },
+
     ///////////////////////////////////////////////////////////////////////////
     // the functions related to screening
     ///////////////////////////////////////////////////////////////////////////
+
+    add_tag: function(paper_id, tag) {
+        srv_screener.add_tag(paper_id, tag, function(data) {
+            var paper = data.paper;
+            // update the tag list
+            $('#tb-rowext-tags-' + paper.paper_id).html(
+                tbjs_paperlist.__get_div_tags(paper)
+            );
+        });
+    },
+    
     remove_paper_from_tbjs: function(paper_id) {
         this.table.row($('#tb-row-' + paper_id))
             .remove()
