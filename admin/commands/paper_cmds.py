@@ -75,7 +75,6 @@ class Paper:
             )
         ])
 
-
         # the text of tags
         txt_tags = ''
         if 'tags' in paper.meta:

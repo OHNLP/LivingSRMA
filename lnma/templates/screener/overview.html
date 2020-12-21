@@ -64,8 +64,9 @@ tr.shown td.details-control {
 }
 .badge-tag {
     cursor: pointer;
-    color: #674624;
-    background-color: bisque;
+    color: #333333;
+    background-color: #ececea;
+    font-weight: normal;
 }
 .badge-ckl {
     color: #fff;
@@ -957,7 +958,7 @@ var tbjs_paperlist = {
     },
 
     update: function(data) {
-        // add more columns to data
+        // add more columns to data and bind to local
         this.update_data_attrs(data);
         
         // remove the old data
@@ -974,33 +975,36 @@ var tbjs_paperlist = {
         for (var i = 0; i < data.length; i++) {
             var d = data[i];
 
-            // add the pred_is_rct column
-            d['first_column'] = this._update_attr_first_column(d);
-
-            // add the pred_is_rct column
-            d['labels'] = this._update_attr_labels(d);
-            
-            // add the date_created_norm column
-            d['date_created_norm'] = this._update_attr_date_created_norm(d);
-            
-            // add the date_published_norm column
-            d['date_published_norm'] = this._update_attr_date_published_norm(d);
-
-            // add the basic buttons column
-            d['basic_actions'] = this._get_basic_actions_by_stage(d);
-
-            // add the decision reason column for sort
-            d['decision_reason'] = this._update_attr_decision_reason(d);
-
-            // add the tags column for filter
-            d['tags'] = this._update_attr_tags(d);
+            // update the attrs of d
+            d = this.update_datum_attrs(d);
         }
 
         this.data = data;
     },
 
-    update_data_columns: function(stage) {
+    update_datum_attrs: function(d) {
+        // add the pred_is_rct column
+        d['first_column'] = this._update_attr_first_column(d);
 
+        // add the pred_is_rct column
+        d['labels'] = this._update_attr_labels(d);
+
+        // add the date_created_norm column
+        d['date_created_norm'] = this._update_attr_date_created_norm(d);
+
+        // add the date_published_norm column
+        d['date_published_norm'] = this._update_attr_date_published_norm(d);
+
+        // add the basic buttons column
+        d['basic_actions'] = this._get_basic_actions_by_stage(d);
+
+        // add the decision reason column for sort
+        d['decision_reason'] = this._update_attr_decision_reason(d);
+
+        // add the tags column for filter
+        d['tags'] = this._update_attr_tags(d);
+
+        return d;
     },
 
     ///////////////////////////////////////////////////////////////////////////
@@ -1565,10 +1569,12 @@ var tbjs_paperlist = {
     add_tag: function(paper_id, tag) {
         srv_screener.add_tag(paper_id, tag, function(data) {
             var paper = data.paper;
-            // update the tag list
+            // update the tag list UI
             $('#tb-rowext-tags-' + paper.paper_id).html(
                 tbjs_paperlist.__get_div_tags(paper)
             );
+
+            // update the tb data list
         });
     },
     
