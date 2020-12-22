@@ -1552,15 +1552,16 @@ var tbjs_paperlist = {
     },
 
     __get_tr_tags: function(d) {
-        return '<tr>'+
-            '<td>Tags:</td>'+
-            '<td class="d-flex flex-row">' + 
-                this.__get_dropdown_tags(d) + 
-                '<div id="tb-rowext-tags-'+d.paper_id+'" class="tr-tags">' +
-                    this.__get_div_tags(d) + 
-                '</div>' +
-            '</td>' + 
-        '</tr>';
+        // return '<tr>'+
+        //     '<td>Tags:</td>'+
+        //     '<td class="d-flex flex-row">' + 
+        //         this.__get_dropdown_tags(d) + 
+        //         '<div id="tb-rowext-tags-'+d.paper_id+'" class="tr-tags">' +
+        //             this.__get_div_tags(d) + 
+        //         '</div>' +
+        //     '</td>' + 
+        // '</tr>';
+        return '';
     },
 
     __get_div_tags: function(d) {
