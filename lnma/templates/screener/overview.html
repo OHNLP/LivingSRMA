@@ -1020,7 +1020,7 @@ var tbjs_paperlist = {
             if (this.table.row(i).data().paper_id == paper.paper_id) {
                 this.table.row(i).data(
                     this.update_datum_attrs(paper)
-                ).draw();
+                ).draw(false);
                 break;
             }
         }
@@ -1631,7 +1631,7 @@ var tbjs_paperlist = {
     remove_paper_from_tbjs: function(paper_id) {
         this.table.row($('#tb-row-' + paper_id))
             .remove()
-            .draw();
+            .draw(false);
     },
 
     exclude_by_tt: function(paper_id) {
