@@ -65,8 +65,12 @@ tr.shown td.details-control {
 .badge-tag {
     cursor: pointer;
     color: #333333;
-    background-color: #ececea;
+    background-color: #dfdfd5;
     font-weight: normal;
+}
+.badge-tag:hover {
+    color: black;
+    background-color: rgb(212, 211, 211);
 }
 .badge-ckl {
     color: #fff;
@@ -707,7 +711,7 @@ var tbjs_paperlist = {
         // column 4
         { 
             title: 'Title', 
-            data: 'title',
+            data: 'title_with_tags',
             className: 'col-title',
         },
 
@@ -989,6 +993,9 @@ var tbjs_paperlist = {
         // add the pred_is_rct column
         d['labels'] = this._update_attr_labels(d);
 
+        // add the title_with_tags column
+        d['title_with_tags'] = this._update_attr_title_with_tags(d);
+
         // add the date_created_norm column
         d['date_created_norm'] = this._update_attr_date_created_norm(d);
 
@@ -1005,6 +1012,18 @@ var tbjs_paperlist = {
         d['tags'] = this._update_attr_tags(d);
 
         return d;
+    },
+
+    update_data_by_paper: function(paper) {
+        // find the paper in the data 
+        for (var i = 0; i < this.table.data().length; i++) {
+            if (this.table.row(i).data().paper_id == paper.paper_id) {
+                this.table.row(i).data(
+                    this.update_datum_attrs(paper)
+                ).draw();
+                break;
+            }
+        }
     },
 
     ///////////////////////////////////////////////////////////////////////////
@@ -1032,6 +1051,36 @@ var tbjs_paperlist = {
             ret += label_ckl;
         }
 
+        return ret;
+    },
+
+    _update_attr_title_with_tags: function(d) {
+        var ret = '';
+        var tags = [];
+        if (d.meta.hasOwnProperty('tags')) {
+            for (var i = 0; i < d.meta.tags.length; i++) {
+                var tag = d.meta.tags[i];
+
+                // create a tag badge
+                var tag_badge = '<span class="badge badge-tag mr-1">' +
+                    // '<i class="fa fa-tag"></i> ' + 
+                    tag +
+                    '</span>';
+
+                tags.push(tag_badge);
+            }
+        }
+        // combine the tags
+        tags = tags.join('');
+
+        // combine the tags and title
+        if (tags == '') {
+            // if no tags, just leave title
+            ret = d.title;
+        } else {
+            // if has tags, put tags as one line
+            ret = tags + '<br>' + d.title;
+        }
         return ret;
     },
 
@@ -1553,8 +1602,8 @@ var tbjs_paperlist = {
             '</button>',
             '<div class="dropdown-menu" aria-labelledby="dropdownMenuButton">',
                 html_options_tags,
-                '<div class="dropdown-divider"></div>',
-                '<a class="dropdown-item" href="javascript:void();">Add a new tag</a>',
+                // '<div class="dropdown-divider"></div>',
+                // '<a class="dropdown-item" href="javascript:void();">Add a new tag</a>',
             '</div>',
             '</div>',
         ].join('');
@@ -1575,6 +1624,7 @@ var tbjs_paperlist = {
             );
 
             // update the tb data list
+            tbjs_paperlist.update_data_by_paper(paper);
         });
     },
     

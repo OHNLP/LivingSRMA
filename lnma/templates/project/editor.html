@@ -44,6 +44,18 @@ Project Editor
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" 
+                            id="ie_keywords_info_tab"
+                            data-toggle="tab"
+                            role="tab" 
+                            href="#ie_keywords_info_panel"
+                            aria-controls="ie_keywords_info_panel" 
+                            aria-selected="true">
+                            <i class="fa fa-highlighter"></i>
+                            Inclusion / Exclusion Keywords
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link"
                             id="ex_reason_info_tab"
                             data-toggle="tab"
@@ -80,8 +92,7 @@ Project Editor
                     <div>
                         <div class="form-group">
                             <label for="input_title">Project Title</label>
-                            <input type="text" class="form-control" id="input_title" name="title"
-                                placeholder="The lung cancer meta-analysis">
+                            <input type="text" class="form-control" id="input_title" name="title" value="[[ project.title ]]">
                             <small id="input_title_help" class="form-text text-muted">
                                 The project title must be at least 8 characters long, contain letters and numbers, no special characters.
                             </small>
@@ -89,8 +100,7 @@ Project Editor
 
                         <div class="form-group">
                             <label for="input_keystr">Short Identifier</label>
-                            <input type="text" class="form-control" id="input_keystr" name="title"
-                                placeholder="CAT">
+                            <input type="text" class="form-control" id="input_keystr" name="title" value="[[ project.keystr ]]" disabled>
                             <small id="input_keystr_help" class="form-text text-muted">
                                 The project short identifier is used for checking updates in email or other data sources. It must be at least 3 characters long, contain upper case letters and numbers
                             </small>
@@ -114,7 +124,7 @@ Project Editor
                     
                         <button type="submit" class="btn btn-primary">
                             <i class="far fa-save"></i>
-                            Save Project
+                            Save basic information
                         </button>
                     </div>
 
@@ -124,6 +134,46 @@ Project Editor
                 
                 <div class="tab-pane fade" id="ie_criteria_info_panel" role="tabpanel" aria-labelledby="ie_criteria_info_tab">
                     <p class="lead">The inclusion / exclusion criterias</p>
+
+                </div>
+                <!-- /#ie_criteria_info_panel -->
+                
+                <div class="tab-pane fade" id="ie_keywords_info_panel" role="tabpanel" aria-labelledby="ie_keywords_info_tab">
+                    <p class="lead">The inclusion / exclusion keywords</p>
+                    <p>
+                        The inclusion keywords will be highlighted as <b style="color: rgb(1, 56, 1); background: rgb(223, 245, 223); padding: 1px 8px;">green</b> in title and abstract. <br>
+                        The exclusion keywords will be highlighted as <b style="color: rgb(250, 89, 89); background: rgb(255, 205, 205); padding: 1px 8px;">red</b> in title and abstract.<br>
+                        One keyword per line. 
+                    </p>
+                    <form method="POST" action="[[ url_for('project.api_set_tags') ]]">
+                        <div class="row">
+                            <div class="col-3">
+                                <div class="form-group">
+                                    <label for="form_textarea_inclusion_keywords">Inclusion keywords</label>
+                                    <textarea class="form-control"
+                                        style="color: rgb(1, 56, 1); background: rgb(223, 245, 223);"
+                                        id="form_textarea_inclusion_keywords" 
+                                        name="form_textarea_inclusion_keywords" 
+                                        rows="15">[[ form_textarea_inclusion_keywords ]]</textarea>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="form-group">
+                                    <label for="form_textarea_exclusion_keywords">Exclusion keywords</label>
+                                    <textarea class="form-control"  
+                                        style="color: rgb(250, 89, 89); background: rgb(255, 205, 205);"
+                                        id="form_textarea_exclusion_keywords" 
+                                        name="form_textarea_exclusion_keywords" 
+                                        rows="15">[[ form_textarea_exclusion_keywords ]]</textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa fa-save"></i>
+                            Save inclusion and exclusion keywords
+                        </button>
+                    </form>
 
                 </div>
                 <!-- /#ie_criteria_info_panel -->

@@ -299,6 +299,10 @@ The details are as follows:
    "exclusion_reasons": [          # a list of strings for the reasons
       "", ...
    ],
+   "highlight_keywords": {         # the keywords for highlight title or abs
+      "inclusion": [],             # the inclusion keywords
+      "exclusion": []              # the exclusion keywords
+   },
    "tags": [                       # a list of strings for the tags
       "", ...
    ]

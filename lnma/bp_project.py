@@ -65,9 +65,17 @@ def editor():
     # preprocessing the tags
     form_textarea_tags = project.get_tags_text()
 
+    # preprocessing the ie keywords
+    form_textarea_inclusion_keywords = project.get_inclusion_keywords_text()
+
+    # preprocessing the ie keywords
+    form_textarea_exclusion_keywords = project.get_exclusion_keywords_text()
+
     return render_template('project/editor.html', 
         project=project,
-        form_textarea_tags=form_textarea_tags
+        form_textarea_tags=form_textarea_tags,
+        form_textarea_inclusion_keywords=form_textarea_inclusion_keywords,
+        form_textarea_exclusion_keywords=form_textarea_exclusion_keywords
     )
 
 

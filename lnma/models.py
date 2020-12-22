@@ -90,11 +90,13 @@ class Project(db.Model):
             'related_users': [ u.as_dict() for u in self.related_users ]
         }
 
+
     def is_user_in(self, uid):
         for u in self.related_users:
             if u.uid == uid:
                 return (True, u)
         return (False, None)
+
 
     def get_tags_text(self):
         if 'tags' in self.settings:
@@ -103,6 +105,23 @@ class Project(db.Model):
             txt = ''
 
         return txt
+
+
+    def get_inclusion_keywords_text(self):
+        txt = ''
+        if 'highlight_keywords' in self.settings:
+            if 'inclusion' in self.settings['highlight_keywords']:
+                txt = '\n'.join(self.settings['highlight_keywords']['inclusion'])
+        return txt
+
+
+    def get_exclusion_keywords_text(self):
+        txt = ''
+        if 'highlight_keywords' in self.settings:
+            if 'exclusion' in self.settings['highlight_keywords']:
+                txt = '\n'.join(self.settings['highlight_keywords']['exclusion'])
+        return txt
+
 
     def __repr__(self):
         return '<Project {0}: {1}>'.format(self.project_id, self.title)
