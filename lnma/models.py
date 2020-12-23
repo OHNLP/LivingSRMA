@@ -213,3 +213,20 @@ class Note(db.Model):
 
     def __repr__(self):
         return '<Note {0}: {1}>'.format(self.note_id, self.date_created)
+
+
+class DataSource(db.Model):
+    """
+    Data source for the studies, such as email, xml, and pmid list
+    """
+    __tablename__ = 'datasources'
+    __table_args__ = {'extend_existing': True}
+
+    datasource_id = db.Column(db.String(48), primary_key=True, nullable=False)
+    ds_type = db.Column(db.String(48), index=False)
+    title = db.Column(db.Text, index=False)
+    content = db.Column(LONGTEXT, index=False)
+    date_created = db.Column(db.DateTime, index=False)
+
+    def __repr__(self):
+        return '<DataSource {0}: {1}>'.format(self.ds_type, self.title)

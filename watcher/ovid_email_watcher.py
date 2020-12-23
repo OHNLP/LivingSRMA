@@ -28,6 +28,7 @@ from imbox import Imbox
 from lnma import db, create_app
 from lnma.models import *
 from lnma import dora
+from lnma import util
 from lnma import ss_state
 
 # for the RCT 
@@ -42,34 +43,55 @@ app.app_context().push()
 WATCHER_EMAIL_USERNAME = app.config['WATCHER_EMAIL_USERNAME']
 WATCHER_EMAIL_PASSWORD = app.config['WATCHER_EMAIL_PASSWORD']
 
+DS_TYPE = 'OVID_EMAIL_TEXT'
 PAPER_EMAIL_KEY = '_UPDATE'
 
 def check_updates():
-    '''Check the updates of all projects
     '''
+    Check the updates of all projects
+    '''
+    # get all of the projects
     projects = Project.query.filter(and_(
         Project.is_deleted == 'no'
     )).all()
+
+    # get all emails
+    emails = _get_all_paper_emails_from_inbox()
+
+    for email in emails:
+        ds = dora.create_datasource(
+            DS_TYPE, email['subject'], email['content']
+        )
+
+    logger.info('saved %s emails!' % len(email))
     
     for project in projects:
-        _check_update_by_project(project)
+        _check_update_by_project_in_emails(project, emails)
 
     return 0
 
 
 def check_update_by_prj_keystr(prj_keystr):
-    '''Check update by project keystr
     '''
-    project = Project.query.filter(and_(
-        Project.is_deleted == 'no',
-        Project.keystr == prj_keystr
-    )).first()
-
+    Check update by project keystr
+    '''
+    project = dora.get_project_by_keystr(prj_keystr)
     if project is None:
         # TODO what???
-        pass
+        return None
 
-    ret = _check_update_by_project(project)
+    # get all emails
+    emails = _get_all_paper_emails_from_inbox()
+
+    # save emails
+    for email in emails:
+        ds = dora.create_datasource(
+            DS_TYPE, email['subject'], email['content']
+        )
+
+    # check these emails for the given project
+    ret = _check_update_by_project_in_emails(project, emails)
+
     return ret
 
 
@@ -113,6 +135,7 @@ def _get_all_paper_emails_from_inbox():
 
             paper_email = {
                 'subject': mail.subject,
+                'date': mail.date,
                 'content': content
             }
             
@@ -129,8 +152,161 @@ def _get_all_paper_emails_from_inbox():
     return emails
 
 
+def _check_update_by_project_in_emails(project, emails):
+    '''
+    Check the updates of a specified project in given emails
+    '''
+    # the keyword in subject is always XXX_UPDATE
+    # where the XXX is the project id
+    prj_subject_keyword = '%s_UPDATE' % project.keystr.upper()
+
+    # create a counter
+    cnt = {
+        'ovid_update': 0,
+        'other': 0
+    }
+    prj_update = {
+        'keyword': prj_subject_keyword,
+        'project': project,
+        'papers': [],
+        'cnt': {
+            'existed': [],
+            'notfound': [],
+            'created': [],
+        }
+    }
+
+    logger.info('parsing %s emails for project %s...' % (len(emails), project.keystr))
+
+    # check all the mails and summarize the information
+    for mail in tqdm(emails):
+        # check the email date, ignore old emails
+        # TODO: also check the title
+
+        # check this email belong to which project or not
+        is_other_email = True
+
+        if prj_subject_keyword in mail['subject']:
+            is_other_email = False
+            cnt['ovid_update'] += 1
+            # check the content of this email
+            content = mail['content']
+
+            # get the articles from email content
+            papers = ovid_parser(content)
+            logger.debug('found and %s papers for prject [%s] in %s|%s' % \
+                (len(papers), project.keystr, mail['date'], mail['subject']))
+
+            # put these papers in update list
+            prj_update['papers'] += papers
+            
+        else:
+            cnt['other'] += 1
+
+    logger.info('found %s email of %s papers related to project [%s], %s other emails' % (
+        cnt['ovid_update'], len(prj_update['papers']), project.keystr, cnt['other']
+    ))
+
+    # reduce the duplicate paper in the updates
+    unique_pid_dict = {}
+    for paper in prj_update['papers']:
+        if 'UI' in paper:
+            pid = paper['UI']
+            if pid in unique_pid_dict:
+                pass
+            else:
+                unique_pid_dict[pid] = paper
+        else:
+            # if no UI in paper, this is not a paper
+            pass
+
+    unique_papers = unique_pid_dict.values()
+    logger.info('removed the duplicate records %s -> %s' % (
+        len(prj_update['papers']),
+        len(unique_papers)
+    ))
+    
+    # update the prj_update
+    prj_update['papers'] = unique_papers
+
+    # create or update
+    prj_updated = _update_papers_in_project(prj_update)
+
+    # updated, generate a report for this run
+    logger.info('done check email for project [%s]!' % project.keystr)
+
+    return prj_updated
+
+
+def _update_papers_in_project(prj_update):
+    '''
+    Update the project papers in the prj_update:
+
+    prj_update = {
+        'keyword': prj_subject_keyword,
+        'project': prj,
+        'papers': [],
+        'cnt': {
+            'existed': [],
+            'notfound': [],
+            'created': [],
+        }
+    }
+
+    '''
+    # create / update the list of project
+    papers = prj_update['papers']
+    project_id = prj_update['project'].project_id
+
+    # create paper in database
+    created_papers = []
+    for paper in tqdm(papers):
+
+        # ok, save these new papers
+        pid = paper['UI']
+        title = paper['TI'] if 'TI' in paper else ''
+        abstract = paper['AB'] if 'AB' in paper else ''
+        authors = ', '.join(paper['AU']) if 'AU' in paper else ''
+
+        pid_type = paper['DB'].upper() if 'DB' in paper else 'OVID'
+        pid_type = util.check_paper_pid_type(pid_type)
+    
+        if pid_type.startswith('EMBASE'):
+            pub_date = paper['DP'] if 'DP' in paper else ''
+            journal = paper['JA'] if 'JA' in paper else ''
+        elif pid_type.startswith('OVID MEDLINE'):
+            pub_date = paper['EP'] if 'EP' in paper else ''
+            journal = paper['AS'] if 'AS' in paper else ''
+        else:
+            pub_date = paper['EP'] if 'EP' in paper else ''
+            journal = paper['AS'] if 'AS' in paper else ''
+
+        # create a paper and pred rct if not exists
+
+        is_existed, paper_db = dora.create_paper_if_not_exist_and_predict_rct(
+            project_id, pid, pid_type,
+            title, abstract, pub_date, authors, journal, {'paper': paper},
+            ss_state.SS_ST_AUTO_EMAIL, None, None, None
+        )
+        if is_existed:
+            prj_update['cnt']['existed'].append(pid)
+        else:
+            prj_update['cnt']['created'].append(pid)
+
+    logger.info('done %s papers for project [%s], existed: %s, created: %s' % (\
+        len(papers), 
+        prj_update['keyword'], 
+        len(prj_update['cnt']['existed']), 
+        len(prj_update['cnt']['created']),
+    ))
+
+    return prj_update
+
+
 def _check_update_by_project(project):
-    '''Check the updates of a specified project
+    '''
+    Deprecated.
+    Check the updates of a specified project
     '''
     # the keyword in subject is always XXX_UPDATE
     # where the XXX is the project id
@@ -226,7 +402,7 @@ def _check_update_by_project(project):
     prj_update['papers'] = unique_papers
 
     # create or update
-    prj_updated = _update_papers_in_project(prj_update)
+    prj_updated = _update_papers(prj_update)
 
     # updated, generate a report for this run
     logger.info('done check email for project [%s]!' % project.keystr)
@@ -234,8 +410,10 @@ def _check_update_by_project(project):
     return prj_updated
 
 
-def _update_papers_in_project(prj_update):
-    '''Update the project papers in the prj_update:
+def _update_papers(prj_update):
+    '''
+    Deprecated.
+    Update the project papers in the prj_update:
 
     prj_update = {
         'keyword': prj_subject_keyword,
@@ -321,7 +499,8 @@ def _update_papers_in_project(prj_update):
 
 
 def ovid_parser(txt):
-    '''Parse the email content from OVID 
+    '''
+    Parse the email content from OVID 
     '''
     # open('tmp.txt', 'w').write(txt)
 
@@ -337,6 +516,25 @@ def ovid_parser(txt):
     attr = ''
 
     for line in lines:
+
+        # try articl pattern
+        m = re.findall(ptn_new_art, line)
+        if len(m) > 0:
+            # this means this line starts a new article
+            # for example
+            # re.findall(ptn_new_art, '<13>')
+            # the 13rd article is found
+            if art == {}:
+                # it means this is the first article
+                pass
+            else:
+                # not the first, save previous first, then reset
+                arts.append(art)
+                art = {}
+            
+            # once match a pattern, no need to check other patterns
+            continue
+
         # try attr pattern first, it's the most common pattern
         m = re.findall(ptn_attr, line)
         if len(m) > 0:
@@ -370,23 +568,12 @@ def ovid_parser(txt):
             if attr == '':
                 pass
             else:
+                if attr not in art: art[attr] = []
                 art[attr].append(val)
 
                 # once match a pattern, no need to check other patterns
                 continue
 
-        # try next pattern
-        m = re.findall(ptn_new_art, line)
-        if len(m) > 0:
-            # this means this line starts a new article
-            if art == {}:
-                pass
-            else:
-                arts.append(art)
-                art = {}
-            
-            # once match a pattern, no need to check other patterns
-            continue
     
     # usually, the last art need to be appended manually
     if art != {}:

@@ -127,6 +127,20 @@ def add_tag():
     return jsonify(ret)
 
 
+@bp.route('/toggle_tag', methods=['GET', 'POST'])
+@login_required
+def toggle_tag():
+    paper_id = request.form.get('paper_id')
+    tag = request.form.get('tag')
+    is_success, paper = dora.toggle_paper_tag(paper_id, tag)
+
+    ret = {
+        'success': True,
+        'paper': paper.as_very_simple_dict()
+    }
+    return jsonify(ret)
+
+
 @bp.route('/sspr/exclude_all', methods=['GET', 'POST'])
 @login_required
 def sspr_exclude_all():

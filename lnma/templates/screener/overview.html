@@ -66,11 +66,18 @@ tr.shown td.details-control {
     cursor: pointer;
     color: #333333;
     background-color: #dfdfd5;
-    font-weight: normal;
+    font-weight: bold;
 }
 .badge-tag:hover {
     color: black;
     background-color: rgb(212, 211, 211);
+}
+.badge-tag-not-used {
+    cursor: pointer;
+    color: #999999;
+    background-color: #dddddd;
+    border: 1px dotted #cccccc;
+    font-weight: normal;
 }
 .badge-ckl {
     color: #fff;
@@ -303,7 +310,8 @@ var srv_screener = {
         set_rct_feedback: '[[ url_for("screener.sspr_set_rct_feedback") ]]',
 
         // for tag
-        add_tag: '[[ url_for("screener.add_tag") ]]'
+        add_tag: '[[ url_for("screener.add_tag") ]]',
+        toggle_tag: '[[ url_for("screener.toggle_tag") ]]'
     },
 
     project: [[ project_json|safe ]],
@@ -434,6 +442,19 @@ var srv_screener = {
         var project_id = Cookies.get('project_id');
         
         var url = this.api_url.add_tag;
+        $.post(
+            url,
+            {paper_id: paper_id, tag: tag},
+            callback,
+            'json'
+        );  
+    },
+
+    toggle_tag: function(paper_id, tag, callback) {
+        // send request to backend
+        var project_id = Cookies.get('project_id');
+        
+        var url = this.api_url.toggle_tag;
         $.post(
             url,
             {paper_id: paper_id, tag: tag},
@@ -1042,8 +1063,11 @@ var tbjs_paperlist = {
         var ret = '';
         
         // the RCT label
-        if (d.meta.pred[0].is_rct) {
-            ret += label_rct;
+        if (d.meta.hasOwnProperty('pred')) {
+            // if is RCT
+            if (d.meta.pred[0].is_rct) {
+                ret += label_rct;
+            }
         }
 
         // the Check later label
@@ -1552,18 +1576,21 @@ var tbjs_paperlist = {
     },
 
     __get_tr_tags: function(d) {
-        // return '<tr>'+
-        //     '<td>Tags:</td>'+
-        //     '<td class="d-flex flex-row">' + 
-        //         this.__get_dropdown_tags(d) + 
-        //         '<div id="tb-rowext-tags-'+d.paper_id+'" class="tr-tags">' +
-        //             this.__get_div_tags(d) + 
-        //         '</div>' +
-        //     '</td>' + 
-        // '</tr>';
-        return '';
+        return '<tr>'+
+            '<td>Tags:</td>'+
+            '<td class="d-flex flex-row">' + 
+                // this.__get_dropdown_tags(d) + 
+                '<div id="tb-rowext-tags-'+d.paper_id+'" class="tr-tags">' +
+                    this.__get_line_tags(d) + 
+                '</div>' +
+            '</td>' + 
+        '</tr>';
+        // return '';
     },
 
+    /**
+     * Generate tags for in-title display
+     */
     __get_div_tags: function(d) {
         var html_tags = [ '<div>' ];
         if (d.meta.hasOwnProperty('tags')) {
@@ -1584,6 +1611,69 @@ var tbjs_paperlist = {
         // convert to string
         html_tags = html_tags.join('');
     
+        return html_tags;
+    },
+
+    /**
+     * Generate a line of tags for user to label the study
+     */
+    __get_line_tags: function(d) {
+        // for the tag names 
+        var tag_names = [];
+        // for indicating whether the tag is used for this study
+        var tag_useds = [];
+
+        // first, put the tags of this project in the list
+        for (var i = 0; i < srv_screener.project.settings.tags.length; i++) {
+            var tag = srv_screener.project.settings.tags[i];
+            tag_names.push(tag);
+            tag_useds.push(0);
+        }
+
+        // second, check the tags of this study
+        if (d.meta.hasOwnProperty('tags')) {
+            for (var i = 0; i < d.meta.tags.length; i++) {
+                var used_tag = d.meta.tags[i];
+                // check if this tag exists in the tag_names
+                var idx = tag_names.indexOf(used_tag);
+
+                if (idx < 0) {
+                    // which means it is a new tag
+                    tag_names.push(used_tag);
+                    tag_useds.push(1);
+                } else {
+                    // which means it is a existing tag
+                    tag_names[idx] = used_tag;
+                    tag_useds[idx] = 1;
+                }
+            }
+        }
+
+        // third, generate the line of tags according to the analysis result
+        var html_tags = ['<div>'];
+        for (var i = 0; i < tag_names.length; i++) {
+            var tag_name = tag_names[i];
+            var tag_used = tag_useds[i];
+
+            var class_tag = 'badge-tag-not-used';
+            if (tag_used == 0) {
+                // which means not used
+            } else {
+                // which means this tag is used for this study
+                class_tag = 'badge-tag';
+            }
+            html_tags.push(
+                '<span class="badge '+class_tag+' ml-2" onclick="tbjs_paperlist.toggle_tag(\''+d.paper_id+'\', \'' + tag_name + '\')">'+
+                    '<i class="fa fa-tag"></i> ' + 
+                    tag_name +
+                '</span>'
+            );
+        }
+        html_tags.push('</div>');
+
+        // convert to string
+        html_tags = html_tags.join('');
+
         return html_tags;
     },
 
@@ -1622,6 +1712,19 @@ var tbjs_paperlist = {
             // update the tag list UI
             $('#tb-rowext-tags-' + paper.paper_id).html(
                 tbjs_paperlist.__get_div_tags(paper)
+            );
+
+            // update the tb data list
+            tbjs_paperlist.update_data_by_paper(paper);
+        });
+    },
+
+    toggle_tag: function(paper_id, tag) {
+        srv_screener.toggle_tag(paper_id, tag, function(data) {
+            var paper = data.paper;
+            // update the tag line UI
+            $('#tb-rowext-tags-' + paper.paper_id).html(
+                tbjs_paperlist.__get_line_tags(paper)
             );
 
             // update the tb data list

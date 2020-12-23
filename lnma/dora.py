@@ -295,6 +295,29 @@ def add_paper_tag(paper_id, tag):
     return True, paper
 
 
+def toggle_paper_tag(paper_id, tag):
+    '''
+    Toggle a tag on a paper.
+    '''
+    paper = get_paper_by_id(paper_id)
+    
+    # add tags key if not exist
+    if 'tags' not in paper.meta:
+        paper.meta['tags'] = []
+
+    # toggle tag
+    if tag not in paper.meta['tags']:
+        paper.meta['tags'].append(tag)
+    else:
+        paper.meta['tags'].remove(tag)
+
+    flag_modified(paper, 'meta')
+    db.session.add(paper)
+    db.session.commit()
+    
+    return True, paper
+
+
 def is_existed_paper(project_id, pid):
     '''Check if a pid exists
 
@@ -1078,3 +1101,31 @@ def get_prisma(project_id):
         prisma[k] = r[k]
 
     return prisma
+
+
+###############################################################################
+# Data Source Related Functions
+###############################################################################
+
+def create_datasource(
+    ds_type, title, content
+):
+    '''
+    Create a new data source record in db
+    '''
+    # create a datasource
+    datasource_id = str(uuid.uuid1())
+    date_created = datetime.datetime.now()
+
+    datasource = DataSource(
+        datasource_id = datasource_id,
+        ds_type = ds_type,
+        title = title,
+        content = content,
+        date_created = date_created,
+    )
+    
+    db.session.add(datasource)
+    db.session.commit()
+
+    return datasource

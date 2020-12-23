@@ -399,10 +399,11 @@ $ flask db migrate
 $ flask db upgrade
 ```
 
-On the server side, we don't need to init the migration folder.
-The only thing we need to do is upgrade:
+On the server side, we follow the same process.
 
 ```bash
+(py37lnma) $ export FLASK_APP=lnma
+(py37lnma) $ flask db migrate
 (py37lnma) $ flask db upgrade
 ```
 # Update log
