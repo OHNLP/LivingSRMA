@@ -19,6 +19,11 @@ from lnma.util import get_today_date_str
 
 bp = Blueprint("screener", __name__, url_prefix="/screener")
 
+@bp.context_processor
+def inject_enumerate():
+    return dict(enumerate=enumerate)
+
+
 @bp.route('/')
 @login_required
 def index():
@@ -37,7 +42,8 @@ def overview():
 
     return render_template(
         'screener/overview.html',
-        project_json=json.dumps(project.as_dict())
+        project=project,
+        project_json_str=json.dumps(project.as_dict())
     )
 
 

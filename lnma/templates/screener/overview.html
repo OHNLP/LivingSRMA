@@ -58,6 +58,12 @@ tr.shown td.details-control {
     background-color: rgb(230, 195, 132);
 }
 /* badge */
+.tag-filter-item {
+    background: #e0dfdf;
+    padding-left: 3px;
+    padding-right: 3px;
+    border-radius: 3px;
+}
 .tr-tags .badge-tag {
     padding: 9px 7px;
     font-size: .8em;
@@ -209,7 +215,7 @@ Screener Overview
                 <div id="tbjs_paperlist_tools">
                     <div class="form-row">
                         
-                        <div class="form-group col">
+                        <div class="form-group col mb-0">
                             <label class="mr-2">
                                 <i class="fa fa-filter"></i>
                                 Filters: 
@@ -231,7 +237,7 @@ Screener Overview
                             </div>
                         </div>
 
-                        <div class="form-group col form-inline">
+                        <div class="form-group col form-inline mb-0">
                             <label class="mr-2">
                                 <i class="fa fa-sort-amount-down"></i>
                                 Sort by: 
@@ -244,6 +250,30 @@ Screener Overview
                             
                         </div>
 
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col">
+                            <label for="" class="mr-2">
+                                <i class="fa fa-tags"></i>
+                                Tag Filters:
+                            </label>
+
+                            <button class="btn btn-default btn-sm"
+                                onclick="tbjs_paperlist.reset_tag_filter();">
+                                <i class="fa fa-undo"></i>
+                                Reset
+                            </button>
+
+                            {% for i, tag in enumerate(project['settings']['tags']) %}
+                            <div class="form-check form-check-inline mr-2 tag-filter-item">
+                                <input class="form-check-input tag-filter" type="checkbox" name="checkbox_tag_[[i]]" id="checkbox_tag_[[i]]" value="[[ tag ]]">
+                                <label class="form-check-label" for="checkbox_tag_[[i]]">
+                                    [[ tag ]]
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
                     </div>
 
                 </div>
@@ -314,7 +344,7 @@ var srv_screener = {
         toggle_tag: '[[ url_for("screener.toggle_tag") ]]'
     },
 
-    project: [[ project_json|safe ]],
+    project: [[ project_json_str|safe ]],
 
     stage: {
         // view stage
@@ -760,7 +790,7 @@ var tbjs_paperlist = {
             title: '',
             data: 'tags',
             visible: false,
-            searchable: false
+            searchable: true
         }
     ],
 
@@ -800,6 +830,32 @@ var tbjs_paperlist = {
                     }
                 }
                 return true;
+            }
+        );
+
+        // the search filter for tags
+        $.fn.dataTable.ext.search.push(
+            function( settings, data, dataIndex ) {
+                var chk_tags = [];
+                $('.tag-filter').each(function(){ 
+                    var chk = $(this).prop('checked');
+                    if (chk) {
+                        chk_tags.push($(this).val())
+                    }
+                });
+                if (chk_tags.length == 0) {
+                    // no tag is checked, ok
+                    return true;
+                } else {
+                    // at least one tag is checked
+                    for (var i = 0; i < chk_tags.length; i++) {
+                        var chk_tag = chk_tags[i];
+                        if (data[7].indexOf(chk_tag)>=0) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
             }
         );
 
@@ -900,15 +956,20 @@ var tbjs_paperlist = {
             );
         });
 
-        // the filter event 
+        // the filter event for RCT
         $('#checkbox_lbl_rct').change(function() {
             tbjs_paperlist.toggle_label_rct();
         });
 
-        // the filter event 
+        // the filter event for check later
         $('#checkbox_lbl_ckl').change(function() {
             tbjs_paperlist.toggle_label_ckl();
         });
+
+        // the filter event for tags
+        $('.tag-filter').change(function() {
+            tbjs_paperlist.toggle_tag_filter();
+        })
     },
 
     _mark_element: function(elem) {
@@ -1846,6 +1907,15 @@ var tbjs_paperlist = {
 
     toggle_label_ckl: function() {
         this.table.draw();
+    },
+
+    toggle_tag_filter: function() {
+        this.table.draw();
+    },
+
+    reset_tag_filter: function() {
+        $('.tag-filter').prop('checked', '');
+        this.toggle_tag_filter();
     },
 
     set_rct_feedback: function(paper_id, feedback) {
