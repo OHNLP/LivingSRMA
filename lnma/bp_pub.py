@@ -59,6 +59,17 @@ def IOTOX():
     return render_template('pub/pub.IOTOX.html')
 
 
+@bp.route('/ADJRCC.html')
+def ADJRCC():
+    prj = 'ADJRCC'
+
+    # load the pwma data
+    full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, 'PWMA_DATA.xlsx')
+    pwma = get_pwma_data(full_fn)
+
+    return render_template('pub/pub.ADJRCC.html', pwma=pwma)
+
+
 @bp.route('/RCC.html')
 def RCC():
     prj = 'RCC'
@@ -1061,6 +1072,7 @@ def get_filters_from_itable(full_fn):
         }
         # build ae_name dict
         for i, ft_opt in enumerate(ft_opts):
+            ft_opt = str(ft_opt)
             # remove the white space
             ft_opt = ft_opt.strip()
             ft_item['values'].append({
@@ -1094,6 +1106,7 @@ def get_attr_pack_from_itable(full_fn):
 
     for idx, row in df_attrs.iterrows():
         vtype = 'text'
+        print(row)
         name = row['name'].strip()
         cate = row['cate'].strip()
 
@@ -2767,3 +2780,34 @@ def _conv_nmarst_league_to_lgtable(ret_nma):
             tmp_lgtable_sm[lgt_r][lgt_c] = lgt_cell
 
     return tmp_lgtable_sm
+
+
+def get_pwma_data(full_fn):
+    '''
+    Get the PWMA data for plots
+    '''
+    df = pd.read_excel(full_fn)
+    pwma = OrderedDict()
+    for idx, row in df.iterrows():
+        pwma_type = row['type']
+        option_text = row['option_text']
+        legend_text = row['legend_text']
+        filename = row['filename']
+        if pwma_type not in pwma: 
+            pwma[pwma_type] = {
+                '_default_option': option_text
+            }
+        if option_text not in pwma[pwma_type]: 
+            pwma[pwma_type][option_text] = {
+                'text': option_text,
+                'slides': [],
+                'fns': []
+            }
+        # add this img
+        pwma[pwma_type][option_text]['fns'].append({
+            'fn': filename,
+            'txt': legend_text
+        })
+        pwma[pwma_type][option_text]['slides'].append(filename + '$' + legend_text)
+
+    return pwma

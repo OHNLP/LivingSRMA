@@ -207,9 +207,11 @@ $ sudo apt-get install libmysqlclient-dev
 ```bash
 (py37lnma) $ pip install mysqlclient
 ```
-### 
 
-## Other
+## Other Packages
+
+Not yet.
+
 
 # Folder Structure
 
@@ -305,7 +307,131 @@ The details are as follows:
    },
    "tags": [                       # a list of strings for the tags
       "", ...
-   ]
+   ],
+   "analysis": {                   # a dict for the meta info of analysis
+      "nma": {                     # network meta-analysis
+         "outcomes": {             # a dict for all oc
+            "oc_abbr": {              # use the abbr of oc as key
+               "category": "default", # just leave as default
+               "group": "Primary",    # Primary / Sensitivity / Other
+               "abbr": "oc_abbr",     # the abbreviation of the outcome
+               "full_name": "Full",   # the full name of the outcome
+               "included_in_plots": "yes",   # yes / no
+               "included_in_sof": "yes",     # yes / no
+               "included_in_em": "yes",      # yes / no
+               "data_type": "raw",           # raw / pre / text / other
+               "measure": "HR",              # HR / OR / RR
+               "method": "freq",             # freq / bayes
+               "fixed_or_random": "fixed",   # fixed / random
+               "which_is_better": "lower",   # lower / higher
+               "treatments": {        # a dict for all treats auto-gen
+                  "tr_abbr": {
+                     "abbr": "tr_abbr",      # the abbr for the treat
+                     "full_name": ""         # the full name of the treat
+                  }, ...
+               },
+               "attrs": [  # the attribute list, decided by data_type
+                  "t1",
+                  "t2",
+                  "sm",
+                  "lowerci",
+                  "upperci",
+                  "survival_in_t1",
+                  "survival_in_t2",
+                  "Ec_t1",
+                  "Et_t1",
+                  "Ec_t2",
+                  "Et_t2"
+               ]
+            }, ...
+         "meta": {  # other information about NMA
+
+         }
+      },
+      "pma": {
+         "outcomes": {           # a dict for for all oc
+            "oc_abbr": {
+               "category": "default", # just leave as default
+               "group": "Primary",    # Primary / Sensitivity / Other
+               "abbr": "oc_abbr",     # the abbreviation of the outcome
+               "full_name": "Full",   # the full name of the outcome
+               "included_in_plots": "yes",   # yes / no
+               "included_in_sof": "yes",     # yes / no
+               "data_type": "raw",           # raw / pre / text / other
+               "measure": "HR",              # HR / OR / RR
+               "method": "freq",             # freq / bayes
+               "fixed_or_random": "fixed",   # fixed / random
+               "which_is_better": "lower",   # lower / higher
+            }
+         },
+         "meta": {
+
+         }
+      },
+      "itable": {
+         "Category": {
+            "full_name": "Category",
+            "attrs": [
+               "Attr 1", 
+               "Attr 2|sub1",
+               "Attr 2|sub2"
+            ]
+         }, ...
+      }
+   }
+}
+```
+
+### Attributes by `data_type`
+
+The attributes is decided by the `data_type` and the analysis type,
+
+```bash
+{
+   "nma": {                 # the NMA
+      "pre": [              # the pre-calculated data
+         "t1",
+         "t2",
+         "sm",
+         "lowerci",
+         "upperci",
+         "survival_in_t1",
+         "survival_in_t2",
+         "Ec_t1",
+         "Et_t1",
+         "Ec_t2",
+         "Et_t2"
+      ],
+      "raw": [             # the raw data
+         "t1",
+         "t2",
+         "event_t1",
+         "total_t1",
+         "event_t2",
+         "total_t2"
+      ]
+   },
+
+   "pma": {               # the Pairwise MA
+      "pre": [
+         "sm",
+         "lowerci",
+         "upperci",
+         "treatment",
+         "control",
+         "survival_in_control",
+         "Ec",
+         "Et"
+      ],
+      "raw": [
+         "Et",
+         "Nt",
+         "Ec",
+         "Nc",
+         "treatment",
+         "control"
+      ]
+   }
 }
 ```
 
