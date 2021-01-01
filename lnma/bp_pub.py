@@ -49,6 +49,8 @@ def subindex(prj):
     prj_data = {
         'CAT': { 'prj': 'CAT', 'title': 'Cancer Associated Thrombosis'},
         'RCC': { 'prj': 'RCC', 'title': 'Metastatic Renal Cell Cancer'},
+        'IO': { 'prj': 'IO', 'title': 'Toxicity of Immune'},
+        'ADJRCC': { 'prj': 'ADJRCC', 'title': 'Adjuvant Renal Cell Carcinoma'},
     }[prj]
     return render_template('pub/pub.subindex.html', prj_data=prj_data)
 

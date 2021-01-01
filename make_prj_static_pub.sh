@@ -59,10 +59,10 @@ cp -r ./instance/pubdata/$PRJ/* $FOLDER_BASE/pub/graphdata/$PRJ/
 echo '* copied all graph data'
 
 # get the data files
-# curl "$URL_BASE/graphdata/$PRJ/ITABLE.json" -o "$FOLDER_BASE/pub/graphdata/$PRJ/ITABLE.json"
-# curl "$URL_BASE/graphdata/$PRJ/ITABLE_CFG.json" -o "$FOLDER_BASE/pub/graphdata/$PRJ/ITABLE_CFG.json"
-# curl "$URL_BASE/graphdata/$PRJ/PRISMA.json" -o "$FOLDER_BASE/pub/graphdata/$PRJ/PRISMA.json"
-# curl "$URL_BASE/graphdata/$PRJ/SOFTABLE_PMA.json" -o "$FOLDER_BASE/pub/graphdata/$PRJ/SOFTABLE_PMA.json"
+curl "$URL_BASE/graphdata/$PRJ/ITABLE.json" -o "$FOLDER_BASE/pub/graphdata/$PRJ/ITABLE.json"
+curl "$URL_BASE/graphdata/$PRJ/ITABLE_CFG.json" -o "$FOLDER_BASE/pub/graphdata/$PRJ/ITABLE_CFG.json"
+curl "$URL_BASE/graphdata/$PRJ/PRISMA.json" -o "$FOLDER_BASE/pub/graphdata/$PRJ/PRISMA.json"
+curl "$URL_BASE/graphdata/$PRJ/SOFTABLE_PMA.json?v=2" -o "$FOLDER_BASE/pub/graphdata/$PRJ/SOFTABLE_PMA.json"
 # curl "$URL_BASE/graphdata/$PRJ/SOFTABLE_NMA.json" -o "$FOLDER_BASE/pub/graphdata/$PRJ/SOFTABLE_NMA.json"
 # curl "$URL_BASE/graphdata/$PRJ/EVMAP.json" -o "$FOLDER_BASE/pub/graphdata/$PRJ/EVMAP.json"
 # echo "* download the data jsons"

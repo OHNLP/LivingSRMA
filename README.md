@@ -113,6 +113,8 @@ Add certifaction
 $ sudo certbot --nginx 
 ```
 
+When added new domain name, re-run the command above.
+
 ## MySQL database
 
 We can use local MySQL as the start.
