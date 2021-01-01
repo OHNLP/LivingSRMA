@@ -194,6 +194,11 @@ def prisma_v2():
     return render_template('pub/pub.prisma_v2.html')
 
 
+@bp.route('/prisma_v3.html')
+def prisma_v3():
+    return render_template('pub/pub.prisma_v3.html')
+
+
 @bp.route('/prisma_IOTOX.html')
 def prisma_IOTOX():
     '''A special PRISMA for IOTOX project
