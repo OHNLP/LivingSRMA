@@ -232,21 +232,23 @@ var tb_simple_sofpma = {
                 },
 
                 get_cieclr: function(which_is_better, sm, cie) {
+                    var delta_sm = Math.abs(1 - sm);
+
                     if (which_is_better == 'lower') {
-                        if (sm < 1) {
+                        if (sm < 1 && delta_sm >= 0.055) {
                             return 'cie-bene-' + cie;
-                        } else if (sm > 1) {
+                        } else if (sm > 1 && delta_sm >= 0.055) {
                             return 'cie-harm-' + cie;
                         } else {
-                            return 'cie-nnor-' + cie;
+                            return 'cie-nner-' + cie;
                         }
                     } else {
-                        if (sm > 1) {
+                        if (sm > 1 && delta_sm >= 0.055) {
                             return 'cie-bene-' + cie;
-                        } else if (sm < 1) {
+                        } else if (sm < 1 && delta_sm >= 0.055) {
                             return 'cie-harm-' + cie;
                         } else {
-                            return 'cie-nnor-' + cie;
+                            return 'cie-nner-' + cie;
                         }
                     }
                 },

@@ -239,6 +239,8 @@ a {
 .cie-harm-3 { background: rgb(255, 103, 91); color: black; }
 .cie-harm-2 { background: rgb(255, 199, 193); color: black; }
 .cie-harm-1 { background: rgb(255, 242, 204); color: black; }
+.cie-nner-4 { background: rgb(66, 66, 66); color: rgb(255, 255, 255); }
+.cie-nner-3 { background: rgb(128, 128, 128); color: rgb(255, 255, 255); }
 .cie-nner-2 { background: rgb(191, 191, 191); color: black; }
 .cie-nner-1 { background: rgb(255, 242, 204); color: black; }
 
@@ -261,28 +263,7 @@ a {
 <div id="wrapper">
 
 <div id="color_guide" style="display: none;" title="Color guide">
-<table class="legend-table">
-    <tr>
-        <td class="cie-bene-4">High certainty benefit</td>
-        <td class="cie-harm-4">High certainty harm</td>
-        <td>&nbsp;</td>
-    </tr>
-    <tr>
-        <td class="cie-bene-3">Moderate certainty benefit</td>
-        <td class="cie-harm-3">Moderate certainty harm</td>
-        <td>&nbsp;</td>
-    </tr>
-    <tr>
-        <td class="cie-bene-2">Low certainty benefit</td>
-        <td class="cie-harm-2">Low certainty harm</td>
-        <td class="cie-nner-2">Low certainty neither harm nor benefit</td>
-    </tr>
-    <tr>
-        <td class="cie-bene-1">Very low certainty benefit</td>
-        <td class="cie-harm-1">Very low certainty harm</td>
-        <td class="cie-nner-1">Very low certainty neither harm nor benefit</td>
-    </tr>
-</table>
+{% include 'pub/pub._table_color_guide_v2.html' %}
 </div>
 <!-- /div#legend -->
 

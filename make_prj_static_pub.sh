@@ -33,6 +33,7 @@ curl "$URL_BASE/subindex/$PRJ" -o "$FOLDER_BASE/index.html"
 # get the shared module
 curl "$URL_BASE/prisma.html" -o "$FOLDER_BASE/pub/prisma.html"
 curl "$URL_BASE/prisma_v2.html" -o "$FOLDER_BASE/pub/prisma_v2.html"
+curl "$URL_BASE/prisma_v3.html" -o "$FOLDER_BASE/pub/prisma_v3.html"
 curl "$URL_BASE/itable.html" -o "$FOLDER_BASE/pub/itable.html"
 curl "$URL_BASE/slide.html" -o "$FOLDER_BASE/pub/slide.html"
 curl "$URL_BASE/graph_v1.html" -o "$FOLDER_BASE/pub/graph_v1.html"
