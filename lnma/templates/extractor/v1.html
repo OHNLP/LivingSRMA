@@ -1,0 +1,300 @@
+{% extends '_layout_adminlte.html' %}
+
+{% block title %}
+Data Extractor v1
+{% endblock %}
+
+{% block style %}
+<style>
+#main {
+    display: flex;
+    flex-direction: row;
+}
+#navi_tree {
+    width: 250px;
+    padding-left: 10px;
+    padding-right: 5px;
+    border-right: 1px dotted #999999;
+    margin-right: 5px;
+}
+#pan_outcome {
+    width: calc(100% - 250px);
+}
+.oc-attr {
+    display: inline-block;
+    margin: 0 10px 3px 0;
+}
+.oc-attr-name {
+    background: #ececec;
+    padding: 0 3px;
+    border-bottom: 1px solid #ececec;
+}
+.oc-attr-value {
+    width: auto;
+    font-weight: bold;
+    margin-left: -3px;
+    padding: 0 3px;
+    border: 0;
+    border-bottom: 1px solid #ececec;
+}
+</style>
+{% endblock %}
+
+{% block page_name %}
+<i class="far fa-edit"></i>
+Data Extractor
+{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+<div id="navi_header">
+
+</div>
+<!-- /#navi_header -->
+
+<div id="main">
+
+    <div id="navi_tree">
+
+        <h5>PWMA Outcomes</h5>
+        <div>
+            <div class="oper-bar">
+                <button class="btn-sm">Add Outcome</button>
+            </div>
+            <div class="oc-list">
+                <div v-for="oc in data.pma.outcomes" class="oc-item">
+                    {{ oc.full_name }}
+                </div>
+            </div>
+
+        </div>
+
+        <h5>NMA Outcomes</h5>
+        <div>
+            <div class="oper-bar">
+                <button>Add Outcome</button>
+            </div>
+            <div class="oc-list">
+
+                <div v-for="oc in data.nma.outcomes" class="oc-item">
+                    {{ oc.full_name }}
+                </div>
+            </div>
+        </div>
+
+        <h5>Interactive Table</h5>
+        <div>
+
+        </div>
+    </div>
+    <!-- /#navi_tree -->
+
+    <div id="pan_outcome">
+        <div class="panel-info">
+            <div v-for="attr_value, attr_name in data" 
+                class="oc-attr">
+                <span class="oc-attr-name">{{ attr_name }}</span>
+                <input class="oc-attr-value" 
+                    :id="'pan_oc_attr_' + attr_name" 
+                    :value="attr_value">
+            </div>
+        </div>
+        <!-- /.panel-info -->
+
+        <div class="panel-paperlist">
+
+        </div>
+        <!-- /.panel-paperlist -->
+    </div>
+    <!-- /#pan_outcome -->
+
+</div>
+<!-- /#main -->
+
+
+{% endblock %}
+
+{% block active_nav_link %}extractor{% endblock %}
+
+{% block script %}
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<script>
+var sample_project_data = {
+    pma: {
+        outcomes: {
+            "PFS": {
+                category: 'default',
+                group: 'Primary',
+                analysis_type: 'pma',
+                abbr: 'PFS',
+                full_name: 'Progession free survival',
+                included_in_plots: 'yes',
+                included_in_sof: 'yes',
+                data_type: 'raw',
+                measure: 'HR',
+                method: 'freq',
+                fixed_or_random: 'fixed',
+                which_is_better: 'lower',
+                attrs: [
+                    "Et",
+                    "Nt",
+                    "Ec",
+                    "Nc",
+                    "treatment",
+                    "control"
+                ],
+                treatment: {
+                    abbr: "tr_abbr",
+                    full_name: "full_name"
+                },
+                control: {
+                    abbr: "tr_abbr",
+                    full_name: "full_name"
+                }
+            },
+            "OS": {
+                category: 'default',
+                group: 'Primary',
+                analysis_type: 'pma',
+                abbr: 'OS',
+                full_name: 'Overall survival',
+                included_in_plots: 'yes',
+                included_in_sof: 'yes',
+                data_type: 'pre',
+                measure: 'HR',
+                method: 'freq',
+                fixed_or_random: 'fixed',
+                which_is_better: 'lower',
+                attrs: [
+                    "sm",
+                    "lowerci",
+                    "upperci",
+                    "treatment",
+                    "control",
+                    "survival_in_control",
+                    "Et",
+                    "Ec",
+                ],
+                treatment: {
+                    abbr: "tr_abbr",
+                    full_name: "full_name"
+                },
+                control: {
+                    abbr: "tr_abbr",
+                    full_name: "full_name"
+                }
+            },
+        }
+    },
+
+    nma: {
+        outcomes: {
+            "PFS": {
+                category: 'default',
+                group: 'Primary',
+                analysis_type: 'nma',
+                abbr: 'PFS',
+                full_name: 'Progession free survival',
+                included_in_plots: 'yes',
+                included_in_sof: 'yes',
+                included_in_em: 'yes',
+                data_type: 'raw',
+                measure: 'HR',
+                method: 'freq',
+                fixed_or_random: 'fixed',
+                which_is_better: 'lower',
+                attrs: [
+                    "t1",
+                    "t2",
+                    "sm",
+                    "lowerci",
+                    "upperci",
+                    "survival_in_t1",
+                    "survival_in_t2",
+                    "Ec_t1",
+                    "Et_t1",
+                    "Ec_t2",
+                    "Et_t2"
+                ]
+            }
+        }
+    },
+
+    itable: {
+        attrs: {
+
+        },
+        filters: {
+
+        }
+    }
+};
+
+var sample_oc_data = {
+    project_id: 'xxx',
+
+    analysis_type: 'pma',
+    oc_abbr: 'PFS',
+    rs: {}
+};
+
+var navi_tree = {
+    vpp_id: '#navi_tree',
+    vpp: null,
+
+    init: function(data) {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                data: data
+            },
+            methods: {
+                
+            }
+        });
+    }
+};
+
+var pan_outcome = {
+    vpp_id: "#pan_outcome",
+    vpp: null,
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                data: {},
+                type: null
+            },
+            methods: {
+
+            }
+        });
+    },
+
+    update: function(data) {
+        this.vpp.data = data;
+        // this.$forceUpdate();
+    }
+};
+
+var jarvis = {
+    init: function() {
+        // $('#navi_tree').accordion();
+
+        navi_tree.init(sample_project_data);
+
+        pan_outcome.init();
+
+        pan_outcome.update(sample_project_data.pma.outcomes.PFS)
+    }
+}
+
+$(document).ready(function() {
+    jarvis.init();
+})
+</script>
+{% endblock %}

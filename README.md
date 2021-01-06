@@ -364,6 +364,14 @@ The details are as follows:
                "method": "freq",             # freq / bayes
                "fixed_or_random": "fixed",   # fixed / random
                "which_is_better": "lower",   # lower / higher
+               "treatment": {
+                  "abbr": "tr_abbr",
+                  "full_name": "full_name"
+               },
+               "control": {
+                  "abbr": "tr_abbr",
+                  "full_name": "full_name"
+               }
             }
          },
          "meta": {
