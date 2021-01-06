@@ -534,6 +534,33 @@ On the server side, we follow the same process.
 (py37lnma) $ flask db migrate
 (py37lnma) $ flask db upgrade
 ```
+
+### Data type update
+
+For the data type update, need to change the settings of flask:
+
+```bash
+$ vim migrations/env.py
+
+# in the run_migrations_online() function
+# in the context.configure, add:
+# compare_type=True,
+# compare_server_default=True,
+
+    with connectable.connect() as connection:
+        context.configure(
+            connection=connection,
+            target_metadata=target_metadata,
+            process_revision_directives=process_revision_directives,
+            compare_type=True,
+            compare_server_default=True,
+            **current_app.extensions['migrate'].configure_args
+        )
+
+```
+
+Then the `flask db migrate` could find the data type upgrade.
+
 # Update log
 
 ## 2020-10-07

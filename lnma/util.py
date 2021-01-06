@@ -246,7 +246,8 @@ def e_fetch(ids, db='pubmed'):
 
 
 def parse_ovid_exported_xml(full_fn):
-    '''Parse the file from ovid export
+    '''
+    Parse the file from ovid export
     '''
     try:
         tree = ET.parse(full_fn)
@@ -255,8 +256,35 @@ def parse_ovid_exported_xml(full_fn):
         logger.error('ERROR when parsing %s, %s' % (full_fn, err))
         return None
 
+    return _parse_ovid_exported_xml_root(root)
+
+
+def parse_ovid_exported_xml_text(text):
+    '''
+    Parse the XML text from ovid export
+    '''
+    try:
+        tree = ET.fromstring(text)
+        try:
+            root = tree.getroot()
+        except:
+            root = tree
+
+    except Exception as err:
+        logger.error('ERROR when parsing xml text, %s' % (err))
+        return None
+
+    return _parse_ovid_exported_xml_root(root)
+    
+    
+def _parse_ovid_exported_xml_root(root):
+    '''
+    Parse a XML root which is an exported XML
+    '''
     papers = []
-    for record in root.find('records').findall('record'):
+    records = root.find('records').findall('record')
+    # logger.info('found %s records in XML root' % (len(records)))
+    for record in records:
         paper = {
             'pid': '',
             'pid_type': '',
@@ -266,6 +294,7 @@ def parse_ovid_exported_xml(full_fn):
             'pub_date': '',
             'pub_type': '',
             'journal': '',
+            'rct_id': '',
         }
 
         for node in record.iter():
@@ -274,34 +303,74 @@ def parse_ovid_exported_xml(full_fn):
 
                 if c == 'UI':
                     # update the pid
-                    paper['pid'] = paper['pid'] if node.find('D') is None else node.find('D').text 
+                    paper['pid'] = __get_node_text(paper['pid'], node)
                 elif c == 'ST':
-                    # update the title
-                    paper['pid_type'] = paper['pid_type'] if node.find('D') is None else node.find('D').text
+                    # update the pid type by ST
+                    paper['pid_type'] = __get_node_text(paper['pid_type'], node)
+                elif c == 'DB':
+                    # update the pid type by DB
+                    paper['pid_type'] = __get_node_text(paper['pid_type'], node)
                 elif c == 'TI':
                     # update the title
-                    paper['title'] = paper['title'] if node.find('D') is None else node.find('D').text
+                    paper['title'] = __get_node_text(paper['title'], node)
                 elif c == 'AU':
                     # update the authors
                     paper['authors'] = ', '.join([ _.text for _ in node.findall('D') ])
                 elif c == 'AB':
                     # update the abstract
-                    paper['abstract'] = paper['abstract'] if node.find('D') is None else node.find('D').text
+                    paper['abstract'] = __get_node_text(paper['abstract'], node)
+                elif c == 'AS':
+                    # update the journal by AS Abbreviated Source
+                    paper['journal'] = __get_node_text(paper['journal'], node)
                 elif c == 'SO':
-                    # update the journal
-                    paper['journal'] = paper['journal'] if node.find('D') is None else node.find('D').text
+                    # update the journal by SO
+                    paper['journal'] = __get_node_text(paper['journal'], node)
+                elif c == 'JA':
+                    # update the journal by JA
+                    paper['journal'] = __get_node_text(paper['journal'], node)
                 elif c == 'YR':
                     # update the pub_date
-                    paper['pub_date'] = paper['pub_date'] if node.find('D') is None else node.find('D').text
+                    paper['pub_date'] = __get_node_text(paper['pub_date'], node)
+                elif c == 'DP':
+                    # update the pub date by other info
+                    paper['pub_date'] = __get_node_text(paper['pub_date'], node)
                 elif c == 'PT':
                     # update the pub_type
-                    paper['pub_type'] = paper['pub_type'] if node.find('D') is None else node.find('D').text
+                    paper['pub_type'] = __get_node_text(paper['pub_type'], node)
+                elif c == 'CN':
+                    # update the RCT id
+                    paper['rct_id'] = __get_node_text(paper['rct_id'], node)
                 else:
                     pass
         
         papers.append(paper)
 
     return papers
+
+
+def __get_node_text(old_text, node):
+    '''
+    Get the node text and return the option
+    '''
+    if node.find('D') is None:
+        # if node is none, nothing to do
+        return old_text
+
+    # otherwise, get the text
+    new_text = node.find('D').text.strip()
+
+    if new_text == '':
+        # if text is empty, just use the old text
+        return old_text
+
+    if old_text == '':
+        # great! old text is empty, just use the new text
+        return new_text
+
+    # now is the hardest situation, both are not empty
+    # TODO should decide the value by node type
+    c = node.attrib['C']
+    return new_text
 
 
 def parse_endnote_exported_xml(full_fn):
@@ -464,6 +533,13 @@ def check_paper_journal(journal):
         return ''
     else:
         return journal[0:settings.PAPER_JOURNAL_MAX_LENGTH]
+
+
+def escape_illegal_xml_characters(x):
+    '''
+    Make a safe XML content
+    '''
+    return re.sub(u'[\x00-\x08\x0b\x0c\x0e-\x1F\uD800-\uDFFF\uFFFE\uFFFF]', '', x)
 
 
 if __name__ == "__main__":

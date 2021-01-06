@@ -135,7 +135,7 @@ class Paper(db.Model):
 
     paper_id = db.Column(db.String(48), primary_key=True, nullable=False)
     pid = db.Column(db.String(settings.PAPER_PID_MAX_LENGTH), index=False)
-    pid_type = db.Column(db.String(settings.PID_TYPE_MAX_LENGTH), index=False)
+    pid_type = db.Column(db.Text, index=False)
     seq_num = db.Column(db.Integer, index=False)
     project_id = db.Column(db.String(48), index=False)
     title = db.Column(db.Text, index=False)
