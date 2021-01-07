@@ -230,3 +230,28 @@ class DataSource(db.Model):
 
     def __repr__(self):
         return '<DataSource {0}: {1}>'.format(self.ds_type, self.title)
+
+
+class Extract(db.Model):
+    """
+    The product details extracted by user
+    """
+    
+    __tablename__ = 'extracts'
+    __table_args__ = {'extend_existing': True}
+
+    extract_id = db.Column(db.String(48), primary_key=True, nullable=False)
+    project_id = db.Column(db.String(48), index=False)
+    oc_type = db.Column(db.String(48), index=False)
+    abbr = db.Column(db.String(48), index=False)
+    meta = db.Column(db.JSON, index=False)
+    data = db.Column(db.JSON, index=False)
+    date_created = db.Column(db.DateTime, index=False)
+    date_updated = db.Column(db.DateTime, index=False)
+
+    def __repr__(self):
+        return '<Extract {0} {1}: {2}>'.format(
+            self.oc_type, self.abbr, self.extract_id)
+
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}

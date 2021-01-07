@@ -6,19 +6,58 @@ Data Extractor v1
 
 {% block style %}
 <style>
+html {
+    overflow: hidden;
+}
+#navi_header {
+    margin: 5px 5px 0 0;
+    padding: 0 5px 0 10px;
+}
 #main {
     display: flex;
     flex-direction: row;
+    width: 100%;
+    height: calc(100% - 100px);
+    overflow: hidden;
 }
-#navi_tree {
-    width: 250px;
-    padding-left: 10px;
-    padding-right: 5px;
+.panel-s {
+    width: 24%;
+    margin: 5px 5px 0 0;
+    padding: 0 5px 0 10px;
     border-right: 1px dotted #999999;
-    margin-right: 5px;
 }
-#pan_outcome {
-    width: calc(100% - 250px);
+.panel-m {
+    width: 49%;
+    margin: 5px 5px 0 0;
+    padding: 0 5px 0 10px;
+    border-right: 1px dotted #999999;
+}
+.panel-l {
+    width: 74%;
+    margin: 5px 5px 0 0;
+    padding: 0 5px 0 10px;
+    border-right: 1px dotted #999999;
+}
+.panel-box {
+    margin: 5px 0 15px 0;
+    border-bottom: 1px dotted #cccccc;
+    padding: 10px 0;
+}
+.panel-container {
+    max-width: 100%;
+    overflow-y: auto;
+}
+#pan_outcomes {
+    height: 100%;
+}
+#pan_ocpapers {
+
+}
+#pan_collector {
+
+}
+#pan_analyzer {
+
 }
 .oc-attr {
     display: inline-block;
@@ -49,48 +88,113 @@ Data Extractor
 <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 
 <div id="navi_header">
+    <button>
+        <i class="fa fa-list"></i>
+        Manage Outcomes
+    </button>
 
+    <button>
+        <i class="fa fa-list"></i>
+        Extract Information
+    </button>
+
+    <button>
+        <i class="fa fa-list"></i>
+        Analyze Outcome
+    </button>
 </div>
 <!-- /#navi_header -->
 
 <div id="main">
 
-    <div id="navi_tree">
+    <div id="pan_outcomes" class="panel-m panel-container">
 
-        <h5>PWMA Outcomes</h5>
-        <div>
-            <div class="oper-bar">
-                <button class="btn-sm">Add Outcome</button>
-            </div>
-            <div class="oc-list">
-                <div v-for="oc in data.pma.outcomes" class="oc-item">
-                    {{ oc.full_name }}
-                </div>
-            </div>
+        <h5>
+            Interactive Table
+            <button class="btn-sm"
+                v-on:click="create_itable_column()">
+                <i class="fa fa-add"></i>
+                Add Column
+            </button>
+        </h5>
+        <div class="panel-box">
 
         </div>
 
-        <h5>NMA Outcomes</h5>
-        <div>
+        <h5>
+            PWMA Outcomes
+            <button class="btn-sm"
+                v-on:click="create_extract('pma')">
+                <i class="fa fa-add"></i>
+                Add Outcome
+            </button>
+        </h5>
+        <div class="panel-box">
             <div class="oper-bar">
-                <button>Add Outcome</button>
+                
             </div>
-            <div class="oc-list">
+            <table class="table">
+                <tr>
+                    <th>Group</th>
+                    <th>Full Name</th>
+                    <th>Measure</th>
+                    <th>Treatment</th>
+                    <th>Control</th>
+                </tr>
+                <tr v-for="oc in data.pma.outcomes">
+                    <td>{{ oc.group }}</td>
+                    <td>
+                        <a href="javascript:void(0);"
+                            v-on:click="show_extract_data(oc.oc_type, oc.abbr)">
+                            {{ oc.full_name }}
+                        </a>
+                    </td>
+                    <td>{{ oc.measure }}</td>
+                    <td>{{ oc.treatment.full_name }}</td>
+                    <td>{{ oc.control.full_name }}</td>
+                </tr>
+            </table>
 
-                <div v-for="oc in data.nma.outcomes" class="oc-item">
-                    {{ oc.full_name }}
-                </div>
-            </div>
         </div>
 
-        <h5>Interactive Table</h5>
-        <div>
+        <h5>
+            NMA Outcomes
+            <button class="btn-sm"
+                v-on:click="create_extract('nma')">
+                <i class="fa fa-add"></i>
+                Add Outcome
+            </button>
+        </h5>
+        <div class="panel-box">
+            <div class="oper-bar">
 
+            </div>
+            <table class="table">
+                <tr>
+                    <th>Group</th>
+                    <th>Full Name</th>
+                    <th>Measure</th>
+                    <th>Treatment</th>
+                    <th>Control</th>
+                </tr>
+                <tr v-for="oc in data.nma.outcomes">
+                    <td>{{ oc.group }}</td>
+                    <td>
+                        <a href="javascript:void(0);"
+                            v-on:click="show_extract_data(oc.oc_type, oc.abbr)">
+                            {{ oc.full_name }}
+                        </a>
+                    </td>
+                    <td>{{ oc.measure }}</td>
+                    <td>{{ oc.treatment.full_name }}</td>
+                    <td>{{ oc.control.full_name }}</td>
+                </tr>
+            </table>
         </div>
     </div>
-    <!-- /#navi_tree -->
+    <!-- /#pan_outcomes -->
 
-    <div id="pan_outcome">
+    <div id="pan_ocpapers" class="panel-m">
         <div class="panel-info">
             <div v-for="attr_value, attr_name in data" 
                 class="oc-attr">
@@ -107,8 +211,27 @@ Data Extractor
         </div>
         <!-- /.panel-paperlist -->
     </div>
-    <!-- /#pan_outcome -->
+    <!-- /#pan_ocpapers -->
 
+    <div id="pan_collector" class="panel-m">
+        <div class="panel-info">
+            
+        </div>
+        <!-- /.panel-info -->
+
+        
+    </div>
+    <!-- /#pan_collector -->
+
+    <div id="pan_analyzer" class="panel-m">
+        <div class="panel-info">
+            
+        </div>
+        <!-- /.panel-info -->
+
+        
+    </div>
+    <!-- /#pan_analyzer -->
 </div>
 <!-- /#main -->
 
@@ -128,7 +251,7 @@ var sample_project_data = {
             "PFS": {
                 category: 'default',
                 group: 'Primary',
-                analysis_type: 'pma',
+                oc_type: 'pma',
                 abbr: 'PFS',
                 full_name: 'Progession free survival',
                 included_in_plots: 'yes',
@@ -158,7 +281,7 @@ var sample_project_data = {
             "OS": {
                 category: 'default',
                 group: 'Primary',
-                analysis_type: 'pma',
+                oc_type: 'pma',
                 abbr: 'OS',
                 full_name: 'Overall survival',
                 included_in_plots: 'yes',
@@ -195,7 +318,7 @@ var sample_project_data = {
             "PFS": {
                 category: 'default',
                 group: 'Primary',
-                analysis_type: 'nma',
+                oc_type: 'nma',
                 abbr: 'PFS',
                 full_name: 'Progession free survival',
                 included_in_plots: 'yes',
@@ -241,25 +364,157 @@ var sample_oc_data = {
     rs: {}
 };
 
-var navi_tree = {
-    vpp_id: '#navi_tree',
+var pan_outcomes = {
+    vpp_id: '#pan_outcomes',
     vpp: null,
 
-    init: function(data) {
+    load: function() {
+        var project_id = Cookies.get('project_id');
+
+        $.get(
+            jarvis.url.get_extracts,
+            {project_id:project_id},
+            function(data) {
+                console.log(data);
+                pan_outcomes.add_extracts(data.extracts);
+            }, 'json'
+        );
+    },
+
+    init: function() {
         this.vpp = new Vue({
             el: this.vpp_id,
             data: {
-                data: data
+                data: {
+                    pma: { outcomes: {} },
+                    nma: { outcomes: {} },
+                    itable: { outcomes: {} },
+                }
             },
             methods: {
-                
+                create_extract: function(oc_type) {
+                    pan_outcomes.create_extract(oc_type);
+                },
+
+                create_itable_column: function() {
+                    pan_outcomes.create_itable_column();
+                },
+
+                show_extract_data: function(oc_type, abbr) {
+                    pan_outcomes.show_extract_data(oc_type, abbr);
+                }
             }
         });
+    },
+
+    show_extract_data: function(oc_type, abbr) {
+        console.log('* show extract [' + oc_type + '] [' + abbr + ']');
+    },
+
+    create_itable_column: function() {
+        var text = jarvis.prompt('The column name:');
+        if (text == null) { return; }
+        text = text.trim();
+        if (text == '') { return; }
+
+        // detect if exists
+
+        // send to backend
+
+        
+    },
+    
+    create_extract: function(oc_type) {
+        var abbr = jarvis.create_default_oc_abbr();
+        var meta = {
+            category: 'default',
+            group: 'Primary',
+            oc_type: oc_type,
+            abbr: 'PFS',
+            full_name: 'Progession free survival',
+            included_in_plots: 'yes',
+            included_in_sof: 'yes',
+            data_type: 'raw',
+            measure: 'HR',
+            method: 'freq',
+            fixed_or_random: 'fixed',
+            which_is_better: 'lower',
+            attrs: [
+                "Et",
+                "Nt",
+                "Ec",
+                "Nc",
+                "treatment",
+                "control"
+            ],
+            treatment: {
+                abbr: "tr_abbr",
+                full_name: "full_name"
+            },
+            control: {
+                abbr: "tr_abbr",
+                full_name: "full_name"
+            }
+        };
+
+        var data = {};
+        var project_id = Cookies.get('project_id');
+
+        // update the full name
+        var text = jarvis.prompt('The outcome full name:');
+        if (text == null) { return; }
+        text = text.trim();
+        if (text == '') { return; }
+
+        meta.full_name = text;
+
+        $.post(
+            jarvis.url.create_extract,
+            {
+                project_id: project_id,
+                oc_type: oc_type,
+                abbr: abbr,
+                meta: JSON.stringify(meta),
+                data: JSON.stringify(data)
+            }, 
+            function(data) {
+                console.log(data);
+                // update UI
+                pan_outcomes.add_extracts([data.extract]);
+            }, 'json'
+        );
+    },
+
+    add_extracts: function(extracts) {
+        for (let i = 0; i < extracts.length; i++) {
+            var extract = extracts[i];
+            var oc_type = extract.oc_type;
+            var abbr = extract.abbr;
+            // add to the related type
+            this.vpp.data[oc_type].outcomes[abbr] = extract.meta;
+        }
+
+        // update the vpp
+        this.vpp.$forceUpdate();
+    },
+
+    show: function() {
+        $(this.vpp_id).show();
+    },
+
+    hide: function() {
+        $(this.vpp_id).hide();
+    },
+
+    set_size: function(size) {
+        $(this.vpp_id).removeClass('panel-s panel-m panel-l')
+            .addClass('panel-' + size);
     }
 };
 
-var pan_outcome = {
-    vpp_id: "#pan_outcome",
+
+var pan_ocpapers = {
+    vpp_id: "#pan_ocpapers",
     vpp: null,
 
     init: function() {
@@ -278,18 +533,169 @@ var pan_outcome = {
     update: function(data) {
         this.vpp.data = data;
         // this.$forceUpdate();
+    },
+
+    show: function() {
+        $(this.vpp_id).show();
+    },
+
+    hide: function() {
+        $(this.vpp_id).hide();
+    },
+
+    set_size: function(size) {
+        $(this.vpp_id).removeClass('panel-s panel-m panel-l')
+            .addClass('panel-' + size);
     }
 };
 
-var jarvis = {
+
+var pan_collector = {
+    vpp_id: "#pan_collector",
+    vpp: null,
+
     init: function() {
-        // $('#navi_tree').accordion();
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                data: {},
+                type: null
+            },
+            methods: {
 
-        navi_tree.init(sample_project_data);
+            }
+        });
+    },
 
-        pan_outcome.init();
+    update: function(data) {
+        this.vpp.data = data;
+        // this.$forceUpdate();
+    },
 
-        pan_outcome.update(sample_project_data.pma.outcomes.PFS)
+    show: function() {
+        $(this.vpp_id).show();
+    },
+
+    hide: function() {
+        $(this.vpp_id).hide();
+    },
+
+    set_size: function(size) {
+        $(this.vpp_id).removeClass('panel-s panel-m panel-l')
+            .addClass('panel-' + size);
+    }
+};
+
+
+var pan_analyzer = {
+    vpp_id: "#pan_analyzer",
+    vpp: null,
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                data: {},
+                type: null
+            },
+            methods: {
+
+            }
+        });
+    },
+
+    update: function(data) {
+        this.vpp.data = data;
+        // this.$forceUpdate();
+    },
+
+    show: function() {
+        $(this.vpp_id).show();
+    },
+
+    hide: function() {
+        $(this.vpp_id).hide();
+    },
+
+    set_size: function(size) {
+        $(this.vpp_id).removeClass('panel-s panel-m panel-l')
+            .addClass('panel-' + size);
+    }
+};
+
+
+var jarvis = {
+    url: {
+        create_extract: "[[ url_for('extractor.create_extract') ]]",
+        get_extracts: "[[ url_for('extractor.get_extracts') ]]",
+    },
+
+    tpl: {
+
+    },
+
+    layout: {
+        manage_outcomes: 'manage_outcomes'
+    },
+
+    create_default_oc_abbr: function() {
+        var result = '';
+        var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        var len = characters.length;
+        for (var i = 0; i < 8; i++) {
+            result += characters.charAt(Math.floor(Math.random() * len));
+        }
+        return result;
+    },
+
+    init: function() {
+        // $('#pan_outcomes').accordion();
+
+        pan_outcomes.init();
+
+        pan_ocpapers.init();
+
+        pan_ocpapers.update(sample_project_data.pma.outcomes.PFS);
+
+        pan_collector.init();
+
+        pan_analyzer.init();
+
+        // switch to default layout
+        this.switch_layout('manage_outcomes')
+
+        // the load the init outcomes
+        pan_outcomes.load();
+
+        // when resize
+        this.adjust_panel_height();
+        $(window).resize(function() {
+            jarvis.adjust_panel_height();
+        });
+    },
+
+    switch_layout: function(layout) {
+        if (layout == 'manage_outcomes') {
+            pan_outcomes.show();
+            pan_ocpapers.show();
+            pan_collector.hide();
+            pan_analyzer.hide();
+
+            // set the default size
+            pan_outcomes.set_size('m');
+            pan_ocpapers.set_size('m');
+        }
+    },
+
+    prompt: function(text) {
+        return window.prompt(text);
+    },
+
+    adjust_panel_height: function() {
+        var height = $( window ).height();
+        $('.panel-container').css(
+            'max-height', (height - 90) + 'px'
+        );
     }
 }
 

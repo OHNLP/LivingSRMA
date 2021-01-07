@@ -1129,3 +1129,48 @@ def create_datasource(
     db.session.commit()
 
     return datasource
+
+
+###############################################################################
+# Extract Related Functions
+###############################################################################
+
+def create_extract(project_id, oc_type, abbr, meta, data):
+    '''
+    Create a new extract for a project
+
+    Args:
+
+    oc_type: nma, pma, itable
+    '''
+    # create the id
+    extract_id = str(uuid.uuid1())
+    date_created = datetime.datetime.now()
+    date_updated = datetime.datetime.now()
+
+    extract = Extract(
+        extract_id = extract_id,
+        project_id = project_id,
+        oc_type = oc_type,
+        abbr = abbr,
+        meta = meta,
+        data = data,
+        date_created = date_created,
+        date_updated = date_updated
+    )
+
+    db.session.add(extract)
+    db.session.commit()
+
+    return extract
+
+
+def get_extracts_by_project_id(project_id):
+    '''
+    Get the extract detail of a project
+    '''
+    extracts = Extract.query.filter(
+        Extract.project_id == project_id
+    ).all()
+
+    return extracts
