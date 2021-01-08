@@ -1167,10 +1167,22 @@ def create_extract(project_id, oc_type, abbr, meta, data):
 
 def get_extracts_by_project_id(project_id):
     '''
-    Get the extract detail of a project
+    Get all of the extract detail of a project
     '''
     extracts = Extract.query.filter(
         Extract.project_id == project_id
     ).all()
 
     return extracts
+
+
+def get_extract_by_project_id_and_abbr(project_id, abbr):
+    '''
+    Get an extract
+    '''
+    extract = Extract.query.filter(and_(
+        Extract.project_id == project_id,
+        Extract.abbr == abbr
+    )).first()
+
+    return extract

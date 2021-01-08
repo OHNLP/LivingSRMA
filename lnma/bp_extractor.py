@@ -11,6 +11,7 @@ from flask_login import login_required
 from flask_login import current_user
 
 from lnma import dora
+from lnma import ss_state
 
 bp = Blueprint("extractor", __name__, url_prefix="/extractor")
 
@@ -25,12 +26,6 @@ def v1():
 def get_papers_by_stage():
     project_id = request.args.get('project_id')
     stage = request.args.get('stage')
-    if stage != 'f1':
-        return jsonify({
-            'success': False,
-            'msg': 'wrong stage'
-        })
-
     papers = dora.get_papers_by_stage(project_id, stage)
     json_papers = [ p.as_very_simple_dict() for p in papers ]
 
@@ -69,6 +64,29 @@ def create_extract():
     return jsonify(ret)
 
 
+@bp.route('/get_extract_and_papers')
+@login_required
+def get_extract_and_papers():
+    project_id = request.args.get('project_id')
+    abbr = request.args.get('abbr')
+    
+    # get the exisiting extracts
+    extract = dora.get_extract_by_project_id_and_abbr(project_id, abbr)
+
+    # get papers
+    stage = ss_state.SS_STAGE_INCLUDED_SR
+    papers = dora.get_papers_by_stage(project_id, stage)
+
+    # merge the return obj
+    ret = {
+        'success': True,
+        'msg': '',
+        'extract': extract.as_dict(),
+        'papers': [ p.as_simple_dict() for p in papers ]
+    }
+    return jsonify(ret)
+
+
 @bp.route('/get_extracts')
 @login_required
 def get_extracts():
@@ -82,28 +100,5 @@ def get_extracts():
         'success': True,
         'msg': '',
         'extracts': [ extr.as_dict() for extr in extracts ]
-    }
-    return jsonify(ret)
-
-
-@bp.route('/get_extracts_and_details')
-@login_required
-def get_extracts_and_details():
-    project_id = request.args.get('project_id')
-    stage = 'f1'
-
-    # get papers by the stage
-    papers = dora.get_papers_by_stage(project_id, stage)
-
-    # get the exisiting extracts
-    extracts = dora.get_extracts_by_project_id(project_id)
-
-    # merge the papers and the existing outcome 
-    
-
-    ret = {
-        'success': True,
-        'msg': '',
-        'oc': json_papers
     }
     return jsonify(ret)

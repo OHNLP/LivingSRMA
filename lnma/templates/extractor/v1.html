@@ -88,17 +88,17 @@ Data Extractor
 <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 
 <div id="navi_header">
-    <button>
+    <button onclick="jarvis.switch_layout('manage_outcomes');">
         <i class="fa fa-list"></i>
         Manage Outcomes
     </button>
 
-    <button>
+    <button onclick="jarvis.switch_layout('extract_information');">
         <i class="fa fa-list"></i>
         Extract Information
     </button>
 
-    <button>
+    <button onclick="jarvis.switch_layout('analyze_outcome');">
         <i class="fa fa-list"></i>
         Analyze Outcome
     </button>
@@ -140,6 +140,7 @@ Data Extractor
                     <th>Measure</th>
                     <th>Treatment</th>
                     <th>Control</th>
+                    <th>&nbsp;</th>
                 </tr>
                 <tr v-for="oc in data.pma.outcomes">
                     <td>{{ oc.group }}</td>
@@ -152,6 +153,11 @@ Data Extractor
                     <td>{{ oc.measure }}</td>
                     <td>{{ oc.treatment.full_name }}</td>
                     <td>{{ oc.control.full_name }}</td>
+                    <td>
+                        <a href="javascript:void(0);" class="text-danger">
+                            <i class="far fa-trash-alt"></i>
+                        </a>
+                    </td>
                 </tr>
             </table>
 
@@ -195,19 +201,36 @@ Data Extractor
     <!-- /#pan_outcomes -->
 
     <div id="pan_ocpapers" class="panel-m">
-        <div class="panel-info">
-            <div v-for="attr_value, attr_name in data" 
+        <div class="panel-info" v-if="extract != null">
+            <div v-for="attr_value, attr_name in extract.meta" 
                 class="oc-attr">
                 <span class="oc-attr-name">{{ attr_name }}</span>
                 <input class="oc-attr-value" 
                     :id="'pan_oc_attr_' + attr_name" 
-                    :value="attr_value">
+                    v-model="extract.meta[attr_name]">
             </div>
         </div>
         <!-- /.panel-info -->
 
-        <div class="panel-paperlist">
-
+        <div class="panel-paperlist" v-if="extract != null">
+            <table class="table">
+                <tr>
+                    <th style="width: 90px;">RCT ID</th>
+                    <th style="">Paper</th>
+                    <th style="">Year</th>
+                    <th v-for="attr in extract.meta.attrs">
+                        {{ attr }}
+                    </th>
+                </tr>
+                <tr v-for="paper in papers">
+                    <td>{{ paper.meta.rct_id }}</td>
+                    <td>{{ paper.seq_num }}</td>
+                    <td>{{ paper.pub_date }}</td>
+                    <td v-for="attr in extract.meta.attrs">
+                        -
+                    </td>
+                </tr>
+            </table>
         </div>
         <!-- /.panel-paperlist -->
     </div>
@@ -215,7 +238,12 @@ Data Extractor
 
     <div id="pan_collector" class="panel-m">
         <div class="panel-info">
-            
+            <div class="oc-attr">
+                <span class="oc-attr-name">Abstract</span>
+            </div>
+            <div class="oc-attr">
+                <span class="oc-attr-name">Filename.pdf</span>
+            </div>
         </div>
         <!-- /.panel-info -->
 
@@ -225,7 +253,7 @@ Data Extractor
 
     <div id="pan_analyzer" class="panel-m">
         <div class="panel-info">
-            
+            Analyzer
         </div>
         <!-- /.panel-info -->
 
@@ -409,6 +437,7 @@ var pan_outcomes = {
 
     show_extract_data: function(oc_type, abbr) {
         console.log('* show extract [' + oc_type + '] [' + abbr + ']');
+        pan_ocpapers.show_extract_and_papers(oc_type, abbr);
     },
 
     create_itable_column: function() {
@@ -425,13 +454,22 @@ var pan_outcomes = {
     },
     
     create_extract: function(oc_type) {
+        // get the full name
+        var text = jarvis.prompt('The outcome full name:');
+        if (text == null) { return; }
+        text = text.trim();
+        if (text == '') { return; }
+
+        // create an abbr
         var abbr = jarvis.create_default_oc_abbr();
+
+        // create an meta
         var meta = {
             category: 'default',
             group: 'Primary',
             oc_type: oc_type,
-            abbr: 'PFS',
-            full_name: 'Progession free survival',
+            abbr: abbr,
+            full_name: text,
             included_in_plots: 'yes',
             included_in_sof: 'yes',
             data_type: 'raw',
@@ -459,14 +497,6 @@ var pan_outcomes = {
 
         var data = {};
         var project_id = Cookies.get('project_id');
-
-        // update the full name
-        var text = jarvis.prompt('The outcome full name:');
-        if (text == null) { return; }
-        text = text.trim();
-        if (text == '') { return; }
-
-        meta.full_name = text;
 
         $.post(
             jarvis.url.create_extract,
@@ -521,8 +551,8 @@ var pan_ocpapers = {
         this.vpp = new Vue({
             el: this.vpp_id,
             data: {
-                data: {},
-                type: null
+                extract: null,
+                papers: []
             },
             methods: {
 
@@ -531,8 +561,24 @@ var pan_ocpapers = {
     },
 
     update: function(data) {
-        this.vpp.data = data;
-        // this.$forceUpdate();
+        // the data is a combo of extract and papers
+        this.vpp.extract = data.extract;
+        this.vpp.papers = data.papers;
+
+        // update
+        this.vpp.$forceUpdate();
+    },
+
+    show_extract_and_papers: function(oc_type, abbr) {
+        var project_id = Cookies.get('project_id');
+        $.get(
+            jarvis.url.get_extract_and_papers,
+            {project_id:project_id, abbr:abbr, rnd:Math.random()},
+            function(data) {
+                pan_ocpapers.update(data);
+
+            }, 'json'
+        );
     },
 
     show: function() {
@@ -628,6 +674,7 @@ var jarvis = {
     url: {
         create_extract: "[[ url_for('extractor.create_extract') ]]",
         get_extracts: "[[ url_for('extractor.get_extracts') ]]",
+        get_extract_and_papers: "[[ url_for('extractor.get_extract_and_papers') ]]",
     },
 
     tpl: {
@@ -635,7 +682,9 @@ var jarvis = {
     },
 
     layout: {
-        manage_outcomes: 'manage_outcomes'
+        manage_outcomes: 'manage_outcomes',
+        extract_information: 'extract_information',
+        analyze_outcome: 'analyze_outcome'
     },
 
     create_default_oc_abbr: function() {
@@ -654,8 +703,6 @@ var jarvis = {
         pan_outcomes.init();
 
         pan_ocpapers.init();
-
-        pan_ocpapers.update(sample_project_data.pma.outcomes.PFS);
 
         pan_collector.init();
 
@@ -684,6 +731,29 @@ var jarvis = {
             // set the default size
             pan_outcomes.set_size('m');
             pan_ocpapers.set_size('m');
+
+        } else if (layout == 'extract_information') {
+            pan_outcomes.hide();
+            pan_ocpapers.show();
+            pan_collector.show();
+            pan_analyzer.hide();
+
+            // set the default size
+            pan_ocpapers.set_size('m');
+            pan_collector.set_size('m');
+
+        } else if (layout == 'analyze_outcome') {
+            pan_outcomes.hide();
+            pan_ocpapers.show();
+            pan_collector.hide();
+            pan_analyzer.show();
+
+            // set the default size
+            pan_ocpapers.set_size('m');
+            pan_analyzer.set_size('m');
+
+        } else {
+
         }
     },
 
