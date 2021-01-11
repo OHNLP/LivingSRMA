@@ -146,9 +146,11 @@ def CAT():
     return render_template('pub/pub.CAT_v2.html', dma=dma, nma=nma)
 
 
-
 @bp.route('/CAT_v1.html')
 def CAT_v1():
+    '''
+    Deprecated
+    '''
     prj = 'CAT'
     # load the graph data
     full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, 'NMA_LIST.json')
@@ -413,7 +415,8 @@ def graphdata_itable_json(prj):
 
 @bp.route('/graphdata/<prj>/GRAPH.json')
 def graphdata_graph_json(prj):
-    '''Special rule for the graphs.
+    '''
+    Special rule for the graphs.
     Generate a GRAPH.json for this project.
     And, it will also generate a set of outcome seperate file
     '''
@@ -454,7 +457,8 @@ def graphdata_graph_json(prj):
 
 @bp.route('/graphdata/<prj>/SOFTABLE_PMA.json')
 def graphdata_softable_pma_json(prj):
-    '''Special rule for the SoF Table PMA which does not exist
+    '''
+    Special rule for the SoF Table PMA which does not exist
     In this function, all the data are stored in ALL_DATA.xlsx
     The first tab is Study characteristics
     The second tab is Adverse events
@@ -1096,6 +1100,7 @@ def get_filters_from_itable(full_fn):
 
     return ft_list
 
+
 def get_attr_pack_from_itable(full_fn):
     # read data, hope it is xlsx format ...
     if full_fn.endswith('csv'):
@@ -1146,8 +1151,10 @@ def get_attr_pack_from_itable(full_fn):
     return { 'attr_dict': attr_dict, 'attr_tree': attr_tree }
 
 
-def get_pma_by_py(dataset, datatype='CAT_RAW', sm='RR', method='MH', fixed_or_random='random', ):
-    '''Get the PMA results
+def get_pma_by_py(dataset, datatype='CAT_RAW', 
+    sm='RR', method='MH', fixed_or_random='random'):
+    '''
+    Get the PMA results
     The input dataset should follow:
 
     [Et, Nt, Ec, Nc, Name 1],
@@ -2466,7 +2473,8 @@ def get_ae_nma_data(full_fn, backend):
 
 
 def get_sof_pma_data(full_fn):
-    ''' The OC data for PMA
+    '''
+    The OC data for PMA
     Support different types of data and 
     '''
     # load data
@@ -2733,7 +2741,6 @@ def get_sof_pma_data(full_fn):
     }
 
     return ret
-
 
 
 def calc_cie(vals):

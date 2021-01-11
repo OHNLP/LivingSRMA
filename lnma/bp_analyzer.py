@@ -82,6 +82,14 @@ def read_data_file():
 @bp.route('/analyze', methods=['GET', 'POST'])
 @login_required
 def analyze():
+    '''
+    Analyze the given dataset
+
+    Args:
+
+    - rs: the records
+    - cfg: the configs
+    '''
     if request.method == 'GET':
         return 'USE POST'
 
