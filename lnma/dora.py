@@ -1165,6 +1165,48 @@ def create_extract(project_id, oc_type, abbr, meta, data):
     return extract
 
 
+def delete_extract(project_id, oc_type, abbr):
+    '''
+    Delete an extract
+    '''
+    extract = Extract.query.filter(and_(
+        Extract.project_id == project_id,
+        Extract.oc_type == oc_type,
+        Extract.abbr == abbr
+    )).first()
+
+    db.session.delete(extract)
+    db.session.commit()
+
+    return 0
+
+
+def update_extract_meta_and_data(project_id, oc_type, abbr, meta, data):
+    '''
+    Update the existing extract
+    '''
+    extract = Extract.query.filter(and_(
+        Extract.project_id == project_id,
+        Extract.abbr == abbr
+    )).first()
+
+    # TODO check if not exists
+
+    # update
+    extract.meta = meta
+    extract.data = data
+    extract.date_updated = datetime.datetime.now()
+
+    flag_modified(extract, "meta")
+    flag_modified(extract, "data")
+
+    # commit this
+    db.session.add(extract)
+    db.session.commit()
+
+    return extract
+    
+
 def get_extracts_by_project_id(project_id):
     '''
     Get all of the extract detail of a project

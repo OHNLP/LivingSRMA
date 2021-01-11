@@ -1,6 +1,8 @@
 import os
 import pathlib
 
+ALLOWED_UPLOAD_EXTENSIONS = {'pdf', 'png', 'jpg'}
+
 TMP_FOLDER = '/dev/shm/lnma'
 PATH_PUBDATA = 'pubdata'
 

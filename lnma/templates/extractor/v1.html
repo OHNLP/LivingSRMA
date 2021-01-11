@@ -76,6 +76,16 @@ html {
     border: 0;
     border-bottom: 1px solid #ececec;
 }
+.paper-extract-input {
+    width: 40px;
+    min-width: 30px;
+    max-width: 80px;
+    height: 20px;
+    padding: 1px 1px;
+}
+.hide {
+    display: none;
+}
 </style>
 {% endblock %}
 
@@ -89,17 +99,22 @@ Data Extractor
 
 <div id="navi_header">
     <button onclick="jarvis.switch_layout('manage_outcomes');">
+        <i class="fa fa-table"></i>
+        Interactive Table
+    </button>
+
+    <button onclick="jarvis.switch_layout('manage_outcomes');">
         <i class="fa fa-list"></i>
         Manage Outcomes
     </button>
 
     <button onclick="jarvis.switch_layout('extract_information');">
-        <i class="fa fa-list"></i>
+        <i class="fa fa-edit"></i>
         Extract Information
     </button>
 
     <button onclick="jarvis.switch_layout('analyze_outcome');">
-        <i class="fa fa-list"></i>
+        <i class="fa fa-chart-bar"></i>
         Analyze Outcome
     </button>
 </div>
@@ -109,7 +124,7 @@ Data Extractor
 
     <div id="pan_outcomes" class="panel-m panel-container">
 
-        <h5>
+        <!-- <h5>
             Interactive Table
             <button class="btn-sm"
                 v-on:click="create_itable_column()">
@@ -119,14 +134,19 @@ Data Extractor
         </h5>
         <div class="panel-box">
 
-        </div>
+        </div> -->
 
         <h5>
             PWMA Outcomes
             <button class="btn-sm"
-                v-on:click="create_extract('pma')">
-                <i class="fa fa-add"></i>
+                v-on:click="create_extract('pma', 'default')">
+                <i class="fa fa-plus"></i>
                 Add Outcome
+            </button>
+            <button class="btn-sm"
+                v-on:click="create_extract('spma', 'default')">
+                <i class="fa fa-plus"></i>
+                Add Subgroup Analysis
             </button>
         </h5>
         <div class="panel-box">
@@ -144,7 +164,7 @@ Data Extractor
                 </tr>
                 <tr v-for="oc in data.pma.outcomes">
                     <td>{{ oc.group }}</td>
-                    <td>
+                    <td :oc_abbr="oc.abbr">
                         <a href="javascript:void(0);"
                             v-on:click="show_extract_data(oc.oc_type, oc.abbr)">
                             {{ oc.full_name }}
@@ -154,7 +174,26 @@ Data Extractor
                     <td>{{ oc.treatment.full_name }}</td>
                     <td>{{ oc.control.full_name }}</td>
                     <td>
-                        <a href="javascript:void(0);" class="text-danger">
+                        <a href="javascript:void(0);" class="text-danger"
+                            v-on:click="delete_extract(oc.oc_type, oc.abbr, oc.full_name)">
+                            <i class="far fa-trash-alt"></i>
+                        </a>
+                    </td>
+                </tr>
+                <tr v-for="oc in data.spma.outcomes">
+                    <td>{{ oc.group }}</td>
+                    <td :oc_abbr="oc.abbr">
+                        <a href="javascript:void(0);"
+                            v-on:click="show_extract_data(oc.oc_type, oc.abbr)">
+                            {{ oc.full_name }}
+                        </a>
+                    </td>
+                    <td>{{ oc.measure }}</td>
+                    <td>{{ oc.treatment.full_name }}</td>
+                    <td>{{ oc.control.full_name }}</td>
+                    <td>
+                        <a href="javascript:void(0);" class="text-danger"
+                            v-on:click="delete_extract(oc.oc_type, oc.abbr, oc.full_name)">
                             <i class="far fa-trash-alt"></i>
                         </a>
                     </td>
@@ -166,8 +205,8 @@ Data Extractor
         <h5>
             NMA Outcomes
             <button class="btn-sm"
-                v-on:click="create_extract('nma')">
-                <i class="fa fa-add"></i>
+                v-on:click="create_extract('nma', 'default')">
+                <i class="far fa-plus-square"></i>
                 Add Outcome
             </button>
         </h5>
@@ -180,8 +219,8 @@ Data Extractor
                     <th>Group</th>
                     <th>Full Name</th>
                     <th>Measure</th>
-                    <th>Treatment</th>
-                    <th>Control</th>
+                    <th>Treatments</th>
+                    <th>&nbsp;</th>
                 </tr>
                 <tr v-for="oc in data.nma.outcomes">
                     <td>{{ oc.group }}</td>
@@ -192,8 +231,13 @@ Data Extractor
                         </a>
                     </td>
                     <td>{{ oc.measure }}</td>
-                    <td>{{ oc.treatment.full_name }}</td>
-                    <td>{{ oc.control.full_name }}</td>
+                    <td> - </td>
+                    <td>
+                        <a href="javascript:void(0);" class="text-danger"
+                            v-on:click="delete_extract(oc.oc_type, oc.abbr, oc.full_name)">
+                            <i class="far fa-trash-alt"></i>
+                        </a>
+                    </td>
                 </tr>
             </table>
         </div>
@@ -202,19 +246,124 @@ Data Extractor
 
     <div id="pan_ocpapers" class="panel-m">
         <div class="panel-info" v-if="extract != null">
-            <div v-for="attr_value, attr_name in extract.meta" 
+            <div class="oc-attr">
+                <span style="font-size: 1.2em;">Outcome <b>[{{ extract.meta.full_name }}]</b> Details</span>
+            </div>
+            <div class="oc-attr">
+                <button v-on:click="toggle_show_settings();">
+                    <i class="fa" v-bind:class="{'fa-toggle-on': show_settings, 'fa-toggle-off': !show_settings}"></i>
+                    Toggle settings
+                </button> |
+                <button v-on:click="update_extract();">
+                    <i class="fa fa-save"></i>
+                    Save all
+                </button>
+                
+                <button v-on:click="copy_extract();">
+                    <i class="far fa-copy"></i>
+                    Save a copy
+                </button>
+            </div>
+        </div>
+
+        <div v-bind:class="{hide: !show_settings}">
+        <div class="panel-info" v-if="extract != null && extract.meta.oc_type == 'pma'">
+            <div class="oc-attr">
+                <span class="oc-attr-name">Full Name</span>
+                <input class="oc-attr-value" v-model="extract.meta.full_name">
+            </div>
+            <div class="oc-attr">
+                <span class="oc-attr-name">Category</span>
+                <input class="oc-attr-value" v-model="extract.meta.category">
+            </div>
+
+            <div class="oc-attr">
+                <span class="oc-attr-name">Analysis Group</span>
+                <input class="oc-attr-value" v-model="extract.meta.group">
+            </div>
+
+            <div class="oc-attr">
+                <span class="oc-attr-name">Analysis Measure</span>
+                <select v-model="extract.meta.measure">
+                    <option value="HR">Hazard Ratio (HR)</option>
+                    <option value="RR">Relative Risk (RR)</option>
+                    <option value="OR">Odds Ratio (OR)</option>
+                    <option value="RD">Risk Difference (RD)</option>
+                </select>
+            </div>
+
+            <div class="oc-attr">
+                <span class="oc-attr-name">Data Type</span>
+                <select v-model="extract.meta.data_type">
+                    <option value="raw">Raw Data</option>
+                    <option value="pre">Pre-calculated Data</option>
+                </select>
+            </div>
+
+            <div class="oc-attr">
+                <span class="oc-attr-name">Treatment Arm</span>
+                <input class="oc-attr-value" v-model="extract.meta.treatment.abbr">
+                <input class="oc-attr-value" v-model="extract.meta.treatment.full_name">
+            </div>
+
+            <div class="oc-attr">
+                <span class="oc-attr-name">Control Arm</span>
+                <input class="oc-attr-value" v-model="extract.meta.control.abbr">
+                <input class="oc-attr-value" v-model="extract.meta.control.full_name">
+            </div>
+
+            <div class="oc-attr">
+                <span class="oc-attr-name">Fixed or Random</span>
+                <select v-model="extract.meta.fixed_or_random">
+                    <option value="fixed">Fixed Effect</option>
+                    <option value="random">Random Effects</option>
+                </select>
+            </div>
+
+            <div class="oc-attr">
+                <span class="oc-attr-name">Which is better</span>
+                <select v-model="extract.meta.which_is_better">
+                    <option value="lower">Lower is better</option>
+                    <option value="higher">Higher is better</option>
+                </select>
+            </div>
+
+            <div class="oc-attr">
+                <span class="oc-attr-name">Include this outcome in SoF Table</span>
+                <select v-model="extract.meta.included_in_sof">
+                    <option value="yes">Yes, include this outcome</option>
+                    <option value="no">No, exclude this outcome</option>
+                </select>
+            </div>
+
+            <div class="oc-attr">
+                <span class="oc-attr-name">Include this outcome in result plots</span>
+                <select v-model="extract.meta.included_in_plots">
+                    <option value="yes">Yes, include this outcome</option>
+                    <option value="no">No, exclude this outcome</option>
+                </select>
+            </div>
+
+            <div class="oc-attr">
+                <span class="oc-attr-name">The attributes to extract</span>
+                <span>{{ extract.meta.attrs }}</span>
+            </div>
+
+            <!-- <div v-for="attr_value, attr_name in extract.meta" 
                 class="oc-attr">
                 <span class="oc-attr-name">{{ attr_name }}</span>
                 <input class="oc-attr-value" 
                     :id="'pan_oc_attr_' + attr_name" 
                     v-model="extract.meta[attr_name]">
-            </div>
+            </div> -->
         </div>
         <!-- /.panel-info -->
+        </div>
 
         <div class="panel-paperlist" v-if="extract != null">
             <table class="table">
                 <tr>
+                    <th>&nbsp;</th>
                     <th style="width: 90px;">RCT ID</th>
                     <th style="">Paper</th>
                     <th style="">Year</th>
@@ -223,16 +372,19 @@ Data Extractor
                     </th>
                 </tr>
                 <tr v-for="paper in papers">
+                    <td><input type="checkbox" id="" v-model="extract.data[paper.pid].selected" ></td>
                     <td>{{ paper.meta.rct_id }}</td>
-                    <td>{{ paper.seq_num }}</td>
+                    <td>{{ paper.seq_num }} | {{ paper.pid }}</td>
                     <td>{{ paper.pub_date }}</td>
                     <td v-for="attr in extract.meta.attrs">
-                        -
+                        <input class="paper-extract-input" type="text" 
+                            v-model="extract.data[paper.pid].attrs[attr]">
                     </td>
                 </tr>
             </table>
         </div>
         <!-- /.panel-paperlist -->
+
     </div>
     <!-- /#pan_ocpapers -->
 
@@ -257,7 +409,7 @@ Data Extractor
         </div>
         <!-- /.panel-info -->
 
-        
+        {% include 'analyzer/embed.html' %}
     </div>
     <!-- /#pan_analyzer -->
 </div>
@@ -273,128 +425,17 @@ Data Extractor
 <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
 <script>
-var sample_project_data = {
-    pma: {
-        outcomes: {
-            "PFS": {
-                category: 'default',
-                group: 'Primary',
-                oc_type: 'pma',
-                abbr: 'PFS',
-                full_name: 'Progession free survival',
-                included_in_plots: 'yes',
-                included_in_sof: 'yes',
-                data_type: 'raw',
-                measure: 'HR',
-                method: 'freq',
-                fixed_or_random: 'fixed',
-                which_is_better: 'lower',
-                attrs: [
-                    "Et",
-                    "Nt",
-                    "Ec",
-                    "Nc",
-                    "treatment",
-                    "control"
-                ],
-                treatment: {
-                    abbr: "tr_abbr",
-                    full_name: "full_name"
-                },
-                control: {
-                    abbr: "tr_abbr",
-                    full_name: "full_name"
-                }
-            },
-            "OS": {
-                category: 'default',
-                group: 'Primary',
-                oc_type: 'pma',
-                abbr: 'OS',
-                full_name: 'Overall survival',
-                included_in_plots: 'yes',
-                included_in_sof: 'yes',
-                data_type: 'pre',
-                measure: 'HR',
-                method: 'freq',
-                fixed_or_random: 'fixed',
-                which_is_better: 'lower',
-                attrs: [
-                    "sm",
-                    "lowerci",
-                    "upperci",
-                    "treatment",
-                    "control",
-                    "survival_in_control",
-                    "Et",
-                    "Ec",
-                ],
-                treatment: {
-                    abbr: "tr_abbr",
-                    full_name: "full_name"
-                },
-                control: {
-                    abbr: "tr_abbr",
-                    full_name: "full_name"
-                }
-            },
-        }
-    },
-
-    nma: {
-        outcomes: {
-            "PFS": {
-                category: 'default',
-                group: 'Primary',
-                oc_type: 'nma',
-                abbr: 'PFS',
-                full_name: 'Progession free survival',
-                included_in_plots: 'yes',
-                included_in_sof: 'yes',
-                included_in_em: 'yes',
-                data_type: 'raw',
-                measure: 'HR',
-                method: 'freq',
-                fixed_or_random: 'fixed',
-                which_is_better: 'lower',
-                attrs: [
-                    "t1",
-                    "t2",
-                    "sm",
-                    "lowerci",
-                    "upperci",
-                    "survival_in_t1",
-                    "survival_in_t2",
-                    "Ec_t1",
-                    "Et_t1",
-                    "Ec_t2",
-                    "Et_t2"
-                ]
-            }
-        }
-    },
-
-    itable: {
-        attrs: {
-
-        },
-        filters: {
-
-        }
-    }
-};
-
-var sample_oc_data = {
-    project_id: 'xxx',
-
-    analysis_type: 'pma',
-    oc_abbr: 'PFS',
-    rs: {}
-};
 
 var pan_outcomes = {
     vpp_id: '#pan_outcomes',
     vpp: null,
+
+    data_empty: {
+        pma: { outcomes: {} },
+        spma: { outcomes: {} },
+        nma: { outcomes: {} },
+        itable: { outcomes: {} },
+    },
 
     load: function() {
         var project_id = Cookies.get('project_id');
@@ -404,7 +445,7 @@ var pan_outcomes = {
             {project_id:project_id},
             function(data) {
                 console.log(data);
-                pan_outcomes.add_extracts(data.extracts);
+                pan_outcomes.show_extracts(data.extracts);
             }, 'json'
         );
     },
@@ -413,15 +454,11 @@ var pan_outcomes = {
         this.vpp = new Vue({
             el: this.vpp_id,
             data: {
-                data: {
-                    pma: { outcomes: {} },
-                    nma: { outcomes: {} },
-                    itable: { outcomes: {} },
-                }
+                data: JSON.parse(JSON.stringify(this.data_empty))
             },
             methods: {
-                create_extract: function(oc_type) {
-                    pan_outcomes.create_extract(oc_type);
+                create_extract: function(oc_type, tpl) {
+                    pan_outcomes.create_extract(oc_type, tpl);
                 },
 
                 create_itable_column: function() {
@@ -430,9 +467,29 @@ var pan_outcomes = {
 
                 show_extract_data: function(oc_type, abbr) {
                     pan_outcomes.show_extract_data(oc_type, abbr);
+                },
+
+                delete_extract: function(oc_type, abbr, full_name) {
+                    pan_outcomes.delete_extract(oc_type, abbr, full_name);
                 }
             }
         });
+    },
+
+    delete_extract: function(oc_type, abbr, full_name) {
+        var ret = jarvis.confirm('The deleted outcome and related extractions can NOT be restored. Are you sure to delete [' + full_name + ']?');
+    
+        if (ret) {
+            var project_id = Cookies.get('project_id');
+            $.post(
+                jarvis.url.delete_extract,
+                {project_id:project_id, oc_type:oc_type, abbr:abbr},
+                function(data) {
+                    jarvis.toast('Deleted!');
+                    pan_outcomes.load();
+                }, 'json'
+            );
+        }
     },
 
     show_extract_data: function(oc_type, abbr) {
@@ -450,10 +507,9 @@ var pan_outcomes = {
 
         // send to backend
 
-        
     },
     
-    create_extract: function(oc_type) {
+    create_extract: function(oc_type, tpl) {
         // get the full name
         var text = jarvis.prompt('The outcome full name:');
         if (text == null) { return; }
@@ -464,36 +520,9 @@ var pan_outcomes = {
         var abbr = jarvis.create_default_oc_abbr();
 
         // create an meta
-        var meta = {
-            category: 'default',
-            group: 'Primary',
-            oc_type: oc_type,
-            abbr: abbr,
-            full_name: text,
-            included_in_plots: 'yes',
-            included_in_sof: 'yes',
-            data_type: 'raw',
-            measure: 'HR',
-            method: 'freq',
-            fixed_or_random: 'fixed',
-            which_is_better: 'lower',
-            attrs: [
-                "Et",
-                "Nt",
-                "Ec",
-                "Nc",
-                "treatment",
-                "control"
-            ],
-            treatment: {
-                abbr: "tr_abbr",
-                full_name: "full_name"
-            },
-            control: {
-                abbr: "tr_abbr",
-                full_name: "full_name"
-            }
-        };
+        var meta = JSON.parse(JSON.stringify(jarvis.tpl.oc_type[oc_type][tpl]));
+        meta.full_name = text;
+        meta.abbr = abbr;
 
         var data = {};
         var project_id = Cookies.get('project_id');
@@ -513,6 +542,14 @@ var pan_outcomes = {
                 pan_outcomes.add_extracts([data.extract]);
             }, 'json'
         );
+    },
+
+    show_extracts: function(extracts) {
+        // clear existing
+        this.vpp.$data.data = JSON.parse(JSON.stringify(this.data_empty));
+        this.add_extracts(extracts);
+        // update the vpp
+        this.vpp.$forceUpdate();
     },
 
     add_extracts: function(extracts) {
@@ -551,11 +588,24 @@ var pan_ocpapers = {
         this.vpp = new Vue({
             el: this.vpp_id,
             data: {
+                show_settings: true,
                 extract: null,
                 papers: []
             },
             methods: {
+                toggle_show_settings: function() {
+                    this.show_settings = !this.show_settings;
+                },
 
+                // save all!
+                update_extract: function() {
+                    pan_ocpapers.update_extract();
+                },
+                
+                // copy 
+                copy_extract: function() {
+                    pan_ocpapers.copy_extract();
+                }
             }
         });
     },
@@ -578,6 +628,59 @@ var pan_ocpapers = {
                 pan_ocpapers.update(data);
 
             }, 'json'
+        );
+    },
+
+    copy_extract: function() {
+        var project_id = Cookies.get('project_id');
+        var oc_type = this.vpp.$data.extract.oc_type;
+        var full_name = this.vpp.$data.extract.meta.full_name;
+        var abbr = this.vpp.$data.extract.abbr;
+        var meta = this.vpp.$data.extract.meta;
+        var data = this.vpp.$data.extract.data;
+
+        var new_full_name = jarvis.prompt('Copy current outcome [' + full_name + '] and make a new outcome. The new outcome full name is: ', full_name);
+        if (new_full_name == null) { return; }
+        new_full_name = new_full_name.trim();
+        if (new_full_name == '') { return; }
+
+        // save this new 
+        var new_abbr = jarvis.create_default_oc_abbr();
+
+        // send request!
+        $.post(
+            jarvis.url.copy_extract,
+            {project_id:project_id, oc_type:oc_type, abbr:abbr,
+             new_abbr:new_abbr, new_full_name: new_full_name,
+             meta:JSON.stringify(meta), data:JSON.stringify(data)},
+            function(data) {
+                // show
+                toast('Copied the new outcome [' + data.extract.meta.full_name + ']');
+                // reload the outcomes
+                pan_outcomes.load();
+            }
+        );
+    },
+
+    update_extract: function() {
+        // there are 
+        var project_id = Cookies.get('project_id');
+        var oc_type = this.vpp.$data.extract.oc_type;
+        var abbr = this.vpp.$data.extract.abbr;
+        var meta = this.vpp.$data.extract.meta;
+        var data = this.vpp.$data.extract.data;
+
+        // send request!
+        $.post(
+            jarvis.url.update_extract,
+            {project_id:project_id, oc_type:oc_type, abbr:abbr,
+             meta:JSON.stringify(meta), data:JSON.stringify(data)},
+            function(data) {
+                // show
+                toast('Saved the outcome [' + data.extract.meta.full_name + ']');
+                // reload the outcomes
+                pan_outcomes.load();
+            }
         );
     },
 
@@ -673,12 +776,105 @@ var pan_analyzer = {
 var jarvis = {
     url: {
         create_extract: "[[ url_for('extractor.create_extract') ]]",
+        update_extract: "[[ url_for('extractor.update_extract') ]]",
+        copy_extract: "[[ url_for('extractor.copy_extract') ]]",
+        delete_extract: "[[ url_for('extractor.delete_extract') ]]",
         get_extracts: "[[ url_for('extractor.get_extracts') ]]",
         get_extract_and_papers: "[[ url_for('extractor.get_extract_and_papers') ]]",
     },
 
+    // the templates for the extraction
     tpl: {
-
+        oc_type: {
+            pma: {
+                default: {
+                    abbr: '',
+                    subgroups: [],
+                    oc_type: 'pma',
+                    category: 'default',
+                    group: 'Primary',
+                    full_name: 'PMA Outcome full name',
+                    included_in_plots: 'yes',
+                    included_in_sof: 'yes',
+                    data_type: 'raw',
+                    measure: 'RR',
+                    fixed_or_random: 'fixed',
+                    which_is_better: 'lower',
+                    attrs: [ "Et", "Nt", "Ec", "Nc" ],
+                    treatment: {
+                        abbr: "Treat",
+                        full_name: "Treatment arm full name"
+                    },
+                    control: {
+                        abbr: "Ctrl",
+                        full_name: "Control arm full name"
+                    }
+                },
+            },
+            spma: {
+                default: {
+                    abbr: '',
+                    subgroups: ['A', 'B'],
+                    oc_type: 'spma',
+                    category: 'default',
+                    group: 'Subgroup',
+                    full_name: 'PMA Outcome full name',
+                    included_in_plots: 'yes',
+                    included_in_sof: 'yes',
+                    data_type: 'raw',
+                    measure: 'RR',
+                    fixed_or_random: 'fixed',
+                    which_is_better: 'lower',
+                    attrs: [ "Et", "Nt", "Ec", "Nc" ],
+                    treatment: {
+                        abbr: "Treat",
+                        full_name: "Treatment arm full name"
+                    },
+                    control: {
+                        abbr: "Ctrl",
+                        full_name: "Control arm full name"
+                    }
+                }
+            },
+            nma: {
+                default: {
+                    abbr: '',
+                    oc_type: 'nma',
+                    category: 'default',
+                    group: 'Primary',
+                    full_name: 'NMA Outcome full name',
+                    included_in_plots: 'yes',
+                    included_in_sof: 'yes',
+                    included_in_em: 'yes',
+                    data_type: 'raw',
+                    measure: 'HR',
+                    method: 'freq',
+                    fixed_or_random: 'fixed',
+                    which_is_better: 'lower',
+                    attrs: ['t1', 't2', 
+                        'event_t1', 'total_t1', 
+                        'event_t2', 'total_t2'],
+                    treatment: {
+                        treat_abbr: {
+                            abbr: 'treatAbbr',
+                            full_name: "Treatment full name"
+                        }
+                    }
+                }
+            }
+        },
+        data_type: {
+            pma: {
+                raw: ['Et', 'Nt', 'Ec', 'Nc'],
+                pre: ['sm', 'lowerci', 'upperci', 'survival_c', 'Ec', 'Et']
+            },
+            nma: {
+                raw: ['t1', 't2', 'event_t1', 'total_t1', 'event_t2', 'total_t2'],
+                pre: ['t1', 't2', 'sm', 'lowerci', 'upperci', 
+                      'survival_t1', 'survival_t2',
+                      'Ec_t1', 'Et_t1', 'Ec_t2', 'Et_t2']
+            }
+        }
     },
 
     layout: {
@@ -757,8 +953,16 @@ var jarvis = {
         }
     },
 
-    prompt: function(text) {
-        return window.prompt(text);
+    prompt: function(text, value) {
+        return window.prompt(text, value);
+    },
+
+    confirm: function(text) {
+        return window.confirm(text);
+    },
+
+    toast: function(s) {
+        toast(s);
     },
 
     adjust_panel_height: function() {
