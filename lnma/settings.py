@@ -20,12 +20,14 @@ STANDARD_DATA_COLS = {
     'HRLU': ['study', 't1', 't2', 'hr', 'upperci', 'lowerci'],
     'FTET': ['study', 'treat', 'event', 'total', 'time'],
     'ET': ['study', 'treat', 'event', 'total'],
+    
     # for PWMA - SUBGROUP
     'SUBG_CATIRR_RAW': ['study', 'year', 'Et', 'Tt', 'Ec', 'Tc', 'treatment', 'control', 'subgroup'],
     'SUBG_CAT_RAW': ['study', 'year', 'Et', 'Nt', 'Ec', 'Nc', 'treatment', 'control', 'subgroup'],
     'SUBG_CAT_PRE': ['study', 'year', 'TE', 'lowerci', 'upperci', 'treatment', 'control', 'subgroup'],
     'SUBG_CONTD_RAW': ['study', 'year', 'Nt', 'Nt', 'SDt', 'Nc', 'Mc', 'SDc', 'treatment', 'control', 'subgroup'],
     'SUBG_CONTD_PRE': ['study', 'year', 'TE', 'SE', 'treatment', 'control', 'subgroup'],
+
     # for PWMA - PRIMARY ANALYSIS / SENSITIVITY / CUMULATIVE
     'PRIM_CATIRR_RAW': ['study', 'year', 'Et', 'Tt', 'Ec', 'Tc', 'treatment', 'control'],
     'PRIM_CAT_RAW': ['study', 'year', 'Et', 'Nt', 'Ec', 'Nc', 'treatment', 'control'],

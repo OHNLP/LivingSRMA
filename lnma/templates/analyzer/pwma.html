@@ -472,12 +472,12 @@ PWMA Analyzer
                         <label>Pooling Method:</label>
                     </div>
                     <div class="box-bodyitem-value">
-                        <select v-model="cfgs.poolinig_method.selected"
-                            v-bind:disabled="cfgs.poolinig_method.disabled">
+                        <select v-model="cfgs.pooling_method.selected"
+                            v-bind:disabled="cfgs.pooling_method.disabled">
                             <option 
-                                v-for="option in cfgs.poolinig_method.options"
+                                v-for="option in cfgs.pooling_method.options"
                                 v-bind:value="option.value"
-                                v-if="show_cfg_option('poolinig_method', option.value)">
+                                v-if="show_cfg_option('pooling_method', option.value)">
                                 {{ option.text }}
                             </option>
                         </select>
@@ -768,7 +768,7 @@ var fm_config = {
             ]
         },
 
-        poolinig_method: {
+        pooling_method: {
             selected: 'Inverse',
             use: true,
             disabled: false,
@@ -928,7 +928,7 @@ var fm_config = {
 
                 show_cfg_option: function(cfg_name, option) {
                     switch (cfg_name) {
-                        case 'poolinig_method':
+                        case 'pooling_method':
                             switch (option) {
                                 case 'MH':
                                     if (this.cfgs.input_format.selected.includes('CAT_RAW') ||
@@ -956,12 +956,12 @@ var fm_config = {
                                         this.cfgs.input_format.selected.includes('CAT_RAW')) return true;
                                     else return false;
                                 case 'RR':
-                                    if (this.cfgs.poolinig_method.selected == 'Peto') return false;
+                                    if (this.cfgs.pooling_method.selected == 'Peto') return false;
                                     if (this.cfgs.input_format.selected.includes('CAT_PRE') ||
                                         this.cfgs.input_format.selected.includes('CAT_RAW')) return true;
                                     else return false;
                                 case 'RD':
-                                    if (this.cfgs.poolinig_method.selected == 'Peto') return false;
+                                    if (this.cfgs.pooling_method.selected == 'Peto') return false;
                                     if (this.cfgs.input_format.selected.includes('CAT_PRE') ||
                                         this.cfgs.input_format.selected.includes('CAT_RAW')) return true;
                                     else return false;

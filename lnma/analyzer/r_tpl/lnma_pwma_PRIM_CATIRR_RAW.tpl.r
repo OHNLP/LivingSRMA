@@ -52,7 +52,7 @@ resultsraw <- metainc(Et,
                       comb.fixed = {{ is_fixed }}, 
                       comb.random = {{ is_random }}, 
                       sm = "{{ measure_of_effect }}", 
-                      method = "{{ poolinig_method }}", 
+                      method = "{{ pooling_method }}", 
                       method.tau = "{{ tau_estimation_method }}", 
                       hakn = {{ is_hakn }})
 
