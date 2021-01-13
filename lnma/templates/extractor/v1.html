@@ -139,12 +139,12 @@ Data Extractor
         <h5>
             PWMA Outcomes
             <button class="btn-sm"
-                v-on:click="create_extract('pma', 'default')">
+                v-on:click="create_extract('pwma', 'default')">
                 <i class="fa fa-plus"></i>
                 Add Outcome
             </button>
             <button class="btn-sm"
-                v-on:click="create_extract('spma', 'default')">
+                v-on:click="create_extract('spwma', 'default')">
                 <i class="fa fa-plus"></i>
                 Add Subgroup Analysis
             </button>
@@ -162,7 +162,7 @@ Data Extractor
                     <th>Control</th>
                     <th>&nbsp;</th>
                 </tr>
-                <tr v-for="oc in data.pma.outcomes">
+                <tr v-for="oc in data.pwma.outcomes">
                     <td>{{ oc.group }}</td>
                     <td :oc_abbr="oc.abbr">
                         <a href="javascript:void(0);"
@@ -180,7 +180,7 @@ Data Extractor
                         </a>
                     </td>
                 </tr>
-                <tr v-for="oc in data.spma.outcomes">
+                <tr v-for="oc in data.spwma.outcomes">
                     <td>{{ oc.group }}</td>
                     <td :oc_abbr="oc.abbr">
                         <a href="javascript:void(0);"
@@ -267,7 +267,7 @@ Data Extractor
         </div>
 
         <div v-bind:class="{hide: !show_settings}">
-        <div class="panel-info" v-if="extract != null && extract.meta.oc_type == 'pma'">
+        <div class="panel-info" v-if="extract != null && extract.meta.oc_type == 'pwma'">
             <div class="oc-attr">
                 <span class="oc-attr-name">Full Name</span>
                 <input class="oc-attr-value" v-model="extract.meta.full_name">
@@ -284,7 +284,7 @@ Data Extractor
 
             <div class="oc-attr">
                 <span class="oc-attr-name">Analysis Measure</span>
-                <select v-model="extract.meta.measure">
+                <select v-model="extract.meta.measure_of_effect">
                     <option value="HR">Hazard Ratio (HR)</option>
                     <option value="RR">Relative Risk (RR)</option>
                     <option value="OR">Odds Ratio (OR)</option>
@@ -294,9 +294,12 @@ Data Extractor
 
             <div class="oc-attr">
                 <span class="oc-attr-name">Data Type</span>
-                <select v-model="extract.meta.data_type">
-                    <option value="raw">Raw Data</option>
-                    <option value="pre">Pre-calculated Data</option>
+                <select v-model="extract.meta.input_format">
+                    <option value="PRIM_CAT_PRE">Categorical Precalculated Data</option>
+                    <option value="PRIM_CAT_RAW">Categorical Raw Data</option>
+                    <option value="PRIM_CATIRR_RAW">Categorical Raw (Incidence Rate Ratios) Data</option>
+                    <option value="PRIM_CONTD_PRE">Continuous Precalculated Data</option>
+                    <option value="PRIM_CONTD_RAW">Continuous Raw Data</option>
                 </select>
             </div>
 
@@ -405,7 +408,22 @@ Data Extractor
 
     <div id="pan_analyzer" class="panel-m">
         <div class="panel-info">
-            Analyzer
+            <div class="oc-attr">
+                <span style="font-size: 1.2em;">
+                    <i class="fa fa-balance-scale"></i>
+                    Analyzer
+                </span>
+            </div>
+            <div class="oc-attr">
+                <button v-on:click="toggle_show_settings();">
+                    <i class="fa" v-bind:class="{'fa-toggle-on': show_settings, 'fa-toggle-off': !show_settings}"></i>
+                    Toggle settings
+                </button> |
+                <button v-on:click="analyze();">
+                    <i class="fa fa-calculator"></i>
+                    Run analyzer
+                </button>
+            </div>
         </div>
         <!-- /.panel-info -->
 
@@ -433,8 +451,8 @@ var pan_outcomes = {
     vpp: null,
 
     data_empty: {
-        pma: { outcomes: {} },
-        spma: { outcomes: {} },
+        pwma: { outcomes: {} },
+        spwma: { outcomes: {} },
         nma: { outcomes: {} },
         itable: { outcomes: {} },
     },
@@ -621,6 +639,20 @@ var pan_ocpapers = {
         this.vpp.$forceUpdate();
     },
 
+    get_current_extract_and_papers: function() {
+        if (this.vpp.$data.extract == null) {
+            return null;
+        }
+        
+        // build a object
+        var ret = {
+            extract: this.vpp.$data.extract,
+            papers: this.vpp.$data.papers
+        };
+
+        return ret;
+    },
+
     show_extract_and_papers: function(oc_type, abbr) {
         var project_id = Cookies.get('project_id');
         $.get(
@@ -747,10 +779,21 @@ var pan_analyzer = {
             el: this.vpp_id,
             data: {
                 data: {},
-                type: null
+                type: null,
+
+                // show the analyzer settings
+                show_settings: false,
             },
             methods: {
+                toggle_show_settings: function() {
+                    this.show_settings = !this.show_settings;
+                },
 
+                // the main entry for the analyze
+                analyze: function() {
+                    // call the pan_analyzer
+                    pan_analyzer.analyze();
+                }
             }
         });
     },
@@ -771,7 +814,115 @@ var pan_analyzer = {
     set_size: function(size) {
         $(this.vpp_id).removeClass('panel-s panel-m panel-l')
             .addClass('panel-' + size);
+    },
+
+    /**
+     * The main entry for analyze, it will detect the settings and send to the
+     * lisr_analyzer.js for details
+     */
+    analyze: function() {
+        // first, get the extract and papers from pan_ocpapers
+        // a pack is { extract: {}, papers: [] } object
+        var pack = pan_ocpapers.get_current_extract_and_papers();
+        if (pack == null) {
+            alert('Open an outcome first');
+            return -1;
+        }
+
+        // then, parse the pack to create the cfg and rs for lisr_analyzer.js
+        var oc_type = pack.extract.oc_type;
+
+        if (oc_type == 'pwma') {
+            var ret = this.__gen_pwma_cfg_and_rs(pack);
+            console.log(ret);
+            lisr_analyzer.analyze(ret.cfg, ret.rs, function(data) {
+                console.log(data);
+            });
+        } else {
+            alert('Not implemented [' + oc_type + '] analyzing function');
+            return -2;
+        }
+
+        // submit to lisr_ana
+    },
+
+    __gen_pwma_cfg_and_rs: function(pack) {
+        var extract = pack.extract;
+        var papers = pack.papers;
+
+        var cfg = lisr_analyzer.get_blank_cfg();
+        var rs = [];
+        
+        // first, set the general cfg
+        cfg._analyze_type = 'pwma';
+        cfg.input_format = extract.meta.input_format;
+        cfg.measure_of_effect = extract.meta.measure_of_effect;
+        cfg.fixed_or_random = extract.meta.fixed_or_random;
+        cfg.which_is_better = extract.meta.which_is_better;
+
+        // then, set those for pwma PRIMARY
+        cfg.pairwise_analysis = 'PRIM';
+        cfg.pooling_method = 'Inverse';
+        cfg.tau_estimation_method = 'DL';
+        cfg.hakn_adjustment = 'no';
+        cfg.smd_estimation_method = 'Hedges';
+        cfg.prediction_interval = 'no';
+        cfg.sensitivity_analysis = 'no';
+        cfg.cumulative_meta_analysis = 'no';
+        cfg.cumulative_meta_analysis_sortby = 'year';
+        cfg.treatment = extract.meta.treatment.abbr;
+        cfg.control = extract.meta.control.abbr;
+
+        // last, build the rs
+        var rs = [];
+        for (let i = 0; i < papers.length; i++) {
+            const paper = papers[i];
+            var pid = paper.pid;
+            
+            // get the data of this paper
+            if (!extract.data.hasOwnProperty(pid)) {
+                // what??? not exists in extract data???
+                continue;
+            }
+
+            var ext_paper = extract.data[pid];
+            if (!ext_paper.selected) {
+                // unfortunely, this paper is not selected for ananlysis
+                continue;
+            }
+
+            // build a row from this paper
+
+            // first, the basic info from the paper
+            let col_study = paper.seq_num + ' - ' + paper.authors.split(',')[0];
+            let col_year = jarvis.get_year(paper.pub_date);
+            let col_treatment = extract.meta.treatment.abbr;
+            let col_control = extract.meta.control.abbr;
+
+            var r = {
+                study: col_study,
+                year: col_year,
+                treatment: col_treatment,
+                control: col_control
+            };
+
+            // second, the extracted info 
+            for (let j = 0; j < extract.meta.attrs.length; j++) {
+                const attr = extract.meta.attrs[j];
+                // get the attribute value from the ext_paper
+                r[attr] = ext_paper.attrs[attr];
+            }
+
+            // done! put into rs
+            rs.push(r);
+        }
+
+        return {
+            cfg: cfg,
+            rs: rs
+        };
     }
+
 };
 
 
@@ -788,18 +939,18 @@ var jarvis = {
     // the templates for the extraction
     tpl: {
         oc_type: {
-            pma: {
+            pwma: {
                 default: {
                     abbr: '',
                     subgroups: [],
-                    oc_type: 'pma',
+                    oc_type: 'pwma',
                     category: 'default',
                     group: 'Primary',
-                    full_name: 'PMA Outcome full name',
+                    full_name: 'pwma Outcome full name',
                     included_in_plots: 'yes',
                     included_in_sof: 'yes',
-                    data_type: 'raw',
-                    measure: 'RR',
+                    input_format: 'PRIM_CAT_RAW',
+                    measure_of_effect: 'RR',
                     fixed_or_random: 'fixed',
                     which_is_better: 'lower',
                     attrs: [ "Et", "Nt", "Ec", "Nc" ],
@@ -813,18 +964,18 @@ var jarvis = {
                     }
                 },
             },
-            spma: {
+            subg: {
                 default: {
                     abbr: '',
                     subgroups: ['A', 'B'],
-                    oc_type: 'spma',
+                    oc_type: 'subg',
                     category: 'default',
                     group: 'Subgroup',
-                    full_name: 'PMA Outcome full name',
+                    full_name: 'pwma Outcome full name',
                     included_in_plots: 'yes',
                     included_in_sof: 'yes',
-                    data_type: 'raw',
-                    measure: 'RR',
+                    input_format: 'SUBG_CAT_RAW',
+                    measure_of_effect: 'RR',
                     fixed_or_random: 'fixed',
                     which_is_better: 'lower',
                     attrs: [ "Et", "Nt", "Ec", "Nc" ],
@@ -848,8 +999,8 @@ var jarvis = {
                     included_in_plots: 'yes',
                     included_in_sof: 'yes',
                     included_in_em: 'yes',
-                    data_type: 'raw',
-                    measure: 'HR',
+                    input_format: 'raw',
+                    measure_of_effect: 'HR',
                     method: 'freq',
                     fixed_or_random: 'fixed',
                     which_is_better: 'lower',
@@ -866,9 +1017,19 @@ var jarvis = {
             }
         },
         data_type: {
-            pma: {
-                raw: ['Et', 'Nt', 'Ec', 'Nc'],
-                pre: ['sm', 'lowerci', 'upperci', 'survival_c', 'Ec', 'Et']
+            pwma: {
+                PRIM_CATIRR_RAW: ['Et', 'Tt', 'Ec', 'Tc'],
+                PRIM_CAT_RAW: ['Et', 'Nt', 'Ec', 'Nc'],
+                PRIM_CAT_PRE: ['TE', 'lowerci', 'upperci'],
+                PRIM_CONTD_RAW: ['Nt', 'Mt', 'SDt', 'Nc', 'Mc', 'SDc'],
+                PRIM_CONTD_PRE: ['TE', 'SE'],
+            },
+            subg: {
+                SUBG_CATIRR_RAW: ['Et', 'Tt', 'Ec', 'Tc'],
+                SUBG_CAT_RAW: ['Et', 'Nt', 'Ec', 'Nc'],
+                SUBG_CAT_PRE: ['TE', 'lowerci', 'upperci'],
+                SUBG_CONTD_RAW: ['Nt', 'Nt', 'SDt', 'Nc', 'Mc', 'SDc'],
+                SUBG_CONTD_PRE: ['TE', 'SE'],
             },
             nma: {
                 raw: ['t1', 't2', 'event_t1', 'total_t1', 'event_t2', 'total_t2'],
@@ -972,6 +1133,15 @@ var jarvis = {
         $('.panel-container').css(
             'max-height', (height - 90) + 'px'
         );
+    },
+
+    get_year: function(s) {
+        const regex = /\d{4}/gm;
+        let m;
+        if ((m = regex.exec(s)) !== null) {
+            return m[0];
+        }
+        return '';
     }
 }
 

@@ -1051,14 +1051,16 @@ var fg_imglst = {
     vpp: null,
     vpp_id: "#fg_imglst",
     headers: {
-        fn_outplt1: function(){
-            return fm_config.cfg_optval2text('pairwise_analysis', fm_config.vpp.cfgs.pairwise_analysis.selected) + ' Result';
-        },
+        // fn_outplt1: function(){
+        //     return fm_config.cfg_optval2text('pairwise_analysis', fm_config.vpp.cfgs.pairwise_analysis.selected) + ' Result';
+        // },
 
-        fn_fnnlplt: function(){
-            return fm_config.cfg_optval2text('pairwise_analysis', fm_config.vpp.cfgs.pairwise_analysis.selected) + ' Result Funnel Plot';
-        },
+        // fn_fnnlplt: function(){
+        //     return fm_config.cfg_optval2text('pairwise_analysis', fm_config.vpp.cfgs.pairwise_analysis.selected) + ' Result Funnel Plot';
+        // },
 
+        fn_outplt1: ()=>'Analysis Result',
+        fn_fnnlplt: ()=>'Analysis Result Funnel Plot',
         fn_sensplt: ()=>'Sensitivity Analysis Result',
         fn_cumuplt: ()=>'Cumulative Meta-Analysis Result'
     },
