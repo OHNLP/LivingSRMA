@@ -101,3 +101,26 @@ class User:
             cprint('* added user [%s] to project [%s | %s]' % (
                 uid, project.keystr, project.title
             ), 'green')
+
+
+    @command
+    @argument("uid", type=str, description="The uid of the user")
+    @argument("keystr", type=str, description="The unique project keystr")
+    def unlink_project(self, uid:str, keystr:str):
+        """
+        unlink user from a project
+        """
+        is_in, user, project = dora.remove_user_from_project_by_keystr_if_inadd (uid, keystr)
+
+        if is_in is None:
+            cprint('* wrong user [%s] or project [%s]' % (
+                uid, keystr
+            ), 'white', 'on_red')
+        elif is_in:
+            cprint('* existed user [%s] in project [%s | %s]' % (
+                uid, project.keystr, project.title
+            ), 'red')
+        else:
+            cprint('* added user [%s] to project [%s | %s]' % (
+                uid, project.keystr, project.title
+            ), 'green')

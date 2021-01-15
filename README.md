@@ -135,9 +135,13 @@ $ sudo apt-get install mysql-server
 
 ### password policy
 
+### settings
+
+
 ### Users and Database
 
 ```bash
+sudo mysql
 mysql> create database lnma;
 mysql> create user lnma@localhost identified with mysql_native_password by 'LNMA_password_12#$';
 mysql> grant all on lnma.* to lnma@localhost;
@@ -149,8 +153,14 @@ mysql> grant all on lnma.* to lnma@localhost;
 To install the backend R packages, install some dependency packages first:
 
 ```bash
-$ sudo apt install jags libglpk-dev libxml2-dev libcurl4-openssl-dev libssl-dev build-essential libcurl4-gnutls-dev
+$ sudo apt install jags libglpk-dev libxml2-dev libcurl4-openssl-dev libssl-dev build-essential libcurl4-gnutls-dev libgit2-dev
 ```
+
+For more detailed information about installing R on ubuntu, check the official post here:
+https://cran.r-project.org/bin/linux/ubuntu/README.html
+and if meet the error of keys `"gpg: keyblock resource '(null)': General error"`
+check this post: 
+https://askubuntu.com/questions/1246031/gpg-invalid-key-resource-url-following-docker-official-guide
 
 Then add CRAN repository, the last line may be not required if no errors.
 
@@ -162,7 +172,10 @@ $ sudo apt install r-base
 $ sudo apt install r-base --fix-missing
 ```
 
-Then install packages for LNMA (for whole system). The `dmetar` package is required to calculate the SUCRA, but this can also be done by Python.
+Then install packages for LNMA (for whole system). The `dmetar` package is required to calculate the SUCRA, but this can also be done by Python. Please make sure the packages mentioned above have been installed in advance, otherwise installation of R packages will fail.
+
+The installation of the following packages may require about one hour.
+To make sure all of them are installed correctly, please install one by one.
 
 ```bash
 $ sudo R
@@ -271,7 +284,7 @@ conda create rctpy36 python=3.6
 conda activate rctpy36
 ```
 
-Then, install the package and upgrade the Keras to 2.1.6 to fix a bug.
+Then, install the package and upgrade the Keras to 2.1.6 to fix a bug: `robotsearch 0.1.3 requires Keras==2.0.6, but you have keras 2.1.6 which is incompatible.`
 
 ```bash
 (rctpy36) pip install -U https://github.com/ijmarshall/robotsearch/archive/master.zip
@@ -285,6 +298,8 @@ Last, install the web api package and wsgi server. The server script could found
 (rctpy36) pip install fastapi
 
 (rctpy36) ./run.sh
+
+(rctpy36) ./run_webapi.sh
 ```
 
 # Data Structure

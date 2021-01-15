@@ -1,0 +1,24 @@
+<div id="fg_pwma_imglist" class="box" style="width: 100%;">
+    <div class="box-header">
+        <h4>
+            <i class="fa fa-tree"></i>
+            PAIRWISE META-ANALYSIS RESULTS
+        </h4>
+    </div>
+    <div class="box-body">
+        <div v-for="plot in plots">
+            <p>
+                <i class="far fa-file-image"></i>
+                <span>
+                    {{ get_header(plot.plot_id)() }}
+                </span>
+                <button
+                    v-on:click="download_img(plot.fn)">
+                    <i class="fa fa-download"></i>
+                    Download Figure
+                </button>
+            </p>
+            <img class="img" v-bind:src="'/f/' + plot.fn">
+        </div>
+    </div>
+</div>

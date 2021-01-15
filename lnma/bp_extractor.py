@@ -94,6 +94,7 @@ def get_extract_and_papers():
         # if not exist, add this paper
         extract.data[pid] = {
             'selected': False,
+            'has_checked': False,
             'attrs': {}
         }
         # put the attrs

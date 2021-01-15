@@ -86,6 +86,7 @@ html {
 .hide {
     display: none;
 }
+{% include 'css/box.css' %}
 </style>
 {% endblock %}
 
@@ -144,7 +145,7 @@ Data Extractor
                 Add Outcome
             </button>
             <button class="btn-sm"
-                v-on:click="create_extract('spwma', 'default')">
+                v-on:click="create_extract('subg', 'default')">
                 <i class="fa fa-plus"></i>
                 Add Subgroup Analysis
             </button>
@@ -170,9 +171,9 @@ Data Extractor
                             {{ oc.full_name }}
                         </a>
                     </td>
-                    <td>{{ oc.measure }}</td>
-                    <td>{{ oc.treatment.full_name }}</td>
-                    <td>{{ oc.control.full_name }}</td>
+                    <td>{{ oc.measure_of_effect }}</td>
+                    <td>{{ oc.treatment.abbr }}</td>
+                    <td>{{ oc.control.abbr }}</td>
                     <td>
                         <a href="javascript:void(0);" class="text-danger"
                             v-on:click="delete_extract(oc.oc_type, oc.abbr, oc.full_name)">
@@ -180,7 +181,20 @@ Data Extractor
                         </a>
                     </td>
                 </tr>
-                <tr v-for="oc in data.spwma.outcomes">
+            </table>
+
+            <table class="table" v-if="Object.keys(data.subg.outcomes).length != 0">
+                <tr>
+                    <th>Group</th>
+                    <th>Full Name</th>
+                    <th>Measure</th>
+                    <th>Treatment</th>
+                    <th>Control</th>
+                    <th>Subgroups</th>
+                    <th>&nbsp;</th>
+                </tr>
+
+                <tr v-for="oc in data.subg.outcomes">
                     <td>{{ oc.group }}</td>
                     <td :oc_abbr="oc.abbr">
                         <a href="javascript:void(0);"
@@ -188,9 +202,10 @@ Data Extractor
                             {{ oc.full_name }}
                         </a>
                     </td>
-                    <td>{{ oc.measure }}</td>
-                    <td>{{ oc.treatment.full_name }}</td>
-                    <td>{{ oc.control.full_name }}</td>
+                    <td>{{ oc.measure_of_effect }}</td>
+                    <td>{{ oc.treatment.abbr }}</td>
+                    <td>{{ oc.control.abbr }}</td>
+                    <td>{{ oc.subgroups }}</td>
                     <td>
                         <a href="javascript:void(0);" class="text-danger"
                             v-on:click="delete_extract(oc.oc_type, oc.abbr, oc.full_name)">
@@ -244,7 +259,7 @@ Data Extractor
     </div>
     <!-- /#pan_outcomes -->
 
-    <div id="pan_ocpapers" class="panel-m">
+    <div id="pan_ocpapers" class="panel-m panel-container">
         <div class="panel-info" v-if="extract != null">
             <div class="oc-attr">
                 <span style="font-size: 1.2em;">Outcome <b>[{{ extract.meta.full_name }}]</b> Details</span>
@@ -262,11 +277,18 @@ Data Extractor
                 <button v-on:click="copy_extract();">
                     <i class="far fa-copy"></i>
                     Save a copy
+                </button> 
+                |
+                <button>
+                    <i class="fa" v-bind:class="{'fa-toggle-on': show_settings, 'fa-toggle-off': !show_settings}"></i>
+                    Only 
                 </button>
             </div>
         </div>
 
         <div v-bind:class="{hide: !show_settings}">
+        
+        <!-- panel for the pwma -->
         <div class="panel-info" v-if="extract != null && extract.meta.oc_type == 'pwma'">
             <div class="oc-attr">
                 <span class="oc-attr-name">Full Name</span>
@@ -361,29 +383,164 @@ Data Extractor
             </div> -->
         </div>
         <!-- /.panel-info -->
+
+        <!-- panel for the subg -->
+        <div class="panel-info" v-if="extract != null && extract.meta.oc_type == 'subg'">
+            <div class="oc-attr">
+                <span class="oc-attr-name">Full Name</span>
+                <input class="oc-attr-value" v-model="extract.meta.full_name">
+            </div>
+            <div class="oc-attr">
+                <span class="oc-attr-name">Category</span>
+                <input class="oc-attr-value" v-model="extract.meta.category">
+            </div>
+
+            <div class="oc-attr">
+                <span class="oc-attr-name">Analysis Group</span>
+                <input class="oc-attr-value" v-model="extract.meta.group">
+            </div>
+
+            <div class="oc-attr">
+                <span class="oc-attr-name">Analysis Measure</span>
+                <select v-model="extract.meta.measure_of_effect">
+                    <option value="HR">Hazard Ratio (HR)</option>
+                    <option value="RR">Relative Risk (RR)</option>
+                    <option value="OR">Odds Ratio (OR)</option>
+                    <option value="RD">Risk Difference (RD)</option>
+                </select>
+            </div>
+
+            <div class="oc-attr">
+                <span class="oc-attr-name">Data Type</span>
+                <select v-model="extract.meta.input_format">
+                    <option value="SUBG_CAT_PRE">Categorical Precalculated Data</option>
+                    <option value="SUBG_CAT_RAW">Categorical Raw Data</option>
+                    <option value="SUBG_CATIRR_RAW">Categorical Raw (Incidence Rate Ratios) Data</option>
+                    <option value="SUBG_CONTD_PRE">Continuous Precalculated Data</option>
+                    <option value="SUBG_CONTD_RAW">Continuous Raw Data</option>
+                </select>
+            </div>
+
+            <div class="oc-attr">
+                <span class="oc-attr-name">Treatment Arm</span>
+                <input class="oc-attr-value" v-model="extract.meta.treatment.abbr"> | 
+                <input class="oc-attr-value" v-model="extract.meta.treatment.full_name">
+            </div>
+
+            <div class="oc-attr">
+                <span class="oc-attr-name">Control Arm</span>
+                <input class="oc-attr-value" v-model="extract.meta.control.abbr"> | 
+                <input class="oc-attr-value" v-model="extract.meta.control.full_name">
+            </div>
+
+            <div class="oc-attr">
+                <span class="oc-attr-name">Fixed or Random</span>
+                <select v-model="extract.meta.fixed_or_random">
+                    <option value="fixed">Fixed Effect</option>
+                    <option value="random">Random Effects</option>
+                </select>
+            </div>
+
+            <div class="oc-attr">
+                <span class="oc-attr-name">Which is better</span>
+                <select v-model="extract.meta.which_is_better">
+                    <option value="lower">Lower is better</option>
+                    <option value="higher">Higher is better</option>
+                </select>
+            </div>
+
+            <div class="oc-attr">
+                <span class="oc-attr-name">Include this outcome in SoF Table</span>
+                <select v-model="extract.meta.included_in_sof">
+                    <option value="yes">Yes, include this outcome</option>
+                    <option value="no">No, exclude this outcome</option>
+                </select>
+            </div>
+
+            <div class="oc-attr">
+                <span class="oc-attr-name">Include this outcome in result plots</span>
+                <select v-model="extract.meta.included_in_plots">
+                    <option value="yes">Yes, include this outcome</option>
+                    <option value="no">No, exclude this outcome</option>
+                </select>
+            </div>
+
+            <div class="oc-attr">
+                <span class="oc-attr-name">The attributes to extract</span>
+                <span>{{ extract.meta.attrs }}</span>
+            </div>
+
+            <div class="oc-attr">
+                <span class="oc-attr-name">Subgroups</span>
+                <input class="oc-attr-value" v-model="extract.meta.subgroups[0]"> , 
+                <input class="oc-attr-value" v-model="extract.meta.subgroups[1]">
+            </div>
+
         </div>
+        <!-- /.panel-info -->
+
+        </div>
+        <!-- /div of settings -->
 
         <div class="panel-paperlist" v-if="extract != null">
-            <table class="table">
+            <table class="table" v-if="extract.meta.oc_type === 'pwma'">
                 <tr>
                     <th>&nbsp;</th>
                     <th style="width: 90px;">RCT ID</th>
-                    <th style="">Paper</th>
+                    <th style="">Paper (5 selected) </th>
+                    <th style="">Status?</th>
                     <th style="">Year</th>
                     <th v-for="attr in extract.meta.attrs">
                         {{ attr }}
                     </th>
                 </tr>
+
+                <tbody>
+                    <tr v-for="paper in papers" >
+                        <td><input type="checkbox" id="" v-model="extract.data[paper.pid].selected" ></td>
+                        <td>{{ paper.meta.rct_id }}</td>
+                        <td>{{ paper.seq_num }} - {{ paper.authors.split(',')[0] }}</td>
+                        <td>
+                            <input type="checkbox" name="" id="">
+                        </td>
+                        <td>{{ get_year(paper.pub_date) }}</td>
+                        <td v-for="attr in extract.meta.attrs">
+                            <input class="paper-extract-input" type="text" 
+                                v-model="extract.data[paper.pid].attrs[attr]">
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <table class="table" v-else-if="extract.meta.oc_type === 'subg'">
+                <tr>
+                    <th>&nbsp;</th>
+                    <th style="width: 90px;">RCT ID</th>
+                    <th style="">Paper</th>
+                    <th style="">Year</th>
+                    <th>Subgroup</th>
+                    <th v-for="attr in extract.meta.attrs">
+                        {{ attr }}
+                    </th>
+                </tr>
+
+                <tbody>
                 <tr v-for="paper in papers">
                     <td><input type="checkbox" id="" v-model="extract.data[paper.pid].selected" ></td>
                     <td>{{ paper.meta.rct_id }}</td>
-                    <td>{{ paper.seq_num }} | {{ paper.pid }}</td>
-                    <td>{{ paper.pub_date }}</td>
+                    <td>{{ paper.seq_num }} | {{ paper.authors.split(',')[0] }}</td>
+                    <td>{{ get_year(paper.pub_date) }}</td>
+                    <td>
+                        <span>{{ extract.meta.subgroups[0] }}</span><br>
+                        <span>{{ extract.meta.subgroups[1] }}</span>
+                    </td>
                     <td v-for="attr in extract.meta.attrs">
                         <input class="paper-extract-input" type="text" 
                             v-model="extract.data[paper.pid].attrs[attr]">
                     </td>
                 </tr>
+                </tbody>
+
             </table>
         </div>
         <!-- /.panel-paperlist -->
@@ -391,7 +548,7 @@ Data Extractor
     </div>
     <!-- /#pan_ocpapers -->
 
-    <div id="pan_collector" class="panel-m">
+    <div id="pan_collector" class="panel-m panel-container">
         <div class="panel-info">
             <div class="oc-attr">
                 <span class="oc-attr-name">Abstract</span>
@@ -406,7 +563,7 @@ Data Extractor
     </div>
     <!-- /#pan_collector -->
 
-    <div id="pan_analyzer" class="panel-m">
+    <div id="pan_analyzer" class="panel-m panel-container">
         <div class="panel-info">
             <div class="oc-attr">
                 <span style="font-size: 1.2em;">
@@ -415,11 +572,7 @@ Data Extractor
                 </span>
             </div>
             <div class="oc-attr">
-                <button v-on:click="toggle_show_settings();">
-                    <i class="fa" v-bind:class="{'fa-toggle-on': show_settings, 'fa-toggle-off': !show_settings}"></i>
-                    Toggle settings
-                </button> |
-                <button v-on:click="analyze();">
+                <button onclick="pan_analyzer.analyze();">
                     <i class="fa fa-calculator"></i>
                     Run analyzer
                 </button>
@@ -427,7 +580,7 @@ Data Extractor
         </div>
         <!-- /.panel-info -->
 
-        {% include 'analyzer/embed.html' %}
+        {% include 'analyzer/_fg_pwma_imglist.html' %}
     </div>
     <!-- /#pan_analyzer -->
 </div>
@@ -445,6 +598,7 @@ Data Extractor
 <script>
 
 {% include 'js/lisr_analyzer.js' %}
+{% include 'js/fg_pwma_imglist.js' %}
 
 var pan_outcomes = {
     vpp_id: '#pan_outcomes',
@@ -452,7 +606,7 @@ var pan_outcomes = {
 
     data_empty: {
         pwma: { outcomes: {} },
-        spwma: { outcomes: {} },
+        subg: { outcomes: {} },
         nma: { outcomes: {} },
         itable: { outcomes: {} },
     },
@@ -625,6 +779,11 @@ var pan_ocpapers = {
                 // copy 
                 copy_extract: function() {
                     pan_ocpapers.copy_extract();
+                },
+
+                // get year
+                get_year: function(s) {
+                    return jarvis.get_year(s);
                 }
             }
         });
@@ -772,36 +931,32 @@ var pan_collector = {
 
 var pan_analyzer = {
     vpp_id: "#pan_analyzer",
-    vpp: null,
+    // vpp: null,
 
     init: function() {
-        this.vpp = new Vue({
-            el: this.vpp_id,
-            data: {
-                data: {},
-                type: null,
+        // this.vpp = new Vue({
+        //     el: this.vpp_id,
+        //     data: {
+        //         data: {},
+        //         type: null,
 
-                // show the analyzer settings
-                show_settings: false,
-            },
-            methods: {
-                toggle_show_settings: function() {
-                    this.show_settings = !this.show_settings;
-                },
+        //         // show the analyzer settings
+        //         show_settings: false,
+        //     },
+        //     methods: {
+        //         toggle_show_settings: function() {
+        //             this.show_settings = !this.show_settings;
+        //         },
 
-                // the main entry for the analyze
-                analyze: function() {
-                    // call the pan_analyzer
-                    pan_analyzer.analyze();
-                }
-            }
-        });
+        //         // the main entry for the analyze
+        //         analyze: function() {
+        //             // call the pan_analyzer
+        //             pan_analyzer.analyze();
+        //         }
+        //     }
+        // });
     },
 
-    update: function(data) {
-        this.vpp.data = data;
-        // this.$forceUpdate();
-    },
 
     show: function() {
         $(this.vpp_id).show();
@@ -837,6 +992,8 @@ var pan_analyzer = {
             console.log(ret);
             lisr_analyzer.analyze(ret.cfg, ret.rs, function(data) {
                 console.log(data);
+
+                fg_pwma_imglist.draw(data);
             });
         } else {
             alert('Not implemented [' + oc_type + '] analyzing function');
@@ -894,8 +1051,8 @@ var pan_analyzer = {
             // build a row from this paper
 
             // first, the basic info from the paper
-            let col_study = paper.seq_num + ' - ' + paper.authors.split(',')[0];
             let col_year = jarvis.get_year(paper.pub_date);
+            let col_study = paper.seq_num + ' - ' + paper.authors.split(',')[0] + ' ' + col_year;
             let col_treatment = extract.meta.treatment.abbr;
             let col_control = extract.meta.control.abbr;
 
@@ -942,7 +1099,6 @@ var jarvis = {
             pwma: {
                 default: {
                     abbr: '',
-                    subgroups: [],
                     oc_type: 'pwma',
                     category: 'default',
                     group: 'Primary',
@@ -1023,6 +1179,9 @@ var jarvis = {
                 PRIM_CAT_PRE: ['TE', 'lowerci', 'upperci'],
                 PRIM_CONTD_RAW: ['Nt', 'Mt', 'SDt', 'Nc', 'Mc', 'SDc'],
                 PRIM_CONTD_PRE: ['TE', 'SE'],
+                PRIM_CAT_RAW_G5: ['GA_Et', 'GA_Nt', 'GA_Ec', 'GA_Nc', 
+                    'G34_Et', 'G34_Ec', 'G3H_Et', 'G3H_Ec', 'G5N_Et', 'G5N_Ec', 
+                    'drug_used', 'malignancy']
             },
             subg: {
                 SUBG_CATIRR_RAW: ['Et', 'Tt', 'Ec', 'Tc'],
@@ -1066,6 +1225,9 @@ var jarvis = {
         pan_collector.init();
 
         pan_analyzer.init();
+
+        // the sub module of analyzers
+        fg_pwma_imglist.init();
 
         // switch to default layout
         this.switch_layout('manage_outcomes')
@@ -1142,7 +1304,18 @@ var jarvis = {
             return m[0];
         }
         return '';
-    }
+    },
+
+    download_file: function(fn) {
+        // fixed image download bug
+        // Thanks to https://stackoverflow.com/questions/17311645/download-image-with-javascript
+        var a = $('<a>').attr('href', '/f/' + fn)
+            .attr('download', fn)
+            .appendTo("body");
+        a[0].click()
+        a.remove();
+    },
+
 }
 
 $(document).ready(function() {

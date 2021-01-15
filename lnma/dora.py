@@ -167,6 +167,25 @@ def add_user_to_project_if_not_in(uid, project_id):
     return (is_in, user, project)
 
 
+def remove_user_from_project_by_keystr_if_in(uid, keystr):
+    '''
+    '''
+    project = get_project_by_keystr(keystr)
+    if project is None:
+        return None, None, None
+
+    is_in, user = project.is_user_in(uid)
+
+    if is_in:
+        user = User.query.get(uid)
+        if user is None:
+            return None, None, project
+        project.related_users.remove(user)
+        db.session.commit()
+
+    return (is_in, user, project)
+
+
 def get_user(uid):
     user = User.query.filter(User.uid == uid).first()
     return user
