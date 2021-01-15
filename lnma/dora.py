@@ -567,18 +567,21 @@ def get_papers_by_stage(project_id, stage):
         )).order_by(Paper.date_updated.desc()).all()
 
     elif stage == ss_state.SS_STAGE_DECIDED:
-        papers = Paper.query.filter(
+        papers = Paper.query.filter(and_(
+            Paper.project_id == project_id,
             Paper.ss_rs != ss_state.SS_RS_NA
-        ).order_by(Paper.date_updated.desc()).all()
+        )).order_by(Paper.date_updated.desc()).all()
 
     elif stage == ss_state.SS_STATE_PASSED_TITLE_NOT_FULLTEXT:
         papers = Paper.query.filter(and_(
+            Paper.project_id == project_id,
             Paper.ss_pr == ss_state.SS_PR_PASSED_TITLE,
             Paper.ss_rs == ss_state.SS_RS_NA
         )).order_by(Paper.date_updated.desc()).all()
 
     elif stage == ss_state.SS_STAGE_INCLUDED_SR:
         papers = Paper.query.filter(and_(
+            Paper.project_id == project_id,
             Paper.ss_rs.in_([
                 ss_state.SS_RS_INCLUDED_ONLY_SR,
                 ss_state.SS_RS_INCLUDED_SRMA
@@ -587,6 +590,7 @@ def get_papers_by_stage(project_id, stage):
 
     elif stage == ss_state.SS_STAGE_INCLUDED_SRMA:
         papers = Paper.query.filter(and_(
+            Paper.project_id == project_id,
             Paper.ss_rs == ss_state.SS_RS_INCLUDED_SRMA
         )).order_by(Paper.date_updated.desc()).all()
 
