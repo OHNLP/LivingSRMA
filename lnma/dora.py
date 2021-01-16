@@ -432,6 +432,16 @@ def create_paper(project_id, pid,
     return paper
     
 
+def update_paper_rct_result_by_keystr_and_seq_num(keystr, seq_num):
+    '''
+    Update the RCT detection result
+    '''
+    paper = get_paper_by_keystr_and_seq(keystr, seq_num)
+    paper = _update_paper_rct_result(paper)
+
+    return paper
+
+
 def update_paper_rct_result(project_id, pid):
     '''Update the RCT detection result
     '''

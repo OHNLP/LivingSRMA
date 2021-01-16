@@ -24,6 +24,21 @@ class Paper:
     """
     Paper related commands
     """
+    @command
+    @argument("keystr", type=str, description="The keystr for a project")
+    @argument("seq_num", type=str, description="The sequence number of the paper in project")
+    async def check_rct(self, keystr:str, seq_num:int):
+        """
+        Check the RCT for a paper
+        """
+        paper = dora.update_paper_rct_result_by_keystr_and_seq_num(keystr, seq_num)
+        if paper.meta['pred'][0]['is_rct']:
+            cprint('* Paper [%s][%s] is RCT!' % (
+                seq_num, paper.title[:40]), 'green')
+        else:
+            cprint('* Paper [%s][%s] is NOT RCT!' % (
+                seq_num, paper.title[:40]), 'red')
+
 
     @command
     @argument("keystr", type=str, description="The keystr for a project")
