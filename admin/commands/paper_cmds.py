@@ -42,6 +42,24 @@ class Paper:
 
     @command
     @argument("keystr", type=str, description="The keystr for a project")
+    @argument("seq_num", type=int, description="The sequence number of the paper in project")
+    @argument("is_del", type=str, description="[y]es/[n]o?")
+    async def mark_del(self, keystr:str, seq_num:int, is_del:str):
+        """
+        Mark is_delete to a paper
+        """
+        is_deleted = is_del == 'y'
+        paper = dora.set_paper_is_deleted_by_keystr_and_seq_num(keystr, seq_num, is_deleted)
+        if paper.is_deleted == 'yes':
+            cprint('* Paper [%s][%s] is deleted!' % (
+                seq_num, paper.title[:40]), 'red')
+        else:
+            cprint('* Paper [%s][%s] is still there!' % (
+                seq_num, paper.title[:40]), 'green')
+
+
+    @command
+    @argument("keystr", type=str, description="The keystr for a project")
     @argument("seq_num", type=int, description="The paper sequence number in this project")
     def get(self, keystr:str, seq_num:int):
         '''

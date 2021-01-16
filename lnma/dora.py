@@ -466,6 +466,23 @@ def _update_paper_rct_result(paper):
     return paper
 
 
+def set_paper_is_deleted_by_keystr_and_seq_num(keystr, seq_num, is_deleted):
+    '''
+    Update the is_deleted
+    '''
+    paper = get_paper_by_keystr_and_seq(keystr, seq_num)
+
+    if is_deleted:
+        paper.is_deleted = IS_DELETED_YES
+    else:
+        paper.is_deleted = IS_DELETED_NO
+
+    db.session.add(paper)
+    db.session.commit()
+
+    return paper
+
+
 def create_paper_if_not_exist(project_id, pid, 
     pid_type=None, title=None, abstract=None,
     pub_date=None, authors=None, journal=None, meta=None,
@@ -557,9 +574,10 @@ def get_papers_by_stage(project_id, stage):
     '''
     print('* get_papers_by_stage [%s]' % stage)
     if stage == ss_state.SS_STAGE_ALL_OF_THEM:
-        papers = Paper.query.filter(
-            Paper.project_id == project_id
-        ).order_by(Paper.date_updated.desc()).all()
+        papers = Paper.query.filter(and_(
+            Paper.project_id == project_id,
+            Paper.is_deleted == IS_DELETED_NO
+        )).order_by(Paper.date_updated.desc()).all()
 
     elif stage == ss_state.SS_STAGE_UNSCREENED:
         papers = Paper.query.filter(and_(
@@ -574,20 +592,23 @@ def get_papers_by_stage(project_id, stage):
             #     ss_state.SS_ST_IMPORT_SIMPLE_CSV
             # ]),
             Paper.ss_pr == ss_state.SS_PR_NA,
-            Paper.ss_rs == ss_state.SS_RS_NA
+            Paper.ss_rs == ss_state.SS_RS_NA,
+            Paper.is_deleted == IS_DELETED_NO
         )).order_by(Paper.date_updated.desc()).all()
 
     elif stage == ss_state.SS_STAGE_DECIDED:
         papers = Paper.query.filter(and_(
             Paper.project_id == project_id,
-            Paper.ss_rs != ss_state.SS_RS_NA
+            Paper.ss_rs != ss_state.SS_RS_NA,
+            Paper.is_deleted == IS_DELETED_NO
         )).order_by(Paper.date_updated.desc()).all()
 
     elif stage == ss_state.SS_STATE_PASSED_TITLE_NOT_FULLTEXT:
         papers = Paper.query.filter(and_(
             Paper.project_id == project_id,
             Paper.ss_pr == ss_state.SS_PR_PASSED_TITLE,
-            Paper.ss_rs == ss_state.SS_RS_NA
+            Paper.ss_rs == ss_state.SS_RS_NA,
+            Paper.is_deleted == IS_DELETED_NO
         )).order_by(Paper.date_updated.desc()).all()
 
     elif stage == ss_state.SS_STAGE_INCLUDED_SR:
@@ -597,12 +618,14 @@ def get_papers_by_stage(project_id, stage):
                 ss_state.SS_RS_INCLUDED_ONLY_SR,
                 ss_state.SS_RS_INCLUDED_SRMA
             ]),
+            Paper.is_deleted == IS_DELETED_NO
         )).order_by(Paper.date_updated.desc()).all()
 
     elif stage == ss_state.SS_STAGE_INCLUDED_SRMA:
         papers = Paper.query.filter(and_(
             Paper.project_id == project_id,
-            Paper.ss_rs == ss_state.SS_RS_INCLUDED_SRMA
+            Paper.ss_rs == ss_state.SS_RS_INCLUDED_SRMA,
+            Paper.is_deleted == IS_DELETED_NO
         )).order_by(Paper.date_updated.desc()).all()
 
     elif stage == ss_state.SS_STAGE_EXCLUDED_BY_TITLE_ABSTRACT:
@@ -611,25 +634,29 @@ def get_papers_by_stage(project_id, stage):
             Paper.ss_rs.in_([
                 ss_state.SS_RS_EXCLUDED_TITLE,
                 ss_state.SS_RS_EXCLUDED_ABSTRACT
-            ])
+            ]),
+            Paper.is_deleted == IS_DELETED_NO
         )).order_by(Paper.date_updated.desc()).all()
 
     elif stage == ss_state.SS_STAGE_EXCLUDED_BY_TITLE:
         papers = Paper.query.filter(and_(
             Paper.project_id == project_id,
-            Paper.ss_rs == ss_state.SS_RS_EXCLUDED_TITLE
+            Paper.ss_rs == ss_state.SS_RS_EXCLUDED_TITLE,
+            Paper.is_deleted == IS_DELETED_NO
         )).order_by(Paper.date_updated.desc()).all()
 
     elif stage == ss_state.SS_STAGE_EXCLUDED_BY_ABSTRACT:
         papers = Paper.query.filter(and_(
             Paper.project_id == project_id,
-            Paper.ss_rs == ss_state.SS_RS_EXCLUDED_ABSTRACT
+            Paper.ss_rs == ss_state.SS_RS_EXCLUDED_ABSTRACT,
+            Paper.is_deleted == IS_DELETED_NO
         )).order_by(Paper.date_updated.desc()).all()
 
     elif stage == ss_state.SS_STAGE_EXCLUDED_BY_FULLTEXT:
         papers = Paper.query.filter(and_(
             Paper.project_id == project_id,
-            Paper.ss_rs == ss_state.SS_RS_EXCLUDED_FULLTEXT
+            Paper.ss_rs == ss_state.SS_RS_EXCLUDED_FULLTEXT,
+            Paper.is_deleted == IS_DELETED_NO
         )).order_by(Paper.date_updated.desc()).all()
 
     else:
