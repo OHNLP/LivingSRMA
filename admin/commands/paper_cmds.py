@@ -26,7 +26,7 @@ class Paper:
     """
     @command
     @argument("keystr", type=str, description="The keystr for a project")
-    @argument("seq_num", type=str, description="The sequence number of the paper in project")
+    @argument("seq_num", type=int, description="The sequence number of the paper in project")
     async def check_rct(self, keystr:str, seq_num:int):
         """
         Check the RCT for a paper
