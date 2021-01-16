@@ -117,10 +117,10 @@ class User:
                 uid, keystr
             ), 'white', 'on_red')
         elif is_in:
-            cprint('* existed user [%s] in project [%s | %s]' % (
+            cprint('* removed user [%s] in project [%s | %s]' % (
                 uid, project.keystr, project.title
             ), 'red')
         else:
-            cprint('* added user [%s] to project [%s | %s]' % (
+            cprint('* what user [%s] to project [%s | %s]' % (
                 uid, project.keystr, project.title
             ), 'green')

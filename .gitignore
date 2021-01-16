@@ -131,4 +131,4 @@ dmypy.json
 settings.json
 
 # db flask migrations
-migrations/
+migrations/*
