@@ -169,6 +169,7 @@ def add_user_to_project_if_not_in(uid, project_id):
 
 def remove_user_from_project_by_keystr_if_in(uid, keystr):
     '''
+    Remove user from a project
     '''
     project = get_project_by_keystr(keystr)
     if project is None:

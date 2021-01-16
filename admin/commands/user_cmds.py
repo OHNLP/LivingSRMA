@@ -110,7 +110,7 @@ class User:
         """
         unlink user from a project
         """
-        is_in, user, project = dora.remove_user_from_project_by_keystr_if_inadd (uid, keystr)
+        is_in, user, project = dora.remove_user_from_project_by_keystr_if_in (uid, keystr)
 
         if is_in is None:
             cprint('* wrong user [%s] or project [%s]' % (
