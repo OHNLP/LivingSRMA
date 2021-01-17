@@ -40,7 +40,7 @@ Project Editor
                             aria-controls="ie_criteria_info_panel" 
                             aria-selected="true">
                             <i class="fa fa-align-left"></i>
-                            Inclusion / Exclusion Criterias
+                            Inclusion / Exclusion Criteria
                         </a>
                     </li>
                     <li class="nav-item">
@@ -133,11 +133,45 @@ Project Editor
                 <!-- /#basic_info_panel -->
                 
                 <div class="tab-pane fade" id="ie_criteria_info_panel" role="tabpanel" aria-labelledby="ie_criteria_info_tab">
-                    <p class="lead">The inclusion / exclusion criterias</p>
+                    <p class="lead">The inclusion / exclusion criteria</p>
+
+                    <p>
+                        The inclusion / exclusion criteria will be displayed as a floating window to help user check the criterias.
+                    </p>
+                    <form method="POST" action="[[ url_for('project.api_set_criterias') ]]">
+                        <div class="row">
+                            <div class="col-3">
+                                <div class="form-group">
+                                    <label for="form_textarea_inclusion_criterias">Inclusion Criteria</label>
+                                    <textarea class="form-control"
+                                        style="background: rgb(223, 245, 223);"
+                                        id="form_textarea_inclusion_criterias" 
+                                        name="form_textarea_inclusion_criterias" 
+                                        rows="15">[[ form_textarea_inclusion_criterias ]]</textarea>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="form-group">
+                                    <label for="form_textarea_exclusion_criterias">Exclusion Criteria</label>
+                                    <textarea class="form-control"  
+                                        style="background: rgb(255, 205, 205);"
+                                        id="form_textarea_exclusion_criterias" 
+                                        name="form_textarea_exclusion_criterias" 
+                                        rows="15">[[ form_textarea_exclusion_criterias ]]</textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa fa-save"></i>
+                            Save inclusion and exclusion criterias
+                        </button>
+                    </form>
 
                 </div>
                 <!-- /#ie_criteria_info_panel -->
                 
+
                 <div class="tab-pane fade" id="ie_keywords_info_panel" role="tabpanel" aria-labelledby="ie_keywords_info_tab">
                     <p class="lead">The inclusion / exclusion keywords</p>
                     <p>

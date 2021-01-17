@@ -304,6 +304,32 @@ def is_existed_project(project_id):
         return True
 
 
+def set_project_criterias(project_id, inclusion_criterias, exclusion_criterias):
+    '''
+    Set the inclusion/exclusion criterias list for a project
+    '''
+    project = get_project(project_id)
+    if project is None:
+        return False, None
+
+    if 'criterias' not in project.settings:
+        project.settings['criterias'] = {
+            "inclusion": '',
+            "exclusion": ''
+        }
+
+    project.settings['criterias']['inclusion'] = inclusion_criterias
+    project.settings['criterias']['exclusion'] = exclusion_criterias
+    
+    flag_modified(project, "settings")
+
+    # commit this
+    db.session.add(project)
+    db.session.commit()
+
+    return True, project
+
+
 def set_project_exclusion_reasons(project_id, exclusion_reasons):
     '''
     Set the exclusion_reasons for a project

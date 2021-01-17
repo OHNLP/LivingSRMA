@@ -107,6 +107,22 @@ class Project(db.Model):
         return txt
 
 
+    def get_inclusion_criterias_text(self):
+        txt = ''
+        if 'criterias' in self.settings:
+            if 'inclusion' in self.settings['criterias']:
+                txt = self.settings['criterias']['inclusion']
+        return txt
+        
+
+    def get_exclusion_criterias_text(self):
+        txt = ''
+        if 'criterias' in self.settings:
+            if 'exclusion' in self.settings['criterias']:
+                txt = self.settings['criterias']['exclusion']
+        return txt
+        
+
     def get_exclusion_reasons_text(self):
         txt = ''
         if 'exclusion_reasons' in self.settings:

@@ -62,6 +62,12 @@ def editor():
     # preprocessing the tags
     form_textarea_tags = project.get_tags_text()
 
+    # preprocessing the ie criterias
+    form_textarea_inclusion_criterias = project.get_inclusion_criterias_text()
+
+    # preprocessing the ie criterias
+    form_textarea_exclusion_criterias = project.get_exclusion_criterias_text()
+
     # preprocessing the exclusion reasons
     form_textarea_exclusion_reasons = project.get_exclusion_reasons_text()
 
@@ -74,6 +80,8 @@ def editor():
     return render_template('project/editor.html', 
         project=project,
         form_textarea_tags=form_textarea_tags,
+        form_textarea_inclusion_criterias=form_textarea_inclusion_criterias,
+        form_textarea_exclusion_criterias=form_textarea_exclusion_criterias,
         form_textarea_exclusion_reasons=form_textarea_exclusion_reasons,
         form_textarea_inclusion_keywords=form_textarea_inclusion_keywords,
         form_textarea_exclusion_keywords=form_textarea_exclusion_keywords
@@ -130,6 +138,33 @@ def api_add_user_to_project():
     flash("Added %s to Project [%s]" % (to_add_user.uid, project.title))
 
     return redirect(url_for('project.mylist'))
+
+
+@bp.route('/api/api_set_criterias', methods=['GET', 'POST'])
+@login_required
+def api_set_criterias():
+    if request.method == 'GET':
+        return redirect(url_for('project_editor'))
+        
+    project_id = request.cookies.get('project_id')
+    if project_id is None or project_id == '':
+        flash('Set working project first')
+        return redirect(url_for('project.mylist'))
+
+    raw_inclusion_criterias = request.form.get('form_textarea_inclusion_criterias')
+    raw_exclusion_criterias = request.form.get('form_textarea_exclusion_criterias')
+
+    # remove blank
+    raw_inclusion_criterias = raw_inclusion_criterias.strip()
+    raw_exclusion_criterias = raw_exclusion_criterias.strip()
+
+    # update
+    is_success, project = dora.set_project_criterias(
+        project_id, raw_inclusion_criterias, raw_exclusion_criterias
+    )
+
+    flash('Saved inclusion/exclusion criterias!')
+    return redirect(url_for('project.editor'))
 
 
 @bp.route('/api/set_exclusion_reasons', methods=['GET', 'POST'])
