@@ -28,6 +28,13 @@ def create_project(owner_uid, title, keystr=None, abstract="", settings={}):
         keystr = str(uuid.uuid1()).split('-')[0].upper()
     else:
         pass
+
+    # detect if the keystr exists
+    _p = get_project_by_keystr(keystr)
+    if _p is not None:
+        # existed???
+        return None
+
     date_created = datetime.datetime.now()
     date_updated = datetime.datetime.now()
     is_deleted = IS_DELETED_NO
@@ -272,6 +279,30 @@ def is_existed_project(project_id):
         return True
 
 
+def set_project_highlight_keywords(project_id, highlight_keywords):
+    '''
+    Set the highlight_keywords list for a project
+    '''
+    project = get_project(project_id)
+    if project is None:
+        return False, None
+
+    if 'highlight_keywords' not in project.settings:
+        project.settings['highlight_keywords'] = {
+            "inclusion": [],
+            "exclusion": []
+        }
+
+    project.settings['highlight_keywords'] = highlight_keywords
+    flag_modified(project, "settings")
+
+    # commit this
+    db.session.add(project)
+    db.session.commit()
+
+    return True, project
+
+
 def set_project_tags(project_id, tags):
     '''
     Set the tag list for a project
@@ -291,6 +322,24 @@ def set_project_tags(project_id, tags):
     db.session.commit()
 
     return True, project
+
+
+def set_paper_rct_id(paper_id, rct_id):
+    '''
+    Set the main rct_id for study
+    '''
+    paper = get_paper_by_id(paper_id)
+
+    paper.meta['rct_id'] = rct_id
+    flag_modified(paper, "meta")
+
+    # automatic update the date_updated
+    paper.date_updated = datetime.datetime.now()
+    
+    db.session.add(paper)
+    db.session.commit()
+    
+    return True, paper
 
 
 def add_paper_tag(paper_id, tag):
@@ -782,24 +831,6 @@ def get_papers_by_stage_v1(project_id, stage):
         papers = []
 
     return papers
-
-
-def set_paper_rct_id(paper_id, rct_id):
-    '''Set the main rct_id for study
-    '''
-    paper = Paper.query.filter_by(
-        paper_id=paper_id
-    ).first()
-
-    paper.meta['rct_id'] = rct_id
-    flag_modified(paper, "meta")
-
-    # automatic update the date_updated
-    paper.date_updated = datetime.datetime.now()
-    
-    db.session.add(paper)
-    db.session.commit()
-    return paper
 
 
 def set_paper_pr_rs(paper_id, pr=None, rs=None):

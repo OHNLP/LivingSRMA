@@ -20,3 +20,5 @@ imbox
 requests
 # for the meta-analysis
 PythonMeta
+# for the admin
+python-nubia

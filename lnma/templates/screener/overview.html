@@ -339,6 +339,9 @@ var srv_screener = {
         unset_label_ckl: '[[ url_for("screener.sspr_unset_label_ckl") ]]',
         set_rct_feedback: '[[ url_for("screener.sspr_set_rct_feedback") ]]',
 
+        // for NCT8
+        set_rct_id: '[[ url_for("screener.set_rct_id") ]]',
+
         // for tag
         add_tag: '[[ url_for("screener.add_tag") ]]',
         toggle_tag: '[[ url_for("screener.toggle_tag") ]]'
@@ -466,6 +469,20 @@ var srv_screener = {
     ///////////////////////////////////////////////////////////////////////////
     // the functions related to screening
     ///////////////////////////////////////////////////////////////////////////
+
+    set_rct_id: function(paper_id, rct_id, callback) {
+        // send request to backend
+        var project_id = Cookies.get('project_id');
+        
+        var url = this.api_url.set_rct_id;
+        $.post(
+            url,
+            {project_id: project_id, paper_id: paper_id, rct_id: rct_id},
+            callback,
+            'json'
+        );  
+
+    },
 
     add_tag: function(paper_id, tag, callback) {
         // send request to backend
@@ -939,7 +956,7 @@ var tbjs_paperlist = {
             // in the title column
             // mark the inclusion keywords
             $(".col-title").mark(
-                tbjs_paperlist.keywords.inclusion,
+                srv_screener.project.settings.highlight_keywords.inclusion,
                 {
                     className: 'keyword-inclusion',
                     separateWordSearch: false
@@ -948,7 +965,7 @@ var tbjs_paperlist = {
 
             // mark the exclusion keywords
             $(".col-title").mark(
-                tbjs_paperlist.keywords.exclusion,
+                srv_screener.project.settings.highlight_keywords.exclusion,
                 {
                     className: 'keyword-exclusion',
                     separateWordSearch: false
@@ -975,7 +992,7 @@ var tbjs_paperlist = {
     _mark_element: function(elem) {
         // mark the inclusion keywords
         $(elem).mark(
-            tbjs_paperlist.keywords.inclusion,
+            srv_screener.project.settings.highlight_keywords.inclusion,
             {
                 className: 'keyword-inclusion',
                 separateWordSearch: false
@@ -984,7 +1001,7 @@ var tbjs_paperlist = {
 
         // mark the exclusion keywords
         $(elem).mark(
-            tbjs_paperlist.keywords.exclusion,
+            srv_screener.project.settings.highlight_keywords.exclusion,
             {
                 className: 'keyword-exclusion',
                 separateWordSearch: false
@@ -1547,6 +1564,9 @@ var tbjs_paperlist = {
         return html;
     },
 
+    /**
+     * Deprecated
+     */
     __get_select_fulltext_exclusion_reasons_v1: function(d) {
         var html = [
             '<div class="dropdown">',
@@ -1598,11 +1618,13 @@ var tbjs_paperlist = {
         var html = [];
         if (d.meta.rct_id == '') {
             html = [
-                // '<a href="javascript:void(0);" click="" title="Click to update the NCT number for this study">Add NCT Number</a>'
+                '<a href="javascript:void(0);" onclick="tbjs_paperlist.set_rct_id(\''+d.paper_id+'\', \'\')" title="Click to update the NCT number for this study">Add NCT Number</a>'
             ].join('');
         } else {
             html = [
-                d.meta.rct_id
+                '<a href="javascript:void(0);" onclick="tbjs_paperlist.set_rct_id(\''+d.paper_id+'\', \''+d.meta.rct_id+'\')" title="Click to update the NCT number for this study">',
+                    d.meta.rct_id,
+                '</a>'
             ].join('');
         }
 
@@ -1620,10 +1642,7 @@ var tbjs_paperlist = {
         return '<tr>'+
             '<td>Information:</td>'+
             '<td id="tb-rowext-info-'+d.paper_id+'">' +
-                this.__get_span_rct_id(d) + ' | ' +
-                '<a target="_blank" href="' + jarvis.create_src_url(d) + '"><span>' + d.pid_type + ': ' + d.pid + '</span></a> | ' +
-                '<span>' + d.journal + '</span> | ' + 
-                '<span>' + d.pub_date + '</span>' + 
+                this.__get_line_info(d) + 
             '</td>'+
         '</tr>';
     },
@@ -1647,6 +1666,16 @@ var tbjs_paperlist = {
             '</td>' + 
         '</tr>';
         // return '';
+    },
+
+    /**
+     * Generate info line content for the information
+     */
+    __get_line_info: function(d) {
+        return this.__get_span_rct_id(d) + ' | ' +
+            '<a target="_blank" href="' + jarvis.create_src_url(d) + '"><span>' + d.pid_type + ': ' + d.pid + '</span></a> | ' +
+            '<span>' + d.journal + '</span> | ' + 
+            '<span>' + d.pub_date + '</span>';
     },
 
     /**
@@ -1856,6 +1885,33 @@ var tbjs_paperlist = {
         // remove from the list
         this.remove_paper_from_tbjs(paper_id);
     },
+
+    set_rct_id: function(paper_id, rct_id) {
+        var txt = jarvis.prompt('Please input the NCT number (e.g., NCT12345678)', rct_id);
+
+        if (txt == null) {
+            return;
+        }
+        txt = txt.trim();
+
+        if (txt == '') {
+            return;
+        }
+
+        srv_screener.set_rct_id(paper_id, txt, function(data) {
+            // console.log('* set RCT_ID!', data);
+            toast("Updated NCT Number [" + data.paper.meta.rct_id + '] for ' + data.paper.seq_num);
+            var paper = data.paper;
+
+            // update the UI, well, just update the whole line of info
+            $('#tb-rowext-info-' + paper.paper_id).html(
+                tbjs_paperlist.__get_line_info(paper)
+            );
+
+            // update the tb data list
+            tbjs_paperlist.update_data_by_paper(data.paper);
+        });
+    },
     
     set_unscreened: function(paper_id) {
         // mark include in server
@@ -1955,6 +2011,10 @@ var jarvis = {
 
         // load unscreened papers by default
         tbjs_paperlist.load_by_stage(srv_screener.STAGE_UNSCREENED);
+    },
+
+    prompt: function(text, value) {
+        return window.prompt(text, value);
     },
 };
 

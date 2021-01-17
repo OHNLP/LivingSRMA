@@ -2,7 +2,6 @@ import sys
 sys.path.append('..')
 import textwrap
 
-import typing
 from termcolor import colored, cprint
 from nubia import command, argument, context
 from prettytable import PrettyTable

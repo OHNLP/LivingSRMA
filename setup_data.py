@@ -15,52 +15,59 @@ n_projects = Project.query.count()
 print('* Number of projects: {:,}'.format(n_projects))
 
 users = [
-    ['hehuan2112@gmail.com', 'Mayo1234', 'Huan', 'He', 'user,admin', 'no'],
-    ['sipra.irbaz@gmail.com', 'Mayo1234', 'Irbaz', 'Riaz', 'user,admin', 'no'],
-    ['arsalannaqvi016@gmail.com', 'arsalannaqvi016', 'Arsalan', 'Naqvi', 'user', 'no'],
-    ['rabbiasiddiqi@hotmail.com', 'rabbiasiddiqi', 'Rabbia', 'Siddiqi', 'user', 'no'],
+    ['hehuan2112@gmail.com', 'LNMA2020', 'Huan', 'He', 'user,admin', 'no'],
+    ['sipra.irbaz@gmail.com', 'LNMA2020', 'Irbaz', 'Riaz', 'user,admin', 'no'],
+    ['arsalannaqvi016@gmail.com', 'LNMA2020', 'Arsalan', 'Naqvi', 'user', 'no'],
+    ['rabbiasiddiqi@hotmail.com', 'LNMA2020', 'Rabbia', 'Siddiqi', 'user', 'no'],
 ]
 
 # %% create users
-if n_users == 0:
-    # create the following
-    for r in users:
-        user = User(
-            uid=r[0],
-            password="",
-            first_name=r[2],
-            last_name=r[3],
-            role=r[4],
-            is_deleted=r[5]
-        )
-        user.set_password(r[1])
-        db.session.add(user)
-        print('* add user [%s]' % user.uid)
 
-    db.session.commit()
-    print('* created users')
+for r in users:
+    is_existed, user = dora.create_user_if_not_exist(
+        r[0], r[2], r[3], r[1], r[4]
+    )
+    if is_existed:
+        print('* existed user [%s] %s %s' % (
+            user.uid, user.first_name, user.last_name
+        ))
+    else:
+        print('* add user [%s] ' % user.uid)
 
-else:
-    print('* existed users, skip creation')
+print('* done user creation')
 
 
 #%% create projects
-if n_projects == 0:
-    rs = [
-        ['sipra.irbaz@gmail.com', 'Cancer Associated Thrombosis', 'CAT', 'Cancer Associated Thrombosis'],
-        ['sipra.irbaz@gmail.com', 'Metastatic Renal Cell Cancer', 'RCC', 'Metastatic Renal Cell Cancer'],
-        ['sipra.irbaz@gmail.com', 'LSR', 'LSR', 'LSR'],
-    ]
 
-    for r in rs:
-        p = dora.create_project(
-            r[0], r[1], r[2], r[3]
-        )
+rs = [
+    ['sipra.irbaz@gmail.com', 'Cancer Associated Thrombosis', 'CAT', 'Cancer Associated Thrombosis'],
+    ['sipra.irbaz@gmail.com', 'Metastatic Renal Cell Cancer', 'RCC', 'Metastatic Renal Cell Cancer'],
+    ['sipra.irbaz@gmail.com', 'Toxicity of Immune Checkpoint Inhibitors 3', 'IO', 'IO Toxicity'],
+    ['sipra.irbaz@gmail.com', 'Living Bladder Review', 'LBR', 'Living Bladder Review'],
+]
+
+for r in rs:
+    p = dora.create_project(
+        r[0], r[1], r[2], r[3]
+    )
+
+    if p is None:
+        print('* existed project [%s]' % r[1])
+    else:
         print('* created project [%s]' % r[1])
-        
-        for u in users:
-            dora.add_user_to_project(u[0], p.project_id)
-            print('* add [%s] to project [%s]' % (u[0], p.keystr))
+    
+    for u in users:
+        is_in, user, project = dora.add_user_to_project_by_keystr_if_not_in(
+            u[0], r[2]
+        )
 
-else:
-    print('* existed projects, skip creation')
+        if is_in:
+            print('* existed user [%s] in project [%s]' % (
+                u[0], r[1]
+            ))
+        else:
+            print('* added user [%s] to project [%s]' % (
+                u[0], project.keystr
+            ))
+
+print('* done setup data!')

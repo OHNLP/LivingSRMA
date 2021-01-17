@@ -35,7 +35,25 @@ def create():
         abstract = request.form.get('abstract'),
         settings={
             'collect_template': {},
-            'query': query
+            'query': query,
+            'criterias': {
+                "inclusion": "",             # string, the inclusion criteria
+                "exclusion": "",             # string, the exclusion criteria
+            },
+            "exclusion_reasons": [          # a list of strings for the reasons
+                "Conference Abstract"
+            ],
+            "highlight_keywords": {         # the keywords for highlight title or abs
+                "inclusion": [              # the inclusion keywords
+                    'phase 3'
+                ],             
+                "exclusion": [              # the exclusion keywords
+                    'meta-analysis'
+                ]              
+            },
+            "tags": [                       # a list of strings for the tags
+                "Other MA"
+            ],
         }
     )
 
@@ -129,6 +147,61 @@ def api_add_user_to_project():
     flash("Added %s to Project [%s]" % (to_add_user.uid, project.title))
 
     return redirect(url_for('project.mylist'))
+
+
+@bp.route('/api/set_highlight_keywords', methods=['GET', 'POST'])
+@login_required
+def api_set_highlight_keywords():
+    if request.method == 'GET':
+        return redirect(url_for('project_editor'))
+        
+    project_id = request.cookies.get('project_id')
+    if project_id is None or project_id == '':
+        flash('Set working project first')
+        return redirect(url_for('project.mylist'))
+
+    raw_hk_inc = request.form.get('form_textarea_inclusion_keywords')
+    raw_hk_exc = request.form.get('form_textarea_exclusion_keywords')
+
+    # remove blank
+    raw_hk_inc = raw_hk_inc.strip()
+    raw_hk_exc = raw_hk_exc.strip()
+
+    # split
+    hk_incs = raw_hk_inc.split('\n')
+    hk_excs = raw_hk_exc.split('\n')
+
+    # remove empty
+    hk_incs_cleaned = []
+    for hk_inc in hk_incs:
+        hk_inc = hk_inc.strip()
+        if hk_inc == '':
+            pass
+        else:
+            hk_incs_cleaned.append(hk_inc)
+    
+    hk_excs_cleaned = []
+    for hk_exc in hk_excs:
+        hk_exc = hk_exc.strip()
+        if hk_exc == '':
+            pass
+        else:
+            hk_excs_cleaned.append(hk_exc)
+
+    highlight_keywords = {
+        "inclusion": hk_incs_cleaned,
+        "exclusion": hk_excs_cleaned
+    }
+    # update
+    is_success, project = dora.set_project_highlight_keywords(
+        project_id, highlight_keywords
+    )
+
+    flash('Saved %s + %s highlight_keywords!' % (
+        len(highlight_keywords['inclusion']), 
+        len(highlight_keywords['exclusion']), 
+    ))
+    return redirect(url_for('project.editor'))
 
 
 @bp.route('/api/set_tags', methods=['GET', 'POST'])

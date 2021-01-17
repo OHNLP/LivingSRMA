@@ -119,6 +119,20 @@ def get_prisma():
     return jsonify(ret)
 
 
+@bp.route('/set_rct_id', methods=['GET', 'POST'])
+@login_required
+def set_rct_id():
+    paper_id = request.form.get('paper_id')
+    rct_id = request.form.get('rct_id')
+    is_success, paper = dora.set_paper_rct_id(paper_id, rct_id)
+
+    ret = {
+        'success': True,
+        'paper': paper.as_very_simple_dict()
+    }
+    return jsonify(ret)
+
+
 @bp.route('/add_tag', methods=['GET', 'POST'])
 @login_required
 def add_tag():
