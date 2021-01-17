@@ -34,6 +34,14 @@ STANDARD_DATA_COLS = {
     'PRIM_CONTD_RAW': ['study', 'year', 'Nt', 'Mt', 'SDt', 'Nc', 'Mc', 'SDc', 'treatment', 'control'],
     'PRIM_CONTD_PRE': ['study', 'year', 'TE', 'SE', 'treatment', 'control'],
     'PRIM_CATIRR_RAW': ['study', 'year', 'Et', 'Tt', 'Ec', 'Tc', 'treatment', 'control'],
+
+    # for PWMA - Special for IO project
+    'PRIM_CAT_RAW_G5': ['study', 'year', 'treatment', 'control', 
+                        'GA_Et', 'GA_Nt', 'GA_Ec', 'GA_Nc', 
+                        'G34_Et', 'G34_Ec', 
+                        'G3H_Et', 'G3H_Ec', 
+                        'G5N_Et', 'G5N_Ec', 
+                        'drug_used', 'malignancy']
 }
 
 RSCRIPT_TPL = {
