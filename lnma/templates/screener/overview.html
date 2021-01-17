@@ -1542,17 +1542,17 @@ var tbjs_paperlist = {
     ///////////////////////////////////////////////////////////////////////////
 
     __get_select_fulltext_exclusion_reasons: function(d) {
+        var reasons = [];
+        for (let i = 0; i < srv_screener.project.settings.exclusion_reasons.length; i++) {
+            const er = srv_screener.project.settings.exclusion_reasons[i];
+            let opt_r = '<option value="'+er+'">'+er+'</option>';
+            reasons.push(opt_r);
+        }
+        reasons = reasons.join('\n');
         var html = [
             '<div class="ml-2">',
             '<select class="custom-select exclusion-reason custom-select-sm mr-2" id="tb-row-exclude-reason-'+d.paper_id+'">',
-                '<option value="Conference Abstracts">Conference Abstracts</option>',
-                '<option value="Editorials, Commentaries, Case Reports">Editorials, Commentaries, Case Reports</option>',
-                '<option value="Non-Randomized Studies">Non-Randomized Studies</option>',
-                '<option value="Cohort Studies">Cohort Studies</option>',
-                '<option value="Narrative Reviews">Narrative Reviews</option>',
-                '<option value="Systematic Reviews and Meta-Analyses">Systematic Reviews and Meta-Analyses</option>',
-                '<option value="Subgroup Analysis/Exploratory Analysis/Sub-Study">Subgroup Analysis/Exploratory Analysis/Sub-Study</option>',
-                '<option value="ICI in the control arm">ICI in the control arm</option>',
+                reasons,
             '</select>',
             
             '<button class="btn btn-danger btn-sm" type="button" onclick="tbjs_paperlist.exclude_by_ft(\''+d.paper_id+'\')">',

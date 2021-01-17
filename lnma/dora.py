@@ -19,7 +19,7 @@ IS_DELETED_NO = 'no'
 
 REL_PROJECT_USER_CREATOR = 'creator'
 
-def create_project(owner_uid, title, keystr=None, abstract="", settings={}):
+def create_project(owner_uid, title, keystr=None, abstract="", settings=None):
     """Create a project based on given parameter
     """
     # create a project
@@ -38,6 +38,31 @@ def create_project(owner_uid, title, keystr=None, abstract="", settings={}):
     date_created = datetime.datetime.now()
     date_updated = datetime.datetime.now()
     is_deleted = IS_DELETED_NO
+
+    # settings is very very very important!
+    if settings is None:
+        settings = {
+            'collect_template': {},
+            'query': '',
+            'criterias': {
+                "inclusion": "",            # string, the inclusion criteria
+                "exclusion": "",            # string, the exclusion criteria
+            },
+            "exclusion_reasons": [          # a list of strings for the reasons
+                "Conference Abstract"
+            ],
+            "highlight_keywords": {         # the keywords for highlight title or abs
+                "inclusion": [              # the inclusion keywords
+                    'phase 3'
+                ],             
+                "exclusion": [              # the exclusion keywords
+                    'meta-analysis'
+                ]              
+            },
+            "tags": [                       # a list of strings for the tags
+                "Other MA"
+            ],
+        }
 
     project = Project(
         project_id = project_id,
@@ -279,6 +304,27 @@ def is_existed_project(project_id):
         return True
 
 
+def set_project_exclusion_reasons(project_id, exclusion_reasons):
+    '''
+    Set the exclusion_reasons for a project
+    '''
+    project = get_project(project_id)
+    if project is None:
+        return False, None
+
+    if 'exclusion_reasons' not in project.settings:
+        project.settings['exclusion_reasons'] = []
+
+    project.settings['exclusion_reasons'] = exclusion_reasons
+    flag_modified(project, "settings")
+
+    # commit this
+    db.session.add(project)
+    db.session.commit()
+
+    return True, project
+
+
 def set_project_highlight_keywords(project_id, highlight_keywords):
     '''
     Set the highlight_keywords list for a project
@@ -338,7 +384,7 @@ def set_paper_rct_id(paper_id, rct_id):
     
     db.session.add(paper)
     db.session.commit()
-    
+
     return True, paper
 
 

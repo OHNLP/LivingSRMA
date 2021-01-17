@@ -107,6 +107,13 @@ class Project(db.Model):
         return txt
 
 
+    def get_exclusion_reasons_text(self):
+        txt = ''
+        if 'exclusion_reasons' in self.settings:
+            txt = '\n'.join(self.settings['exclusion_reasons'])
+        return txt
+
+
     def get_inclusion_keywords_text(self):
         txt = ''
         if 'highlight_keywords' in self.settings:

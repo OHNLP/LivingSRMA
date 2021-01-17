@@ -33,28 +33,7 @@ def create():
         title = request.form.get('title'),
         keystr = request.form.get('keystr'),
         abstract = request.form.get('abstract'),
-        settings={
-            'collect_template': {},
-            'query': query,
-            'criterias': {
-                "inclusion": "",             # string, the inclusion criteria
-                "exclusion": "",             # string, the exclusion criteria
-            },
-            "exclusion_reasons": [          # a list of strings for the reasons
-                "Conference Abstract"
-            ],
-            "highlight_keywords": {         # the keywords for highlight title or abs
-                "inclusion": [              # the inclusion keywords
-                    'phase 3'
-                ],             
-                "exclusion": [              # the exclusion keywords
-                    'meta-analysis'
-                ]              
-            },
-            "tags": [                       # a list of strings for the tags
-                "Other MA"
-            ],
-        }
+        settings=None
     )
 
     flash('Project is created!')
@@ -83,6 +62,9 @@ def editor():
     # preprocessing the tags
     form_textarea_tags = project.get_tags_text()
 
+    # preprocessing the exclusion reasons
+    form_textarea_exclusion_reasons = project.get_exclusion_reasons_text()
+
     # preprocessing the ie keywords
     form_textarea_inclusion_keywords = project.get_inclusion_keywords_text()
 
@@ -92,6 +74,7 @@ def editor():
     return render_template('project/editor.html', 
         project=project,
         form_textarea_tags=form_textarea_tags,
+        form_textarea_exclusion_reasons=form_textarea_exclusion_reasons,
         form_textarea_inclusion_keywords=form_textarea_inclusion_keywords,
         form_textarea_exclusion_keywords=form_textarea_exclusion_keywords
     )
@@ -147,6 +130,45 @@ def api_add_user_to_project():
     flash("Added %s to Project [%s]" % (to_add_user.uid, project.title))
 
     return redirect(url_for('project.mylist'))
+
+
+@bp.route('/api/set_exclusion_reasons', methods=['GET', 'POST'])
+@login_required
+def api_set_exclusion_reasons():
+    if request.method == 'GET':
+        return redirect(url_for('project_editor'))
+        
+    project_id = request.cookies.get('project_id')
+    if project_id is None or project_id == '':
+        flash('Set working project first')
+        return redirect(url_for('project.mylist'))
+
+    raw_exclusion_reasons = request.form.get('form_textarea_exclusion_reasons')
+
+    # remove blank
+    raw_exclusion_reasons = raw_exclusion_reasons.strip()
+
+    # split
+    exclusion_reasons = raw_exclusion_reasons.split('\n')
+    
+    # remove empty
+    exclusion_reasons_cleaned = []
+    for t in exclusion_reasons:
+        t = t.strip()
+        if t == '':
+            pass
+        else:
+            exclusion_reasons_cleaned.append(t)
+
+    # update
+    is_success, project = dora.set_project_exclusion_reasons(
+        project_id, exclusion_reasons_cleaned
+    )
+
+    flash('Saved %s exclusion_reasons!' % (
+        len(exclusion_reasons_cleaned),
+    ))
+    return redirect(url_for('project.editor'))
 
 
 @bp.route('/api/set_highlight_keywords', methods=['GET', 'POST'])

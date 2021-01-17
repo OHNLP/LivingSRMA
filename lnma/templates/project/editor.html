@@ -178,11 +178,34 @@ Project Editor
                 </div>
                 <!-- /#ie_criteria_info_panel -->
                 
-                <div class="tab-pane fade" id="ex_reason_info_panel" role="tabpanel" aria-labelledby="ex_reason_info_tab">
-                    <p class="lead">The exclusion reasons</p>
 
+                <div class="tab-pane fade" id="ex_reason_info_panel" role="tabpanel" aria-labelledby="ex_reason_info_tab">
+                    <p class="lead">The full text exclusion reasons</p>
+                    <p>
+                        The full text exclusion reasons will be used in the full text review stage.<br>
+                        One reason per line. 
+                    </p>
+                    <form method="POST" action="[[ url_for('project.api_set_exclusion_reasons') ]]">
+                        <div class="row">
+                            <div class="col-lg-3 col-md-4 col-sm-10">
+                                <div class="form-group">
+                                    <label for="form_textarea_inclusion_keywords">Full text exclusion reasons</label>
+                                    <textarea class="form-control"
+                                        id="form_textarea_exclusion_reasons" 
+                                        name="form_textarea_exclusion_reasons" 
+                                        rows="15">[[ form_textarea_exclusion_reasons ]]</textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa fa-save"></i>
+                            Save exclusion reasons
+                        </button>
+                    </form>
                 </div>
                 <!-- /#ie_criteria_info_panel -->
+
 
                 <div class="tab-pane fade" id="tag_info_panel" role="tabpanel" aria-labelledby="tag_info_tab">
 
