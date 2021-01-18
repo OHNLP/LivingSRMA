@@ -55,12 +55,14 @@
 
         <div class="oc-attr">
             <span class="oc-attr-name">Data Type</span>
-            <select v-model="extract.meta.input_format">
+            <select v-model="extract.meta.input_format"
+                v-on:change="on_change_input_format($event)">
                 <option value="PRIM_CAT_PRE">Categorical Precalculated Data</option>
                 <option value="PRIM_CAT_RAW">Categorical Raw Data</option>
                 <option value="PRIM_CATIRR_RAW">Categorical Raw (Incidence Rate Ratios) Data</option>
                 <option value="PRIM_CONTD_PRE">Continuous Precalculated Data</option>
                 <option value="PRIM_CONTD_RAW">Continuous Raw Data</option>
+                <option value="PRIM_CAT_RAW_G5">Categorical Raw Data of Grades (IO)</option>
             </select>
         </div>
 
@@ -282,7 +284,7 @@
 
         </table>
 
-        
+
     </div>
     <!-- /.panel-paperlist -->
 

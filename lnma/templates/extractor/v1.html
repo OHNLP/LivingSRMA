@@ -154,6 +154,7 @@ Data Extractor
                 <tr>
                     <th>Group</th>
                     <th>Full Name</th>
+                    <th>Data Type</th>
                     <th>Measure</th>
                     <th>Treatment</th>
                     <th>Control</th>
@@ -167,6 +168,7 @@ Data Extractor
                             {{ oc.full_name }}
                         </a>
                     </td>
+                    <td>{{ oc.input_format }}</td>
                     <td>{{ oc.measure_of_effect }}</td>
                     <td>{{ oc.treatment.abbr }}</td>
                     <td>{{ oc.control.abbr }}</td>
@@ -497,6 +499,17 @@ var pan_ocpapers = {
                 // get year
                 get_year: function(s) {
                     return jarvis.get_year(s);
+                },
+
+                // events
+                on_change_input_format: function(event) {
+                    let val = event.target.value;
+                    console.log('Changed input_format: ' + val);
+                    // update the attrs
+                    this.extract.meta.attrs = jarvis.tpl.data_type[
+                        this.extract.oc_type
+                    ][val];
+                    
                 }
             }
         });
@@ -943,14 +956,16 @@ var pan_itbuilder = {
         
         // add to the itable
         this.vpp.$data.itable.meta.cate_attrs.push(cate);
+        this.vpp.$forceUpdate();
     },
 
     create_attribute: function(cate_abbr) {
         // get the full name
-        var text = jarvis.prompt('The attribute full name:');
-        if (text == null) { return; }
-        text = text.trim();
-        if (text == '') { return; }
+        // var text = jarvis.prompt('The attribute full name:');
+        // if (text == null) { return; }
+        // text = text.trim();
+        // if (text == '') { return; }
+        var text = 'New attribute';
 
         // create an abbr
         var abbr = jarvis.mk_it_abbr();
@@ -965,21 +980,27 @@ var pan_itbuilder = {
         for (let i = 0; i < this.vpp.$data.itable.meta.cate_attrs.length; i++) {
             var cate = this.vpp.$data.itable.meta.cate_attrs[i];
             if (cate.abbr == cate_abbr) {
-                cate.attrs.push(attr);
+                this.vpp.$data.itable.meta.cate_attrs[i].attrs.push(attr);
                 break;
             }
         }
+
+        this.vpp.$forceUpdate();
+
+        // focus on the new input
+        $('#cate_attr_' + abbr).focus().select();
     },
 
 
     create_sub: function(cate_abbr, attr_abbr) {
         // get the full name
-        var text = jarvis.prompt('The sub-attribute name (e.g., Rx, Treatment, Control):');
-        if (text == null) { return; }
-        text = text.trim();
-        if (text == '') { return; }
+        // var text = jarvis.prompt('The sub-attribute name (e.g., Rx, Treatment, Control):');
+        // if (text == null) { return; }
+        // text = text.trim();
+        // if (text == '') { return; }
 
         // create an abbr
+        var text = "New option";
         var abbr = jarvis.mk_it_abbr();
 
         // create a new cate
@@ -997,9 +1018,9 @@ var pan_itbuilder = {
                     if (attr.abbr == attr_abbr) {
                         if (attr.subs == null) {
                             // which means no sub yet
-                            attr.subs = [sub];
+                            this.vpp.$data.itable.meta.cate_attrs[i].attrs[j].subs = [sub];
                         } else {
-                            attr.subs.push(sub);
+                            this.vpp.$data.itable.meta.cate_attrs[i].attrs[j].subs.push(sub);
                         }
                         break;
                     }
@@ -1007,6 +1028,10 @@ var pan_itbuilder = {
                 break;
             }
         }
+        this.vpp.$forceUpdate();
+
+        // focus on the new input
+        $('#cate_attr_sub' + abbr).focus().select();
     },
 
     remove_category: function(cate_abbr) {

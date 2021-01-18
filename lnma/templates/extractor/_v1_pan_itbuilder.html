@@ -1,9 +1,14 @@
 <div id="pan_itbuilder" class="panel-container">
     <div class="panel-info">
         <div class="oc-attr">
-            <button class="btn btn-primary" v-on:click="save_itable();">
+            <button class="btn btn-primary btn-sm" v-on:click="save_itable();">
                 <i class="fa fa-save"></i>
                 Save Interactive Table Design
+            </button>
+
+            <button class="btn btn-primary btn-sm" v-on:click="save_itable();">
+                <i class="fa fa-edit"></i>
+                Extract Information for Interactive Table
             </button>
         </div>
     </div>
@@ -11,8 +16,7 @@
 
     <div class="d-flex flex-row">
 
-    <div v-if="itable != null">
-
+    <div v-if="itable != null" class="panel-m">
 
         <div class="panel-info">
             <div class="oc-attr">
@@ -47,12 +51,16 @@
                 <div v-for="attr, attr_idx in cate.attrs"
                     style="padding: 3px 0; border-bottom: 1px dotted #efefef;">
                     <i class="far fa-check-circle"></i>
-                    <input class="oc-attr-value" type="text" v-model="attr.name">
+                    <input class="oc-attr-value" type="text"
+                        v-model="attr.name"
+                        v-bind:id="'cate_attr_' + attr.abbr">
 
                     <span v-if="attr.subs != null">
                         [
                         <span v-for="sub, sub_idx in attr.subs">
-                            <input class="oc-attr-value oc-attr-value-sm" type="text" v-model="sub.name">
+                            <input class="oc-attr-value oc-attr-value-sm" type="text" 
+                                v-model="sub.name"
+                                v-bind:id="'cate_attr_sub_' + sub.abbr">
                         </span>
                         ]
                     </span>
