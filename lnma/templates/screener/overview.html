@@ -31,6 +31,7 @@ Screener Overview
     overflow-y: auto;
     white-space: pre-wrap;
     word-wrap: break-word;
+    margin: 0;
 }
 td.details-control {
     cursor: pointer;
@@ -148,7 +149,7 @@ Screener Overview
         </a>
     </div>
     <div class="d-flex flex-row">
-        <div class="d-flex flex-column w-50">
+        <div class="d-flex flex-column w-50 border-right">
             <div class="text-center fw-bolder border-bottom .bg-success">INCLUSION</div>
             <pre class="criteria-box fs-m" v-if="criterias != null">{{ criterias.inclusion }}</pre>
         </div>
