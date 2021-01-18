@@ -46,7 +46,20 @@ def create_extract():
     meta = json.loads(request.form.get('meta'))
     data = json.loads(request.form.get('data'))
 
-    # get the exisiting extracts
+    # check if exists first
+    extract = dora.get_extract_by_project_id_and_abbr(
+        project_id, abbr
+    )
+    if extract is not None:
+        # if get the exisiting extracts
+        ret = {
+            'success': False,
+            'msg': 'exists extract %s' % abbr,
+            'extract': extract.as_dict()
+        }
+        return jsonify(ret)
+
+    # ok, not exists! create!
     extract = dora.create_extract(
         project_id,
         oc_type,
@@ -72,6 +85,14 @@ def get_extract_and_papers():
     
     # get the exisiting extracts
     extract = dora.get_extract_by_project_id_and_abbr(project_id, abbr)
+
+    if extract is None:
+        # this is a new extract
+        ret = {
+            'success': False,
+            'msg': 'not exist extract %s' % abbr
+        }
+        return jsonify(ret)
 
     # get papers
     stage = ss_state.SS_STAGE_INCLUDED_SR
@@ -116,6 +137,29 @@ def get_extract_and_papers():
         'msg': '',
         'extract': extract.as_dict(),
         'papers': [ p.as_simple_dict() for p in papers ]
+    }
+    return jsonify(ret)
+
+
+@bp.route('/update_extract_meta', methods=['POST'])
+@login_required
+def update_extract_meta():
+    project_id = request.form.get('project_id')
+    oc_type = request.form.get('oc_type')
+    abbr = request.form.get('abbr')
+    # the meta of the extract settings
+    meta = json.loads(request.form.get('meta'))
+    
+    # update the extract with given info
+    extract = dora.update_extract_meta(
+        project_id, oc_type, abbr, meta
+    )
+
+    # build the return obj
+    ret = {
+        'success': True,
+        'msg': '',
+        'extract': extract.as_dict()
     }
     return jsonify(ret)
 
@@ -201,9 +245,40 @@ def delete_extract():
     return jsonify(ret)
 
 
+@bp.route('/get_extract')
+@login_required
+def get_extract():
+    '''
+    Get one extract by the project_id and the abbr
+    '''
+    project_id = request.args.get('project_id')
+    abbr = request.args.get('abbr')
+    
+    # get the exisiting extracts
+    extract = dora.get_extract_by_project_id_and_abbr(project_id, abbr)
+
+    if extract is None:
+        # this is a new extract
+        ret = {
+            'success': False,
+            'msg': 'not exist extract %s' % abbr
+        }
+        return jsonify(ret)
+
+    ret = {
+        'success': True,
+        'msg': '',
+        'extract': extract.as_dict()
+    }
+    return jsonify(ret)
+
+
 @bp.route('/get_extracts')
 @login_required
 def get_extracts():
+    '''
+    Get all of the extracts by the project_id
+    '''
     project_id = request.args.get('project_id')
     
     # get the exisiting extracts

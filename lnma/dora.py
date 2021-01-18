@@ -1345,6 +1345,30 @@ def delete_extract(project_id, oc_type, abbr):
     return 0
 
 
+def update_extract_meta(project_id, oc_type, abbr, meta):
+    '''
+    Update the existing extract meta only
+    '''
+    extract = Extract.query.filter(and_(
+        Extract.project_id == project_id,
+        Extract.abbr == abbr
+    )).first()
+
+    # TODO check if not exists
+
+    # update
+    extract.meta = meta
+    extract.date_updated = datetime.datetime.now()
+
+    flag_modified(extract, "meta")
+
+    # commit this
+    db.session.add(extract)
+    db.session.commit()
+
+    return extract
+
+
 def update_extract_meta_and_data(project_id, oc_type, abbr, meta, data):
     '''
     Update the existing extract

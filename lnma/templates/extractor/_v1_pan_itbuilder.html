@@ -1,0 +1,103 @@
+<div id="pan_itbuilder" class="panel-container">
+    <div class="panel-info">
+        <div class="oc-attr">
+            <button class="btn btn-primary" v-on:click="save_itable();">
+                <i class="fa fa-save"></i>
+                Save Interactive Table Design
+            </button>
+        </div>
+    </div>
+    <!-- /.panel-info -->
+
+    <div class="d-flex flex-row">
+
+    <div v-if="itable != null">
+
+
+        <div class="panel-info">
+            <div class="oc-attr">
+                <span style="font-size: 1.2em;">
+                    <i class="fa fa-table"></i>
+                    Columns Design
+                </span>
+            </div>
+            <div class="oc-attr">
+                <button v-on:click="create_category();">
+                    <i class="fa fa-bars"></i>
+                    Add Category
+                </button>
+            </div>
+        </div>
+        <!-- /.panel-info -->
+
+        <div v-for="cate, cate_idx in itable.meta.cate_attrs"
+            class="panel-info" style="margin: 10px 0; border-bottom: 1px dotted grey;">
+            
+            <div class="oc-attr">
+                <i class="fa fa-bars"></i>
+                <input class="oc-attr-value" type="text" v-model="cate.name">
+
+                <button v-on:click="create_attribute(cate.abbr);">
+                    <i class="far fa-plus-square"></i>
+                    Add Attribute
+                </button>
+            </div>
+
+            <div style="margin: 0 0 10px 10px; padding: 0 0 10px 10px; border-left: 1px solid #777777;">
+                <div v-for="attr, attr_idx in cate.attrs"
+                    style="padding: 3px 0; border-bottom: 1px dotted #efefef;">
+                    <i class="far fa-check-circle"></i>
+                    <input class="oc-attr-value" type="text" v-model="attr.name">
+
+                    <span v-if="attr.subs != null">
+                        [
+                        <span v-for="sub, sub_idx in attr.subs">
+                            <input class="oc-attr-value oc-attr-value-sm" type="text" v-model="sub.name">
+                        </span>
+                        ]
+                    </span>
+
+                    <a v-on:click="create_sub(cate.abbr, attr.abbr);"
+                        href="javascript:void(0);"
+                        :title="'Add sub-attribute to [' + attr.name + ']'">
+                        <i class="fa fa-plus"></i>
+                    </a>
+
+                    <a v-on:click="remove_attribute(cate.abbr, attr.abbr);"
+                        href="javascript:void(0);"
+                        class="text-danger"
+                        :title="'Remove this attribute [' + attr.name + ']'">
+                        <i class="fa fa-minus"></i>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <div v-if="itable != null" class="panel-m">
+
+        <div class="panel-info">
+            <div class="oc-attr">
+                <span style="font-size: 1.2em;">
+                    <i class="fa fa-filter"></i>
+                    Filters Design
+                </span>
+            </div>
+            <div class="oc-attr">
+                <button v-on:click="create_category();">
+                    <i class="fa fa-bars"></i>
+                    Add Filter
+                </button>
+            </div>
+        </div>
+        <!-- /.panel-info -->
+
+    </div>
+    <!-- /#filter -->
+        
+    </div>
+
+</div>
+<!-- /#pan_itbuilder -->

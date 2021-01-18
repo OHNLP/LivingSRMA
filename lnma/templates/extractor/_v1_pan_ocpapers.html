@@ -1,0 +1,290 @@
+<div id="pan_ocpapers" class="panel-m panel-container">
+    <div class="panel-info" v-if="extract != null">
+        <div class="oc-attr">
+            <span style="font-size: 1.2em;">Outcome <b>[{{ extract.meta.full_name }}]</b> Details</span>
+        </div>
+        <div class="oc-attr">
+            <button v-on:click="toggle_show_settings();">
+                <i class="fa" v-bind:class="{'fa-toggle-on': show_settings, 'fa-toggle-off': !show_settings}"></i>
+                Toggle settings
+            </button> |
+            <button v-on:click="update_extract();">
+                <i class="fa fa-save"></i>
+                Save all
+            </button>
+            
+            <button v-on:click="copy_extract();">
+                <i class="far fa-copy"></i>
+                Save a copy
+            </button> 
+            |
+            <button>
+                <i class="fa" v-bind:class="{'fa-toggle-on': show_settings, 'fa-toggle-off': !show_settings}"></i>
+                Only 
+            </button>
+        </div>
+    </div>
+
+    <div v-bind:class="{hide: !show_settings}">
+    
+    <!-- panel for the pwma -->
+    <div class="panel-info" v-if="extract != null && extract.meta.oc_type == 'pwma'">
+        <div class="oc-attr">
+            <span class="oc-attr-name">Full Name</span>
+            <input class="oc-attr-value" v-model="extract.meta.full_name">
+        </div>
+        <div class="oc-attr">
+            <span class="oc-attr-name">Category</span>
+            <input class="oc-attr-value" v-model="extract.meta.category">
+        </div>
+
+        <div class="oc-attr">
+            <span class="oc-attr-name">Analysis Group</span>
+            <input class="oc-attr-value" v-model="extract.meta.group">
+        </div>
+
+        <div class="oc-attr">
+            <span class="oc-attr-name">Analysis Measure</span>
+            <select v-model="extract.meta.measure_of_effect">
+                <option value="HR">Hazard Ratio (HR)</option>
+                <option value="RR">Relative Risk (RR)</option>
+                <option value="OR">Odds Ratio (OR)</option>
+                <option value="RD">Risk Difference (RD)</option>
+            </select>
+        </div>
+
+        <div class="oc-attr">
+            <span class="oc-attr-name">Data Type</span>
+            <select v-model="extract.meta.input_format">
+                <option value="PRIM_CAT_PRE">Categorical Precalculated Data</option>
+                <option value="PRIM_CAT_RAW">Categorical Raw Data</option>
+                <option value="PRIM_CATIRR_RAW">Categorical Raw (Incidence Rate Ratios) Data</option>
+                <option value="PRIM_CONTD_PRE">Continuous Precalculated Data</option>
+                <option value="PRIM_CONTD_RAW">Continuous Raw Data</option>
+            </select>
+        </div>
+
+        <div class="oc-attr">
+            <span class="oc-attr-name">Treatment Arm</span>
+            <input class="oc-attr-value" v-model="extract.meta.treatment.abbr">
+            <input class="oc-attr-value" v-model="extract.meta.treatment.full_name">
+        </div>
+
+        <div class="oc-attr">
+            <span class="oc-attr-name">Control Arm</span>
+            <input class="oc-attr-value" v-model="extract.meta.control.abbr">
+            <input class="oc-attr-value" v-model="extract.meta.control.full_name">
+        </div>
+
+        <div class="oc-attr">
+            <span class="oc-attr-name">Fixed or Random</span>
+            <select v-model="extract.meta.fixed_or_random">
+                <option value="fixed">Fixed Effect</option>
+                <option value="random">Random Effects</option>
+            </select>
+        </div>
+
+        <div class="oc-attr">
+            <span class="oc-attr-name">Which is better</span>
+            <select v-model="extract.meta.which_is_better">
+                <option value="lower">Lower is better</option>
+                <option value="higher">Higher is better</option>
+            </select>
+        </div>
+
+        <div class="oc-attr">
+            <span class="oc-attr-name">Include this outcome in SoF Table</span>
+            <select v-model="extract.meta.included_in_sof">
+                <option value="yes">Yes, include this outcome</option>
+                <option value="no">No, exclude this outcome</option>
+            </select>
+        </div>
+
+        <div class="oc-attr">
+            <span class="oc-attr-name">Include this outcome in result plots</span>
+            <select v-model="extract.meta.included_in_plots">
+                <option value="yes">Yes, include this outcome</option>
+                <option value="no">No, exclude this outcome</option>
+            </select>
+        </div>
+
+        <div class="oc-attr">
+            <span class="oc-attr-name">The attributes to extract</span>
+            <span>{{ extract.meta.attrs }}</span>
+        </div>
+
+        <!-- <div v-for="attr_value, attr_name in extract.meta" 
+            class="oc-attr">
+            <span class="oc-attr-name">{{ attr_name }}</span>
+            <input class="oc-attr-value" 
+                :id="'pan_oc_attr_' + attr_name" 
+                v-model="extract.meta[attr_name]">
+        </div> -->
+    </div>
+    <!-- /.panel-info -->
+
+    <!-- panel for the subg -->
+    <div class="panel-info" v-if="extract != null && extract.meta.oc_type == 'subg'">
+        <div class="oc-attr">
+            <span class="oc-attr-name">Full Name</span>
+            <input class="oc-attr-value" v-model="extract.meta.full_name">
+        </div>
+        <div class="oc-attr">
+            <span class="oc-attr-name">Category</span>
+            <input class="oc-attr-value" v-model="extract.meta.category">
+        </div>
+
+        <div class="oc-attr">
+            <span class="oc-attr-name">Analysis Group</span>
+            <input class="oc-attr-value" v-model="extract.meta.group">
+        </div>
+
+        <div class="oc-attr">
+            <span class="oc-attr-name">Analysis Measure</span>
+            <select v-model="extract.meta.measure_of_effect">
+                <option value="HR">Hazard Ratio (HR)</option>
+                <option value="RR">Relative Risk (RR)</option>
+                <option value="OR">Odds Ratio (OR)</option>
+                <option value="RD">Risk Difference (RD)</option>
+            </select>
+        </div>
+
+        <div class="oc-attr">
+            <span class="oc-attr-name">Data Type</span>
+            <select v-model="extract.meta.input_format">
+                <option value="SUBG_CAT_PRE">Categorical Precalculated Data</option>
+                <option value="SUBG_CAT_RAW">Categorical Raw Data</option>
+                <option value="SUBG_CATIRR_RAW">Categorical Raw (Incidence Rate Ratios) Data</option>
+                <option value="SUBG_CONTD_PRE">Continuous Precalculated Data</option>
+                <option value="SUBG_CONTD_RAW">Continuous Raw Data</option>
+            </select>
+        </div>
+
+        <div class="oc-attr">
+            <span class="oc-attr-name">Treatment Arm</span>
+            <input class="oc-attr-value" v-model="extract.meta.treatment.abbr"> | 
+            <input class="oc-attr-value" v-model="extract.meta.treatment.full_name">
+        </div>
+
+        <div class="oc-attr">
+            <span class="oc-attr-name">Control Arm</span>
+            <input class="oc-attr-value" v-model="extract.meta.control.abbr"> | 
+            <input class="oc-attr-value" v-model="extract.meta.control.full_name">
+        </div>
+
+        <div class="oc-attr">
+            <span class="oc-attr-name">Fixed or Random</span>
+            <select v-model="extract.meta.fixed_or_random">
+                <option value="fixed">Fixed Effect</option>
+                <option value="random">Random Effects</option>
+            </select>
+        </div>
+
+        <div class="oc-attr">
+            <span class="oc-attr-name">Which is better</span>
+            <select v-model="extract.meta.which_is_better">
+                <option value="lower">Lower is better</option>
+                <option value="higher">Higher is better</option>
+            </select>
+        </div>
+
+        <div class="oc-attr">
+            <span class="oc-attr-name">Include this outcome in SoF Table</span>
+            <select v-model="extract.meta.included_in_sof">
+                <option value="yes">Yes, include this outcome</option>
+                <option value="no">No, exclude this outcome</option>
+            </select>
+        </div>
+
+        <div class="oc-attr">
+            <span class="oc-attr-name">Include this outcome in result plots</span>
+            <select v-model="extract.meta.included_in_plots">
+                <option value="yes">Yes, include this outcome</option>
+                <option value="no">No, exclude this outcome</option>
+            </select>
+        </div>
+
+        <div class="oc-attr">
+            <span class="oc-attr-name">The attributes to extract</span>
+            <span>{{ extract.meta.attrs }}</span>
+        </div>
+
+        <div class="oc-attr">
+            <span class="oc-attr-name">Subgroups</span>
+            <input class="oc-attr-value" v-model="extract.meta.subgroups[0]"> , 
+            <input class="oc-attr-value" v-model="extract.meta.subgroups[1]">
+        </div>
+
+    </div>
+    <!-- /.panel-info -->
+
+    </div>
+    <!-- /div of settings -->
+
+    <div class="panel-paperlist" v-if="extract != null">
+        <table class="table" v-if="extract.meta.oc_type === 'pwma'">
+            <tr>
+                <th>&nbsp;</th>
+                <th style="width: 90px;">RCT ID</th>
+                <th style="">Paper (5 selected) </th>
+                <th style="">Status?</th>
+                <th style="">Year</th>
+                <th v-for="attr in extract.meta.attrs">
+                    {{ attr }}
+                </th>
+            </tr>
+
+            <tbody>
+                <tr v-for="paper in papers" >
+                    <td><input type="checkbox" id="" v-model="extract.data[paper.pid].selected" ></td>
+                    <td>{{ paper.meta.rct_id }}</td>
+                    <td>{{ paper.seq_num }} - {{ paper.authors.split(',')[0] }}</td>
+                    <td>
+                        <input type="checkbox" name="" id="">
+                    </td>
+                    <td>{{ get_year(paper.pub_date) }}</td>
+                    <td v-for="attr in extract.meta.attrs">
+                        <input class="paper-extract-input" type="text" 
+                            v-model="extract.data[paper.pid].attrs[attr]">
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <table class="table" v-else-if="extract.meta.oc_type === 'subg'">
+            <tr>
+                <th>&nbsp;</th>
+                <th style="width: 90px;">RCT ID</th>
+                <th style="">Paper</th>
+                <th style="">Year</th>
+                <th>Subgroup</th>
+                <th v-for="attr in extract.meta.attrs">
+                    {{ attr }}
+                </th>
+            </tr>
+
+            <tbody>
+            <tr v-for="paper in papers">
+                <td><input type="checkbox" id="" v-model="extract.data[paper.pid].selected" ></td>
+                <td>{{ paper.meta.rct_id }}</td>
+                <td>{{ paper.seq_num }} | {{ paper.authors.split(',')[0] }}</td>
+                <td>{{ get_year(paper.pub_date) }}</td>
+                <td>
+                    <span>{{ extract.meta.subgroups[0] }}</span><br>
+                    <span>{{ extract.meta.subgroups[1] }}</span>
+                </td>
+                <td v-for="attr in extract.meta.attrs">
+                    <input class="paper-extract-input" type="text" 
+                        v-model="extract.data[paper.pid].attrs[attr]">
+                </td>
+            </tr>
+            </tbody>
+
+        </table>
+
+        
+    </div>
+    <!-- /.panel-paperlist -->
+
+</div>
+<!-- /#pan_ocpapers -->

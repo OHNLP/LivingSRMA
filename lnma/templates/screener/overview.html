@@ -14,6 +14,24 @@ Screener Overview
 #tbjs_paperlist {
     width: 100%;
 }
+#pan_iecriteria {
+    width: calc(80% - 300px);
+    height: 260px;
+    position: fixed;
+    top: 50px;
+    left: 400px;
+    right: 0;
+    border: 1px solid #999999;
+    background-color: white;
+    z-index: 999;
+}
+.criteria-box {
+    padding: 10px;
+    height: 230px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
 td.details-control {
     cursor: pointer;
 }
@@ -100,6 +118,18 @@ tr.shown td.details-control {
 .exclusion-reason {
     width: 150px;
 }
+.hide {
+    display: none;
+}
+.fs-s {
+    font-size: 10px;
+}
+.fs-m {
+    font-size: 12px;
+}
+.fs-l {
+    font-size: 14px;
+}
 </style>
 {% endblock %}
 
@@ -109,6 +139,25 @@ Screener Overview
 {% endblock %}
 
 {% block content %}
+
+<div id="pan_iecriteria" class="shadow-sm" :class="{hide:is_hide}">
+    <div style="position: absolute; left: 5px; top: 0px;">
+        <a href="javascript:void(0);"
+            v-on:click="toggle();">
+            <i class="fa fa-close"></i>
+        </a>
+    </div>
+    <div class="d-flex flex-row">
+        <div class="d-flex flex-column w-50">
+            <div class="text-center fw-bolder border-bottom .bg-success">INCLUSION</div>
+            <pre class="criteria-box fs-m" v-if="criterias != null">{{ criterias.inclusion }}</pre>
+        </div>
+        <div class="d-flex flex-column w-50 ml-1">
+            <div class="text-center fw-bolder border-bottom">EXCLUSION</div>
+            <pre class="criteria-box fs-m" v-if="criterias != null">{{ criterias.exclusion }}</pre>
+        </div>
+    </div>
+</div>
 
 <div class="content">
     <div class="container-fluid">
@@ -210,6 +259,11 @@ Screener Overview
                     <i class="far fa-file-alt"></i>
                     Reference List | 
                     <span id="tbjs_paperlist_title"></span>
+
+                    <a style="font-size: .8em;" href="javascript:void(0);" onclick="pan_iecriteria.toggle();">
+                        <i class="far fa-clipboard"></i>
+                        Inclusion / Exclusion Criteria
+                    </a>
                 </h5>
 
                 <div id="tbjs_paperlist_tools">
@@ -659,6 +713,7 @@ var srv_screener = {
         return false;
     }
 };
+
 
 var ui_category_stat = {
     vpp_id: '#ui_category_stat',
@@ -1998,6 +2053,32 @@ var tbjs_paperlist = {
     }
 };
 
+
+var pan_iecriteria = {
+    vpp_id: '#pan_iecriteria',
+    vpp: null,
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                criterias: srv_screener.project.settings.criterias,
+                is_hide: true
+            },
+            methods: {
+                toggle: function() {
+                    pan_iecriteria.toggle();
+                }
+            }
+        });
+    },
+
+    toggle: function() {
+        this.vpp.$data.is_hide = !this.vpp.$data.is_hide;
+    }
+};
+
+
 var jarvis = {
     create_src_url: function(d) {
         return 'https://pubmed.ncbi.nlm.nih.gov/' + d.pid;
@@ -2011,6 +2092,8 @@ var jarvis = {
 
         // load unscreened papers by default
         tbjs_paperlist.load_by_stage(srv_screener.STAGE_UNSCREENED);
+
+        pan_iecriteria.init();
     },
 
     prompt: function(text, value) {

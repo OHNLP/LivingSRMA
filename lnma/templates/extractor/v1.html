@@ -38,6 +38,11 @@ html {
     padding: 0 5px 0 10px;
     border-right: 1px dotted #999999;
 }
+.panel-f {
+    width: 98%;
+    margin: 5px 5px 0 0;
+    padding: 0 5px 0 10px;
+}
 .panel-box {
     margin: 5px 0 15px 0;
     border-bottom: 1px dotted #cccccc;
@@ -70,11 +75,14 @@ html {
 }
 .oc-attr-value {
     width: auto;
-    font-weight: bold;
-    margin-left: -3px;
+    /* margin-left: -3px; */
     padding: 0 3px;
     border: 0;
     border-bottom: 1px solid #ececec;
+}
+.oc-attr-value-sm {
+    width: 120px;
+    margin-left: 5px;
 }
 .paper-extract-input {
     width: 40px;
@@ -99,7 +107,7 @@ Data Extractor
 <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 
 <div id="navi_header">
-    <button onclick="jarvis.switch_layout('manage_outcomes');">
+    <button onclick="jarvis.switch_layout('build_itable');">
         <i class="fa fa-table"></i>
         Interactive Table
     </button>
@@ -124,18 +132,6 @@ Data Extractor
 <div id="main">
 
     <div id="pan_outcomes" class="panel-m panel-container">
-
-        <!-- <h5>
-            Interactive Table
-            <button class="btn-sm"
-                v-on:click="create_itable_column()">
-                <i class="fa fa-add"></i>
-                Add Column
-            </button>
-        </h5>
-        <div class="panel-box">
-
-        </div> -->
 
         <h5>
             PWMA Outcomes
@@ -259,294 +255,11 @@ Data Extractor
     </div>
     <!-- /#pan_outcomes -->
 
-    <div id="pan_ocpapers" class="panel-m panel-container">
-        <div class="panel-info" v-if="extract != null">
-            <div class="oc-attr">
-                <span style="font-size: 1.2em;">Outcome <b>[{{ extract.meta.full_name }}]</b> Details</span>
-            </div>
-            <div class="oc-attr">
-                <button v-on:click="toggle_show_settings();">
-                    <i class="fa" v-bind:class="{'fa-toggle-on': show_settings, 'fa-toggle-off': !show_settings}"></i>
-                    Toggle settings
-                </button> |
-                <button v-on:click="update_extract();">
-                    <i class="fa fa-save"></i>
-                    Save all
-                </button>
-                
-                <button v-on:click="copy_extract();">
-                    <i class="far fa-copy"></i>
-                    Save a copy
-                </button> 
-                |
-                <button>
-                    <i class="fa" v-bind:class="{'fa-toggle-on': show_settings, 'fa-toggle-off': !show_settings}"></i>
-                    Only 
-                </button>
-            </div>
-        </div>
 
-        <div v-bind:class="{hide: !show_settings}">
-        
-        <!-- panel for the pwma -->
-        <div class="panel-info" v-if="extract != null && extract.meta.oc_type == 'pwma'">
-            <div class="oc-attr">
-                <span class="oc-attr-name">Full Name</span>
-                <input class="oc-attr-value" v-model="extract.meta.full_name">
-            </div>
-            <div class="oc-attr">
-                <span class="oc-attr-name">Category</span>
-                <input class="oc-attr-value" v-model="extract.meta.category">
-            </div>
+    {% include 'extractor/_v1_pan_itbuilder.html' %}
 
-            <div class="oc-attr">
-                <span class="oc-attr-name">Analysis Group</span>
-                <input class="oc-attr-value" v-model="extract.meta.group">
-            </div>
+    {% include 'extractor/_v1_pan_ocpapers.html' %}
 
-            <div class="oc-attr">
-                <span class="oc-attr-name">Analysis Measure</span>
-                <select v-model="extract.meta.measure_of_effect">
-                    <option value="HR">Hazard Ratio (HR)</option>
-                    <option value="RR">Relative Risk (RR)</option>
-                    <option value="OR">Odds Ratio (OR)</option>
-                    <option value="RD">Risk Difference (RD)</option>
-                </select>
-            </div>
-
-            <div class="oc-attr">
-                <span class="oc-attr-name">Data Type</span>
-                <select v-model="extract.meta.input_format">
-                    <option value="PRIM_CAT_PRE">Categorical Precalculated Data</option>
-                    <option value="PRIM_CAT_RAW">Categorical Raw Data</option>
-                    <option value="PRIM_CATIRR_RAW">Categorical Raw (Incidence Rate Ratios) Data</option>
-                    <option value="PRIM_CONTD_PRE">Continuous Precalculated Data</option>
-                    <option value="PRIM_CONTD_RAW">Continuous Raw Data</option>
-                </select>
-            </div>
-
-            <div class="oc-attr">
-                <span class="oc-attr-name">Treatment Arm</span>
-                <input class="oc-attr-value" v-model="extract.meta.treatment.abbr">
-                <input class="oc-attr-value" v-model="extract.meta.treatment.full_name">
-            </div>
-
-            <div class="oc-attr">
-                <span class="oc-attr-name">Control Arm</span>
-                <input class="oc-attr-value" v-model="extract.meta.control.abbr">
-                <input class="oc-attr-value" v-model="extract.meta.control.full_name">
-            </div>
-
-            <div class="oc-attr">
-                <span class="oc-attr-name">Fixed or Random</span>
-                <select v-model="extract.meta.fixed_or_random">
-                    <option value="fixed">Fixed Effect</option>
-                    <option value="random">Random Effects</option>
-                </select>
-            </div>
-
-            <div class="oc-attr">
-                <span class="oc-attr-name">Which is better</span>
-                <select v-model="extract.meta.which_is_better">
-                    <option value="lower">Lower is better</option>
-                    <option value="higher">Higher is better</option>
-                </select>
-            </div>
-
-            <div class="oc-attr">
-                <span class="oc-attr-name">Include this outcome in SoF Table</span>
-                <select v-model="extract.meta.included_in_sof">
-                    <option value="yes">Yes, include this outcome</option>
-                    <option value="no">No, exclude this outcome</option>
-                </select>
-            </div>
-
-            <div class="oc-attr">
-                <span class="oc-attr-name">Include this outcome in result plots</span>
-                <select v-model="extract.meta.included_in_plots">
-                    <option value="yes">Yes, include this outcome</option>
-                    <option value="no">No, exclude this outcome</option>
-                </select>
-            </div>
-
-            <div class="oc-attr">
-                <span class="oc-attr-name">The attributes to extract</span>
-                <span>{{ extract.meta.attrs }}</span>
-            </div>
-
-            <!-- <div v-for="attr_value, attr_name in extract.meta" 
-                class="oc-attr">
-                <span class="oc-attr-name">{{ attr_name }}</span>
-                <input class="oc-attr-value" 
-                    :id="'pan_oc_attr_' + attr_name" 
-                    v-model="extract.meta[attr_name]">
-            </div> -->
-        </div>
-        <!-- /.panel-info -->
-
-        <!-- panel for the subg -->
-        <div class="panel-info" v-if="extract != null && extract.meta.oc_type == 'subg'">
-            <div class="oc-attr">
-                <span class="oc-attr-name">Full Name</span>
-                <input class="oc-attr-value" v-model="extract.meta.full_name">
-            </div>
-            <div class="oc-attr">
-                <span class="oc-attr-name">Category</span>
-                <input class="oc-attr-value" v-model="extract.meta.category">
-            </div>
-
-            <div class="oc-attr">
-                <span class="oc-attr-name">Analysis Group</span>
-                <input class="oc-attr-value" v-model="extract.meta.group">
-            </div>
-
-            <div class="oc-attr">
-                <span class="oc-attr-name">Analysis Measure</span>
-                <select v-model="extract.meta.measure_of_effect">
-                    <option value="HR">Hazard Ratio (HR)</option>
-                    <option value="RR">Relative Risk (RR)</option>
-                    <option value="OR">Odds Ratio (OR)</option>
-                    <option value="RD">Risk Difference (RD)</option>
-                </select>
-            </div>
-
-            <div class="oc-attr">
-                <span class="oc-attr-name">Data Type</span>
-                <select v-model="extract.meta.input_format">
-                    <option value="SUBG_CAT_PRE">Categorical Precalculated Data</option>
-                    <option value="SUBG_CAT_RAW">Categorical Raw Data</option>
-                    <option value="SUBG_CATIRR_RAW">Categorical Raw (Incidence Rate Ratios) Data</option>
-                    <option value="SUBG_CONTD_PRE">Continuous Precalculated Data</option>
-                    <option value="SUBG_CONTD_RAW">Continuous Raw Data</option>
-                </select>
-            </div>
-
-            <div class="oc-attr">
-                <span class="oc-attr-name">Treatment Arm</span>
-                <input class="oc-attr-value" v-model="extract.meta.treatment.abbr"> | 
-                <input class="oc-attr-value" v-model="extract.meta.treatment.full_name">
-            </div>
-
-            <div class="oc-attr">
-                <span class="oc-attr-name">Control Arm</span>
-                <input class="oc-attr-value" v-model="extract.meta.control.abbr"> | 
-                <input class="oc-attr-value" v-model="extract.meta.control.full_name">
-            </div>
-
-            <div class="oc-attr">
-                <span class="oc-attr-name">Fixed or Random</span>
-                <select v-model="extract.meta.fixed_or_random">
-                    <option value="fixed">Fixed Effect</option>
-                    <option value="random">Random Effects</option>
-                </select>
-            </div>
-
-            <div class="oc-attr">
-                <span class="oc-attr-name">Which is better</span>
-                <select v-model="extract.meta.which_is_better">
-                    <option value="lower">Lower is better</option>
-                    <option value="higher">Higher is better</option>
-                </select>
-            </div>
-
-            <div class="oc-attr">
-                <span class="oc-attr-name">Include this outcome in SoF Table</span>
-                <select v-model="extract.meta.included_in_sof">
-                    <option value="yes">Yes, include this outcome</option>
-                    <option value="no">No, exclude this outcome</option>
-                </select>
-            </div>
-
-            <div class="oc-attr">
-                <span class="oc-attr-name">Include this outcome in result plots</span>
-                <select v-model="extract.meta.included_in_plots">
-                    <option value="yes">Yes, include this outcome</option>
-                    <option value="no">No, exclude this outcome</option>
-                </select>
-            </div>
-
-            <div class="oc-attr">
-                <span class="oc-attr-name">The attributes to extract</span>
-                <span>{{ extract.meta.attrs }}</span>
-            </div>
-
-            <div class="oc-attr">
-                <span class="oc-attr-name">Subgroups</span>
-                <input class="oc-attr-value" v-model="extract.meta.subgroups[0]"> , 
-                <input class="oc-attr-value" v-model="extract.meta.subgroups[1]">
-            </div>
-
-        </div>
-        <!-- /.panel-info -->
-
-        </div>
-        <!-- /div of settings -->
-
-        <div class="panel-paperlist" v-if="extract != null">
-            <table class="table" v-if="extract.meta.oc_type === 'pwma'">
-                <tr>
-                    <th>&nbsp;</th>
-                    <th style="width: 90px;">RCT ID</th>
-                    <th style="">Paper (5 selected) </th>
-                    <th style="">Status?</th>
-                    <th style="">Year</th>
-                    <th v-for="attr in extract.meta.attrs">
-                        {{ attr }}
-                    </th>
-                </tr>
-
-                <tbody>
-                    <tr v-for="paper in papers" >
-                        <td><input type="checkbox" id="" v-model="extract.data[paper.pid].selected" ></td>
-                        <td>{{ paper.meta.rct_id }}</td>
-                        <td>{{ paper.seq_num }} - {{ paper.authors.split(',')[0] }}</td>
-                        <td>
-                            <input type="checkbox" name="" id="">
-                        </td>
-                        <td>{{ get_year(paper.pub_date) }}</td>
-                        <td v-for="attr in extract.meta.attrs">
-                            <input class="paper-extract-input" type="text" 
-                                v-model="extract.data[paper.pid].attrs[attr]">
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <table class="table" v-else-if="extract.meta.oc_type === 'subg'">
-                <tr>
-                    <th>&nbsp;</th>
-                    <th style="width: 90px;">RCT ID</th>
-                    <th style="">Paper</th>
-                    <th style="">Year</th>
-                    <th>Subgroup</th>
-                    <th v-for="attr in extract.meta.attrs">
-                        {{ attr }}
-                    </th>
-                </tr>
-
-                <tbody>
-                <tr v-for="paper in papers">
-                    <td><input type="checkbox" id="" v-model="extract.data[paper.pid].selected" ></td>
-                    <td>{{ paper.meta.rct_id }}</td>
-                    <td>{{ paper.seq_num }} | {{ paper.authors.split(',')[0] }}</td>
-                    <td>{{ get_year(paper.pub_date) }}</td>
-                    <td>
-                        <span>{{ extract.meta.subgroups[0] }}</span><br>
-                        <span>{{ extract.meta.subgroups[1] }}</span>
-                    </td>
-                    <td v-for="attr in extract.meta.attrs">
-                        <input class="paper-extract-input" type="text" 
-                            v-model="extract.data[paper.pid].attrs[attr]">
-                    </td>
-                </tr>
-                </tbody>
-
-            </table>
-        </div>
-        <!-- /.panel-paperlist -->
-
-    </div>
-    <!-- /#pan_ocpapers -->
 
     <div id="pan_collector" class="panel-m panel-container">
         <div class="panel-info">
@@ -691,7 +404,7 @@ var pan_outcomes = {
         if (text == '') { return; }
 
         // create an abbr
-        var abbr = jarvis.create_default_oc_abbr();
+        var abbr = jarvis.mk_oc_abbr();
 
         // create an meta
         var meta = JSON.parse(JSON.stringify(jarvis.tpl.oc_type[oc_type][tpl]));
@@ -838,7 +551,7 @@ var pan_ocpapers = {
         if (new_full_name == '') { return; }
 
         // save this new 
-        var new_abbr = jarvis.create_default_oc_abbr();
+        var new_abbr = jarvis.mk_oc_abbr();
 
         // send request!
         $.post(
@@ -1083,12 +796,270 @@ var pan_analyzer = {
 };
 
 
+var pan_itbuilder = {
+    vpp_id: '#pan_itbuilder',
+    vpp: null,
+
+    load: function() {
+        this.get_itable();
+    },
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                itable: null
+            },
+            methods: {
+                save_itable: function() {
+                    pan_itbuilder.save_itable();
+                },
+
+                create_category: function() {
+                    pan_itbuilder.create_category();
+                },
+
+                create_attribute: function(cate_abbr) {
+                    pan_itbuilder.create_attribute(cate_abbr);
+                },
+
+                create_sub: function(cate_abbr, attr_abbr) {
+                    pan_itbuilder.create_sub(cate_abbr, attr_abbr);
+                },
+
+                remove_category: function(cate_abbr) {
+                    pan_itbuilder.remove_category(cate_abbr);
+                },
+
+                remove_attribute: function(cate_abbr, attr_abbr) {
+                    pan_itbuilder.remove_attribute(cate_abbr, attr_abbr);
+                },
+
+                remove_sub: function(cate_abbr, attr_abbr, sub_abbr) {
+                    pan_itbuilder.remove_sub(cate_abbr, attr_abbr, sub_abbr);
+                }
+            }
+        });
+    },
+
+    /**
+     * The itable is an extract object in fact.
+     */
+    update: function(itable) {
+        console.log(itable);
+        this.vpp.$data.itable = itable;
+        
+        // update the vpp
+        this.vpp.$forceUpdate();
+    },
+
+    /**
+     * The itable is a special extract, so get_itable equals to get extract
+     */
+    get_itable: function() {
+        var project_id = Cookies.get('project_id');
+        var abbr = 'itable';
+        $.get(
+            jarvis.url.get_extract,
+            {project_id:project_id, abbr:abbr, rnd:Math.random()},
+            function(data) {
+                if (data.success) {
+                    pan_itbuilder.update(data.extract);
+                } else {
+                    // at present, there is not itable extract for this project
+                    // create an itable extract
+                    pan_itbuilder.init_itable('itable');
+                }
+            }, 'json'
+        );
+    },
+
+    /**
+     * Create an itable
+     * the abbr should be 'itable'
+     * but this could be expanded in the future
+     */
+    init_itable: function(abbr) {
+        var project_id = Cookies.get('project_id');
+        var oc_type = 'itable';
+        var tpl = 'default';
+        var meta = JSON.parse(JSON.stringify(jarvis.tpl.oc_type[oc_type][tpl]));
+        var data = {}
+
+        $.post(
+            jarvis.url.create_extract,
+            {
+                project_id: project_id,
+                oc_type: oc_type,
+                abbr: abbr,
+                meta: JSON.stringify(meta),
+                data: JSON.stringify(data)
+            }, 
+            function(data) {
+                // show what we get!
+                console.log(data);
+                // update UI
+                pan_itbuilder.update(data.extract);
+            }, 'json'
+        );
+    },
+
+    save_itable: function() {
+        var project_id = Cookies.get('project_id');
+        var oc_type = 'itable';
+        var abbr = 'itable';
+        var meta = this.vpp.$data.itable.meta;
+
+        // // send back to server
+        $.post(
+            jarvis.url.update_extract_meta,
+            {project_id:project_id, oc_type:oc_type, abbr:abbr,
+             meta:JSON.stringify(meta)},
+            function(data) {
+                // show
+                toast('Saved the interactive table');
+                // reload the outcomes
+                pan_itbuilder.load();
+            }
+        );
+    },
+
+    create_category: function() {
+        // get the full name
+        var text = jarvis.prompt('The category full name:');
+        if (text == null) { return; }
+        text = text.trim();
+        if (text == '') { return; }
+
+        // create an abbr
+        var abbr = jarvis.mk_it_abbr();
+
+        // create a new cate
+        var cate = {
+            abbr: abbr,
+            name: text,
+            attrs: []
+        };
+        
+        // add to the itable
+        this.vpp.$data.itable.meta.cate_attrs.push(cate);
+    },
+
+    create_attribute: function(cate_abbr) {
+        // get the full name
+        var text = jarvis.prompt('The attribute full name:');
+        if (text == null) { return; }
+        text = text.trim();
+        if (text == '') { return; }
+
+        // create an abbr
+        var abbr = jarvis.mk_it_abbr();
+
+        // create a new cate
+        var attr = {
+            abbr: abbr,
+            name: text,
+            sub: null
+        };
+        
+        for (let i = 0; i < this.vpp.$data.itable.meta.cate_attrs.length; i++) {
+            var cate = this.vpp.$data.itable.meta.cate_attrs[i];
+            if (cate.abbr == cate_abbr) {
+                cate.attrs.push(attr);
+                break;
+            }
+        }
+    },
+
+
+    create_sub: function(cate_abbr, attr_abbr) {
+        // get the full name
+        var text = jarvis.prompt('The sub-attribute name (e.g., Rx, Treatment, Control):');
+        if (text == null) { return; }
+        text = text.trim();
+        if (text == '') { return; }
+
+        // create an abbr
+        var abbr = jarvis.mk_it_abbr();
+
+        // create a new cate
+        var sub = {
+            abbr: abbr,
+            name: text
+        };
+        
+        for (let i = 0; i < this.vpp.$data.itable.meta.cate_attrs.length; i++) {
+            var cate = this.vpp.$data.itable.meta.cate_attrs[i];
+            if (cate.abbr == cate_abbr) {
+                // check each attribute
+                for (let j = 0; j < cate.attrs.length; j++) {
+                    var attr = cate.attrs[j];
+                    if (attr.abbr == attr_abbr) {
+                        if (attr.subs == null) {
+                            // which means no sub yet
+                            attr.subs = [sub];
+                        } else {
+                            attr.subs.push(sub);
+                        }
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+    },
+
+    remove_category: function(cate_abbr) {
+    },
+
+    remove_attribute: function(cate_abbr, attr_abbr) {
+        var ret = jarvis.confirm('Remove [], are you sure?');
+        if (ret == false) { return }
+
+        for (let i = 0; i < this.vpp.$data.itable.meta.cate_attrs.length; i++) {
+            var cate = this.vpp.$data.itable.meta.cate_attrs[i];
+            if (cate.abbr == cate_abbr) {
+                // check each attribute
+                for (let j = 0; j < cate.attrs.length; j++) {
+                    var attr = cate.attrs[j];
+                    if (attr.abbr == attr_abbr) {
+                        // ok, found out this attr
+                        this.vpp.$data.itable.meta.cate_attrs[i].attrs.splice(j, 1);
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+        console.log('* removed ' + attr_abbr + ' from ' + cate_abbr);
+    },
+
+    remove_sub: function(cate_abbr, attr_abbr, sub_abbr) {
+    },
+
+    show: function() {
+        $(this.vpp_id).show();
+    },
+
+    hide: function() {
+        $(this.vpp_id).hide();
+    },
+
+    set_size: function(size) {
+        $(this.vpp_id).removeClass('panel-s panel-m panel-l')
+            .addClass('panel-' + size);
+    }
+};
+
+
 var jarvis = {
     url: {
         create_extract: "[[ url_for('extractor.create_extract') ]]",
         update_extract: "[[ url_for('extractor.update_extract') ]]",
+        update_extract_meta: "[[ url_for('extractor.update_extract_meta') ]]",
         copy_extract: "[[ url_for('extractor.copy_extract') ]]",
         delete_extract: "[[ url_for('extractor.delete_extract') ]]",
+        get_extract: "[[ url_for('extractor.get_extract') ]]",
         get_extracts: "[[ url_for('extractor.get_extracts') ]]",
         get_extract_and_papers: "[[ url_for('extractor.get_extract_and_papers') ]]",
     },
@@ -1170,6 +1141,47 @@ var jarvis = {
                         }
                     }
                 }
+            },
+            itable: {
+                default: {
+                    abbr: 'itable',
+                    oc_type: 'itable',
+                    category: 'default',
+                    group: 'itable',
+                    full_name: 'Interactive Table',
+                    input_format: 'custom',
+                    /**
+                     * To make sure the order of the cate and attr list
+                     * the attrs are saved as a hierarchical list structure.
+                     * As a result, need to implement serval functions
+                     */
+                    cate_attrs: [
+                    {
+                        abbr: 'ITABLECAT000',
+                        name: "TRIAL CHARACTERISTICS",
+                        attrs: [{
+                            abbr: 'ITABLEATT000',
+                            name: 'Phase',
+                            subs: null
+                        }]
+                    },
+                    {
+                        abbr: 'ITABLECAT002',
+                        name: "POPULATION CHARACTERISTICS",
+                        attrs: [{
+                            abbr: 'ITABLEATT001',
+                            name: 'Number of Participants',
+                            subs: [{
+                                abbr: 'ITABLESUB001',
+                                name: 'Treatment Arm'
+                            }, {
+                                abbr: 'ITABLESUB002',
+                                name: 'Control Arm'
+                            }]
+                        }]
+                    }
+                    ]
+                }
             }
         },
         data_type: {
@@ -1205,11 +1217,27 @@ var jarvis = {
         analyze_outcome: 'analyze_outcome'
     },
 
-    create_default_oc_abbr: function() {
+    /**
+     * Make the oc abbr for an outcome / ae
+     */
+    mk_oc_abbr: function() {
         var result = '';
         var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
         var len = characters.length;
         for (var i = 0; i < 8; i++) {
+            result += characters.charAt(Math.floor(Math.random() * len));
+        }
+        return result;
+    },
+
+    /**
+     * Make the column abbr / id for itable
+     */
+    mk_it_abbr: function() {
+        var result = '';
+        var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        var len = characters.length;
+        for (var i = 0; i < 12; i++) {
             result += characters.charAt(Math.floor(Math.random() * len));
         }
         return result;
@@ -1225,6 +1253,8 @@ var jarvis = {
         pan_collector.init();
 
         pan_analyzer.init();
+
+        pan_itbuilder.init();
 
         // the sub module of analyzers
         fg_pwma_imglist.init();
@@ -1244,6 +1274,7 @@ var jarvis = {
 
     switch_layout: function(layout) {
         if (layout == 'manage_outcomes') {
+            pan_itbuilder.hide();
             pan_outcomes.show();
             pan_ocpapers.show();
             pan_collector.hide();
@@ -1254,6 +1285,7 @@ var jarvis = {
             pan_ocpapers.set_size('m');
 
         } else if (layout == 'extract_information') {
+            pan_itbuilder.hide();
             pan_outcomes.hide();
             pan_ocpapers.show();
             pan_collector.show();
@@ -1264,6 +1296,7 @@ var jarvis = {
             pan_collector.set_size('m');
 
         } else if (layout == 'analyze_outcome') {
+            pan_itbuilder.hide();
             pan_outcomes.hide();
             pan_ocpapers.show();
             pan_collector.hide();
@@ -1272,6 +1305,19 @@ var jarvis = {
             // set the default size
             pan_ocpapers.set_size('m');
             pan_analyzer.set_size('m');
+
+        } else if (layout == 'build_itable') {
+            pan_itbuilder.show();
+            pan_outcomes.hide();
+            pan_ocpapers.hide();
+            pan_collector.hide();
+            pan_analyzer.hide();
+
+            // set the default size
+            pan_itbuilder.set_size('f');
+
+            // and load the itable
+            pan_itbuilder.get_itable();
 
         } else {
 
