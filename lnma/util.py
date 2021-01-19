@@ -170,7 +170,8 @@ def _e_fetch(ids, db='pubmed'):
 
 
 def e_fetch(ids, db='pubmed'):
-    '''get jsonfied data
+    '''
+    get JSONfied data
     '''
     text = _e_fetch(ids, db)
 

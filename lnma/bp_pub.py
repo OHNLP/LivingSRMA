@@ -358,7 +358,8 @@ def graphdata_itable_cfg_json(prj):
 
 @bp.route('/graphdata/<prj>/ITABLE.json')
 def graphdata_itable_json(prj):
-    '''Special rule for the ITABLE.json which does not exist
+    '''
+    Special rule for the ITABLE.json which does not exist
     '''
     fn = 'ITABLE_ATTR_DATA.xlsx'
     full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)

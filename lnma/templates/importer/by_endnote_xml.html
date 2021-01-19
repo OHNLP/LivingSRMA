@@ -163,7 +163,7 @@ var srv_importer = {
         excluded_by_rct_classifier: { title: 'Excluded by RCT classifier' },
     },
 
-    api_url: {
+    url: {
         upload_endnote_xml: "[[ url_for('importer.upload_endnote_xml') ]]",
         save_papers: "[[ url_for('importer.save_papers') ]]",
     },
@@ -176,7 +176,7 @@ var srv_importer = {
         }
 
         $.post(
-            this.api_url.save_papers,
+            this.url.save_papers,
             {project_id:project_id, papers: JSON.stringify(papers), stage:stage},
             callback, 
             'json'
@@ -248,7 +248,7 @@ var vw_uploader_endnote_xml = {
         // send request
         $.ajax({
             type: 'POST',
-            url: srv_importer.api_url.upload_endnote_xml,
+            url: srv_importer.url.upload_endnote_xml,
             data: form_data,
             contentType: false,
             cache: false,

@@ -124,6 +124,121 @@ def upload_pmids():
     return jsonify(ret)
 
 
+@bp.route('/import_pmids', methods=['GET', 'POST'])
+@login_required
+def import_pmids():
+    if request.method == 'GET':
+        return redirect(url_for('importer.index'))
+
+    # save the uploads
+    project_id = request.form.get('project_id')
+    rs = json.loads(request.form.get('rs'))
+
+    # TODO check the pmids and project_id
+
+    if len(rs) > 200:
+        rs = rs[:200]
+
+    rs2 = []
+    pmids = []
+    pmid2rct_id = {}
+
+    # remove the duplicated rows
+    for r in rs:
+        if r['pmid'] not in pmids:
+            pmid = r['pmid']
+            pmids.append(pmid)
+            rs2.append(r)
+            pmid2rct_id[pmid] = r['rct_id']
+
+    # get detail by PubMed API
+    data = util.e_fetch(pmids)
+
+    # prepare the return object
+    ret = {
+        'rs': []
+    }
+
+    uids = data['result']['uids']
+    # check each pmid
+    for pmid in uids:
+
+        # ok, save this pmid
+        paper = data['result'][pmid]
+        title = paper['title']
+        abstract = paper['abstract']
+        pub_date = paper['sortpubdate']
+        authors = ', '.join([ a['name'] for a in paper['authors'] ])
+        journal = paper['source']
+        rct_id = pmid2rct_id[pmid]
+
+        is_existed, paper = dora.create_paper_if_not_exist_and_predict_rct(
+            project_id, pmid, 'PMID', title, abstract, pub_date, authors, journal,
+            {'rct_id': rct_id}, 
+            ss_state.SS_ST_IMPORT_SIMPLE_CSV, 
+            ss_state.SS_PR_NA,
+            ss_state.SS_RS_NA,
+        )
+
+        ret['rs'].append({
+            'pmid': pmid,
+            'paper': paper.as_simple_dict(),
+            'is_existed': is_existed
+        })
+
+    return jsonify(ret)
+
+
+@bp.route('/upload_pmid_data_file', methods=['GET', 'POST'])
+@login_required
+def upload_pmid_data_file():
+    if request.method == 'GET':
+        return redirect(url_for('importer.index'))
+
+    # save tmp file
+    if 'input_file' not in request.files:
+        return jsonify({'success': False, 'msg':'No file is uploaded'})
+
+    file_obj = request.files['input_file']
+    if file_obj.filename == '':
+        return jsonify({'success': False, 'msg':'No selected file'})
+
+    # save the upload file
+    if file_obj and util.allowed_file_format(file_obj.filename):
+        fn = secure_filename(file_obj.filename)
+        full_fn = os.path.join(current_app.config['UPLOAD_FOLDER'], fn)
+        file_obj.save(full_fn)
+    else:
+        return jsonify({'success': False, 'msg': 'Not supported file format'})
+
+    # get the project_id
+    project_id = request.form.get('project_id')
+
+    # read file
+    fmt = full_fn.split('.')[-1].lower()
+    if fmt == 'xls' or fmt == 'xlsx':
+        df = pd.read_excel(full_fn)
+    else:
+        df = pd.read_csv(full_fn)
+
+    # prepare the return object
+    ret = {
+        'success': True,
+        'rs': []
+    }
+
+    # parse each record
+    for idx, row in df.iterrows():
+        rct_id = row['NCT ID']
+        pmid = row['PMID']
+        
+        ret['rs'].append({
+            'pmid': pmid,
+            'rct_id': rct_id
+        })
+
+    return jsonify(ret)
+
 
 @bp.route('/upload_pubmedcsv', methods=['GET', 'POST'])
 @login_required
