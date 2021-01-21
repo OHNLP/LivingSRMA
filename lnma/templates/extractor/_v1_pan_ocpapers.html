@@ -220,10 +220,43 @@
     </div>
     <!-- /.panel-info -->
 
+    <!-- panel for the itable -->
+    <div class="panel-info" v-if="extract != null && extract.meta.oc_type == 'itable'">
+        <div v-for="cate, cate_idx in extract.meta.cate_attrs">
+            <div>
+                <b>{{ cate.name }}</b> |
+                <a href="javascript:void(0);">
+                    toggle all columns
+                </a> |
+                <a href="javascript:void(0);">
+                    toggle
+                </a>
+            </div>
+            <div :id="'cate-' + cate.abbr" class="d-flex flex-row flex-wrap">
+                <div v-for="attr, attr_idx in cate.attrs">
+                    <input type="checkbox">
+                    {{ attr.name }}
+                    <span v-if="attr.subs != null">
+                        [
+                        <span v-for="sub, sub_idx in attr.subs">
+                            <input type="checkbox">
+                            {{ sub.name }}
+                        </span>
+                        ]
+                    </span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <!-- /.panel-info -->
+
     </div>
     <!-- /div of settings -->
 
     <div class="panel-paperlist" v-if="extract != null">
+
+        <!-- table for pwma -->
         <table class="table" v-if="extract.meta.oc_type === 'pwma'">
             <tr>
                 <th>&nbsp;</th>
@@ -253,6 +286,7 @@
             </tbody>
         </table>
 
+        <!-- table for subg -->
         <table class="table" v-else-if="extract.meta.oc_type === 'subg'">
             <tr>
                 <th>&nbsp;</th>
@@ -284,6 +318,28 @@
 
         </table>
 
+        <!-- table for itable -->
+        <table class="table" v-else-if="extract.meta.oc_type === 'itable'">
+            <tr>
+                <th>&nbsp;</th>
+                <th style="width: 90px;">RCT ID</th>
+                <th style="">Paper (5 selected) </th>
+                <th style="">Status?</th>
+                <th style="">Year</th>
+            </tr>
+
+            <tbody>
+                <tr v-for="paper in papers">
+                    <td><input type="checkbox" id="" v-model="extract.data[paper.pid].selected" ></td>
+                    <td>{{ paper.meta.rct_id }}</td>
+                    <td>{{ paper.seq_num }} - {{ paper.authors.split(',')[0] }}</td>
+                    <td>
+                        <input type="checkbox" v-model="extract.data[paper.pid].has_checked">
+                    </td>
+                    <td>{{ get_year(paper.pub_date) }}</td>
+                </tr>
+            </tbody>
+        </table>
 
     </div>
     <!-- /.panel-paperlist -->

@@ -828,6 +828,13 @@ var pan_itbuilder = {
                     pan_itbuilder.save_itable();
                 },
 
+                extract_itable: function() {
+                    // change layout to extract
+                    jarvis.switch_layout('extract_information');
+                    // load extract special for itable
+                    pan_ocpapers.show_extract_and_papers('itable', 'itable');
+                },
+
                 create_category: function() {
                     pan_itbuilder.create_category();
                 },

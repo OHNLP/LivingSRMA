@@ -688,7 +688,18 @@ def get_papers(project_id):
     )).order_by(Paper.date_created.desc()).all()
 
     return papers
-    
+
+
+def get_papers_by_pmids(project_id, pmids):
+    '''
+    Get all the papers according to pmid list
+    '''
+    papers = Paper.query.filter(and_(
+        Paper.project_id == project_id,
+        Paper.pid.in_(pmids)
+    )).all()
+    return papers
+
 
 def get_papers_by_stage(project_id, stage):
     '''Get all papers of specified stage
@@ -923,7 +934,8 @@ def set_paper_pr_rs(paper_id, pr=None, rs=None):
 
 
 def set_paper_pr_rs_with_details(paper_id, pr=None, rs=None, detail_dict=None):
-    '''Set the pr and rs state with more detail
+    '''
+    Set the pr and rs state with more detail
 
     The detail is a dict that will be added/overwrite the paper.
     '''

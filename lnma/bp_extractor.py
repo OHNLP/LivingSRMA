@@ -124,8 +124,25 @@ def get_extract_and_papers():
             'attrs': {}
         }
         # put the attrs
-        for attr in extract.meta['attrs']:
-            extract.data[pid]['attrs'][attr] = ''
+        if abbr == 'itable':
+            extract.data[pid]['attrs'] = {
+                'main': {},
+                'other': []
+            }
+            # itable has a different rule
+            for cate in extract.meta['cate_attrs']:
+                for attr in cate['attrs']:
+                    attr_abbr = attr['abbr']
+                    if attr['subs'] is None:
+                        extract.data[pid]['attrs']['main'][attr_abbr] = ''
+                    else:
+                        # have multiple subs
+                        for sub in attr['subs']:
+                            sub_abbr = sub['abbr']
+                            extract.data[pid]['attrs']['main'][sub_abbr] = ''
+        else:
+            for attr in extract.meta['attrs']:
+                extract.data[pid]['attrs'][attr] = ''
 
     # reverse search, unselect those are not in papers
     for pid in extract.data:
@@ -318,11 +335,11 @@ def test():
     return jsonify(ret)
 
 
-@bp.route('/import_itable_from_xls')
+@bp.route('/import_itable_meta_and_data_from_xls')
 @login_required
-def import_itable_from_xls():
+def import_itable_meta_and_data_from_xls():
     '''
-    Test function
+    Create the meta for itable
     '''
     # project_id = request.args.get('project_id')
     project_id = request.cookies.get('project_id')
@@ -387,11 +404,17 @@ def get_itable_from_itable_data_xls(keystr):
         is_main = False
         if pmid not in data:
             # ok, this is a new study
+            # by default not selected and not checked
+            # 
             # `main` is for the main records
             # `other` is for other arms, by default, other is empty
             data[pmid] = {
-                'main': {},
-                'other': []
+                'selected': False,
+                'has_checked': False,
+                'attrs': {
+                    'main': {},
+                    'other': []
+                }
             }
             is_main = True
         else:
@@ -419,14 +442,14 @@ def get_itable_from_itable_data_xls(keystr):
             abbr = i2a[idx]
 
             if is_main:
-                data[pmid]['main'][abbr] = val
+                data[pmid]['attrs']['main'][abbr] = val
             else:
-                # one way is check 
-                if val == data[pmid]['main'][abbr]: 
+                # check if this value is same in the main track
+                if val == data[pmid]['attrs']['main'][abbr]: 
                     pass
                 else:
                     # just save the different values
-                    data[pmid]['other'][-1][abbr] = val
+                    data[pmid]['attrs']['other'][-1][abbr] = val
 
     return ca_dict, ca_list, i2a, data
 

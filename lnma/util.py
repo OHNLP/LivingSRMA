@@ -450,7 +450,8 @@ def parse_endnote_exported_xml(full_fn):
 
 
 def pred_rct(ti, ab):
-    '''Predict if a study is RCT
+    '''
+    Predict if a study is RCT
     '''
     url = 'http://localhost:12580/'
     headers = {
@@ -465,13 +466,15 @@ def pred_rct(ti, ab):
 
 
 def get_today_date_str():
-    '''Get the today date string
+    '''
+    Get the today date string
     '''
     return datetime.datetime.today().strftime('%Y-%m-%d')
 
 
 def get_nct_number(s):
-    '''Get the NCT8 number from study
+    '''
+    Get the NCT8 number from study
     '''
     return re.findall('NCT\d{8}', s, re.MULTILINE)
 

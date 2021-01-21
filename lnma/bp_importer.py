@@ -1,5 +1,7 @@
 import os
 import re
+import time
+import datetime
 
 from flask import request
 from flask import flash
@@ -9,6 +11,7 @@ from flask import redirect
 from flask import url_for
 from flask import current_app
 from flask import jsonify
+from sqlalchemy.sql.operators import exists
 
 from flask_login import login_required
 from flask_login import current_user
@@ -17,7 +20,7 @@ import pandas as pd
 
 from werkzeug.utils import secure_filename
 
-from lnma import dora
+from lnma import dora, settings
 from lnma import util
 from lnma import ss_state
 
@@ -33,13 +36,13 @@ bp = Blueprint("importer", __name__, url_prefix="/importer")
 @bp.route('/by_pmid_list')
 @login_required
 def by_pmid_list():
-    return render_template('importer/by_pmid_list.html')
+    return render_template('importer/by_pmid_list.html', ss=ss_state)
 
 
 @bp.route('/by_pubmed_csv')
 @login_required
 def by_pubmed_csv():
-    return render_template('importer/by_pubmed_csv.html')
+    return render_template('importer/by_pubmed_csv.html', ss=ss_state)
 
 
 @bp.route('/by_endnote_xml')
@@ -48,80 +51,80 @@ def by_endnote_xml():
     return render_template('importer/by_endnote_xml.html', ss=ss_state)
 
 
-@bp.route('/upload_pmids', methods=['GET', 'POST'])
-@login_required
-def upload_pmids():
-    if request.method == 'GET':
-        return redirect(url_for('importer.index'))
+# @bp.route('/upload_pmids', methods=['GET', 'POST'])
+# @login_required
+# def upload_pmids():
+#     if request.method == 'GET':
+#         return redirect(url_for('importer.index'))
 
-    # save the uploads
-    project_id = request.form.get('project_id')
-    pmids = request.form.get('pmids')
+#     # save the uploads
+#     project_id = request.form.get('project_id')
+#     pmids = request.form.get('pmids')
 
-    # TODO check the pmids and project_id
+#     # TODO check the pmids and project_id
 
-    # remove the white space at start and end
-    pmids = pmids.strip()
+#     # remove the white space at start and end
+#     pmids = pmids.strip()
 
-    # split by . , \s 
-    pmids = re.split(r'[.,\s]+', pmids)
+#     # split by . , \s 
+#     pmids = re.split(r'[.,\s]+', pmids)
 
-    if len(pmids) > 200:
-        pmids = pmids[:200]
+#     if len(pmids) > 200:
+#         pmids = pmids[:200]
 
-    # get detail by PubMed API
-    data = util.e_summary(pmids)
+#     # get detail by PubMed API
+#     data = util.e_summary(pmids)
 
-    # prepare the return object
-    ret = {
-        'rs': []
-    }
+#     # prepare the return object
+#     ret = {
+#         'rs': []
+#     }
 
-    uids = data['result']['uids']
-    # check each pmid
-    for pmid in uids:
+#     uids = data['result']['uids']
+#     # check each pmid
+#     for pmid in uids:
 
-        if not util.is_valid_pmid(pmid):
-            # that's weird
-            ret['rs'].append({
-                'pmid': pmid,
-                'success': False,
-                'msg': 'NOT VALID PMID'
-            })
-            continue
+#         if not util.is_valid_pmid(pmid):
+#             # that's weird
+#             ret['rs'].append({
+#                 'pmid': pmid,
+#                 'success': False,
+#                 'msg': 'NOT VALID PMID'
+#             })
+#             continue
         
-        # first check if pmid exists
-        is_existed = False
-        is_existed, _paper = dora.is_existed_paper(project_id, pmid)
+#         # first check if pmid exists
+#         is_existed = False
+#         is_existed, _paper = dora.is_existed_paper(project_id, pmid)
 
-        if is_existed:
-            # that's possible!
-            ret['rs'].append({
-                'pmid': pmid,
-                'success': False,
-                'msg': 'PMID EXISTED'
-            })
-            continue
+#         if is_existed:
+#             # that's possible!
+#             ret['rs'].append({
+#                 'pmid': pmid,
+#                 'success': False,
+#                 'msg': 'PMID EXISTED'
+#             })
+#             continue
         
-        # ok, save this pmid
-        paper = data['result'][pmid]
-        title = paper['title']
-        pub_date = paper['sortpubdate'].split(' ')[0]
-        authors = ', '.join([ a['name'] for a in paper['authors'] ])
-        journal = paper['source']
+#         # ok, save this pmid
+#         paper = data['result'][pmid]
+#         title = paper['title']
+#         pub_date = paper['sortpubdate'].split(' ')[0]
+#         authors = ', '.join([ a['name'] for a in paper['authors'] ])
+#         journal = paper['source']
 
-        paper = dora.create_paper(project_id, pmid, 'pmid',
-            title, pub_date, authors, journal, None, ss_state.SS_ST_AUTO_OTHER
-        )
+#         paper = dora.create_paper(project_id, pmid, 'pmid',
+#             title, pub_date, authors, journal, None, ss_state.SS_ST_AUTO_OTHER
+#         )
 
-        ret['rs'].append({
-            'pmid': pmid,
-            'success': True,
-            'msg': 'PAPER CREATED'
-        })
+#         ret['rs'].append({
+#             'pmid': pmid,
+#             'success': True,
+#             'msg': 'PAPER CREATED'
+#         })
 
 
-    return jsonify(ret)
+#     return jsonify(ret)
 
 
 @bp.route('/import_pmids', methods=['GET', 'POST'])
@@ -134,59 +137,114 @@ def import_pmids():
     project_id = request.form.get('project_id')
     rs = json.loads(request.form.get('rs'))
 
+    # get the default stage
+    stage = request.form.get('stage')
+
+    # convert stage to pr and rs
+    ss_pr, ss_rs = ss_state.SS_STAGE_TO_PR_AND_RS[stage]
+    ss_ex = create_pr_rs_details('User specified', stage)
+
     # TODO check the pmids and project_id
 
-    if len(rs) > 200:
-        rs = rs[:200]
+    # only import 40
+    if len(rs) > 40:
+        rs = rs[:40]
 
-    rs2 = []
+    rs_dict = {}
     pmids = []
     pmid2rct_id = {}
+    pmid2idx = {}
 
-    # remove the duplicated rows
+    # need to track the status of all the records
+    # the idx is needed for the frontend
     for r in rs:
+        idx = r['idx']
+        pmid = r['pmid']
+        rs_dict[idx] = r
+        rs_dict[idx]['paper'] = None
+        rs_dict[idx]['result'] = 'notfound'
+
         if r['pmid'] not in pmids:
-            pmid = r['pmid']
             pmids.append(pmid)
-            rs2.append(r)
             pmid2rct_id[pmid] = r['rct_id']
+            pmid2idx[pmid] = [idx]
+        else:
+            rs_dict[idx]['result'] = 'duplicated'
+            pmid2idx[pmid].append(idx)
+
+    # before search in PubMed, check local
+    exist_papers = dora.get_papers_by_pmids(project_id, pmids)
+    exist_pmids = [ p.pid for p in exist_papers ]
+
+    # for those existed papers
+    for paper in exist_papers:
+        pmid = paper.pid
+        paper_id = paper.paper_id
+        rct_id = pmid2rct_id[pmid]
+        # update the stage
+        detail_dict = {
+            'date_decided': util.get_today_date_str(),
+            'reason': settings.SCREENER_REASON_INCLUDED_IN_SR_BY_IMPORT_PMIDS,
+            'decision': stage
+        }
+        
+        # Well. just update the information
+        _ = dora.set_paper_rct_id(paper_id, rct_id)
+        _paper = dora.set_paper_pr_rs_with_details(paper_id, ss_pr, ss_rs, detail_dict)
+        
+        for idx in pmid2idx[pmid]:
+            rs_dict[idx]['result'] = 'existed'
+            rs_dict[idx]['paper'] = _paper.as_very_simple_dict()
+
+    # the new pmids are those not in exist_pmids
+    new_pmids = list(
+        set(pmids).difference(set(exist_pmids))
+    )
 
     # get detail by PubMed API
-    data = util.e_fetch(pmids)
+    if len(new_pmids) == 0:
+        # ok, no new studies
+        pass
+    else:
+        # found new pmid!
+        print('* found %s new pmids: %s' % (
+            len(new_pmids), new_pmids
+        ))
+        data = util.e_fetch(new_pmids)
 
-    # prepare the return object
-    ret = {
-        'rs': []
-    }
+        # prepare the return object
+        uids = data['result']['uids']
+        # check each pmid
+        for pmid in uids:
+            # ok, save this paper
+            pubmed_record = data['result'][pmid]
 
-    uids = data['result']['uids']
-    # check each pmid
-    for pmid in uids:
+            # get the attributes
+            title = pubmed_record['title']
+            abstract = pubmed_record['abstract']
+            pub_date = pubmed_record['sortpubdate']
+            authors = ', '.join([ a['name'] for a in pubmed_record['authors'] ])
+            journal = pubmed_record['source']
+            rct_id = pmid2rct_id[pmid]
 
-        # ok, save this pmid
-        paper = data['result'][pmid]
-        title = paper['title']
-        abstract = paper['abstract']
-        pub_date = paper['sortpubdate']
-        authors = ', '.join([ a['name'] for a in paper['authors'] ])
-        journal = paper['source']
-        rct_id = pmid2rct_id[pmid]
+            is_existed, paper = dora.create_paper_if_not_exist_and_predict_rct(
+                project_id, pmid, 'PMID', title, abstract, 
+                pub_date, authors, journal,
+                {'rct_id': rct_id}, 
+                ss_state.SS_ST_IMPORT_SIMPLE_CSV, 
+                ss_pr,
+                ss_rs,
+                ss_ex
+            )
 
-        is_existed, paper = dora.create_paper_if_not_exist_and_predict_rct(
-            project_id, pmid, 'PMID', title, abstract, pub_date, authors, journal,
-            {'rct_id': rct_id}, 
-            ss_state.SS_ST_IMPORT_SIMPLE_CSV, 
-            ss_state.SS_PR_NA,
-            ss_state.SS_RS_NA,
-        )
+            for idx in pmid2idx[pmid]:
+                rs_dict[idx]['result'] = 'created'
+                rs_dict[idx]['paper'] = paper.as_very_simple_dict()
 
-        ret['rs'].append({
-            'pmid': pmid,
-            'paper': paper.as_simple_dict(),
-            'is_existed': is_existed
-        })
-
-    return jsonify(ret)
+    return jsonify({
+        'success': True,
+        'rs': [ rs_dict[idx] for idx in rs_dict ]
+    })
 
 
 @bp.route('/upload_pmid_data_file', methods=['GET', 'POST'])
@@ -233,8 +291,10 @@ def upload_pmid_data_file():
         pmid = row['PMID']
         
         ret['rs'].append({
-            'pmid': pmid,
-            'rct_id': rct_id
+            'idx': idx,
+            'pmid': '%s' % pmid,
+            'rct_id': '%s' % rct_id,
+            'result': 'waiting'
         })
 
     return jsonify(ret)
@@ -486,4 +546,17 @@ def upload_endnote_xml_and_save_papers():
         "success": True,
         "cnt": cnt
     }
+    return jsonify(ret)
+
+
+
+@bp.route('/test', methods=['GET', 'POST'])
+@login_required
+def test():
+    ret = {
+        'success': True,
+        'msg': '%s' % datetime.datetime.now()
+    }
+    time.sleep(2)
+
     return jsonify(ret)
