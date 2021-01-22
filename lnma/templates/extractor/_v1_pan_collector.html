@@ -1,0 +1,61 @@
+<div id="pan_collector" class="panel-m panel-container">
+    <div v-if="paper == null">
+        Click the paper name to show details
+    </div>
+
+    <!-- details of paper -->
+    <div v-else>
+
+        <div class="panel-info">
+        
+            <ul class="nav nav-tabs">
+                <li class="nav-item">
+                    <a class="nav-link" 
+                        v-bind:class="{active: show_tab == 'basic_info'}"
+                        href="javascript:void(0);"
+                        v-on:click="switch_tab('basic_info');">
+                        <i class="fa fa-info-circle"></i>
+                        Basic Information
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#javascript:void(0);"
+                        v-bind:class="{active: show_tab == 'pdf'}"
+                        v-on:click="switch_tab('pdf');">
+                        <i class="far fa-file-pdf"></i>
+                        PDFs
+                    </a>
+                </li>
+            </ul>
+        
+        </div>
+        <!-- /.panel-info -->
+
+        <!-- the basic info -->
+        <div id="pan_collector_basic_info"  
+            class="border-top-0 pan-normal"
+            v-show="show_tab == 'basic_info'">
+
+            <div class="panel-info">
+                <p style="font-size: 0.9em; color: #777777; ">{{ paper.pub_date }} - {{ paper.journal }}</p>
+                <p style="font-size: 1.5em; font-weight: bold; line-height: 1.2em;">{{ paper.title }}</p>
+                <p styel="font-size: 1em;">{{ paper.authors }}</p>
+                <p>
+                    PMID: 
+                    <a target="_blank" title="Show in " :href="'https://pubmed.ncbi.nlm.nih.gov/' + paper.pid ">{{ paper.pid }}</a> ({{ paper.pid_type }})
+                </p>
+                <p style="font-size: 1.2em; font-weight: bold;">Abstract</p>
+                <div style="font-size: 1em;">{{ paper.abstract }}</div>
+            </div>
+            
+        </div>
+
+        <!-- the PDF page -->
+        <div id="pan_collector_pdf" v-show="show_tab == 'pdf'">
+            PDFs
+        </div>
+        
+    </div>
+    
+</div>
+<!-- /#pan_collector -->

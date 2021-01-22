@@ -224,23 +224,31 @@
     <div class="panel-info" v-if="extract != null && extract.meta.oc_type == 'itable'">
         <div v-for="cate, cate_idx in extract.meta.cate_attrs">
             <div>
-                <b>{{ cate.name }}</b> |
-                <a href="javascript:void(0);">
-                    toggle all columns
-                </a> |
-                <a href="javascript:void(0);">
-                    toggle
-                </a>
+                <input type="checkbox" v-bind:id="'toggle-cate-' + cate.abbr"
+                    v-on:change="on_toggle_itable_select_category(cate_idx, $event)">
+                <label :for="'toggle-cate-' + cate.abbr" class="extract-attr-label">
+                    <b>{{ cate.name }}</b>
+                </label>
             </div>
             <div :id="'cate-' + cate.abbr" class="d-flex flex-row flex-wrap">
-                <div v-for="attr, attr_idx in cate.attrs">
-                    <input type="checkbox">
-                    {{ attr.name }}
-                    <span v-if="attr.subs != null">
+                <div v-for="attr, attr_idx in cate.attrs"
+                    class="mr-2 border-end">
+                    
+                    <span v-if="attr.subs == null">
+                        <input type="checkbox" 
+                            v-model="show_attrs[attr.abbr]"
+                            v-on:change="on_toggle_attr_selection($event)"
+                            :id="'attr-' + attr.abbr">
+                        <label class="extract-attr-label" :for="'attr-' + attr.abbr">{{ attr.name }}</label>
+                    </span>
+                    <span v-else>
+                        {{ attr.name }}
                         [
-                        <span v-for="sub, sub_idx in attr.subs">
-                            <input type="checkbox">
-                            {{ sub.name }}
+                        <span class="mr-2" v-for="sub, sub_idx in attr.subs">
+                            <input type="checkbox" v-model="show_attrs[sub.abbr]"
+                                v-on:change="on_toggle_attr_selection($event)"
+                                :id="'sub-' + sub.abbr">
+                            <label class="extract-attr-sub-label" :for="'sub-' + sub.abbr">{{ sub.name }}</label>
                         </span>
                         ]
                     </span>
@@ -262,7 +270,7 @@
                 <th>&nbsp;</th>
                 <th style="width: 90px;">RCT ID</th>
                 <th style="">Paper (5 selected) </th>
-                <th style="">Status?</th>
+                <th style="">Checked</th>
                 <th style="">Year</th>
                 <th v-for="attr in extract.meta.attrs">
                     {{ attr }}
@@ -271,11 +279,13 @@
 
             <tbody>
                 <tr v-for="paper in papers" >
-                    <td><input type="checkbox" id="" v-model="extract.data[paper.pid].selected" ></td>
+                    <td><input type="checkbox" id="" v-model="extract.data[paper.pid].is_selected" ></td>
                     <td>{{ paper.meta.rct_id }}</td>
                     <td>{{ paper.seq_num }} - {{ paper.authors.split(',')[0] }}</td>
                     <td>
-                        <input type="checkbox" name="" id="">
+                        <input type="checkbox" 
+                            v-bind:id="'paper-row-checked'+paper.pid"
+                            v-model="extract.data[paper.pid].is_checked">
                     </td>
                     <td>{{ get_year(paper.pub_date) }}</td>
                     <td v-for="attr in extract.meta.attrs">
@@ -301,7 +311,7 @@
 
             <tbody>
             <tr v-for="paper in papers">
-                <td><input type="checkbox" id="" v-model="extract.data[paper.pid].selected" ></td>
+                <td><input type="checkbox" id="" v-model="extract.data[paper.pid].is_selected" ></td>
                 <td>{{ paper.meta.rct_id }}</td>
                 <td>{{ paper.seq_num }} | {{ paper.authors.split(',')[0] }}</td>
                 <td>{{ get_year(paper.pub_date) }}</td>
@@ -320,23 +330,80 @@
 
         <!-- table for itable -->
         <table class="table" v-else-if="extract.meta.oc_type === 'itable'">
-            <tr>
-                <th>&nbsp;</th>
-                <th style="width: 90px;">RCT ID</th>
-                <th style="">Paper (5 selected) </th>
-                <th style="">Status?</th>
-                <th style="">Year</th>
-            </tr>
+            <thead class="paper-table-header">
+                <tr>
+                    <th class="paper-table-header-th" style="width: 20px;">
+                        <input type="checkbox" title="Toggle selection"
+                            v-on:click="toggle_select_all_papers($event);">
+                    </th>
+                    <th class="paper-table-header-th" style="width: 90px;">NCT</th>
+                    <th class="paper-table-header-th" style="width: 130px;">Paper ({{ n_selected }} selected) </th>
+                    <th class="paper-table-header-th" style="width: 90px;">Checked</th>
+                    <th class="paper-table-header-th" style="width: 50px;"># Arms</th>
+                    
+                    <!-- the attributes need to collect -->
+                    <th class="paper-table-header-th" 
+                        v-for="attr_sub in all_attrs"
+                        v-show="show_attrs[attr_sub.abbr]">
+                        <span v-if="show_attrs[attr_sub.abbr]">
+                            {{ attr_sub.name }}
+                        </span>
+                    </th>
+                </tr>
+            </thead>
 
             <tbody>
-                <tr v-for="paper in papers">
-                    <td><input type="checkbox" id="" v-model="extract.data[paper.pid].selected" ></td>
-                    <td>{{ paper.meta.rct_id }}</td>
-                    <td>{{ paper.seq_num }} - {{ paper.authors.split(',')[0] }}</td>
-                    <td>
-                        <input type="checkbox" v-model="extract.data[paper.pid].has_checked">
+                <tr class="paper-table-row" 
+                    v-for="paper in papers"
+                    v-bind:id="'paper-table-row-' + paper.pid"
+                    v-on:click="on_click_paper(paper.pid)">
+                    <td class="paper-table-body-td">
+                        <input type="checkbox" id="" v-model="extract.data[paper.pid].is_selected" >
                     </td>
-                    <td>{{ get_year(paper.pub_date) }}</td>
+                    <td class="paper-table-body-td">
+                        {{ paper.meta.rct_id }}
+                    </td>
+                    <td class="paper-name paper-table-body-td">
+                        {{ paper.seq_num }} - {{ paper.authors.split(',')[0] }} {{ get_year(paper.pub_date) }}
+                    </td>
+                    <td class="paper-table-body-td">
+                        <input type="checkbox" 
+                            v-bind:id="'paper-row-checked'+paper.pid"
+                            v-model="extract.data[paper.pid].is_checked">
+                    </td>
+                    <td class="paper-table-body-td">
+                        <select name="" id="" v-model="extract.data[paper.pid].n_arms"
+                            v-on:change="on_change_itable_n_arms(paper.pid, $event)">
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </select>
+                    </td>
+
+                    <!-- the attributes need to collect -->
+                    <td v-for="attr_sub in all_attrs" 
+                        v-show="show_attrs[attr_sub.abbr]"
+                        class="paper-table-body-td paper-value">
+                        
+                        <!-- the main track -->
+                        <span class="cell-input">
+                            <input class="paper-extract-input-auto" type="text" 
+                                v-bind:size="get_input_size(extract.data[paper.pid].attrs.main[attr_sub.abbr])"
+                                v-model="extract.data[paper.pid].attrs.main[attr_sub.abbr]">    
+                        </span>
+                        <!-- the other tracks if n_arms > 2 -->
+                        <hr class="n-arms-hr" v-if="extract.data[paper.pid].n_arms > 2">
+
+                        <span v-for="other, other_idx in extract.data[paper.pid].attrs.other"
+                            class="cell-input">
+                            <br v-if="other_idx > 0">
+                            <input class="paper-extract-input-auto" type="text" 
+                                v-bind:size="get_input_size(extract.data[paper.pid].attrs.other[other_idx][attr_sub.abbr])"
+                                v-model="extract.data[paper.pid].attrs.other[other_idx][attr_sub.abbr]">  
+                        </span>                        
+
+                    </td>
                 </tr>
             </tbody>
         </table>

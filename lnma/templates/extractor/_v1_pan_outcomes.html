@@ -1,0 +1,125 @@
+<div id="pan_outcomes" class="panel-m panel-container">
+
+    <h5>
+        PWMA Outcomes
+        <button class="btn-sm"
+            v-on:click="create_extract('pwma', 'default')">
+            <i class="fa fa-plus"></i>
+            Add Outcome
+        </button>
+        <button class="btn-sm"
+            v-on:click="create_extract('subg', 'default')">
+            <i class="fa fa-plus"></i>
+            Add Subgroup Analysis
+        </button>
+    </h5>
+    <div class="panel-box">
+        <div class="oper-bar">
+            
+        </div>
+        <table class="table">
+            <tr>
+                <th>Group</th>
+                <th>Full Name</th>
+                <th>Data Type</th>
+                <th>Measure</th>
+                <th>Treatment</th>
+                <th>Control</th>
+                <th>&nbsp;</th>
+            </tr>
+            <tr v-for="oc in data.pwma.outcomes">
+                <td>{{ oc.group }}</td>
+                <td :oc_abbr="oc.abbr">
+                    <a href="javascript:void(0);"
+                        v-on:click="show_extract_data(oc.oc_type, oc.abbr)">
+                        {{ oc.full_name }}
+                    </a>
+                </td>
+                <td>{{ oc.input_format }}</td>
+                <td>{{ oc.measure_of_effect }}</td>
+                <td>{{ oc.treatment.abbr }}</td>
+                <td>{{ oc.control.abbr }}</td>
+                <td>
+                    <a href="javascript:void(0);" class="text-danger"
+                        v-on:click="delete_extract(oc.oc_type, oc.abbr, oc.full_name)">
+                        <i class="far fa-trash-alt"></i>
+                    </a>
+                </td>
+            </tr>
+        </table>
+
+        <table class="table" v-if="Object.keys(data.subg.outcomes).length != 0">
+            <tr>
+                <th>Group</th>
+                <th>Full Name</th>
+                <th>Measure</th>
+                <th>Treatment</th>
+                <th>Control</th>
+                <th>Subgroups</th>
+                <th>&nbsp;</th>
+            </tr>
+
+            <tr v-for="oc in data.subg.outcomes">
+                <td>{{ oc.group }}</td>
+                <td :oc_abbr="oc.abbr">
+                    <a href="javascript:void(0);"
+                        v-on:click="show_extract_data(oc.oc_type, oc.abbr)">
+                        {{ oc.full_name }}
+                    </a>
+                </td>
+                <td>{{ oc.measure_of_effect }}</td>
+                <td>{{ oc.treatment.abbr }}</td>
+                <td>{{ oc.control.abbr }}</td>
+                <td>{{ oc.subgroups }}</td>
+                <td>
+                    <a href="javascript:void(0);" class="text-danger"
+                        v-on:click="delete_extract(oc.oc_type, oc.abbr, oc.full_name)">
+                        <i class="far fa-trash-alt"></i>
+                    </a>
+                </td>
+            </tr>
+        </table>
+
+    </div>
+
+    <h5>
+        NMA Outcomes
+        <button class="btn-sm"
+            v-on:click="create_extract('nma', 'default')">
+            <i class="far fa-plus-square"></i>
+            Add Outcome
+        </button>
+    </h5>
+    <div class="panel-box">
+        <div class="oper-bar">
+
+        </div>
+        <table class="table">
+            <tr>
+                <th>Group</th>
+                <th>Full Name</th>
+                <th>Measure</th>
+                <th>Treatments</th>
+                <th>&nbsp;</th>
+            </tr>
+            <tr v-for="oc in data.nma.outcomes">
+                <td>{{ oc.group }}</td>
+                <td>
+                    <a href="javascript:void(0);"
+                        v-on:click="show_extract_data(oc.oc_type, oc.abbr)">
+                        {{ oc.full_name }}
+                    </a>
+                </td>
+                <td>{{ oc.measure }}</td>
+                <td> - </td>
+                <td>
+                    <a href="javascript:void(0);" class="text-danger"
+                        v-on:click="delete_extract(oc.oc_type, oc.abbr, oc.full_name)">
+                        <i class="far fa-trash-alt"></i>
+                    </a>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+<!-- /#pan_outcomes -->

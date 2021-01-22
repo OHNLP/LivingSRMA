@@ -1,12 +1,12 @@
 <div id="pan_itbuilder" class="panel-container">
     <div class="panel-info">
         <div class="oc-attr">
-            <button class="btn btn-primary btn-sm" v-on:click="save_itable();">
+            <button class="" v-on:click="save_itable();">
                 <i class="fa fa-save"></i>
                 Save Interactive Table Design
             </button>
 
-            <button class="btn btn-primary btn-sm" v-on:click="extract_itable();">
+            <button class="" v-on:click="extract_itable();">
                 <i class="fa fa-edit"></i>
                 Extract Information for Interactive Table
             </button>
@@ -71,7 +71,7 @@
                         <i class="fa fa-plus"></i>
                     </a>
 
-                    <a v-on:click="remove_attribute(cate.abbr, attr.abbr);"
+                    <a v-on:click="remove_attribute(cate.abbr, attr.abbr, attr.name);"
                         href="javascript:void(0);"
                         class="text-danger"
                         :title="'Remove this attribute [' + attr.name + ']'">

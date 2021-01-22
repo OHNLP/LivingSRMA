@@ -26,6 +26,23 @@ def v1():
     return render_template('extractor/v1.html')
 
 
+@bp.route('/get_paper')
+@login_required
+def get_paper():
+    project_id = request.args.get('project_id')
+    project_id = request.cookies.get('project_id')
+    pid = request.args.get('pid')
+
+    paper = dora.get_paper(project_id, pid)
+    json_paper = paper.as_dict()
+
+    ret = {
+        'success': True,
+        'paper': json_paper
+    }
+    return jsonify(ret)
+
+
 @bp.route('/get_papers_by_stage')
 @login_required
 def get_papers_by_stage():
@@ -119,8 +136,9 @@ def get_extract_and_papers():
 
         # if not exist, add this paper
         extract.data[pid] = {
-            'selected': False,
-            'has_checked': False,
+            'is_selected': False,
+            'is_checked': False,
+            'n_arms': 2,
             'attrs': {}
         }
         # put the attrs
@@ -409,8 +427,9 @@ def get_itable_from_itable_data_xls(keystr):
             # `main` is for the main records
             # `other` is for other arms, by default, other is empty
             data[pmid] = {
-                'selected': False,
-                'has_checked': False,
+                'is_selected': True,
+                'is_checked': True,
+                'n_arms': 2,
                 'attrs': {
                     'main': {},
                     'other': []
@@ -420,7 +439,8 @@ def get_itable_from_itable_data_xls(keystr):
         else:
             # which means this row is an multi arm
             # add a new object in other
-            data[pmid]['other'].append({})
+            data[pmid]['n_arms'] += 1
+            data[pmid]['attrs']['other'].append({})
 
         # check each column
         for idx in range(n_cols):
@@ -446,12 +466,14 @@ def get_itable_from_itable_data_xls(keystr):
             else:
                 # check if this value is same in the main track
                 if val == data[pmid]['attrs']['main'][abbr]: 
-                    pass
+                    # for the same value, also set ...
+                    data[pmid]['attrs']['other'][-1][abbr] = val
                 else:
                     # just save the different values
                     data[pmid]['attrs']['other'][-1][abbr] = val
 
     return ca_dict, ca_list, i2a, data
+
 
 def get_cate_attr_subs_from_itable_data_xls(keystr):
     '''

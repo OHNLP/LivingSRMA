@@ -10,36 +10,42 @@ html {
     overflow: hidden;
 }
 #navi_header {
+    width: 130px;
+    height: 100%;
     margin: 5px 5px 0 0;
     padding: 0 5px 0 10px;
+}
+#navi_header button {
+    text-align: left;
+    margin: 0 0 15px 0;
 }
 #main {
     display: flex;
     flex-direction: row;
-    width: 100%;
-    height: calc(100% - 100px);
+    width: calc(100% - 150px);
+    height: 100%;
     overflow: hidden;
 }
 .panel-s {
-    width: 24%;
+    width: calc(25% - 5px);
     margin: 5px 5px 0 0;
     padding: 0 5px 0 10px;
     border-right: 1px dotted #999999;
 }
 .panel-m {
-    width: 49%;
+    width: calc(50% - 5px);
     margin: 5px 5px 0 0;
     padding: 0 5px 0 10px;
     border-right: 1px dotted #999999;
 }
 .panel-l {
-    width: 74%;
+    width: calc(75% - 5px);
     margin: 5px 5px 0 0;
     padding: 0 5px 0 10px;
     border-right: 1px dotted #999999;
 }
 .panel-f {
-    width: 98%;
+    width: calc(100% - 5px);
     margin: 5px 5px 0 0;
     padding: 0 5px 0 10px;
 }
@@ -84,6 +90,16 @@ html {
     width: 120px;
     margin-left: 5px;
 }
+.nav-link.active {
+    font-weight: bold;
+    color: rgb(0, 110, 255);
+}
+.extract-attr-label {
+    font-weight: normal !important;
+}
+.extract-attr-sub-label {
+    font-weight: normal !important;
+}
 .paper-extract-input {
     width: 40px;
     min-width: 30px;
@@ -91,9 +107,60 @@ html {
     height: 20px;
     padding: 1px 1px;
 }
+.paper-extract-input-auto {
+    height: 20px;
+    padding: 1px 1px;
+}
+.pan-normal {
+    padding: 10px;
+    background: white;
+    border: 1px solid #dee2e6;
+    border-top: 0;
+}
 .hide {
     display: none;
 }
+
+.paper-table-header-th {
+    padding: 0 0 0 3px !important;
+    border-right: 1px solid #888888;
+}
+.paper-table-row {
+    min-height: 24px;
+}
+.paper-table-row:hover {
+    background: #cccccc;
+}
+.paper-table-row-clicked {
+    background-color: rgb(189, 228, 238) !important;
+}
+.paper-table-row-clicked .paper-name {
+    font-weight: bold;
+}
+.paper-table-body-td {
+    padding: 0 0 0 3px !important;
+}
+.paper-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0 3px 0 0 !important;
+    cursor: pointer;
+}
+.paper-name:hover {
+    font-weight: bold;
+}
+.paper-value {
+    padding: 1px 2px !important;
+}
+
+.cell-input {
+    margin: 0 0 2px 0 !important;
+}
+.n-arms-hr {
+    margin: 3px 0 !important;
+}
+
 {% include 'css/box.css' %}
 </style>
 {% endblock %}
@@ -105,6 +172,8 @@ Data Extractor
 
 {% block content %}
 <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+
+<div class="d-flex flex-row" style="height: calc(100% - 50px);">
 
 <div id="navi_header">
     <button onclick="jarvis.switch_layout('build_itable');">
@@ -130,177 +199,22 @@ Data Extractor
 <!-- /#navi_header -->
 
 <div id="main">
-
-    <div id="pan_outcomes" class="panel-m panel-container">
-
-        <h5>
-            PWMA Outcomes
-            <button class="btn-sm"
-                v-on:click="create_extract('pwma', 'default')">
-                <i class="fa fa-plus"></i>
-                Add Outcome
-            </button>
-            <button class="btn-sm"
-                v-on:click="create_extract('subg', 'default')">
-                <i class="fa fa-plus"></i>
-                Add Subgroup Analysis
-            </button>
-        </h5>
-        <div class="panel-box">
-            <div class="oper-bar">
-                
-            </div>
-            <table class="table">
-                <tr>
-                    <th>Group</th>
-                    <th>Full Name</th>
-                    <th>Data Type</th>
-                    <th>Measure</th>
-                    <th>Treatment</th>
-                    <th>Control</th>
-                    <th>&nbsp;</th>
-                </tr>
-                <tr v-for="oc in data.pwma.outcomes">
-                    <td>{{ oc.group }}</td>
-                    <td :oc_abbr="oc.abbr">
-                        <a href="javascript:void(0);"
-                            v-on:click="show_extract_data(oc.oc_type, oc.abbr)">
-                            {{ oc.full_name }}
-                        </a>
-                    </td>
-                    <td>{{ oc.input_format }}</td>
-                    <td>{{ oc.measure_of_effect }}</td>
-                    <td>{{ oc.treatment.abbr }}</td>
-                    <td>{{ oc.control.abbr }}</td>
-                    <td>
-                        <a href="javascript:void(0);" class="text-danger"
-                            v-on:click="delete_extract(oc.oc_type, oc.abbr, oc.full_name)">
-                            <i class="far fa-trash-alt"></i>
-                        </a>
-                    </td>
-                </tr>
-            </table>
-
-            <table class="table" v-if="Object.keys(data.subg.outcomes).length != 0">
-                <tr>
-                    <th>Group</th>
-                    <th>Full Name</th>
-                    <th>Measure</th>
-                    <th>Treatment</th>
-                    <th>Control</th>
-                    <th>Subgroups</th>
-                    <th>&nbsp;</th>
-                </tr>
-
-                <tr v-for="oc in data.subg.outcomes">
-                    <td>{{ oc.group }}</td>
-                    <td :oc_abbr="oc.abbr">
-                        <a href="javascript:void(0);"
-                            v-on:click="show_extract_data(oc.oc_type, oc.abbr)">
-                            {{ oc.full_name }}
-                        </a>
-                    </td>
-                    <td>{{ oc.measure_of_effect }}</td>
-                    <td>{{ oc.treatment.abbr }}</td>
-                    <td>{{ oc.control.abbr }}</td>
-                    <td>{{ oc.subgroups }}</td>
-                    <td>
-                        <a href="javascript:void(0);" class="text-danger"
-                            v-on:click="delete_extract(oc.oc_type, oc.abbr, oc.full_name)">
-                            <i class="far fa-trash-alt"></i>
-                        </a>
-                    </td>
-                </tr>
-            </table>
-
-        </div>
-
-        <h5>
-            NMA Outcomes
-            <button class="btn-sm"
-                v-on:click="create_extract('nma', 'default')">
-                <i class="far fa-plus-square"></i>
-                Add Outcome
-            </button>
-        </h5>
-        <div class="panel-box">
-            <div class="oper-bar">
-
-            </div>
-            <table class="table">
-                <tr>
-                    <th>Group</th>
-                    <th>Full Name</th>
-                    <th>Measure</th>
-                    <th>Treatments</th>
-                    <th>&nbsp;</th>
-                </tr>
-                <tr v-for="oc in data.nma.outcomes">
-                    <td>{{ oc.group }}</td>
-                    <td>
-                        <a href="javascript:void(0);"
-                            v-on:click="show_extract_data(oc.oc_type, oc.abbr)">
-                            {{ oc.full_name }}
-                        </a>
-                    </td>
-                    <td>{{ oc.measure }}</td>
-                    <td> - </td>
-                    <td>
-                        <a href="javascript:void(0);" class="text-danger"
-                            v-on:click="delete_extract(oc.oc_type, oc.abbr, oc.full_name)">
-                            <i class="far fa-trash-alt"></i>
-                        </a>
-                    </td>
-                </tr>
-            </table>
-        </div>
-    </div>
-    <!-- /#pan_outcomes -->
-
+    
+    {% include 'extractor/_v1_pan_outcomes.html' %}
 
     {% include 'extractor/_v1_pan_itbuilder.html' %}
 
     {% include 'extractor/_v1_pan_ocpapers.html' %}
 
-
-    <div id="pan_collector" class="panel-m panel-container">
-        <div class="panel-info">
-            <div class="oc-attr">
-                <span class="oc-attr-name">Abstract</span>
-            </div>
-            <div class="oc-attr">
-                <span class="oc-attr-name">Filename.pdf</span>
-            </div>
-        </div>
-        <!-- /.panel-info -->
-
-        
-    </div>
-    <!-- /#pan_collector -->
-
-    <div id="pan_analyzer" class="panel-m panel-container">
-        <div class="panel-info">
-            <div class="oc-attr">
-                <span style="font-size: 1.2em;">
-                    <i class="fa fa-balance-scale"></i>
-                    Analyzer
-                </span>
-            </div>
-            <div class="oc-attr">
-                <button onclick="pan_analyzer.analyze();">
-                    <i class="fa fa-calculator"></i>
-                    Run analyzer
-                </button>
-            </div>
-        </div>
-        <!-- /.panel-info -->
-
-        {% include 'analyzer/_fg_pwma_imglist.html' %}
-    </div>
-    <!-- /#pan_analyzer -->
+    {% include 'extractor/_v1_pan_collector.html' %}
+    
+    {% include 'extractor/_v1_pan_analyzer.html' %}
+    
 </div>
 <!-- /#main -->
 
+
+</div>
 
 {% endblock %}
 
@@ -478,8 +392,23 @@ var pan_ocpapers = {
             el: this.vpp_id,
             data: {
                 show_settings: true,
+                all_attrs: null,
+                show_attrs: null,
                 extract: null,
                 papers: []
+            },
+            computed: {
+                n_selected: function() {
+                    var n = 0;
+                    for (const pmid in this.extract.data) {
+                        if (Object.hasOwnProperty.call(this.extract.data, pmid)) {
+                            if (this.extract.data[pmid].is_selected) {
+                                n += 1;
+                            };
+                        }
+                    }
+                    return n;
+                }
             },
             methods: {
                 toggle_show_settings: function() {
@@ -496,12 +425,28 @@ var pan_ocpapers = {
                     pan_ocpapers.copy_extract();
                 },
 
+                get_input_size: function(str) {
+                    // convert null to empty
+                    if (str == null) {
+                        str = '';
+                    }
+                    // convert number to string
+                    str = '' + str;
+                    var s = str.length;
+                    if (s<5) {
+                        return 5;
+                    } else if (s > 14) {
+                        return 14;
+                    } else {
+                        return s;
+                    }
+                },
+
                 // get year
                 get_year: function(s) {
                     return jarvis.get_year(s);
                 },
 
-                // events
                 on_change_input_format: function(event) {
                     let val = event.target.value;
                     console.log('Changed input_format: ' + val);
@@ -510,6 +455,71 @@ var pan_ocpapers = {
                         this.extract.oc_type
                     ][val];
                     
+                },
+
+                on_toggle_attr_selection: function(event) {
+                    this.$forceUpdate();
+                },
+
+                on_click_paper: function(pmid) {
+                    // highlight this line
+                    $('.paper-table-row').removeClass('paper-table-row-clicked');
+                    $('#paper-table-row-' + pmid).addClass('paper-table-row-clicked');
+                    // call collector to do something
+                    pan_collector.show_paper(pmid);
+                },
+
+                toggle_select_all_papers: function(event) {
+                    let val = event.srcElement.checked;
+                    console.log('* set all papers selected: ', val);
+                    for (const pmid in this.extract.data) {
+                        if (Object.hasOwnProperty.call(this.extract.data, pmid)) {
+                            this.extract.data[pmid].is_selected = val;
+                        }
+                    }
+                    // this.$forceUpdate();
+                },
+
+                on_toggle_itable_select_category: function(cate_idx, event) {
+                    let val = event.srcElement.checked;
+
+                    for (let i = 0; i < this.extract.meta.cate_attrs[cate_idx].attrs.length; i++) {
+                        const attr = this.extract.meta.cate_attrs[cate_idx].attrs[i];
+
+                        if (attr.subs == null) {
+                            this.show_attrs[attr.abbr] = val;
+                        } else {
+                            for (let j = 0; j < attr.subs.length; j++) {
+                                const sub = attr.subs[j];
+                                this.show_attrs[sub.abbr] = val;
+                            }
+                        }
+                    }
+                    // force update the UI because change a lot
+                    this.$forceUpdate();
+                },
+
+                on_change_itable_n_arms: function(pmid, $event) {
+                    let val = event.target.value;
+                    console.log('* change ' + pmid + ' n_arms to ' + val);
+
+                    var new_n_others = val - 2;
+                    if (new_n_others == this.extract.data[pmid].attrs.other.length) {
+
+                    } else if (new_n_others > this.extract.data[pmid].attrs.other.length) {
+                        // the number of arms increases, need to put more elements
+                        var delta = new_n_others - this.extract.data[pmid].attrs.other.length;
+                        for (let i = 0; i < delta; i++) {
+                            this.extract.data[pmid].attrs.other.push({});
+                        }
+                    } else {
+                        // the number of arms decreases, need to remove
+                        var delta = this.extract.data[pmid].attrs.other.length - new_n_others;
+                        for (let i = 0; i < delta; i++) {
+                            this.extract.data[pmid].attrs.other.pop();
+                        }
+                    }
+                    this.$forceUpdate();
                 }
             }
         });
@@ -519,6 +529,33 @@ var pan_ocpapers = {
         // the data is a combo of extract and papers
         this.vpp.extract = data.extract;
         this.vpp.papers = data.papers;
+
+        // update the show show_attrs
+        if (data.extract.oc_type == 'itable') {
+            // init the all_attrs which for list all the nested attrs
+            this.vpp.all_attrs = [];
+            // init the show_attrs
+            this.vpp.show_attrs = {}
+            // loop on the cate_attrs
+            for (let i = 0; i < data.extract.meta.cate_attrs.length; i++) {
+                const cate = data.extract.meta.cate_attrs[i];
+                for (let j = 0; j < cate.attrs.length; j++) {
+                    const attr = cate.attrs[j];
+                    
+                    if (attr.subs == null) {
+                        // which means this attr doesn't have a sub
+                        this.vpp.all_attrs.push(attr);
+                        this.vpp.show_attrs[attr.abbr] = false;
+                    } else {
+                        for (let k = 0; k < attr.subs.length; k++) {
+                            const sub = attr.subs[k];
+                            this.vpp.all_attrs.push(sub);
+                            this.vpp.show_attrs[sub.abbr] = false;
+                        }
+                    }
+                }
+            }
+        }
 
         // update
         this.vpp.$forceUpdate();
@@ -626,18 +663,32 @@ var pan_collector = {
         this.vpp = new Vue({
             el: this.vpp_id,
             data: {
-                data: {},
-                type: null
+                paper: null,
+                show_tab: null
             },
             methods: {
-
+                switch_tab: function(tab_name) {
+                    this.show_tab = tab_name;
+                }
             }
         });
     },
 
-    update: function(data) {
-        this.vpp.data = data;
-        // this.$forceUpdate();
+    update: function(paper) {
+        this.vpp.paper = paper;
+        this.vpp.show_tab = 'basic_info';
+        this.vpp.$forceUpdate();
+    },
+
+    show_paper: function(pid) {
+        // get the paper
+        $.get(
+            jarvis.url.get_paper,
+            {pid: pid, rnd:Math.random()},
+            function(data) {
+                pan_collector.update(data.paper);
+            }, 'json'
+        );
     },
 
     show: function() {
@@ -851,8 +902,8 @@ var pan_itbuilder = {
                     pan_itbuilder.remove_category(cate_abbr);
                 },
 
-                remove_attribute: function(cate_abbr, attr_abbr) {
-                    pan_itbuilder.remove_attribute(cate_abbr, attr_abbr);
+                remove_attribute: function(cate_abbr, attr_abbr, attr_name) {
+                    pan_itbuilder.remove_attribute(cate_abbr, attr_abbr, attr_name);
                 },
 
                 remove_sub: function(cate_abbr, attr_abbr, sub_abbr) {
@@ -1044,8 +1095,8 @@ var pan_itbuilder = {
     remove_category: function(cate_abbr) {
     },
 
-    remove_attribute: function(cate_abbr, attr_abbr) {
-        var ret = jarvis.confirm('Remove [], are you sure?');
+    remove_attribute: function(cate_abbr, attr_abbr, attr_name) {
+        var ret = jarvis.confirm('Remove ['+attr_name+'], are you sure?');
         if (ret == false) { return }
 
         for (let i = 0; i < this.vpp.$data.itable.meta.cate_attrs.length; i++) {
@@ -1091,6 +1142,7 @@ var jarvis = {
         update_extract_meta: "[[ url_for('extractor.update_extract_meta') ]]",
         copy_extract: "[[ url_for('extractor.copy_extract') ]]",
         delete_extract: "[[ url_for('extractor.delete_extract') ]]",
+        get_paper: "[[ url_for('extractor.get_paper') ]]",
         get_extract: "[[ url_for('extractor.get_extract') ]]",
         get_extracts: "[[ url_for('extractor.get_extracts') ]]",
         get_extract_and_papers: "[[ url_for('extractor.get_extract_and_papers') ]]",
@@ -1371,7 +1423,7 @@ var jarvis = {
     adjust_panel_height: function() {
         var height = $( window ).height();
         $('.panel-container').css(
-            'max-height', (height - 90) + 'px'
+            'max-height', (height - 60) + 'px'
         );
     },
 
