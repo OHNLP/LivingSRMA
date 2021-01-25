@@ -165,7 +165,7 @@ class Paper(db.Model):
     abstract = db.Column(LONGTEXT, index=False)
     pub_date = db.Column(db.String(settings.PAPER_PUB_DATE_MAX_LENGTH), index=False)
     authors = db.Column(db.Text, index=False)
-    journal = db.Column(db.String(settings.PAPER_JOURNAL_MAX_LENGTH), index=False)
+    journal = db.Column(db.Text, index=False)
     meta = db.Column(db.JSON, index=False)
     ss_st = db.Column(db.String(8), index=False)
     ss_pr = db.Column(db.String(8), index=False)

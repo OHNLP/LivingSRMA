@@ -141,26 +141,24 @@ def get_extract_and_papers():
             'n_arms': 2,
             'attrs': {}
         }
-        # put the attrs
-        if abbr == 'itable':
-            extract.data[pid]['attrs'] = {
-                'main': {},
-                'other': []
-            }
-            # itable has a different rule
-            for cate in extract.meta['cate_attrs']:
-                for attr in cate['attrs']:
-                    attr_abbr = attr['abbr']
-                    if attr['subs'] is None:
-                        extract.data[pid]['attrs']['main'][attr_abbr] = ''
-                    else:
-                        # have multiple subs
-                        for sub in attr['subs']:
-                            sub_abbr = sub['abbr']
-                            extract.data[pid]['attrs']['main'][sub_abbr] = ''
-        else:
-            for attr in extract.meta['attrs']:
-                extract.data[pid]['attrs'][attr] = ''
+
+        extract.data[pid]['attrs'] = {
+            'main': {},
+            'other': []
+        }
+        for cate in extract.meta['cate_attrs']:
+            for attr in cate['attrs']:
+                attr_abbr = attr['abbr']
+                if attr['subs'] is None:
+                    extract.data[pid]['attrs']['main'][attr_abbr] = ''
+                else:
+                    # have multiple subs
+                    for sub in attr['subs']:
+                        sub_abbr = sub['abbr']
+                        extract.data[pid]['attrs']['main'][sub_abbr] = ''
+        # else:
+        #     for attr in extract.meta['attrs']:
+        #         extract.data[pid]['attrs']['main'][attr] = ''
 
     # reverse search, unselect those are not in papers
     for pid in extract.data:

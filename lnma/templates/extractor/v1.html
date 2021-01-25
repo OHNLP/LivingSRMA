@@ -178,7 +178,13 @@ Data Extractor
 <div id="navi_header">
     <button onclick="jarvis.switch_layout('build_itable');">
         <i class="fa fa-table"></i>
-        Interactive Table
+        Interactive Table Design
+    </button>
+
+    <button onclick="jarvis.switch_layout('extract_information'); 
+    pan_ocpapers.show_extract_and_papers('itable', 'itable');">
+        <i class="fa fa-table"></i>
+        Extract Interactive Table Data
     </button>
 
     <button onclick="jarvis.switch_layout('manage_outcomes');">
@@ -264,10 +270,6 @@ var pan_outcomes = {
                     pan_outcomes.create_extract(oc_type, tpl);
                 },
 
-                create_itable_column: function() {
-                    pan_outcomes.create_itable_column();
-                },
-
                 show_extract_data: function(oc_type, abbr) {
                     pan_outcomes.show_extract_data(oc_type, abbr);
                 },
@@ -299,18 +301,6 @@ var pan_outcomes = {
         console.log('* show extract [' + oc_type + '] [' + abbr + ']');
         pan_ocpapers.show_extract_and_papers(oc_type, abbr);
     },
-
-    create_itable_column: function() {
-        var text = jarvis.prompt('The column name:');
-        if (text == null) { return; }
-        text = text.trim();
-        if (text == '') { return; }
-
-        // detect if exists
-
-        // send to backend
-
-    },
     
     create_extract: function(oc_type, tpl) {
         // get the full name
@@ -326,6 +316,9 @@ var pan_outcomes = {
         var meta = JSON.parse(JSON.stringify(jarvis.tpl.oc_type[oc_type][tpl]));
         meta.full_name = text;
         meta.abbr = abbr;
+
+        // copy the meta.cate_attr
+        meta.cate_attrs = JSON.parse(JSON.stringify(jarvis.tpl.input_format[oc_type][meta.input_format]));
 
         var data = {};
         var project_id = Cookies.get('project_id');
@@ -451,7 +444,7 @@ var pan_ocpapers = {
                     let val = event.target.value;
                     console.log('Changed input_format: ' + val);
                     // update the attrs
-                    this.extract.meta.attrs = jarvis.tpl.data_type[
+                    this.extract.meta.cate_attrs = jarvis.tpl.input_format[
                         this.extract.oc_type
                     ][val];
                     
@@ -531,27 +524,64 @@ var pan_ocpapers = {
         this.vpp.papers = data.papers;
 
         // update the show show_attrs
-        if (data.extract.oc_type == 'itable') {
-            // init the all_attrs which for list all the nested attrs
-            this.vpp.all_attrs = [];
-            // init the show_attrs
-            this.vpp.show_attrs = {}
-            // loop on the cate_attrs
-            for (let i = 0; i < data.extract.meta.cate_attrs.length; i++) {
-                const cate = data.extract.meta.cate_attrs[i];
-                for (let j = 0; j < cate.attrs.length; j++) {
-                    const attr = cate.attrs[j];
+        // if (data.extract.oc_type == 'itable') {
+        //     // init the all_attrs which for list all the nested attrs
+        //     this.vpp.all_attrs = [];
+        //     // init the show_attrs
+        //     this.vpp.show_attrs = {}
+        //     // loop on the cate_attrs
+        //     for (let i = 0; i < data.extract.meta.cate_attrs.length; i++) {
+        //         const cate = data.extract.meta.cate_attrs[i];
+        //         for (let j = 0; j < cate.attrs.length; j++) {
+        //             const attr = cate.attrs[j];
                     
-                    if (attr.subs == null) {
-                        // which means this attr doesn't have a sub
-                        this.vpp.all_attrs.push(attr);
-                        this.vpp.show_attrs[attr.abbr] = false;
-                    } else {
-                        for (let k = 0; k < attr.subs.length; k++) {
-                            const sub = attr.subs[k];
-                            this.vpp.all_attrs.push(sub);
-                            this.vpp.show_attrs[sub.abbr] = false;
-                        }
+        //             if (attr.subs == null) {
+        //                 // which means this attr doesn't have a sub
+        //                 this.vpp.all_attrs.push(attr);
+        //                 this.vpp.show_attrs[attr.abbr] = false;
+        //             } else {
+        //                 for (let k = 0; k < attr.subs.length; k++) {
+        //                     const sub = attr.subs[k];
+        //                     this.vpp.all_attrs.push(sub);
+        //                     this.vpp.show_attrs[sub.abbr] = false;
+        //                 }
+        //             }
+        //         }
+        //     }
+        // } else if (data.extract.oc_type == 'pwma' || 
+        //            data.extract.oc_type == 'subg' ||
+        //            data.extract.oc_type == 'nma') {
+        //     // init the all_attrs for settings
+        //     this.vpp.all_attrs = []
+        //     // init the show_attrs for table
+        //     this.vpp.show_attrs = {}
+        //     // loop on the attrs of this outcome
+        //     for (let i = 0; i < data.extract.meta.attrs.length; i++) {
+        //         const attr = data.extract.meta.attrs[i];
+        //         this.vpp.all_attrs.push(attr);
+        //         this.vpp.show_attrs[attr] = true;
+        //     }
+        // }
+
+        // init the all_attrs which for list all the nested attrs
+        this.vpp.all_attrs = [];
+        // init the show_attrs
+        this.vpp.show_attrs = {}
+        // loop on the cate_attrs
+        for (let i = 0; i < data.extract.meta.cate_attrs.length; i++) {
+            const cate = data.extract.meta.cate_attrs[i];
+            for (let j = 0; j < cate.attrs.length; j++) {
+                const attr = cate.attrs[j];
+                
+                if (attr.subs == null) {
+                    // which means this attr doesn't have a sub
+                    this.vpp.all_attrs.push(attr);
+                    this.vpp.show_attrs[attr.abbr] = false;
+                } else {
+                    for (let k = 0; k < attr.subs.length; k++) {
+                        const sub = attr.subs[k];
+                        this.vpp.all_attrs.push(sub);
+                        this.vpp.show_attrs[sub.abbr] = false;
                     }
                 }
             }
@@ -841,10 +871,17 @@ var pan_analyzer = {
             };
 
             // second, the extracted info 
-            for (let j = 0; j < extract.meta.attrs.length; j++) {
-                const attr = extract.meta.attrs[j];
-                // get the attribute value from the ext_paper
-                r[attr] = ext_paper.attrs[attr];
+            // for (let j = 0; j < extract.meta.attrs.length; j++) {
+            //     const attr = extract.meta.attrs[j];
+            //     // get the attribute value from the ext_paper
+            //     r[attr] = ext_paper.attrs[attr];
+            // }
+            for (let idx_cate = 0; idx_cate < extract.meta.cate_attrs.length; idx_cate++) {
+                const cate = extract.meta.cate_attrs[idx_cate];
+                for (let idx_attr = 0; idx_attr < cate.attrs.length; idx_attr++) {
+                    const attr = cate.attrs[idx_attr];
+                    r[attr.abbr] = ext_paper.attrs[attr.abbr];
+                }
             }
 
             // done! put into rs
@@ -1164,7 +1201,8 @@ var jarvis = {
                     measure_of_effect: 'RR',
                     fixed_or_random: 'fixed',
                     which_is_better: 'lower',
-                    attrs: [ "Et", "Nt", "Ec", "Nc" ],
+                    attrs: null,
+                    cate_attrs: null,
                     treatment: {
                         abbr: "Treat",
                         full_name: "Treatment arm full name"
@@ -1268,16 +1306,115 @@ var jarvis = {
                 }
             }
         },
-        data_type: {
+        input_format: {
             pwma: {
-                PRIM_CATIRR_RAW: ['Et', 'Tt', 'Ec', 'Tc'],
-                PRIM_CAT_RAW: ['Et', 'Nt', 'Ec', 'Nc'],
-                PRIM_CAT_PRE: ['TE', 'lowerci', 'upperci'],
-                PRIM_CONTD_RAW: ['Nt', 'Mt', 'SDt', 'Nc', 'Mc', 'SDc'],
-                PRIM_CONTD_PRE: ['TE', 'SE'],
-                PRIM_CAT_RAW_G5: ['GA_Et', 'GA_Nt', 'GA_Ec', 'GA_Nc', 
+                PRIM_CATIRR_RAWp: ['Et', 'Tt', 'Ec', 'Tc'],
+                PRIM_CAT_RAWp: ['Et', 'Nt', 'Ec', 'Nc', 'treatment', 'control'],
+                PRIM_CAT_PREp: ['TE', 'lowerci', 'upperci'],
+                PRIM_CONTD_RAWp: ['Nt', 'Mt', 'SDt', 'Nc', 'Mc', 'SDc'],
+                PRIM_CONTD_PREp: ['TE', 'SE'],
+                PRIM_CAT_RAW_G5p: ['GA_Et', 'GA_Nt', 'GA_Ec', 'GA_Nc', 
                     'G34_Et', 'G34_Ec', 'G3H_Et', 'G3H_Ec', 'G5N_Et', 'G5N_Ec', 
-                    'drug_used', 'malignancy']
+                    'drug_used', 'malignancy'],
+
+                PRIM_CAT_RAW: [{
+                    'abbr': 'default',
+                    'name': 'default',
+                    'attrs': [{
+                        'abbr': 'Et',
+                        'name': 'Event total',
+                        'subs': null
+                    }, {
+                        'abbr': 'Nt',
+                        'name': 'Nt',
+                        'subs': null
+                    }, {
+                        'abbr': 'Ec',
+                        'name': 'Ec',
+                        'subs': null
+                    }, {
+                        'abbr': 'Nc',
+                        'name': 'Nc',
+                        'subs': null
+                    }, {
+                        'abbr': 'treatment',
+                        'name': 'Treatment',
+                        'subs': null
+                    }, {
+                        'abbr': 'control',
+                        'name': 'Control',
+                        'subs': null
+                    }]
+                }],
+                PRIM_CAT_RAW_G5: [{
+                    'abbr': 'default',
+                    'name': 'default',
+                    'attrs': [{
+                        'abbr': 'drug_used',
+                        'name': 'Drug Used',
+                        'subs': null
+                    }, {
+                        'abbr': 'malignancy',
+                        'name': 'Malignancy',
+                        'subs': null
+                    }]
+                },{
+                    'abbr': 'GA',
+                    'name': 'All Grade',
+                    'attrs': [{
+                        'abbr': 'GA_Et',
+                        'name': 'Tx',
+                        'subs': null
+                    }, {
+                        'abbr': 'GA_Nt',
+                        'name': 'N',
+                        'subs': null
+                    }, {
+                        'abbr': 'GA_Ec',
+                        'name': 'Control',
+                        'subs': null
+                    }, {
+                        'abbr': 'GA_Nc',
+                        'name': 'n',
+                        'subs': null
+                    }]
+                }, {
+                    'abbr': 'G34',
+                    'name': 'Grade 3/4',
+                    'attrs': [{
+                        'abbr': 'G34_Et',
+                        'name': 'Tx',
+                        'subs': null
+                    }, {
+                        'abbr': 'G34_Nt',
+                        'name': 'Control',
+                        'subs': null
+                    }]
+                }, {
+                    'abbr': 'G3H',
+                    'name': 'Grade 3 or higher',
+                    'attrs': [{
+                        'abbr': 'G3H_Et',
+                        'name': 'Tx',
+                        'subs': null
+                    }, {
+                        'abbr': 'G3H_Nt',
+                        'name': 'Control',
+                        'subs': null
+                    }]
+                }, {
+                    'abbr': 'G5N',
+                    'name': 'Grade 5 only',
+                    'attrs': [{
+                        'abbr': 'G5N_Et',
+                        'name': 'Tx',
+                        'subs': null
+                    }, {
+                        'abbr': 'G5N_Nt',
+                        'name': 'Control',
+                        'subs': null
+                    }]
+                }]
             },
             subg: {
                 SUBG_CATIRR_RAW: ['Et', 'Tt', 'Ec', 'Tc'],
