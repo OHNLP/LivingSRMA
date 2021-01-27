@@ -23,8 +23,6 @@
                 <th>Full Name</th>
                 <th>Data Type</th>
                 <th>Measure</th>
-                <th>Treatment</th>
-                <th>Control</th>
                 <th>&nbsp;</th>
             </tr>
             <tr v-for="oc in data.pwma.outcomes">
@@ -37,8 +35,6 @@
                 </td>
                 <td>{{ oc.input_format }}</td>
                 <td>{{ oc.measure_of_effect }}</td>
-                <td>{{ oc.treatment.abbr }}</td>
-                <td>{{ oc.control.abbr }}</td>
                 <td>
                     <a href="javascript:void(0);" class="text-danger"
                         v-on:click="delete_extract(oc.oc_type, oc.abbr, oc.full_name)">
@@ -53,8 +49,6 @@
                 <th>Group</th>
                 <th>Full Name</th>
                 <th>Measure</th>
-                <th>Treatment</th>
-                <th>Control</th>
                 <th>Subgroups</th>
                 <th>&nbsp;</th>
             </tr>
@@ -68,8 +62,6 @@
                     </a>
                 </td>
                 <td>{{ oc.measure_of_effect }}</td>
-                <td>{{ oc.treatment.abbr }}</td>
-                <td>{{ oc.control.abbr }}</td>
                 <td>{{ oc.subgroups }}</td>
                 <td>
                     <a href="javascript:void(0);" class="text-danger"

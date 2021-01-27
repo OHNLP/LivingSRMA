@@ -539,7 +539,8 @@ def graphdata_softable_nma_json(prj):
 
 @bp.route('/graphdata/<prj>/OPLOTS.json')
 def graphdata_oplots(prj):
-    '''Special rule for the OPLOTS.json which does not exist
+    '''
+    Special rule for the OPLOTS.json which does not exist
     
     The input file is OPLOTS.xls with multiple sheets
 

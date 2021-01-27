@@ -15,6 +15,7 @@ from flask_login import login_required
 from flask_login import current_user
 
 from lnma import dora
+from lnma import util
 from lnma import ss_state
 from lnma import settings
 
@@ -384,6 +385,146 @@ def import_itable_meta_and_data_from_xls():
     }
     return jsonify(ret)
 
+
+
+@bp.route('/import_IO_aes_from_xls')
+@login_required
+def import_IO_aes_from_xls():
+    '''
+    Create the meta for itable
+    '''
+    import pandas as pd
+    prj = 'IO'
+    fn = 'ALL_DATA.xlsx'
+    full_fn = os.path.join(current_app.instance_path, settings.PATH_PUBDATA, prj, fn)
+    # ret = get_ae_pma_data(full_fn, is_getting_sms=False)
+
+    # First, create a row->pmid dictionary
+    xls = pd.ExcelFile(full_fn)
+    df = xls.parse(xls.sheet_names[0], skiprows=1)
+    idx2pmid = {}
+    for idx, row in df.iterrows():
+        idx2pmid[idx] = row['PMID']
+
+    # Second, create tab->cate+tab dictionary
+    dft = xls.parse(xls.sheet_names[1])
+    ae_dict = {}
+    ae_list = []
+    for col in dft.columns:
+        ae_cate = col
+        ae_names = dft[col][~dft[col].isna()]
+        ae_item = {
+            'ae_cate': ae_cate,
+            'ae_names': []
+        }
+        # build ae_name dict
+        for ae_name in ae_names:
+            # remove the white space
+            ae_name = ae_name.strip()
+            if ae_name in ae_dict:
+                cate1 = ae_dict[ae_name]
+                print('! duplicate %s in [%s] and [%s]' % (ae_name, cate1, ae_cate))
+                continue
+            ae_dict[ae_name] = ae_cate
+            ae_item['ae_names'].append(ae_name)
+
+        ae_list.append(ae_item)
+            
+        print('* parsed ae_cate %s with %s names' % (col, len(ae_names)))
+    print('* created ae_dict %s terms' % (len(ae_dict)))
+
+    # Third, loop on tabs
+    cols = ['author', 'year', 'GA_Et', 'GA_Nt', 'GA_Ec', 'GA_Nc', 
+            'G34_Et', 'G34_Ec', 'G3H_Et', 'G3H_Ec', 'G5N_Et', 'G5N_Ec', 
+            'drug_used', 'malignancy']
+
+    # each sheet is an AE/OC
+    outcomes = []
+    for sheet_name in xls.sheet_names[2:]:
+        ae_name = sheet_name
+
+        # create an empty meta
+        ae_meta = json.loads(json.dumps(settings.OC_TYPE_TPL['pwma']['default']))
+        
+        # update the abbr
+        ae_meta['abbr'] = util.mk_oc_abbr()
+
+        # update the cate
+        ae_meta['category'] = ae_dict[ae_name]
+
+        # update the full name
+        ae_meta['full_name'] = ae_name
+
+        # update the input format for this project?
+        ae_meta['input_format'] = 'PRIM_CAT_RAW_G5'
+
+        # update the cate_attrs
+        ae_meta['cate_attrs'] = json.loads(json.dumps(settings.INPUT_FORMAT_TPL['pwma']['PRIM_CAT_RAW_G5']))
+
+        # get the data part
+        dft = xls.parse(sheet_name, skiprows=1, usecols='A:N', names=cols)
+        dft = dft[~dft.author.isna()]
+        ae_data = {}
+        for idx, row in dft.iterrows():
+            pmid = idx2pmid[idx]
+            is_main = False
+            if pmid not in ae_data:
+                # ok, new record
+                ae_data[pmid] = {
+                    'is_selected': True,
+                    'is_checked': True,
+                    'n_arms': 2,
+                    'attrs': {
+                        'main': {},
+                        'other': []
+                    }
+                }
+                is_main = True
+            else:
+                ae_data[pmid]['n_arms'] += 1
+                ae_data[pmid]['attrs']['other'].append({})
+
+            # collect all values in the col
+            for col in cols[2:]:
+                # the first two cols are not used
+                val = row[col]
+                
+                if pd.isna(val): val = None
+
+                if is_main:
+                    ae_data[pmid]['attrs']['main'][col] = val
+                else:
+                    ae_data[pmid]['attrs']['other'][-1][col] = val
+
+        outcomes.append([
+            ae_meta, ae_data
+        ])
+
+    # finally, save all
+    project_id = request.cookies.get('project_id')
+    oc_type = 'pwma'
+
+    extracts = []
+    for oc in outcomes:
+        extract = dora.create_extract(
+            project_id, 
+            oc_type, 
+            oc[0]['abbr'], 
+            oc[0],
+            oc[1]
+        )
+
+        extracts.append(extract)
+
+    # return!
+
+    ret = {
+        'success': True,
+        'n_extracts': len(extracts),
+        'extracts': [ ext.as_dict() for ext in extracts ]
+    }
+
+    return jsonify(ret)
 
 
 ###############################################################################

@@ -2,6 +2,7 @@
 import re
 import json
 import time
+import random
 import datetime
 import requests
 
@@ -48,6 +49,10 @@ class AlchemyEncoder(json.JSONEncoder):
             return fields
 
         return json.JSONEncoder.default(self, obj)
+
+
+def mk_oc_abbr():
+    return ''.join(random.choice('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789') for i in range(8))
 
 
 def is_valid_pmid(pmid):

@@ -44,6 +44,100 @@ STANDARD_DATA_COLS = {
                         'drug_used', 'malignancy']
 }
 
+OC_TYPE_TPL = {
+    "pwma": {
+        "default": {
+            "abbr": '',
+            "oc_type": 'pwma',
+            "category": 'default',
+            "group": 'Primary',
+            "full_name": 'pwma Outcome full name',
+            "included_in_plots": 'yes',
+            "included_in_sof": 'yes',
+            "input_format": 'PRIM_CAT_RAW',
+            "measure_of_effect": 'RR',
+            "fixed_or_random": 'fixed',
+            "which_is_better": 'lower',
+            "attrs": None,
+            "cate_attrs": None
+        }
+    }
+}
+
+INPUT_FORMAT_TPL = {
+    "pwma": {
+        'PRIM_CAT_RAW_G5': [{
+            'abbr': 'default',
+            'name': 'default',
+            'attrs': [{
+                'abbr': 'drug_used',
+                'name': 'Drug Used',
+                'subs': None
+            }, {
+                'abbr': 'malignancy',
+                'name': 'Malignancy',
+                'subs': None
+            }]
+        },{
+            'abbr': 'GA',
+            'name': 'All Grade',
+            'attrs': [{
+                'abbr': 'GA_Et',
+                'name': 'Tx',
+                'subs': None
+            }, {
+                'abbr': 'GA_Nt',
+                'name': 'N',
+                'subs': None
+            }, {
+                'abbr': 'GA_Ec',
+                'name': 'Control',
+                'subs': None
+            }, {
+                'abbr': 'GA_Nc',
+                'name': 'n',
+                'subs': None
+            }]
+        }, {
+            'abbr': 'G34',
+            'name': 'Grade 3/4',
+            'attrs': [{
+                'abbr': 'G34_Et',
+                'name': 'Tx',
+                'subs': None
+            }, {
+                'abbr': 'G34_Nt',
+                'name': 'Control',
+                'subs': None
+            }]
+        }, {
+            'abbr': 'G3H',
+            'name': 'Grade 3 or higher',
+            'attrs': [{
+                'abbr': 'G3H_Et',
+                'name': 'Tx',
+                'subs': None
+            }, {
+                'abbr': 'G3H_Nt',
+                'name': 'Control',
+                'subs': None
+            }]
+        }, {
+            'abbr': 'G5N',
+            'name': 'Grade 5 only',
+            'attrs': [{
+                'abbr': 'G5N_Et',
+                'name': 'Tx',
+                'subs': None
+            }, {
+                'abbr': 'G5N_Nt',
+                'name': 'Control',
+                'subs': None
+            }]
+        }]
+    }
+}
+
 RSCRIPT_TPL = {
     # for frequentist NMA
     'freq_pairwise_netmeta': 'lnma_freq_pairwise_netmeta.tpl.r',
