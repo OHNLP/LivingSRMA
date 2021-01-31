@@ -19,14 +19,14 @@
         </div>
         <table class="table">
             <tr>
-                <th>Group</th>
+                <th>Category</th>
                 <th>Full Name</th>
                 <th>Data Type</th>
                 <th>Measure</th>
                 <th>&nbsp;</th>
             </tr>
             <tr v-for="oc in data.pwma.outcomes">
-                <td>{{ oc.group }}</td>
+                <td>{{ oc.category }}</td>
                 <td :oc_abbr="oc.abbr">
                     <a href="javascript:void(0);"
                         v-on:click="show_extract_data(oc.oc_type, oc.abbr)">

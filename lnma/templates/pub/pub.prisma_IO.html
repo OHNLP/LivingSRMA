@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-<title>Study Selection v2</title>
+<title>Study Selection for IO</title>
 <link rel="icon" href="/static/img/favicon.png" type="image/png">
 <link rel="stylesheet" href="/static/lib/font-awesome/css/all.css">
 <link rel="stylesheet" href="/static/lib/jquery-ui/jquery-ui.min.css">
@@ -342,7 +342,7 @@ a {
 
 <div id="fg_prisma" class="box" style="width: 500px; min-width: 500px;">
 
-    {% include 'svg/PRISMA_IOTOX_v2.svg' %}
+    {% include 'svg/PRISMA_IO_v3.svg' %}
 
 </div><!-- /#fg_prisma -->
 
@@ -577,7 +577,7 @@ var jarvis = {
         var prj = jarvis.getUrlParameter('prj');
 
         $.get(
-            '/pub/graphdata/IOTOX/PRISMA_K.json',
+            '/pub/graphdata/IO/PRISMA_K.json',
             { ver: Math.random() },
             function(data) {
                 console.log(data);

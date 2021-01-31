@@ -55,6 +55,12 @@ def subindex(prj):
     return render_template('pub/pub.subindex.html', prj_data=prj_data)
 
 
+@bp.route('/IO.html')
+def static_IO():
+    prj = 'IO'
+    return render_template('pub/pub.IO.html')
+
+
 @bp.route('/IOTOX.html')
 def IOTOX():
     prj = 'IOTOX'
@@ -201,12 +207,13 @@ def prisma_v3():
     return render_template('pub/pub.prisma_v3.html')
 
 
-@bp.route('/prisma_IOTOX.html')
-def prisma_IOTOX():
-    '''A special PRISMA for IOTOX project
+@bp.route('/prisma_IO.html')
+def prisma_IO():
+    '''
+    A special PRISMA for IOTOX project
     The looking is different from others
     '''
-    return render_template('pub/pub.prisma_IOTOX.html')
+    return render_template('pub/pub.prisma_IO.html')
 
 
 @bp.route('/itable.html')
@@ -558,13 +565,71 @@ def graphdata_oplots(prj):
     return jsonify(ret)
 
 
+@bp.route('/graphdata/<prj>/PRISMA_v2.json')
+def graphdata_prisma_json_v2(prj):
+    '''
+    Get the prisma data from database
+    '''
+    ret = {
+        "paper_dict": {},
+        "study_dict": {},
+        "prisma": {}
+    }
+
+    return jsonify(ret)
+
+
 @bp.route('/graphdata/<prj>/PRISMA.json')
 def graphdata_prisma_json(prj):
-    '''Special rule for the PRISMA.json
+    '''
+    Special rule for the PRISMA.json
 
     This JSON file is for the PRISMA plot
     '''
 
+    ret = get_prisma_from_xls(prj)
+
+    return jsonify(ret)
+
+
+@bp.route('/graphdata/<prj>/EVMAP.json')
+def graphdata_evmap_json(prj):
+    '''Special rule for the EVMAP.json
+
+    This JSON file is for the evidence map plot
+    '''
+
+    fn = 'EVMAP_DATA.xlsx'
+    fn = 'SOFTABLE_NMA_DATA.xlsx'
+    full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
+
+    # hold all the outcomes
+    fn_json = 'EVMAP.json'
+    full_fn_json = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn_json)
+
+    use_cache = request.args.get('use_cache')
+    if use_cache == 'yes':
+        return send_from_directory(
+            os.path.join(current_app.instance_path, PATH_PUBDATA, prj),
+            fn_json
+        )
+
+    # no cache
+    ret = get_evmap_data(full_fn)
+
+    # cache the latest data
+    json.dump(ret, open(full_fn_json, 'w'))
+
+    return jsonify(ret)
+
+
+###########################################################
+# Other utils
+###########################################################
+
+def get_prisma_from_xls(prj):
+    '''
+    '''
     fn = 'PRISMA_DATA.xlsx'
     full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
 
@@ -716,43 +781,8 @@ def graphdata_prisma_json(prj):
         "paper_dict": paper_dict
     }
 
-    return jsonify(ret)
+    return ret
 
-
-@bp.route('/graphdata/<prj>/EVMAP.json')
-def graphdata_evmap_json(prj):
-    '''Special rule for the EVMAP.json
-
-    This JSON file is for the evidence map plot
-    '''
-
-    fn = 'EVMAP_DATA.xlsx'
-    fn = 'SOFTABLE_NMA_DATA.xlsx'
-    full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
-
-    # hold all the outcomes
-    fn_json = 'EVMAP.json'
-    full_fn_json = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn_json)
-
-    use_cache = request.args.get('use_cache')
-    if use_cache == 'yes':
-        return send_from_directory(
-            os.path.join(current_app.instance_path, PATH_PUBDATA, prj),
-            fn_json
-        )
-
-    # no cache
-    ret = get_evmap_data(full_fn)
-
-    # cache the latest data
-    json.dump(ret, open(full_fn_json, 'w'))
-
-    return jsonify(ret)
-
-
-###########################################################
-# Other utils
-###########################################################
 
 def get_evmap_data(full_fn):
     # return get_evmap_data_v1(full_fn)
