@@ -494,7 +494,8 @@ def save_pdf(file):
     Save the Upload file
     '''
     folder = datetime.datetime.now().strftime(settings.PATH_PDF_FOLDER_FORMAT)
-    file_name = project_id = str(uuid.uuid1()) + '.pdf'
+    file_id = project_id = str(uuid.uuid1())
+    file_name = file_id + '.pdf'
     display_name = secure_filename(file.filename)
 
     # save the file
@@ -508,7 +509,7 @@ def save_pdf(file):
     # return the obj
     return {
         'folder': folder,
-        'file_name': file_name,
+        'file_id': file_id,
         'display_name': display_name
     }
 
@@ -517,7 +518,16 @@ def delete_pdf(pdf_meta):
     '''
     Delete the PDF file
     '''
-    raise Exception('Not yet')
+    full_fn = os.path.join(
+        settings.PATH_PDF_FILES,
+        pdf_meta['folder'],
+        pdf_meta['file_id'] + '.pdf'
+    )
+
+    if os.path.exists(full_fn):
+        os.remove(full_fn)
+
+    return True
 
 
 ###############################################################################

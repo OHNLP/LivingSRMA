@@ -1038,14 +1038,40 @@ def add_pdfs_to_paper(paper_id, pdf_metas):
     '''
     Add PDF meta to a paper
     '''
-    raise Exception('Not yet')
+    paper = get_paper_by_id(paper_id)
+    if paper is None:
+        raise Exception('no such paper???')
+
+    paper.meta['pdfs'] += pdf_metas
+    flag_modified(paper, "meta")
+
+    db.session.add(paper)
+    db.session.commit()
+    
+    return paper
 
 
 def remove_pdfs_from_paper(paper_id, pdf_metas):
     '''
     Remove PDF meta from a paper
     '''
-    raise Exception('Not yet')
+    paper = get_paper_by_id(paper_id)
+    if paper is None:
+        raise Exception('no such paper???')
+
+    file_ids_to_remove = [ f['file_id'] for f in pdf_metas ]
+    new_pdf_metas = []
+    for pdf_meta in paper.meta['pdfs']:
+        if pdf_meta['file_id'] not in file_ids_to_remove:
+            new_pdf_metas.append(pdf_meta)
+
+    paper.meta['pdfs'] = new_pdf_metas
+    flag_modified(paper, "meta")
+
+    db.session.add(paper)
+    db.session.commit()
+    
+    return paper
 
 
 def get_screener_stat_by_stage(project_id, stage):
