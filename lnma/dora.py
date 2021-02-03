@@ -497,8 +497,9 @@ def create_paper(project_id, pid,
     all_rct_ids = get_nct_number(abstract)
     rct_id = '' if len(all_rct_ids) == 0 else all_rct_ids[0]
     _meta = {
-        'rct_id': rct_id,
         'tags': [],
+        'pdfs': [],
+        'rct_id': rct_id,
         'all_rct_ids': all_rct_ids
     }
     if meta is None:
@@ -1031,6 +1032,20 @@ def set_rct_user_feedback(paper_id, usr_fb):
     db.session.commit()
     
     return paper
+
+
+def add_pdfs_to_paper(paper_id, pdf_metas):
+    '''
+    Add PDF meta to a paper
+    '''
+    raise Exception('Not yet')
+
+
+def remove_pdfs_from_paper(paper_id, pdf_metas):
+    '''
+    Remove PDF meta from a paper
+    '''
+    raise Exception('Not yet')
 
 
 def get_screener_stat_by_stage(project_id, stage):

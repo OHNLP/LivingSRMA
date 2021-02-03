@@ -1,10 +1,15 @@
 #%% define packages and methods
+import os
 import re
 import json
 import time
 import random
 import datetime
 import requests
+
+import uuid 
+
+from werkzeug.utils import secure_filename
 
 from tqdm import tqdm
 
@@ -482,6 +487,37 @@ def get_nct_number(s):
     Get the NCT8 number from study
     '''
     return re.findall('NCT\d{8}', s, re.MULTILINE)
+
+
+def save_pdf(file):
+    '''
+    Save the Upload file
+    '''
+    folder = datetime.datetime.now().strftime(settings.PATH_PDF_FOLDER_FORMAT)
+    file_name = project_id = str(uuid.uuid1()) + '.pdf'
+    display_name = secure_filename(file.filename)
+
+    # save the file
+    full_path = os.path.join(
+        settings.PATH_PDF_FILES,
+        folder
+    )
+    os.makedirs(os.path.dirname(full_path), exist_ok=True)
+    file.save(full_path, file_name)
+
+    # return the obj
+    return {
+        'folder': folder,
+        'file_name': file_name,
+        'display_name': display_name
+    }
+
+
+def delete_pdf(pdf_meta):
+    '''
+    Delete the PDF file
+    '''
+    raise Exception('Not yet')
 
 
 ###############################################################################

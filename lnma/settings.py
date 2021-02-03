@@ -2,9 +2,12 @@ import os
 import pathlib
 
 ALLOWED_UPLOAD_EXTENSIONS = {'pdf', 'png', 'jpg'}
+ALLOWED_PDF_UPLOAD_EXTENSIONS = {'pdf'}
 
 TMP_FOLDER = '/dev/shm/lnma'
 PATH_PUBDATA = 'pubdata'
+PATH_PDF_FILES = '/data/pdf'
+PATH_PDF_FOLDER_FORMAT = '%Y%m%d'
 
 RSCRIPT_TPL_FOLDER = os.path.join(
     os.path.join(pathlib.Path(__file__).parent.absolute(), 'analyzer'),
