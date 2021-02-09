@@ -224,6 +224,11 @@ def _check_update_by_project_in_emails(project, emails):
 
                 # parse the papers from the xml_text
                 papers = util.parse_ovid_exported_xml_text(xml_text)
+            
+            else:
+                # ???
+                logger.debug('!!! unknown email type: %s' % mail['email_type'])
+                papers = []
 
             logger.debug('found and %s papers for prject [%s] in %s|%s|%s' % \
                 (len(papers), project.keystr, 

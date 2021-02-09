@@ -306,6 +306,7 @@ def _parse_ovid_exported_xml_root(root):
             'pub_type': '',
             'journal': '',
             'rct_id': '',
+            'other': {}
         }
 
         for node in record.iter():
@@ -352,7 +353,11 @@ def _parse_ovid_exported_xml_root(root):
                     # update the RCT id
                     paper['rct_id'] = __get_node_text(paper['rct_id'], node)
                 else:
-                    pass
+                    # unknow keywords
+                    if c not in paper['other']:
+                        paper['other'][c] = []
+                    # extend this
+                    paper['other'][c] += [ d.text for d in node.findall('D') ]
         
         papers.append(paper)
 
@@ -489,6 +494,17 @@ def get_nct_number(s):
     return re.findall('NCT\d{8}', s, re.MULTILINE)
 
 
+def get_year(s):
+    '''
+    Get the year number from a string
+    '''
+    rs = re.findall('\d{4}', s, re.MULTILINE)
+    if len(rs) == 0:
+        return ''
+    else:
+        return rs[0]
+
+
 def save_pdf(file):
     '''
     Save the Upload file
@@ -496,15 +512,18 @@ def save_pdf(file):
     folder = datetime.datetime.now().strftime(settings.PATH_PDF_FOLDER_FORMAT)
     file_id = project_id = str(uuid.uuid1())
     file_name = file_id + '.pdf'
-    display_name = secure_filename(file.filename)
+
+    # TODO make sure the display name is safe
+    display_name = file.filename
 
     # save the file
-    full_path = os.path.join(
+    full_file_name = os.path.join(
         settings.PATH_PDF_FILES,
-        folder
+        folder,
+        file_name
     )
-    os.makedirs(os.path.dirname(full_path), exist_ok=True)
-    file.save(full_path, file_name)
+    os.makedirs(os.path.dirname(full_file_name), exist_ok=True)
+    file.save(full_file_name)
 
     # return the obj
     return {

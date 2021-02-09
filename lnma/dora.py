@@ -691,6 +691,17 @@ def get_papers(project_id):
     return papers
 
 
+def get_papers_by_seq_nums(project_id, seq_nums):
+    '''
+    Get papers by the seq_num list
+    '''
+    papers = Paper.query.filter(and_(
+        Paper.project_id == project_id,
+        Paper.seq_num.in_(seq_nums)
+    )).all()
+    return papers
+
+
 def get_papers_by_pmids(project_id, pmids):
     '''
     Get all the papers according to pmid list
@@ -1041,6 +1052,9 @@ def add_pdfs_to_paper(paper_id, pdf_metas):
     paper = get_paper_by_id(paper_id)
     if paper is None:
         raise Exception('no such paper???')
+
+    if 'pdfs' not in paper.meta:
+        paper.meta['pdfs'] = []
 
     paper.meta['pdfs'] += pdf_metas
     flag_modified(paper, "meta")

@@ -216,6 +216,99 @@ class Paper(db.Model):
         return simple_dict
 
 
+    def as_endnote_xml(self):
+        '''
+        Return the EndNote XML format fragment
+        '''
+        author_list = self.authors.split(',')
+        xml = """
+<record>
+    <database name="EndNote_Export.enl">EndNote_Export.enl</database>
+    <source-app name="EndNote" version="19.3">EndNote</source-app>
+    <contributors>
+        <authors>
+        {contributors}
+        </authors>
+    </contributors>
+    <dates>
+        <year>
+            <style face="normal" font="default" size="100%">{year}</style>
+        </year>
+    </dates>
+    <periodical>
+        <full-title>
+            <style face="normal" font="default" size="100%">{journal}</style>
+        </full-title>
+    </periodical>
+    <accession-num>
+        <style face="normal" font="default" size="100%">{accession_num}</style>
+    </accession-num>
+    <titles>
+        <title>
+            <style face="normal" font="default" size="100%">{title}</style>
+        </title>
+    </titles>
+    <abstract>
+        <style face="normal" font="default" size="100%">{abstract}</style>
+    </abstract>
+</record>
+        """.format(
+            contributors="\n".join([ '<author><style face="normal" font="default" size="100%">%s</style></author>' % au for au in author_list ]),
+            accession_num=self.pid,
+            title=self.title,
+            abstract=self.abstract,
+            year=self.pub_date,
+            journal=self.journal
+        )
+        return xml
+
+
+    def as_ovid_xml(self):
+        '''
+        Return the OVID XML format fragment
+        '''
+        author_list = self.authors.split(',')
+        xml = """
+<record>
+    <F C="UI" L="Unique Identifier">
+        <D type="c">{UI}</D>
+    </F>
+    <F C="TI" L="Title">
+        <D type="c">{TI}</D>
+    </F>
+    <F C="SO" L="Source">
+        <D type="c">{SO}</D>
+    </F>
+    <F C="VI" L="Version ID">
+        <D type="c">{VI}</D>
+    </F>
+    <F C="ST" L="Status">
+        <D type="c">{ST}</D>
+    </F>
+    <F C="AU" L="Authors">
+        {AU}
+    </F>
+    <F C="AB" L="Abstract">
+        <D type="c">{AB}</D>
+    </F>
+    <F C="YR" L="Year of Publication">
+        <D type="c">{YR}</D>
+    </F>
+</record>
+        """.format(
+            UI=self.pid,
+            TI=self.title,
+            SO=self.journal,
+            VI=1,
+            ST=self.pid_type,
+            AU="\n".join([ '<D type="s">%s</D>' % au for au in author_list ]),
+            AB=self.abstract,
+            YR=self.pub_date
+        )
+
+        return xml
+
+
     def __repr__(self):
         return '<Paper {0}: {1} {2}>'.format(self.paper_id, self.pub_date, self.title)
 

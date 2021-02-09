@@ -6,6 +6,7 @@ Screener Overview
 
 {% block style %}
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.min.css">
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css">
 
 <style>
 #ui_category_stat {
@@ -23,7 +24,10 @@ Screener Overview
     right: 0;
     border: 1px solid #999999;
     background-color: white;
-    z-index: 9999;
+    z-index: 9990;
+}
+iframe {
+    height: 100%;
 }
 .criteria-box {
     padding: 10px;
@@ -32,6 +36,21 @@ Screener Overview
     white-space: pre-wrap;
     word-wrap: break-word;
     margin: 0;
+}
+#pan_pdfviewer {
+    position: fixed;
+    min-width: 1000px;
+    min-height: 400px;
+    padding: 20px 5px 5px 5px;
+    background-color: rgba(249, 249, 250, 1);;
+    z-index: 9999;
+}
+#ifr_pdfviewer {
+    width: 100%;
+    height: 400px;
+}
+#export_dialog {
+    /* width: 500px; */
 }
 td.details-control {
     cursor: pointer;
@@ -122,6 +141,9 @@ tr.shown td.details-control {
 .hide {
     display: none;
 }
+.offscreen {
+    left: -8888px !important;
+}
 .fs-s {
     font-size: 10px;
 }
@@ -159,6 +181,77 @@ Screener Overview
         </div>
     </div>
 </div>
+
+<div id="pan_pdfviewer" class="shadow-sm" :class="{offscreen:is_hide}">
+    <div style="position: absolute; left: 5px; top: 0px;">
+        <a href="javascript:void(0);"
+            v-on:click="toggle();">
+            <i class="fa fa-close"></i>
+        </a>
+    </div>
+    <iframe id="ifr_pdfviewer" src="/pdfworker/view_pdf" 
+        width="100%" scrolling="yes"
+        frameborder="0"></iframe>
+</div>
+
+<!-- <div id="export_dialog" title="Export Table" class="hide">
+    <p>There are <b id="export_dialog_total_number">&nbsp;</b> records in the current table, export them as the following foramt:</p>
+    <div class="form-check">
+        <input class="form-check-input" type="radio" name="export_format" id="export_format_1" value="pubmed_xml" checked>
+        <label class="form-check-label" for="export_format_1">
+          PubMed XML 
+        </label>
+      </div>
+      <div class="form-check">
+        <input class="form-check-input" type="radio" name="export_format" id="export_format_2" value="custom_xls">
+        <label class="form-check-label" for="export_format_2">
+          Excel XLS
+        </label>
+    </div>
+    <p>
+        <button onclick="tbjs_paperlist.export_current_table();">
+            <i class="fa fa-file-export"></i>
+            Export
+        </button>
+    </p>
+</div> -->
+
+<div id="export_dialog" class="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Export Table</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <p>There are <b id="export_dialog_total_number">&nbsp;</b> records in the current table, export them as the following foramt:</p>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="export_format" id="export_format_1" value="pubmed_xml" checked>
+                <label class="form-check-label" for="export_format_1">
+                  PubMed XML 
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="export_format" id="export_format_2" value="custom_xls">
+                <label class="form-check-label" for="export_format_2">
+                  Excel XLS
+                </label>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary"
+            onclick="tbjs_paperlist.export_current_table();">
+            <i class="fa fa-file-export"></i>
+            Export
+          </button>
+
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
 <div class="content">
     <div class="container-fluid">
@@ -261,9 +354,16 @@ Screener Overview
                     Reference List | 
                     <span id="tbjs_paperlist_title"></span>
 
-                    <a style="font-size: .8em;" href="javascript:void(0);" onclick="pan_iecriteria.toggle();">
+                    <a style="font-size: .8em;" class="mr-2" href="javascript:void(0);" onclick="pan_iecriteria.toggle();">
                         <i class="far fa-clipboard"></i>
                         Inclusion / Exclusion Criteria
+                    </a>
+                    
+                    <a style="font-size: .8em;" class="mr-2" 
+                        href="javascript:void(0);" 
+                        onclick="tbjs_paperlist.show_export_panel();">
+                        <i class="fa fa-file-export"></i>
+                        Export List
                     </a>
                 </h5>
 
@@ -1418,42 +1518,7 @@ var tbjs_paperlist = {
             '</tr>'+
 
             this.__get_tr_tags(d) +
-
-            '<tr>' +
-                '<td>Files: </td>' +
-                '<td class="d-flex flex-row">' +                        
-                    '<div class="custom-file mr-2" style="width: 200px;">' + 
-                        '<input type="file" class="custom-file-input" id="tb-row-upload-'+d.paper_id+'">' +
-                        '<label class="custom-file-label" for="tb-row-upload-'+d.paper_id+'">Choose file</label>' +
-                    '</div>' +
-                    '<button class="btn btn-primary mr-2">Upload</button>' + 
-
-                    '<div class="btn-group mr-2">' +
-                    '    <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' +
-                    '        <i class="far fa-file-pdf"></i> The-file-name-of-the-uploaded-file.pdf' +
-                    '    </button>' +
-                    '    <div class="dropdown-menu dropdown-menu-right">' +
-                    '        <a class="dropdown-item" href="javascript:void(0);">View PDF</a>' +
-                    '        <a class="dropdown-item" href="javascript:void(0);">Download</a>' +
-                    '        <div class="dropdown-divider"></div>' +
-                    '        <a class="dropdown-item" href="javascript:void(0);"><i class="far fa-trash-alt"></i> Delete this file</a>' +
-                    '    </div>' +
-                    '</div>' +
-
-                    '<div class="btn-group mr-2">' +
-                    '    <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' +
-                    '        <i class="far fa-file-pdf"></i> Another-uploaded-file.pdf' +
-                    '    </button>' +
-                    '    <div class="dropdown-menu dropdown-menu-right">' +
-                    '        <a class="dropdown-item" href="javascript:void(0);">View PDF</a>' +
-                    '        <a class="dropdown-item" href="javascript:void(0);">Download</a>' +
-                    '        <div class="dropdown-divider"></div>' +
-                    '        <a class="dropdown-item" href="javascript:void(0);"><i class="far fa-trash-alt"></i> Delete this file</a>' +
-                    '    </div>' +
-                    '</div>' +
-
-                '</td>' +
-            '</tr>' +
+            this.__get_tr_pdfs(d) +
             this.__get_tr_info(d) + 
             this.__get_tr_authors(d) +
             this.__get_tr_abstract(d);
@@ -1687,6 +1752,27 @@ var tbjs_paperlist = {
         return html;
     },
 
+    __get_tr_pdfs: function(d) {
+        return '<tr>' +
+            '<td>Files: </td>' +
+            '<td id="tb-rowext-pdfs-'+d.paper_id+'" class="d-flex flex-row">' +
+                '<form id="tb-rowext-pdfs-form-'+d.paper_id+'" method="post" enctype="multipart/form-data">' +
+                '<div class="custom-file mr-2" style="width: 200px;">' + 
+                    '<input type="hidden" name="paper_id" value="'+d.paper_id+'">' + 
+                    '<input type="file" name="files[]" multiple class="custom-file-input" id="tb-row-upload-'+d.paper_id+'">' +
+                    '<label class="custom-file-label" for="tb-row-upload-'+d.paper_id+'">Choose file</label>' +
+                '</div>' +
+                '</form>' +
+                '<button class="btn btn-primary mr-2" onclick="srv_pdfworker.update_pdfs(\''+d.paper_id+'\');">Upload</button>' + 
+                
+                '<div id="tb-rowext-pdfs-list-'+d.paper_id+'">' +
+                this.__get_div_pdfs(d) +
+                '</div>'
+
+            '</td>' +
+        '</tr>';
+    },
+
     __get_tr_authors: function(d) {
         return '<tr>'+
             '<td>Authors:</td>'+
@@ -1732,6 +1818,38 @@ var tbjs_paperlist = {
             '<a target="_blank" href="' + jarvis.create_src_url(d) + '"><span>' + d.pid_type + ': ' + d.pid + '</span></a> | ' +
             '<span>' + d.journal + '</span> | ' + 
             '<span>' + d.pub_date + '</span>';
+    },
+
+    /**
+     * Generate the div of pdfs
+     */
+    __get_div_pdfs: function(d) {
+        var html_tags = [];
+
+        if (!d.meta.hasOwnProperty('pdfs')) {
+            html_tags = html_tags.join('');
+            return html_tags;
+        }
+
+        // add the pdfs
+        for (let i = 0; i < d.meta.pdfs.length; i++) {
+            const pdf_meta = d.meta.pdfs[i];
+            html_tags.push(
+                '<div class="btn-group mr-2">' +
+                '    <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' +
+                '        <i class="far fa-file-pdf"></i> ' + pdf_meta.display_name +
+                '    </button>' +
+                '    <div class="dropdown-menu dropdown-menu-right">' +
+                '        <a class="dropdown-item" href="javascript:void(0);" onclick="srv_pdfworker.view_pdf(\''+d.paper_id+'\', \''+pdf_meta.file_id+'\', \''+pdf_meta.folder+'\')"><i class="far fa-envelope-open"></i> View this PDF</a>' +
+                '        <a class="dropdown-item" href="javascript:void(0);" onclick="srv_pdfworker.download_pdf(\''+d.paper_id+'\', \''+pdf_meta.file_id+'\', \''+pdf_meta.folder+'\', \'File-'+i+'.pdf\')"><i class="fa fa-download"></i> Download this PDF</a>' +
+                '        <div class="dropdown-divider"></div>' +
+                '        <a class="dropdown-item" href="javascript:void(0);" onclick="srv_pdfworker.remove_pdf(\''+d.paper_id+'\', \''+pdf_meta.file_id+'\', \''+pdf_meta.folder+'\')"><i class="far fa-trash-alt"></i> Delete this file</a>' +
+                '    </div>' +
+                '</div>'
+            );
+        }
+        html_tags = html_tags.join('');
+        return html_tags;
     },
 
     /**
@@ -1847,6 +1965,12 @@ var tbjs_paperlist = {
 
         return html;
     },
+
+    ///////////////////////////////////////////////////////////////////////////
+    // the functions related to pdf
+    ///////////////////////////////////////////////////////////////////////////
+
+    
 
     ///////////////////////////////////////////////////////////////////////////
     // the functions related to screening
@@ -2051,6 +2175,26 @@ var tbjs_paperlist = {
 
     sort_by_decision_reason: function() {
         this.sort_by(6, 'asc');
+    },
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Export
+    ///////////////////////////////////////////////////////////////////////////
+    show_export_panel: function() {
+        // update the number
+        var n_total = this.table.rows({search:'applied'}).data().length;
+        $('#export_dialog_total_number').html(n_total);
+
+        $( "#export_dialog" ).modal({
+            width: 500
+        });
+    },
+
+    export_current_table: function() {
+        // show the panel first
+        var n_total = this.table.rows({search:'applied'}).data().length;
+
+        //
     }
 };
 
@@ -2080,6 +2224,127 @@ var pan_iecriteria = {
 };
 
 
+var pan_pdfviewer = {
+    vpp_id: '#pan_pdfviewer',
+    vpp: null,
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                is_hide: true
+            },
+            methods: {
+                toggle: function() {
+                    pan_pdfviewer.toggle();
+                }
+            }
+        });
+    },
+
+    toggle: function() {
+        this.vpp.$data.is_hide = !this.vpp.$data.is_hide;
+    },
+
+    show: function() {
+        this.vpp.$data.is_hide = false;
+    },
+
+    open_pdf: function(folder, file_id) {
+        var pdf_url = "/pdfworker/pdf/" + folder + "/" + file_id + '.pdf';
+        document.getElementById("ifr_pdfviewer").contentWindow.PDFViewerApplication.open(pdf_url);
+    }
+};
+
+
+var srv_pdfworker = {
+    api_url: {
+        upload_pdfs: '[[ url_for("pdfworker.upload_pdfs") ]]',
+        remove_pdf: '[[ url_for("pdfworker.remove_pdf") ]]',
+    },
+    ///////////////////////////////////////////////////////////////////////////
+    // the functions related to pdf
+    ///////////////////////////////////////////////////////////////////////////
+
+    update_pdfs: function(paper_id) {
+        // get the pdf form data
+        var form_data = new FormData(
+            $('#tb-rowext-pdfs-form-' + paper_id)[0]
+        );
+
+        // send the update
+        $.ajax({
+            type: 'POST',
+            url: srv_pdfworker.api_url.upload_pdfs,
+            data: form_data,
+            contentType: false,
+            cache: false,
+            processData: false,
+            success: function(data) {
+                
+                console.log(data);
+
+                var paper = data.paper;
+
+                // update hte pdf list UI
+                $('#tb-rowext-pdfs-list-' + paper.paper_id).html(
+                    tbjs_paperlist.__get_div_pdfs(paper)
+                );
+
+                // update the tb data list
+                tbjs_paperlist.update_data_by_paper(paper);
+            },
+        });
+    },
+
+    view_pdf: function(paper_id, file_id, folder) {
+        // show the PDF panel
+        pan_pdfviewer.show();
+
+        // load the PDF
+        pan_pdfviewer.open_pdf(folder, file_id);
+    },
+
+    download_pdf: function(paper_id, file_id, folder, display_name) {
+        var url = '/pdfworker/download_pdf/' + folder + '/' + file_id;
+        url += "?fn=" + encodeURI(display_name);
+        window.open(url);
+    },
+
+    remove_pdf: function(paper_id, file_id, folder) {
+        var ret = window.confirm('Deleted files could NOT be recovered. Are you sure to continue?');
+
+        if (!ret) {
+            return;
+        }
+
+        $.post(
+            srv_pdfworker.api_url.remove_pdf,
+            {
+                paper_id: paper_id,
+                pdf_metas: JSON.stringify([{
+                    folder: folder,
+                    file_id: file_id
+                }])
+            },
+            function(data) {
+                console.log(data);
+
+                var paper = data.paper;
+
+                // update hte pdf list UI
+                $('#tb-rowext-pdfs-list-' + paper.paper_id).html(
+                    tbjs_paperlist.__get_div_pdfs(paper)
+                );
+
+                // update the tb data list
+                tbjs_paperlist.update_data_by_paper(paper);
+            }, 'json'
+        );
+    }
+};
+
+
 var jarvis = {
     create_src_url: function(d) {
         return 'https://pubmed.ncbi.nlm.nih.gov/' + d.pid;
@@ -2095,6 +2360,9 @@ var jarvis = {
         tbjs_paperlist.load_by_stage(srv_screener.STAGE_UNSCREENED);
 
         pan_iecriteria.init();
+
+        // load the pdf workers
+        pan_pdfviewer.init();
     },
 
     prompt: function(text, value) {
