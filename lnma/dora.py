@@ -11,7 +11,7 @@ from .models import *
 
 from . import db
 
-from lnma.util import pred_rct
+from lnma.util import get_year, pred_rct
 from lnma.util import get_nct_number
 
 IS_DELETED_YES = 'yes'
@@ -394,6 +394,64 @@ def set_project_tags(project_id, tags):
     db.session.commit()
 
     return True, project
+
+
+def sort_paper_rct_seq_in_project(project_id):
+    '''
+    Sort the paper's rct seq
+
+    Based on 
+    '''
+    papers = get_papers(project_id)
+
+    # get all nct
+    ncts = {}
+
+    for paper in papers:
+        if paper.meta['rct_id'] == '': continue
+
+        # update the rct
+        nct = paper.meta['rct_id']
+        if nct not in ncts:
+            ncts[nct] = {
+                'rct_seq': {},
+                'papers': []
+            }
+
+        ncts[nct]['papers'].append({
+            'pid': paper.pid,
+            'pub_date': get_year(paper.pub_date)
+        })
+    
+    # sort the nct's paper
+    for nct in ncts:
+        ncts[nct]['papers'] = sorted(
+            ncts[nct]['papers'],
+            lambda p: p['pub_date']
+        )
+        for i, p in enumerate(ncts[nct]['papers']):
+            ncts[nct]['rct_seq'][p['pid']] = i
+
+    # update the paper
+    for paper in papers:
+        if paper.meta['rct_id'] == '': continue
+
+        nct = paper.meta['rct_id']
+        
+        rct_seq = ncts[nct]['rct_seq'][paper.pid]
+        if rct_seq == 0:
+            study_type = settings.PAPER_STUDY_TYPE_ORIGINAL
+        else:
+            study_type = settings.PAPER_STUDY_TYPE_FOLLOWUP
+        
+        paper.meta['rct_seq'] = rct_seq
+        paper.meta['study_type'] = study_type
+
+        db.session.add(paper)
+
+    db.session.commit()
+
+    return papers
 
 
 def set_paper_rct_id(paper_id, rct_id):
