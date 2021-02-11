@@ -177,7 +177,11 @@ var srv_importer = {
 
         $.post(
             this.url.save_papers,
-            {project_id:project_id, papers: JSON.stringify(papers), stage:stage},
+            {
+                project_id:project_id, 
+                papers: JSON.stringify(papers), 
+                stage:stage
+            },
             callback, 
             'json'
         );

@@ -1,6 +1,7 @@
 import os
 import uuid
 from flask.helpers import send_from_directory
+from flask.helpers import send_file
 
 import pandas as pd
 
@@ -39,17 +40,32 @@ def export():
 
     if format == 'endnote_xml':
         fn = _export_endnote_xml(papers)
+        mimetype = 'text/xml'
+        filename = 'EndNote-export-%d.xml' % len(papers)
+
     elif format == 'ovid_xml':
         fn = _export_ovid_xml(papers)
+        mimetype = 'text/xml'
+        filename = 'OVID-export-%d.xml' % len(papers)
+
     elif format == 'ct01_csv':
         fn = _export_ct01_csv(papers)
+        mimetype = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        filename = 'Excel-export-%d.xlsx' % len(papers)
+
     else:
         fn = _export_ovid_xml(papers)
-    # convert to file
+        mimetype = 'text/xml'
+        filename = 'OVID-export-%d.xml' % len(papers)
 
-    return send_from_directory(
-        settings.TMP_FOLDER,
-        fn
+    return send_file(
+        os.path.join(
+            settings.TMP_FOLDER,
+            fn
+        ),
+        mimetype=mimetype,
+        as_attachment=True,
+        attachment_filename=filename
     )
 
 
@@ -59,6 +75,12 @@ def _export_endnote_xml(papers):
     '''
     xmls = [ p.as_endnote_xml() for p in papers ]
     s = '\n'.join(xmls)
+    xml_text = """<?xml version="1.0" encoding="utf-8"?>
+<xml>
+<records>
+%s
+</records>
+</xml>""" % s
 
     # generate the file name
     fn = str(uuid.uuid4()) + '.xml'
@@ -69,7 +91,7 @@ def _export_endnote_xml(papers):
 
     # write the xml content to an tmp file
     with open(full_fn, 'w') as f:
-        f.write(s)
+        f.write(xml_text)
 
     return fn
 
@@ -80,7 +102,13 @@ def _export_ovid_xml(papers):
     '''
     xmls = [ p.as_ovid_xml() for p in papers ]
     s = '\n'.join(xmls)
-
+    xml_text = """<?xml version="1.0" encoding="utf-8"?>
+<ovidresults>
+<records>
+%s
+</records>
+</ovidresults>""" % s
+    
     # generate the file name
     fn = str(uuid.uuid4()) + '.xml'
     full_fn = os.path.join(
@@ -90,7 +118,7 @@ def _export_ovid_xml(papers):
 
     # write the xml content to an tmp file
     with open(full_fn, 'w') as f:
-        f.write(s)
+        f.write(xml_text)
 
     return fn
 
@@ -99,9 +127,12 @@ def _export_ct01_csv(papers):
     '''
     Export the papers as Customized Type 
     '''
+    # import HTMLParser
+    # htmlparser = HTMLParser.HTMLParser()
+# htmlparser.unescape(paper.journal)
     ps = []
     for paper in papers:
-        authors = paper.author.split(',')
+        authors = paper.authors.split(';')
         p = {
             'NCT': paper.meta['rct_id'],
             'PMID': paper.pid,
@@ -111,7 +142,7 @@ def _export_ct01_csv(papers):
             'Number of Citations': '',            
         }
         for i, au in enumerate(authors):
-            p['Author %d' % i] = au
+            p['Author %d' % (i+1)] = au
 
         ps.append(p)
     

@@ -1,3 +1,5 @@
+from xml.sax.saxutils import escape
+
 from . import db
 from . import settings
 from werkzeug.security import generate_password_hash
@@ -220,6 +222,10 @@ class Paper(db.Model):
         '''
         Return the EndNote XML format fragment
         '''
+        if self.meta['raw_type'] == 'endnote_xml':
+            # this paper is imported by endnote
+            return self.meta['xml']
+            
         author_list = self.authors.split(',')
         xml = """
 <record>
@@ -253,12 +259,12 @@ class Paper(db.Model):
     </abstract>
 </record>
         """.format(
-            contributors="\n".join([ '<author><style face="normal" font="default" size="100%">%s</style></author>' % au for au in author_list ]),
+            contributors= "\n".join([ '<author>%s</author>' % escape(au) for au in author_list ]),
             accession_num=self.pid,
-            title=self.title,
-            abstract=self.abstract,
-            year=self.pub_date,
-            journal=self.journal
+            title=escape(self.title),
+            abstract=escape(self.abstract),
+            year=escape(self.pub_date),
+            journal=escape(self.journal)
         )
         return xml
 
@@ -297,13 +303,13 @@ class Paper(db.Model):
 </record>
         """.format(
             UI=self.pid,
-            TI=self.title,
-            SO=self.journal,
+            TI=escape(self.title),
+            SO=escape(self.journal),
             VI=1,
-            ST=self.pid_type,
-            AU="\n".join([ '<D type="s">%s</D>' % au for au in author_list ]),
-            AB=self.abstract,
-            YR=self.pub_date
+            ST=escape(self.pid_type),
+            AU="\n".join([ '<D type="s">%s</D>' % escape(au) for au in author_list ]),
+            AB=escape(self.abstract),
+            YR=escape(self.pub_date)
         )
 
         return xml

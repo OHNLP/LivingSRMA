@@ -301,6 +301,11 @@ def _update_papers_in_project(prj_update):
         ss_rs = None
         ss_ex = None
         seq_num = None
+        meta = {
+            'raw_type': paper['raw_type'],
+            'xml': paper['xml'],
+            'other': paper['other']
+        }
         is_existed, paper_db = dora.create_paper_if_not_exist_and_predict_rct(
             project_id, pid, paper['pid_type'],
             paper['title'], paper['abstract'], paper['pub_date'], paper['authors'], 
@@ -321,6 +326,10 @@ def _update_papers_in_project(prj_update):
 
     return prj_update
 
+
+###########################################################
+# Deprecated functions
+###########################################################
 
 def _check_update_by_project(project):
     '''

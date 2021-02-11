@@ -204,7 +204,9 @@ def e_fetch(ids, db='pubmed'):
             'source': '',
             'title': '',
             'authors': [],
-            'abstract': []
+            'abstract': [],
+            'raw_type': 'pubmed_xml',
+            'xml': ET.tostring(item, encoding='utf8', method='xml')
         }
 
         # check each xml node
@@ -306,6 +308,8 @@ def _parse_ovid_exported_xml_root(root):
             'pub_type': '',
             'journal': '',
             'rct_id': '',
+            'raw_type': 'ovid_xml',
+            'xml': ET.tostring(record, encoding='utf8', method='xml').decode('utf-8'),
             'other': {}
         }
 
@@ -327,7 +331,7 @@ def _parse_ovid_exported_xml_root(root):
                     paper['title'] = __get_node_text(paper['title'], node)
                 elif c == 'AU':
                     # update the authors
-                    paper['authors'] = ', '.join([ _.text for _ in node.findall('D') ])
+                    paper['authors'] = '; '.join([ _.text for _ in node.findall('D') ])
                 elif c == 'AB':
                     # update the abstract
                     paper['abstract'] = __get_node_text(paper['abstract'], node)
@@ -390,7 +394,8 @@ def __get_node_text(old_text, node):
 
 
 def parse_endnote_exported_xml(full_fn):
-    '''Parse the file from endnote export
+    '''
+    Parse the file from endnote export
     '''
     try:
         tree = ET.parse(full_fn)
@@ -410,7 +415,11 @@ def parse_endnote_exported_xml(full_fn):
             'pub_date': [],
             'pub_type': '',
             'journal': [],
+            'raw_type': 'endnote_xml',
+            # 'xml': ""
+            'xml': ET.tostring(record, encoding='utf8', method='xml').decode('utf-8')
         }
+        # print(paper)
 
         for node in record.iter():
             # print(node.tag)
@@ -448,7 +457,7 @@ def parse_endnote_exported_xml(full_fn):
                 paper['pub_type'] = ''.join(node.itertext())
 
         # update the authors
-        paper['authors'] = ', '.join(paper['authors'])
+        paper['authors'] = '; '.join(paper['authors'])
         paper['pub_date'] = check_paper_pub_date(' '.join(paper['pub_date']))
         paper['journal'] = check_paper_journal('; '.join(paper['journal']))
         paper['pid_type'] = check_paper_pid_type(paper['pid_type'])

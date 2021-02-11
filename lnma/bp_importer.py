@@ -437,7 +437,15 @@ def save_papers():
     }
 
     for p in papers:
-    # for p in tqdm(papers):
+        # meta
+        meta = {}
+        if 'raw_type' in p:
+            if p['raw_type'] in ['pubmed_xml', 'endnote_xml', 'ovid_xml']:
+                meta['raw_type'] = p['raw_type']
+                meta['xml'] = p['xml']
+        else:
+            meta['raw_type'] = None
+        # create
         is_exist, paper = dora.create_paper_if_not_exist_and_predict_rct(
             project_id, 
             p['pid'], 
@@ -447,7 +455,7 @@ def save_papers():
             util.check_paper_pub_date(p['pub_date']),
             p['authors'],
             util.check_paper_journal(p['journal']),
-            None,
+            meta,
             ss_state.SS_ST_IMPORT_ENDNOTE_XML,
             ss_pr,
             ss_rs,

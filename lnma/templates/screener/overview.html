@@ -194,27 +194,6 @@ Screener Overview
         frameborder="0"></iframe>
 </div>
 
-<!-- <div id="export_dialog" title="Export Table" class="hide">
-    <p>There are <b id="export_dialog_total_number">&nbsp;</b> records in the current table, export them as the following foramt:</p>
-    <div class="form-check">
-        <input class="form-check-input" type="radio" name="export_format" id="export_format_1" value="pubmed_xml" checked>
-        <label class="form-check-label" for="export_format_1">
-          PubMed XML 
-        </label>
-      </div>
-      <div class="form-check">
-        <input class="form-check-input" type="radio" name="export_format" id="export_format_2" value="custom_xls">
-        <label class="form-check-label" for="export_format_2">
-          Excel XLS
-        </label>
-    </div>
-    <p>
-        <button onclick="tbjs_paperlist.export_current_table();">
-            <i class="fa fa-file-export"></i>
-            Export
-        </button>
-    </p>
-</div> -->
 
 <div id="export_dialog" class="modal" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
@@ -228,15 +207,21 @@ Screener Overview
         <div class="modal-body">
             <p>There are <b id="export_dialog_total_number">&nbsp;</b> records in the current table, export them as the following foramt:</p>
             <div class="form-check">
-                <input class="form-check-input" type="radio" name="export_format" id="export_format_1" value="pubmed_xml" checked>
+                <input class="form-check-input" type="radio" name="export_format" id="export_format_1" value="endnote_xml" checked>
                 <label class="form-check-label" for="export_format_1">
-                  PubMed XML 
+                  EndNote XML 
                 </label>
-              </div>
-              <div class="form-check">
-                <input class="form-check-input" type="radio" name="export_format" id="export_format_2" value="custom_xls">
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="export_format" id="export_format_3" value="ovid_xml" checked>
+                <label class="form-check-label" for="export_format_3">
+                  OVID XML 
+                </label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="export_format" id="export_format_2" value="ct01_csv">
                 <label class="form-check-label" for="export_format_2">
-                  Excel XLS
+                  Excel XLS (NCT, PMID, Journal, Year, Number of Authors, Authors)
                 </label>
             </div>
         </div>
@@ -2194,7 +2179,20 @@ var tbjs_paperlist = {
         // show the panel first
         var n_total = this.table.rows({search:'applied'}).data().length;
 
-        //
+        // collect the seq numbers
+        var seq_nums = [];
+        var data = this.table.rows({search:'applied'}).data();
+        for (let i = 0; i < data.length; i++) {
+            const d = data[i];
+            seq_nums.push(d.seq_num);
+        }
+
+        // send the request to get 
+        var project_id = Cookies.get('project_id');
+        var format = $('input[name=export_format]:checked').val();
+
+        // build a form
+        srv_collector.export(project_id, format, seq_nums);
     }
 };
 
@@ -2341,6 +2339,50 @@ var srv_pdfworker = {
                 tbjs_paperlist.update_data_by_paper(paper);
             }, 'json'
         );
+    }
+};
+
+
+var srv_collector = {
+
+    api_url: {
+        export: "[[ url_for('collector.export') ]]"
+    },
+
+    export: function(project_id, format, seq_nums) {
+        this.submit_form(
+            this.api_url.export,
+            {
+                project_id: project_id,
+                seq_nums: seq_nums.join(','),
+                format: format
+            },
+            'POST'
+        );
+    },
+
+    submit_form: function(path, params, method) {
+        method = method || "POST";
+
+        var form = document.createElement("form");
+
+        form.setAttribute("target", '_blank');
+        form.setAttribute("method", method);
+        form.setAttribute("action", path);
+
+        for(var key in params) {
+            if(params.hasOwnProperty(key)) {
+                var hiddenField = document.createElement("input");
+                hiddenField.setAttribute("type", "hidden");
+                hiddenField.setAttribute("name", key);
+                hiddenField.setAttribute("value", params[key]);
+
+                form.appendChild(hiddenField);
+            }
+        }
+
+        document.body.appendChild(form);
+        form.submit();
     }
 };
 
