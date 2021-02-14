@@ -61,6 +61,28 @@ html {
 #pan_outcomes {
     height: 100%;
 }
+.cate-line {
+    cursor: pointer;
+}
+.cate-extract-line {
+    border-left: 1px solid black;
+    padding: 0 0 0 10px;
+    margin: 0 0 0 10px;
+}
+.cate-extract-name {
+    width: 250px;
+    min-width: 250px;
+    max-width: 250px;
+}
+.cate-extract-col {
+    width: 150px;
+    min-width: 100px;
+    max-width: 200px;
+    font-size: .9em;
+}
+.cate-extract-line:hover {
+    background-color: #efefef;
+}
 #pan_ocpapers {
 
 }
@@ -263,6 +285,12 @@ var pan_outcomes = {
         this.vpp = new Vue({
             el: this.vpp_id,
             data: {
+                stat: {
+                    pwma: { total: 0 },
+                    subg: { total: 0 },
+                    nam: { total: 0 },
+                    itable: { total: 0 },
+                },
                 data: JSON.parse(JSON.stringify(this.data_empty))
             },
             methods: {
@@ -276,6 +304,15 @@ var pan_outcomes = {
 
                 delete_extract: function(oc_type, abbr, full_name) {
                     pan_outcomes.delete_extract(oc_type, abbr, full_name);
+                },
+
+                toggle_cate: function(event) {
+                    var elem = $(event.target);
+                    elem.next().toggle();
+                },
+
+                close_all_cates: function(oc_type, event) {
+                    $('.cate-extracts-' + oc_type).toggle();
                 }
             }
         });
@@ -349,13 +386,34 @@ var pan_outcomes = {
     },
 
     add_extracts: function(extracts) {
+        var cate_exts = {};
+
+        // build the sorted cate
         for (let i = 0; i < extracts.length; i++) {
-            var extract = extracts[i];
+            const extract = extracts[i];
             var oc_type = extract.oc_type;
-            var abbr = extract.abbr;
-            // add to the related type
-            this.vpp.data[oc_type].outcomes[abbr] = extract.meta;
+            var cate = extract.meta.category;
+
+            if (!this.vpp.$data.data[oc_type].outcomes.hasOwnProperty(cate)) {
+                this.vpp.$data.data[oc_type].outcomes[cate] = [];
+            }
+
+            // put this ext into cate
+            this.vpp.$data.data[oc_type].outcomes[cate].push(
+                extract.meta
+            );
+
+            // add number
+            this.vpp.$data.stat[oc_type].total += 1;
         }
+
+        // for (let i = 0; i < extracts.length; i++) {
+        //     var extract = extracts[i];
+        //     var oc_type = extract.oc_type;
+        //     var abbr = extract.abbr;
+        //     // add to the related type
+        //     this.vpp.data[oc_type].outcomes[abbr] = extract.meta;
+        // }
 
         // update the vpp
         this.vpp.$forceUpdate();

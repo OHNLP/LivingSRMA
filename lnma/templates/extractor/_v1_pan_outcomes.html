@@ -15,34 +15,49 @@
     </h5>
     <div class="panel-box">
         <div class="oper-bar">
-            
+            {{ Object.keys(data.pwma.outcomes).length }} categories, 
+            {{ stat.pwma.total }} outcomes.
+            <button v-on:click="close_all_cates('pwma', event)">Close folders</button>
         </div>
-        <table class="table">
-            <tr>
-                <th>Category</th>
-                <th>Full Name</th>
-                <th>Data Type</th>
-                <th>Measure</th>
-                <th>&nbsp;</th>
-            </tr>
-            <tr v-for="oc in data.pwma.outcomes">
-                <td>{{ oc.category }}</td>
-                <td :oc_abbr="oc.abbr">
-                    <a href="javascript:void(0);"
-                        v-on:click="show_extract_data(oc.oc_type, oc.abbr)">
-                        {{ oc.full_name }}
-                    </a>
-                </td>
-                <td>{{ oc.input_format }}</td>
-                <td>{{ oc.measure_of_effect }}</td>
-                <td>
-                    <a href="javascript:void(0);" class="text-danger"
-                        v-on:click="delete_extract(oc.oc_type, oc.abbr, oc.full_name)">
-                        <i class="far fa-trash-alt"></i>
-                    </a>
-                </td>
-            </tr>
-        </table>
+        
+        <div v-if="Object.keys(data.pwma.outcomes).length != 0">
+
+            <div v-for="ocs, cate in data.pwma.outcomes">
+                <div class="cate-line" v-on:click="toggle_cate(event)">
+                    <i class="far fa-folder-open"></i>
+                    {{ cate }} | {{ ocs.length }} outcomes
+                </div>
+
+                <div class="cate-extracts cate-extracts-pwma">
+                    <div v-for="oc in ocs" class="cate-extract-line d-flex flex-row">
+                            
+                        <div class="cate-extract-name">
+                            <a href="javascript:void(0);"
+                                v-on:click="show_extract_data(oc.oc_type, oc.abbr)">
+                                {{ oc.full_name }}
+                            </a>
+                        </div>
+
+                        <div class="cate-extract-col">
+                            {{ oc.input_format }}
+                        </div>
+
+                        <div class="cate-extract-col">
+                            {{ oc.measure_of_effect }}
+                        </div>
+
+                        <div class="cate-extract-delete">
+                            <a href="javascript:void(0);" class="text-danger"
+                                v-on:click="delete_extract(oc.oc_type, oc.abbr, oc.full_name)">
+                                <i class="far fa-trash-alt"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
 
         <table class="table" v-if="Object.keys(data.subg.outcomes).length != 0">
             <tr>
