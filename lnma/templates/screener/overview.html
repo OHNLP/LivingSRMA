@@ -39,11 +39,16 @@ iframe {
 }
 #pan_pdfviewer {
     position: fixed;
+    top: 10px;
     min-width: 1000px;
     min-height: 400px;
-    padding: 20px 5px 5px 5px;
+    padding: 42px 5px 5px 5px;
     background-color: rgba(249, 249, 250, 1);;
     z-index: 9999;
+    border: 3px solid #efefef;
+}
+#pan_pdfviewer_btns {
+    width: 100%;
 }
 #ifr_pdfviewer {
     width: 100%;
@@ -183,12 +188,19 @@ Screener Overview
 </div>
 
 <div id="pan_pdfviewer" class="shadow-sm" :class="{offscreen:is_hide}">
-    <div style="position: absolute; left: 5px; top: 0px;">
-        <a href="javascript:void(0);"
-            v-on:click="toggle();">
-            <i class="fa fa-close"></i>
-        </a>
+    <div style="position: absolute; left: 5px; top: 5px;" class="d-flex flex-row">
+        <div class="mt-1 mr-5 ml-1">
+            <a href="javascript:void(0);"
+                v-on:click="toggle();">
+                <i class="fa fa-close"></i>
+            </a>
+        </div>
+
+        <div id="pan_pdfviewer_btns" class="d-flex flex-row">
+            
+        </div>
     </div>
+
     <iframe id="ifr_pdfviewer" src="/pdfworker/view_pdf" 
         width="100%" scrolling="yes"
         frameborder="0"></iframe>
@@ -1484,30 +1496,44 @@ var tbjs_paperlist = {
     },
     
     _get_expand_html_by_stage_passed_title_not_fulltext: function(d) {
-        var _html_btn_ckl = this.__get_btn_check_later(d);
-        var html = 
-            '<tr>'+
-                '<td>Actions:</td>'+
-                '<td class="d-flex flex-row">'+
-                '<div><button class="btn btn-primary btn-sm" onclick="tbjs_paperlist.include_in_sr(\''+d.paper_id+'\', \'Through Full Text Review\')">Include in SR</button></div>'+
-                this.__get_select_fulltext_exclusion_reasons(d) +
-                '<div class="ml-2"><button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_unscreened(\''+d.paper_id+'\')">Send Back to Unscreened</button></div>'+
-                '<div class="ml-2">' + _html_btn_ckl + '</div>' + 
+        var html = [
+            '<tr>', 
+                '<td>Actions:</td>',
+                '<td class="d-flex flex-row">',
+                '<div>',
+                    '<button class="btn btn-primary btn-sm" onclick="tbjs_paperlist.include_in_sr(\''+d.paper_id+'\', \'Through Full Text Review\')">Include in SR</button>',
+                '</div>',
 
-                '<div class="ml-2">' +
-                    '<span class="mr-2">|</span>' + 
-                    this.__get_div_rct_yes_no(d) + 
-                '</div>' +
+                '<div class="ml-2">',
+                    this.__get_select_fulltext_exclusion_reasons(d),
+                    '<button class="btn btn-danger btn-sm" type="button" onclick="tbjs_paperlist.exclude_by_ft(\''+d.paper_id+'\')">',
+                        'Exclude by Full-Text Review',
+                    '</button>',
+                '</div>',
 
-                '</td>' +
-            '</tr>'+
+                '<div class="ml-2">',
+                    '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_unscreened(\''+d.paper_id+'\')">Send Back to Unscreened</button>',
+                '</div>',
 
-            this.__get_tr_tags(d) +
-            this.__get_tr_pdfs(d) +
-            this.__get_tr_info(d) + 
-            this.__get_tr_authors(d) +
-            this.__get_tr_abstract(d);
+                '<div class="ml-2">',
+                    this.__get_btn_check_later(d),
+                '</div>',
 
+                '<div class="ml-2">',
+                    '<span class="mr-2">|</span>',
+                    this.__get_div_rct_yes_no(d),
+                '</div>',
+
+                '</td>',
+            '</tr>',
+
+            this.__get_tr_tags(d),
+            this.__get_tr_pdfs(d),
+            this.__get_tr_info(d),
+            this.__get_tr_authors(d),
+            this.__get_tr_abstract(d)
+
+        ].join('');
         return html;
     },
 
@@ -1647,7 +1673,50 @@ var tbjs_paperlist = {
     // HTML fragment makers
     ///////////////////////////////////////////////////////////////////////////
 
+
+    /* this is just for the toolbar */
+    _get_pdfview_toolbar: function(d) {
+        // var _html_btn_ckl = this.__get_btn_check_later(d);
+        var html = [
+            '<div>',
+                '<button class="btn btn-primary btn-sm" onclick="tbjs_paperlist.include_in_sr(\''+d.paper_id+'\', \'Through Full Text Review\'); pan_pdfviewer.hide();">Include in SR</button>',
+            '</div>',
+
+            '<div class="ml-2">',
+                this.__get_select_fulltext_exclusion_reasons(d),
+                '<button class="btn btn-danger btn-sm" type="button" onclick="tbjs_paperlist.exclude_by_ft(\''+d.paper_id+'\'); pan_pdfviewer.hide();">',
+                    'Exclude by Full-Text Review',
+                '</button>',
+            '</div>',
+
+            '<div class="ml-2">',
+                '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_unscreened(\''+d.paper_id+'\'); pan_pdfviewer.hide();">Send Back to Unscreened</button>',
+            '</div>',
+        ].join('');
+
+        return html;
+    },
+
     __get_select_fulltext_exclusion_reasons: function(d) {
+        var reasons = [];
+        for (let i = 0; i < srv_screener.project.settings.exclusion_reasons.length; i++) {
+            const er = srv_screener.project.settings.exclusion_reasons[i];
+            let opt_r = '<option value="'+er+'">'+er+'</option>';
+            reasons.push(opt_r);
+        }
+        reasons = reasons.join('\n');
+        var html = [
+            '<select class="custom-select exclusion-reason custom-select-sm mr-2" id="tb-row-exclude-reason-'+d.paper_id+'">',
+                reasons,
+            '</select>'
+        ].join('');
+        return html;
+    },
+
+    /**
+     * Deprecated
+     */
+    __get_select_fulltext_exclusion_reasons_v1: function(d) {
         var reasons = [];
         for (let i = 0; i < srv_screener.project.settings.exclusion_reasons.length; i++) {
             const er = srv_screener.project.settings.exclusion_reasons[i];
@@ -2244,8 +2313,31 @@ var pan_pdfviewer = {
         this.vpp.$data.is_hide = !this.vpp.$data.is_hide;
     },
 
+    hide: function() {
+        this.vpp.$data.is_hide = true;
+    },
+
     show: function() {
         this.vpp.$data.is_hide = false;
+
+        // resize
+        var w = $('#tbjs_paperlist_tools').width();
+        var h = $(window).height() - 25;
+
+        $(this.vpp_id).css('width', w + 'px');
+        $(this.vpp_id).css('height', h + 'px');
+
+        // relocate
+        $(this.vpp_id).css('left', '330px');
+
+        // resize the iframe
+        $('#ifr_pdfviewer').height(h - 52);
+    },
+
+    update_toolbar: function(paper_id) {
+        $('#pan_pdfviewer_btns').html(
+            tbjs_paperlist._get_pdfview_toolbar({paper_id:paper_id})
+        );
     },
 
     open_pdf: function(folder, file_id) {
@@ -2303,6 +2395,9 @@ var srv_pdfworker = {
     },
 
     view_pdf: function(paper_id, file_id, folder) {
+        // update the toolbar
+        pan_pdfviewer.update_toolbar(paper_id);
+
         // show the PDF panel
         pan_pdfviewer.show();
 
