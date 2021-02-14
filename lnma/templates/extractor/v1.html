@@ -89,6 +89,13 @@ html {
 #pan_collector {
 
 }
+
+#ifr_pdfviewer {
+    width: 100%;
+    height: 400px;
+    min-height: 400px;
+}
+
 #pan_analyzer {
 
 }
@@ -193,7 +200,6 @@ Data Extractor
 {% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 
 <div class="d-flex flex-row" style="height: calc(100% - 50px);">
 
@@ -214,7 +220,7 @@ Data Extractor
         Manage Outcomes
     </button>
 
-    <button onclick="jarvis.switch_layout('extract_information');">
+    <!-- <button onclick="jarvis.switch_layout('extract_information');">
         <i class="fa fa-edit"></i>
         Extract Information
     </button>
@@ -222,21 +228,21 @@ Data Extractor
     <button onclick="jarvis.switch_layout('analyze_outcome');">
         <i class="fa fa-chart-bar"></i>
         Analyze Outcome
-    </button>
+    </button> -->
 </div>
 <!-- /#navi_header -->
 
 <div id="main">
     
-    {% include 'extractor/_v1_pan_outcomes.html' %}
+{% include 'extractor/_v1_pan_outcomes.html' %}
 
-    {% include 'extractor/_v1_pan_itbuilder.html' %}
+{% include 'extractor/_v1_pan_itbuilder.html' %}
 
-    {% include 'extractor/_v1_pan_ocpapers.html' %}
+{% include 'extractor/_v1_pan_ocpapers.html' %}
 
-    {% include 'extractor/_v1_pan_collector.html' %}
-    
-    {% include 'extractor/_v1_pan_analyzer.html' %}
+{% include 'extractor/_v1_pan_collector.html' %}
+
+{% include 'extractor/_v1_pan_analyzer.html' %}
     
 </div>
 <!-- /#main -->
@@ -249,8 +255,6 @@ Data Extractor
 {% block active_nav_link %}extractor{% endblock %}
 
 {% block script %}
-<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
 <script>
 
@@ -442,7 +446,11 @@ var pan_ocpapers = {
         this.vpp = new Vue({
             el: this.vpp_id,
             data: {
+                // flags
                 show_settings: true,
+                only_show_selected: false,
+
+                // data
                 all_attrs: null,
                 show_attrs: null,
                 extract: null,
@@ -553,7 +561,7 @@ var pan_ocpapers = {
                     this.$forceUpdate();
                 },
 
-                on_change_itable_n_arms: function(pmid, $event) {
+                on_change_itable_n_arms: function(pmid, event) {
                     let val = event.target.value;
                     console.log('* change ' + pmid + ' n_arms to ' + val);
 
@@ -573,6 +581,12 @@ var pan_ocpapers = {
                             this.extract.data[pmid].attrs.other.pop();
                         }
                     }
+                    this.$forceUpdate();
+                },
+
+                on_change_only_show_selected: function(event) {
+                    let val = event.srcElement.checked;                    
+                    this.only_show_selected = val;
                     this.$forceUpdate();
                 }
             }
@@ -760,6 +774,7 @@ var pan_ocpapers = {
 var pan_collector = {
     vpp_id: "#pan_collector",
     vpp: null,
+    pdfviewer_id: '#ifr_pdfviewer',
 
     init: function() {
         this.vpp = new Vue({
@@ -771,15 +786,26 @@ var pan_collector = {
             methods: {
                 switch_tab: function(tab_name) {
                     this.show_tab = tab_name;
+                },
+
+                view_pdf: function(paper_id, file_id, folder) {
+                    pan_collector.view_pdf(paper_id, file_id, folder);
                 }
             }
         });
+
+        this.resize_pdfviewer();
     },
 
     update: function(paper) {
         this.vpp.paper = paper;
+
+        // update the normal UI
         this.vpp.show_tab = 'basic_info';
         this.vpp.$forceUpdate();
+
+        // update the PDF viewer
+        // this.load_pdf();
     },
 
     show_paper: function(pid) {
@@ -804,6 +830,31 @@ var pan_collector = {
     set_size: function(size) {
         $(this.vpp_id).removeClass('panel-s panel-m panel-l')
             .addClass('panel-' + size);
+    },
+
+    view_pdf: function(paper_id, file_id, folder) {
+        // update the pdf viewer size
+        this.resize_pdfviewer();
+
+        // load the pdf
+        this.load_pdf(folder, file_id);
+    },
+
+    load_pdf: function(folder, file_id) {
+        var pdf_url = "/pdfworker/pdf/" + folder + "/" + file_id + '.pdf';
+
+        // just load the blank page
+        if (typeof(folder) == 'undefined') {
+            pdf_url = '/pdfworker/view_pdf';
+        }
+
+        // show
+        document.getElementById("ifr_pdfviewer").contentWindow.PDFViewerApplication.open(pdf_url);
+    },
+
+    resize_pdfviewer: function() {
+        var h = $(this.vpp_id).height() - 70;
+        $(this.pdfviewer_id).css('height', h + 'px');
     }
 };
 
@@ -1646,7 +1697,12 @@ var jarvis = {
         // when resize
         this.adjust_panel_height();
         $(window).resize(function() {
+
+            // adjust the panel size
             jarvis.adjust_panel_height();
+
+            // adjust the pdf view size
+            pan_collector.resize_pdfviewer();
         });
     },
 

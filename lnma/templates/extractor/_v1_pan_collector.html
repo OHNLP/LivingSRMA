@@ -19,7 +19,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#javascript:void(0);"
+                    <a class="nav-link" href="javascript:void(0);"
                         v-bind:class="{active: show_tab == 'pdf'}"
                         v-on:click="switch_tab('pdf');">
                         <i class="far fa-file-pdf"></i>
@@ -52,7 +52,19 @@
 
         <!-- the PDF page -->
         <div id="pan_collector_pdf" v-show="show_tab == 'pdf'">
-            PDFs
+            <div>
+                <button v-for="pdf in paper.meta.pdfs"
+                    v-on:click="view_pdf(paper.paper_id, pdf.file_id, pdf.folder);"
+                    class="mr-1 mt-1 mb-1">
+                    <i class="far fa-file-pdf"></i>
+                    {{ pdf.display_name }}
+                </button>
+            </div>
+
+            <iframe id="ifr_pdfviewer" src="/pdfworker/view_pdf" 
+                width="100%" scrolling="yes"
+                frameborder="0">
+            </iframe>
         </div>
         
     </div>
