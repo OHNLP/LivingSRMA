@@ -2265,6 +2265,13 @@ var srv_pdfworker = {
     ///////////////////////////////////////////////////////////////////////////
 
     update_pdfs: function(paper_id) {
+        // check the form files
+        var n_files = $('#tb-row-upload-' + paper_id).prop('files').length;
+
+        if (n_files < 1) {
+            return;
+        }
+
         // get the pdf form data
         var form_data = new FormData(
             $('#tb-rowext-pdfs-form-' + paper_id)[0]

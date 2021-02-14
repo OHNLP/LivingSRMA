@@ -501,11 +501,14 @@ var pan_ocpapers = {
                 on_change_input_format: function(event) {
                     let val = event.target.value;
                     console.log('Changed input_format: ' + val);
+
                     // update the attrs
                     this.extract.meta.cate_attrs = jarvis.tpl.input_format[
                         this.extract.oc_type
                     ][val];
                     
+                    // update the papers setting
+                    pan_ocpapers.update_all_and_show_attrs();
                 },
 
                 on_toggle_attr_selection: function(event) {
@@ -621,13 +624,23 @@ var pan_ocpapers = {
         //     }
         // }
 
+        // update the all_attrs and show_attrs variables for display
+        this.update_all_and_show_attrs();
+
+        // update
+        this.vpp.$forceUpdate();
+    },
+
+    update_all_and_show_attrs: function() {
         // init the all_attrs which for list all the nested attrs
         this.vpp.all_attrs = [];
+
         // init the show_attrs
         this.vpp.show_attrs = {}
+
         // loop on the cate_attrs
-        for (let i = 0; i < data.extract.meta.cate_attrs.length; i++) {
-            const cate = data.extract.meta.cate_attrs[i];
+        for (let i = 0; i < this.vpp.extract.meta.cate_attrs.length; i++) {
+            const cate = this.vpp.extract.meta.cate_attrs[i];
             for (let j = 0; j < cate.attrs.length; j++) {
                 const attr = cate.attrs[j];
                 
@@ -635,6 +648,7 @@ var pan_ocpapers = {
                     // which means this attr doesn't have a sub
                     this.vpp.all_attrs.push(attr);
                     this.vpp.show_attrs[attr.abbr] = false;
+
                 } else {
                     for (let k = 0; k < attr.subs.length; k++) {
                         const sub = attr.subs[k];
@@ -1358,37 +1372,41 @@ var jarvis = {
         },
         input_format: {
             pwma: {
-                PRIM_CATIRR_RAWp: ['Et', 'Tt', 'Ec', 'Tc'],
                 PRIM_CAT_RAWp: ['Et', 'Nt', 'Ec', 'Nc', 'treatment', 'control'],
                 PRIM_CAT_PREp: ['TE', 'lowerci', 'upperci'],
                 PRIM_CONTD_RAWp: ['Nt', 'Mt', 'SDt', 'Nc', 'Mc', 'SDc'],
                 PRIM_CONTD_PREp: ['TE', 'SE'],
+                PRIM_CATIRR_RAWp: ['Et', 'Tt', 'Ec', 'Tc'],
                 PRIM_CAT_RAW_G5p: ['GA_Et', 'GA_Nt', 'GA_Ec', 'GA_Nc', 
                     'G34_Et', 'G34_Ec', 'G3H_Et', 'G3H_Ec', 'G5N_Et', 'G5N_Ec', 
                     'drug_used', 'malignancy'],
 
                 PRIM_CAT_RAW: [{
-                    'abbr': 'default',
-                    'name': 'default',
+                    'abbr': 'PRIM_CAT_RAW_treat',
+                    'name': 'Treatment Arm',
                     'attrs': [{
                         'abbr': 'Et',
-                        'name': 'Event total',
+                        'name': 'Event',
                         'subs': null
                     }, {
                         'abbr': 'Nt',
-                        'name': 'Nt',
-                        'subs': null
-                    }, {
-                        'abbr': 'Ec',
-                        'name': 'Ec',
-                        'subs': null
-                    }, {
-                        'abbr': 'Nc',
-                        'name': 'Nc',
+                        'name': 'Total',
                         'subs': null
                     }, {
                         'abbr': 'treatment',
                         'name': 'Treatment',
+                        'subs': null
+                    }]
+                }, {
+                    'abbr': 'PRIM_CAT_RAW_control',
+                    'name': 'Control Arm',
+                    'attrs': [{
+                        'abbr': 'Ec',
+                        'name': 'Event',
+                        'subs': null
+                    }, {
+                        'abbr': 'Nc',
+                        'name': 'Total',
                         'subs': null
                     }, {
                         'abbr': 'control',
@@ -1396,6 +1414,95 @@ var jarvis = {
                         'subs': null
                     }]
                 }],
+
+                PRIM_CAT_PRE: [{
+                    'abbr': 'PRIM_CAT_PRE_default', 
+                    'name': 'Default attributes', 
+                    'attrs': [{
+                        'abbr': 'TE', 
+                        'name': 'TE',
+                        'subs': null,
+                    }, {
+                        'abbr': 'lowerci', 
+                        'name': 'Lower CI', 
+                        'subs': null,
+                    }, {
+                        'abbr': 'upperci', 
+                        'name': 'Upper CI', 
+                        'subs': null,
+                    }]
+                }],
+
+                PRIM_CONTD_RAW: [{
+                    'abbr': 'PRIM_CONTD_RAW_treat', 
+                    'name': 'Treatment Arm', 
+                    'attrs': [{
+                        'abbr': 'Nt', 
+                        'name': 'Nt',
+                        'subs': null,
+                    }, {
+                        'abbr': 'Mt', 
+                        'name': 'Mt', 
+                        'subs': null,
+                    }, {
+                        'abbr': 'SDt', 
+                        'name': 'SDt', 
+                        'subs': null,
+                    }]
+                }, {
+                    'abbr': 'PRIM_CONTD_RAW_control', 
+                    'name': 'Control Arm', 
+                    'attrs': [{
+                        'abbr': 'Nc', 
+                        'name': 'Nc',
+                        'subs': null,
+                    }, {
+                        'abbr': 'Mc', 
+                        'name': 'Mc', 
+                        'subs': null,
+                    }, {
+                        'abbr': 'SDc', 
+                        'name': 'SDc', 
+                        'subs': null,
+                    }]
+                }],
+
+                PRIM_CONTD_PRE: [{
+                    'abbr': 'PRIM_CONTD_PRE_default', 
+                    'name': 'Default attributes', 
+                    'attrs': [{
+                        'abbr': 'TE', 
+                        'name': 'TE',
+                        'subs': null,
+                    }, {
+                        'abbr': 'SE',
+                        'name': 'SE', 
+                        'subs': null,
+                    }]
+                }],
+
+                PRIM_CATIRR_RAW: [{
+                    'abbr': 'PRIM_CATIRR_RAW_default', 
+                    'name': 'Default attributes', 
+                    'attrs': [{
+                        'abbr': 'Et', 
+                        'name': 'Et',
+                        'subs': null,
+                    }, {
+                        'abbr': 'Tt',
+                        'name': 'Tt', 
+                        'subs': null,
+                    }, {
+                        'abbr': 'Ec', 
+                        'name': 'Ec',
+                        'subs': null,
+                    }, {
+                        'abbr': 'Tc',
+                        'name': 'Tc', 
+                        'subs': null,
+                    }]
+                }],
+
                 PRIM_CAT_RAW_G5: [{
                     'abbr': 'default',
                     'name': 'default',
