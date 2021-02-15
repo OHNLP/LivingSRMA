@@ -61,7 +61,9 @@
                 </button>
             </div>
 
-            <iframe id="ifr_pdfviewer" src="/pdfworker/view_pdf" 
+
+            <iframe v-if="paper.meta.hasOwnProperty('pdfs') && paper.meta.pdfs.length > 0"
+                id="ifr_pdfviewer" src="/pdfworker/view_pdf" 
                 width="100%" scrolling="yes"
                 frameborder="0">
             </iframe>

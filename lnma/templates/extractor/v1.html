@@ -86,10 +86,30 @@ html {
 #pan_ocpapers {
 
 }
+#pan_ocpapers_ctx_menu {
+    border: 2px solid #EFEFEF;
+    box-shadow: 0px 0px 15px #cccccc;;
+}
+#pan_ocpapers_ctx_menu_txt {
+    color: black;
+}
+#pan_ocpapers_ctx_menu .menu-header {
+    font-size: .8em;
+    background-color: #ececec;
+}
+#pan_ocpapers_ctx_menu .menu-info {
+    font-size: .8em;
+}
+#pan_ocpapers_ctx_menu .menu-item {
+    font-size: .9em;
+}
+#pan_ocpapers_ctx_menu .ui-menu { 
+    width: 280px; 
+    max-width: 320px;
+}
 #pan_collector {
 
 }
-
 #ifr_pdfviewer {
     width: 100%;
     height: 400px;
@@ -192,6 +212,10 @@ html {
 
 {% include 'css/box.css' %}
 </style>
+
+<!-- jQuery UI Theme -->
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css">
+
 {% endblock %}
 
 {% block page_name %}
@@ -450,6 +474,9 @@ var pan_ocpapers = {
                 show_settings: true,
                 only_show_selected: false,
 
+                // mode
+                mode: 'manage_outcomes',
+
                 // data
                 all_attrs: null,
                 show_attrs: null,
@@ -524,11 +551,18 @@ var pan_ocpapers = {
                 },
 
                 on_click_paper: function(pmid) {
+                    // set the working pmid ?
+                    // no need to set
+
                     // highlight this line
                     $('.paper-table-row').removeClass('paper-table-row-clicked');
                     $('#paper-table-row-' + pmid).addClass('paper-table-row-clicked');
+
                     // call collector to do something
-                    pan_collector.show_paper(pmid);
+                    pan_collector.show_paper(
+                        pmid, 
+                        pan_ocpapers.vpp.$data.extract.data[pmid]
+                    );
                 },
 
                 toggle_select_all_papers: function(event) {
@@ -591,6 +625,10 @@ var pan_ocpapers = {
                 }
             }
         });
+    },
+
+    set_mode: function(mode) {
+        this.vpp.$data.mode = mode;
     },
 
     update: function(data) {
@@ -675,6 +713,91 @@ var pan_ocpapers = {
 
         // update
         this.vpp.$forceUpdate();
+    },
+
+    set_highlight_text_to_attr: function(highlight_text, pid, attr_abbr, seq) {
+
+    },
+
+    update_ctx_menu: function(highlight_text, pid, n_arms) {
+        // loop on the cate_attrs
+        var html = [
+            '<li class="ui-state-disabled menu-info"><div>',
+                'Highlighted <b id="pan_ocpapers_ctx_menu_txt">'+highlight_text+'</b> is:',
+            '</div></li>'
+        ];
+
+        // this is for the main extracting
+        html = this.__update_ctx_menu_html(html, highlight_text, pid, n_arms);
+
+        // this is for the other extracing (i.e., multiple arms)
+        if (n_arms > 2) {
+            html.push('<li class="ui-state-disabled menu-header"><div>Other Arms</div></li>');
+            
+            for (let a = 0; a < n_arms - 2; a++) {
+                html.push('<li class="menu-item"><div>Other '+(a+1)+'</div><ul>');
+                html = this.__update_ctx_menu_html(html, highlight_text, pid, n_arms);
+                html.push('</ul></li>')
+            }
+        }
+
+        // put the new html into box
+        $('#pan_ocpapers_ctx_menu').html(
+            html.join('')
+        );
+    },
+
+    __update_ctx_menu_html: function(html, highlight_text, pid, n_arms) {
+
+        for (let i = 0; i < this.vpp.extract.meta.cate_attrs.length; i++) {
+
+            const cate = this.vpp.extract.meta.cate_attrs[i];
+
+            // put a new cate
+            html.push('<li class="ui-state-disabled menu-header"><div>'+cate.name+'</div></li>');
+
+            var flag_has_shown_attr = false;
+            for (let j = 0; j < cate.attrs.length; j++) {
+                const attr = cate.attrs[j];
+                
+                if (attr.subs == null) {
+                    var is_show = this.vpp.show_attrs[attr.abbr];
+                    if (is_show) {
+                        html.push(
+                        '<li class="menu-item">' +
+                            '<div onclick="">' +
+                            attr.name +
+                            '</div>' +
+                        '</li>'
+                        );
+                        flag_has_shown_attr = true;
+                    }
+                } else {
+                    for (let k = 0; k < attr.subs.length; k++) {
+                        const sub = attr.subs[k];
+                        if (this.vpp.show_attrs[sub.abbr]) {
+                            html.push(
+                            '<li class="menu-item">' +
+                                '<div onclick="">' +
+                                attr.name + ' - ' + sub.name +
+                                '</div>' +
+                            '</li>'
+                            );
+                            flag_has_shown_attr = true;
+                        }
+                    }
+                }
+            }
+
+            if (flag_has_shown_attr) {
+                //
+            } else {
+                html.pop();
+            }
+            
+        }
+
+        return html;
     },
 
     get_current_extract_and_papers: function() {
@@ -775,6 +898,10 @@ var pan_collector = {
     vpp_id: "#pan_collector",
     vpp: null,
     pdfviewer_id: '#ifr_pdfviewer',
+    current: {
+        paper: null,
+        extract_paper: null
+    },
 
     init: function() {
         this.vpp = new Vue({
@@ -791,14 +918,58 @@ var pan_collector = {
                 view_pdf: function(paper_id, file_id, folder) {
                     pan_collector.view_pdf(paper_id, file_id, folder);
                 }
+            },
+            updated: function() {
+                pan_collector.bind_ctx_menu();
             }
         });
 
         this.resize_pdfviewer();
     },
 
+    bind_ctx_menu: function() {
+        $(this.vpp_id + '_basic_info').on('contextmenu', function(event) {
+            // get the highlighted text
+            var text = "";
+            if (window.getSelection) {
+                text = window.getSelection().toString();
+            } else if (document.selection && document.selection.type != "Control") {
+                text = document.selection.createRange().text;
+            }
+
+            // update the context menu content based on the selected attributes.
+            // all of the details about this paper is need to generate the menu.
+            // but since the attrs are only available in pan_ocpapers,
+            // we have to use pan_oc
+            pan_ocpapers.update_ctx_menu(
+                text, 
+                pan_collector.current.paper.pid,
+                pan_collector.current.extract_paper.n_arms
+            );
+
+            // show the context menu at where clicked
+            var top = event.pageY - 20;
+            var left = event.pageX;
+            console.log('* context menu at', left, top);
+            $("#pan_ocpapers_ctx_menu").css({
+                position: 'absolute',
+                display: "block",
+                top: top,
+                left: left
+            }).addClass("show").menu();
+
+            $("#pan_ocpapers_ctx_menu").menu('refresh');
+
+            //blocks default Webbrowser right click menu
+            return false; 
+        });
+        console.log('* binded ctx menu')
+    },
+
     update: function(paper) {
+        // update data
         this.vpp.paper = paper;
+        this.current.paper = paper;
 
         // update the normal UI
         this.vpp.show_tab = 'basic_info';
@@ -806,9 +977,15 @@ var pan_collector = {
 
         // update the PDF viewer
         // this.load_pdf();
+
+        // bind the context menu
+        this.bind_ctx_menu();
     },
 
-    show_paper: function(pid) {
+    show_paper: function(pid, extract_paper) {
+        // set the extract info
+        this.current.extract_paper = extract_paper;
+
         // get the paper
         $.get(
             jarvis.url.get_paper,
@@ -817,10 +994,14 @@ var pan_collector = {
                 pan_collector.update(data.paper);
             }, 'json'
         );
+        // bind the context menu
+        this.bind_ctx_menu();
     },
 
     show: function() {
         $(this.vpp_id).show();
+        // bind the context menu
+        this.bind_ctx_menu();
     },
 
     hide: function() {
@@ -1556,7 +1737,7 @@ var jarvis = {
 
                 PRIM_CAT_RAW_G5: [{
                     'abbr': 'default',
-                    'name': 'default',
+                    'name': 'Treatments',
                     'attrs': [{
                         'abbr': 'drug_used',
                         'name': 'Drug Used',
@@ -1707,6 +1888,10 @@ var jarvis = {
     },
 
     switch_layout: function(layout) {
+        // the layout is important for this interface
+        pan_ocpapers.set_mode(layout);
+
+        // change the layout
         if (layout == 'manage_outcomes') {
             pan_itbuilder.hide();
             pan_outcomes.show();
@@ -1717,6 +1902,7 @@ var jarvis = {
             // set the default size
             pan_outcomes.set_size('m');
             pan_ocpapers.set_size('m');
+            pan_ocpapers.set_mode(layout);
 
         } else if (layout == 'extract_information') {
             pan_itbuilder.hide();

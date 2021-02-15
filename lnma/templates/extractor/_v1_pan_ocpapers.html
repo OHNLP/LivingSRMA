@@ -15,7 +15,8 @@
                   <span class="sr-only">Toggle Dropdown</span>
                 </button>
                 <div class="dropdown-menu">
-                    <a class="dropdown-item" href="javascript:void(0);">
+                    <a v-on:click="toggle_show_settings();"
+                        class="dropdown-item" href="javascript:void(0);">
                         Toggle settings
                     </a>
                     <a class="dropdown-item" href="javascript:void(0);">
@@ -49,13 +50,13 @@
                         <i class="far fa-copy"></i>
                         Save a copy
                     </a>
-                    <a class="dropdown-item" href="javascript:void(0);">
+                    <!-- <a class="dropdown-item" href="javascript:void(0);">
                         Something else here
                     </a>
                     <div class="dropdown-divider"></div>
                     <a class="dropdown-item" href="javascript:void(0);">
                         Separated link
-                    </a>
+                    </a> -->
                 </div>
             </div>
 
@@ -82,21 +83,39 @@
     
     <!-- panel for the pwma -->
     <div class="panel-info" v-if="extract != null && extract.meta.oc_type == 'pwma'">
-        <div class="oc-attr">
+
+        <div v-if="mode == 'manage_outcomes'" class="oc-attr">
             <span class="oc-attr-name">Full Name</span>
             <input class="oc-attr-value" v-model="extract.meta.full_name">
         </div>
-        <div class="oc-attr">
+
+        <div v-if="mode == 'manage_outcomes'" class="oc-attr">
             <span class="oc-attr-name">Category</span>
             <input class="oc-attr-value" v-model="extract.meta.category">
         </div>
 
-        <div class="oc-attr">
+        <div v-if="mode == 'manage_outcomes'" class="oc-attr">
             <span class="oc-attr-name">Analysis Group</span>
             <input class="oc-attr-value" v-model="extract.meta.group">
         </div>
 
-        <div class="oc-attr">
+        <div v-if="mode == 'manage_outcomes'" class="oc-attr">
+            <span class="oc-attr-name">Include this outcome in SoF Table</span>
+            <select v-model="extract.meta.included_in_sof">
+                <option value="yes">Yes, include this outcome</option>
+                <option value="no">No, exclude this outcome</option>
+            </select>
+        </div>
+
+        <div v-if="mode == 'manage_outcomes'" class="oc-attr">
+            <span class="oc-attr-name">Include this outcome in result plots</span>
+            <select v-model="extract.meta.included_in_plots">
+                <option value="yes">Yes, include this outcome</option>
+                <option value="no">No, exclude this outcome</option>
+            </select>
+        </div>
+
+        <div v-if="mode == 'manage_outcomes' || mode == 'analyze_outcome'" class="oc-attr">
             <span class="oc-attr-name">Analysis Measure</span>
             <select v-model="extract.meta.measure_of_effect">
                 <option value="HR">Hazard Ratio (HR)</option>
@@ -106,7 +125,7 @@
             </select>
         </div>
 
-        <div class="oc-attr">
+        <div v-if="mode == 'manage_outcomes' || mode == 'extract_information'" class="oc-attr">
             <span class="oc-attr-name">Data Type</span>
             <select v-model="extract.meta.input_format"
                 v-on:change="on_change_input_format($event)">
@@ -119,7 +138,7 @@
             </select>
         </div>
 
-        <div class="oc-attr">
+        <div v-if="mode == 'manage_outcomes' || mode == 'analyze_outcome'" class="oc-attr">
             <span class="oc-attr-name">Fixed or Random</span>
             <select v-model="extract.meta.fixed_or_random">
                 <option value="fixed">Fixed Effect</option>
@@ -127,7 +146,7 @@
             </select>
         </div>
 
-        <div class="oc-attr">
+        <div v-if="mode == 'manage_outcomes' || mode == 'analyze_outcome'" class="oc-attr">
             <span class="oc-attr-name">Which is better</span>
             <select v-model="extract.meta.which_is_better">
                 <option value="lower">Lower is better</option>
@@ -135,42 +154,30 @@
             </select>
         </div>
 
-        <div class="oc-attr">
-            <span class="oc-attr-name">Include this outcome in SoF Table</span>
-            <select v-model="extract.meta.included_in_sof">
-                <option value="yes">Yes, include this outcome</option>
-                <option value="no">No, exclude this outcome</option>
-            </select>
-        </div>
+        <div v-if="mode == 'manage_outcomes' || mode == 'extract_information' || mode == 'analyze_outcome'">
 
-        <div class="oc-attr">
-            <span class="oc-attr-name">Include this outcome in result plots</span>
-            <select v-model="extract.meta.included_in_plots">
-                <option value="yes">Yes, include this outcome</option>
-                <option value="no">No, exclude this outcome</option>
-            </select>
-        </div>
-
-        <div>
-            <span class="oc-attr-name">The attributes to extract</span>
-        </div>
-        <div v-for="cate, cate_idx in extract.meta.cate_attrs" class="oc-attr">
             <div>
-                <input type="checkbox" v-bind:id="'toggle-cate-' + cate.abbr"
-                    v-on:change="on_toggle_itable_select_category(cate_idx, $event)">
-                <label :for="'toggle-cate-' + cate.abbr" class="extract-attr-label">
-                    <b>{{ cate.name }}</b>
-                </label>
+                <span class="oc-attr-name">The attributes of this outcome</span>
             </div>
-            <div :id="'cate-' + cate.abbr" class="d-flex flex-row flex-wrap">
-                <div v-for="attr, attr_idx in cate.attrs"
-                    class="mr-2 border-end">
-                    
-                    <input type="checkbox" 
-                            v-model="show_attrs[attr.abbr]"
-                            v-on:change="on_toggle_attr_selection($event)"
-                            :id="'attr-' + attr.abbr">
-                    <label class="extract-attr-label" :for="'attr-' + attr.abbr">{{ attr.name }}</label>
+
+            <div v-for="cate, cate_idx in extract.meta.cate_attrs" class="oc-attr">
+                <div>
+                    <input type="checkbox" v-bind:id="'toggle-cate-' + cate.abbr"
+                        v-on:change="on_toggle_itable_select_category(cate_idx, $event)">
+                    <label :for="'toggle-cate-' + cate.abbr" class="extract-attr-label">
+                        <b>{{ cate.name }}</b>
+                    </label>
+                </div>
+                <div :id="'cate-' + cate.abbr" class="d-flex flex-row flex-wrap">
+                    <div v-for="attr, attr_idx in cate.attrs"
+                        class="mr-2 border-end">
+                        
+                        <input type="checkbox" 
+                                v-model="show_attrs[attr.abbr]"
+                                v-on:change="on_toggle_attr_selection($event)"
+                                :id="'attr-' + attr.abbr">
+                        <label class="extract-attr-label" :for="'attr-' + attr.abbr">{{ attr.name }}</label>
+                    </div>
                 </div>
             </div>
         </div>
@@ -515,3 +522,23 @@
 
 </div>
 <!-- /#pan_ocpapers -->
+
+<!-- <div class="dropdown-menu dropdown-menu-sm" id="pan_ocpapers_ctx_menu">
+    <h6 class="dropdown-header text-left">
+        <a href="javascript:void(0);"
+            title="Close this menu"
+            onclick="$('#pan_ocpapers_ctx_menu').hide();"
+            class="mr-2">
+            <i class="fa fa-times"></i>
+        </a><br>
+
+        Select text <b id="pan_ocpapers_ctx_menu_txt">&nbsp;</b> is:
+    </h6>
+    <div id="pan_ocpapers_ctx_menu_items">
+        &nbsp;
+    </div>
+</div> -->
+
+<ul id="pan_ocpapers_ctx_menu" style="display: none;">
+    
+</ul>
