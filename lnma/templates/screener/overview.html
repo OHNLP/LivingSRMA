@@ -209,47 +209,47 @@ Screener Overview
 
 
 <div id="export_dialog" class="modal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Export Table</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
+<div class="modal-dialog" role="document">
+    <div class="modal-content">
+    <div class="modal-header">
+    <h5 class="modal-title">Export Table</h5>
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+    </button>
+    </div>
+    <div class="modal-body">
+        <p>There are <b id="export_dialog_total_number">&nbsp;</b> records in the current table, export them as the following foramt:</p>
+        <div class="form-check">
+            <input class="form-check-input" type="radio" name="export_format" id="export_format_1" value="endnote_xml" checked>
+            <label class="form-check-label" for="export_format_1">
+            EndNote XML 
+            </label>
         </div>
-        <div class="modal-body">
-            <p>There are <b id="export_dialog_total_number">&nbsp;</b> records in the current table, export them as the following foramt:</p>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="export_format" id="export_format_1" value="endnote_xml" checked>
-                <label class="form-check-label" for="export_format_1">
-                  EndNote XML 
-                </label>
-            </div>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="export_format" id="export_format_3" value="ovid_xml" checked>
-                <label class="form-check-label" for="export_format_3">
-                  OVID XML 
-                </label>
-            </div>
-            <div class="form-check">
-                <input class="form-check-input" type="radio" name="export_format" id="export_format_2" value="ct01_csv">
-                <label class="form-check-label" for="export_format_2">
-                  Excel XLS (NCT, PMID, Journal, Year, Number of Authors, Authors)
-                </label>
-            </div>
+        <div class="form-check">
+            <input class="form-check-input" type="radio" name="export_format" id="export_format_3" value="ovid_xml" checked>
+            <label class="form-check-label" for="export_format_3">
+            OVID XML 
+            </label>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-primary"
+        <div class="form-check">
+            <input class="form-check-input" type="radio" name="export_format" id="export_format_2" value="ct01_csv">
+            <label class="form-check-label" for="export_format_2">
+            Excel XLS (NCT, PMID, Journal, Year, Number of Authors, Authors)
+            </label>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-primary"
             onclick="tbjs_paperlist.export_current_table();">
             <i class="fa fa-file-export"></i>
             Export
-          </button>
+        </button>
 
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        </div>
-      </div>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
     </div>
-  </div>
+    </div>
+</div>
+</div>
 
 <div class="content">
     <div class="container-fluid">
