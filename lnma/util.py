@@ -417,7 +417,8 @@ def parse_endnote_exported_xml(full_fn):
             'journal': [],
             'raw_type': 'endnote_xml',
             # 'xml': ""
-            'xml': ET.tostring(record, encoding='utf8', method='xml').decode('utf-8')
+            'xml': ET.tostring(record, encoding='utf8', method='xml').decode('utf-8'),
+            'other': {}
         }
         # print(paper)
 
@@ -455,6 +456,10 @@ def parse_endnote_exported_xml(full_fn):
                     paper['pub_date'].append( ' '.join(node.find('year').itertext()) )
             elif node.tag == 'work-type':
                 paper['pub_type'] = ''.join(node.itertext())
+            else:
+                if node.tag not in paper['other']:
+                    paper['other'][node.tag] = []
+                paper['other'][node.tag] += list(node.itertext())
 
         # update the authors
         paper['authors'] = '; '.join(paper['authors'])
@@ -469,6 +474,151 @@ def parse_endnote_exported_xml(full_fn):
             pass
         else:
             papers.append(paper)
+
+    return papers
+
+
+def parse_ovid_exported_text_content(txt):
+    '''
+    Parse the email content from OVID 
+
+    This is for the text format
+    '''
+    # open('tmp.txt', 'w').write(txt)
+
+    lines = txt.split('\n')
+    ptn_attr = r'^\s*([A-Z]{2})\s+-\s(.*)'
+    ptn_attr_ext = r'^\s+(.*)'
+    ptn_new_art = r'^\s*\<(\d+)\>'
+
+    arts = []
+
+    # temporal variable
+    art = {}
+    attr = ''
+    buff = []
+
+    for line in lines:
+        buff.append(line)
+        # try articl pattern
+        m = re.findall(ptn_new_art, line)
+        if len(m) > 0:
+            # this means this line starts a new article
+            # for example
+            # re.findall(ptn_new_art, '<13>')
+            # the 13rd article is found
+            if art == {}:
+                # it means this is the first article
+                pass
+            else:
+                # not the first, save previous first, then reset
+                art['text'] = '\n'.join(buff)
+                arts.append(art)
+                art = {}
+                buff = []
+            
+            # once match a pattern, no need to check other patterns
+            continue
+
+        # try attr pattern first, it's the most common pattern
+        m = re.findall(ptn_attr, line)
+        if len(m) > 0:
+            # which means it's a new attribute
+            # for example
+            # > re.findall(ptn_attr, 'DB  - Ovid MEDLINE(R) Revisions')
+            # > [('DB', 'Ovid MEDLINE(R) Revisions')]
+            attr = m[0][0]
+            val = m[0][1].strip()
+
+            # auto seg by UI
+            if attr == 'UI' and 'UI' in art:
+                art['text'] = '\n'.join(buff)
+                arts.append(art)
+                art = {}
+                buff = []
+
+            # append this attr
+            if attr not in art: art[attr] = []
+
+            # put this value into art object
+            art[attr].append(val)
+
+            # once match a pattern, no need to check other patterns
+            continue
+
+        # try next pattern
+        m = re.findall(ptn_attr_ext, line)
+        if len(m) > 0:
+            # this means this line is an extension of previous attr
+            val = m[0]
+            # use previous attr, the attr should exist
+            if attr == '':
+                pass
+            else:
+                if attr not in art: art[attr] = []
+                art[attr].append(val)
+
+                # once match a pattern, no need to check other patterns
+                continue
+
+    
+    # usually, the last art need to be appended manually
+    if art != {}:
+        art['text'] = '\n'.join(buff)
+        arts.append(art)
+        buff = []
+
+    # now need to merge the attributes 
+    for art in arts:
+        for k in art:
+            if len(art[k]) == 1:
+                art[k] = art[k][0]
+            else:
+                if k in ('AU', 'FA', 'ID'): continue
+                elif k == 'AB': art[k] = '\n'.join(art[k])
+                else: art[k] = ' '.join(art[k])
+
+    # convert the articles to paper format
+    papers = []
+
+    for art in arts:
+        if 'UI' not in art:
+            continue
+
+        pid = art['UI']
+        title = art['TI'] if 'TI' in art else ''
+        abstract = art['AB'] if 'AB' in art else ''
+        authors = ', '.join(art['AU']) if 'AU' in art else ''
+        pid_type = art['DB'].upper() if 'DB' in art else 'OVID'
+        pub_type = art['PT'] if 'PT' in art else ''
+        rct_id = art['CN'] if 'CN' in art else ''
+
+        if pid_type.startswith('EMBASE'):
+            pub_date = art['DP'] if 'DP' in art else ''
+            journal = art['JA'] if 'JA' in art else ''
+        elif pid_type.startswith('OVID MEDLINE'):
+            pub_date = art['EP'] if 'EP' in art else ''
+            journal = art['AS'] if 'AS' in art else ''
+        else:
+            pub_date = art['EP'] if 'EP' in art else ''
+            journal = art['AS'] if 'AS' in art else ''
+
+        paper = {
+            'pid': pid,
+            'pid_type': pid_type,
+            'title': title,
+            'authors': authors,
+            'abstract': abstract,
+            'pub_date': pub_date,
+            'pub_type': pub_type,
+            'journal': journal,
+            'rct_id': rct_id,
+            'raw_type': 'text',
+            'xml': '',
+            'other': art
+        }
+
+        papers.append(paper)
 
     return papers
 
