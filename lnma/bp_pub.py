@@ -118,6 +118,47 @@ def RCC():
     return render_template('pub/pub.RCC.html', nma=nma, pwma=pwma, evmap=evmap)
 
 
+
+@bp.route('/mRCC.html')
+def mRCC():
+    prj = 'RCC'
+    # load the graph data
+    full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, 'NMA_LIST.json')
+    nma = json.load(open(full_fn))
+    
+    # load the dma data
+    full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, 'PWMA_DATA.xlsx')
+    df = pd.read_excel(full_fn)
+    pwma = OrderedDict()
+    for idx, row in df.iterrows():
+        pwma_type = row['type']
+        option_text = row['option_text']
+        legend_text = row['legend_text']
+        filename = row['filename']
+        if pwma_type not in pwma: 
+            pwma[pwma_type] = {
+                '_default_option': option_text
+            }
+        if option_text not in pwma[pwma_type]: 
+            pwma[pwma_type][option_text] = {
+                'text': option_text,
+                'slides': [],
+                'fns': []
+            }
+        # add this img
+        pwma[pwma_type][option_text]['fns'].append({
+            'fn': filename,
+            'txt': legend_text
+        })
+        pwma[pwma_type][option_text]['slides'].append(filename + '$' + legend_text)
+
+    # load the evmap data
+    full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, 'EVMAP.json')
+    evmap = json.load(open(full_fn))
+
+    return render_template('pub/pub.mRCC.html', nma=nma, pwma=pwma, evmap=evmap)
+
+
 @bp.route('/CAT.html')
 def CAT():
     prj = 'CAT'

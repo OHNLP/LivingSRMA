@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en">
+<head>
+<!-- Required meta tags -->
+
+<title>Metastatic Renal Cell Cancer | Living Interactive Systematic Reviews</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+
+<link rel="icon" href="/static/img/favicon.ico">
+<!-- Bootstrap CSS -->
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+<link rel="stylesheet" href="/static/lib/font-awesome/css/all.css">
+{% include 'pub/pub._pubstyle.html' %}
+</head>
+<body>
+<br id="sec-concept">
+<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark" style="height: 70px;">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <a class="navbar-brand" href="#">
+        <img src="/static/img/logo-lisr.png" alt="" width="180px">
+    </a>
+
+    <div class="navbar" style="padding:0;">
+        <ul class="navbar-nav">
+            <li class="nav-item" style="color: white;">                
+                Metastatic Renal Cell Cancer<br>
+            </li>
+        </ul>
+    </div>
+    
+    <div class="collapse navbar-collapse" id="navbarsExampleDefault" style="justify-content: flex-end;">
+        <ul class="navbar-nav">
+
+
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">NMA</a>
+                <div class="dropdown-menu" aria-labelledby="dropdown01">
+                {% for tp in nma %}
+                    <a class="dropdown-item" href="#sec-nma-[[ tp[:4] ]]">[[ tp ]]</a>
+                {% endfor %}
+                </div>
+            </li>
+
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="dropdown02" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">SOF TABLE</a>
+                <div class="dropdown-menu" aria-labelledby="dropdown02">
+                    <a class="dropdown-item" href="#sec-sof-nma">Summary of Findings: Network MA</a>
+                </div>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="#sec-evmap">EVIDENCE MAP</a>
+            </li>
+
+        </ul>
+    </div>
+</nav>
+
+
+<div id="sec-intro" style="position: absolute; top: 0;"></div>
+<div class="container" style="margin-top: 1rem;">
+<h3 style="font-size: 2rem;color: black;text-decoration: none;">
+    Interactive Approach to presenting Network Meta-Analysis Results. 
+</h3>
+</div>
+
+
+<br id="sec-nma-oucome">
+<!-- to reduce the spacing between this section and next, adding -3.5rem bottom -->
+<div class="container" style="margin-top: 0;">
+    <h3>
+        NETWORK META-ANALYSIS
+    </h3>
+    <p>
+        Results are summarized as forest plots for primary analysis and sensitivity network meta-analysis. Users can choose to view results for their outcome of interest using the dropdown menu (“Select outcome”).
+    </p>
+    <p>
+        How to use this figure? 
+        <a href="javascript:;" data-toggle="modal" data-target="#exampleModalCenter3">Video demonstration</a>
+    </p>
+</div>
+
+
+{% for tp in nma %}
+<br id="sec-nma-[[ tp[:4] ]]">
+<div class="container mt-3">
+    <div class="row">
+        <div class="col">
+            <h4 style="margin-bottom: 2rem;">[[ tp ]]</h4>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-4">
+            <div class="dropdown">
+                <button class="btn btn-primary bg-dark bd-dark dropdown-toggle" type="button" id="dropdownMenuButton-nma-[[ tp[:4] ]]" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fa fa-clipboard"></i>
+                    Select outcome
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton-nma-[[ tp[:4] ]]">
+                    {% for oc in nma[tp]['oc_names'] %}
+                    <a class="dropdown-item" href="javascript:switch_nma_data('[[ tp[:4] ]]', '[[ oc['oc_name'] ]]', '[[ oc['oc_fullname'] ]]');">[[ oc['oc_fullname'] ]]</a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col-8 d-flex justify-content-end">
+            <div class="outcome-name" style="padding: .5rem; margin-right: 1rem;">
+                <span id="optext-nma-[[ tp[:4] ]]" style="font-weight: bold;"></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-2 mb-3" style="max-width: 1250px;">
+    <div class="row">
+        <div class="col">
+            <iframe id="iframe-nma-[[ tp[:4] ]]" class="auto-height" 
+                src="" scrolling="no" frameborder="0"
+                style="width: 100%; height: 920px; min-height: 700px;"></iframe>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+
+<br id="sec-sof-nma">
+<div class="container">
+
+    <h3>
+        SUMMARY OF FINDINGS: NETWORK META-ANALYSIS
+    </h3>
+    <p>
+        The Summary of Findings (SoF) table is designed to display multiple comparisons in an interactive manner. All possible combinations in network meta-analysis can be compared using this framework. Users can interactively select or deselect SoF for a given clinical outcome by clicking the outcome of interest from the left-hand panel. Users can also enter any baseline risk for an outcome, to visualize the absolute risk differences due to treatment. Clicking on any of the colored boxes displays details of that effect estimate as well as its associated certainty of evidence assessment.
+    </p>
+    <p>
+        <b>Choose reference treatment, measure of effect, and denominator for absolute effect</b>
+    </p>
+    <div class="row">
+        <div class="col">
+            <iframe id="ifm-ocplots" src="[[ url_for('pub.softable_nma_v2', prj='RCC', msrs='OR,RR,HR', dc='Suni') ]]" frameborder="0" style="width: 100%; min-height: 500px;"></iframe>
+        </div>
+    </div>
+</div>
+
+
+<br id="sec-evmap">
+<div class="container">
+    <h3>
+        EVIDENCE MAP
+    </h3>
+    <p>
+        The evidence map visually summarizes the evidence for available treatment comparisons and identifies evidence gaps that warrant future research. User can select a treatment option of interest from the dropdown to visualize whether it is comparable, beneficial or harmful (color), certainty of evidence (size of the circle) as compared to other treatment options in the network. Empty slots (no circles) denote the complete lack of evidence (either direct or indirect).
+    </p>
+    <div class="row">
+        <div class="col-4">
+            <div class="dropdown">
+                <button class="btn btn-primary bg-dark bd-dark dropdown-toggle" type="button" id="dropdownMenuButton-evmap" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fa fa-clipboard"></i>
+                    Select treatment
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton-evmap">
+                    {% for tr in evmap['treat_list'] %}
+                    <a class="dropdown-item" href="javascript:switch_evmap_data('[[ tr ]]', '[[ evmap['treat_dict'][tr]['tr_fullname'] ]]');">[[ evmap['treat_dict'][tr]['tr_fullname'] ]]</a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col-8 d-flex justify-content-end">
+            <div class="outcome-name" style="padding: .5rem; margin-right: 1rem;">
+                <span id="optext-evmap" style="font-weight: bold;">
+                    [[ evmap['treat_dict'][evmap['treat_list'][0]]['tr_fullname'] ]]
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <iframe id="iframe-evmap" src="[[ url_for('pub.evmap_tr_v2', prj='RCC', tr=evmap['treat_list'][0]) ]]" frameborder="0" style="width: 100%; min-height: 620px;"></iframe>
+        </div>
+    </div>
+
+</div>
+<!-- /#sec-evmap -->
+
+
+</div>
+
+<hr class="featurette-divider">
+
+<!-- FOOTER -->
+<footer class="container">
+    <p class="float-right"><a href="#">Back to top</a></p>
+    <p>&copy; 2020 &middot; <a href="#">Terms</a></p>
+</footer>
+
+<!-- Estimated HR(OR) reflect outcomes for treatment in columns compared to treatment in rows 
+The HR for 1,2 , The OR for the last one!
+-->
+
+<!-- Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+
+<script>
+var prj = 'RCC';
+var default_treat = 'Suni';
+
+function resizeIFrameToFitContent( id ) {
+    var iFrame = document.getElementById(id);
+    iFrame.height = iFrame.contentWindow.document.body.scrollHeight;
+    // console.log('* ' + id + ': ' + iFrame.height);
+}
+
+
+function switch_nma_data(tag, oc_name, oc_fullname, tr) {
+    if (typeof(tr) == 'undefined') {
+        tr = default_treat;
+    }
+    var oc = tag;
+    var url = "[[ url_for('pub.graph_RCC') ]]";
+    url += '?prj=' + prj + '&oc=' + oc_name + '&tr=' + tr;
+    console.log('* switch nma: ' + url);
+    $('#iframe-nma-' + tag).attr('src', url);
+    $('#optext-nma-' + tag).html(oc_fullname);
+}
+
+
+function switch_evmap_data(treat, treat_fullname) {
+    // var url = '[[ url_for("pub.evmap") ]]';
+    // url += '?prj=' + prj;
+    // url += '&dc=' + treat;
+    // $('#iframe-evmap').attr('src', url);
+
+    var win_evmap = $('#iframe-evmap')[0].contentWindow;
+    win_evmap.fg_evmap.draw(treat);
+
+    // update the display name
+    $('#optext-evmap').html(treat_fullname);
+}
+
+$(document).ready(function() {
+   
+    // show the NMA
+    {% for tp in nma %}
+    switch_nma_data(
+        '[[ tp[:4] ]]', 
+        '[[ nma[tp]["oc_names"][0]["oc_name"] ]]', 
+        '[[ nma[tp]["oc_names"][0]["oc_fullname"] ]]',
+        'Suni'
+    );
+        // resizeIFrameToFitContent('iframe-nma-[[ tp[:4] ]]');
+        // setTimeout("resizeIFrameToFitContent('iframe-nma-[[ tp[:4] ]]');", 300);
+        // setTimeout("resizeIFrameToFitContent('iframe-nma-[[ tp[:4] ]]');", 900);
+    {% endfor %}
+
+    // show the evmap
+    // switch_evmap_data('[[ evmap["treat_list"][0] ]]', "[[ evmap['treat_dict'][evmap['treat_list'][0]]['tr_fullname'] ]]");
+});
+</script>
+</body>
+</html>

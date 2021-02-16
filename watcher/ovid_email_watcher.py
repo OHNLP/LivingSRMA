@@ -190,10 +190,10 @@ def _check_update_by_project_in_emails(project, emails):
         }
     }
 
-    logger.info('parsing %s emails for project %s...' % (len(emails), project.keystr))
+    # logger.info('parsing %s emails for project %s...' % (len(emails), project.keystr))
 
     # check all the mails and summarize the information
-    for mail in tqdm(emails):
+    for mail in emails:
         # check the email date, ignore old emails
         # TODO: also check the title
 
@@ -240,9 +240,9 @@ def _check_update_by_project_in_emails(project, emails):
         else:
             cnt['other'] += 1
 
-    logger.info('found %s (%sx + %st) email of %s papers related to project [%s], %s other emails' % (
+    logger.info('found %s (%s XML + %s TXT) email for [%s]' % (
         cnt['ovid_update'], cnt['type_xml_update'], cnt['type_txt_update'], 
-        len(prj_update['papers']), project.keystr, cnt['other']
+        project.keystr
     ))
 
     # reduce the duplicate paper in the updates
@@ -255,7 +255,8 @@ def _check_update_by_project_in_emails(project, emails):
             unique_pid_dict[pid] = paper
 
     unique_papers = unique_pid_dict.values()
-    logger.info('removed the duplicate records %s -> %s' % (
+    logger.info('removed %d duplicate papers (%s -> %s)' % (
+        ( len(prj_update['papers']) - len(unique_papers)),
         len(prj_update['papers']),
         len(unique_papers)
     ))
@@ -265,9 +266,6 @@ def _check_update_by_project_in_emails(project, emails):
 
     # create or update
     prj_updated = _update_papers_in_project(prj_update)
-
-    # updated, generate a report for this run
-    logger.info('done check email for project [%s]!' % project.keystr)
 
     return prj_updated
 
@@ -317,12 +315,13 @@ def _update_papers_in_project(prj_update):
         else:
             prj_update['cnt']['created'].append(pid)
 
-    logger.info('done %s papers for project [%s], existed: %s, created: %s' % (\
-        len(papers), 
-        prj_update['keyword'], 
-        len(prj_update['cnt']['existed']), 
+    logger.info('done [%s] %s papers, existed %s, created %s' % (\
+        prj_update['keyword'],
+        len(papers),
+        len(prj_update['cnt']['existed']),
         len(prj_update['cnt']['created']),
     ))
+    logger.info('*' * 30)
 
     return prj_update
 
