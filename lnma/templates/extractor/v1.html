@@ -601,12 +601,21 @@ var pan_ocpapers = {
 
                     var new_n_others = val - 2;
                     if (new_n_others == this.extract.data[pmid].attrs.other.length) {
+                        // which means the number of arms doesn't change
 
                     } else if (new_n_others > this.extract.data[pmid].attrs.other.length) {
                         // the number of arms increases, need to put more elements
                         var delta = new_n_others - this.extract.data[pmid].attrs.other.length;
                         for (let i = 0; i < delta; i++) {
-                            this.extract.data[pmid].attrs.other.push({});
+                            // just copy the keys from main track
+                            var obj = JSON.parse(JSON.stringify(this.extract.data[pmid].attrs.main));
+                            // and clear the exising data
+                            for (const key in obj) {
+                                if (Object.hasOwnProperty.call(obj, key)) {
+                                    obj[key] = '';
+                                }
+                            }
+                            this.extract.data[pmid].attrs.other.push(obj);
                         }
                     } else {
                         // the number of arms decreases, need to remove
@@ -715,8 +724,24 @@ var pan_ocpapers = {
         this.vpp.$forceUpdate();
     },
 
+    /**
+     * Set the highlight text to pid in the box
+     * 
+     * seq: null means `main`, 0 to x means item index in `other`
+     */
     set_highlight_text_to_attr: function(highlight_text, pid, attr_abbr, seq) {
+        console.log('* set_highlight_text_to_attr: ' + highlight_text + ', ' + pid + ', ' + attr_abbr + ', ' + seq);
 
+        // update the value for the specific paper
+        if (seq == null) {
+            // it means this is the main track
+            this.vpp.$data.extract.data[pid].attrs.main[attr_abbr] = highlight_text;
+        } else {
+            // this means the value is for other arms
+            this.vpp.$data.extract.data[pid].attrs.other[seq][attr_abbr] = highlight_text;
+        }
+        // update UI
+        this.vpp.$forceUpdate();
     },
 
     update_ctx_menu: function(highlight_text, pid, n_arms) {
@@ -728,7 +753,8 @@ var pan_ocpapers = {
         ];
 
         // this is for the main extracting
-        html = this.__update_ctx_menu_html(html, highlight_text, pid, n_arms);
+        // the last argument is null, means it's the main track
+        html = this.__update_ctx_menu_html(html, highlight_text, pid, null);
 
         // this is for the other extracing (i.e., multiple arms)
         if (n_arms > 2) {
@@ -736,7 +762,7 @@ var pan_ocpapers = {
             
             for (let a = 0; a < n_arms - 2; a++) {
                 html.push('<li class="menu-item"><div>Other '+(a+1)+'</div><ul>');
-                html = this.__update_ctx_menu_html(html, highlight_text, pid, n_arms);
+                html = this.__update_ctx_menu_html(html, highlight_text, pid, a);
                 html.push('</ul></li>')
             }
         }
@@ -747,7 +773,7 @@ var pan_ocpapers = {
         );
     },
 
-    __update_ctx_menu_html: function(html, highlight_text, pid, n_arms) {
+    __update_ctx_menu_html: function(html, highlight_text, pid, seq) {
 
         for (let i = 0; i < this.vpp.extract.meta.cate_attrs.length; i++) {
 
@@ -765,7 +791,7 @@ var pan_ocpapers = {
                     if (is_show) {
                         html.push(
                         '<li class="menu-item">' +
-                            '<div onclick="">' +
+                            '<div onclick="pan_ocpapers.set_highlight_text_to_attr(\''+highlight_text+'\', \''+pid+'\', \''+attr.abbr+'\', '+seq+')">' +
                             attr.name +
                             '</div>' +
                         '</li>'
@@ -778,7 +804,7 @@ var pan_ocpapers = {
                         if (this.vpp.show_attrs[sub.abbr]) {
                             html.push(
                             '<li class="menu-item">' +
-                                '<div onclick="">' +
+                                '<div onclick="pan_ocpapers.set_highlight_text_to_attr(\''+highlight_text+'\', \''+pid+'\', \''+attr.abbr+'\', '+seq+')">' +
                                 attr.name + ' - ' + sub.name +
                                 '</div>' +
                             '</li>'
@@ -920,14 +946,14 @@ var pan_collector = {
                 }
             },
             updated: function() {
-                pan_collector.bind_ctx_menu();
+                pan_collector.bind_txt_ctx_menu();
             }
         });
 
         this.resize_pdfviewer();
     },
 
-    bind_ctx_menu: function() {
+    bind_txt_ctx_menu: function() {
         $(this.vpp_id + '_basic_info').on('contextmenu', function(event) {
             // get the highlighted text
             var text = "";
@@ -950,7 +976,7 @@ var pan_collector = {
             // show the context menu at where clicked
             var top = event.pageY - 20;
             var left = event.pageX;
-            console.log('* context menu at', left, top);
+            
             $("#pan_ocpapers_ctx_menu").css({
                 position: 'absolute',
                 display: "block",
@@ -960,10 +986,56 @@ var pan_collector = {
 
             $("#pan_ocpapers_ctx_menu").menu('refresh');
 
+            $('#pan_ocpapers_ctx_menu .ui-menu-item').on('click', function() {
+                $("#pan_ocpapers_ctx_menu").hide();
+            });
+
             //blocks default Webbrowser right click menu
             return false; 
         });
         console.log('* binded ctx menu')
+    },
+
+    bind_pdf_ctx_menu: function() {
+        
+    },
+
+    on_contextmenu_pdfviewer: function(event) {
+        // get text
+        var text = this.get_pdf_selection_text();
+        
+        // update the menu
+        pan_ocpapers.update_ctx_menu(
+            text, 
+            pan_collector.current.paper.pid,
+            pan_collector.current.extract_paper.n_arms
+        );
+
+        // show the context menu at where clicked
+        // need to calculate the offset for the iframe
+        var offset = $('#ifr_pdfviewer').offset();
+        var top = offset.top + event.pageY - 20;
+        var left = offset.left + event.pageX;
+        
+        $("#pan_ocpapers_ctx_menu").css({
+            position: 'absolute',
+            display: "block",
+            top: top,
+            left: left
+        }).addClass("show").menu();
+
+        $("#pan_ocpapers_ctx_menu").menu('refresh');
+
+        $('#pan_ocpapers_ctx_menu .ui-menu-item').on('click', function() {
+            $("#pan_ocpapers_ctx_menu").hide();
+        });
+    },
+
+    get_pdf_selection_text: function() {
+        var txt = '';
+        txt = document.getElementById('ifr_pdfviewer').contentWindow.getSelection().toString();
+
+        return txt;
     },
 
     update: function(paper) {
@@ -979,7 +1051,7 @@ var pan_collector = {
         // this.load_pdf();
 
         // bind the context menu
-        this.bind_ctx_menu();
+        this.bind_txt_ctx_menu();
     },
 
     show_paper: function(pid, extract_paper) {
@@ -995,13 +1067,13 @@ var pan_collector = {
             }, 'json'
         );
         // bind the context menu
-        this.bind_ctx_menu();
+        this.bind_txt_ctx_menu();
     },
 
     show: function() {
         $(this.vpp_id).show();
         // bind the context menu
-        this.bind_ctx_menu();
+        this.bind_txt_ctx_menu();
     },
 
     hide: function() {
@@ -1034,7 +1106,7 @@ var pan_collector = {
     },
 
     resize_pdfviewer: function() {
-        var h = $(this.vpp_id).height() - 70;
+        var h = $(window).height() - 150;
         $(this.pdfviewer_id).css('height', h + 'px');
     }
 };
@@ -1477,6 +1549,11 @@ var pan_itbuilder = {
 
 
 var jarvis = {
+    // for locating the mouse position
+    mouse: {
+        x: null,
+        y: null,
+    },
     url: {
         create_extract: "[[ url_for('extractor.create_extract') ]]",
         update_extract: "[[ url_for('extractor.update_extract') ]]",
@@ -1884,6 +1961,14 @@ var jarvis = {
 
             // adjust the pdf view size
             pan_collector.resize_pdfviewer();
+        });
+
+        // when mouse move
+        $(document).on('mousemove', function(event) {
+            jarvis.mouse = {
+                x: event.clientX,
+                y: event.clientY
+            }
         });
     },
 

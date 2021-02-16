@@ -400,5 +400,25 @@ See https://github.com/adobe-type-tools/cmap-resources
 
     </div> <!-- outerContainer -->
     <div id="printContainer"></div>
+
+    <!-- the context menu -->
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css">
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <!-- jQuery UI -->
+    <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
+
+    <ul id="pan_ocpapers_ctx_menu" style="display: none;">
+      
+    </ul>
+
+    <script>
+    $(document).on('contextmenu', function(event) {
+      console.log('* rightclicked in PDF');
+      parent.pan_collector.on_contextmenu_pdfviewer(event);
+      return false;
+    });
+    </script>
   </body>
 </html>

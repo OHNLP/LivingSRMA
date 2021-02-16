@@ -31,7 +31,7 @@
         </div>
         <!-- /.panel-info -->
 
-        <!-- the basic info -->
+        <!-- the Abstract page -->
         <div id="pan_collector_basic_info"  
             class="border-top-0 pan-normal"
             v-show="show_tab == 'basic_info'">
@@ -45,7 +45,7 @@
                     <a target="_blank" title="Show in " :href="'https://pubmed.ncbi.nlm.nih.gov/' + paper.pid ">{{ paper.pid }}</a> ({{ paper.pid_type }})
                 </p>
                 <p style="font-size: 1.2em; font-weight: bold;">Abstract</p>
-                <div style="font-size: 1em;">{{ paper.abstract }}</div>
+                <div style="font-size: 1em;" v-html="paper.abstract"></div>
             </div>
             
         </div>
