@@ -101,7 +101,7 @@ var fg_scrplt = {
             legend: {
                 orient: 'vertical',
                 x: 'right',
-                y: 'center',
+                y: 'top',
                 data: (function(vals){
                     var labels = [];
                     for (let i = 0; i < vals.length; i++) {

@@ -19,7 +19,7 @@ INPUT_FORMATS_FTET = 'FTET'
 INPUT_FORMATS_ET = 'ET'
 
 STANDARD_DATA_COLS = {
-    # for NMA
+    # for NMA, the column `hr` could be `sm` or `TE`, the analyzer will handle
     'HRLU': ['study', 't1', 't2', 'hr', 'upperci', 'lowerci'],
     'FTET': ['study', 'treat', 'event', 'total', 'time'],
     'ET': ['study', 'treat', 'event', 'total'],
@@ -47,6 +47,14 @@ STANDARD_DATA_COLS = {
                         'drug_used', 'malignancy']
 }
 
+SOFTABLE_NMA_COLS = {
+    'raw': ['A:D', ['study', 'treat', 'event', 'total' ]],
+    'pre': ['A:L', ['t1', 't2', 'sm', 'lowerci', 'upperci', 
+                    'study', 
+                    'survival in t1', 'survival in t2',
+                    'Ec_t1', 'Et_t1', 'Ec_t2', 'Et_t2']]
+}
+
 OC_TYPE_TPL = {
     "pwma": {
         "default": {
@@ -71,7 +79,7 @@ INPUT_FORMAT_TPL = {
     "pwma": {
         'PRIM_CAT_RAW_G5': [{
             'abbr': 'default',
-            'name': 'default',
+            'name': 'Treatments',
             'attrs': [{
                 'abbr': 'drug_used',
                 'name': 'Drug Used',
@@ -171,6 +179,13 @@ RSCRIPT_TPL = {
     'nma_freq_CAT_PRE': 'lnma_nma_freq_CAT_PRE.tpl.r',
     'nma_bayes_CAT_RAW': 'lnma_nma_bayes_CAT_RAW.tpl.r',
     'nma_bayes_CAT_PRE': 'lnma_nma_bayes_CAT_PRE.tpl.r',
+
+    # for NMA v2
+    'nma_freq_ET': 'lnma_nma_freq_ET.tpl.r',
+    'nma_freq_HRLU': 'lnma_nma_freq_HRLU.tpl.r',
+    'nma_bayes_ET': 'lnma_nma_bayes_ET.tpl.r',
+    'nma_bayes_HRLU': 'lnma_nma_bayes_HRLU.tpl.r',
+
 
     # for R Plots (RPLT)
     'rplt_IOTOX_FOREST': 'lnma_rplt_IOTOX_FOREST.tpl.r',

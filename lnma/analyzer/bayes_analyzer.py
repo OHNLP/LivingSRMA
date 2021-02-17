@@ -86,6 +86,15 @@ def analyze(rs, cfg):
 
 
 def analyze_by_bugsnet(rs, params):
+    '''
+    Bayesian Analysis by BUGSnet
+    
+    The input `rs` must be in the following format:
+
+        study, treat, event, total
+
+    which is the raw data format, also known as `ET`
+    '''
     # prepare the r script
     subtype = params['subtype']
 
@@ -172,9 +181,10 @@ def analyze_by_bugsnet(rs, params):
 
 def analyze_by_dmetar(rs, params):
     '''
-    Bayesian Analysis
+    Bayesian Analysis by dmetar
     
     The input `rs` must be in the following format:
+    The hr could be sm or TE
 
         study, t1, t2, hr, lowerci, upperci
     '''
@@ -207,9 +217,13 @@ def analyze_by_dmetar(rs, params):
     df = pd.DataFrame(rs)
     
     # check the columns
-    if 'TE' not in df.columns:
+    if 'TE' not in df.columns and 'hr' in df.columns:
         df['TE'] = np.log(df['hr'])
         print('* fixed TE column with hr')
+
+    if 'TE' not in df.columns and 'sm' in df.columns:
+        df['TE'] = np.log(df['sm'])
+        print('* fixed TE column with sm')
 
     if 'seTE' not in df.columns:
         f_ci2se = lambda r: (math.log(r['upperci']) - math.log(r['lowerci'])) / 3.92
@@ -302,9 +316,13 @@ def analyze_by_gemtc(rs, params):
     df = pd.DataFrame(rs)
 
     # check the columns
-    if 'TE' not in df.columns:
+    if 'TE' not in df.columns and 'hr' in df.columns:
         df['TE'] = np.log(df['hr'])
         print('* fixed TE column with hr')
+
+    if 'TE' not in df.columns and 'sm' in df.columns:
+        df['TE'] = np.log(df['sm'])
+        print('* fixed TE column with sm')
 
     if 'seTE' not in df.columns:
         f_ci2se = lambda r: (math.log(r['upperci']) - math.log(r['lowerci'])) / 3.92

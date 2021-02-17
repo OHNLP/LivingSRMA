@@ -36,7 +36,17 @@ var fg_evmap = {
     },
 
     init: function(data, treat) {
+        console.log(data);
         this.data = data;
+
+        // treat could be null or undefined
+        if (typeof(treat) == 'undefined' ||
+            treat == null) {
+            treat = data.treat_list[0];
+        }
+        if (data.treat_list.indexOf(treat)<0) {
+            treat = data.treat_list[0];   
+        }
         this.draw(treat);
     },
 

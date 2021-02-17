@@ -200,6 +200,7 @@ a {
 }
 .rank_table td {
     border-bottom: 1px solid #666666;
+    padding: 5px 0;
 }
 .pane-col {
 }
@@ -355,6 +356,24 @@ a {
             </div>
         </div><!-- .box P-Score plot -->
 
+        <div class="box" style="width: 300px; display: none;" id="fg-nma-scrplt">
+            <div class="box-header">
+                <h4>
+                    <span class="fa fa-chart-line"></span>
+                    SUCRA PLOT
+                </h4>
+                <!-- <div style="margin-left: 5px;">
+                    <button onclick="var svg = d3.select('#fg-nma-scrplt-div svg');fig_saver.save_png(svg, 'figure_sucra_plot');">
+                        <i class="far fa-save"></i> Save PNG
+                    </button>
+                </div> -->
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+                <div id="fg-nma-scrplt-div"></div>
+            </div>
+        </div><!-- .box SUCRA plot -->
+
     </div>
     <!-- .pane-row -->
 
@@ -487,6 +506,7 @@ var jarvis = {
         // update the sucra rank
         if (typeof(data.tmrank) != 'undefined') {
             tb_ranktb.draw(data.tmrank);
+            fg_scrplt.draw(data.scrplt);
         }
         
         // update the pscore rank
@@ -535,9 +555,13 @@ var jarvis = {
         // init the rank table
         tb_ranktb.init();
         
+        // init the pscore figure
         fg_pscplt.width = 350;
         fg_pscplt.height = 270;
         fg_pscplt.init();
+
+        // init the SUCRA plot figure
+        fg_scrplt.init();
 
         // set the ref treatment
         fm_ref_treat_selector.init(this.default_treat);

@@ -2,6 +2,7 @@ import os
 import json
 import uuid
 from collections import OrderedDict
+from pprint import pprint
 
 from flask import request
 from flask import flash
@@ -430,26 +431,27 @@ def graphdata_itable_json(prj):
     rs = json.loads(df.to_json(orient='records'))
 
     # add the category info for attrs
-    attrs = [ {'name': a} for a in df.columns.tolist() ]
-    for i in range(len(attrs)):
-        name = attrs[i]['name']
-        name_parts = name.split('|')
-        if len(name_parts) > 1:
-            trunk = name_parts[0].strip()
-            branch = name_parts[1].strip()
-        else:
-            trunk = '_'
-            branch = name
-        attr_id = trunk.upper() + '|' + branch.upper()
+    # attrs = [ {'name': a} for a in df.columns.tolist() ]
+    # for i in range(len(attrs)):
+    #     name = attrs[i]['name']
+    #     name_parts = name.split('|')
+    #     if len(name_parts) > 1:
+    #         trunk = name_parts[0].strip()
+    #         branch = name_parts[1].strip()
+    #     else:
+    #         trunk = '_'
+    #         branch = name
+    #     attr_id = trunk.upper() + '|' + branch.upper()
 
-        if attr_id in attr_pack['attr_dict']:
-            attrs[i].update(attr_pack['attr_dict'][attr_id])
-        else:
-            attrs[i]['cate'] = 'Other'
-            attrs[i]['vtype'] = 'text'
-            attrs[i]['trunk'] = trunk
-            attrs[i]['branch'] = branch
-            attrs[i]['attr_id'] = attr_id
+    #     if attr_id in attr_pack['attr_dict']:
+    #         attrs[i].update(attr_pack['attr_dict'][attr_id])
+    #     else:
+    #         attrs[i]['cate'] = 'Other'
+    #         attrs[i]['vtype'] = 'text'
+    #         attrs[i]['trunk'] = trunk
+    #         attrs[i]['branch'] = branch
+    #         attrs[i]['attr_id'] = attr_id
+    attrs = list(attr_pack['attr_dict'].values())
 
     ret = {
         'rs': rs,
@@ -476,9 +478,11 @@ def graphdata_graph_json(prj):
     # hold all the outcomes
     fn_json = 'GRAPH.json'
     full_fn_json = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn_json)
+
     # hold one outcome
     fn_oc_json = 'GRAPH_%s.json'
     full_oc_fn_json = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn_oc_json)
+
     # hold the outcome list 
     fn_nma_list_json = 'NMA_LIST.json'
     full_nma_list_json = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn_nma_list_json)
@@ -491,7 +495,9 @@ def graphdata_graph_json(prj):
             fn_json
         )
     
+    # generate the NMA List data
     nma = get_nma_list_data(full_fn)
+
     # cache the NMA list
     json.dump(nma, open(full_nma_list_json, 'w'))
 
@@ -530,6 +536,7 @@ def graphdata_softable_pma_json(prj):
             fn = 'SOFTABLE_PMA_DATA.xlsx'
             full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
             ret = get_ae_pma_data_simple(full_fn)
+
     elif v == '2':
         fn = 'SOFTABLE_PMA_DATA.xlsx'
         full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
@@ -578,7 +585,7 @@ def graphdata_softable_nma_json(prj):
         # cache the result
         json.dump(ret, open(full_fn_json, 'w'))
     elif v == '2':
-        ret = get_sof_nma_data(full_fn, backend=backend)
+        ret = get_sof_nma_data(full_fn)
         # cache the result
         json.dump(ret, open(full_fn_json, 'w'))
 
@@ -853,6 +860,7 @@ def get_evmap_data_v2(full_fn):
     oc_names = []
     for idx, row in dft.iterrows():
         oc = {
+            "oc_method": row['method'],
             "oc_name": row['name'],
             "oc_fullname": row['full name'],
             "oc_measures": row['measure'].split(','),
@@ -924,12 +932,7 @@ def get_evmap_data_v2(full_fn):
             calc_cie(row[cols_calc_cert].tolist())
 
     # now get the NMA results
-    cols_dict = {
-        'raw': ['A:D', ['study', 'treat', 'event', 'total' ]],
-        'pre': ['A:L', ['study', 't1', 't2', 'sm', 'lowerci', 'upperci', 
-                        'survival in t1', 'survival in t2',
-                        'Ec_t1', 'Et_t1', 'Ec_t2', 'Et_t2']]
-    }
+    cols_dict = settings.SOFTABLE_NMA_COLS
     
     for oc_name in oc_names:
         oc = oc_dict[oc_name]
@@ -951,12 +954,16 @@ def get_evmap_data_v2(full_fn):
         cfg = {
             # for init analyzer
             "backend": oc['param']['analysis_method'],
-            "data_type": {'pre': 'CAT_PRE', 'raw': 'CAT_RAW'}[oc['oc_datatype']],
+            "input_format": {
+                'pre': settings.INPUT_FORMATS_HRLU, 
+                'raw': settings.INPUT_FORMATS_ET,
+                'raw_time': settings.INPUT_FORMATS_FTET
+            }[oc['oc_datatype']],
             "measure_of_effect": sm,
             "fixed_or_random": oc['param']['fixed_or_random'],
             # just use the first one as 
             "reference_treatment": treat_list[0],
-            "which_is_better": 'big' if oc['param']["which_is_better"] == 'higher' else 'small'
+            "which_is_better": 'big' if oc['param']["which_is_better"] in ['higher', 'bigger'] else 'small'
         }
         # invoke analyzer
         ret_nma = nma_analyzer.analyze(rs, cfg)
@@ -1020,9 +1027,13 @@ def get_evmap_data_v2(full_fn):
 
                 # update the table data
                 data[comparator].append({
-                    "c": c, "e": e, "e_txt": e_txt, 
-                    "oc": oc_name, "t": treatment
+                    "c": c, 
+                    "e": e, 
+                    "e_txt": e_txt, 
+                    "oc": oc_name, 
+                    "t": treatment
                 })
+
     ret = {
         "treat_list": treat_list,
         "treat_dict": treat_dict,
@@ -1191,7 +1202,6 @@ def get_attr_pack_from_itable(full_fn):
 
     for idx, row in df_attrs.iterrows():
         vtype = 'text'
-        print(row)
         name = row['name'].strip()
         cate = row['cate'].strip()
 
@@ -1216,6 +1226,7 @@ def get_attr_pack_from_itable(full_fn):
             'branch': branch,
             'attr_id': attr_id,
         }
+        pprint(attr)
 
         # put this item into dict
         attr_tree[cate][trunk].append(attr)
@@ -1909,6 +1920,10 @@ def get_nma_list_data(full_fn):
 
 
 def get_oc_graph_data(full_fn):
+    '''
+    Get the OC GRAPH.json based on SOFTABLE_NMA_DATA.xlsx
+
+    '''
     # get all
     xls = pd.ExcelFile(full_fn)
 
@@ -1926,6 +1941,7 @@ def get_oc_graph_data(full_fn):
     oc_names = []
     for idx, row in dft.iterrows():
         oc = {
+            "oc_method": row['method'],
             "oc_name": row['name'],
             "oc_fullname": row['full name'],
             "oc_measures": row['measure'].split(','),
@@ -1973,8 +1989,11 @@ def get_oc_graph_data(full_fn):
         analysis_method = oc['param']['analysis_method']
         reference_treatment = treat_list[0]
         fixed_or_random = oc['param']['fixed_or_random']
-        which_is_better = "small" if oc['param']['which_is_better'] == 'lower' else "big"
+        which_is_better = "big" if oc['param']['which_is_better'] in ['higher', 'bigger'] else "small"
+
         cfg = {
+            # for init analyzer
+            "backend": analysis_method,
             "input_format": input_format,
             "reference_treatment": reference_treatment,
             "measure_of_effect": measure,
@@ -1986,10 +2005,10 @@ def get_oc_graph_data(full_fn):
         rs = json.loads(dft.to_json(orient='table', index=False))['data']
 
         # calc!
-        analysis_ret = freq_analyzer.analyze(rs, cfg)
+        ret_nma = nma_analyzer.analyze(rs, cfg)
 
         # put in result
-        ret['graph_dict'][oc_name] = analysis_ret
+        ret['graph_dict'][oc_name] = ret_nma
 
     ######################################
     # Build the GRAPH-outcome.json
@@ -2017,7 +2036,7 @@ def get_oc_graph_data(full_fn):
     return ret
 
 
-def get_sof_nma_data(full_fn, backend):
+def get_sof_nma_data(full_fn):
     '''
     Get the SoF Table NMA data
 
@@ -2025,6 +2044,7 @@ def get_sof_nma_data(full_fn, backend):
 
     - bayes
     - freq
+
     '''
     xls = pd.ExcelFile(full_fn)
     
@@ -2069,6 +2089,7 @@ def get_sof_nma_data(full_fn, backend):
 
         # put current row in to ae_dict
         oc_dict[oc_name] = {
+            "oc_method": row['method'],
             "oc_cate": oc_cate,
             "oc_measures": row['measure'].split(','),
             "oc_datatype": row['data type'],
@@ -2129,12 +2150,7 @@ def get_sof_nma_data(full_fn, backend):
 
 
     # build OC details by the data type
-    cols_dict = {
-        'raw': ['A:D', ['study', 'treat', 'event', 'total' ]],
-        'pre': ['A:L', ['study', 't1', 't2', 'sm', 'lowerci', 'upperci', 
-                        'survival in t1', 'survival in t2',
-                        'Ec_t1', 'Et_t1', 'Ec_t2', 'Et_t2']]
-    }
+    cols_dict = settings.SOFTABLE_NMA_COLS
     oc_dfts = []
     oc_rsts = {}
 
@@ -2263,6 +2279,9 @@ def get_sof_nma_data(full_fn, backend):
                 else:
                     treats[t]['internal_val'] = 100
 
+        else:
+            pass
+
         # update treats
         all_treat_list += treat_list
 
@@ -2275,6 +2294,7 @@ def get_sof_nma_data(full_fn, backend):
         # get the records
         rs = json.loads(dft.to_json(orient='table', index=False))['data']
 
+        # for each measure, HR, OR, RR ... etc
         for sm in oc['oc_measures']:
             # init this measure with a blank table
             oc_dict[oc_name]['lgtable'][sm] = {}
@@ -2286,12 +2306,16 @@ def get_sof_nma_data(full_fn, backend):
             cfg = {
                 # for init analyzer
                 "backend": oc['param']['analysis_method'],
-                "data_type": {'pre': 'CAT_PRE', 'raw': 'CAT_RAW'}[oc['oc_datatype']],
+                "input_format": {
+                    'pre': settings.INPUT_FORMATS_HRLU, 
+                    'raw': settings.INPUT_FORMATS_ET,
+                    'raw_time': settings.INPUT_FORMATS_FTET
+                }[oc['oc_datatype']],
                 "measure_of_effect": sm,
                 "fixed_or_random": oc['param']['fixed_or_random'],
                 # just use the first one as 
                 "reference_treatment": treat_list[0],
-                "which_is_better": 'big' if oc['param']["which_is_better"] == 'higher' else 'small'
+                "which_is_better": 'big' if oc['param']["which_is_better"] in ['higher', 'bigger'] else 'small'
             }
             
             # invoke analyzer
@@ -2302,14 +2326,20 @@ def get_sof_nma_data(full_fn, backend):
             oc_dict[oc_name]['lgtable'][sm] = tmp_lgtable_sm
 
             # get the rank data
-            if backend == 'freq':
+            # 2/16/2021: use the method specified in the input file
+            if oc['param']['analysis_method'] == 'freq':
                 rank_name = 'psrank'
-            elif backend == 'bayes':
+
+            elif oc['param']['analysis_method'] == 'bayes':
                 rank_name = 'tmrank'
+
+            else:
+                rank_name = 'psrank'
 
             # get the output rank
             # 9/23/2020: add reverse, the higher value, the higher rank
             reverse = True
+
             # # 10/3/2020: add reverse according to the which_is_better column
             # if oc_dict[oc_name]['param']['which_is_better'] == 'lower':
             #     reverse = False
@@ -2317,11 +2347,15 @@ def get_sof_nma_data(full_fn, backend):
             #     reverse = True
             # if sm in ['HR']:
             #     reverse = False
-            print('* for %s, which is better: %s, %s' % (oc_name, oc_dict[oc_name]['param']['which_is_better'], reverse))
+            print('* for %s, which is better: %s, %s' % (
+                oc_name, oc_dict[oc_name]['param']['which_is_better'], 
+                reverse
+            ))
             
             ranks = sorted(ret_nma['data'][rank_name]['rs'], 
                 key=lambda v: v['value'],
                 reverse=reverse)
+
             for i, r in enumerate(ranks):
                 oc_dict[oc_name]['treats'][r['treat']]['rank'] = i+1
                 oc_dict[oc_name]['treats'][r['treat']]['score'] = r['value']
@@ -2348,6 +2382,8 @@ def get_sof_nma_data(full_fn, backend):
 
 def get_ae_nma_data(full_fn, backend):
     '''
+    Deprecated
+
     Get the SoF Table NMA data
 
     the backend supports:
@@ -2737,7 +2773,7 @@ def get_sof_pma_data(full_fn):
             if oc_rsts[oc_name]['has_internal_val']:
                 oc_rsts[oc_name]['internal_val'] = int(1000 * oc_rsts[oc_name]['internal_val_ec'] / oc_rsts[oc_name]['internal_val_et'])
             else:
-                treats[t]['internal_val'] = None
+                oc_rsts[oc_name]['internal_val'] = None
 
             # oc_rsts[oc_name]['external_val'] = int(dft['Ec'].mean())
 
@@ -2748,12 +2784,19 @@ def get_sof_pma_data(full_fn):
                 lowerci = r['lowerci']
                 upperci = r['upperci']
                 study = r['study']
+                # try:
+                # only those with values can be added
                 try:
-                    # only those with values can be added
                     _srvc = float(r['survival in control'])
-                    survival_in_control.append(_srvc)
                 except:
+                    _srvc = None
+                if pd.isna(_srvc):
+                    # some thing wrong with the value
                     pass
+                else:
+                    survival_in_control.append(_srvc)
+                # except:
+                #     pass
 
                 # convert data to PythonMeta Format
                 ds.append([ TE, lowerci, upperci, study ])

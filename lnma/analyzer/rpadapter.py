@@ -512,7 +512,7 @@ def _dmetar_trans_scrplt(j, params):
     ret = {
         'n_ranks': len(treats),
         'vals': vals,
-        'backend': 'bugsnet'
+        'backend': 'dmetar'
     }
     return ret
 

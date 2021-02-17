@@ -1,6 +1,6 @@
 library(gemtc)
 library(rjags)
-
+library(dmetar)
 library(jsonlite)
 data<-read.csv("{{ fn_csvfile }}")
 
@@ -35,6 +35,7 @@ all_ret <- list(
     sucrarank = rank.sucra,
     version = list(
         jsonlite = packageVersion('jsonlite'),
+        dmetar = packageVersion('dmetar'),
         gemtc = packageVersion('gemtc')
     )
 )
