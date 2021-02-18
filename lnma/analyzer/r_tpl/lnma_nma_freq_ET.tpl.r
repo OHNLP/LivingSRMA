@@ -65,6 +65,9 @@ mynetplt <- netgraph(nma)
 # Generate league table.
 myleaguetb <- netleague(nma, bracket="(", digits=2)
 
+# Generate forest plot.
+myforest <- forest(nma)
+
 # Generate ranks
 # the default output on the screen looks like the following
 ##               P-score
@@ -97,6 +100,7 @@ all_ret <- list(
     nma = nma,
     mynetplt = mynetplt,
     myleaguetb = myleaguetb,
+    myforest = myforest,
     myrank = list(
         trts = nma$trts,
         fixed = myrank$Pscore.fixed,

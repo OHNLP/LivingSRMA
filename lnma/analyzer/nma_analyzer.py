@@ -81,11 +81,11 @@ def analyze(rs, cfg):
             ret = analyze_raw_by_bugsnet(rs, params)
 
     elif cfg['backend'] == 'freq':
-        if cfg['input_format'] == 'ET':
+        if cfg['input_format'] == INPUT_FORMATS_ET:
             ret = analyze_raw_by_freq(rs, params)
-        elif cfg['input_format'] == 'CAT_RAW':
+        elif cfg['input_format'] == INPUT_FORMATS_FTET:
             ret = analyze_raw_by_freq(rs, params)
-        elif cfg['input_format'] == 'CAT_PRE':
+        elif cfg['input_format'] == INPUT_FORMATS_HRLU:
             ret = analyze_pre_by_freq(rs, params)
         else:
             ret = {}
@@ -356,7 +356,9 @@ def analyze_raw_by_freq(rs, params):
         'params': params,
         'success': True,
         'data': {
+            'netcha': _netmeta_trans_netcha(jrst['nma'], params),
             'netplt': _netmeta_trans_netplt(jrst['mynetplt'], params),
+            'forest': _netmeta_trans_forest(jrst['myforest'], params),
             'league': _netmeta_trans_league_r(jrst['myleaguetb'], params),
             'psrank': _netmeta_trans_pscore(jrst, params)
         }

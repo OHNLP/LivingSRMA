@@ -2238,20 +2238,26 @@ def get_sof_nma_data(full_fn):
                     }
 
                 # count the survival when value is float for t1
+                treats[t1]['n_stus'] += 1
                 try:
-                    treats[t1]['n_stus'] += 1
-                    treats[t1]['survival_in_control'] += float(row['survival in t1'])
+                    _srvc = float(row['survival in t1'])
                 except:
-                    if row['survival in t1'] == 'NR':
-                        pass
+                    _srvc = None
+                if pd.isna(_srvc):
+                    pass
+                else:
+                    treats[t1]['survival_in_control'] += _srvc
             
                 # count the survival when value is float for t2
+                treats[t2]['n_stus'] += 1
                 try:
-                    treats[t2]['n_stus'] += 1
-                    treats[t2]['survival_in_control'] += float(row['survival in t2'])
+                    _srvc = float(row['survival in t2'])
                 except:
-                    if row['survival in t2'] == 'NR':
-                        pass
+                    _srvc = None
+                if pd.isna(_srvc):
+                    pass
+                else:
+                    treats[t2]['survival_in_control'] += _srvc
 
                 # count the Ec and Et of t1
                 try: 
