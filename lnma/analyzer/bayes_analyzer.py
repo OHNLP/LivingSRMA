@@ -39,10 +39,28 @@ from .rpadapter import _gemtc_trans_netplt
 
 
 def analyze(rs, cfg):
-    # since most of the Bayesian NMA is done by bugsnet ... well, so as follows:
-    cfg['bayes_backend'] = 'bugsnet'
+    # decide which backend service to use
     if cfg['input_format'] == INPUT_FORMATS_HRLU:
+        # 2021-02-17: The dmetar mixed the Freq and Bayes
+        # That's why we don't use this for the Bayesian analysis
+        # The SUCRA is done by Bayesian
+        # The League table is done by Freq
+        #
+        # cfg['bayes_backend'] = 'dmetar'
+        #
+        # Please use gemtc to get the Bayesian result
         cfg['bayes_backend'] = 'gemtc'
+
+    elif cfg['input_format'] == INPUT_FORMATS_ET:
+        # this is for the `study, treat, event, total` format
+        cfg['bayes_backend'] = 'bugsnet'
+
+    elif cfg['input_format'] == INPUT_FORMATS_FTET:
+        # this is for the `study, treat, event, total, time` format
+        cfg['bayes_backend'] = 'bugsnet'
+        
+    else:
+        cfg['bayes_backend'] = 'bugsnet'
 
     # generate
     submission_id = hashlib.sha224(str(datetime.datetime.now()).encode('utf8')).hexdigest()[:12].upper()
@@ -137,10 +155,12 @@ def analyze_by_bugsnet(rs, params):
             rs2[study]['treat1'] = row['treat']
             rs2[study]['event1'] = row['event']
             rs2[study]['n1'] = row['total']
+
         elif 'treat2' not in rs2[study]:
             rs2[study]['treat2'] = row['treat']
             rs2[study]['event2'] = row['event']
             rs2[study]['n2'] = row['total']
+
         else:
             pass
     
@@ -212,6 +232,9 @@ def analyze_by_dmetar(rs, params):
         'sucra_lower_is_better': 'TRUE' if params['which_is_better'] == 'small' else 'FALSE'
     }
     r_params.update(params)
+    
+    # for passing the measure of effect to the script
+    r_params['measure_of_effect'] = r_params['measure_of_effect'].upper()
 
     # output data
     df = pd.DataFrame(rs)

@@ -544,7 +544,7 @@ a {
                 v-bind:title="'[' + r.title + ']'"
                 v-on:click="show_study_by_pmid(r.pmid)">
                 <span class="study-badge">{{ idx + 1 }}</span>
-                {{ r.title }}
+                <span v-html="r.title"></span>
             </div>
 
             <div class="study-authors">
@@ -553,7 +553,7 @@ a {
 
             <div class="study-pub">
                 {{ r.date }} 
-                <span class="study-journal">{{ r.journal }}</span class="">. 
+                <span class="study-journal" v-html="r.journal"></span>. 
                     
                 <a class="study-pmid" target="_blank" title="Show in PubMed" 
                     v-bind:href="url.pubmed.view_pmid + r.pmid">{{ r.pmid }}</a>

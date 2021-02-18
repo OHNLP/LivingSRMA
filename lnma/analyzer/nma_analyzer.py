@@ -20,8 +20,11 @@ from .rpadapter import _netmeta_trans_league_r
 from .rpadapter import _netmeta_trans_forest
 from .rpadapter import _netmeta_trans_pscore
 
+from .rpadapter import _bugsnet_trans_netcha
 from .rpadapter import _bugsnet_trans_netplt
 from .rpadapter import _bugsnet_trans_league
+from .rpadapter import _bugsnet_trans_forest
+from .rpadapter import _bugsnet_trans_scrplt
 from .rpadapter import _bugsnet_trans_rksucra
 
 from .rpadapter import _gemtc_trans_forest
@@ -153,7 +156,11 @@ def analyze_raw_by_bugsnet(rs, params):
         'data': {
             'netplt': _bugsnet_trans_netplt(jrst['network_char']['comparison'], params),
             'league': _bugsnet_trans_league(jrst['league'], params),
-            'tmrank': _bugsnet_trans_rksucra(jrst['sucraplot'], params)
+            'tmrank': _bugsnet_trans_rksucra(jrst['sucraplot'], params),
+
+            'scrplt': _bugsnet_trans_scrplt(jrst['sucraplot'], params),
+            'netcha': _bugsnet_trans_netcha(jrst['network_char']['network'], params),
+            'forest': _bugsnet_trans_forest(jrst['league'], params),
         }
     }
 

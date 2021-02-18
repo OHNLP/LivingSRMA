@@ -1978,7 +1978,12 @@ def get_oc_graph_data(full_fn):
         if oc['oc_datatype'] == 'pre':
             treat_list = list(set(dft['t1'].unique().tolist() + dft['t2'].unique().tolist()))
             input_format = settings.INPUT_FORMATS_HRLU
+
         elif oc['oc_datatype'] == 'raw':
+            treat_list = dft['treat'].unique().tolist()
+            input_format = settings.INPUT_FORMATS_ET
+            
+        else:
             treat_list = dft['treat'].unique().tolist()
             input_format = settings.INPUT_FORMATS_ET
 

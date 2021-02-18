@@ -1,6 +1,6 @@
 library(gemtc)
 library(rjags)
-
+library(dmetar)
 library(jsonlite)
 data<-read.csv("{{ fn_csvfile }}")
 
@@ -15,6 +15,8 @@ rank.probability <- rank.probability(mcmc1)
 rank.probsmat = as.matrix(rank.probability)
 rank.rownames = rownames(rank.probsmat)
 rank.sucra<-sucra(rank.probability, lower.is.better = {{ sucra_lower_is_better }})
+# rank.sucra<-sucra(rank.probability)
+
 # plot(sucra)
 
 # FORET PLOT
@@ -38,6 +40,7 @@ all_ret <- list(
         gemtc = packageVersion('gemtc')
     )
 )
+
 jsonstr <- toJSON(all_ret, pretty=TRUE, force=TRUE)
 cat(jsonstr, file = (con <- file("{{ fn_jsonret }}", "w", encoding = "UTF-8")))
 close(con)
