@@ -48,6 +48,7 @@ def create_app(test_config=None):
     from lnma import bp_rplt
     from lnma import bp_study
     from lnma import bp_extractor
+    from lnma import bp_exporter
     from lnma import bp_pdfworker
 
     login_manager = LoginManager()
@@ -77,6 +78,7 @@ def create_app(test_config=None):
     app.register_blueprint(bp_rplt.bp)
     app.register_blueprint(bp_study.bp)
     app.register_blueprint(bp_extractor.bp)
+    app.register_blueprint(bp_exporter.bp)
     app.register_blueprint(bp_pdfworker.bp)
 
     # make url_for('index') == url_for('blog.index')

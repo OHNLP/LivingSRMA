@@ -749,6 +749,18 @@ def get_papers(project_id):
     return papers
 
 
+def get_papers_by_keystr(keystr):
+    '''
+    Get papers by the project keystr
+    '''
+    project = get_project_by_keystr(keystr)
+    papers = Paper.query.filter(and_(
+        Paper.project_id == project.project_id
+    )).order_by(Paper.date_created.desc()).all()
+
+    return papers
+
+
 def get_papers_by_seq_nums(project_id, seq_nums):
     '''
     Get papers by the seq_num list
