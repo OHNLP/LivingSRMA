@@ -311,7 +311,7 @@ a {
 
                         <div class="d-flex" 
                             style="width: calc(100%-120px); flex-direction: row; justify-content: flex-start; flex-wrap: wrap; width: auto; line-height: 1.5em;"
-                            v-if="trunk == '_'">
+                            v-if="trunk.substring(0, 1) == '_'">
                             <div class="chk-group d-flex" style="align-items: center;"
                                 v-for="attr, i in trunkobj.branches">
                                 <input type="checkbox" style="margin:0 2px 0 0;"
@@ -418,10 +418,18 @@ a {
                             v-for="col, idx in cols"
                             v-bind:title="attrs[idx].name + ': ' + r[col]"
                             v-bind:class="get_td_cls(idx, r[col])">
-                            <span v-if="attrs[idx].attr_id=='_|PUBMED ID' || attrs[idx].attr_id=='_|PMID'">
-                                <a class="url_pubmed" target="_blank" v-bind:href="url.pubmed + r[col]">
+                            <span v-if="attrs[idx].attr_id=='_PUBMED ID|PUBMED ID' || attrs[idx].attr_id=='_PMID|PMID'">
+                                <a v-if="r[col] == 'NA'"
+                                    v-bind:href="r[attr_id2col('_URL|URL')]"
+                                    class="url_pubmed" target="_blank">
+                                    {{ r[attr_id2col('_URL|URL')] }}
+                                </a>
+                                <a v-else
+                                    v-bind:href="url.pubmed + r[col]"
+                                    class="url_pubmed" target="_blank">
                                     {{ r[col] }}
                                 </a>
+                                
                             </span>
                             <span v-else>{{ r[col] }}</span>
                         </td>
@@ -474,8 +482,8 @@ var dt_tbcore = {
         var trunk = '';
         var branch = '';
         if (ps.length == 1) {
-            trunk = '_';
             branch = ps[0].trim();
+            trunk = '_' + branch;
         } else if (ps.length == 2) {
             trunk = ps[0].trim();
             branch = ps[1].trim();
@@ -511,7 +519,7 @@ var dt_tbcore = {
             this.attrs[i]['is_marked'] = false;
             this.attrs[i]['is_fixed'] = false;
 
-            this.attrs[i].is_trunk_shown = (last_trunk == this.attrs[i].trunk || this.attrs[i].trunk == '_')? false : true;
+            this.attrs[i].is_trunk_shown = (last_trunk == this.attrs[i].trunk || this.attrs[i].trunk.substring(0, 1) == '_')? false : true;
             // shorter version for display
             this.attrs[i].short_name = this.get_short_name(this.attrs[i].name);
             this.attrs[i].short_trunk = this.get_short_name(this.attrs[i].trunk);
@@ -676,6 +684,10 @@ var tb_schtab = {
                     } else {
                         return '';
                     }
+                },
+
+                attr_id2col: function(attr_id) {
+                    return dt_tbcore.t_a2c[attr_id];
                 },
 
                 get_td_cls: function(idx, val) {

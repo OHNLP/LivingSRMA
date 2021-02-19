@@ -1211,7 +1211,7 @@ def get_attr_pack_from_itable(full_fn):
             trunk = name_parts[0].strip()
             branch = name_parts[1].strip()
         else:
-            trunk = '_'
+            trunk = '_' + name
             branch = name
         attr_id = trunk.upper() + '|' + branch.upper()
 
