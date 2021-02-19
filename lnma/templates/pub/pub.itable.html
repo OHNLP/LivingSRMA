@@ -649,8 +649,13 @@ var tb_coltab = {
 
                 check_all_cols: function(evt) {
                     for (let i = 0; i < this.attrs.length; i++) {
-                        this.attrs[i].is_marked = true;
-                        this.attrs[i].is_short_shown = !this.attrs[i].is_marked;
+                        // 2021-02-19: hide _SYS
+                        if (this.attrs[i].cate == '_SYS') {
+
+                        } else {
+                            this.attrs[i].is_marked = true;
+                            this.attrs[i].is_short_shown = !this.attrs[i].is_marked;
+                        }
                     }
                 },
 

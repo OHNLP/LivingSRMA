@@ -429,7 +429,7 @@ def graphdata_itable_json(prj):
     #     df = pd.read_excel(full_fn, skiprows=[0])
     df = pd.read_excel(full_fn, skiprows=[0])
     rs = json.loads(df.to_json(orient='records'))
-
+    
     # add the category info for attrs
     # attrs = [ {'name': a} for a in df.columns.tolist() ]
     # for i in range(len(attrs)):
@@ -2061,7 +2061,7 @@ def get_sof_nma_data(full_fn):
     dft = xls.parse(oc_tab_name)
     dft = dft[~dft['name'].isna()]
     
-    # only include those 
+    # only include those should be included in sof
     dft = dft[dft['included in sof'] == 'yes']
 
     # build oc category
@@ -2125,6 +2125,7 @@ def get_sof_nma_data(full_fn):
 
     # build certainty
     if oc_tab_cert in xls.sheet_names:
+
         dft = xls.parse(oc_tab_cert, usecols=cols_range, names=cols_certs)
 
         # there maybe nan 
@@ -2135,6 +2136,11 @@ def get_sof_nma_data(full_fn):
             oc_name = row['oc_name']
             comparator = row['comparator']
             treatment = row['treatment']
+
+            # 2021-02-19: skip those not included in sof
+            if oc_name not in oc_names:
+                print('* skip oc [%s] due to NOT included-in-sof' % oc_tab_cert)
+                continue
 
             if comparator not in oc_dict[oc_name]['cetable']:
                 oc_dict[oc_name]['cetable'][comparator] = { comparator: {} }
@@ -2613,6 +2619,10 @@ def get_sof_pma_data(full_fn):
     ]
     dft = xls.parse(oc_tab_name, usecols='A:Q', names=cols_outcome)
     dft = dft[~dft['oc_name'].isna()]
+
+    # 2021-02-19: fix the include in sof not working
+    # only include those should be included in sof
+    dft = dft[dft['oc_iisof'] == 'yes']
 
     # build oc category
     oc_dict = {}

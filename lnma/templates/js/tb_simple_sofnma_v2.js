@@ -140,7 +140,13 @@ var tb_simple_sofnma = {
                         // it means no available data for this treat
                         return 'NA';
                     } else {
-                        return Math.round(ACR * this.baseline) + ' per ' + this.baseline;
+                        if (r.oc.treats[t].which_ACR.use_which_val == 'internal') {
+                            return Math.round(ACR * this.baseline) + ' per ' + this.baseline;
+                        } else {
+                            return Math.round(ACR * this.baseline) + ' per ' + this.baseline;
+                            // return Math.round(ACR * this.baseline) + ' per ' + this.baseline + '<br>' +
+                                // '('+r.oc.treats[t].which_ACR.use_which_val+')';
+                        }
                     }
                 },
 

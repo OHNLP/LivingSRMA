@@ -317,7 +317,7 @@ a {
                         </td>
                         <td class="col-comparator"
                             v-else>
-                            {{ get_ACR_txt(r, comparator) }} <br>
+                            <span v-html="get_ACR_txt(r, comparator)"></span> <br>
                             <b>{{ get_rank_txt(r, comparator) }}</b>
                         </td>
 
