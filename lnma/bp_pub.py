@@ -1226,7 +1226,7 @@ def get_attr_pack_from_itable(full_fn):
             'branch': branch,
             'attr_id': attr_id,
         }
-        pprint(attr)
+        # pprint(attr)
 
         # put this item into dict
         attr_tree[cate][trunk].append(attr)
