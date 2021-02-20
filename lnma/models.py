@@ -357,6 +357,36 @@ class DataSource(db.Model):
 class Extract(db.Model):
     """
     The product details extracted by user
+
+    The extraction contains the information related to an outcome (or AE).
+    The oc_type currently have the following:
+
+    - pwma
+    - subg
+    - nma
+    - itable
+
+    For each oc_type, the meta content would be different accordingly.
+
+    For the `pwma` type, the `meta` includes:
+    {
+        abbr: '',
+        oc_type: 'pwma',
+        category: 'default',
+        group: 'Primary',
+        full_name: 'pwma Outcome full name',
+        included_in_plots: 'yes',
+        included_in_sof: 'yes',
+        input_format: 'PRIM_CAT_RAW',
+        measure_of_effect: 'RR',
+        fixed_or_random: 'fixed',
+        which_is_better: 'lower',
+        attrs: null,
+        cate_attrs: null
+    }
+
+    Some attributes are designed for the public site only.
+    More information would be added in the future.
     """
     
     __tablename__ = 'extracts'

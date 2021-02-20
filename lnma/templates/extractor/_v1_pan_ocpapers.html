@@ -328,25 +328,27 @@
 
         <!-- table for pwma -->
         <table class="table" v-if="extract.meta.oc_type === 'pwma'">
-            <tr>
-                <th class="paper-table-header-th" style="width: 20px;">
-                    <input type="checkbox" title="Toggle selection"
-                        v-on:click="toggle_select_all_papers($event);">
-                </th>
-                <th class="paper-table-header-th" style="width: 90px;">NCT</th>
-                <th class="paper-table-header-th" style="width: 130px;">Paper ({{ n_selected }} selected) </th>
-                <th class="paper-table-header-th" style="width: 90px;">Checked</th>
-                <th class="paper-table-header-th" style="width: 50px;"># Arms</th>
+            <thead class="paper-table-header">
+                <tr>
+                    <th class="paper-table-header-th" style="width: 20px;">
+                        <input type="checkbox" title="Toggle selection"
+                            v-on:click="toggle_select_all_papers($event);">
+                    </th>
+                    <th class="paper-table-header-th" style="width: 90px;">NCT</th>
+                    <th class="paper-table-header-th" style="width: 130px;">Paper ({{ n_selected }} selected) </th>
+                    <th class="paper-table-header-th" style="width: 90px;">Checked</th>
+                    <th class="paper-table-header-th" style="width: 50px;"># Arms</th>
 
-                <!-- the attributes of pwma -->
-                <th class="paper-table-header-th" 
-                    v-for="attr_sub in all_attrs"
-                    v-show="show_attrs[attr_sub.abbr]">
-                    <span v-if="show_attrs[attr_sub.abbr]">
-                        {{ attr_sub.name }}
-                    </span>
-                </th>
-            </tr>
+                    <!-- the attributes of pwma -->
+                    <th class="paper-table-header-th" 
+                        v-for="attr_sub in all_attrs"
+                        v-show="show_attrs[attr_sub.abbr]">
+                        <span v-if="show_attrs[attr_sub.abbr]">
+                            {{ attr_sub.name }}
+                        </span>
+                    </th>
+                </tr>
+            </thead>
 
             <tbody>
                 <tr class="paper-table-row" 
@@ -386,9 +388,11 @@
                         <!-- the main track -->
                         <span class="cell-input">
                             <input class="paper-extract-input-auto" type="text" 
+                                v-bind:abbr="attr_sub.abbr"
                                 v-bind:size="get_input_size(extract.data[paper.pid].attrs.main[attr_sub.abbr])"
                                 v-model="extract.data[paper.pid].attrs.main[attr_sub.abbr]">    
                         </span>
+
                         <!-- the other tracks if n_arms > 2 -->
                         <hr class="n-arms-hr" v-if="extract.data[paper.pid].n_arms > 2">
 
@@ -465,7 +469,8 @@
                 <tr class="paper-table-row" 
                     v-for="paper in papers"
                     v-bind:id="'paper-table-row-' + paper.pid"
-                    v-on:click="on_click_paper(paper.pid)">
+                    v-on:click="on_click_paper(paper.pid)"
+                    v-show="!only_show_selected || extract.data[paper.pid].is_selected">
                     <td class="paper-table-body-td">
                         <input type="checkbox" id="" v-model="extract.data[paper.pid].is_selected" >
                     </td>
@@ -489,8 +494,8 @@
                             <option value="5">5</option>
                         </select>
                     </td>
-
-                    <!-- the attributes need to collect -->
+                    
+                    <!-- the attributes of pwma -->
                     <td v-for="attr_sub in all_attrs" 
                         v-show="show_attrs[attr_sub.abbr]"
                         class="paper-table-body-td paper-value">
@@ -498,9 +503,11 @@
                         <!-- the main track -->
                         <span class="cell-input">
                             <input class="paper-extract-input-auto" type="text" 
+                                v-bind:abbr="attr_sub.abbr"
                                 v-bind:size="get_input_size(extract.data[paper.pid].attrs.main[attr_sub.abbr])"
                                 v-model="extract.data[paper.pid].attrs.main[attr_sub.abbr]">    
                         </span>
+
                         <!-- the other tracks if n_arms > 2 -->
                         <hr class="n-arms-hr" v-if="extract.data[paper.pid].n_arms > 2">
 

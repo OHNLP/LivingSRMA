@@ -94,7 +94,7 @@
                 </span>
             </div>
             <div class="oc-attr">
-                <button v-on:click="create_category();">
+                <button v-on:click="create_filter();">
                     <i class="fa fa-bars"></i>
                     Add Filter
                 </button>
@@ -102,6 +102,28 @@
         </div>
         <!-- /.panel-info -->
 
+        <div v-if="itable.meta.hasOwnProperty('filters')">
+            <div v-for="filter, filter_idx in itable.meta.filters"
+                class="filter-div pt-2 pb-2 mb-2 mt-2">
+                <h6 class="filter-title">
+                    Filter {{ filter_idx + 1 }}
+                </h6>
+                <label for="">Filter Label: </label>
+                <input type="text" class="oc-attr-value" v-model="filter.display_name">
+                
+                <label for="">Display Style: </label>
+                <select v-model="filter.type">
+                    <option value="radio">Radio Buttons</option>
+                    <option value="select">Dropdown Selections</option>
+                    <option value="text">Text Box</option>
+                </select>
+
+                <br>
+
+                <label for="">Attribute name for this filter: </label>
+                <input type="text" class="oc-attr-value" v-model="filter.attr">
+            </div>
+        </div>
     </div>
     <!-- /#filter -->
         

@@ -209,7 +209,12 @@ html {
 .n-arms-hr {
     margin: 3px 0 !important;
 }
-
+.filter-div {
+    border-bottom: 1px solid #EFEFEF;
+}
+.filter-title {
+    margin: 0 !important;
+}
 {% include 'css/box.css' %}
 </style>
 
@@ -756,7 +761,7 @@ var pan_ocpapers = {
         // the last argument is null, means it's the main track
         html = this.__update_ctx_menu_html(html, highlight_text, pid, null);
 
-        // this is for the other extracing (i.e., multiple arms)
+        // this is for the other extracting (i.e., multiple arms)
         if (n_arms > 2) {
             html.push('<li class="ui-state-disabled menu-header"><div>Other Arms</div></li>');
             
@@ -804,7 +809,7 @@ var pan_ocpapers = {
                         if (this.vpp.show_attrs[sub.abbr]) {
                             html.push(
                             '<li class="menu-item">' +
-                                '<div onclick="pan_ocpapers.set_highlight_text_to_attr(\''+highlight_text+'\', \''+pid+'\', \''+attr.abbr+'\', '+seq+')">' +
+                                '<div onclick="pan_ocpapers.set_highlight_text_to_attr(\''+highlight_text+'\', \''+pid+'\', \''+sub.abbr+'\', '+seq+')">' +
                                 attr.name + ' - ' + sub.name +
                                 '</div>' +
                             '</li>'
@@ -994,10 +999,6 @@ var pan_collector = {
             return false; 
         });
         console.log('* binded ctx menu')
-    },
-
-    bind_pdf_ctx_menu: function() {
-        
     },
 
     on_contextmenu_pdfviewer: function(event) {
@@ -1321,6 +1322,33 @@ var pan_itbuilder = {
 
                 remove_sub: function(cate_abbr, attr_abbr, sub_abbr) {
                     pan_itbuilder.remove_sub(cate_abbr, attr_abbr, sub_abbr);
+                },
+
+                ////////////////////////////////////////////////////////
+                // Filters
+                ////////////////////////////////////////////////////////
+                create_filter: function() {
+
+                    // get the full name
+                    var text = jarvis.prompt('The filter label name:');
+                    if (text == null) { return; }
+                    text = text.trim();
+                    if (text == '') { return; }
+
+                    // create a new filter
+                    var filter = JSON.parse(JSON.stringify(jarvis.tpl.filter));
+                    
+                    // update the filter's label / display_name
+                    filter.display_name = text;
+
+                    // add to the itable filters
+                    if (!this.itable.meta.hasOwnProperty('filters')) {
+                        this.itable.meta['filters'] = [];
+                    }
+                    this.itable.meta.filters.push(filter);
+
+                    // update the UI
+                    this.$forceUpdate();
                 }
             }
         });
@@ -1645,6 +1673,18 @@ var jarvis = {
                     group: 'itable',
                     full_name: 'Interactive Table',
                     input_format: 'custom',
+                    filters: [{
+                        display_name: 'Name',
+                        type: 'radio',
+                        attr: 'ITABLEATT000',
+                        value: 0,
+                        values: [{
+                            display_name: 'All',
+                            value: 0,
+                            sql_cond: "{$col} is not NULL",
+                            default: true
+                        }]
+                    }],
                     /**
                      * To make sure the order of the cate and attr list
                      * the attrs are saved as a hierarchical list structure.
@@ -1681,14 +1721,14 @@ var jarvis = {
         },
         input_format: {
             pwma: {
-                PRIM_CAT_RAWp: ['Et', 'Nt', 'Ec', 'Nc', 'treatment', 'control'],
-                PRIM_CAT_PREp: ['TE', 'lowerci', 'upperci'],
-                PRIM_CONTD_RAWp: ['Nt', 'Mt', 'SDt', 'Nc', 'Mc', 'SDc'],
-                PRIM_CONTD_PREp: ['TE', 'SE'],
-                PRIM_CATIRR_RAWp: ['Et', 'Tt', 'Ec', 'Tc'],
-                PRIM_CAT_RAW_G5p: ['GA_Et', 'GA_Nt', 'GA_Ec', 'GA_Nc', 
-                    'G34_Et', 'G34_Ec', 'G3H_Et', 'G3H_Ec', 'G5N_Et', 'G5N_Ec', 
-                    'drug_used', 'malignancy'],
+                // PRIM_CAT_RAWp: ['Et', 'Nt', 'Ec', 'Nc', 'treatment', 'control'],
+                // PRIM_CAT_PREp: ['TE', 'lowerci', 'upperci'],
+                // PRIM_CONTD_RAWp: ['Nt', 'Mt', 'SDt', 'Nc', 'Mc', 'SDc'],
+                // PRIM_CONTD_PREp: ['TE', 'SE'],
+                // PRIM_CATIRR_RAWp: ['Et', 'Tt', 'Ec', 'Tc'],
+                // PRIM_CAT_RAW_G5p: ['GA_Et', 'GA_Nt', 'GA_Ec', 'GA_Nc', 
+                //     'G34_Et', 'G34_Ec', 'G3H_Et', 'G3H_Ec', 'G5N_Et', 'G5N_Ec', 
+                //     'drug_used', 'malignancy'],
 
                 PRIM_CAT_RAW: [{
                     'abbr': 'PRIM_CAT_RAW_treat',
@@ -1895,6 +1935,19 @@ var jarvis = {
                       'survival_t1', 'survival_t2',
                       'Ec_t1', 'Et_t1', 'Ec_t2', 'Et_t2']
             }
+        },
+
+        filter: {
+            display_name: '',
+            type: 'radio',
+            attr: null,
+            value: 0,
+            values: [{
+                display_name: 'All',
+                value: 0,
+                sql_cond: "{$col} is not NULL",
+                default: true
+            }]
         }
     },
 
