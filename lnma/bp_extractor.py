@@ -358,10 +358,16 @@ def import_itable_meta_and_data_from_xls():
     '''
     Create the meta for itable
     '''
-    # project_id = request.args.get('project_id')
-    project_id = request.cookies.get('project_id')
-    project = dora.get_project(project_id)
+    prj = request.args.get('prj')
+    project = dora.get_project_by_keystr(prj)
 
+    if project is None:
+        return jsonify({
+            'success': False,
+            'msg': 'NO SUCH PROJECT'
+        })
+
+    project_id = project.project_id
     oc_type = 'itable'
     abbr = 'itable'
 

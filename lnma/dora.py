@@ -709,6 +709,15 @@ def get_paper(project_id, pid):
     return paper
 
 
+def get_paper_by_project_id_and_pid(project_id, pid):
+    paper = Paper.query.filter(and_(
+        Paper.project_id == project_id,
+        Paper.pid == pid
+    )).first()
+
+    return paper
+
+
 def get_paper_by_id(paper_id):
     paper = Paper.query.filter(and_(
         Paper.paper_id == paper_id
@@ -1549,6 +1558,24 @@ def get_extract_by_project_id_and_abbr(project_id, abbr):
     '''
     extract = Extract.query.filter(and_(
         Extract.project_id == project_id,
+        Extract.abbr == abbr
+    )).first()
+
+    return extract
+
+
+def get_extract_by_keystr_and_abbr(keystr, abbr):
+    '''
+    Get an extract by keystr and abbr
+    '''
+    project = get_project_by_keystr(keystr)
+
+    if project is None:
+        # what???
+        return None
+
+    extract = Extract.query.filter(and_(
+        Extract.project_id == project.project_id,
         Extract.abbr == abbr
     )).first()
 

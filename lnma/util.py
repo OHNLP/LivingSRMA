@@ -664,6 +664,19 @@ def get_year(s):
         return rs[0]
 
 
+def get_author_etal_from_paper(paper):
+    '''
+    Get the "First author name et al" format
+    '''
+    aus = paper.authors.split(';')
+    if len(aus) == 1:
+        aus = paper.authors.split(',')
+    
+    au_etal = aus[0] + ' et al'
+
+    return au_etal
+
+
 def save_pdf(file):
     '''
     Save the Upload file

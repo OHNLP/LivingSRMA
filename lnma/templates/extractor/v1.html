@@ -538,6 +538,14 @@ var pan_ocpapers = {
                     return jarvis.get_year(s);
                 },
 
+                get_first_author: function(s) {
+                    var aus = s.split(';');
+                    if (aus.length == 1) {
+                        aus = s.split(',');
+                    }
+                    return aus[0];
+                },
+
                 on_change_input_format: function(event) {
                     let val = event.target.value;
                     console.log('Changed input_format: ' + val);
@@ -1473,7 +1481,7 @@ var pan_itbuilder = {
         var attr = {
             abbr: abbr,
             name: text,
-            sub: null
+            subs: null
         };
         
         for (let i = 0; i < this.vpp.$data.itable.meta.cate_attrs.length; i++) {

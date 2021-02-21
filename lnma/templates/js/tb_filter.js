@@ -71,6 +71,10 @@ var tb_filter = {
             // add this cond
             sql_conds.push(cond);
         }
-        return sql_conds.join('\n  and ');
+        if (sql_conds.length == 0) {
+            return '1=1';
+        } else {
+            return sql_conds.join('\n  and ');
+        }
     }
 };

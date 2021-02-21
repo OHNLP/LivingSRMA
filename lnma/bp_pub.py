@@ -26,6 +26,7 @@ from .analyzer import bayes_analyzer
 
 from lnma import settings
 from lnma import util
+from lnma import dora
 
 import PythonMeta as PMA
 
@@ -416,43 +417,30 @@ def graphdata_itable_json(prj):
     output_fn = 'ITABLE.json'
     full_output_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, output_fn)
 
-    # get the cols
+    # get the itable from database directly
+    src = request.args.get('src')
+
+    if src == 'db':
+        ret = get_itable_attr_rs_cfg_from_db(prj)
+
+        if ret is None:
+            ret = {
+                'success': False,
+                'msg': 'ITABLE DATA NOT EXISTS FOR THIS PROJECT'
+            }
+            
+        return jsonify(ret)
+
+    # OK, get the itable data from XLS
+    # get the cols from the xls
     attr_pack = get_attr_pack_from_itable(full_fn)
-
-    # the rows starts from 2nd line are data
-    df_h = pd.read_excel(full_fn, skiprows=[0])
-
-    # load file 
-    # if full_fn.endswith('csv'):
-    #     df = pd.read_csv(full_fn, skiprows=[0])
-    # else:
-    #     df = pd.read_excel(full_fn, skiprows=[0])
-    df = pd.read_excel(full_fn, skiprows=[0])
-    rs = json.loads(df.to_json(orient='records'))
-    
-    # add the category info for attrs
-    # attrs = [ {'name': a} for a in df.columns.tolist() ]
-    # for i in range(len(attrs)):
-    #     name = attrs[i]['name']
-    #     name_parts = name.split('|')
-    #     if len(name_parts) > 1:
-    #         trunk = name_parts[0].strip()
-    #         branch = name_parts[1].strip()
-    #     else:
-    #         trunk = '_'
-    #         branch = name
-    #     attr_id = trunk.upper() + '|' + branch.upper()
-
-    #     if attr_id in attr_pack['attr_dict']:
-    #         attrs[i].update(attr_pack['attr_dict'][attr_id])
-    #     else:
-    #         attrs[i]['cate'] = 'Other'
-    #         attrs[i]['vtype'] = 'text'
-    #         attrs[i]['trunk'] = trunk
-    #         attrs[i]['branch'] = branch
-    #         attrs[i]['attr_id'] = attr_id
     attrs = list(attr_pack['attr_dict'].values())
 
+    # load the data from file 
+    df = pd.read_excel(full_fn, skiprows=[0])
+    rs = json.loads(df.to_json(orient='records'))
+
+    # create the return obj
     ret = {
         'rs': rs,
         'attrs': attrs
@@ -1183,6 +1171,182 @@ def get_filters_from_itable(full_fn):
     print('* created ft_list %s filters' % (len(ft_list)))
 
     return ft_list
+
+
+def get_itable_attr_rs_cfg_from_db(prj):
+    '''
+    Get everything related to itable from db
+    '''
+    # get the paper data as well
+    # the itable is a special extract for this project
+    extract = dora.get_extract_by_keystr_and_abbr(prj, 'itable')
+
+    if extract is None:
+        return None
+
+    project = dora.get_project_by_keystr(prj)
+    project_id = project.project_id
+
+    meta = extract.meta
+    data = extract.data
+
+    rs = []
+    cfg = {}
+    attrs = []
+
+    abbr2attr_name = {}
+    # convert the format for attrs
+    for cate in meta['cate_attrs']:
+        for attr in cate['attrs']:
+            if attr['subs'] is None or attr['subs'] == []:
+                attr_name = "%s" % attr['name']
+                attr_id = ("_%s|%s" % (attr['name'], attr['name'])).upper()
+                abbr2attr_name[attr['abbr']] = attr_name
+
+                attrs.append({
+                    "attr_id": attr_id, 
+                    "branch": "%s" % attr['name'], 
+                    "cate": "%s" % cate['name'], 
+                    "name": attr_name, 
+                    "trunk": "_%s" % attr['name'], 
+                    "vtype": "text"
+                })
+
+            else:
+                for sub in attr['subs']:
+                    attr_name = "%s | %s" % (attr['name'], sub['name'])
+                    attr_id = ("%s|%s" % (attr['name'], sub['name'])).upper()
+                    abbr2attr_name[sub['abbr']] = attr_name
+
+                    attrs.append({
+                        "attr_id": attr_id, 
+                        "branch": "%s" % sub['name'], 
+                        "cate": "%s" % cate['name'], 
+                        "name": attr_name, 
+                        "trunk": "%s" % attr['name'], 
+                        "vtype": "text"
+                    })
+
+    # after the attributes in the `extract.meta`, which are customized for itable,
+    # need to add those "basic" attributes, which just some information for paper.
+    basic_attrs = [
+        { 'abbr': 'ba_ofu', 'name': 'Original/Follow Up', },
+        { 'abbr': 'ba_year', 'name': 'Year',              },
+        { 'abbr': 'ba_authors', 'name': 'Authors',        },
+        { 'abbr': 'ba_pmid', 'name': 'PMID',              },
+        { 'abbr': 'ba_nct', 'name': 'NCT',                },
+    ]
+    first_cate = attrs[0]['cate']
+    for attr in basic_attrs:
+        attr_name = "%s" % attr['name']
+        attr_id = ("_%s|%s" % (attr['name'], attr['name'])).upper()
+        abbr2attr_name[attr['abbr']] = attr_name
+        attrs.insert(0, {
+            "attr_id": attr_id, 
+            "branch": "%s" % attr['name'], 
+            "cate": first_cate, 
+            "name": attr_name, 
+            "trunk": "_%s" % attr['name'], 
+            "vtype": "text"
+        })
+
+    # now convert the records
+    # first, we need to understand that, maybe not all of the f1, f2, and f3
+    # are used in the itable, the only way to decide that is the `is_selected`
+    # flag in the `extract.data`.
+    # so, when getting the `rs`, the main loop is to get the studies
+
+    for pid in data:
+        paper_ext = data[pid]
+
+        if paper_ext['is_selected'] == False: continue
+
+        # now, let's parse this paper
+        paper = dora.get_paper_by_project_id_and_pid(project_id, pid)
+
+        if paper is None:
+            # what???
+            continue
+        
+        # the `r` is for the output
+        r = {}
+
+        # `r` use name as key to retrive data, 
+        # which is used in the itable.html.
+        # but the case here is quite complex, the multi-arm issue
+        # let's append the main track
+        # the paper_ext is a dictionary:
+        #
+        # {
+        #    'attrs': {
+        #         'main': {
+        #              abbr: value
+        #         },
+        #         'other': [{
+        #              abbr: value
+        #         }]
+        #    }
+        #    'n_arms':
+        #    'is_checked':
+        #    'is_selected':
+        # }
+        #
+        # So, please check the data carefully.
+
+        # no mater what happens, get the main track first
+        for abbr in abbr2attr_name:
+            attr_name = abbr2attr_name[abbr]
+            if abbr in paper_ext['attrs']['main']:
+                r[attr_name] = paper_ext['attrs']['main'][abbr]
+            else:
+                # in most case, the value should be there
+                # but ... you know ... give an empty value
+                r[attr_name] = ''
+
+        # add the basic features
+        for attr in basic_attrs:
+            attr_name = "%s" % attr['name']
+            if attr['abbr'] == 'ba_year':
+                val = util.get_year(paper.pub_date)
+            elif attr['abbr'] == 'ba_authors':
+                # the author name maybe different format, use paper instead of `r`
+                val = util.get_author_etal_from_paper(paper)
+            elif attr['abbr'] == 'ba_ofu':
+                val = 'NA'
+            elif attr['abbr'] == 'ba_pmid':
+                val = paper.pid
+            elif attr['abbr'] == 'ba_nct':
+                val = paper.meta['rct_id']
+            else:
+                val = 'NA'
+
+            r[attr_name] = val
+
+        if paper_ext['n_arms'] > 2:
+            # ok, multi-arms!
+            pass
+
+        rs.append(r)
+
+    # last thing is the filter
+    # filter is in the meta
+    cfg['cols'] = {
+        'default': ['Authors'],
+        'fixed': ['Authors']
+    }
+    # 
+
+    cfg['filters'] = meta['filters']
+
+    # finally, finished!
+    ret = {
+        'rs': rs,
+        'cfg': cfg,
+        'attrs': attrs,
+    }
+
+    return ret
+
 
 
 def get_attr_pack_from_itable(full_fn):

@@ -363,7 +363,7 @@
                         {{ paper.meta.rct_id }}
                     </td>
                     <td class="paper-name paper-table-body-td">
-                        {{ paper.seq_num }} - {{ paper.authors.split(',')[0] }} {{ get_year(paper.pub_date) }}
+                        {{ paper.seq_num }} - {{ get_first_author(paper.authors) }} {{ get_year(paper.pub_date) }}
                     </td>
                     <td class="paper-table-body-td">
                         <input type="checkbox" 
@@ -426,7 +426,7 @@
             <tr v-for="paper in papers">
                 <td><input type="checkbox" id="" v-model="extract.data[paper.pid].is_selected" ></td>
                 <td>{{ paper.meta.rct_id }}</td>
-                <td>{{ paper.seq_num }} | {{ paper.authors.split(',')[0] }}</td>
+                <td>{{ paper.seq_num }} | {{ get_first_author(paper.authors) }}</td>
                 <td>{{ get_year(paper.pub_date) }}</td>
                 <td>
                     <span>{{ extract.meta.subgroups[0] }}</span><br>
@@ -478,7 +478,7 @@
                         {{ paper.meta.rct_id }}
                     </td>
                     <td class="paper-name paper-table-body-td">
-                        {{ paper.seq_num }} - {{ paper.authors.split(',')[0] }} {{ get_year(paper.pub_date) }}
+                        {{ paper.seq_num }} - {{ get_first_author(paper.authors) }} {{ get_year(paper.pub_date) }}
                     </td>
                     <td class="paper-table-body-td">
                         <input type="checkbox" 

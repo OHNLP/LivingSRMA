@@ -736,6 +736,8 @@ var tb_schtab = {
 
 
 var jarvis = {
+    src: '',
+
     init: function() {
         var isIE = /*@cc_on!@*/false || !!document.documentMode;
 
@@ -745,10 +747,65 @@ var jarvis = {
             return;
         }
         var prj = jarvis.getUrlParameter('prj');
+        var src = jarvis.getUrlParameter('src');
 
+        if (src == '') {
+            src = 'xls'
+        }
+
+        jarvis.src = src;
+
+        if (jarvis.src == 'db') {
+            $.get(
+                '/pub/graphdata/'+prj+'/ITABLE.json',
+                {ver: Math.random(), src: jarvis.src},
+                function(data) {
+                    console.log(data);
+
+                    // init the cfg
+                    // update the filters
+                    tb_filter.filters = tb_filter.filters.concat(data.cfg.filters);
+
+                    // update columns
+                    var cols_fixed = [];
+                    var cols_default = [];
+                    for (var i = 0; i < data.cfg.cols.fixed.length; i++) {
+                        cols_fixed.push(data.cfg.cols.fixed[i].toUpperCase());
+                    }
+                    for (var i = 0; i < data.cfg.cols.default.length; i++) {
+                        cols_default.push(data.cfg.cols.default[i].toUpperCase());
+                    }
+                    tb_coltab.cols.fixed = tb_coltab.cols.fixed.concat(cols_fixed);
+                    tb_coltab.cols.default = tb_coltab.cols.default.concat(cols_default);
+
+
+                    // init the modules
+                    dt_tbcore.init(data.rs, data.attrs);
+                    console.log('* inited dt_tbcore');
+
+                    tb_filter.init();
+                    console.log('* inited tb_filter');
+
+                    tb_coltab.init();
+                    console.log('* inited tb_coltab');
+
+                    tb_schtab.init();
+                    console.log('* inited tb_schtab');
+
+                    jarvis.update_schtab();
+
+                    // clsoe the start-screen
+                    jarvis.ssmsg('Almost initialized.');
+                    setTimeout('jarvis.ssclose();', 400);
+                }, 'json'
+            );
+            return;
+        }
+
+        // the previous method is read two files:
         $.get(
             '/pub/graphdata/' + prj + '/ITABLE_CFG.json',
-            { ver: Math.random() },
+            { ver: Math.random()},
             function(cfg_data) {
                 // update the filters
                 tb_filter.filters = tb_filter.filters.concat(cfg_data.filters);
@@ -773,12 +830,16 @@ var jarvis = {
                         console.log(data);
                         dt_tbcore.init(data.rs, data.attrs);
                         console.log('* inited dt_tbcore');
+
                         tb_filter.init();
                         console.log('* inited tb_filter');
+
                         tb_coltab.init();
                         console.log('* inited tb_coltab');
+
                         tb_schtab.init();
                         console.log('* inited tb_schtab');
+
                         jarvis.update_schtab();
 
                         // clsoe the start-screen
