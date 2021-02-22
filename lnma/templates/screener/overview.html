@@ -150,13 +150,13 @@ tr.shown td.details-control {
 .offscreen {
     left: -8888px !important;
 }
-.fs-s {
+.fs-s, .text-sm {
     font-size: 10px;
 }
-.fs-m {
+.fs-m, .text-nm {
     font-size: 12px;
 }
-.fs-l {
+.fs-l, .text-lg {
     font-size: 14px;
 }
 </style>
@@ -495,6 +495,9 @@ var srv_screener = {
         // for NCT8
         set_rct_id: '[[ url_for("screener.set_rct_id") ]]',
 
+        // for PMID
+        set_pmid: '[[ url_for("screener.set_pmid") ]]',
+
         // for tag
         add_tag: '[[ url_for("screener.add_tag") ]]',
         toggle_tag: '[[ url_for("screener.toggle_tag") ]]'
@@ -631,6 +634,20 @@ var srv_screener = {
         $.post(
             url,
             {project_id: project_id, paper_id: paper_id, rct_id: rct_id},
+            callback,
+            'json'
+        );  
+
+    },
+
+    set_pmid: function(paper_id, pmid, callback) {
+        // send request to backend
+        var project_id = Cookies.get('project_id');
+        
+        var url = this.api_url.set_pmid;
+        $.post(
+            url,
+            {project_id: project_id, paper_id: paper_id, pmid: pmid},
             callback,
             'json'
         );  
@@ -1809,6 +1826,17 @@ var tbjs_paperlist = {
         return html;
     },
 
+    __get_span_pmid: function(d) {
+        var html = [
+            '<a href="javascript:void(0);" onclick="tbjs_paperlist.set_pmid(\''+d.paper_id+'\', \''+d.pid+'\')" title="Click to update the PMID for this study">',
+                d.pid_type + ': ', 
+                d.pid,
+            '</a>'
+        ].join('');
+        
+        return html;
+    },
+
     __get_tr_pdfs: function(d) {
         return '<tr>' +
             '<td>Files: </td>' +
@@ -1872,9 +1900,10 @@ var tbjs_paperlist = {
      */
     __get_line_info: function(d) {
         return this.__get_span_rct_id(d) + ' | ' +
-            '<a target="_blank" href="' + jarvis.create_src_url(d) + '"><span>' + d.pid_type + ': ' + d.pid + '</span></a> | ' +
+            this.__get_span_pmid(d) + ' | ' +
             '<span>' + d.journal + '</span> | ' + 
-            '<span>' + d.pub_date + '</span>';
+            '<span class="mr-2">' + d.pub_date + '</span>' + 
+            '<a href="javascript:void(0);" class="text-sm" onclick="tbjs_paperlist.sync_data_from_pubmed(\''+d.paper_id+'\', \''+d.pid+'\')"><i class="fa fa-sync"></i> Sync</a>';
     },
 
     /**
@@ -2149,6 +2178,39 @@ var tbjs_paperlist = {
             tbjs_paperlist.update_data_by_paper(data.paper);
         });
     },
+
+    set_pmid: function(paper_id, pmid) {
+        var txt = jarvis.prompt('Please input the new PubMed ID(e.g., 12345678)', pmid);
+
+        if (txt == null) {
+            return;
+        }
+        txt = txt.trim();
+
+        if (txt == '') {
+            return;
+        }
+
+        srv_screener.set_pmid(paper_id, txt, function(data) {
+
+            if (data.success) {
+                // console.log('* set RCT_ID!', data);
+                toast("Updated PMID [" + data.paper.pid + '] for ' + data.paper.seq_num);
+                var paper = data.paper;
+
+                // update the UI, well, just update the whole line of info
+                $('#tb-rowext-info-' + paper.paper_id).html(
+                    tbjs_paperlist.__get_line_info(paper)
+                );
+
+                // update the tb data list
+                tbjs_paperlist.update_data_by_paper(data.paper);
+
+            } else {
+                toast("Existed PMID [" + data.paper.pid + '] for another study [' + data.paper.seq_num + ']', 'error');
+            }
+        });
+    },
     
     set_unscreened: function(paper_id) {
         // mark include in server
@@ -2265,6 +2327,163 @@ var tbjs_paperlist = {
 
         // build a form
         srv_collector.export(project_id, format, seq_nums);
+    },
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Get data from PubMed
+    ///////////////////////////////////////////////////////////////////////////
+    sync_data_from_pubmed: function(paper_id, pmid) {
+        toast('Getting data from PubMed to update this study ['+pmid+'] information ...');
+
+        srv_pubmed.efetch([pmid], function(data) {
+            srv_pubmed.ret = data;
+            console.log(data);
+            var paper_dict = srv_pubmed.parse_efetch_data(data);
+            console.log(paper_dict);
+            srv_pubmed.paper_dict = paper_dict;
+
+            toast('Parsed the data from PubMed successfully!');
+        });
+    }
+};
+
+var srv_pubmed = {
+    ret: null,
+    paper_dict: null,
+    url: {
+        esearch: 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed',
+        esummary: 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed',
+        efetch: "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed",
+        view_pmid: 'https://www.ncbi.nlm.nih.gov/pubmed/?term='
+    },
+    
+    efetch: function(ids, callback) {
+        $.get(
+            this.url.efetch,
+            {id: ids.join(','), retmode:'xml'},
+            callback, 'xml'
+        );
+    },
+
+    parse_efetch_data: function(data) {
+        var xml = $(data);
+        var docs = xml.find('PubmedArticle');
+        
+        var paper_dict = {};
+        for (var i = 0; i < docs.length; i++) {
+            var doc = $(docs[i]);
+
+            // get PMID
+            var pmid = doc.find('PMID')[0].textContent;
+
+            // get title
+            var title = doc.find('ArticleTitle')[0].textContent;
+            title = title.trim();
+
+            // get title
+            var abstract = doc.find('Abstract')[0].textContent;
+            abstract = abstract.trim();
+
+            // get authors
+            var authors = [];
+            var authors_elems = doc.find('Author');
+            for (var j = 0; j < authors_elems.length; j++) {
+                var elem = $(authors_elems[j]);
+                var last_name = elem.find('LastName')[0].textContent;
+                var fore_name = elem.find('ForeName')[0].textContent;
+                var initials = elem.find('Initials')[0].textContent;
+                var name = fore_name + ' ' + last_name;
+                authors.push(name);
+            }
+
+            // get journal
+            var journal = doc.find('Journal Title')[0].textContent;
+
+            // get date
+            var pub_date = '';
+            try {
+                const y = doc.find('ArticleDate Year')[0].textContent;
+                const m = doc.find('ArticleDate Month')[0].textContent;
+                const d = doc.find('ArticleDate Day')[0].textContent;
+                pub_date = y + '-' + m + '-' + d;
+            } catch {
+                try {
+                    const y = doc.find('DateCompleted Year')[0].textContent;
+                    const m = doc.find('DateCompleted Month')[0].textContent;
+                    const d = doc.find('DateCompleted Day')[0].textContent;
+                    pub_date = y + '-' + m + '-' + d;
+                } catch {
+                    try {
+                        const y = doc.find('PubDate Year')[0].textContent;
+                        const m = doc.find('PubDate Month')[0].textContent;
+                        pub_date = y + '-' + m;
+                    } catch {
+                        pub_date = doc.find('Year')[0].textContent;
+                    }
+                }
+            }
+            pub_date = pub_date.trim();
+
+            // update the record
+            paper_dict[pmid] = {};
+            paper_dict[pmid].pmid = pmid;
+            paper_dict[pmid].title = title;
+            paper_dict[pmid].abstract = abstract;
+            paper_dict[pmid].authors = authors;
+            paper_dict[pmid].journal = journal;
+            paper_dict[pmid].pub_date = pub_date;
+
+            // most important, bind this doc to paper
+            paper_dict[pmid].xml = doc;
+        }
+
+        return paper_dict;
+    },
+
+    esummary: function(ids, callback) {
+        $.get(
+            this.url.esummary,
+            {id: ids.join(',')},
+            callback, 'xml'
+        );
+    },
+
+    parse_esummary_data: function(data) {
+        var xml = $(data);
+        var docsums = xml.find('DocSum');
+        
+        var paper_dict = {};
+        for (var i = 0; i < docsums.length; i++) {
+            var docsum_xml = $(docsums[i]);
+
+            // get PMID
+            var pmid = docsum_xml.find('Id')[0].textContent;
+
+            // get title
+            var title = docsum_xml.find('Item[Name="Title"]')[0].textContent;
+
+            // get authors
+            var authors = [];
+            var authors_elems = docsum_xml.find('Item[Name="Author"]');
+            for (var j = 0; j < authors_elems.length; j++) {
+                var elem = authors_elems[j];
+                authors.push(elem.textContent);
+            }
+
+            // get journal
+            var journal = docsum_xml.find('Item[Name="FullJournalName"]')[0].textContent;
+
+            // get date
+            var pub_date = docsum_xml.find('Item[Name="PubDate"]')[0].textContent;
+
+            // update the record
+            paper_dict[pmid] = {};
+            paper_dict[pmid].title = title;
+            paper_dict[pmid].journal = journal;
+            paper_dict[pmid].pub_date = pub_date;
+            paper_dict[pmid].authors = authors;
+        }
+        return paper_dict;
     }
 };
 
@@ -2497,6 +2716,8 @@ var jarvis = {
         return 'https://pubmed.ncbi.nlm.nih.gov/' + d.pid;
     },
 
+    project: [[ project_json_str|safe ]],
+
     init: function () {
         tbjs_paperlist.init();
 
@@ -2514,6 +2735,10 @@ var jarvis = {
 
     prompt: function(text, value) {
         return window.prompt(text, value);
+    },
+
+    confirm: function(text) {
+        return window.confirm(text);
     },
 };
 

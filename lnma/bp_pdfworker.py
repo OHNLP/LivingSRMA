@@ -78,19 +78,17 @@ def upload_pdfs():
             'success': False,
             'msg': 'missing files'
         })
-    files = request.files.getlist('files[]')
+    # get the info of paper and files
     paper_id = request.form.get('paper_id')
+    files = request.files.getlist('files[]')
 
-    # save the files first
-    pdf_metas = []
-    for file in files:
-        if file and allowed_file(file.filename):
-            pdf_meta = util.save_pdf(file)
-            pdf_metas.append(pdf_meta)
+    # save the files
+    pdf_metas = util.save_pdfs_from_request_files(files)
     
     # update the paper itself
     paper = dora.add_pdfs_to_paper(paper_id, pdf_metas)
 
+    # ok
     ret = {
         'success': True,
         'paper': paper.as_simple_dict()
@@ -121,5 +119,3 @@ def remove_pdf():
     return jsonify(ret)
     
 
-def allowed_file(filename):
-	return '.' in filename and filename.rsplit('.', 1)[1].lower() in settings.ALLOWED_PDF_UPLOAD_EXTENSIONS

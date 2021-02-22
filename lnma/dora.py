@@ -472,6 +472,34 @@ def set_paper_rct_id(paper_id, rct_id):
     return True, paper
 
 
+def set_paper_pmid(paper_id, pmid):
+    '''
+    Set the PMID (pid) for a paper
+    '''
+    paper = get_paper_by_id(paper_id)
+    project_id = paper.project_id
+
+    existed_papers = get_papers_by_pmids(project_id, [pmid])
+    if existed_papers == []:
+        # which means it is not exists
+        pass
+    else:
+        # this pmid exists!!!
+        return None, existed_papers[0]
+
+    # need to check if this pmid exists    
+    paper.pid = pmid
+    paper.pid_type = 'PubMed MEDLINE'
+
+    # automatic update the date_updated
+    paper.date_updated = datetime.datetime.now()
+    
+    db.session.add(paper)
+    db.session.commit()
+
+    return True, paper
+
+
 def add_paper_tag(paper_id, tag):
     '''
     Add a tag to a paper

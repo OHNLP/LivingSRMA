@@ -60,13 +60,36 @@ def mk_oc_abbr():
     return ''.join(random.choice('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789') for i in range(8))
 
 
+def mk_number_str(length=6):
+    '''
+    Make a random str of numbers
+    '''
+    return ''.join(random.choice('0123456789') for i in range(length))
+
+
 def is_valid_pmid(pmid):
     '''Check if a pmid is valid PMID
 
     Just a basic check
     '''
-    # TODO implement this
-    return True
+    valid_pmids = re.findall('\d{8}', pmid, re.MULTILINE)
+
+    if valid_pmids == []:
+        return False
+    else:
+        return True
+
+
+def get_valid_pmid(pmid):
+    '''
+    Get the valid PMID from a pmid string (candidate)
+    '''
+    valid_pmids = re.findall('\d{8}', pmid, re.MULTILINE)
+
+    if valid_pmids == []:
+        return None
+    else:
+        return valid_pmids[0]
 
 
 def allowed_file_format(fn, exts=['csv', 'xls', 'xlsx', 'xml']):
@@ -705,6 +728,23 @@ def save_pdf(file):
     }
 
 
+def save_pdfs_from_request_files(files):
+    '''
+    Save the uploaded files in the request
+    and return the pdf_metas for paper.meta['pdfs']
+
+    The `files` is a request form object which contains every file
+    '''
+    # save the files first
+    pdf_metas = []
+    for file in files:
+        if file and allowed_file(file.filename):
+            pdf_meta = save_pdf(file)
+            pdf_metas.append(pdf_meta)
+
+    return pdf_metas
+
+
 def delete_pdf(pdf_meta):
     '''
     Delete the PDF file
@@ -719,6 +759,17 @@ def delete_pdf(pdf_meta):
         os.remove(full_fn)
 
     return True
+
+
+def make_temp_pid():
+    pid_type = 'TEMP_PID'
+    pid = 'TMP' + mk_number_str()
+
+    return pid, pid_type
+
+
+def allowed_file(filename):
+	return '.' in filename and filename.rsplit('.', 1)[1].lower() in settings.ALLOWED_PDF_UPLOAD_EXTENSIONS
 
 
 ###############################################################################

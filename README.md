@@ -589,6 +589,26 @@ $ vim migrations/env.py
 
 Then the `flask db migrate` could find the data type upgrade.
 
+
+## Data Import
+
+When running the system, an important issue is importing existed studies.
+And especially the extracted informations (iTable and outcomes).
+
+So, to import this information smoothly without error (or less error),
+please follow the instruction.
+
+1. No matter what extract data to import, import the studies first.
+   So, you could use the `Study Importer` functions to import the studies.
+   Then those studies (i.e., PMID) will be available in the database for further tasks.
+2. Once the studies are imported, make sure the studies are in the right stage.
+   For thoese used in iTable, PWMA, and NMA, the studies should be at least in the `Included in SR` stage. 
+   Otherwise when importing the extracted data, the paper may not be linked correctly.
+3. Before importing the itable and others, 
+   make sure each record contains the correct PMID.
+   If PMID is missing, the importing of that record fails.
+   
+
 # Update log
 
 ## 2020-10-07

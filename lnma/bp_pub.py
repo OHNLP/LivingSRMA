@@ -428,7 +428,7 @@ def graphdata_itable_json(prj):
                 'success': False,
                 'msg': 'ITABLE DATA NOT EXISTS FOR THIS PROJECT'
             }
-            
+
         return jsonify(ret)
 
     # OK, get the itable data from XLS
@@ -622,6 +622,20 @@ def graphdata_prisma_json(prj):
 
     This JSON file is for the PRISMA plot
     '''
+    # get the itable from database directly
+    src = request.args.get('src')
+
+    if src == 'db':
+        ret = get_prisma_from_db(prj)
+
+        if ret is None:
+            ret = {
+                'success': False,
+                'msg': 'ITABLE DATA NOT EXISTS FOR THIS PROJECT'
+            }
+
+        return jsonify(ret)
+
 
     ret = get_prisma_from_xls(prj)
 
@@ -663,8 +677,39 @@ def graphdata_evmap_json(prj):
 # Other utils
 ###########################################################
 
+def get_prisma_from_db(prj):
+    '''
+    Get PRISMA JSON data from database
+    '''
+    project = dora.get_project_by_keystr(prj)
+
+    # get the fixed number from project settings
+    # this depends on whether this project 
+    past_prisma = {}
+
+    # get the living prisma from database
+    prisma = {}
+
+    # get the paper information from database
+
+    # the study dict is NCT based
+    study_dict = {}
+
+    # the paper dict is PMID based
+    paper_dict = {}
+
+    ret = {
+        "prisma": prisma,
+        "study_dict": study_dict,
+        "paper_dict": paper_dict
+    }
+
+    return jsonify(ret)
+
+
 def get_prisma_from_xls(prj):
     '''
+    Get PRISMA JSON data from Excel file
     '''
     fn = 'PRISMA_DATA.xlsx'
     full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
@@ -1335,8 +1380,10 @@ def get_itable_attr_rs_cfg_from_db(prj):
         'fixed': ['Authors']
     }
     # 
-
-    cfg['filters'] = meta['filters']
+    if 'filters' in meta:
+        cfg['filters'] = meta['filters']
+    else:
+        cfg['filters'] = []
 
     # finally, finished!
     ret = {

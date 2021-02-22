@@ -215,6 +215,26 @@ html {
 .filter-title {
     margin: 0 !important;
 }
+.offscreen {
+    left: -8888px !important;
+}
+
+#pan_itbuilder_previewer {
+    position: fixed;
+    top: 10px;
+    min-width: 1200px;
+    min-height: 400px;
+    padding: 35px 5px 5px 5px;
+    background-color: #f5f5f5;
+    z-index: 9999;
+    border: 3px solid #efefef;
+}
+#ifr_itable_previewer {
+    width: 100%;
+    height: 400px;
+    min-height: 400px;
+}
+
 {% include 'css/box.css' %}
 </style>
 
@@ -1294,7 +1314,9 @@ var pan_itbuilder = {
         this.vpp = new Vue({
             el: this.vpp_id,
             data: {
-                itable: null
+                itable: null,
+
+                is_hide_previewer: true
             },
             methods: {
                 save_itable: function() {
@@ -1306,6 +1328,34 @@ var pan_itbuilder = {
                     jarvis.switch_layout('extract_information');
                     // load extract special for itable
                     pan_ocpapers.show_extract_and_papers('itable', 'itable');
+                },
+
+                show_itable_preview: function() {
+
+                    var project_id = Cookies.get('project_id');
+                    var project_keystr = jarvis.project.keystr;
+
+                    // update url
+                    var url = '/pub/itable.html?src=db&prj=' + project_keystr;
+
+                    // reload the iframe
+                    if (url == $('#ifr_itable_previewer').prop('src')) {
+                        // reload 
+                        document.getElementById('ifr_itable_previewer').contentWindow.location.reload();
+                    } else {
+                        // load url
+                        $('#ifr_itable_previewer').prop('src', url);
+                    }
+
+                    // resize
+                    pan_itbuilder.resize_itable_previewer();
+
+                    // show the panel
+                    this.is_hide_previewer = false;
+                },
+
+                close_itable_preview: function() {
+                    this.is_hide_previewer = true;
                 },
 
                 create_category: function() {
@@ -1580,11 +1630,23 @@ var pan_itbuilder = {
     set_size: function(size) {
         $(this.vpp_id).removeClass('panel-s panel-m panel-l')
             .addClass('panel-' + size);
+    },
+
+    resize_itable_previewer: function() {
+        var h = $(window).height() - 25;
+
+        // resize the popup
+        $('#pan_itbuilder_previewer').height(h)
+
+        // resize the iframe
+        $('#ifr_itable_previewer').height(h - 40);
     }
 };
 
 
 var jarvis = {
+    project: [[ project_json_str|safe ]],
+
     // for locating the mouse position
     mouse: {
         x: null,
@@ -1682,9 +1744,9 @@ var jarvis = {
                     full_name: 'Interactive Table',
                     input_format: 'custom',
                     filters: [{
-                        display_name: 'Name',
+                        display_name: 'Included in MA',
                         type: 'radio',
-                        attr: 'ITABLEATT000',
+                        attr: 'Included in MA',
                         value: 0,
                         values: [{
                             display_name: 'All',
@@ -1709,18 +1771,16 @@ var jarvis = {
                         }]
                     },
                     {
-                        abbr: 'ITABLECAT002',
-                        name: "POPULATION CHARACTERISTICS",
+                        abbr: 'ITABLECATSYS',
+                        name: "_SYS",
                         attrs: [{
-                            abbr: 'ITABLEATT001',
-                            name: 'Number of Participants',
-                            subs: [{
-                                abbr: 'ITABLESUB001',
-                                name: 'Treatment Arm'
-                            }, {
-                                abbr: 'ITABLESUB002',
-                                name: 'Control Arm'
-                            }]
+                            abbr: 'ITABLEECATSYS001',
+                            name: 'URL',
+                            subs: null
+                        }, {
+                            abbr: 'ITABLEECATSYSSUB002',
+                            name: 'Included in MA',
+                            subs: null
                         }]
                     }
                     ]

@@ -9,6 +9,8 @@ from flask import flash
 from flask import render_template
 from flask import Blueprint
 from flask import current_app
+from flask import redirect
+from flask import url_for
 from flask import jsonify
 
 from flask_login import login_required
@@ -24,7 +26,18 @@ bp = Blueprint("extractor", __name__, url_prefix="/extractor")
 @bp.route('/v1')
 @login_required
 def v1():
-    return render_template('extractor/v1.html')
+    project_id = request.cookies.get('project_id')
+
+    if project_id is None:
+        return redirect(url_for('project.mylist'))
+
+    project = dora.get_project(project_id)
+
+    return render_template(
+        'extractor/v1.html',
+        project=project,
+        project_json_str=json.dumps(project.as_dict())
+    )
 
 
 @bp.route('/get_paper')
@@ -375,11 +388,17 @@ def import_itable_meta_and_data_from_xls():
     extract = dora.get_extract_by_project_id_and_abbr(
         project.project_id, abbr
     )
+
+    # get the itable data
     cad, cate_attrs, i2a, data = get_itable_from_itable_data_xls(project.keystr)
 
     # update the meta
     meta = extract.meta
     meta['cate_attrs'] = cate_attrs
+
+    # get the filters
+    filters = get_itable_filters_from_xls(project.keystr)
+    meta['filters'] = filters
 
     # update the extract
     extract = dora.update_extract_meta_and_data(project_id, oc_type, abbr, meta, data)
@@ -390,7 +409,6 @@ def import_itable_meta_and_data_from_xls():
         'extract': extract.as_dict()
     }
     return jsonify(ret)
-
 
 
 
@@ -537,6 +555,68 @@ def import_IO_aes_from_xls():
 ###############################################################################
 # Utils for the extraction
 ###############################################################################
+
+def get_itable_filters_from_xls(keystr):
+    '''
+    Get the filters from ITABLE_FILTER.xlsx
+    '''
+    import pandas as pd
+
+    fn = 'ITABLE_FILTERS.xlsx'
+    full_fn = os.path.join(current_app.instance_path, settings.PATH_PUBDATA, keystr, fn)
+    # load the data file
+    xls = pd.ExcelFile(full_fn)
+    # load the Filters tab
+    sheet_name = 'Filters'
+    dft = xls.parse(sheet_name)
+
+    # build Filters data
+    ft_list = []
+    for col in dft.columns[1:]:
+        display_name = col
+        tmp = dft[col].tolist()
+        # the first line of dft is the column name / attribute name
+        ft_attr = tmp[0]
+        # the second line of dft is the filter type: radio or select
+        ft_type = tmp[1].strip().lower()
+        # get those rows not NaN, which means containing option
+        ft_opts = dft[col][~dft[col].isna()].tolist()[3:]
+        # get the default label
+        ft_def_opt_label = tmp[2].strip()
+
+        # set the default option
+        ft_item = {
+            'display_name': display_name,
+            'type': ft_type,
+            'attr': ft_attr,
+            'value': 0,
+            'values': [{
+                "display_name": ft_def_opt_label,
+                "value": 0,
+                "sql_cond": "{$col} is not NULL",
+                "default": True
+            }]
+        }
+        # build ae_name dict
+        for i, ft_opt in enumerate(ft_opts):
+            ft_opt = str(ft_opt)
+            # remove the white space
+            ft_opt = ft_opt.strip()
+            ft_item['values'].append({
+                "display_name": ft_opt,
+                "value": i+1,
+                "sql_cond": "{$col} like '%%%s%%'" % ft_opt,
+                "default": False
+            })
+
+        ft_list.append(ft_item)
+            
+        print('* parsed ft_attr %s with %s options' % (ft_attr, len(ft_opts)))
+    print('* created ft_list %s filters' % (len(ft_list)))
+
+    return ft_list
+
+
 def get_itable_from_itable_data_xls(keystr):
     '''
     Get the itable extract from ITABLE_ATTR_DATA.xlsx
@@ -562,7 +642,10 @@ def get_itable_from_itable_data_xls(keystr):
     # begin loop 
     for _, row in df.iterrows():
         # find the pmid first
-        pmid = row['PMID']
+        if 'PMID' in row:
+            pmid = row['PMID']
+        else:
+            pmid = row['PubMed ID']
 
         # check if this pmid exists
         is_main = False

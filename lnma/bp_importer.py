@@ -1,4 +1,5 @@
 import os
+from pprint import pprint
 import re
 import time
 import datetime
@@ -49,6 +50,13 @@ def by_pubmed_csv():
 @login_required
 def by_endnote_xml():
     return render_template('importer/by_endnote_xml.html', ss=ss_state)
+
+
+@bp.route('/by_user_input')
+@login_required
+def by_user_input():
+    return render_template('importer/by_user_input.html', ss=ss_state)
+
 
 
 # @bp.route('/upload_pmids', methods=['GET', 'POST'])
@@ -160,6 +168,18 @@ def import_pmids():
     for r in rs:
         idx = r['idx']
         pmid = r['pmid']
+
+        is_valid = util.is_valid_pmid(pmid)
+
+        if not is_valid:
+            # which means it is not a valid id
+            rs_dict[idx] = r
+            rs_dict[idx]['paper'] = None
+            rs_dict[idx]['result'] = 'not pmid'
+
+            print('* not valid PMID: %s' % pmid)
+            continue
+
         rs_dict[idx] = r
         rs_dict[idx]['paper'] = None
         rs_dict[idx]['result'] = 'notfound'
@@ -275,7 +295,7 @@ def upload_pmid_data_file():
     # read file
     fmt = full_fn.split('.')[-1].lower()
     if fmt == 'xls' or fmt == 'xlsx':
-        df = pd.read_excel(full_fn)
+        df = pd.read_excel(full_fn, dtype=str)
     else:
         df = pd.read_csv(full_fn)
 
@@ -285,10 +305,34 @@ def upload_pmid_data_file():
         'rs': []
     }
 
+    # col0 = df.columns[0]
+    # col1 = df.columns[1]
+
+    # # the first col should be the NCT
+    # df[col0] = df[col0].apply(lambda v: str(v))
+
+    # # the second col should be the PMID
+    # df[col1] = df[col1].apply(lambda v: 'NA' if pd.isna(v) else str(int(v)))
+
+    pprint(df)
+
     # parse each record
     for idx, row in df.iterrows():
-        rct_id = row['NCT ID']
-        pmid = row['PMID']
+        # get the NCT
+        if 'NCT' in row:
+            rct_id = row['NCT']
+        elif 'NCT ID' in row:
+            rct_id = row['NCT ID']
+        else:
+            rct_id = row.values[0]
+
+        # get the PMID
+        if 'PMID' in row:
+            pmid = row['PMID']
+        elif 'PubMed ID' in row:
+            pmid = row['PubMed ID']
+        else:
+            pmid = row.values[1]
         
         ret['rs'].append({
             'idx': idx,
@@ -296,6 +340,64 @@ def upload_pmid_data_file():
             'rct_id': '%s' % rct_id,
             'result': 'waiting'
         })
+
+    return jsonify(ret)
+
+
+@bp.route('/upload_userinput', methods=['GET', 'POST'])
+@login_required
+def upload_userinput():
+    if request.method == 'GET':
+        return ''
+
+    # first, check pid to decide what to do next
+    pid = request.form.get('pid').strip()
+
+    if pid == '':
+        # ok, need to create a temp pid for this one
+        pid, pid_type = util.make_temp_pid()
+    else:
+        pid_type = 'PubMed / MEDLINE'
+
+    # then check is this ID exists?
+
+    project_id = request.form.get('project_id').strip()
+    title = request.form.get('title').strip()
+    abstract = request.form.get('abstract').strip()
+    pub_date = request.form.get('pub_date').strip()
+    authors = request.form.get('authors').strip()
+    journal = request.form.get('journal').strip()
+    nct = request.form.get('nct').strip()
+
+    # other information could be none
+    is_existed, paper = dora.create_paper_if_not_exist_and_predict_rct(
+        project_id, pid, pid_type, title, abstract,
+        pub_date, authors, journal, {'rct_id': nct}
+    )
+
+    if is_existed:
+        ret = {
+            'success': False,
+            'is_existed': is_existed,
+            'paper': paper.as_dict()
+        }
+
+        return jsonify(ret)
+
+
+    # get the PDF files
+    files = request.files.getlist('files[]')
+    pdf_metas = util.save_pdfs_from_request_files(files)
+
+    # update the paper itself
+    paper = dora.add_pdfs_to_paper(paper.paper_id, pdf_metas)
+
+    # OK!
+    ret = {
+        'success': True,
+        'is_existed': is_existed,
+        'paper': paper.as_dict()
+    }
 
     return jsonify(ret)
 

@@ -1,0 +1,220 @@
+{% extends '_layout_adminlte.html' %}
+
+{% block title %}
+Study Importer
+{% endblock %}
+
+{% block style %}
+<style>
+.result-item {
+    padding: 1px 0;
+}
+</style>
+{% endblock %}
+
+{% block page_name %}
+<i class="nav-icon fas fa-file-upload"></i> 
+Study Importer
+{% endblock %}
+
+{% block active_nav_link %}importer-user-input{% endblock %}
+
+{% block content %}
+
+<div class="content">
+    <div class="container-fluid">
+
+        <div id="vw_uploader_userinput" class="row">
+            <div class="col-md-5">
+                <h5>Import Study</h5>
+                <p class="card-text">Input the main information manually.</p>
+
+                <form id="upload_userinput" method="post" enctype="multipart/form-data">
+                    
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="exampleFormControlInput1">PubMed ID / Paper Identifier</label>
+                            <input v-model="paper.pid" name="pid"
+                                class="form-control" id="exampleFormControlInput1" placeholder="PubMed ID / EMBASE ID / Other ID">
+                            <small id="passwordHelpBlock1" class="form-text text-muted">
+                                If there is no identifier yet, just leave empty. System will generate a temporal ID for this study if it is blank.
+                            </small>
+                        </div>
+
+                        <div class="form-group col-md-6">
+                            <label for="exampleFormControlInpute">NCT Number</label>
+                            <input v-model="paper.nct" name="nct"
+                                class="form-control" id="exampleFormControlInpute" placeholder="NCT12345678">
+                            <small id="passwordHelpBlock2" class="form-text text-muted">
+                                If there is no clinical trial number yet, just leave empty.
+                            </small>
+                        </div>
+                        
+                    </div>
+
+                    <div class="form-group">
+                        <label for="exampleFormControlInput2">Title</label>
+                        <input v-model="paper.title" name="title"
+                            class="form-control" id="exampleFormControlInput2" placeholder="">
+                    </div>
+
+                    <div class="form-row">
+
+                        <div class="form-group col-md-5">
+                            <label for="exampleFormControlInput3">Authors</label>
+                            <input v-model="paper.authors" name="authors"
+                                class="form-control" id="exampleFormControlInput3" placeholder="">
+
+                            <small id="passwordHelpBlock_authors" class="form-text text-muted">
+                                If multiple names, seperate names by comma or semicolon.
+                            </small>
+                        </div>
+
+                        <div class="form-group col-md-4">
+                            <label for="exampleFormControlInput4">Journal</label>
+                            <input v-model="paper.journal" name="journal"
+                                class="form-control" id="exampleFormControlInput4" placeholder="">
+
+                            <small id="passwordHelpBlock_journal" class="form-text text-muted">
+                                The journal information.
+                            </small>
+                        </div>
+
+                        <div class="form-group col-md-3">
+                            <label for="exampleFormControlInput5">Year / Date</label>
+                            <input v-model="paper.pub_date" name="pub_date"
+                                class="form-control" id="exampleFormControlInput5" placeholder="">
+
+                            <small id="passwordHelpBlock_date" class="form-text text-muted">
+                                Year or the publication date of this study.
+                            </small>
+                        </div>
+
+                    </div>
+
+                    <div class="form-group">
+                        <label for="exampleFormControlTextarea1">Abstract</label>
+                        <textarea v-model="paper.abstract" name="abstract" 
+                            class="form-control" id="exampleFormControlTextarea1" rows="5"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="form_pdf_files">PDF Files</label>
+                        <input type="file" name="files[]" multiple accept=".pdf"    
+                            class="form-control-file" id="form_pdf_files">
+                    </div>
+
+                </form>
+                <div>                    
+                    <button class="btn btn-primary"
+                        v-bind:disabled="btn_import.disabled"
+                        v-on:click="import_study">
+                        <i class="fa fa-upload"></i>
+                        Import this study to the current project
+                    </button>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block script %}
+<script>
+
+
+var vw_uploader_userinput = {
+    vpp: null,
+    vpp_id: '#vw_uploader_userinput',
+    api_url: "[[ url_for('importer.upload_userinput') ]]",
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                result: null,
+                paper: {
+                    pid: '',
+                    title: '',
+                    abstract: '',
+                    pub_date: '',
+                    authors: '',
+                    journal: '',
+                    nct: '',
+                },
+                btn_import: {
+                    disabled: false
+                }
+            },
+            methods: {
+                import_study: function() {
+                    vw_uploader_userinput.import_study();
+                }
+            }
+        });
+    },
+
+    import_study: function() {
+        var project_id = Cookies.get('project_id');
+        if (project_id == undefined) {
+            alert('Set working project first.');
+            return;
+        }
+        // update UI
+        this.vpp.btn_import.disabled = true;
+
+        // create form for upload
+
+        var form_data = new FormData($('#upload_userinput')[0]);
+        form_data.append('project_id', project_id);
+
+        // send request
+        $.ajax({
+            type: 'POST',
+            url: this.api_url,
+            data: form_data,
+            contentType: false,
+            cache: false,
+            processData: false,
+            success: function(data) {
+                vw_uploader_userinput.show_result(data);
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.error(textStatus, errorThrown);
+            }
+        });
+    },
+
+    show_result: function(data) {
+        console.log(data);
+        this.vpp.result = data;
+
+        this.vpp.btn_import.disabled = false;
+
+        if (data.success) {
+            toast('Imported the study ['+data.paper.pid+'] successfully!');
+        } else {
+            if (data.is_existed) {
+                toast('The PMID ['+data.paper.pid+'] already exists!', 'error');
+            } else {
+                toast('System Error!')
+            }
+        }
+    }
+};
+
+var jarvis = {
+    init: function() {
+        vw_uploader_userinput.init();
+    }
+};
+
+$(document).ready(function() {
+    jarvis.init();
+})
+</script>
+{% endblock %}

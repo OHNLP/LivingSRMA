@@ -133,6 +133,21 @@ def set_rct_id():
     return jsonify(ret)
 
 
+@bp.route('/set_pmid', methods=['GET', 'POST'])
+@login_required
+def set_pmid():
+    paper_id = request.form.get('paper_id')
+    pmid = request.form.get('pmid')
+    is_success, paper = dora.set_paper_pmid(paper_id, pmid)
+
+    ret = {
+        'success': is_success,
+        'paper': paper.as_very_simple_dict()
+    }
+    
+    return jsonify(ret)
+
+
 @bp.route('/add_tag', methods=['GET', 'POST'])
 @login_required
 def add_tag():
