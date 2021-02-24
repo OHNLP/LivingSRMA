@@ -17,10 +17,18 @@
                 <div class="dropdown-menu">
                     <a v-on:click="toggle_show_settings();"
                         class="dropdown-item" href="javascript:void(0);">
+                        <i class="far fa-caret-square-up"></i>
                         Toggle settings
                     </a>
-                    <a class="dropdown-item" href="javascript:void(0);">
-                        Toggle all attributes
+                    <a v-on:click="toggle_on_all_attributes();"
+                        class="dropdown-item" href="javascript:void(0);">
+                        <i class="far fa-check-square"></i>
+                        Select all attributes
+                    </a>
+                    <a v-on:click="toggle_off_all_attributes();"
+                        class="dropdown-item" href="javascript:void(0);">
+                        <i class="far fa-square"></i>
+                        Unselect all attributes
                     </a>
                     <div class="dropdown-divider"></div>
                     <a v-on:click="return false;"

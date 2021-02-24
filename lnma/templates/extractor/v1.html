@@ -614,6 +614,24 @@ var pan_ocpapers = {
                     this.show_settings = !this.show_settings;
                 },
 
+                toggle_on_all_attributes: function() {
+                    for (const key in this.show_attrs) {
+                        if (Object.hasOwnProperty.call(this.show_attrs, key)) {
+                            this.show_attrs[key] = true;
+                        }
+                    }
+                    this.$forceUpdate();
+                },
+
+                toggle_off_all_attributes: function() {
+                    for (const key in this.show_attrs) {
+                        if (Object.hasOwnProperty.call(this.show_attrs, key)) {
+                            this.show_attrs[key] = false;
+                        }
+                    }
+                    this.$forceUpdate();
+                },
+
                 // save all!
                 update_extract: function() {
                     pan_ocpapers.update_extract();
@@ -1114,7 +1132,7 @@ var pan_collector = {
             //blocks default Webbrowser right click menu
             return false; 
         });
-        console.log('* binded ctx menu')
+        // console.log('* binded ctx menu')
     },
 
     on_contextmenu_pdfviewer: function(event) {
