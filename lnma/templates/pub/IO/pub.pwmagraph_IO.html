@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+
+<title>Outcome Plots v2</title>
+
+<link rel="icon" href="/static/img/favicon.png" type="image/png">
+<script src="https://kit.fontawesome.com/cb45cc91b0.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="/static/lib/jquery-ui/jquery-ui.min.css">
+<link rel="stylesheet" href="/static/css/mybox-0.9.1.css">
+
+<style>
+html, body {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+}
+body {
+    font-size: 12px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+a {
+    color: #333333;
+    text-decoration: none;
+}
+#wrapper {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+}
+#start-screen {
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    background: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+#ss-msg {
+    width: 100%;
+    padding: 10px 0;
+    text-align: center;
+}
+
+/* for this page */
+#app {
+    width: 100%;
+    height: 100%;
+}
+#vw_oclist {
+    width: 300px;
+    padding: 0 5px;
+    height: 100%;
+    /* background-color: whitesmoke; */
+}
+#vw_oclist_aespanel {
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+#vw_ocplots_mainpanel {
+    width: calc(100% - 300px);
+    padding: 0 5px;
+    height: 100%;
+}
+#vw_ocplots_plotpanel {
+    height: 100%;
+    overflow-y: auto;
+}
+.oc-name {
+    width:     180px;
+    min-width: 180px;
+    cursor: pointer;
+    padding: 2px 0;
+}
+.oc-type {
+    width: 30px;
+    min-width: 30px;
+    text-align: center;
+    cursor: pointer;
+    padding: 2px 0;
+}
+.oc-type:hover {
+    background-color: #cccccc;
+    font-weight: bold;
+}
+.oc-type-selected {
+    background-color: #555555;
+    color: #ffffff;
+    font-weight: bold;
+}
+.oc-cate {
+    flex-direction: column;
+}
+.oc-cate-info {
+    width: 100%;
+    border-bottom: 1px solid transparent;
+}
+.oc-cate-info:hover {
+    border-bottom: 1px solid #555555;
+}
+.oc-cate-info .oc-name {
+    font-weight: bold;
+}
+.oc-cate-info .oc-type {
+    font-weight: bold;
+}
+.oc-items {
+    width: 100%;
+    padding-left: 20px;
+}
+.oc-items-hide {
+    display: none;
+}
+.oc-item {
+    width: 100%;
+    border-left: 1px solid #aaaaaa;
+}
+.oc-item-info {
+    width: calc(100% - 20px);
+    border-bottom: 1px solid transparent;
+}
+.oc-item-info:hover {
+    background-color: #efefef;
+    border-bottom: 1px solid #cccccc;
+}
+.oc-item-info .oc-name {
+    width:       150px;
+    min-width:   150px;
+    padding-left: 10px;
+}
+.oc-plot-img {
+    width: 100%;
+}
+.oc-plot-tab {
+    padding: 4px 15px;
+    border: 0;
+    color: #999999;
+    border-bottom: 1px solid #999999;
+    cursor: pointer;
+}
+.oc-plot-tab:hover {
+    color: #555555;
+    border-bottom: 1px solid #555555;
+}
+.oc-plot-tab-selected {
+    color: #000000;
+    font-weight: bold;
+    border-bottom: 1px solid #000000;
+}
+.oc-plot-tab-page {
+    display: none;
+    padding: 10px 10px 0 15px;
+}
+.oc-plot-tab-page-selected {
+    display: block;
+}
+</style>
+</head>
+<body>
+<div id="start-screen">
+    <h1>
+        <i class="fa fa-chart-bar"></i>
+        Outcome Plots
+    </h1>
+    <div id="ss-msg">Loading data and initializing ...</div>
+</div>
+
+<div id="wrapper">
+
+<div id="app" class="d-flex fx-row">
+
+    {% include 'pub/pub._vw_oclist.html' %}
+
+    <div id="vw_ocplot">
+        <div class="box" style="height: 100%;">
+            <div class="box-header">
+                <h4>
+                    <i class="fa fa-chart-bar"></i>
+                    PLOTS | 
+                </h4>
+                <div class="d-flex fx-row">
+                    <div class="box-radio-group d-flex fx-row">
+                        <div>
+                            <i class="fa fa-cog"></i>
+                            Measure of effect: 
+                        </div>
+                        <div class="box-radio-item">
+                            <input type="radio" checked name="vw_ocplots_input_sm"
+                                value="OR" id="vw_ocplots_input_sm_or"
+                                v-on:change="update_plot"
+                                v-model="params.sm">
+                            <label for="vw_ocplots_input_sm_or">OR</label>
+                        </div>
+                        <div class="box-radio-item">
+                            <input type="radio" name="vw_ocplots_input_sm"
+                                value="RR" id="vw_ocplots_input_sm_rr"
+                                v-on:change="update_plot"
+                                v-model="params.sm">
+                            <label for="vw_ocplots_input_sm_rr">RR</label>
+                        </div>
+                        <div class="box-radio-item">
+                            <input type="radio" name="vw_ocplots_input_sm"
+                                value="RD" id="vw_ocplots_input_sm_rd"
+                                v-on:change="update_plot"
+                                v-model="params.sm">
+                            <label for="vw_ocplots_input_sm_rd">RD</label>
+                        </div>
+                    </div>
+                    <div class="box-radio-group d-flex fx-row">
+                        <div>
+                            <i class="fa fa-cog"></i>
+                            Hartung-Knapp: 
+                        </div>
+                        <div class="box-radio-item">
+                            <input type="radio" checked name="vw_ocplots_input_hk" 
+                                value="TRUE" id="vw_ocplots_input_hk_t"
+                                v-on:change="update_plot"
+                                v-model="params.hk">
+                            <label for="vw_ocplots_input_hk_t">True</label>
+                        </div>
+                        <div class="box-radio-item">
+                            <input type="radio" name="vw_ocplots_input_hk"
+                                value="FALSE" id="vw_ocplots_input_hk_f"
+                                v-on:change="update_plot"
+                                v-model="params.hk">
+                            <label for="vw_ocplots_input_hk_f">False</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="box-body" style="height: 100%;">
+
+                <div id="vw_ocplots_plotpanel"
+                    v-if="current.has_img">
+                    <h5>The forest plots of {{ current.cnt_studies }} studies of {{ current.ae_cate }} - {{ current.ae_name }}, {{ get_grade_label(current.ae_grade) }}</h5>
+                    <div class="d-flex fx-row">
+                        <div class="oc-plot-tab"
+                            v-bind:class="{'oc-plot-tab-selected': current.is_prim_plot}"
+                            v-on:click="switch_plot('is_prim_plot')">
+                            <i class="fa fa-chart-bar"></i>
+                            Primary Meta-Analysis with {{ params.sm }} and HK={{ params.hk }}
+                        </div>
+                        <div class="oc-plot-tab"
+                            v-bind:class="{'oc-plot-tab-selected': current.is_cumu_plot}"
+                            v-on:click="switch_plot('is_cumu_plot')">
+                            <i class="fa fa-chart-bar"></i>
+                            Cumulative Meta-Analysis with {{ params.sm }}
+                        </div>
+                    </div>
+                    <div class="oc-plot-tab-page"
+                        v-bind:class="{'oc-plot-tab-page-selected': current.is_prim_plot}">
+                        <div id="fg_prim_forest" style="width: 100%; height: 100%;">
+                            <svg id="fg_prim_forest_svg"></svg>
+                        </div>
+                    </div>
+                    <div class="oc-plot-tab-page"
+                        v-bind:class="{'oc-plot-tab-page-selected': current.is_cumu_plot}">
+                        <div id="fg_cumu_forest" style="width: 100%; height: 100%;">
+                            <svg id="fg_cumu_forest_svg"></svg>
+                        </div>
+                    </div>
+
+                </div>
+                <div v-else>
+                    <h5>{{ current.title }}</h5>
+                    
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+</div>
+
+<!-- use third party libs -->
+<script src="/static/lib/jquery/jquery-3.4.1.min.js"></script>
+<script src="/static/lib/jquery-ui/jquery-ui.min.js"></script>
+<script src="/static/lib/vue.js/vue.min.js"></script>
+<script src="/static/lib/alasql/alasql.min.js"></script>
+<!-- D3.js -->
+<script src="/static/lib/d3/d3.min.js"></script>
+<script src="/static/lib/d3/d3-tip.min.js"></script>
+
+<script>
+var isIE = /*@cc_on!@*/false || !!document.documentMode;
+if (isIE) {
+    document.getElementById('ss-msg').innerHTML = 'The functions used in this website require advanced web technologies, which are <b>NOT</b> supported by Internet Explorer<br>Try using Google Chrome, Apple Safari, Mozilla Firefox or other modern browsers.';
+}
+</script>
+
+<script>
+
+{% include 'js/vw_oclist.js' %}
+{% include 'js/fg_prim_forest.js' %}
+{% include 'js/fg_cumu_forest.js' %}
+
+var vw_ocplot = {
+    vpp: null,
+    vpp_id: '#vw_ocplot',
+
+    apikey: '7323590e-577b-4f46-b19f-3ec401829bd6',
+    pids: [],
+
+    sms: {
+        'OR': { sm: 'OR', name: 'Odds Ratio'},
+        'RR': { sm: 'RR', name: 'Risk Ratio'},
+        'HR': { sm: 'HR', name: 'Hazard Ratio'},
+        'RD': { sm: 'RD', name: 'Risk Difference'},
+    },
+
+    init: function(data) {
+        // bind local data
+        this.data = data;
+
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                params: {
+                    sm: 'OR',
+                    hk: 'FALSE'
+                },
+
+                current: {
+                    ae_cate: '',
+                    ae_name: '',
+                    ae_grade: '',
+                    cnt_studies: 0, 
+                    has_img: false,
+                    img: {
+                        cumuplt: {},
+                        outplt1: {}
+                    },
+                    title: '',
+                    is_prim_plot: true,
+                    is_cumu_plot: false
+                }
+            },
+            methods: {
+
+                get_grade_label: function(g) {
+                    return jarvis.texts[g];
+                },
+
+                switch_plot: function(plot) {
+                    // set all to false
+                    this.current.is_cumu_plot = false;
+                    this.current.is_prim_plot = false;
+
+                    // set the selected as true
+                    this.current[plot] = true;
+                },
+
+                update_plot: function() {
+                    if (this.current.ae_cate == '') {
+                        // nothing to update
+                        return;
+                    }
+                    // update 
+                    vw_ocplot.show_plot(
+                        this.current.ae_cate,
+                        this.current.ae_name,
+                        this.current.ae_grade
+                    );
+                }
+            },
+            updated: function() {
+                if (this.current.has_img) {
+                    console.log('* render plot')
+                    var cfg = {
+                        sm: vw_ocplot.sms[this.params.sm]
+                    }
+                    fg_prim_forest.draw(vw_ocplot.data.data.primma, cfg);
+                    fg_cumu_forest.draw(vw_ocplot.data.data.cumuma, cfg)
+                }
+            }
+        });
+    },
+
+    update: function(pids) {
+        this.pids = pids;
+    },
+
+    get_pid_condition: function() {
+        if (this.pids.length == 0) {
+            return 'pid is not null ';
+        } else {
+            var cond = this.pids.map(function(v) { return '' + v}).join(',');
+            return 'pid in (' + cond + ') '
+        }
+    },
+
+    show_plot: function(ae_cate, ae_name, ae_grade) {
+        // set no img and try to load
+        this.vpp.current.has_img = false;
+
+        var sql = 'select author as study, year, ' +
+            ae_grade + '_Et as Et, ' +
+            ae_grade + '_Ec as Ec, ' +
+            'GA_Nt as Nt, GA_Nc as Nc ' +
+            'from aes ' +
+            'where ' + this.get_pid_condition() + ' ' +
+            "  and ae_cate='" + ae_cate + "' " +
+            "  and ae_name='" + ae_name + "' " +
+            "  and has_" + ae_grade + " = true";
+
+         var rs = alasql(sql);
+         console.log(rs);
+
+         // update the data in vpp
+         this.vpp.current.ae_cate = ae_cate;
+         this.vpp.current.ae_name = ae_name;
+         this.vpp.current.ae_grade = ae_grade;
+         this.vpp.current.cnt_studies = rs.length;
+
+         // send ajax to server
+         var params = {
+             am: 'FORESTDATA',
+             sm: this.vpp.params.sm,
+             rs: JSON.stringify(rs),
+             hk: this.vpp.params.hk,
+             apikey: this.apikey
+         };
+
+         var base = '';
+         // var base = 'https://workspace.network-meta-analysis.com/';
+
+         $.post(
+             base + '/rplt/IOTOX',
+             params,
+             function(data) {
+                 console.log('* get return', data);
+                 vw_ocplot._show_plot(data);
+             }, 'json'
+         );
+    },
+
+    _show_plot: function(data) {
+        if (data.success) {
+             // great! show images
+             this.data = data;
+             this.vpp.current.has_img = true;
+         } else {
+             // update message
+         }
+    }
+
+};
+
+
+var jarvis = {
+
+    texts: {
+        "GA": "All Grade",
+        "G34": "Grade 3/4",
+        "G3H": "Grade 3 or higher",
+        "G5N": "Grade 5 only"
+    },
+    
+    init: function() {
+        var isIE = /*@cc_on!@*/false || !!document.documentMode;
+
+        console.log('* User is using IE:', isIE);
+        if (isIE) {
+            jarvis.ssmsg('The functions used in this website require advanced web technologies, which are <b>NOT</b> supported by Internet Explorer<br>Try using Google Chrome, Apple Safari, Mozilla Firefox or other modern browsers.')
+            return;
+        }
+
+        // OK, 
+        var prj = jarvis.getUrlParameter('prj');
+        if (prj == null) {
+            jarvis.ssmsg('Project information error.')
+            return;
+        }
+
+        // set the vw_oclist to radio button model
+        vw_oclist.select_mode = 'radio';
+
+        $.when(
+            $.get(
+                '/pub/graphdata/' + prj + '/ITABLE_CFG.json',
+                {}
+            ),
+            $.get(
+                '/pub/graphdata/'+prj+'/OPLOTS.json',
+                {ver: Math.random()},
+            )
+        ).done(function(r1, r2) {
+            var data1 = r1[0];
+            var data2 = r2[0];
+            jarvis.data1 = data1;
+            jarvis.data2 = data2;
+
+            // init the table
+            console.log(data1);
+            console.log(data2);
+
+            vw_oclist.init(data2);
+            vw_ocplot.init(data2);
+
+            // init the fg_prim_forest module
+
+            // ok, remove the 
+            jarvis.ssmsg('Almost initialized.');
+            setTimeout('jarvis.ssclose();', 400);
+        });
+
+        
+    },
+
+    getUrlParameter: function(name) {
+        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+        var results = regex.exec(location.search);
+        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    },
+
+    toggle_ae: function(ae_cate, ae_name, ae_grade) {
+        console.log('* toggle_ae ' + ae_cate + ', ' + ae_name + ', ' + ae_grade);
+        vw_ocplot.show_plot(ae_cate, ae_name, ae_grade);
+    },
+
+    clear_all_ae: function() {
+
+    },
+
+    ssmsg: function(msg) {
+        $('#ss-msg').html(msg);
+    },
+
+    ssclose: function() {
+        $('#start-screen').hide();
+    }
+};
+
+$(document).ready(function() {
+    jarvis.init();
+})
+</script>
+</body>

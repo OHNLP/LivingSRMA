@@ -15,6 +15,7 @@ from flask import jsonify
 
 from flask_login import login_required
 from flask_login import current_user
+from flask_login.utils import login_fresh
 
 from lnma import dora
 from lnma import util
@@ -410,6 +411,23 @@ def import_itable_meta_and_data_from_xls():
     }
     return jsonify(ret)
 
+
+@bp.route('/sort_rct_seq')
+@login_required
+def sort_rct_seq():
+    '''
+    Sort the RCT origin or followup
+    '''
+    project_id = request.cookies.get('project_id')
+
+    papers = dora.sort_paper_rct_seq_in_project(project_id)
+
+    ret = {
+        'success': True,
+        'msg': 'sorted RCT sequences',
+        'papers': [ p.as_very_simple_dict() for p in papers ]
+    }
+    return jsonify(ret)
 
 
 @bp.route('/import_IO_aes_from_xls')

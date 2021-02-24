@@ -57,10 +57,15 @@ def subindex(prj):
     return render_template('pub/pub.subindex.html', prj_data=prj_data)
 
 
+###############################################################################
+# For IO project
+# Every thing is special designed
+###############################################################################
+
 @bp.route('/IO.html')
 def static_IO():
     prj = 'IO'
-    return render_template('pub/pub.IO.html')
+    return render_template('pub/IO/pub.IO.html')
 
 
 @bp.route('/IOTOX.html')
@@ -68,6 +73,30 @@ def IOTOX():
     prj = 'IOTOX'
     return render_template('pub/pub.IOTOX.html')
 
+
+@bp.route('/prisma_IO.html')
+def prisma_IO():
+    '''
+    A special PRISMA for IOTOX project
+    The looking is different from others
+    '''
+    return render_template('pub/IO/pub.prisma_IO.html')
+
+# the ITable for IO is the same version as others
+
+@bp.route('/pwmagraph_IO.html')
+def pwmagraph_IO():
+    return render_template('pub/IO/pub.pwmagraph_IO.html')
+
+
+@bp.route('/softable_pma_IO.html')
+def softable_pma_IO():
+    return render_template('pub/IO/pub.softable_pma_IO.html')
+
+
+###############################################################################
+# For the public webpage of each project
+###############################################################################
 
 @bp.route('/ADJRCC.html')
 def ADJRCC():
@@ -250,13 +279,6 @@ def prisma_v3():
     return render_template('pub/pub.prisma_v3.html')
 
 
-@bp.route('/prisma_IO.html')
-def prisma_IO():
-    '''
-    A special PRISMA for IOTOX project
-    The looking is different from others
-    '''
-    return render_template('pub/pub.prisma_IO.html')
 
 
 @bp.route('/itable.html')
@@ -309,13 +331,11 @@ def oplot_v2():
     return render_template('pub/pub.oplot_v2.html')
 
 
+
 @bp.route('/softable_pma.html')
 def softable_pma():
     prj = request.args.get('prj')
-    if prj == 'IOTOX':
-        fn = 'pub/pub.softable_pma_IOTOX.html'
-    else:
-        fn = 'pub/pub.softable_pma.html'
+    fn = 'pub/pub.softable_pma.html'
     return render_template(fn)
 
 

@@ -407,6 +407,7 @@ def sort_paper_rct_seq_in_project(project_id):
     # get all nct
     ncts = {}
 
+    n_papers = 0
     for paper in papers:
         if paper.meta['rct_id'] == '': continue
 
@@ -422,34 +423,51 @@ def sort_paper_rct_seq_in_project(project_id):
             'pid': paper.pid,
             'pub_date': get_year(paper.pub_date)
         })
+
+        n_papers += 1
+
+    print('* found %d papers of %d RCT_ID' % (
+        n_papers, len(ncts)
+    ))
     
     # sort the nct's paper
     for nct in ncts:
         ncts[nct]['papers'] = sorted(
             ncts[nct]['papers'],
-            lambda p: p['pub_date']
+            key=lambda p: p['pub_date']
         )
         for i, p in enumerate(ncts[nct]['papers']):
             ncts[nct]['rct_seq'][p['pid']] = i
 
+    print('* sorted all nct and papers')
+
     # update the paper
+    n_updates = 0
     for paper in papers:
-        if paper.meta['rct_id'] == '': continue
+        if paper.meta['rct_id'] == '':
+            paper.meta['rct_seq'] = None
+            paper.meta['study_type'] = None
+            flag_modified(paper, 'meta')
 
-        nct = paper.meta['rct_id']
-        
-        rct_seq = ncts[nct]['rct_seq'][paper.pid]
-        if rct_seq == 0:
-            study_type = settings.PAPER_STUDY_TYPE_ORIGINAL
         else:
-            study_type = settings.PAPER_STUDY_TYPE_FOLLOWUP
-        
-        paper.meta['rct_seq'] = rct_seq
-        paper.meta['study_type'] = study_type
+            nct = paper.meta['rct_id']
+            
+            rct_seq = ncts[nct]['rct_seq'][paper.pid]
+            if rct_seq == 0:
+                study_type = settings.PAPER_STUDY_TYPE_ORIGINAL
+            else:
+                study_type = settings.PAPER_STUDY_TYPE_FOLLOWUP
+            
+            paper.meta['rct_seq'] = rct_seq
+            paper.meta['study_type'] = study_type
+            flag_modified(paper, 'meta')
 
-        db.session.add(paper)
+            db.session.add(paper)
+            n_updates += 1
 
+    # commit!
     db.session.commit()
+    print('* updated %s paper study_type' % (n_updates))
 
     return papers
 

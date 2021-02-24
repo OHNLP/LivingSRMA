@@ -8,7 +8,7 @@
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
 
-<title>Summary of Findings: PMA for IOTOX</title>
+<title>Summary of Findings: PMA for IO</title>
 
 <link rel="icon" href="/static/img/favicon.png" type="image/png">
 <script src="https://kit.fontawesome.com/cb45cc91b0.js" crossorigin="anonymous"></script>
@@ -549,7 +549,7 @@ var jarvis = {
             ),
             $.get(
                 '/pub/graphdata/'+prj+'/SOFTABLE_PMA.json',
-                {ver: Math.random()},
+                {rnd: Math.random()},
             )
         ).done(function(r1, r2) {
             var data1 = r1[0];
