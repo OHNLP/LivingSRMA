@@ -1377,7 +1377,7 @@ def get_itable_attr_rs_cfg_from_db(prj):
                 # the author name maybe different format, use paper instead of `r`
                 val = util.get_author_etal_from_paper(paper)
             elif attr['abbr'] == 'ba_ofu':
-                val = 'NA'
+                val = paper.meta['study_type']
             elif attr['abbr'] == 'ba_pmid':
                 val = paper.pid
             elif attr['abbr'] == 'ba_nct':

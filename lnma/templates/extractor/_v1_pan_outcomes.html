@@ -13,6 +13,7 @@
             Add Subgroup Analysis
         </button>
     </h5>
+
     <div class="panel-box">
         <div class="oper-bar">
             {{ Object.keys(data.pwma.outcomes).length }} categories, 
@@ -20,6 +21,7 @@
             <button v-on:click="close_all_cates('pwma', event)">Close folders</button>
         </div>
         
+        <!-- for pwma -->
         <div v-if="Object.keys(data.pwma.outcomes).length != 0">
 
             <div v-for="ocs, cate in data.pwma.outcomes">
@@ -56,9 +58,10 @@
                 </div>
 
             </div>
-
         </div>
 
+
+        <!-- for subg  -->
         <table class="table" v-if="Object.keys(data.subg.outcomes).length != 0">
             <tr>
                 <th>Group</th>

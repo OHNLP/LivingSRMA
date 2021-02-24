@@ -1879,8 +1879,9 @@ var tbjs_paperlist = {
     __get_span_pmid: function(d) {
         var html_study_type = '';
         if (d.meta.rct_id == '') {
+
         } else {
-            if (d.meta.hasOwnProperty('study_type')) {
+            if (d.meta.hasOwnProperty('study_type') && d.meta.study_type != null) {
                 // this means this paper has been sorted
                 if (d.meta.rct_seq == 0) {
                     html_study_type = '<span class="ml-1 mr-1 study-type-'+
