@@ -195,6 +195,7 @@ html {
     text-overflow: ellipsis;
     padding: 0 3px 0 0 !important;
     cursor: pointer;
+    max-width: 150px;
 }
 .paper-name:hover {
     font-weight: bold;
@@ -269,15 +270,18 @@ Data Extractor
         Manage Outcomes
     </button>
 
+    <hr>
     <!-- <button onclick="jarvis.switch_layout('extract_information');">
         <i class="fa fa-edit"></i>
         Extract Information
     </button>
+    -->
 
-    <button onclick="jarvis.switch_layout('analyze_outcome');">
-        <i class="fa fa-chart-bar"></i>
-        Analyze Outcome
-    </button> -->
+    <button onclick="pan_itable_previewer.show_itable_preview();">
+        <i class="fa fa-table"></i>
+        Preview Interactive Table
+    </button>
+
 </div>
 <!-- /#navi_header -->
 
@@ -293,6 +297,27 @@ Data Extractor
 
 {% include 'extractor/_v1_pan_analyzer.html' %}
     
+
+<div id="pan_itbuilder_previewer" class="shadow-sm" :class="{offscreen:is_hide_previewer}">
+    <div style="position: absolute; left: 5px; top: 5px;" class="d-flex flex-row">
+        <div class="mt-1 mr-5 ml-1">
+            <a href="javascript:void(0);"
+                class="mr-3"
+                v-on:click="close_itable_preview();">
+                <i class="fa fa-close"></i>
+            </a>
+
+            <i class="fa fa-table"></i>
+            Interactive Table Preivew
+        </div>
+    </div>
+
+    <iframe id="ifr_itable_previewer" src="" 
+        width="100%" scrolling="yes"
+        frameborder="0"></iframe>
+</div>
+
+
 </div>
 <!-- /#main -->
 
@@ -309,6 +334,69 @@ Data Extractor
 
 {% include 'js/lisr_analyzer.js' %}
 {% include 'js/fg_pwma_imglist.js' %}
+
+
+var pan_itable_previewer = {
+    vpp_id: '#pan_itbuilder_previewer',
+    vpp: null,
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                is_hide_previewer: true
+            },
+            methods: {
+                show_itable_preview: function() {
+                    pan_itable_previewer.show_itable_preview();
+                },
+
+                close_itable_preview: function() {
+                    this.is_hide_previewer = true;
+                },
+            }
+        });
+    },
+
+
+    show_itable_preview: function() {
+
+        var project_id = Cookies.get('project_id');
+        var project_keystr = jarvis.project.keystr;
+
+        // update url
+        var url = '/pub/itable.html?src=db&prj=' + project_keystr;
+
+        // reload the iframe
+        if (url == $('#ifr_itable_previewer').prop('src')) {
+            // reload 
+            document.getElementById('ifr_itable_previewer').contentWindow.location.reload();
+        } else {
+            // load url
+            $('#ifr_itable_previewer').prop('src', url);
+        }
+
+        // resize
+        pan_itable_previewer.resize_itable_previewer();
+
+        // show the panel
+        pan_itable_previewer.vpp.$data.is_hide_previewer = false;
+
+        this.vpp.$forceUpdate();
+    },
+
+
+    resize_itable_previewer: function() {
+        var h = $(window).height() - 25;
+
+        // resize the popup
+        $('#pan_itbuilder_previewer').height(h)
+
+        // resize the iframe
+        $('#ifr_itable_previewer').height(h - 40);
+    }
+};
+
 
 var pan_outcomes = {
     vpp_id: '#pan_outcomes',
@@ -1316,7 +1404,6 @@ var pan_itbuilder = {
             data: {
                 itable: null,
 
-                is_hide_previewer: true
             },
             methods: {
                 save_itable: function() {
@@ -1331,31 +1418,7 @@ var pan_itbuilder = {
                 },
 
                 show_itable_preview: function() {
-
-                    var project_id = Cookies.get('project_id');
-                    var project_keystr = jarvis.project.keystr;
-
-                    // update url
-                    var url = '/pub/itable.html?src=db&prj=' + project_keystr;
-
-                    // reload the iframe
-                    if (url == $('#ifr_itable_previewer').prop('src')) {
-                        // reload 
-                        document.getElementById('ifr_itable_previewer').contentWindow.location.reload();
-                    } else {
-                        // load url
-                        $('#ifr_itable_previewer').prop('src', url);
-                    }
-
-                    // resize
-                    pan_itbuilder.resize_itable_previewer();
-
-                    // show the panel
-                    this.is_hide_previewer = false;
-                },
-
-                close_itable_preview: function() {
-                    this.is_hide_previewer = true;
+                    pan_itbuilder.show_itable_preview();
                 },
 
                 create_category: function() {
@@ -1631,16 +1694,6 @@ var pan_itbuilder = {
         $(this.vpp_id).removeClass('panel-s panel-m panel-l')
             .addClass('panel-' + size);
     },
-
-    resize_itable_previewer: function() {
-        var h = $(window).height() - 25;
-
-        // resize the popup
-        $('#pan_itbuilder_previewer').height(h)
-
-        // resize the iframe
-        $('#ifr_itable_previewer').height(h - 40);
-    }
 };
 
 
@@ -2066,6 +2119,9 @@ var jarvis = {
 
         // the sub module of analyzers
         fg_pwma_imglist.init();
+
+        // the preview for itable
+        pan_itable_previewer.init();
 
         // switch to default layout
         this.switch_layout('manage_outcomes')
