@@ -165,7 +165,7 @@ var vw_idgpanel = {
 
             methods: {
                 get_url: function(folder, fn) {
-                    return '/pub/graphdata/' + jarvis.prj + '/decision_aid/' + folder + '/' + fn + '.png';
+                    return '/pub/graphdata/' + jarvis.prj + '/decision_aid/' + folder + '/' + fn + '.png?rnd=' + Math.random();
                 }
             }
         });
