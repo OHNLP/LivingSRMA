@@ -279,6 +279,12 @@ def prisma_v3():
     return render_template('pub/pub.prisma_v3.html')
 
 
+@bp.route('/ida_RCC.html')
+def ida_RCC():
+    '''
+    A special module for the RCC
+    '''
+    return render_template('pub/RCC/ida.html')
 
 
 @bp.route('/itable.html')
@@ -386,6 +392,19 @@ def graphdata_img(prj, fn):
     '''get image files of specific project
     '''
     full_path = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, 'img')
+    return send_from_directory(full_path, fn)
+
+
+@bp.route('/graphdata/<prj>/decision_aid/<cmp>/<fn>')
+def graphdata_da_cmp(prj, cmp, fn):
+    '''
+    Get decision aid image files of specific project
+    '''
+    full_path = os.path.join(
+        current_app.instance_path, PATH_PUBDATA, prj, 
+        'decision_aid',
+        cmp
+    )
     return send_from_directory(full_path, fn)
 
 
