@@ -46,13 +46,13 @@ a {
 
 <body>
 
-<!-- <div id="start-screen" style="width: 100%; height: 100%; z-index: 9999; background: white; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+<div id="start-screen" style="width: 100%; height: 100%; z-index: 9999; background: white; display: flex; flex-direction: column; justify-content: center; align-items: center;">
     <h1>
         <i class="fa fa-map-signs"></i>
         Decision Aid
     </h1>
     <div id="ss-msg" style="width: 100%; padding: 10px 0; text-align: center;">Initializing Plots...</div>
-</div> -->
+</div>
 
 <div id="vw_idgpanel" style="height: 100%; padding: 5px; display: flex; flex-direction: row;">
     <div id="left_panel" style="width: 270px; margin-right: 5px;">
@@ -119,7 +119,7 @@ a {
             <img class="da-image" :src="get_url(comparison, 'PFS')" v-show="is_shown_pfs">
             <img class="da-image" :src="get_url(comparison, 'S_TRAE')" v-show="is_shown_strae">
             <img class="da-image" :src="get_url(comparison, 'F_TRAE')" v-show="is_shown_ftrae">
-            <img class="da-image" :src="get_url(comparison, 'QOL')" v-show="is_shown_qol">
+            <img class="da-image" :src="get_url(comparison, 'HRQOL')" v-show="is_shown_qol">
             <img class="da-image" :src="get_url(comparison, 'PC')" v-show="is_shown_pc">
 
         </div>
@@ -197,7 +197,7 @@ var vw_idgpanel = {
 
             methods: {
                 get_url: function(folder, fn) {
-                    return '/pub/graphdata/' + jarvis.prj + '/decision_aid/' + folder + '/' + fn + '.png?rnd=' + Math.random();
+                    return '/pub/graphdata/' + jarvis.prj + '/decision_aid/' + folder + '/' + fn + '.svg?rnd=' + Math.random();
                 }
             }
         });
@@ -241,12 +241,11 @@ var jarvis = {
         $('#start-screen').hide();
     },
 };
-vw_idgpanel.init();
 
-// $(document).ready(function() {
-//     jarvis.init();
+$(document).ready(function() {
+    jarvis.init();
     
-// });
+});
 </script>
     
 </body>
