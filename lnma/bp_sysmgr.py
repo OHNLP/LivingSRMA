@@ -89,3 +89,6 @@ def pred_rct_demo():
         'data': rst
     }
     return jsonify(ret)
+
+
+# @bp.route('/')

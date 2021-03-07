@@ -47,7 +47,10 @@ def get_dataset(prj):
 
         r = {
             'seq_num': paper.seq_num,
+            'pid': paper.pid,
+            'pid_type': paper.pid_type,
             'title': paper.title,
+            'pub_date': paper.pub_date,
             'abstract': paper.abstract,
             'decision': decision
         }
