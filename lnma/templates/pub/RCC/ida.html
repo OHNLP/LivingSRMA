@@ -8,7 +8,7 @@
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
 
-<title>Interactive Decision Guidance</title>
+<title>Decision Aid</title>
 
 <link rel="icon" href="/static/img/favicon.png" type="image/png">
 <script src="https://kit.fontawesome.com/cb45cc91b0.js" crossorigin="anonymous"></script>
@@ -38,6 +38,9 @@ a {
 #right_panel img {
     width: 100%;
 }
+.da-image {
+    margin: 0 0 10px 0;
+}
 </style>
 </head>
 
@@ -51,7 +54,7 @@ a {
     <div id="ss-msg" style="width: 100%; padding: 10px 0; text-align: center;">Initializing Plots...</div>
 </div> -->
 
-<div id="vw_idgpanel" style="padding: 5px; display: flex; flex-direction: row;">
+<div id="vw_idgpanel" style="height: 100%; padding: 5px; display: flex; flex-direction: row;">
     <div id="left_panel" style="width: 270px; margin-right: 5px;">
         <v-app>
             <v-container class="px-0" fluid>
@@ -92,7 +95,7 @@ a {
                 <v-switch v-model="is_shown_qol" label="Quality of Life">
                 </v-switch>
 
-                <p>Decision Aid</p>
+                <p>Compare Practical Implications</p>
                 <v-switch v-model="is_shown_pc" label="Practical Implications">
                 </v-switch>
 
@@ -100,18 +103,26 @@ a {
         </v-app>
     </div>
 
-    <div id="right_panel" style="width: (100%-270px); max-width: 1102px; padding: 5px 0 0 0; display: flex; flex-direction: column;">
+    <div id="right_panel" style="width: (100%-270px); min-width: 800px; max-width: 1002px; padding: 5px 0 0 0; display: flex; flex-direction: column;">
 
-        <div style="margin-bottom: 10px;">
-            <span style="font-size: 14px; padding: 5px; margin: 0 10px 0 0; border: 1px solid #333333;">{{ treatments[comparison.split('_')[0]] }}</span> versus 
-            <span style="font-size: 14px; padding: 5px; margin: 0 0 0 10px; border: 1px solid #333333;">{{ treatments[comparison.split('_')[1]] }}</span>
+        <div style="width: 100%; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 16px; padding: 5px; margin: 0 10px 0 0; border: 2px solid #333333; font-weight: bold;">{{ treatments[comparison.split('_')[0]] }}</span>
+            <span>
+                versus
+            </span>
+            <span style="font-size: 16px; padding: 5px; margin: 0 0 0 10px; border: 2px solid #333333; font-weight: bold;">{{ treatments[comparison.split('_')[1]] }}</span>
         </div>
-        <img :src="get_url(comparison, 'OS')" v-show="is_shown_os">
-        <img :src="get_url(comparison, 'PFS')" v-show="is_shown_pfs">
-        <img :src="get_url(comparison, 'S_TRAE')" v-show="is_shown_strae">
-        <img :src="get_url(comparison, 'F_TRAE')" v-show="is_shown_ftrae">
-        <img :src="get_url(comparison, 'QOL')" v-show="is_shown_qol">
-        <img :src="get_url(comparison, 'PC')" v-show="is_shown_pc">
+
+        <div style="width: 100%; height: 100%; overflow-y: auto;">
+
+            <img class="da-image" :src="get_url(comparison, 'OS')" v-show="is_shown_os">
+            <img class="da-image" :src="get_url(comparison, 'PFS')" v-show="is_shown_pfs">
+            <img class="da-image" :src="get_url(comparison, 'S_TRAE')" v-show="is_shown_strae">
+            <img class="da-image" :src="get_url(comparison, 'F_TRAE')" v-show="is_shown_ftrae">
+            <img class="da-image" :src="get_url(comparison, 'QOL')" v-show="is_shown_qol">
+            <img class="da-image" :src="get_url(comparison, 'PC')" v-show="is_shown_pc">
+
+        </div>
     </div>
 
 </div>
@@ -142,14 +153,35 @@ var vw_idgpanel = {
                         {label: 'Lenvatinib vs Suni', value: 'Len_Suni'}
                     ],
                     mixed: [
-                        {label: 'Lenvatinib-Pembrolizumab vs Suni', value: 'LenPem_Suni'}
+                        {label: 'Lenvatinib-Pembrolizumab vs Suni', value: 'LenPem_Suni'},
+                        {label: 'Atezolizumab-Bevacizumab vs Suni', value: 'AteBev_Suni'},
+                        {label: 'Avelumab-Axitinib vs Suni', value: 'AveAxi_Suni'},
+                        {label: 'Cabozantinib-Nivolumab vs Suni', value: 'CaboNivo_Suni'},
+                        {label: 'Nivolumab-Ipilimumab vs Suni', value: 'NivoIpi_Suni'},
+                        {label: 'Pembrolizumab-Axitinib vs Suni', value: 'PemAxi_Suni'},
                     ]
                 },
 
                 treatments: {
+                    'Ate': 'Atezolizumab',
+                    'Bev': 'Bevacizumab',
+                    'Ave': 'Avelumab',
+                    'Axi': 'Axitinib',
+                    'Cabo': 'Cabozantinib',
+                    'Nivo': 'Nivolumab',
+                    'Ipi': 'Ipilimumab',
+                    'Pem': 'Pembrolizumab',
+                    'Pazo': 'Pazopanib',
                     'Len': 'Lenvatinib',
+                    'Tivo': 'Tivozanib',
                     'Suni': 'Sunitinib',
-                    'LenPem': 'Lenvatinib-Pembrolizumab'
+
+                    'AteBev': 'Atezolizumab-Bevacizumab',
+                    'AveAxi': 'Avelumab-Axitinib',
+                    'CaboNivo': 'Cabozantinib-Nivolumab',
+                    'NivoIpi': 'Nivolumab-Ipilimumab',
+                    'PemAxi': 'Pembrolizumab-Axitinib',
+                    'LenPem': 'Lenvatinib-Pembrolizumab',
                 },
 
                 // the values for choosing plots
