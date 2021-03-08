@@ -979,6 +979,7 @@ def get_evmap_data_v2(full_fn):
     dft = xls.parse(tab_name_certainty, usecols=cols_range, names=cols_certs)
     # there maybe nan 
     dft = dft[~dft['oc_name'].isna()]
+
     # parse the data build cert dict
     for idx, row in dft.iterrows():
         oc_cate = row['oc_cate']
@@ -986,6 +987,10 @@ def get_evmap_data_v2(full_fn):
         comparator = row['comparator']
         treatment = row['treatment']
 
+        # 2021-03-08: skip the oc when it is set to no
+        if oc_name not in oc_dict:
+            continue 
+        
         if comparator not in oc_dict[oc_name]['cetable']:
             oc_dict[oc_name]['cetable'][comparator] = { comparator: {} }
 
