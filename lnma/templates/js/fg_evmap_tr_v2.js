@@ -201,7 +201,8 @@ var fg_evmap = {
                 title: this.cfg.xaxis_title,
                 type: 'category',
                 autorange: true,
-                tickvals: oc_list
+                tickvals: oc_list,
+                tickangle: 270
             },
             yaxis: {
                 automargin: true,
