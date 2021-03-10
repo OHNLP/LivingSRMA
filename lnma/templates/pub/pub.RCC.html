@@ -88,10 +88,6 @@
             </li>
 
             <li class="nav-item">
-                <a class="nav-link" href="#sec-dsaid">DECISION AID</a>
-            </li>
-
-            <li class="nav-item">
                 <a class="nav-link" href="#sec-limitations">LIMITATIONS</a>
             </li>
 
@@ -420,27 +416,7 @@
 
     <div class="row">
         <div class="col">
-            <iframe id="iframe-evmap" src="[[ url_for('pub.evmap_tr_v2', prj='RCC', tr=evmap['treat_list'][0]) ]]" frameborder="0" style="width: 100%; min-height: 660px;"></iframe>
-        </div>
-    </div>
-
-</div>
-<!-- /#sec-evmap -->
-
-
-<br id="sec-dsaid">
-<div class="container">
-    <h3>
-        DECISION AID
-    </h3>
-    <p>
-        The decision aid visually summarizes the outcomes available for treatment comparisons and identifies practical considerations. User can select a comparison of treatments the dropdown to visualize whether it is comparable, beneficial or harmful (color) as compared to other treatment options in the network.
-    </p>
-    
-
-    <div class="row">
-        <div class="col">
-            <iframe id="iframe-dsaid" src="[[ url_for('pub.ida_RCC', prj='RCC') ]]" frameborder="0" style="width: 100%; min-height: 820px;"></iframe>
+            <iframe id="iframe-evmap" src="[[ url_for('pub.evmap_tr_v2', prj='RCC', tr=evmap['treat_list'][0]) ]]" frameborder="0" style="width: 100%; min-height: 700px;"></iframe>
         </div>
     </div>
 
