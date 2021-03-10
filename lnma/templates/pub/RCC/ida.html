@@ -113,14 +113,24 @@ a {
         </div>
 
         <div style="width: 100%; height: 100%; overflow-y: auto;">
-            
-            <embed class="da-image" :src="get_url(comparison, 'OS')" v-show="is_shown_os">
-            <embed class="da-image" :src="get_url(comparison, 'PFS')" v-show="is_shown_pfs">
-            <embed class="da-image" :src="get_url(comparison, 'S_TRAE')" v-show="is_shown_strae">
-            <embed class="da-image" :src="get_url(comparison, 'F_TRAE')" v-show="is_shown_ftrae">
-            <embed class="da-image" :src="get_url(comparison, 'HRQOL')" v-show="is_shown_qol">
-            <embed class="da-image" :src="get_url(comparison, 'PC')" v-show="is_shown_pc">
+            <div v-show="is_shown_os" v-html='"<embed class=\"da-image\" src=\""+get_url(comparison, "OS")+"\">"'>
+            </div>
 
+            <div v-show="is_shown_pfs" v-html='"<embed class=\"da-image\" src=\""+get_url(comparison, "PFS")+"\">"'>
+            </div>
+
+            <div v-show="is_shown_strae" v-html='"<embed class=\"da-image\" src=\""+get_url(comparison, "S_TRAE")+"\">"'>
+            </div>
+
+            <div v-show="is_shown_ftrae" v-html='"<embed class=\"da-image\" src=\""+get_url(comparison, "F_TRAE")+"\">"'>
+            </div>
+
+            <div v-show="is_shown_qol" v-html='"<embed class=\"da-image\" src=\""+get_url(comparison, "HRQOL")+"\">"'>
+            </div>
+
+            <div v-show="is_shown_pc" v-html='"<embed class=\"da-image\" src=\""+get_url(comparison, "PC")+"\">"'>
+            </div>
+            
         </div>
     </div>
 
