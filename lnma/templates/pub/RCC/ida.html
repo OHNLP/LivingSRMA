@@ -97,7 +97,8 @@ a {
                 <v-switch v-model="is_shown_pc" label="Practical Implications">
                 </v-switch>
 
-                <img src="/static/img/K_COE.svg" style="width: 240px" alt="">
+                <img v-bind:src="legend_img_src[type_of_evidence]" 
+                    style="width: 240px" alt="">
             </v-container>
         </v-app>
     </div>
@@ -153,6 +154,10 @@ var vw_idgpanel = {
             el: this.vpp_id,
             vuetify: new Vuetify(),
             data: {
+                legend_img_src: {
+                    direct: '/static/img/K_ROB.svg?rnd=' + Math.random(),
+                    mixed: '/static/img/K_COE.svg?rnd=' + Math.random()
+                },
                 evidence_types: [
                     {label: 'Direct treatment evidence', value: 'direct'},
                     {label: 'Mixed treatment evidence', value: 'mixed'}

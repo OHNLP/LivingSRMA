@@ -106,8 +106,13 @@ html {
 .n-arms-hr {
     margin: 1px 0 !important;
 }
-
-
+.cell-input {
+    margin: 0 0 2px 0 !important;
+}
+.cell-input input {
+    padding: 0 3px;
+    height: 18px;
+}
 .extract-attr-label {
     font-weight: normal !important;
 }
@@ -123,6 +128,38 @@ html {
 .extract-table td{
     border-bottom: 1px dotted #dfdfdf;
 }
+
+#pan_ocpapers_ctx_menu {
+    border: 2px solid #EFEFEF;
+    box-shadow: 0px 0px 15px #cccccc;;
+}
+#pan_ocpapers_ctx_menu_txt {
+    color: black;
+}
+#pan_ocpapers_ctx_menu .menu-header {
+    font-size: .8em;
+    background-color: #ececec;
+}
+#pan_ocpapers_ctx_menu .menu-info {
+    font-size: .8em;
+}
+#pan_ocpapers_ctx_menu .menu-item {
+    font-size: .9em;
+}
+#pan_ocpapers_ctx_menu .ui-menu { 
+    width: 280px; 
+    max-width: 320px;
+}
+
+#pan_collector {
+
+}
+#ifr_pdfviewer {
+    width: 100%;
+    height: 400px;
+    min-height: 400px;
+}
+
 </style>
 {% endblock %}
 
@@ -162,13 +199,13 @@ html {
     
     <div class="panel-info d-flex flex-column" v-if="extract != null">
         <div v-for="cate, cate_idx in extract.meta.cate_attrs"
-            style="border-bottom: 1px dotted #999999; margin: 5px 0 5px 0;"
+            style="border-bottom: 1px dotted #dddddd; margin: 5px 0 5px 0;"
             class="d-flex flex-column">
 
             <div :id="'cate-' + cate.abbr"
                 class="d-flex flex-row flex-wrap">
 
-                <div style="border-right: 3px solid #dddddd;"
+                <div style="background: #dddddd;"
                     class="mr-2 pr-2">
                     <input type="checkbox" v-bind:id="'toggle-cate-' + cate.abbr"
                         v-on:change="on_toggle_itable_select_category(cate_idx, $event)">
@@ -335,7 +372,10 @@ html {
 </ul>
 
 
-    
+
+{% include 'extractor/_v1_pan_collector.html' %}
+
+
 </div>
 <!-- /#main -->
 
@@ -779,6 +819,194 @@ var pan_ocpapers = {
 };
 
 
+var pan_collector = {
+    vpp_id: "#pan_collector",
+    vpp: null,
+    pdfviewer_id: '#ifr_pdfviewer',
+    current: {
+        paper: null,
+        extract_paper: null
+    },
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                paper: null,
+                show_tab: null
+            },
+            methods: {
+                switch_tab: function(tab_name) {
+                    this.show_tab = tab_name;
+                },
+
+                view_pdf: function(paper_id, file_id, folder) {
+                    pan_collector.view_pdf(paper_id, file_id, folder);
+                }
+            },
+            updated: function() {
+                pan_collector.bind_txt_ctx_menu();
+            }
+        });
+
+        this.resize_pdfviewer();
+    },
+
+    bind_txt_ctx_menu: function() {
+        $(this.vpp_id + '_basic_info').on('contextmenu', function(event) {
+            // get the highlighted text
+            var text = "";
+            if (window.getSelection) {
+                text = window.getSelection().toString();
+            } else if (document.selection && document.selection.type != "Control") {
+                text = document.selection.createRange().text;
+            }
+
+            // update the context menu content based on the selected attributes.
+            // all of the details about this paper is need to generate the menu.
+            // but since the attrs are only available in pan_ocpapers,
+            // we have to use pan_oc
+            pan_ocpapers.update_ctx_menu(
+                text, 
+                pan_collector.current.paper.pid,
+                pan_collector.current.extract_paper.n_arms
+            );
+
+            // show the context menu at where clicked
+            var top = event.pageY - 20;
+            var left = event.pageX;
+            
+            $("#pan_ocpapers_ctx_menu").css({
+                position: 'absolute',
+                display: "block",
+                top: top,
+                left: left
+            }).addClass("show").menu();
+
+            $("#pan_ocpapers_ctx_menu").menu('refresh');
+
+            $('#pan_ocpapers_ctx_menu .ui-menu-item').on('click', function() {
+                $("#pan_ocpapers_ctx_menu").hide();
+            });
+
+            //blocks default Webbrowser right click menu
+            return false; 
+        });
+        // console.log('* binded ctx menu')
+    },
+
+    on_contextmenu_pdfviewer: function(event) {
+        // get text
+        var text = this.get_pdf_selection_text();
+        
+        // update the menu
+        pan_ocpapers.update_ctx_menu(
+            text, 
+            pan_collector.current.paper.pid,
+            pan_collector.current.extract_paper.n_arms
+        );
+
+        // show the context menu at where clicked
+        // need to calculate the offset for the iframe
+        var offset = $('#ifr_pdfviewer').offset();
+        var top = offset.top + event.pageY - 20;
+        var left = offset.left + event.pageX;
+        
+        $("#pan_ocpapers_ctx_menu").css({
+            position: 'absolute',
+            display: "block",
+            top: top,
+            left: left
+        }).addClass("show").menu();
+
+        $("#pan_ocpapers_ctx_menu").menu('refresh');
+
+        $('#pan_ocpapers_ctx_menu .ui-menu-item').on('click', function() {
+            $("#pan_ocpapers_ctx_menu").hide();
+        });
+    },
+
+    get_pdf_selection_text: function() {
+        var txt = '';
+        txt = document.getElementById('ifr_pdfviewer').contentWindow.getSelection().toString();
+
+        return txt;
+    },
+
+    update: function(paper) {
+        // update data
+        this.vpp.paper = paper;
+        this.current.paper = paper;
+
+        // update the normal UI
+        this.vpp.show_tab = 'basic_info';
+        this.vpp.$forceUpdate();
+
+        // update the PDF viewer
+        // this.load_pdf();
+
+        // bind the context menu
+        this.bind_txt_ctx_menu();
+    },
+
+    show_paper: function(pid, extract_paper) {
+        // set the extract info
+        this.current.extract_paper = extract_paper;
+
+        // get the paper
+        $.get(
+            jarvis.url.get_paper,
+            {pid: pid, rnd:Math.random()},
+            function(data) {
+                pan_collector.update(data.paper);
+            }, 'json'
+        );
+        // bind the context menu
+        this.bind_txt_ctx_menu();
+    },
+
+    show: function() {
+        $(this.vpp_id).show();
+        // bind the context menu
+        this.bind_txt_ctx_menu();
+    },
+
+    hide: function() {
+        $(this.vpp_id).hide();
+    },
+
+    set_size: function(size) {
+        $(this.vpp_id).removeClass('panel-s panel-m panel-l')
+            .addClass('panel-' + size);
+    },
+
+    view_pdf: function(paper_id, file_id, folder) {
+        // update the pdf viewer size
+        this.resize_pdfviewer();
+
+        // load the pdf
+        this.load_pdf(folder, file_id);
+    },
+
+    load_pdf: function(folder, file_id) {
+        var pdf_url = "/pdfworker/pdf/" + folder + "/" + file_id + '.pdf';
+
+        // just load the blank page
+        if (typeof(folder) == 'undefined') {
+            pdf_url = '/pdfworker/view_pdf';
+        }
+
+        // show
+        document.getElementById("ifr_pdfviewer").contentWindow.PDFViewerApplication.open(pdf_url);
+    },
+
+    resize_pdfviewer: function() {
+        var h = $(window).height() - 150;
+        $(this.pdfviewer_id).css('height', h + 'px');
+    }
+};
+
+
 var jarvis = {
 
     getUrlParameter: function(name) {
@@ -801,6 +1029,7 @@ var jarvis = {
 
         // init the UI
         pan_ocpapers.init();
+        pan_collector.init();
 
         // resize
         pan_ocpapers.resize();
@@ -846,6 +1075,8 @@ var jarvis = {
     bind_resize: function() {
         $(window).on('resize', function(){
             pan_ocpapers.resize();
+            // adjust the pdf view size
+            pan_collector.resize_pdfviewer();
         });
     }
 };
