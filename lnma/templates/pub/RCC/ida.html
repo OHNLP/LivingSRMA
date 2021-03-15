@@ -159,15 +159,33 @@ var vw_idgpanel = {
                 ],
                 comparisons_by_type: {
                     direct: [
-                        {label: 'Lenvatinib vs Suni', value: 'Len_Suni'}
-                    ],
-                    mixed: [
-                        {label: 'Lenvatinib-Pembrolizumab vs Suni', value: 'LenPem_Suni'},
                         {label: 'Atezolizumab-Bevacizumab vs Suni', value: 'AteBev_Suni'},
                         {label: 'Avelumab-Axitinib vs Suni', value: 'AveAxi_Suni'},
                         {label: 'Cabozantinib-Nivolumab vs Suni', value: 'CaboNivo_Suni'},
+                        {label: 'Lenvatinib-Pembrolizumab vs Suni', value: 'LenPem_Suni'},
                         {label: 'Nivolumab-Ipilimumab vs Suni', value: 'NivoIpi_Suni'},
                         {label: 'Pembrolizumab-Axitinib vs Suni', value: 'PemAxi_Suni'},
+                    ],
+                    mixed: [
+                        {label: 'Avelumab-Axitinib vs Atezolizumab-Bevacizumab', value: 'AveAxi_AteBev'},
+
+                        {label: 'Cabozantinib-Nivolumab vs Atezolizumab-Bevacizumab', value: 'CaboNivo_AteBev'},
+                        {label: 'Cabozantinib-Nivolumab vs Avelumab-Axitinib', value: 'CaboNivo_AveAxi'},
+                        {label: 'Cabozantinib-Nivolumab vs Nivolumab-Ipilimumab', value: 'CaboNivo_NivoIpi'},
+                        {label: 'Cabozantinib-Nivolumab vs Pembrolizumab-Axitinib', value: 'CaboNivo_PemAxi'},
+
+                        {label: 'Lenvatinib-Pembrolizumab vs Atezolizumab-Bevacizumab', value: 'LenPem_AteBev'},
+                        {label: 'Lenvatinib-Pembrolizumab vs Avelumab-Axitinib', value: 'LenPem_AveAxi'},
+                        {label: 'Lenvatinib-Pembrolizumab vs Cabozantinib-Nivolumab', value: 'LenPem_CaboNivo'},
+                        {label: 'Lenvatinib-Pembrolizumab vs Nivolumab-Ipilimumab', value: 'LenPem_NivoIpi'},
+                        {label: 'Lenvatinib-Pembrolizumab vs Pembrolizumab-Axitinib', value: 'LenPem_PemAxi'},
+
+                        {label: 'Nivolumab-Ipilimumab vs Atezolizumab-Bevacizumab', value: 'NivoIpi_AteBev'},
+                        {label: 'Nivolumab-Ipilimumab vs Avelumab-Axitinib', value: 'NivoIpi_AveAxi'},
+
+                        {label: 'Pembrolizumab-Axitinib vs Atezolizumab-Bevacizumab', value: 'PemAxi_AteBev'},
+                        {label: 'Pembrolizumab-Axitinib vs Avelumab-Axitinib', value: 'PemAxi_AveAxi'},
+                        {label: 'Pembrolizumab-Axitinib vs Nivolumab-Ipilimumab', value: 'PemAxi_NivoIpi'},
                     ]
                 },
 
@@ -194,7 +212,7 @@ var vw_idgpanel = {
                 },
 
                 // the values for choosing plots
-                type_of_evidence: 'mixed',
+                type_of_evidence: 'direct',
                 comparison: 'LenPem_Suni',
                 is_shown_os: false,
                 is_shown_pfs: false,
