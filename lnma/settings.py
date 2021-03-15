@@ -61,7 +61,7 @@ OC_TYPE_TPL = {
             "abbr": '',
             "oc_type": 'pwma',
             "category": 'default',
-            "group": 'Primary',
+            "group": 'primary',
             "full_name": 'pwma Outcome full name',
             "included_in_plots": 'yes',
             "included_in_sof": 'yes',
@@ -69,6 +69,14 @@ OC_TYPE_TPL = {
             "measure_of_effect": 'RR',
             "fixed_or_random": 'fixed',
             "which_is_better": 'lower',
+            "pooling_method": "Inverse",
+            "tau_estimation_method": "DL",
+            "hakn_adjustment": "no",
+            "smd_estimation_method": "Hedges",
+            "prediction_interval": "no",
+            "sensitivity_analysis": "no",
+            "cumulative_meta_analysis": "no",
+            "cumulative_meta_analysis_sortby": "year",
             "attrs": None,
             "cate_attrs": None
         }

@@ -1,6 +1,7 @@
 import os
 import json
 import random
+from re import template
 import string
 from collections import OrderedDict
 
@@ -23,6 +24,7 @@ from lnma import ss_state
 from lnma import settings
 
 bp = Blueprint("extractor", __name__, url_prefix="/extractor")
+template_base = 'extractor/'
 
 @bp.route('/v1')
 @login_required
@@ -38,6 +40,50 @@ def v1():
         'extractor/v1.html',
         project=project,
         project_json_str=json.dumps(project.as_dict())
+    )
+
+
+@bp.route('/manage_outcomes')
+@login_required
+def manage_outcomes():
+    project_id = request.cookies.get('project_id')
+
+    if project_id is None:
+        return redirect(url_for('project.mylist'))
+
+    project = dora.get_project(project_id)
+
+    return render_template(
+        template_base + 'manage_outcomes.html',
+        project=project,
+        project_json_str=json.dumps(project.as_dict())
+    )
+
+
+@bp.route('/manage_itable')
+@login_required
+def manage_itable():
+    '''
+    Design the ITable
+    '''
+    return render_template(
+        template_base + 'manage_itable.html'
+    )
+
+
+@bp.route('/extract_data')
+@login_required
+def extract_data():
+    '''
+    Extract data
+    '''
+    project_id = request.cookies.get('project_id')
+    # project_id = request.args.get('project_id')
+    oc_abbr = request.args.get('abbr')
+
+    return render_template(
+        template_base + 'extract_data.html', 
+        oc_abbr=oc_abbr
     )
 
 
@@ -376,10 +422,15 @@ def import_itable_meta_and_data_from_xls():
     project = dora.get_project_by_keystr(prj)
 
     if project is None:
+        project_id = request.cookies.get('project_id')
+        project = dora.get_project(project_id)
+
+    if project is None:
         return jsonify({
             'success': False,
             'msg': 'NO SUCH PROJECT'
         })
+    prj = project.keystr
 
     project_id = project.project_id
     oc_type = 'itable'

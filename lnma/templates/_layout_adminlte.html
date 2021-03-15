@@ -229,6 +229,7 @@ label {
             <ul class="nav nav-treeview">
               <li class="nav-item">
                 <a id="nav-link-importer-pmid-list" href="[[ url_for('importer.by_pmid_list') ]]" class="nav-link">
+                  &nbsp;&nbsp;
                   <i class="fa fa-list nav-icon"></i>
                   <p>Import by NCT+PMID</p>
                 </a>
@@ -242,6 +243,7 @@ label {
               </li> -->
               <li class="nav-item">
                 <a id="nav-link-importer-endnote-xml" href="[[ url_for('importer.by_endnote_xml') ]]" class="nav-link">
+                  &nbsp;&nbsp;
                   <i class="fa fa-clipboard nav-icon"></i>
                   <p>Import by EndNote XML</p>
                 </a>
@@ -249,6 +251,7 @@ label {
 
               <li class="nav-item">
                 <a id="nav-link-importer-endnote-xml" href="[[ url_for('importer.by_user_input') ]]" class="nav-link">
+                  &nbsp;&nbsp;
                   <i class="fa fa-wpforms nav-icon"></i>
                   <p>Import by User Input</p>
                 </a>
@@ -274,15 +277,55 @@ label {
               </p>
             </a>
           </li>
-
+          
           <li class="nav-item">
-            <a id="nav-link-extractor" href="[[ url_for('extractor.v1') ]]" class="nav-link">
+            <a id="nav-link-extractor" href="#" class="nav-link">
               <i class="nav-icon fas fa-edit"></i>
               <p>
                 Data Extractor
+                <i class="fas fa-angle-left right"></i>
+              </p>
+            </a>
+
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a id="nav-link-extractor-manage-outcomes" href="[[ url_for('extractor.manage_outcomes') ]]" class="nav-link">
+                  &nbsp;&nbsp;
+                  <i class="fa fa-list nav-icon"></i>
+                  <p>Manage Outcomes</p>
+                </a>
+              </li>
+
+              
+              <li class="nav-item">
+                <a id="nav-link-extractor-design-itable" href="[[ url_for('extractor.manage_itable') ]]" class="nav-link">
+                  &nbsp;&nbsp;
+                  <i class="fa fa-table nav-icon"></i>
+                  <p>Manage ITable</p>
+                </a>
+              </li>
+
+              <li class="nav-item">
+                <a id="nav-link-extractor-extract-data" href="[[ url_for('extractor.extract_data') ]]" class="nav-link">
+                  &nbsp;&nbsp;
+                  <i class="fa fa-edit nav-icon"></i>
+                  <p>Extract Data</p>
+                </a>
+              </li>
+
+            </ul>
+          </li>
+
+          <li class="nav-item">
+            <a id="nav-link-analyzer" href="[[ url_for('analyzer.nma') ]]" class="nav-link">
+              <i class="nav-icon fas fa-project-diagram"></i>
+              <p>
+                Meta Analysis
               </p>
             </a>
           </li>
+
+          <li class="nav-item"><hr></li>
 
           <li class="nav-item">
             <a id="nav-link-analyzer" href="[[ url_for('analyzer.nma') ]]" class="nav-link">
@@ -309,15 +352,6 @@ label {
               <i class="nav-icon fa fa-upload"></i>
               <p>
                 Data Upload / Build
-              </p>
-            </a>
-          </li>
-
-          <li class="nav-item">
-            <a href="#" class="nav-link">
-              <i class="nav-icon fas fa-table"></i>
-              <p>
-                Study Tables
               </p>
             </a>
           </li>

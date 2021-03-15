@@ -1,0 +1,959 @@
+{% extends '_layout_adminlte.html' %}
+
+{% block title %}
+Manage Outcomes
+{% endblock %}
+
+{% block page_name %}
+<i class="fa fa-list"></i>
+Manage Outcomes
+{% endblock %}
+
+{% block active_nav_link %}extractor-manage-outcomes{% endblock %}
+
+{% block style %}
+<style>
+html {
+    overflow-x: hidden;
+}
+/* badge */
+.badge-ckl {
+    color: #fff;
+    background-color: #b88d17;
+}
+
+#main {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+    margin: 0 0 0 10px;
+    overflow: hidden;
+}
+#pan_outcomes {
+    height: 100%;
+    overflow-y: auto;
+}
+.cate-line {
+    cursor: pointer;
+}
+.cate-extract-line {
+    border-left: 1px solid black;
+    padding: 0 0 0 10px;
+    margin: 0 0 0 10px;
+}
+.cate-extract-line:hover {
+    background-color: aquamarine;
+}
+.cate-extract-line-clicked {
+    background-color: aquamarine;
+}
+.cate-extract-name {
+    width: 250px;
+    min-width: 250px;
+    max-width: 250px;
+}
+.cate-extract-name:hover {
+    cursor: pointer;
+}
+.cate-extract-col {
+    min-width: 60px;
+    width: 100px;
+    max-width: 200px;
+    font-size: .9em;
+    padding: 0 .5em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.btn-xs {
+    padding: .15rem .5rem;
+    font-size: .8rem;
+    line-height: 1.2;
+    border-radius: .2rem;
+}
+
+#config_outcome {
+    min-width: 1100px;
+    width: 70%;
+    height: 100%;
+    position: absolute;
+    right: 5000px;
+    background-color: #ffffff;
+    padding: 5px;
+}
+
+.paper-table-body-td-author {
+    width: 190px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.paper-table-body-cell {
+    display: block;
+    max-width: 180px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.paper-table-header-th {
+    background-color: whitesmoke;
+    border-left: 1px solid rgb(211, 211, 211);
+    border-right: 1px solid rgb(211, 211, 211);    
+}
+
+.n-arms-hr {
+    margin: 1px 0 !important;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div id="main">
+
+<div id="pan_outcomes" class="panel-m panel-container">
+
+    <h5>
+        PWMA Outcomes
+        
+        <!-- <button class="btn btn-default btn-sm"
+            v-on:click="create_extract('subg', 'default')">
+            <i class="fa fa-plus"></i>
+            Add Subgroup Analysis
+        </button> -->
+
+        <button class="btn btn-default btn-xs"
+            v-on:click="close_all_cates('pwma', event)">
+            <i class="fa fa-close"></i>
+            Fold
+        </button>
+    </h5>
+
+    <div class="panel-box">
+        
+        <!-- for pwma -->
+        <div>
+            <span>Primary Analysis</span>
+
+            <!-- <span class="text-sm">
+                ({{ Object.keys(data.pwma.outcomes).length }} categories, 
+                {{ stat.pwma.total }} outcomes.)
+            </span> -->
+
+            <button class="btn btn-default btn-xs"
+                v-on:click="create_extract('pwma', 'default', 'primary', 'default')">
+                <i class="fa fa-plus"></i>
+                Add Outcome
+            </button>
+        </div>
+
+        <outcome-list 
+            v-bind:force_update="force_update"
+            v-bind:oc_type="'pwma'"
+            v-bind:outcomes="data.pwma.outcomes"
+            v-bind:group="'primary'">
+        </outcome-list>
+
+
+    </div>
+
+<hr>
+    <div class="panel-box">
+        
+        <!-- for pwma -->
+        <div>
+            <span>Sensitivity Analysis</span>
+
+            <!-- <span class="text-sm">
+                ({{ Object.keys(data.pwma.outcomes).length }} categories, 
+                {{ stat.pwma.total }} outcomes.)
+            </span> -->
+
+            <button class="btn btn-default btn-xs"
+                v-on:click="create_extract('pwma', 'default', 'sensitivity', 'default')">
+                <i class="fa fa-plus"></i>
+                Add Outcome
+            </button>
+        </div>
+
+        <outcome-list 
+            v-bind:force_update="force_update"
+            v-bind:oc_type="'pwma'"
+            v-bind:outcomes="data.pwma.outcomes"
+            v-bind:group="'sensitivity'">
+        </outcome-list>
+
+
+    </div>
+    
+</div>
+<!-- /#pan_outcomes -->
+
+<div id="config_outcome">
+    <div style="position: absolute; top: 0; left: -40px; width: 40px; height: 40px; background-color: white;">
+        <div style="font-size: large; width: 40px; height: 40px; line-height: 40px; text-align: center; cursor: pointer;"
+            onclick="$('#config_outcome').css('right', 5000)">
+            <i class="fa fa-close"></i>
+        </div>
+    </div>
+    {% include "extractor/manage_outcomes_ocpapers.html" %}
+</div>
+
+    
+</div>
+<!-- /#main -->
+
+<!-- <div class="dropdown-menu dropdown-menu-sm" id="pan_ocpapers_ctx_menu">
+    <h6 class="dropdown-header text-left">
+        <a href="javascript:void(0);"
+            title="Close this menu"
+            onclick="$('#pan_ocpapers_ctx_menu').hide();"
+            class="mr-2">
+            <i class="fa fa-times"></i>
+        </a><br>
+
+        Select text <b id="pan_ocpapers_ctx_menu_txt">&nbsp;</b> is:
+    </h6>
+    <div id="pan_ocpapers_ctx_menu_items">
+        &nbsp;
+    </div>
+</div> -->
+
+<ul id="pan_ocpapers_ctx_menu" style="display: none;">
+    
+</ul>
+
+
+{% endblock %}
+
+{% block script %}
+<script>
+
+{% include "js/srv_extractor.js" %}
+
+var pan_outcomes = {
+    vpp_id: '#pan_outcomes',
+    vpp: null,
+
+    data_empty: {
+        pwma: { outcomes: {} },
+        subg: { outcomes: {} },
+        nma: { outcomes: {} },
+        itable: { outcomes: {} },
+    },
+
+    load: function() {
+        var project_id = Cookies.get('project_id');
+
+        $.get(
+            srv_extractor.url.get_extracts,
+            {project_id:project_id},
+            function(data) {
+                console.log(data);
+                pan_outcomes.show_extracts(data.extracts);
+            }, 'json'
+        );
+    },
+
+    resize: function() {
+        var h = $(window).height() - 50;
+        $(this.vpp_id).css('height', h);
+    },
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                stat: {
+                    pwma: { total: 0 },
+                    subg: { total: 0 },
+                    nam: { total: 0 },
+                    itable: { total: 0 },
+                },
+                data: JSON.parse(JSON.stringify(this.data_empty)),
+
+                // for update sub-comp
+                force_update: false
+            },
+            methods: {
+                create_extract: function(oc_type, tpl, group, category) {
+                    pan_outcomes.create_extract(oc_type, tpl, group, category);
+                },
+
+                show_extract_data: function(oc_type, abbr) {
+                    pan_outcomes.show_extract_data(oc_type, abbr);
+                },
+
+                delete_extract: function(oc_type, abbr, full_name) {
+                    pan_outcomes.delete_extract(oc_type, abbr, full_name);
+                },
+
+                close_all_cates: function(oc_type, event) {
+                    $('.cate-extracts-' + oc_type).toggle();
+                },
+
+            }
+        });
+    },
+
+    delete_extract: function(oc_type, abbr, full_name) {
+        var ret = jarvis.confirm('The deleted outcome and related extractions can NOT be restored. Are you sure to delete [' + full_name + ']?');
+    
+        if (ret) {
+            var project_id = Cookies.get('project_id');
+            $.post(
+                srv_extractor.url.delete_extract,
+                {project_id:project_id, oc_type:oc_type, abbr:abbr},
+                function(data) {
+                    jarvis.toast('Deleted!');
+                    pan_outcomes.load();
+                }, 'json'
+            );
+        }
+    },
+
+    show_extract_data: function(oc_type, abbr) {
+        console.log('* show extract [' + oc_type + '] [' + abbr + ']');
+
+        // set loc
+        $('#config_outcome').css("right", 0);
+
+        pan_ocpapers.show_extract_and_papers(oc_type, abbr);
+    },
+    
+    create_extract: function(oc_type, tpl, group, category) {
+        // get the full name
+        var text = jarvis.prompt('The outcome full name:');
+        if (text == null) { return; }
+        text = text.trim();
+        if (text == '') { return; }
+
+        // create an abbr
+        var abbr = srv_extractor.mk_oc_abbr();
+
+        // create an meta
+        var meta = JSON.parse(JSON.stringify(srv_extractor.tpl.oc_type[oc_type][tpl]));
+        meta.full_name = text;
+        meta.abbr = abbr;
+        // Primary, default or others
+        meta.group = group;
+        meta.category = category;
+
+        // copy the meta.cate_attr
+        meta.cate_attrs = JSON.parse(JSON.stringify(srv_extractor.tpl.input_format[oc_type][meta.input_format]));
+
+        var data = {};
+        var project_id = Cookies.get('project_id');
+
+        $.post(
+            srv_extractor.url.create_extract,
+            {
+                project_id: project_id,
+                oc_type: oc_type,
+                abbr: abbr,
+                meta: JSON.stringify(meta),
+                data: JSON.stringify(data)
+            }, 
+            function(data) {
+                console.log(data);
+                // update UI
+                pan_outcomes.add_extracts([data.extract]);
+            }, 'json'
+        );
+    },
+
+    show_extracts: function(extracts) {
+        // clear existing
+        this.vpp.$data.data = JSON.parse(JSON.stringify(this.data_empty));
+        this.add_extracts(extracts);
+        // update the vpp
+        this.vpp.$forceUpdate();
+    },
+
+    add_extracts: function(extracts) {
+        var cate_exts = {};
+
+        // build the sorted cate
+        for (let i = 0; i < extracts.length; i++) {
+            const extract = extracts[i];
+            var oc_type = extract.oc_type;
+            var cate = extract.meta.category;
+
+            if (!this.vpp.$data.data[oc_type].outcomes.hasOwnProperty(cate)) {
+                this.vpp.$data.data[oc_type].outcomes[cate] = [];
+            }
+
+            // put this ext into cate
+            this.vpp.$data.data[oc_type].outcomes[cate].push(
+                extract.meta
+            );
+
+            // add number
+            this.vpp.$data.stat[oc_type].total += 1;
+        }
+
+        // for (let i = 0; i < extracts.length; i++) {
+        //     var extract = extracts[i];
+        //     var oc_type = extract.oc_type;
+        //     var abbr = extract.abbr;
+        //     // add to the related type
+        //     this.vpp.data[oc_type].outcomes[abbr] = extract.meta;
+        // }
+
+        // update the vpp
+        this.vpp.$forceUpdate();
+
+        // update the sub-comp
+        this.vpp.$data.force_update = Math.random();
+    },
+
+    show: function() {
+        $(this.vpp_id).show();
+    },
+
+    hide: function() {
+        $(this.vpp_id).hide();
+    },
+
+    set_size: function(size) {
+        $(this.vpp_id).removeClass('panel-s panel-m panel-l')
+            .addClass('panel-' + size);
+    }
+};
+
+
+var pan_ocpapers = {
+    vpp_id: "#pan_ocpapers",
+    vpp: null,
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                // flags
+                show_settings: true,
+                only_show_selected: true,
+                show_col_nct: false,
+
+                // for display:
+                thr1s: [],
+                thr2s: [],
+
+                // mode
+                mode: 'manage_outcomes',
+
+                // data
+                all_attrs: null,
+                show_attrs: null,
+                extract: null,
+                papers: []
+            },
+            computed: {
+                n_selected: function() {
+                    var n = 0;
+                    for (const pmid in this.extract.data) {
+                        if (Object.hasOwnProperty.call(this.extract.data, pmid)) {
+                            if (this.extract.data[pmid].is_selected) {
+                                n += 1;
+                            };
+                        }
+                    }
+                    return n;
+                }
+            },
+            methods: {
+                toggle_show_settings: function() {
+                    this.show_settings = !this.show_settings;
+                },
+
+                toggle_on_all_attributes: function() {
+                    for (const key in this.show_attrs) {
+                        if (Object.hasOwnProperty.call(this.show_attrs, key)) {
+                            this.show_attrs[key] = true;
+                        }
+                    }
+                    this.$forceUpdate();
+                },
+
+                toggle_off_all_attributes: function() {
+                    for (const key in this.show_attrs) {
+                        if (Object.hasOwnProperty.call(this.show_attrs, key)) {
+                            this.show_attrs[key] = false;
+                        }
+                    }
+                    this.$forceUpdate();
+                },
+
+                // save all!
+                update_extract: function() {
+                    pan_ocpapers.update_extract();
+                },
+                
+                // copy 
+                copy_extract: function() {
+                    pan_ocpapers.copy_extract();
+                },
+
+                get_input_size: function(str) {
+                    // convert null to empty
+                    if (str == null) {
+                        str = '';
+                    }
+                    // convert number to string
+                    str = '' + str;
+                    var s = str.length;
+                    if (s<5) {
+                        return 5;
+                    } else if (s > 14) {
+                        return 14;
+                    } else {
+                        return s;
+                    }
+                },
+
+                // get year
+                get_year: function(s) {
+                    return jarvis.get_year(s);
+                },
+
+                get_first_author: function(s) {
+                    var aus = s.split(';');
+                    if (aus.length == 1) {
+                        aus = s.split(',');
+                    }
+                    return aus[0];
+                },
+
+                on_change_input_format: function(event) {
+                    let val = event.target.value;
+                    console.log('Changed input_format: ' + val);
+
+                    // update the attrs
+                    this.extract.meta.cate_attrs = srv_extractor.tpl.input_format[
+                        this.extract.oc_type
+                    ][val];
+                    
+                    // update the papers setting
+                    pan_ocpapers.update_all_and_show_attrs();
+                },
+
+                on_toggle_attr_selection: function(event) {
+                    this.$forceUpdate();
+                },
+
+                on_click_paper: function(pmid) {
+                    // set the working pmid ?
+                    // no need to set
+
+                    // highlight this line
+                    $('.paper-table-row').removeClass('paper-table-row-clicked');
+                    $('#paper-table-row-' + pmid).addClass('paper-table-row-clicked');
+
+                    // call collector to do something
+                    pan_collector.show_paper(
+                        pmid, 
+                        pan_ocpapers.vpp.$data.extract.data[pmid]
+                    );
+                },
+
+                toggle_select_all_papers: function(event) {
+                    let val = event.srcElement.checked;
+                    console.log('* set all papers selected: ', val);
+                    for (const pmid in this.extract.data) {
+                        if (Object.hasOwnProperty.call(this.extract.data, pmid)) {
+                            this.extract.data[pmid].is_selected = val;
+                        }
+                    }
+                    // this.$forceUpdate();
+                },
+
+                on_toggle_itable_select_category: function(cate_idx, event) {
+                    let val = event.srcElement.checked;
+
+                    for (let i = 0; i < this.extract.meta.cate_attrs[cate_idx].attrs.length; i++) {
+                        const attr = this.extract.meta.cate_attrs[cate_idx].attrs[i];
+
+                        if (attr.subs == null) {
+                            this.show_attrs[attr.abbr] = val;
+                        } else {
+                            for (let j = 0; j < attr.subs.length; j++) {
+                                const sub = attr.subs[j];
+                                this.show_attrs[sub.abbr] = val;
+                            }
+                        }
+                    }
+                    // force update the UI because change a lot
+                    this.$forceUpdate();
+                },
+
+                on_change_itable_n_arms: function(pmid, event) {
+                    let val = event.target.value;
+                    console.log('* change ' + pmid + ' n_arms to ' + val);
+
+                    var new_n_others = val - 2;
+                    if (new_n_others == this.extract.data[pmid].attrs.other.length) {
+                        // which means the number of arms doesn't change
+
+                    } else if (new_n_others > this.extract.data[pmid].attrs.other.length) {
+                        // the number of arms increases, need to put more elements
+                        var delta = new_n_others - this.extract.data[pmid].attrs.other.length;
+                        for (let i = 0; i < delta; i++) {
+                            // just copy the keys from main track
+                            var obj = JSON.parse(JSON.stringify(this.extract.data[pmid].attrs.main));
+                            // and clear the exising data
+                            for (const key in obj) {
+                                if (Object.hasOwnProperty.call(obj, key)) {
+                                    obj[key] = '';
+                                }
+                            }
+                            this.extract.data[pmid].attrs.other.push(obj);
+                        }
+                    } else {
+                        // the number of arms decreases, need to remove
+                        var delta = this.extract.data[pmid].attrs.other.length - new_n_others;
+                        for (let i = 0; i < delta; i++) {
+                            this.extract.data[pmid].attrs.other.pop();
+                        }
+                    }
+                    this.$forceUpdate();
+                },
+
+                on_change_only_show_selected: function(event) {
+                    // let val = event.srcElement.checked;                    
+                    // this.only_show_selected = val;
+                    this.$forceUpdate();
+                }
+            }
+        });
+    },
+
+    set_mode: function(mode) {
+        this.vpp.$data.mode = mode;
+    },
+
+    update: function(data) {
+        // the data is a combo of extract and papers
+        this.vpp.extract = data.extract;
+        this.vpp.papers = data.papers;
+
+        // update the all_attrs and show_attrs variables for display
+        this.update_all_and_show_attrs();
+
+        // update
+        this.vpp.$forceUpdate();
+    },
+
+    update_all_and_show_attrs: function() {
+        // init the all_attrs which for list all the nested attrs
+        this.vpp.all_attrs = [];
+
+        // init the show_attrs
+        this.vpp.show_attrs = {}
+
+        // for display
+        this.vpp.thr1s = [];
+        this.vpp.thr2s = [];
+
+        // loop on the cate_attrs
+        for (let i = 0; i < this.vpp.extract.meta.cate_attrs.length; i++) {
+            const cate = this.vpp.extract.meta.cate_attrs[i];
+
+            var thr1 = {
+                name: cate.name,
+                cols: 0
+            }
+            for (let j = 0; j < cate.attrs.length; j++) {
+                const attr = cate.attrs[j];
+                
+                thr1.cols += 1;
+
+                var thr2 = {
+                    name: attr.name,
+                    cols: 0
+                }
+                if (attr.subs == null) {
+                    // which means this attr doesn't have a sub
+                    this.vpp.all_attrs.push(attr);
+                    this.vpp.show_attrs[attr.abbr] = true;
+                    
+                    // update the display row count
+                    thr2.cols += 1;
+
+                } else {
+                    for (let k = 0; k < attr.subs.length; k++) {
+                        const sub = attr.subs[k];
+                        this.vpp.all_attrs.push(sub);
+                        this.vpp.show_attrs[sub.abbr] = true;
+
+                        // update the display count
+                        thr2.cols += 1;
+
+                        // also increase the first row
+                        thr1.cols += 1;
+                    }
+                }
+                this.vpp.thr2s.push(thr2);
+            }
+
+            this.vpp.thr1s.push(thr1);
+        }
+
+        // update
+        this.vpp.$forceUpdate();
+    },
+
+
+    get_current_extract_and_papers: function() {
+        if (this.vpp.$data.extract == null) {
+            return null;
+        }
+        
+        // build a object
+        var ret = {
+            extract: this.vpp.$data.extract,
+            papers: this.vpp.$data.papers
+        };
+
+        return ret;
+    },
+
+    show_extract_and_papers: function(oc_type, abbr) {
+        var project_id = Cookies.get('project_id');
+        $.get(
+            srv_extractor.url.get_extract_and_papers,
+            {project_id:project_id, abbr:abbr, rnd:Math.random()},
+            function(data) {
+                pan_ocpapers.update(data);
+
+            }, 'json'
+        );
+    },
+
+    copy_extract: function() {
+        var project_id = Cookies.get('project_id');
+        var oc_type = this.vpp.$data.extract.oc_type;
+        var full_name = this.vpp.$data.extract.meta.full_name;
+        var abbr = this.vpp.$data.extract.abbr;
+        var meta = this.vpp.$data.extract.meta;
+        var data = this.vpp.$data.extract.data;
+
+        var new_full_name = jarvis.prompt('Copy current outcome [' + full_name + '] and make a new outcome. The new outcome full name is: ', full_name);
+        if (new_full_name == null) { return; }
+        new_full_name = new_full_name.trim();
+        if (new_full_name == '') { return; }
+
+        // save this new 
+        var new_abbr = srv_extractor.mk_oc_abbr();
+
+        // send request!
+        $.post(
+            srv_extractor.url.copy_extract,
+            {project_id:project_id, oc_type:oc_type, abbr:abbr,
+             new_abbr:new_abbr, new_full_name: new_full_name,
+             meta:JSON.stringify(meta), data:JSON.stringify(data)},
+            function(data) {
+                // show
+                toast('Copied the new outcome [' + data.extract.meta.full_name + ']');
+                // reload the outcomes
+                pan_outcomes.load();
+            }
+        );
+    },
+
+    update_extract: function() {
+        // there are 
+        var project_id = Cookies.get('project_id');
+        var oc_type = this.vpp.$data.extract.oc_type;
+        var abbr = this.vpp.$data.extract.abbr;
+        var meta = this.vpp.$data.extract.meta;
+        var data = this.vpp.$data.extract.data;
+
+        // send request!
+        $.post(
+            srv_extractor.url.update_extract,
+            {project_id:project_id, oc_type:oc_type, abbr:abbr,
+             meta:JSON.stringify(meta), data:JSON.stringify(data)},
+            function(data) {
+                // show
+                toast('Saved the outcome [' + data.extract.meta.full_name + ']');
+                // reload the outcomes
+                pan_outcomes.load();
+            }
+        );
+    },
+
+    show: function() {
+        $(this.vpp_id).show();
+    },
+
+    hide: function() {
+        $(this.vpp_id).hide();
+    },
+
+    set_size: function(size) {
+        $(this.vpp_id).removeClass('panel-s panel-m panel-l')
+            .addClass('panel-' + size);
+    }
+};
+
+
+Vue.component('outcome-list', {
+    data: function () {
+        return {
+            update: 0
+        }
+    },
+    methods: {
+        create_extract: function(oc_type, tpl, group, category) {
+            pan_outcomes.create_extract(oc_type, tpl, group, category);
+        },
+
+        show_extract_data: function(oc_type, abbr) {
+            // highlight this line
+            $('.cate-extract-line').removeClass('cate-extract-line-clicked');
+            $('#cate-extract-line-' + abbr).addClass('cate-extract-line-clicked');
+
+            // show it
+            pan_outcomes.show_extract_data(oc_type, abbr);
+        },
+
+        delete_extract: function(oc_type, abbr, full_name) {
+            pan_outcomes.delete_extract(oc_type, abbr, full_name);
+        },
+
+
+        toggle_cate: function(event) {
+            var elem = $(event.target);
+            elem.next().toggle();
+        },
+    },
+
+    props: [
+        'oc_type',
+        'outcomes',
+        'group',
+        'force_update'
+    ],
+
+    template: `
+<div v-if="Object.keys(outcomes).length != 0" :force_update="force_update">
+<div v-for="ocs, cate in outcomes" v-show="ocs.length>0">
+    <div class="cate-line"
+        v-on:click="toggle_cate(event)">
+            <i class="far fa-folder-open"></i>
+            {{ cate }} 
+        <button class="btn btn-default btn-xs"
+            v-on:click="create_extract(oc_type, 'default', group, cate)">
+            <i class="fa fa-plus"></i>
+            Add outcome to <b>{{ cate }}</b>
+        </button>
+    </div>
+
+    <div class="cate-extracts cate-extracts-pwma">
+        <div v-for="oc in ocs" 
+            v-bind:id="'cate-extract-line-' + oc.abbr"
+            class="cate-extract-line d-flex flex-row"
+            v-if="oc.group == group">
+                
+            <div class="cate-extract-name"
+                v-on:click="show_extract_data(oc_type, oc.abbr)">
+                {{ oc.full_name }}
+            </div>
+
+            <div class="cate-extract-col">
+                {{ oc.measure_of_effect }}
+            </div>
+
+            <div class="cate-extract-col">
+                <span v-if="oc.included_in_plots=='yes'" class="badge badge-success">In Plot</span>
+                <span v-else class="badge badge-light">Plot</span>
+            </div>
+
+            <div class="cate-extract-col">
+                <span v-if="oc.included_in_sof=='yes'" class="badge badge-success">In SoF</span>
+                <span v-else class="badge badge-light">SoF</span>
+            </div>
+
+            <div class="cate-extract-delete">
+                <button class="btn btn-default btn-xs"
+                    v-on:click="delete_extract(oc.oc_type, oc.abbr, oc.full_name)">
+                    <i class="far fa-trash-alt"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+</div>
+`
+});
+
+
+var jarvis = {
+    goto_screener: function(project_id, title) {
+        Cookies.set('project_id', project_id);
+        Cookies.set('project_title', title);
+
+        location.href = '[[ url_for("screener.overview") ]]';
+    },
+
+    init: function() {
+        pan_outcomes.init();
+        pan_ocpapers.init();
+
+        // resize
+        pan_outcomes.resize();
+
+        // the load the init outcomes
+        pan_outcomes.load();
+
+        this.bind_resize();
+    },
+
+    prompt: function(text, value) {
+        return window.prompt(text, value);
+    },
+
+    confirm: function(text) {
+        return window.confirm(text);
+    },
+
+    toast: function(s) {
+        toast(s);
+    },
+
+
+    get_year: function(s) {
+        const regex = /\d{4}/gm;
+        let m;
+        if ((m = regex.exec(s)) !== null) {
+            return m[0];
+        }
+        return '';
+    },
+
+    download_file: function(fn) {
+        // fixed image download bug
+        // Thanks to https://stackoverflow.com/questions/17311645/download-image-with-javascript
+        var a = $('<a>').attr('href', '/f/' + fn)
+            .attr('download', fn)
+            .appendTo("body");
+        a[0].click()
+        a.remove();
+    },
+
+    bind_resize: function() {
+        $(window).on('resize', function(){
+            pan_outcomes.resize();
+        });
+    }
+};
+
+$(document).ready(function() {
+    jarvis.init();
+});
+</script>
+{% endblock %}

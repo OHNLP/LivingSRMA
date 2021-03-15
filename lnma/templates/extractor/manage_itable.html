@@ -1,0 +1,1112 @@
+{% extends '_layout_adminlte.html' %}
+
+{% block title %}
+Manage Interactive Table
+{% endblock %}
+
+{% block page_name %}
+<i class="fa fa-list"></i>
+Manage Interactive Table
+{% endblock %}
+
+{% block active_nav_link %}extractor-manage-itable{% endblock %}
+
+{% block style %}
+<style>
+html {
+    overflow-x: hidden;
+}
+/* badge */
+.badge-ckl {
+    color: #fff;
+    background-color: #b88d17;
+}
+
+.panel-s {
+    width: calc(25% - 5px);
+    margin: 5px 5px 0 0;
+    padding: 0 5px 0 10px;
+    border-right: 1px dotted #999999;
+}
+.panel-m {
+    width: calc(50% - 5px);
+    margin: 5px 5px 0 0;
+    padding: 0 5px 0 10px;
+    border-right: 1px dotted #999999;
+}
+.panel-l {
+    width: calc(75% - 5px);
+    margin: 5px 5px 0 0;
+    padding: 0 5px 0 10px;
+    border-right: 1px dotted #999999;
+}
+.panel-f {
+    width: calc(100% - 5px);
+    margin: 5px 5px 0 0;
+    padding: 0 5px 0 10px;
+}
+#main {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+#pan_outcomes {
+    height: 100%;
+}
+.cate-line {
+    cursor: pointer;
+}
+.cate-extract-line {
+    border-left: 1px solid black;
+    padding: 0 0 0 10px;
+    margin: 0 0 0 10px;
+}
+.cate-extract-line:hover {
+    background-color: aquamarine;
+}
+.cate-extract-line-clicked {
+    background-color: aquamarine;
+}
+.cate-extract-name {
+    width: 250px;
+    min-width: 250px;
+    max-width: 250px;
+}
+.cate-extract-name:hover {
+    cursor: pointer;
+}
+.cate-extract-col {
+    min-width: 60px;
+    width: 100px;
+    max-width: 200px;
+    font-size: .9em;
+    padding: 0 .5em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.btn-xs {
+    padding: .15rem .5rem;
+    font-size: .8rem;
+    line-height: 1.2;
+    border-radius: .2rem;
+}
+
+#config_outcome {
+    min-width: 1100px;
+    width: 70%;
+    height: 100%;
+    position: absolute;
+    right: 5000px;
+    background-color: #ffffff;
+    padding: 5px;
+}
+
+.paper-table-body-td-author {
+    width: 190px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.paper-table-body-cell {
+    display: block;
+    max-width: 180px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.paper-table-header-th {
+    background-color: whitesmoke;
+    border-left: 1px solid rgb(211, 211, 211);
+    border-right: 1px solid rgb(211, 211, 211);    
+}
+
+.oc-attr {
+    display: inline-block;
+    margin: 0 10px 3px 0;
+}
+.oc-attr-name {
+    background: #ececec;
+    padding: 0 3px;
+    border-bottom: 1px solid #ececec;
+}
+.oc-attr-value {
+    width: auto;
+    /* margin-left: -3px; */
+    padding: 0 3px;
+    border: 0;
+    border-bottom: 1px solid #ececec;
+}
+.oc-attr-value-sm {
+    width: 120px;
+    margin-left: 5px;
+}
+.n-arms-hr {
+    margin: 1px 0 !important;
+}
+
+.filter-div {
+    border-bottom: 1px solid #EFEFEF;
+}
+.filter-title {
+    margin: 0 !important;
+}
+.offscreen {
+    left: -8888px !important;
+}
+
+#pan_itbuilder_previewer {
+    position: fixed;
+    top: 10px;
+    min-width: 1200px;
+    min-height: 400px;
+    padding: 35px 5px 5px 5px;
+    background-color: #f5f5f5;
+    z-index: 9999;
+    border: 3px solid #efefef;
+}
+#ifr_itable_previewer {
+    width: 100%;
+    height: 400px;
+    min-height: 400px;
+}
+
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div id="main">
+
+<div id="pan_itbuilder" class="panel-container panel-f">
+    <div class="panel-info">
+        <div class="oc-attr">
+            <button class="btn btn-default btn-xs" v-on:click="save_itable();">
+                <i class="fa fa-save"></i>
+                Save Interactive Table Design
+            </button>
+
+            <button class="btn btn-default btn-xs" v-on:click="extract_itable();">
+                <i class="fa fa-edit"></i>
+                Extract Information for Interactive Table
+            </button>
+
+            <button class="btn btn-default btn-xs" v-on:click="show_itable_preview();">
+                <i class="fa fa-table"></i>
+                Preview
+            </button>
+        </div>
+    </div>
+    <!-- /.panel-info -->
+
+    <div class="d-flex flex-row">
+
+    <div v-if="itable != null" class="panel-m">
+
+        <div class="panel-info">
+            <div class="oc-attr">
+                <span style="font-size: 1.2em;">
+                    <i class="fa fa-table"></i>
+                    Table Columns
+                </span>
+            </div>
+            <div class="oc-attr">
+                <button class="btn btn-default btn-xs" 
+                    v-on:click="create_category();">
+                    <i class="fa fa-bars"></i>
+                    Add Category
+                </button>
+            </div>
+        </div>
+        <!-- /.panel-info -->
+
+        <div v-for="cate, cate_idx in itable.meta.cate_attrs"
+            class="panel-info" style="margin: 10px 0; border-bottom: 1px dotted grey;">
+            
+            <div class="oc-attr">
+                <i class="fa fa-bars"></i>
+                <input class="oc-attr-value" type="text" v-model="cate.name">
+
+                <button class="btn btn-default btn-xs"
+                    v-on:click="create_attribute(cate.abbr);">
+                    <i class="fa fa-plus"></i>
+                    Add Attribute
+                </button>
+
+                <button class="btn btn-default btn-xs"
+                    v-on:click="remove_category(cate.abbr, cate.name);">
+                    <i class="fa fa-minus"></i>
+                    Remove Category
+                </button>
+
+            </div>
+
+            <div style="margin: 0 0 10px 10px; padding: 0 0 10px 10px; border-left: 1px solid #777777;">
+                <div v-for="attr, attr_idx in cate.attrs"
+                    style="padding: 3px 0; border-bottom: 1px dotted #efefef;">
+                    <i class="far fa-check-circle"></i>
+                    <input class="oc-attr-value" type="text"
+                        v-model="attr.name"
+                        v-bind:id="'cate_attr_' + attr.abbr">
+
+                    <span v-if="attr.subs != null">
+                        [
+                        <span v-for="sub, sub_idx in attr.subs">
+                            <input class="oc-attr-value oc-attr-value-sm" type="text" 
+                                v-model="sub.name"
+                                v-bind:id="'cate_attr_sub_' + sub.abbr">
+                        </span>
+                        ]
+                    </span>
+
+                    <a v-on:click="create_sub(cate.abbr, attr.abbr);"
+                        href="javascript:void(0);"
+                        :title="'Add sub-attribute to [' + attr.name + ']'">
+                        <i class="fa fa-plus"></i>
+                    </a>
+
+                    <a v-on:click="remove_attribute(cate.abbr, attr.abbr, attr.name);"
+                        href="javascript:void(0);"
+                        class="text-danger"
+                        :title="'Remove this attribute [' + attr.name + ']'">
+                        <i class="fa fa-minus"></i>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+    <div v-if="itable != null" class="panel-m">
+
+        <div class="panel-info">
+            <div class="oc-attr">
+                <span style="font-size: 1.2em;">
+                    <i class="fa fa-filter"></i>
+                    Filters
+                </span>
+            </div>
+            <div class="oc-attr">
+                <button class="btn btn-default btn-xs"
+                    v-on:click="create_filter();">
+                    <i class="fa fa-bars"></i>
+                    Add Filter
+                </button>
+            </div>
+        </div>
+        <!-- /.panel-info -->
+
+        <div v-if="itable.meta.hasOwnProperty('filters')">
+            <div v-for="filter, filter_idx in itable.meta.filters"
+                class="filter-div pt-2 pb-2 mb-2 mt-2">
+                <h6 class="filter-title">
+                    Filter {{ filter_idx + 1 }}
+                </h6>
+                <label for="">Filter Label: </label>
+                <input type="text" class="oc-attr-value" v-model="filter.display_name">
+                
+                <label for="">Display Style: </label>
+                <select v-model="filter.type">
+                    <option value="radio">Radio Buttons</option>
+                    <option value="select">Dropdown Selections</option>
+                    <option value="text">Text Box</option>
+                </select>
+
+                <br>
+
+                <label for="">Attribute name for this filter: </label>
+                <input type="text" class="oc-attr-value" v-model="filter.attr">
+            </div>
+        </div>
+    </div>
+    <!-- /#filter -->
+        
+    </div>
+
+    
+
+</div>
+<!-- /#pan_itbuilder -->
+
+
+    
+</div>
+<!-- /#main -->
+
+
+{% endblock %}
+
+{% block script %}
+<script>
+
+{% include "js/srv_extractor.js" %}
+
+
+var pan_ocpapers = {
+    vpp_id: "#pan_ocpapers",
+    vpp: null,
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                // flags
+                show_settings: true,
+                only_show_selected: false,
+                show_col_nct: false,
+
+                // for display:
+                thr1s: [],
+                thr2s: [],
+
+                // mode
+                mode: 'manage_itable',
+
+                // data
+                all_attrs: null,
+                show_attrs: null,
+                extract: null,
+                papers: []
+            },
+            computed: {
+                n_selected: function() {
+                    var n = 0;
+                    for (const pmid in this.extract.data) {
+                        if (Object.hasOwnProperty.call(this.extract.data, pmid)) {
+                            if (this.extract.data[pmid].is_selected) {
+                                n += 1;
+                            };
+                        }
+                    }
+                    return n;
+                }
+            },
+            methods: {
+                toggle_show_settings: function() {
+                    this.show_settings = !this.show_settings;
+                },
+
+                toggle_on_all_attributes: function() {
+                    for (const key in this.show_attrs) {
+                        if (Object.hasOwnProperty.call(this.show_attrs, key)) {
+                            this.show_attrs[key] = true;
+                        }
+                    }
+                    this.$forceUpdate();
+                },
+
+                toggle_off_all_attributes: function() {
+                    for (const key in this.show_attrs) {
+                        if (Object.hasOwnProperty.call(this.show_attrs, key)) {
+                            this.show_attrs[key] = false;
+                        }
+                    }
+                    this.$forceUpdate();
+                },
+
+                // save all!
+                update_extract: function() {
+                    pan_ocpapers.update_extract();
+                },
+                
+                // copy 
+                copy_extract: function() {
+                    pan_ocpapers.copy_extract();
+                },
+
+                get_input_size: function(str) {
+                    // convert null to empty
+                    if (str == null) {
+                        str = '';
+                    }
+                    // convert number to string
+                    str = '' + str;
+                    var s = str.length;
+                    if (s<5) {
+                        return 5;
+                    } else if (s > 14) {
+                        return 14;
+                    } else {
+                        return s;
+                    }
+                },
+
+                // get year
+                get_year: function(s) {
+                    return jarvis.get_year(s);
+                },
+
+                get_first_author: function(s) {
+                    var aus = s.split(';');
+                    if (aus.length == 1) {
+                        aus = s.split(',');
+                    }
+                    return aus[0];
+                },
+
+                on_change_input_format: function(event) {
+                    let val = event.target.value;
+                    console.log('Changed input_format: ' + val);
+
+                    // update the attrs
+                    this.extract.meta.cate_attrs = srv_extractor.tpl.input_format[
+                        this.extract.oc_type
+                    ][val];
+                    
+                    // update the papers setting
+                    pan_ocpapers.update_all_and_show_attrs();
+                },
+
+                on_toggle_attr_selection: function(event) {
+                    this.$forceUpdate();
+                },
+
+                on_click_paper: function(pmid) {
+                    // set the working pmid ?
+                    // no need to set
+
+                    // highlight this line
+                    $('.paper-table-row').removeClass('paper-table-row-clicked');
+                    $('#paper-table-row-' + pmid).addClass('paper-table-row-clicked');
+
+                    // call collector to do something
+                    pan_collector.show_paper(
+                        pmid, 
+                        pan_ocpapers.vpp.$data.extract.data[pmid]
+                    );
+                },
+
+                toggle_select_all_papers: function(event) {
+                    let val = event.srcElement.checked;
+                    console.log('* set all papers selected: ', val);
+                    for (const pmid in this.extract.data) {
+                        if (Object.hasOwnProperty.call(this.extract.data, pmid)) {
+                            this.extract.data[pmid].is_selected = val;
+                        }
+                    }
+                    // this.$forceUpdate();
+                },
+
+                on_toggle_itable_select_category: function(cate_idx, event) {
+                    let val = event.srcElement.checked;
+
+                    for (let i = 0; i < this.extract.meta.cate_attrs[cate_idx].attrs.length; i++) {
+                        const attr = this.extract.meta.cate_attrs[cate_idx].attrs[i];
+
+                        if (attr.subs == null) {
+                            this.show_attrs[attr.abbr] = val;
+                        } else {
+                            for (let j = 0; j < attr.subs.length; j++) {
+                                const sub = attr.subs[j];
+                                this.show_attrs[sub.abbr] = val;
+                            }
+                        }
+                    }
+                    // force update the UI because change a lot
+                    this.$forceUpdate();
+                },
+
+                on_change_itable_n_arms: function(pmid, event) {
+                    let val = event.target.value;
+                    console.log('* change ' + pmid + ' n_arms to ' + val);
+
+                    var new_n_others = val - 2;
+                    if (new_n_others == this.extract.data[pmid].attrs.other.length) {
+                        // which means the number of arms doesn't change
+
+                    } else if (new_n_others > this.extract.data[pmid].attrs.other.length) {
+                        // the number of arms increases, need to put more elements
+                        var delta = new_n_others - this.extract.data[pmid].attrs.other.length;
+                        for (let i = 0; i < delta; i++) {
+                            // just copy the keys from main track
+                            var obj = JSON.parse(JSON.stringify(this.extract.data[pmid].attrs.main));
+                            // and clear the exising data
+                            for (const key in obj) {
+                                if (Object.hasOwnProperty.call(obj, key)) {
+                                    obj[key] = '';
+                                }
+                            }
+                            this.extract.data[pmid].attrs.other.push(obj);
+                        }
+                    } else {
+                        // the number of arms decreases, need to remove
+                        var delta = this.extract.data[pmid].attrs.other.length - new_n_others;
+                        for (let i = 0; i < delta; i++) {
+                            this.extract.data[pmid].attrs.other.pop();
+                        }
+                    }
+                    this.$forceUpdate();
+                },
+
+                on_change_only_show_selected: function(event) {
+                    let val = event.srcElement.checked;                    
+                    this.only_show_selected = val;
+                    this.$forceUpdate();
+                }
+            }
+        });
+    },
+
+    set_mode: function(mode) {
+        this.vpp.$data.mode = mode;
+    },
+
+    update: function(data) {
+        // the data is a combo of extract and papers
+        this.vpp.extract = data.extract;
+        this.vpp.papers = data.papers;
+
+        // update the all_attrs and show_attrs variables for display
+        this.update_all_and_show_attrs();
+
+        // update
+        this.vpp.$forceUpdate();
+    },
+
+    update_all_and_show_attrs: function() {
+        // init the all_attrs which for list all the nested attrs
+        this.vpp.all_attrs = [];
+
+        // init the show_attrs
+        this.vpp.show_attrs = {}
+
+        // for display
+        this.vpp.thr1s = [];
+        this.vpp.thr2s = [];
+
+        // loop on the cate_attrs
+        for (let i = 0; i < this.vpp.extract.meta.cate_attrs.length; i++) {
+            const cate = this.vpp.extract.meta.cate_attrs[i];
+
+            var thr1 = {
+                name: cate.name,
+                cols: 0
+            }
+            for (let j = 0; j < cate.attrs.length; j++) {
+                const attr = cate.attrs[j];
+                
+                thr1.cols += 1;
+
+                var thr2 = {
+                    name: attr.name,
+                    cols: 0
+                }
+                if (attr.subs == null) {
+                    // which means this attr doesn't have a sub
+                    this.vpp.all_attrs.push(attr);
+                    this.vpp.show_attrs[attr.abbr] = true;
+                    
+                    // update the display row count
+                    thr2.cols += 1;
+
+                } else {
+                    for (let k = 0; k < attr.subs.length; k++) {
+                        const sub = attr.subs[k];
+                        this.vpp.all_attrs.push(sub);
+                        this.vpp.show_attrs[sub.abbr] = true;
+
+                        // update the display count
+                        thr2.cols += 1;
+
+                        // also increase the first row
+                        thr1.cols += 1;
+                    }
+                }
+                this.vpp.thr2s.push(thr2);
+            }
+
+            this.vpp.thr1s.push(thr1);
+        }
+
+        // update
+        this.vpp.$forceUpdate();
+    },
+
+
+    get_current_extract_and_papers: function() {
+        if (this.vpp.$data.extract == null) {
+            return null;
+        }
+        
+        // build a object
+        var ret = {
+            extract: this.vpp.$data.extract,
+            papers: this.vpp.$data.papers
+        };
+
+        return ret;
+    },
+
+    show_extract_and_papers: function(oc_type, abbr) {
+        var project_id = Cookies.get('project_id');
+        $.get(
+            srv_extractor.url.get_extract_and_papers,
+            {project_id:project_id, abbr:abbr, rnd:Math.random()},
+            function(data) {
+                pan_ocpapers.update(data);
+
+            }, 'json'
+        );
+    },
+
+    copy_extract: function() {
+        var project_id = Cookies.get('project_id');
+        var oc_type = this.vpp.$data.extract.oc_type;
+        var full_name = this.vpp.$data.extract.meta.full_name;
+        var abbr = this.vpp.$data.extract.abbr;
+        var meta = this.vpp.$data.extract.meta;
+        var data = this.vpp.$data.extract.data;
+
+        var new_full_name = jarvis.prompt('Copy current outcome [' + full_name + '] and make a new outcome. The new outcome full name is: ', full_name);
+        if (new_full_name == null) { return; }
+        new_full_name = new_full_name.trim();
+        if (new_full_name == '') { return; }
+
+        // save this new 
+        var new_abbr = srv_extractor.mk_oc_abbr();
+
+        // send request!
+        $.post(
+            srv_extractor.url.copy_extract,
+            {project_id:project_id, oc_type:oc_type, abbr:abbr,
+             new_abbr:new_abbr, new_full_name: new_full_name,
+             meta:JSON.stringify(meta), data:JSON.stringify(data)},
+            function(data) {
+                // show
+                toast('Copied the new outcome [' + data.extract.meta.full_name + ']');
+                // reload the outcomes
+                pan_outcomes.load();
+            }
+        );
+    },
+
+    update_extract: function() {
+        // there are 
+        var project_id = Cookies.get('project_id');
+        var oc_type = this.vpp.$data.extract.oc_type;
+        var abbr = this.vpp.$data.extract.abbr;
+        var meta = this.vpp.$data.extract.meta;
+        var data = this.vpp.$data.extract.data;
+
+        // send request!
+        $.post(
+            srv_extractor.url.update_extract,
+            {project_id:project_id, oc_type:oc_type, abbr:abbr,
+             meta:JSON.stringify(meta), data:JSON.stringify(data)},
+            function(data) {
+                // show
+                toast('Saved the outcome [' + data.extract.meta.full_name + ']');
+                // reload the outcomes
+                pan_outcomes.load();
+            }
+        );
+    },
+
+    show: function() {
+        $(this.vpp_id).show();
+    },
+
+    hide: function() {
+        $(this.vpp_id).hide();
+    },
+
+    set_size: function(size) {
+        $(this.vpp_id).removeClass('panel-s panel-m panel-l')
+            .addClass('panel-' + size);
+    }
+};
+
+
+var pan_itbuilder = {
+    vpp_id: '#pan_itbuilder',
+    vpp: null,
+
+    load: function() {
+        this.get_itable();
+    },
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                itable: null,
+
+            },
+            methods: {
+                save_itable: function() {
+                    pan_itbuilder.save_itable();
+                },
+
+                extract_itable: function() {
+                    pan_itbuilder.extract_itable();
+                },
+
+                show_itable_preview: function() {
+                    pan_itbuilder.show_itable_preview();
+                },
+
+                create_category: function() {
+                    pan_itbuilder.create_category();
+                },
+
+                create_attribute: function(cate_abbr) {
+                    pan_itbuilder.create_attribute(cate_abbr);
+                },
+
+                create_sub: function(cate_abbr, attr_abbr) {
+                    pan_itbuilder.create_sub(cate_abbr, attr_abbr);
+                },
+
+                remove_category: function(cate_abbr, cate_name) {
+                    pan_itbuilder.remove_category(cate_abbr, cate_name);
+                },
+
+                remove_attribute: function(cate_abbr, attr_abbr, attr_name) {
+                    pan_itbuilder.remove_attribute(cate_abbr, attr_abbr, attr_name);
+                },
+
+                remove_sub: function(cate_abbr, attr_abbr, sub_abbr) {
+                    pan_itbuilder.remove_sub(cate_abbr, attr_abbr, sub_abbr);
+                },
+
+                ////////////////////////////////////////////////////////
+                // Filters
+                ////////////////////////////////////////////////////////
+                create_filter: function() {
+
+                    // get the full name
+                    var text = jarvis.prompt('The filter label name:');
+                    if (text == null) { return; }
+                    text = text.trim();
+                    if (text == '') { return; }
+
+                    // create a new filter
+                    var filter = JSON.parse(JSON.stringify(jarvis.tpl.filter));
+                    
+                    // update the filter's label / display_name
+                    filter.display_name = text;
+
+                    // add to the itable filters
+                    if (!this.itable.meta.hasOwnProperty('filters')) {
+                        this.itable.meta['filters'] = [];
+                    }
+                    this.itable.meta.filters.push(filter);
+
+                    // update the UI
+                    this.$forceUpdate();
+                }
+            }
+        });
+    },
+
+    show_itable_preview: function() {
+
+    },
+
+    extract_itable: function() {
+        location.href = 
+            srv_extractor.url.extract_data + "?abbr=itable";
+    },
+
+    /**
+     * The itable is an extract object in fact.
+     */
+    update: function(itable) {
+        console.log(itable);
+        this.vpp.$data.itable = itable;
+        
+        // update the vpp
+        this.vpp.$forceUpdate();
+    },
+
+    /**
+     * The itable is a special extract, so get_itable equals to get extract
+     */
+    get_itable: function() {
+        var project_id = Cookies.get('project_id');
+        var abbr = 'itable';
+        $.get(
+            srv_extractor.url.get_extract,
+            {project_id:project_id, abbr:abbr, rnd:Math.random()},
+            function(data) {
+                if (data.success) {
+                    pan_itbuilder.update(data.extract);
+                } else {
+                    // at present, there is not itable extract for this project
+                    // create an itable extract
+                    pan_itbuilder.init_itable('itable');
+                }
+            }, 'json'
+        );
+    },
+
+    /**
+     * Create an itable
+     * the abbr should be 'itable'
+     * but this could be expanded in the future
+     */
+    init_itable: function(abbr) {
+        var project_id = Cookies.get('project_id');
+        var oc_type = 'itable';
+        var tpl = 'default';
+        var meta = JSON.parse(JSON.stringify(srv_extractor.tpl.oc_type[oc_type][tpl]));
+        var data = {}
+
+        $.post(
+            srv_extractor.url.create_extract,
+            {
+                project_id: project_id,
+                oc_type: oc_type,
+                abbr: abbr,
+                meta: JSON.stringify(meta),
+                data: JSON.stringify(data)
+            }, 
+            function(data) {
+                // show what we get!
+                console.log(data);
+                // update UI
+                pan_itbuilder.update(data.extract);
+            }, 'json'
+        );
+    },
+
+    save_itable: function() {
+        var project_id = Cookies.get('project_id');
+        var oc_type = 'itable';
+        var abbr = 'itable';
+        var meta = this.vpp.$data.itable.meta;
+
+        // // send back to server
+        $.post(
+            srv_extractor.url.update_extract_meta,
+            {project_id:project_id, oc_type:oc_type, abbr:abbr,
+             meta:JSON.stringify(meta)},
+            function(data) {
+                // show
+                toast('Saved the interactive table');
+                // reload the outcomes
+                pan_itbuilder.load();
+            }
+        );
+    },
+
+    create_category: function() {
+        // get the full name
+        var text = jarvis.prompt('The category full name:');
+        if (text == null) { return; }
+        text = text.trim();
+        if (text == '') { return; }
+
+        // create an abbr
+        var abbr = srv_extractor.mk_it_abbr();
+
+        // create a new cate
+        var cate = {
+            abbr: abbr,
+            name: text,
+            attrs: []
+        };
+        
+        // add to the itable
+        this.vpp.$data.itable.meta.cate_attrs.push(cate);
+        this.vpp.$forceUpdate();
+    },
+
+    create_attribute: function(cate_abbr) {
+        // get the full name
+        // var text = jarvis.prompt('The attribute full name:');
+        // if (text == null) { return; }
+        // text = text.trim();
+        // if (text == '') { return; }
+        var text = 'New attribute';
+
+        // create an abbr
+        var abbr = jarvis.mk_it_abbr();
+
+        // create a new cate
+        var attr = {
+            abbr: abbr,
+            name: text,
+            subs: null
+        };
+        
+        for (let i = 0; i < this.vpp.$data.itable.meta.cate_attrs.length; i++) {
+            var cate = this.vpp.$data.itable.meta.cate_attrs[i];
+            if (cate.abbr == cate_abbr) {
+                this.vpp.$data.itable.meta.cate_attrs[i].attrs.push(attr);
+                break;
+            }
+        }
+
+        this.vpp.$forceUpdate();
+
+        // focus on the new input
+        $('#cate_attr_' + abbr).focus().select();
+    },
+
+
+    create_sub: function(cate_abbr, attr_abbr) {
+        // get the full name
+        // var text = jarvis.prompt('The sub-attribute name (e.g., Rx, Treatment, Control):');
+        // if (text == null) { return; }
+        // text = text.trim();
+        // if (text == '') { return; }
+
+        // create an abbr
+        var text = "New option";
+        var abbr = jarvis.mk_it_abbr();
+
+        // create a new cate
+        var sub = {
+            abbr: abbr,
+            name: text
+        };
+        
+        for (let i = 0; i < this.vpp.$data.itable.meta.cate_attrs.length; i++) {
+            var cate = this.vpp.$data.itable.meta.cate_attrs[i];
+            if (cate.abbr == cate_abbr) {
+                // check each attribute
+                for (let j = 0; j < cate.attrs.length; j++) {
+                    var attr = cate.attrs[j];
+                    if (attr.abbr == attr_abbr) {
+                        if (attr.subs == null) {
+                            // which means no sub yet
+                            this.vpp.$data.itable.meta.cate_attrs[i].attrs[j].subs = [sub];
+                        } else {
+                            this.vpp.$data.itable.meta.cate_attrs[i].attrs[j].subs.push(sub);
+                        }
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+        this.vpp.$forceUpdate();
+
+        // focus on the new input
+        $('#cate_attr_sub' + abbr).focus().select();
+    },
+
+    remove_category: function(cate_abbr, cate_name) {
+        var ret = jarvis.confirm('Remove ['+cate_name+'], are you sure?');
+        if (ret == false) { return }
+
+        for (let i = 0; i < this.vpp.$data.itable.meta.cate_attrs.length; i++) {
+            var cate = this.vpp.$data.itable.meta.cate_attrs[i];
+            if (cate.abbr == cate_abbr) {
+                this.vpp.$data.itable.meta.cate_attrs.splice(i, 1);
+                break;
+            }
+        }
+        console.log('* removed ' + cate_name);
+    },
+
+    remove_attribute: function(cate_abbr, attr_abbr, attr_name) {
+        var ret = jarvis.confirm('Remove ['+attr_name+'], are you sure?');
+        if (ret == false) { return }
+
+        for (let i = 0; i < this.vpp.$data.itable.meta.cate_attrs.length; i++) {
+            var cate = this.vpp.$data.itable.meta.cate_attrs[i];
+            if (cate.abbr == cate_abbr) {
+                // check each attribute
+                for (let j = 0; j < cate.attrs.length; j++) {
+                    var attr = cate.attrs[j];
+                    if (attr.abbr == attr_abbr) {
+                        // ok, found out this attr
+                        this.vpp.$data.itable.meta.cate_attrs[i].attrs.splice(j, 1);
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+        console.log('* removed ' + attr_abbr + ' from ' + cate_abbr);
+    },
+
+    remove_sub: function(cate_abbr, attr_abbr, sub_abbr) {
+    },
+
+    show: function() {
+        $(this.vpp_id).show();
+    },
+
+    hide: function() {
+        $(this.vpp_id).hide();
+    },
+
+    set_size: function(size) {
+        $(this.vpp_id).removeClass('panel-s panel-m panel-l')
+            .addClass('panel-' + size);
+    },
+};
+
+
+var jarvis = {
+    goto_screener: function(project_id, title) {
+        Cookies.set('project_id', project_id);
+        Cookies.set('project_title', title);
+
+        location.href = '[[ url_for("screener.overview") ]]';
+    },
+
+    init: function() {
+        pan_itbuilder.init();
+        pan_ocpapers.init();
+
+        // the load the init outcomes
+        pan_itbuilder.load();
+
+        this.bind_resize();
+    },
+
+    prompt: function(text, value) {
+        return window.prompt(text, value);
+    },
+
+    confirm: function(text) {
+        return window.confirm(text);
+    },
+
+    toast: function(s) {
+        toast(s);
+    },
+
+
+    get_year: function(s) {
+        const regex = /\d{4}/gm;
+        let m;
+        if ((m = regex.exec(s)) !== null) {
+            return m[0];
+        }
+        return '';
+    },
+
+    download_file: function(fn) {
+        // fixed image download bug
+        // Thanks to https://stackoverflow.com/questions/17311645/download-image-with-javascript
+        var a = $('<a>').attr('href', '/f/' + fn)
+            .attr('download', fn)
+            .appendTo("body");
+        a[0].click()
+        a.remove();
+    },
+
+    bind_resize: function() {
+        $(window).on('resize', function(){
+            pan_outcomes.resize();
+        });
+    }
+
+};
+
+$(document).ready(function() {
+    jarvis.init();
+});
+</script>
+{% endblock %}

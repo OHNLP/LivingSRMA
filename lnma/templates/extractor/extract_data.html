@@ -1,0 +1,857 @@
+{% extends '_layout_adminlte.html' %}
+
+{% block title %}
+Extract Data
+{% endblock %}
+
+{% block page_name %}
+<i class="fa fa-edit"></i>
+Extract Data for []
+{% endblock %}
+
+{% block style %}
+<style>
+html {
+    overflow-x: hidden;
+}
+/* badge */
+.badge-ckl {
+    color: #fff;
+    background-color: #b88d17;
+}
+
+#main {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+    margin: 0 0 0 10px;
+    overflow: hidden;
+}
+#pan_outcomes {
+    height: 100%;
+    overflow-y: auto;
+}
+.cate-line {
+    cursor: pointer;
+}
+.cate-extract-line {
+    border-left: 1px solid black;
+    padding: 0 0 0 10px;
+    margin: 0 0 0 10px;
+}
+.cate-extract-line:hover {
+    background-color: aquamarine;
+}
+.cate-extract-line-clicked {
+    background-color: aquamarine;
+}
+.cate-extract-name {
+    width: 250px;
+    min-width: 250px;
+    max-width: 250px;
+}
+.cate-extract-name:hover {
+    cursor: pointer;
+}
+.cate-extract-col {
+    min-width: 60px;
+    width: 100px;
+    max-width: 200px;
+    font-size: .9em;
+    padding: 0 .5em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.btn-xs {
+    padding: .15rem .5rem;
+    font-size: .8rem;
+    line-height: 1.2;
+    border-radius: .2rem;
+}
+
+#config_outcome {
+    min-width: 1100px;
+    width: 70%;
+    height: 100%;
+    position: absolute;
+    right: 5000px;
+    background-color: #ffffff;
+    padding: 5px;
+}
+
+.paper-table-body-td-author {
+    width: 190px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.paper-table-body-cell {
+    display: block;
+    max-width: 180px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.paper-table-header-th {
+    
+    border-left: 1px solid rgb(211, 211, 211);
+    border-right: 1px solid rgb(211, 211, 211);    
+}
+
+.n-arms-hr {
+    margin: 1px 0 !important;
+}
+
+
+.extract-attr-label {
+    font-weight: normal !important;
+}
+.extract-attr-sub-label {
+    font-weight: normal !important;
+}
+
+.extract-table {
+    font-size: 0.88em;
+}
+
+.extract-table th, 
+.extract-table td{
+    border-bottom: 1px dotted #dfdfdf;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div id="main">
+
+
+<div id="pan_ocpapers" class="panel-m panel-container" v-if="extract != null">
+    <div class="panel-info">
+        <div class="oc-attr d-flex flex-row">
+            <span style="font-size: 1.2em;" class="mr-2">
+                <b>[{{ extract.meta.full_name }}]</b> Details
+            </span>
+
+            <div class="btn-group mr-2">
+                <button v-on:click="toggle_show_settings();"
+                    type="button" class="btn btn-default btn-sm">
+                    <i class="fa" v-bind:class="{'fa-toggle-on': show_settings, 'fa-toggle-off': !show_settings}"></i>
+                    Toggle
+                </button>
+            </div>
+
+            <div class="btn-group mr-2">
+                <button v-on:click="update_extract();"
+                    type="button" class="btn btn-default btn-sm">
+                    <i class="fa fa-save"></i>
+                    Save all
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <div v-bind:class="{hide: !show_settings}"
+        style="width: 100%;">
+    
+    <div class="panel-info d-flex flex-column" v-if="extract != null">
+        <div v-for="cate, cate_idx in extract.meta.cate_attrs"
+            style="border-bottom: 1px dotted #999999; margin: 5px 0 5px 0;"
+            class="d-flex flex-column">
+
+            <div :id="'cate-' + cate.abbr"
+                class="d-flex flex-row flex-wrap">
+
+                <div style="border-right: 3px solid #dddddd;"
+                    class="mr-2 pr-2">
+                    <input type="checkbox" v-bind:id="'toggle-cate-' + cate.abbr"
+                        v-on:change="on_toggle_itable_select_category(cate_idx, $event)">
+                    <label :for="'toggle-cate-' + cate.abbr" class="extract-attr-label">
+                        <b>{{ cate.name }}</b>
+                    </label>
+                </div>
+
+                <div v-for="attr, attr_idx in cate.attrs"
+                    class="mr-2 border-end">
+                    
+                    <span v-if="attr.subs == null" v-bind:abbr="attr.abbr">
+                        <input type="checkbox" 
+                            v-model="show_attrs[attr.abbr]"
+                            v-on:change="on_toggle_attr_selection(attr.abbr, $event)"
+                            :id="'attr-' + attr.abbr">
+                        <label class="extract-attr-label" :for="'attr-' + attr.abbr">{{ attr.name }}</label>
+                    </span>
+
+                    <span v-else v-bind:abbr="attr.abbr">
+                        <input type="checkbox" 
+                            v-model="show_attrs[attr.abbr]"
+                            v-on:change="on_toggle_attr_selection(attr.abbr, $event)"
+                            :id="'attr-' + attr.abbr">
+
+                        {{ attr.name }}
+                        [
+                        <span class="mr-2" v-for="sub, sub_idx in attr.subs">
+                            <input type="checkbox" v-model="show_attrs[sub.abbr]"
+                                v-on:change="on_toggle_attr_selection(attr.abbr, $event)"
+                                :id="'sub-' + sub.abbr">
+                            <label class="extract-attr-sub-label" :for="'sub-' + sub.abbr">
+                                {{ sub.name }}
+                            </label>
+                        </span>
+                        ]
+                    </span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <!-- /.panel-info -->
+
+    </div>
+    <!-- /div of settings -->
+
+
+    <div class="panel-paperlist" style="overflow: auto;">
+
+        <!-- table for itable -->
+        <table class="extract-table">
+            <thead class="paper-table-header">
+                <tr>
+                    <th class="paper-table-header-th" colspan="4">
+                        &nbsp;
+                    </th>
+                    <th v-for="thr1 in thr1s"
+                        v-bind:colspan="thr1.cols"
+                        v-show="show_attrs[thr1.abbr]"
+                        class="paper-table-header-th"
+                        style="text-align: center;">
+                        {{ thr1.name }}
+                    </th>
+                </tr>
+
+                <tr>
+                    <th class="paper-table-header-th" style="width: 20px;">
+                        <input type="checkbox" title="Toggle selection"
+                            v-on:click="toggle_select_all_papers($event);">
+                    </th>
+                    <th class="paper-table-header-th" style="width: 130px;">
+                        ({{ n_selected }} selected)
+                    </th>
+                    <th class="paper-table-header-th" style="width: 90px;">
+                        Checked
+                    </th>
+                    <th class="paper-table-header-th" style="width: 50px;">
+                        Arms
+                    </th>
+                    
+                    <!-- the attributes need to collect -->
+                    <th class="paper-table-header-th" 
+                        style="text-align: center;"
+                        v-for="thr2 in thr2s"
+                        v-bind:colspan="thr2.cols"
+                        v-show="show_attrs[thr2.abbr]">
+                        <span>
+                            {{ thr2.name }}
+                        </span>
+                    </th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr class="paper-table-row" 
+                    v-for="paper in papers"
+                    v-bind:id="'paper-table-row-' + paper.pid"
+                    v-on:click="on_click_paper(paper.pid)"
+                    v-show="!only_show_selected || extract.data[paper.pid].is_selected">
+                    <td class="paper-table-body-td">
+                        <input type="checkbox" v-model="extract.data[paper.pid].is_selected" >
+                    </td>
+                    <td class="paper-name paper-table-body-td">
+                        <div class="paper-table-body-td-author"
+                            v-bind:title="get_first_author(paper.authors)">
+                            {{ get_first_author(paper.authors) }} {{ get_year(paper.pub_date) }}
+                        </div>
+                    </td>
+                    <td class="paper-table-body-td">
+                        <input type="checkbox" 
+                            v-bind:id="'paper-row-checked'+paper.pid"
+                            v-model="extract.data[paper.pid].is_checked">
+                    </td>
+                    <td class="paper-table-body-td">
+                        <select name="" id="" v-model="extract.data[paper.pid].n_arms"
+                            v-on:change="on_change_itable_n_arms(paper.pid, $event)">
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </select>
+                    </td>
+                    
+                    <!-- the attributes of pwma -->
+                    <td v-for="attr_sub in all_attrs" 
+                        v-show="show_attrs[attr_sub.abbr]"
+                        class="paper-table-body-td paper-value">
+                        
+                        <!-- the main track -->
+                        <span class="cell-input">
+                            <input class="paper-extract-input-auto" type="text" 
+                                v-bind:abbr="attr_sub.abbr"
+                                v-bind:size="get_input_size(extract.data[paper.pid].attrs.main[attr_sub.abbr])"
+                                v-model="extract.data[paper.pid].attrs.main[attr_sub.abbr]">    
+                        </span>
+
+                        <!-- the other tracks if n_arms > 2 -->
+                        <hr class="n-arms-hr" v-if="extract.data[paper.pid].n_arms > 2">
+
+                        <span v-for="other, other_idx in extract.data[paper.pid].attrs.other"
+                            class="cell-input">
+                            <br v-if="other_idx > 0">
+                            <input class="paper-extract-input-auto" type="text" 
+                                v-bind:size="get_input_size(extract.data[paper.pid].attrs.other[other_idx][attr_sub.abbr])"
+                                v-model="extract.data[paper.pid].attrs.other[other_idx][attr_sub.abbr]">  
+                        </span>                        
+
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
+    <!-- /.panel-paperlist -->
+
+</div>
+<!-- /#pan_ocpapers -->
+
+
+
+<ul id="pan_ocpapers_ctx_menu" style="display: none;">
+    
+</ul>
+
+
+    
+</div>
+<!-- /#main -->
+
+
+
+
+{% endblock %}
+
+{% block active_nav_link %}extractor-manage-outcomes{% endblock %}
+
+{% block script %}
+<script>
+
+{% include "js/srv_extractor.js" %}
+
+
+var pan_ocpapers = {
+    vpp_id: "#pan_ocpapers",
+    vpp: null,
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                // flags
+                show_settings: true,
+                only_show_selected: true,
+                show_col_nct: false,
+
+                // for display:
+                thr1s: [],
+                thr2s: [],
+
+                // mode
+                mode: 'manage_outcomes',
+
+                // data
+                all_attrs: null,
+                show_attrs: null,
+                extract: null,
+                papers: []
+            },
+            computed: {
+                n_selected: function() {
+                    var n = 0;
+                    for (const pmid in this.extract.data) {
+                        if (Object.hasOwnProperty.call(this.extract.data, pmid)) {
+                            if (this.extract.data[pmid].is_selected) {
+                                n += 1;
+                            };
+                        }
+                    }
+                    return n;
+                }
+            },
+            methods: {
+                toggle_show_settings: function() {
+                    this.show_settings = !this.show_settings;
+                },
+
+                toggle_on_all_attributes: function() {
+                    for (const key in this.show_attrs) {
+                        if (Object.hasOwnProperty.call(this.show_attrs, key)) {
+                            this.show_attrs[key] = true;
+                        }
+                    }
+                    this.$forceUpdate();
+                },
+
+                toggle_off_all_attributes: function() {
+                    for (const key in this.show_attrs) {
+                        if (Object.hasOwnProperty.call(this.show_attrs, key)) {
+                            this.show_attrs[key] = false;
+                        }
+                    }
+                    this.$forceUpdate();
+                },
+
+                // save all!
+                update_extract: function() {
+                    pan_ocpapers.update_extract();
+                },
+                
+                get_input_size: function(str) {
+                    // convert null to empty
+                    if (str == null) {
+                        str = '';
+                    }
+                    // convert number to string
+                    str = '' + str;
+                    var s = str.length;
+                    if (s<5) {
+                        return 5;
+                    } else if (s > 14) {
+                        return 14;
+                    } else {
+                        return s;
+                    }
+                },
+
+                // get year
+                get_year: function(s) {
+                    return jarvis.get_year(s);
+                },
+
+                get_first_author: function(s) {
+                    var aus = s.split(';');
+                    if (aus.length == 1) {
+                        aus = s.split(',');
+                    }
+                    return aus[0];
+                },
+
+                on_change_input_format: function(event) {
+                    let val = event.target.value;
+                    console.log('Changed input_format: ' + val);
+
+                    // update the attrs
+                    this.extract.meta.cate_attrs = srv_extractor.tpl.input_format[
+                        this.extract.oc_type
+                    ][val];
+                    
+                    // update the papers setting
+                    pan_ocpapers.update_all_and_show_attrs();
+                },
+
+                on_toggle_attr_selection: function(attr_abbr, event) {
+
+                    this.$forceUpdate();
+                },
+
+                on_click_paper: function(pmid) {
+                    // set the working pmid ?
+                    // no need to set
+
+                    // highlight this line
+                    $('.paper-table-row').removeClass('paper-table-row-clicked');
+                    $('#paper-table-row-' + pmid).addClass('paper-table-row-clicked');
+
+                    // call collector to do something
+                    pan_collector.show_paper(
+                        pmid, 
+                        pan_ocpapers.vpp.$data.extract.data[pmid]
+                    );
+                },
+
+                toggle_select_all_papers: function(event) {
+                    let val = event.srcElement.checked;
+                    console.log('* set all papers selected: ', val);
+                    for (const pmid in this.extract.data) {
+                        if (Object.hasOwnProperty.call(this.extract.data, pmid)) {
+                            this.extract.data[pmid].is_selected = val;
+                        }
+                    }
+                    // this.$forceUpdate();
+                },
+
+                on_toggle_itable_select_category: function(cate_idx, event) {
+                    let val = event.srcElement.checked;
+
+                    for (let i = 0; i < this.extract.meta.cate_attrs[cate_idx].attrs.length; i++) {
+                        const attr = this.extract.meta.cate_attrs[cate_idx].attrs[i];
+
+                        if (attr.subs == null) {
+                            this.show_attrs[attr.abbr] = val;
+                        } else {
+                            for (let j = 0; j < attr.subs.length; j++) {
+                                const sub = attr.subs[j];
+                                this.show_attrs[sub.abbr] = val;
+                            }
+                        }
+                    }
+                    // force update the UI because change a lot
+                    this.$forceUpdate();
+                },
+
+                on_change_itable_n_arms: function(pmid, event) {
+                    let val = event.target.value;
+                    console.log('* change ' + pmid + ' n_arms to ' + val);
+
+                    var new_n_others = val - 2;
+                    if (new_n_others == this.extract.data[pmid].attrs.other.length) {
+                        // which means the number of arms doesn't change
+
+                    } else if (new_n_others > this.extract.data[pmid].attrs.other.length) {
+                        // the number of arms increases, need to put more elements
+                        var delta = new_n_others - this.extract.data[pmid].attrs.other.length;
+                        for (let i = 0; i < delta; i++) {
+                            // just copy the keys from main track
+                            var obj = JSON.parse(JSON.stringify(this.extract.data[pmid].attrs.main));
+                            // and clear the exising data
+                            for (const key in obj) {
+                                if (Object.hasOwnProperty.call(obj, key)) {
+                                    obj[key] = '';
+                                }
+                            }
+                            this.extract.data[pmid].attrs.other.push(obj);
+                        }
+                    } else {
+                        // the number of arms decreases, need to remove
+                        var delta = this.extract.data[pmid].attrs.other.length - new_n_others;
+                        for (let i = 0; i < delta; i++) {
+                            this.extract.data[pmid].attrs.other.pop();
+                        }
+                    }
+                    this.$forceUpdate();
+                },
+
+                on_change_only_show_selected: function(event) {
+                    // let val = event.srcElement.checked;                    
+                    // this.only_show_selected = val;
+                    this.$forceUpdate();
+                }
+            }
+        });
+    },
+
+    set_mode: function(mode) {
+        this.vpp.$data.mode = mode;
+    },
+
+    update: function(data) {
+        // the data is a combo of extract and papers
+        this.vpp.extract = data.extract;
+        this.vpp.papers = data.papers;
+
+        // update the all_attrs and show_attrs variables for display
+
+        // shortcut
+        if (this.vpp.extract.oc_type == 'itable') {
+            this.update_all_and_show_attrs_for_itable();
+        } else {
+            this.update_all_and_show_attrs_for_outcome();
+        }
+
+        // update
+        this.vpp.$forceUpdate();
+    },
+
+    update_all_and_show_attrs_for_itable: function() {
+        // for itable, just show attr + sub
+        // for outcomes, just show cate + attr
+        // init the all_attrs which for list all the nested attrs
+        this.vpp.all_attrs = [];
+
+        // init the show_attrs
+        this.vpp.show_attrs = {}
+
+        // for display
+        this.vpp.thr1s = [];
+        this.vpp.thr2s = [];
+
+        // loop on the cate_attrs
+        for (let i = 0; i < this.vpp.extract.meta.cate_attrs.length; i++) {
+            const cate = this.vpp.extract.meta.cate_attrs[i];
+
+            for (let j = 0; j < cate.attrs.length; j++) {
+                const attr = cate.attrs[j];
+                
+                var thr1 = {
+                    name: '',
+                    abbr: attr.abbr,
+                    cols: 0
+                }
+
+                var thr2 = null;
+                if (attr.subs == null) {
+                    // which means this attr doesn't have a sub
+                    this.vpp.all_attrs.push(attr);
+                    this.vpp.show_attrs[attr.abbr] = false;
+                    
+                    // also increase the first row
+                    thr1.cols += 1;
+
+                    // just this attr
+                    thr2 = {
+                        name: attr.name,
+                        abbr: attr.abbr,
+                        cols: 1
+                    };
+                    this.vpp.thr2s.push(thr2);
+
+                } else {
+                    for (let k = 0; k < attr.subs.length; k++) {
+                        const sub = attr.subs[k];
+                        this.vpp.all_attrs.push(sub);
+                        this.vpp.show_attrs[sub.abbr] = false;
+
+                        // update the display count
+                        thr1.cols += 1;
+
+                        thr2 = {
+                            name: sub.name,
+                            abbr: sub.abbr,
+                            cols: 1
+                        };
+                        this.vpp.thr2s.push(thr2);
+                    }
+                }
+
+                this.vpp.thr1s.push(thr1);
+
+            }
+
+        }
+
+        // update
+        this.vpp.$forceUpdate();
+    },
+
+
+    update_all_and_show_attrs_for_outcome: function() {
+        // for itable, just show attr + sub
+        // for outcomes, just show cate + attr
+        // init the all_attrs which for list all the nested attrs
+        this.vpp.all_attrs = [];
+
+        // init the show_attrs
+        this.vpp.show_attrs = {}
+
+        // for display
+        this.vpp.thr1s = [];
+        this.vpp.thr2s = [];
+
+        // loop on the cate_attrs
+        for (let i = 0; i < this.vpp.extract.meta.cate_attrs.length; i++) {
+            const cate = this.vpp.extract.meta.cate_attrs[i];
+
+            var thr1 = {
+                name: cate.name,
+                cols: 0
+            }
+            for (let j = 0; j < cate.attrs.length; j++) {
+                const attr = cate.attrs[j];
+                
+                thr1.cols += 1;
+
+                var thr2 = {
+                    name: attr.name,
+                    cols: 0
+                }
+                if (attr.subs == null) {
+                    // which means this attr doesn't have a sub
+                    this.vpp.all_attrs.push(attr);
+                    this.vpp.show_attrs[attr.abbr] = true;
+                    
+                    // update the display row count
+                    thr2.cols += 1;
+
+                } else {
+                    for (let k = 0; k < attr.subs.length; k++) {
+                        const sub = attr.subs[k];
+                        this.vpp.all_attrs.push(sub);
+                        this.vpp.show_attrs[sub.abbr] = true;
+
+                        // update the display count
+                        thr2.cols += 1;
+
+                        // also increase the first row
+                        thr1.cols += 1;
+                    }
+                }
+                this.vpp.thr2s.push(thr2);
+            }
+
+            this.vpp.thr1s.push(thr1);
+        }
+
+        // update
+        this.vpp.$forceUpdate();
+    },
+
+
+    get_current_extract_and_papers: function() {
+        if (this.vpp.$data.extract == null) {
+            return null;
+        }
+        
+        // build a object
+        var ret = {
+            extract: this.vpp.$data.extract,
+            papers: this.vpp.$data.papers
+        };
+
+        return ret;
+    },
+
+    show_extract_and_papers: function(abbr) {
+        var project_id = Cookies.get('project_id');
+        $.get(
+            srv_extractor.url.get_extract_and_papers,
+            {project_id:project_id, abbr:abbr, rnd:Math.random()},
+            function(data) {
+                pan_ocpapers.update(data);
+
+            }, 'json'
+        );
+    },
+
+    update_extract: function() {
+        // there are 
+        var project_id = Cookies.get('project_id');
+        var oc_type = this.vpp.$data.extract.oc_type;
+        var abbr = this.vpp.$data.extract.abbr;
+        var meta = this.vpp.$data.extract.meta;
+        var data = this.vpp.$data.extract.data;
+
+        // send request!
+        $.post(
+            srv_extractor.url.update_extract,
+            {project_id:project_id, oc_type:oc_type, abbr:abbr,
+             meta:JSON.stringify(meta), data:JSON.stringify(data)},
+            function(data) {
+                // show
+                toast('Saved the outcome [' + data.extract.meta.full_name + ']');
+                // reload the outcomes
+                pan_outcomes.load();
+            }
+        );
+    },
+
+    show: function() {
+        $(this.vpp_id).show();
+    },
+
+    hide: function() {
+        $(this.vpp_id).hide();
+    },
+
+    set_size: function(size) {
+        $(this.vpp_id).removeClass('panel-s panel-m panel-l')
+            .addClass('panel-' + size);
+    },
+
+    resize: function() {
+        var w = $(window).width() - 50;
+        var h = $(window).height() - 50;
+        $(this.vpp_id).css('width', w);
+        $(this.vpp_id).css('height', h);
+    }
+};
+
+
+var jarvis = {
+
+    getUrlParameter: function(name) {
+        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+        var results = regex.exec(location.search);
+        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    },
+
+    goto_screener: function(project_id, title) {
+        Cookies.set('project_id', project_id);
+        Cookies.set('project_title', title);
+
+        location.href = '[[ url_for("screener.overview") ]]';
+    },
+
+    init: function() {
+        // get the outcome abbr from url
+        var oc_abbr = jarvis.getUrlParameter('abbr');
+
+        // init the UI
+        pan_ocpapers.init();
+
+        // resize
+        pan_ocpapers.resize();
+
+        // the load the init outcomes
+        pan_ocpapers.show_extract_and_papers(oc_abbr);
+
+        this.bind_resize();
+    },
+
+    prompt: function(text, value) {
+        return window.prompt(text, value);
+    },
+
+    confirm: function(text) {
+        return window.confirm(text);
+    },
+
+    toast: function(s) {
+        toast(s);
+    },
+
+
+    get_year: function(s) {
+        const regex = /\d{4}/gm;
+        let m;
+        if ((m = regex.exec(s)) !== null) {
+            return m[0];
+        }
+        return '';
+    },
+
+    download_file: function(fn) {
+        // fixed image download bug
+        // Thanks to https://stackoverflow.com/questions/17311645/download-image-with-javascript
+        var a = $('<a>').attr('href', '/f/' + fn)
+            .attr('download', fn)
+            .appendTo("body");
+        a[0].click()
+        a.remove();
+    },
+
+    bind_resize: function() {
+        $(window).on('resize', function(){
+            pan_ocpapers.resize();
+        });
+    }
+};
+
+$(document).ready(function() {
+    jarvis.init();
+});
+</script>
+{% endblock %}
