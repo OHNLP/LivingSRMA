@@ -103,6 +103,19 @@ html {
     border-right: 1px solid rgb(211, 211, 211);    
 }
 
+.paper-table-row {
+    min-height: 24px;
+}
+.paper-table-row:hover {
+    background: #cccccc;
+}
+.paper-table-row-clicked {
+    background-color: rgb(189, 228, 238) !important;
+}
+.paper-table-row-clicked .paper-name {
+    font-weight: bold;
+}
+
 .n-arms-hr {
     margin: 1px 0 !important;
 }
@@ -516,10 +529,10 @@ var pan_ocpapers = {
                     $('#paper-table-row-' + pmid).addClass('paper-table-row-clicked');
 
                     // call collector to do something
-                    pan_collector.show_paper(
-                        pmid, 
-                        pan_ocpapers.vpp.$data.extract.data[pmid]
-                    );
+                    // pan_collector.show_paper(
+                    //     pmid, 
+                    //     pan_ocpapers.vpp.$data.extract.data[pmid]
+                    // );
                 },
 
                 toggle_select_all_papers: function(event) {
