@@ -124,17 +124,19 @@
                 <tr class="paper-table-row" 
                     v-for="paper in papers"
                     v-bind:id="'paper-table-row-' + paper.pid"
-                    v-on:click="on_click_paper(paper.pid)"
                     v-show="!only_show_selected || extract.data[paper.pid].is_selected">
                     <td class="paper-table-body-td">
                         <input type="checkbox" v-model="extract.data[paper.pid].is_selected" >
                     </td>
-                    <td class="paper-name paper-table-body-td">
+
+                    <td class="paper-table-body-td"
+                        v-on:click="on_click_paper(paper.pid)">
                         <div class="paper-table-body-td-author"
                             v-bind:title="get_first_author(paper.authors)">
                             {{ get_first_author(paper.authors) }} {{ get_year(paper.pub_date) }}
                         </div>
                     </td>
+
                     <td class="paper-table-body-td">
                         <input type="checkbox" 
                             v-bind:id="'paper-row-checked'+paper.pid"
