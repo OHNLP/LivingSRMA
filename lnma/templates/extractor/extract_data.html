@@ -13,6 +13,7 @@ Extract Data for []
 <style>
 html {
     overflow-x: hidden;
+    overflow-y: hidden;
 }
 /* badge */
 .badge-ckl {
@@ -72,14 +73,14 @@ html {
     border-radius: .2rem;
 }
 
-#config_outcome {
+#win_collector {
     min-width: 1100px;
     width: 70%;
     height: 100%;
     position: absolute;
     right: 5000px;
     background-color: #ffffff;
-    padding: 5px;
+    padding: 5px 10px;
 }
 
 .paper-table-body-td-author {
@@ -116,15 +117,21 @@ html {
     font-weight: bold;
 }
 
+
+.paper-extract-input-auto {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: .9em;
+    padding: 0 3px;
+    height: 20px;
+    line-height: 20px;
+    border: 1px solid #cccccc;
+}
+
 .n-arms-hr {
     margin: 1px 0 !important;
 }
 .cell-input {
     margin: 0 0 2px 0 !important;
-}
-.cell-input input {
-    padding: 0 3px;
-    height: 18px;
 }
 .extract-attr-label {
     font-weight: normal !important;
@@ -142,9 +149,12 @@ html {
     border-bottom: 1px dotted #dfdfdf;
 }
 
+
 #pan_ocpapers_ctx_menu {
     border: 2px solid #EFEFEF;
-    box-shadow: 0px 0px 15px #cccccc;;
+    box-shadow: 0px 0px 15px #cccccc;
+
+    z-index: 99;
 }
 #pan_ocpapers_ctx_menu_txt {
     color: black;
@@ -174,6 +184,11 @@ html {
 }
 
 </style>
+
+<!-- jQuery UI Theme -->
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css">
+
+
 {% endblock %}
 
 {% block content %}
@@ -181,203 +196,7 @@ html {
 <div id="main">
 
 
-<div id="pan_ocpapers" class="panel-m panel-container" v-if="extract != null">
-    <div class="panel-info">
-        <div class="oc-attr d-flex flex-row">
-            <span style="font-size: 1.2em;" class="mr-2">
-                <b>[{{ extract.meta.full_name }}]</b> Details
-            </span>
-
-            <div class="btn-group mr-2">
-                <button v-on:click="toggle_show_settings();"
-                    type="button" class="btn btn-default btn-sm">
-                    <i class="fa" v-bind:class="{'fa-toggle-on': show_settings, 'fa-toggle-off': !show_settings}"></i>
-                    Toggle
-                </button>
-            </div>
-
-            <div class="btn-group mr-2">
-                <button v-on:click="update_extract();"
-                    type="button" class="btn btn-default btn-sm">
-                    <i class="fa fa-save"></i>
-                    Save all
-                </button>
-            </div>
-
-        </div>
-    </div>
-
-    <div v-bind:class="{hide: !show_settings}"
-        style="width: 100%;">
-    
-    <div class="panel-info d-flex flex-column" v-if="extract != null">
-        <div v-for="cate, cate_idx in extract.meta.cate_attrs"
-            style="border-bottom: 1px dotted #dddddd; margin: 5px 0 5px 0;"
-            class="d-flex flex-column">
-
-            <div :id="'cate-' + cate.abbr"
-                class="d-flex flex-row flex-wrap">
-
-                <div style="background: #dddddd;"
-                    class="mr-2 pr-2">
-                    <input type="checkbox" v-bind:id="'toggle-cate-' + cate.abbr"
-                        v-on:change="on_toggle_itable_select_category(cate_idx, $event)">
-                    <label :for="'toggle-cate-' + cate.abbr" class="extract-attr-label">
-                        <b>{{ cate.name }}</b>
-                    </label>
-                </div>
-
-                <div v-for="attr, attr_idx in cate.attrs"
-                    class="mr-2 border-end">
-                    
-                    <span v-if="attr.subs == null" v-bind:abbr="attr.abbr">
-                        <input type="checkbox" 
-                            v-model="show_attrs[attr.abbr]"
-                            v-on:change="on_toggle_attr_selection(attr.abbr, $event)"
-                            :id="'attr-' + attr.abbr">
-                        <label class="extract-attr-label" :for="'attr-' + attr.abbr">{{ attr.name }}</label>
-                    </span>
-
-                    <span v-else v-bind:abbr="attr.abbr">
-                        <input type="checkbox" 
-                            v-model="show_attrs[attr.abbr]"
-                            v-on:change="on_toggle_attr_selection(attr.abbr, $event)"
-                            :id="'attr-' + attr.abbr">
-
-                        {{ attr.name }}
-                        [
-                        <span class="mr-2" v-for="sub, sub_idx in attr.subs">
-                            <input type="checkbox" v-model="show_attrs[sub.abbr]"
-                                v-on:change="on_toggle_attr_selection(attr.abbr, $event)"
-                                :id="'sub-' + sub.abbr">
-                            <label class="extract-attr-sub-label" :for="'sub-' + sub.abbr">
-                                {{ sub.name }}
-                            </label>
-                        </span>
-                        ]
-                    </span>
-                </div>
-            </div>
-        </div>
-
-    </div>
-    <!-- /.panel-info -->
-
-    </div>
-    <!-- /div of settings -->
-
-
-    <div class="panel-paperlist" style="overflow: auto;">
-
-        <!-- table for itable -->
-        <table class="extract-table">
-            <thead class="paper-table-header">
-                <tr>
-                    <th class="paper-table-header-th" colspan="4">
-                        &nbsp;
-                    </th>
-                    <th v-for="thr1 in thr1s"
-                        v-bind:colspan="thr1.cols"
-                        v-show="show_attrs[thr1.abbr]"
-                        class="paper-table-header-th"
-                        style="text-align: center;">
-                        {{ thr1.name }}
-                    </th>
-                </tr>
-
-                <tr>
-                    <th class="paper-table-header-th" style="width: 20px;">
-                        <input type="checkbox" title="Toggle selection"
-                            v-on:click="toggle_select_all_papers($event);">
-                    </th>
-                    <th class="paper-table-header-th" style="width: 130px;">
-                        ({{ n_selected }} selected)
-                    </th>
-                    <th class="paper-table-header-th" style="width: 90px;">
-                        Checked
-                    </th>
-                    <th class="paper-table-header-th" style="width: 50px;">
-                        Arms
-                    </th>
-                    
-                    <!-- the attributes need to collect -->
-                    <th class="paper-table-header-th" 
-                        style="text-align: center;"
-                        v-for="thr2 in thr2s"
-                        v-bind:colspan="thr2.cols"
-                        v-show="show_attrs[thr2.abbr]">
-                        <span>
-                            {{ thr2.name }}
-                        </span>
-                    </th>
-                </tr>
-            </thead>
-
-            <tbody>
-                <tr class="paper-table-row" 
-                    v-for="paper in papers"
-                    v-bind:id="'paper-table-row-' + paper.pid"
-                    v-on:click="on_click_paper(paper.pid)"
-                    v-show="!only_show_selected || extract.data[paper.pid].is_selected">
-                    <td class="paper-table-body-td">
-                        <input type="checkbox" v-model="extract.data[paper.pid].is_selected" >
-                    </td>
-                    <td class="paper-name paper-table-body-td">
-                        <div class="paper-table-body-td-author"
-                            v-bind:title="get_first_author(paper.authors)">
-                            {{ get_first_author(paper.authors) }} {{ get_year(paper.pub_date) }}
-                        </div>
-                    </td>
-                    <td class="paper-table-body-td">
-                        <input type="checkbox" 
-                            v-bind:id="'paper-row-checked'+paper.pid"
-                            v-model="extract.data[paper.pid].is_checked">
-                    </td>
-                    <td class="paper-table-body-td">
-                        <select name="" id="" v-model="extract.data[paper.pid].n_arms"
-                            v-on:change="on_change_itable_n_arms(paper.pid, $event)">
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                            <option value="5">5</option>
-                        </select>
-                    </td>
-                    
-                    <!-- the attributes of pwma -->
-                    <td v-for="attr_sub in all_attrs" 
-                        v-show="show_attrs[attr_sub.abbr]"
-                        class="paper-table-body-td paper-value">
-                        
-                        <!-- the main track -->
-                        <span class="cell-input">
-                            <input class="paper-extract-input-auto" type="text" 
-                                v-bind:abbr="attr_sub.abbr"
-                                v-bind:size="get_input_size(extract.data[paper.pid].attrs.main[attr_sub.abbr])"
-                                v-model="extract.data[paper.pid].attrs.main[attr_sub.abbr]">    
-                        </span>
-
-                        <!-- the other tracks if n_arms > 2 -->
-                        <hr class="n-arms-hr" v-if="extract.data[paper.pid].n_arms > 2">
-
-                        <span v-for="other, other_idx in extract.data[paper.pid].attrs.other"
-                            class="cell-input">
-                            <br v-if="other_idx > 0">
-                            <input class="paper-extract-input-auto" type="text" 
-                                v-bind:size="get_input_size(extract.data[paper.pid].attrs.other[other_idx][attr_sub.abbr])"
-                                v-model="extract.data[paper.pid].attrs.other[other_idx][attr_sub.abbr]">  
-                        </span>                        
-
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-
-    </div>
-    <!-- /.panel-paperlist -->
-
-</div>
-<!-- /#pan_ocpapers -->
-
+{% include 'extractor/extract_data_ocpapers.html' %}
 
 
 <ul id="pan_ocpapers_ctx_menu" style="display: none;">
@@ -385,8 +204,15 @@ html {
 </ul>
 
 
-
-{% include 'extractor/_v1_pan_collector.html' %}
+<div id="win_collector">
+    <div style="position: absolute; top: 0; left: -40px; width: 40px; height: 40px; background-color: white;">
+        <div style="font-size: large; width: 40px; height: 40px; line-height: 40px; text-align: center; cursor: pointer;"
+            onclick="$('#win_collector').css('right', 5000)">
+            <i class="fa fa-close"></i>
+        </div>
+    </div>
+    {% include 'extractor/extract_data_collector.html' %}
+</div>
 
 
 </div>
@@ -404,10 +230,15 @@ html {
 
 {% include "js/srv_extractor.js" %}
 
+{% include "js/srv_pdfworker.js" %}
+
 
 var pan_ocpapers = {
     vpp_id: "#pan_ocpapers",
     vpp: null,
+
+    MIN_INPUT_AUTO_SIZE: 4,
+    MAX_INPUT_AUTO_SIZE: 16,
 
     init: function() {
         this.vpp = new Vue({
@@ -444,6 +275,10 @@ var pan_ocpapers = {
                     return n;
                 }
             },
+            updated: function() {
+                pan_ocpapers.resize();
+
+            },
             methods: {
                 toggle_show_settings: function() {
                     this.show_settings = !this.show_settings;
@@ -474,16 +309,16 @@ var pan_ocpapers = {
                 
                 get_input_size: function(str) {
                     // convert null to empty
-                    if (str == null) {
+                    if (typeof(str) == 'undefined' || str == null) {
                         str = '';
                     }
                     // convert number to string
                     str = '' + str;
                     var s = str.length;
-                    if (s<5) {
-                        return 5;
-                    } else if (s > 14) {
-                        return 14;
+                    if (s<pan_ocpapers.MIN_INPUT_AUTO_SIZE) {
+                        return pan_ocpapers.MIN_INPUT_AUTO_SIZE;
+                    } else if (s > pan_ocpapers.MAX_INPUT_AUTO_SIZE) {
+                        return pan_ocpapers.MAX_INPUT_AUTO_SIZE;
                     } else {
                         return s;
                     }
@@ -529,10 +364,10 @@ var pan_ocpapers = {
                     $('#paper-table-row-' + pmid).addClass('paper-table-row-clicked');
 
                     // call collector to do something
-                    // pan_collector.show_paper(
-                    //     pmid, 
-                    //     pan_ocpapers.vpp.$data.extract.data[pmid]
-                    // );
+                    pan_collector.show_paper(
+                        pmid, 
+                        pan_ocpapers.vpp.$data.extract.data[pmid]
+                    );
                 },
 
                 toggle_select_all_papers: function(event) {
@@ -809,6 +644,114 @@ var pan_ocpapers = {
             }
         );
     },
+    
+    ///////////////////////////////////////////////////////////////////////////
+    // Functions related to collector
+    ///////////////////////////////////////////////////////////////////////////
+    /**
+     * Set the highlight text to pid in the box
+     * 
+     * seq: null means `main`, 0 to x means item index in `other`
+     */
+     set_highlight_text_to_attr: function(highlight_text, pid, attr_abbr, seq) {
+        console.log('* set_highlight_text_to_attr: ' + highlight_text + ', ' + pid + ', ' + attr_abbr + ', ' + seq);
+
+        // update the value for the specific paper
+        if (seq == null) {
+            // it means this is the main track
+            this.vpp.$data.extract.data[pid].attrs.main[attr_abbr] = highlight_text;
+        } else {
+            // this means the value is for other arms
+            this.vpp.$data.extract.data[pid].attrs.other[seq][attr_abbr] = highlight_text;
+        }
+        // update UI
+        this.vpp.$forceUpdate();
+    },
+
+    update_ctx_menu: function(highlight_text, pid, n_arms) {
+        // loop on the cate_attrs
+        var html = [
+            '<li class="ui-state-disabled menu-info"><div>',
+                '<i class="fa fa-close"></i> ',
+                'Highlighted <b id="pan_ocpapers_ctx_menu_txt">'+highlight_text+'</b> is:',
+            '</div></li>'
+        ];
+
+        // this is for the main extracting
+        // the last argument is null, means it's the main track
+        html = this.__update_ctx_menu_html(html, highlight_text, pid, null);
+
+        // this is for the other extracting (i.e., multiple arms)
+        if (n_arms > 2) {
+            html.push('<li class="ui-state-disabled menu-header"><div>Other Arms</div></li>');
+            
+            for (let a = 0; a < n_arms - 2; a++) {
+                html.push('<li class="menu-item"><div>Other '+(a+1)+'</div><ul>');
+                html = this.__update_ctx_menu_html(html, highlight_text, pid, a);
+                html.push('</ul></li>')
+            }
+        }
+
+        // put the new html into box
+        $('#pan_ocpapers_ctx_menu').html(
+            html.join('')
+        );
+    },
+
+    __update_ctx_menu_html: function(html, highlight_text, pid, seq) {
+
+        for (let i = 0; i < this.vpp.extract.meta.cate_attrs.length; i++) {
+
+            const cate = this.vpp.extract.meta.cate_attrs[i];
+
+            // put a new cate
+            html.push('<li class="ui-state-disabled menu-header"><div>'+cate.name+'</div></li>');
+
+            var flag_has_shown_attr = false;
+            for (let j = 0; j < cate.attrs.length; j++) {
+                const attr = cate.attrs[j];
+                
+                if (attr.subs == null) {
+                    var is_show = this.vpp.show_attrs[attr.abbr];
+                    if (is_show) {
+                        html.push(
+                        '<li class="menu-item">' +
+                            '<div onclick="pan_ocpapers.set_highlight_text_to_attr(\''+highlight_text+'\', \''+pid+'\', \''+attr.abbr+'\', '+seq+')">' +
+                            attr.name +
+                            '</div>' +
+                        '</li>'
+                        );
+                        flag_has_shown_attr = true;
+                    }
+                } else {
+                    for (let k = 0; k < attr.subs.length; k++) {
+                        const sub = attr.subs[k];
+                        if (this.vpp.show_attrs[sub.abbr]) {
+                            html.push(
+                            '<li class="menu-item">' +
+                                '<div onclick="pan_ocpapers.set_highlight_text_to_attr(\''+highlight_text+'\', \''+pid+'\', \''+sub.abbr+'\', '+seq+')">' +
+                                attr.name + ' - ' + sub.name +
+                                '</div>' +
+                            '</li>'
+                            );
+                            flag_has_shown_attr = true;
+                        }
+                    }
+                }
+            }
+
+            if (flag_has_shown_attr) {
+                //
+            } else {
+                html.pop();
+            }
+            
+        }
+
+        return html;
+    },
+
+
 
     show: function() {
         $(this.vpp_id).show();
@@ -824,7 +767,7 @@ var pan_ocpapers = {
     },
 
     resize: function() {
-        var w = $(window).width() - 50;
+        var w = $(window).width() - 90;
         var h = $(window).height() - 50;
         $(this.vpp_id).css('width', w);
         $(this.vpp_id).css('height', h);
@@ -855,18 +798,34 @@ var pan_collector = {
 
                 view_pdf: function(paper_id, file_id, folder) {
                     pan_collector.view_pdf(paper_id, file_id, folder);
+                },
+
+                upload_pdfs: function() {
+                    pan_collector.upload_pdfs();
+                },
+
+                download_pdf: function(file_id, folder) {
+
+                },
+
+                remove_pdf: function(display_name, file_id, folder) {
+
                 }
             },
             updated: function() {
-                pan_collector.bind_txt_ctx_menu();
+                // pan_collector.bind_txt_ctx_menu();
             }
         });
 
-        this.resize_pdfviewer();
+        this.resize();
+
+        // bind the context menu
+        this.bind_txt_ctx_menu();
     },
 
     bind_txt_ctx_menu: function() {
-        $(this.vpp_id + '_basic_info').on('contextmenu', function(event) {
+        // $(this.vpp_id + '_basic_info').on('contextmenu', function(event) {
+        $(this.vpp_id).on('contextmenu', function(event) {
             // get the highlighted text
             var text = "";
             if (window.getSelection) {
@@ -874,6 +833,7 @@ var pan_collector = {
             } else if (document.selection && document.selection.type != "Control") {
                 text = document.selection.createRange().text;
             }
+            console.log('* found highlighted text', text);
 
             // update the context menu content based on the selected attributes.
             // all of the details about this paper is need to generate the menu.
@@ -905,7 +865,7 @@ var pan_collector = {
             //blocks default Webbrowser right click menu
             return false; 
         });
-        // console.log('* binded ctx menu')
+        console.log('* binded ctx menu')
     },
 
     on_contextmenu_pdfviewer: function(event) {
@@ -959,43 +919,44 @@ var pan_collector = {
         // this.load_pdf();
 
         // bind the context menu
-        this.bind_txt_ctx_menu();
+        // this.bind_txt_ctx_menu();
     },
 
     show_paper: function(pid, extract_paper) {
+        // set loc to show
+        $('#win_collector').css("right", 0);
+
+        // resize
+        pan_collector.resize();
+
         // set the extract info
         this.current.extract_paper = extract_paper;
 
         // get the paper
         $.get(
-            jarvis.url.get_paper,
+            srv_extractor.url.get_paper,
             {pid: pid, rnd:Math.random()},
             function(data) {
                 pan_collector.update(data.paper);
             }, 'json'
         );
         // bind the context menu
-        this.bind_txt_ctx_menu();
+        // this.bind_txt_ctx_menu();
     },
 
     show: function() {
         $(this.vpp_id).show();
         // bind the context menu
-        this.bind_txt_ctx_menu();
+        // this.bind_txt_ctx_menu();
     },
 
     hide: function() {
         $(this.vpp_id).hide();
     },
 
-    set_size: function(size) {
-        $(this.vpp_id).removeClass('panel-s panel-m panel-l')
-            .addClass('panel-' + size);
-    },
-
     view_pdf: function(paper_id, file_id, folder) {
         // update the pdf viewer size
-        this.resize_pdfviewer();
+        this.resize();
 
         // load the pdf
         this.load_pdf(folder, file_id);
@@ -1013,10 +974,35 @@ var pan_collector = {
         document.getElementById("ifr_pdfviewer").contentWindow.PDFViewerApplication.open(pdf_url);
     },
 
-    resize_pdfviewer: function() {
+    upload_pdfs: function() {
+        var paper_id = this.vpp.paper.paper_id;
+        // call pdfworker service to upload
+        srv_pdfworker.update_form_data(
+            '#form_pdf_files',
+            function(data) {
+                console.log(data);
+                if (data.success) {
+
+                    jarvis.toast('Uploaded PDF for paper!');
+                    
+                    // update display
+                    pan_collector.update(data.paper);
+                } else {
+                    toast('Error when uploading PDF, try later.', 'error')
+                }
+            }
+        );
+    },
+
+    resize: function() {
+        // set the height for the window
+        var h = $(window).height() - 50;
+        $('#win_collector').css("height", h);
+
+        // set the height for the pdf viewer
         var h = $(window).height() - 150;
         $(this.pdfviewer_id).css('height', h + 'px');
-    }
+    },
 };
 
 
@@ -1051,6 +1037,12 @@ var jarvis = {
         pan_ocpapers.show_extract_and_papers(oc_abbr);
 
         this.bind_resize();
+
+        document.addEventListener('click', function(event) {
+
+            // close the menu when click anywhere
+            $("#pan_ocpapers_ctx_menu").hide();
+        });
     },
 
     prompt: function(text, value) {
@@ -1088,8 +1080,7 @@ var jarvis = {
     bind_resize: function() {
         $(window).on('resize', function(){
             pan_ocpapers.resize();
-            // adjust the pdf view size
-            pan_collector.resize_pdfviewer();
+            pan_collector.resize();
         });
     }
 };

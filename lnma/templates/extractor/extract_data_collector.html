@@ -1,0 +1,112 @@
+<div id="pan_collector" class="panel-m panel-container">
+    <div v-if="paper == null">
+        Click the paper name to show details
+    </div>
+
+    <!-- details of paper -->
+    <div v-else>
+
+
+
+        <div class="panel-info">
+        
+            <ul class="nav nav-tabs">
+                <li class="nav-item">
+                    <a class="nav-link" 
+                        v-bind:class="{active: show_tab == 'basic_info'}"
+                        href="javascript:void(0);"
+                        v-on:click="switch_tab('basic_info');">
+                        <i class="fa fa-info-circle"></i>
+                        Abstract
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="javascript:void(0);"
+                        v-bind:class="{active: show_tab == 'pdf'}"
+                        v-on:click="switch_tab('pdf');">
+                        <i class="far fa-file-pdf"></i>
+                        PDFs
+                    </a>
+                </li>
+            </ul>
+        
+        </div>
+        <!-- /.panel-info -->
+
+        <!-- the Abstract page -->
+        <div id="pan_collector_basic_info"  
+            class="border-top-0 pan-normal"
+            v-show="show_tab == 'basic_info'">
+
+            <div class="panel-info">
+                <p style="font-size: 0.9em; color: #777777; ">{{ paper.pub_date }} - {{ paper.journal }}</p>
+                <p style="font-size: 1.5em; font-weight: bold; line-height: 1.2em;">{{ paper.title }}</p>
+                <p styel="font-size: 1em;">{{ paper.authors }}</p>
+                <p>
+                    PMID: 
+                    <a target="_blank" title="Show in " :href="'https://pubmed.ncbi.nlm.nih.gov/' + paper.pid ">{{ paper.pid }}</a> ({{ paper.pid_type }})
+                </p>
+                <p style="font-size: 1.2em; font-weight: bold;">Abstract</p>
+                <div style="font-size: 1em;" v-html="paper.abstract"></div>
+            </div>
+            
+        </div>
+
+        <!-- the PDF page -->
+        <div id="pan_collector_pdf" v-show="show_tab == 'pdf'">
+            <div class="d-flex flex-row mt-2 mb-2 mr-2">
+                
+                <div class="btn-group mr-2"
+                    v-for="pdf in paper.meta.pdfs">
+                    <button type="button" class="btn btn-default btn-sm"
+                    v-on:click="view_pdf(paper.paper_id, pdf.file_id, pdf.folder);">
+                        <i class="far fa-file-pdf"></i>
+                        {{ pdf.display_name }}
+                    </button>
+
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-right">
+                            <a class="dropdown-item" href="javascript:void(0);" 
+                                v-on:click="download_pdf(pdf.file_id, pdf.folder)">
+                                <i class="fa fa-download"></i>
+                                Download this PDF
+                            </a>
+                            <a class="dropdown-item" href="javascript:void(0);" 
+                                v-on:click="remove_pdf(pdf.display_name, pdf.file_id, pdf.folder)">
+                                <i class="far fa-trash-alt"></i>
+                                Delete this PDF
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                                
+                <form id="form_pdf_files" method="post" 
+                    class="ml-1"
+                    enctype="multipart/form-data">
+                    <input type="hidden" name="paper_id" v-bind:value="paper.paper_id">
+                    <input type="file" name="files[]" multiple="" accept=".pdf"
+                            style="width: 210px;" id="input_pdf_files">
+                </form>
+
+                <button class="btn btn-default btn-sm mr-2"
+                    v-on:click="upload_pdfs();">
+                    <i class="fa fa-upload"></i>
+                    Upload
+                </button>
+
+            </div>
+
+
+            <iframe v-if="paper.meta.hasOwnProperty('pdfs') && paper.meta.pdfs.length > 0"
+                id="ifr_pdfviewer" src="/pdfworker/view_pdf" 
+                width="100%" scrolling="yes"
+                frameborder="0">
+            </iframe>
+        </div>
+        
+    </div>
+    
+</div>
+<!-- /#pan_collector -->
