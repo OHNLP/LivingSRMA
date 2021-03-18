@@ -6,8 +6,10 @@ Extract Data
 
 {% block page_name %}
 <i class="fa fa-edit"></i>
-Extract Data for []
+Extract Data
 {% endblock %}
+
+{% block active_nav_link %}extractor-extract-data{% endblock %}
 
 {% block style %}
 <style>
@@ -72,17 +74,6 @@ html {
     line-height: 1.2;
     border-radius: .2rem;
 }
-
-#win_collector {
-    min-width: 1100px;
-    width: 70%;
-    height: 100%;
-    position: absolute;
-    right: 5000px;
-    background-color: #ffffff;
-    padding: 5px 10px;
-}
-
 .paper-table-body-td-author {
     width: 190px;
     white-space: nowrap;
@@ -104,6 +95,9 @@ html {
     border-left: 1px solid rgb(211, 211, 211);
     border-right: 1px solid rgb(211, 211, 211);    
 }
+
+.paper-list tr:nth-child(even) {background: rgb(232, 232, 232)}
+.paper-list tr:nth-child(odd) {background: whitesmoke}
 
 .paper-table-row {
     min-height: 24px;
@@ -184,9 +178,59 @@ html {
     min-height: 400px;
 }
 
-#pan_collector_extract_list {
-    width: 120px;
-    max-width: 150px;
+#win_collector {
+    min-width: 1100px;
+    width: 65%;
+    height: 100%;
+    position: absolute;
+    right: 5000px;
+    background-color: #ffffff;
+    padding: 5px 10px;
+}
+
+#pan_ocpapers_working_paper {
+    width: 160px;
+    padding: 5px;
+    height: auto;
+    position: absolute;
+    z-index: 95;
+    top: 50px;
+    right: 65%;
+    background: white;
+    font-size: .9em;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+#pan_ocpapers_working_paper_title {
+    height: 30px;
+    line-height: 30px;
+    overflow: hidden;
+    text-align: center;
+    font-weight: bold;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    background-color: #dedede;
+}
+#pan_ocpapers_working_paper_attr_list {
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+#pan_ocpapers_working_paper_attr_list div.w-attr-item:nth-child(even) {background: white; }
+#pan_ocpapers_working_paper_attr_list div.w-attr-item:nth-child(odd) {background: whitesmoke; }
+.w-attr-item {
+    border-bottom: 1px dotted #dedede;
+    padding: 3px 0;
+}
+.w-attr-item-name {
+    font-size: .9em;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 </style>
 
@@ -224,11 +268,8 @@ html {
 <!-- /#main -->
 
 
-
-
 {% endblock %}
 
-{% block active_nav_link %}extractor-manage-outcomes{% endblock %}
 
 {% block script %}
 <script>
@@ -258,8 +299,12 @@ var pan_ocpapers = {
                 thr1s: [],
                 thr2s: [],
 
+                // working pmid when clicking on paper
+                working_paper: null,
+                show_working_paper_pan: true,
+
                 // mode
-                mode: 'manage_outcomes',
+                mode: 'extract_data',
 
                 // data
                 all_attrs: null,
@@ -335,11 +380,7 @@ var pan_ocpapers = {
                 },
 
                 get_first_author: function(s) {
-                    var aus = s.split(';');
-                    if (aus.length == 1) {
-                        aus = s.split(',');
-                    }
-                    return aus[0];
+                    return jarvis.get_first_author(s);
                 },
 
                 on_change_input_format: function(event) {
@@ -356,13 +397,15 @@ var pan_ocpapers = {
                 },
 
                 on_toggle_attr_selection: function(attr_abbr, event) {
-
                     this.$forceUpdate();
                 },
 
-                on_click_paper: function(pmid) {
+                on_click_paper: function(paper) {
                     // set the working pmid ?
-                    // no need to set
+                    this.working_paper = paper;
+
+                    // get the pid / pmid
+                    var pmid = paper.pid;
 
                     // highlight this line
                     $('.paper-table-row').removeClass('paper-table-row-clicked');
@@ -373,6 +416,11 @@ var pan_ocpapers = {
                         pmid, 
                         pan_ocpapers.vpp.$data.extract.data[pmid]
                     );
+
+                    // the draggable 
+                    $( "#pan_ocpapers_working_paper" ).draggable({ 
+                        handle: "div#pan_ocpapers_working_paper_title" 
+                    });
                 },
 
                 toggle_select_all_papers: function(event) {
@@ -444,6 +492,8 @@ var pan_ocpapers = {
                 }
             }
         });
+    
+        
     },
 
     set_mode: function(mode) {
@@ -756,6 +806,10 @@ var pan_ocpapers = {
         return html;
     },
 
+    show_working_paper: function() {
+        var w_win_collector = $('#win_collector').width();
+        $('#pan_ocpapers_working_paper').css('right', w_win_collector + 20);
+    },
 
 
     show: function() {
@@ -774,8 +828,12 @@ var pan_ocpapers = {
     resize: function() {
         var w = $(window).width() - 90;
         var h = $(window).height() - 50;
-        $(this.vpp_id).css('width', w);
-        $(this.vpp_id).css('height', h);
+        $(this.vpp_id)
+            .css('width', w)
+            .css('height', h);
+
+        // resize the working paper panel
+        // $('#pan_ocpapers_working_paper').css('height', h-10);
     }
 };
 
@@ -815,7 +873,15 @@ var pan_collector = {
 
                 remove_pdf: function(display_name, file_id, folder) {
 
-                }
+                },
+
+                get_year: function(s) {
+                    return jarvis.get_year(s);
+                },
+
+                get_first_author: function(s) {
+                    return jarvis.get_first_author(s);
+                },
             },
             updated: function() {
                 // pan_collector.bind_txt_ctx_menu();
@@ -925,6 +991,9 @@ var pan_collector = {
 
         // bind the context menu
         // this.bind_txt_ctx_menu();
+
+        // notifiy the ocpaper to show the working paper
+        pan_ocpapers.show_working_paper();
     },
 
     show_paper: function(pid, extract_paper) {
@@ -947,6 +1016,8 @@ var pan_collector = {
         );
         // bind the context menu
         // this.bind_txt_ctx_menu();
+
+        
     },
 
     show: function() {
@@ -1070,6 +1141,14 @@ var jarvis = {
             return m[0];
         }
         return '';
+    },
+
+    get_first_author: function(s) {
+        var aus = s.split(';');
+        if (aus.length == 1) {
+            aus = s.split(',');
+        }
+        return aus[0];
     },
 
     download_file: function(fn) {

@@ -17,7 +17,7 @@
             </div>
 
             <div class="btn-group mr-2" role="group" aria-label="Extract information">
-                <button onclick="jarvis.switch_layout('extract_information');"
+                <button v-on:click="goto_extract_data(extract)"
                     type="button" class="btn btn-default btn-sm">
                     <i class="fa fa-edit"></i>
                     Extract data
@@ -25,7 +25,7 @@
             </div>
 
             <div class="btn-group mr-2" role="group" aria-label="Analyze outcome">
-                <button onclick="jarvis.switch_layout('analyze_outcome');"
+                <button v-on:click="goto_analysis(extract)"
                     type="button" class="btn btn-default btn-sm">
                     <i class="fa fa-chart-bar"></i>
                     Analyze this outcome

@@ -488,6 +488,15 @@ var pan_ocpapers = {
                     this.$forceUpdate();
                 },
 
+                goto_extract_data: function(extract) {
+                    location.href = srv_extractor.url.extract_data + 
+                        '?abbr=' + extract.abbr;
+                },
+
+                goto_analysis: function(extract) {
+
+                },
+
                 // save all!
                 update_extract: function() {
                     pan_ocpapers.update_extract();

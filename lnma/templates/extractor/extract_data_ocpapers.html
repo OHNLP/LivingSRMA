@@ -120,7 +120,7 @@
                 </tr>
             </thead>
 
-            <tbody>
+            <tbody class="paper-list">
                 <tr class="paper-table-row" 
                     v-for="paper in papers"
                     v-bind:id="'paper-table-row-' + paper.pid"
@@ -130,7 +130,7 @@
                     </td>
 
                     <td class="paper-table-body-td"
-                        v-on:click="on_click_paper(paper.pid)">
+                        v-on:click="on_click_paper(paper)">
                         <div class="paper-table-body-td-author"
                             v-bind:title="get_first_author(paper.authors)">
                             {{ get_first_author(paper.authors) }} {{ get_year(paper.pub_date) }}
@@ -184,5 +184,29 @@
     </div>
     <!-- /.panel-paperlist -->
 
+    <div id="pan_ocpapers_working_paper"
+        v-show="show_working_paper_pan">
+        <div v-if="working_paper != null">
+            <div id="pan_ocpapers_working_paper_title">
+                {{ get_first_author(working_paper.authors) }} {{ get_year(working_paper.pub_date) }}
+            </div>
+
+            <div id="pan_ocpapers_working_paper_attr_list">
+                <div v-for="attr_sub in all_attrs"
+                    v-show="show_attrs[attr_sub.abbr]"
+                    class="w-attr-item">
+                    <div class="w-attr-item-name">
+                        {{ attr_sub.name }}
+                    </div>
+                    <div class="w-attr-item-value">
+                        <input class="paper-extract-input-auto" type="text" 
+                            v-bind:abbr="attr_sub.abbr"
+                            v-bind:size="get_input_size(extract.data[working_paper.pid].attrs.main[attr_sub.abbr])"
+                            v-model="extract.data[working_paper.pid].attrs.main[attr_sub.abbr]"> 
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 <!-- /#pan_ocpapers -->
