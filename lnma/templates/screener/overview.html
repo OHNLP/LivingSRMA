@@ -901,39 +901,7 @@ var tbjs_paperlist = {
     // by default, show unscreened stage
     stage: srv_screener.STAGE_UNSCREENED,
 
-    // keywords for highlight
-    keywords: {
-        inclusion: [
-            'immune check point inhibitor',
-            'ICI',
-            'atezolizumab',
-            'avelumab',
-            'cemiplimab',
-            'durvalumab',
-            'ipilimumab',
-            'nivolumab',
-            'pembrolizumab',
-            'tremelimumab',
-            'PD1',
-            'PDL1',
-            'CTLA4',
-            'phase 2',
-            'phase2',
-            'phase 3',
-            'phase3'
-        ],
-        exclusion: [
-            'animals',
-            'phase1',
-            'phase 1',
-            'non-randomized',
-            'nonrandomized',
-            'systematic review',
-            'meta-analysis',
-            'meta analysis'
-        ]
-    },
-
+    // for highlight NCT number
     regex_RCT_ID: /NCT\d{8}/gmi,
 
     columns: [

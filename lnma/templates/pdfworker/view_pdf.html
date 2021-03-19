@@ -38,6 +38,31 @@ See https://github.com/adobe-type-tools/cmap-resources
 .hide-func {
     display: none;
 }
+.txt-red {
+    background: red;
+    padding: 0;
+    margin: 0;
+}
+.txt-orange {
+    background: orange;
+    padding: 0;
+    margin: 0;
+}
+.txt-green {
+    background: green;
+    padding: 0;
+    margin: 0;
+}
+.txt-blue {
+    background: darkblue;
+    padding: 0;
+    margin: 0;
+}
+.txt-purple {
+    background: purple;
+    padding: 0;
+    margin: 0;
+}
 </style>
 
 <!-- This snippet is used in production (included from viewer.html) -->
@@ -408,17 +433,26 @@ See https://github.com/adobe-type-tools/cmap-resources
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <!-- jQuery UI -->
     <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
+    <!-- mark.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js"></script>
 
-    <ul id="pan_ocpapers_ctx_menu" style="display: none;">
-      
-    </ul>
+<script>
+$(document).on('contextmenu', function (event) {
+    console.log('* rightclicked in PDF');
+    parent.pan_collector.on_contextmenu_pdfviewer(event);
+    return false;
+});
 
-    <script>
-    $(document).on('contextmenu', function(event) {
-      console.log('* rightclicked in PDF');
-      parent.pan_collector.on_contextmenu_pdfviewer(event);
-      return false;
-    });
-    </script>
-  </body>
+function mark_words_as(words, color) {
+    $('.page').mark(
+        words,
+        { className: 'txt-' + color, separateWordSearch: false }
+    )
+}
+
+function open_pdf(pdf_url) {
+    PDFViewerApplication.open(pdf_url);
+}
+</script>
+</body>
 </html>

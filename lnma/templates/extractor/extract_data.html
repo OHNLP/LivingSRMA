@@ -838,7 +838,7 @@ var pan_ocpapers = {
             html.push('<li class="ui-state-disabled menu-header"><div>Other Arms</div></li>');
             
             for (let a = 0; a < n_arms - 2; a++) {
-                html.push('<li class="menu-item"><div>Other '+(a+1)+'</div><ul>');
+                html.push('<li class="menu-item"><div>Arm '+(a+1)+'</div><ul>');
                 html = this.__update_ctx_menu_html(html, highlight_text, pid, a);
                 html.push('</ul></li>')
             }
@@ -1086,9 +1086,6 @@ var pan_collector = {
         // update the PDF viewer
         // this.load_pdf();
 
-        // bind the context menu
-        // this.bind_txt_ctx_menu();
-
         // notifiy the ocpaper to show the working paper
         pan_ocpapers.show_working_paper();
     },
@@ -1111,10 +1108,6 @@ var pan_collector = {
                 pan_collector.update(data.paper);
             }, 'json'
         );
-        // bind the context menu
-        // this.bind_txt_ctx_menu();
-
-        
     },
 
     show: function() {
@@ -1143,8 +1136,8 @@ var pan_collector = {
             pdf_url = '/pdfworker/view_pdf';
         }
 
-        // show
-        document.getElementById("ifr_pdfviewer").contentWindow.PDFViewerApplication.open(pdf_url);
+        // show the pdf by the 
+        document.getElementById("ifr_pdfviewer").contentWindow.open_pdf(pdf_url);
     },
 
     upload_pdfs: function() {
