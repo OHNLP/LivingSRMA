@@ -6,7 +6,10 @@ Extract Data
 
 {% block page_name %}
 <i class="fa fa-edit"></i>
-Extract Data
+Extract Data of 
+<a href="javascript:void(0);" onclick="alert('test')">
+    []
+</a>
 {% endblock %}
 
 {% block active_nav_link %}extractor-extract-data{% endblock %}
@@ -212,6 +215,16 @@ html {
     text-overflow: ellipsis;
 
     background-color: #dedede;
+
+    cursor: move;
+    cursor: grab;
+    cursor: -moz-grab;
+    cursor: -webkit-grab;
+}
+#pan_ocpapers_working_paper_title:active {
+    cursor: grabbing;
+    cursor: -moz-grabbing;
+    cursor: -webkit-grabbing;
 }
 #pan_ocpapers_working_paper_attr_list {
     height: 100%;
@@ -231,6 +244,13 @@ html {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.ui-autocomplete {
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+.ui-menu-item-wrapper {
+    font-size: .9em;
 }
 </style>
 
@@ -283,6 +303,9 @@ var pan_ocpapers = {
     vpp_id: "#pan_ocpapers",
     vpp: null,
 
+    // the working abbr
+    extract_abbr: null,
+
     MIN_INPUT_AUTO_SIZE: 4,
     MAX_INPUT_AUTO_SIZE: 16,
 
@@ -328,6 +351,8 @@ var pan_ocpapers = {
             updated: function() {
                 pan_ocpapers.resize();
 
+                // update the autocomplete
+                pan_ocpapers.update_autocomplete();
             },
             methods: {
                 toggle_show_settings: function() {
@@ -372,6 +397,12 @@ var pan_ocpapers = {
                     } else {
                         return s;
                     }
+                },
+
+                // update the value
+                on_change_input_value: function(event) {
+                    let val = event.target.value;
+                    console.log('Changed input_format: ' + val);
                 },
 
                 // get year
@@ -516,6 +547,51 @@ var pan_ocpapers = {
 
         // update
         this.vpp.$forceUpdate();
+    },
+
+    update_autocomplete: function() {
+        $('.input-auto-complete').each(function(idx, elem) {
+            var abbr = $(elem).attr('abbr');
+            var values = pan_ocpapers.get_values_by_abbr(abbr);
+
+            $(elem).autocomplete({
+                source: values,
+                minLength: 0
+            }).on('focus', function(event) {
+                $(this).autocomplete('search');
+            });
+        });
+        console.log('* updated autocomplete');
+    },
+
+    get_values_by_abbr: function(abbr) {
+        var v = {};
+
+        for (const pid in this.vpp.$data.extract.data) {
+            const paper = this.vpp.$data.extract.data[pid];                
+            if (paper.is_selected) {
+                // get the main values
+                var val = paper.attrs.main[abbr];
+                v[val] = 1;
+
+                // get the values from 
+                for (let i = 0; i < paper.attrs.other.length; i++) {
+                    const arm = paper.attrs.other[i];
+                    if (arm.hasOwnProperty(abbr)) {
+                        var arm_val = arm[abbr];
+                        v[arm_val] = 1;
+                    }
+                }
+            }
+        }
+
+        var distinct_vals = Object.keys(v);
+
+        distinct_vals = distinct_vals.filter(function(item) {
+            return item !== ''
+        })
+
+        return distinct_vals;
     },
 
     update_all_and_show_attrs_for_itable: function() {
@@ -667,6 +743,8 @@ var pan_ocpapers = {
     },
 
     show_extract_and_papers: function(abbr) {
+        this.extract_abbr = abbr;
+
         var project_id = Cookies.get('project_id');
         $.get(
             srv_extractor.url.get_extract_and_papers,
@@ -695,7 +773,9 @@ var pan_ocpapers = {
                 // show
                 toast('Saved the outcome [' + data.extract.meta.full_name + ']');
                 // reload the outcomes
-                pan_outcomes.load();
+                pan_ocpapers.show_extract_and_papers(
+                    pan_ocpapers.extract_abbr
+                );
             }
         );
     },

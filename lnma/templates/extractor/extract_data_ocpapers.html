@@ -80,7 +80,7 @@
         <table class="extract-table">
             <thead class="paper-table-header">
                 <tr>
-                    <th class="paper-table-header-th" colspan="4">
+                    <th class="paper-table-header-th" colspan="5">
                         &nbsp;
                     </th>
                     <th v-for="thr1 in thr1s"
@@ -96,6 +96,9 @@
                     <th class="paper-table-header-th" style="width: 20px;">
                         <input type="checkbox" title="Toggle selection"
                             v-on:click="toggle_select_all_papers($event);">
+                    </th>
+                    <th class="paper-table-header-th" style="width: 40px;">
+                        #
                     </th>
                     <th class="paper-table-header-th" style="width: 130px;">
                         ({{ n_selected }} selected)
@@ -127,6 +130,11 @@
                     v-show="!only_show_selected || extract.data[paper.pid].is_selected">
                     <td class="paper-table-body-td">
                         <input type="checkbox" v-model="extract.data[paper.pid].is_selected" >
+                    </td>
+
+                    <td class="paper-table-body-td"
+                        v-on:click="on_click_paper(paper)">
+                        {{ paper.seq_num }}
                     </td>
 
                     <td class="paper-table-body-td"
@@ -199,10 +207,10 @@
                         {{ attr_sub.name }}
                     </div>
                     <div class="w-attr-item-value">
-                        <input class="paper-extract-input-auto" type="text" 
+                        <input class="paper-extract-input-auto input-auto-complete" type="text" 
                             v-bind:abbr="attr_sub.abbr"
                             v-bind:size="get_input_size(extract.data[working_paper.pid].attrs.main[attr_sub.abbr])"
-                            v-model="extract.data[working_paper.pid].attrs.main[attr_sub.abbr]"> 
+                            v-model.lazy="extract.data[working_paper.pid].attrs.main[attr_sub.abbr]"> 
                     </div>
                 </div>
             </div>
