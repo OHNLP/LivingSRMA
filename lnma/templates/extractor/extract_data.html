@@ -556,7 +556,24 @@ var pan_ocpapers = {
 
             $(elem).autocomplete({
                 source: values,
-                minLength: 0
+                minLength: 0,
+
+                select: function (e, ui) {
+                    // console.log("selected!", e, ui);
+                    var abbr = $(e.target).attr('abbr');
+                    var pid = pan_ocpapers.vpp.$data.working_paper.pid;
+                    var val = ui.item.value;
+
+                    console.log('* selected', val, 'for', abbr, 'of', pid);
+
+                    // set the value
+                    pan_ocpapers.vpp.$data.extract.data[pid].attrs.main[abbr] = val;
+                },
+
+                change: function (e, ui) {
+                    // console.log("changed!", e, ui);
+                }
+
             }).on('focus', function(event) {
                 $(this).autocomplete('search');
             });
