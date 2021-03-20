@@ -79,11 +79,17 @@ def extract_data():
     '''
     project_id = request.cookies.get('project_id')
     # project_id = request.args.get('project_id')
+    if project_id is None:
+        return redirect(url_for('project.mylist'))
+
     oc_abbr = request.args.get('abbr')
+    project = dora.get_project(project_id)
 
     return render_template(
         template_base + 'extract_data.html', 
-        oc_abbr=oc_abbr
+        oc_abbr=oc_abbr,
+        project=project,
+        project_json_str=json.dumps(project.as_dict())
     )
 
 

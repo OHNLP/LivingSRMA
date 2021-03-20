@@ -101,6 +101,9 @@ class Project(db.Model):
 
 
     def get_tags_text(self):
+        '''
+        Get the tags in plain text format
+        '''
         if 'tags' in self.settings:
             txt = '\n'.join(self.settings['tags'])
         else:
@@ -110,6 +113,9 @@ class Project(db.Model):
 
 
     def get_inclusion_criterias_text(self):
+        '''
+        Get the inclusion criterias in plain text format
+        '''
         txt = ''
         if 'criterias' in self.settings:
             if 'inclusion' in self.settings['criterias']:
@@ -118,6 +124,9 @@ class Project(db.Model):
         
 
     def get_exclusion_criterias_text(self):
+        '''
+        Get the exclusion criterias in plain text format
+        '''
         txt = ''
         if 'criterias' in self.settings:
             if 'exclusion' in self.settings['criterias']:
@@ -126,6 +135,9 @@ class Project(db.Model):
         
 
     def get_exclusion_reasons_text(self):
+        '''
+        Get the exclusion reasons in plain text format
+        '''
         txt = ''
         if 'exclusion_reasons' in self.settings:
             txt = '\n'.join(self.settings['exclusion_reasons'])
@@ -133,6 +145,9 @@ class Project(db.Model):
 
 
     def get_inclusion_keywords_text(self):
+        '''
+        Get the inclusion keywords in plain text format
+        '''
         txt = ''
         if 'highlight_keywords' in self.settings:
             if 'inclusion' in self.settings['highlight_keywords']:
@@ -141,10 +156,24 @@ class Project(db.Model):
 
 
     def get_exclusion_keywords_text(self):
+        '''
+        Get the exclusion keywords in plain text format
+        '''
         txt = ''
         if 'highlight_keywords' in self.settings:
             if 'exclusion' in self.settings['highlight_keywords']:
                 txt = '\n'.join(self.settings['highlight_keywords']['exclusion'])
+        return txt
+
+
+    def get_pdf_keywords_text(self):
+        '''
+        Get the PDF keywords in plain text format
+        '''
+        txt = ''
+        if 'pdf_keywords' in self.settings:
+            if 'main' in self.settings['pdf_keywords']:
+                txt = '\n'.join(self.settings['pdf_keywords']['main'])
         return txt
 
 

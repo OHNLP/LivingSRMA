@@ -11293,6 +11293,7 @@ class TextLayerBuilder {
 
   _finishRendering() {
     this.renderingDone = true;
+    // console.log('* finished page rendering');
 
     if (!this.enhanceTextSelection) {
       const endOfContent = document.createElement("div");
@@ -11300,11 +11301,17 @@ class TextLayerBuilder {
       this.textLayerDiv.appendChild(endOfContent);
     }
 
-    this.eventBus.dispatch("textlayerrendered", {
+    var _data = {
       source: this,
       pageNumber: this.pageNumber,
       numTextDivs: this.textDivs.length
-    });
+    };
+    this.eventBus.dispatch("textlayerrendered", _data);
+
+    // do something here
+    if (window.hasOwnProperty('lnma_on_rendered_page')) {
+      lnma_on_rendered_page(_data);
+    }
   }
 
   render(timeout = 0) {

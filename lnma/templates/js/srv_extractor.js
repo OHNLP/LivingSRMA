@@ -20,6 +20,9 @@ var srv_extractor = {
         extract_data: "[[ url_for('extractor.extract_data') ]]"
     },
 
+    // the project is binded when running extracting
+    project: null,
+
     tpl: {
         oc_type: {
             pwma: {

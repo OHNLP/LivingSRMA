@@ -74,8 +74,11 @@ def editor():
     # preprocessing the ie keywords
     form_textarea_inclusion_keywords = project.get_inclusion_keywords_text()
 
-    # preprocessing the ie keywords
+    # preprocessing the exclusion keywords
     form_textarea_exclusion_keywords = project.get_exclusion_keywords_text()
+
+    # the pdf keywords
+    form_textarea_pdf_keywords = project.get_pdf_keywords_text()
 
     return render_template('project/editor.html', 
         project=project,
@@ -84,7 +87,8 @@ def editor():
         form_textarea_exclusion_criterias=form_textarea_exclusion_criterias,
         form_textarea_exclusion_reasons=form_textarea_exclusion_reasons,
         form_textarea_inclusion_keywords=form_textarea_inclusion_keywords,
-        form_textarea_exclusion_keywords=form_textarea_exclusion_keywords
+        form_textarea_exclusion_keywords=form_textarea_exclusion_keywords,
+        form_textarea_pdf_keywords=form_textarea_pdf_keywords
     )
 
 
@@ -293,4 +297,39 @@ def api_set_tags():
     is_success, project = dora.set_project_tags(project_id, tags_cleaned)
 
     flash('Saved %s tags!' % (len(tags_cleaned)) )
+    return redirect(url_for('project.editor'))
+
+
+@bp.route('/api/pdf_keywords', methods=['GET', 'POST'])
+@login_required
+def api_set_pdf_keywords():
+    if request.method == 'GET':
+        return redirect(url_for('project_editor'))
+        
+    project_id = request.cookies.get('project_id')
+    if project_id is None or project_id == '':
+        flash('Set working project first')
+        return redirect(url_for('project.mylist'))
+
+    raw_txt = request.form.get('form_textarea_pdf_keywords')
+
+    # remove blank
+    lines = raw_txt.strip()
+
+    # split
+    keywords = lines.split('\n')
+
+    # remove empty
+    keywords_cleaned = []
+    for txt in keywords:
+        txt = txt.strip()
+        if txt == '':
+            pass
+        else:
+            keywords_cleaned.append(txt)
+
+    # update
+    is_success, project = dora.set_project_pdf_keywords(project_id, keywords_cleaned)
+
+    flash('Saved %s PDF keywords!' % (len(keywords_cleaned)) )
     return redirect(url_for('project.editor'))

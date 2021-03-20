@@ -396,6 +396,32 @@ def set_project_tags(project_id, tags):
     return True, project
 
 
+def set_project_pdf_keywords(project_id, keywords, other_keywords=None):
+    '''
+    Set the pdf keywords list for a project
+    '''
+    project = get_project(project_id)
+    if project is None:
+        return False, None
+
+    if 'pdf_keywords' not in project.settings:
+        project.settings['pdf_keywords'] = {
+            "main": []
+        }
+
+    if 'main' not in project.settings['pdf_keywords']:
+        project.settings['pdf_keywords']['main'] = []
+
+    project.settings['pdf_keywords']['main'] = keywords
+    flag_modified(project, "settings")
+
+    # commit this
+    db.session.add(project)
+    db.session.commit()
+
+    return True, project
+
+
 def sort_paper_rct_seq_in_project(project_id):
     '''
     Sort the paper's rct seq

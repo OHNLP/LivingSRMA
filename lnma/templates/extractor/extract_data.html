@@ -298,6 +298,13 @@ html {
 
 {% include "js/srv_pdfworker.js" %}
 
+///////////////////////////////////////////////////////////
+// bind the project information to srv_extractor.js
+///////////////////////////////////////////////////////////
+
+srv_extractor.project = [[ project_json_str|safe ]];
+
+
 
 var pan_ocpapers = {
     vpp_id: "#pan_ocpapers",
@@ -1136,8 +1143,34 @@ var pan_collector = {
             pdf_url = '/pdfworker/view_pdf';
         }
 
+        // get the highlight_keywords
+        var highlight_keywords = pan_collector.get_pdf_highlight_keywords();
+
         // show the pdf by the 
-        document.getElementById("ifr_pdfviewer").contentWindow.open_pdf(pdf_url);
+        document.getElementById("ifr_pdfviewer").contentWindow.LNMA.open_pdf(pdf_url, highlight_keywords);
+    },
+
+    /**
+     * Get the keywords and color for highlighting in PDF
+     */
+    get_pdf_highlight_keywords: function() {
+        var tmp = [];
+
+        // first, the keywords from the project
+        tmp.push({
+            keywords: srv_extractor.project.settings.highlight_keywords.inclusion,
+            color: 'green'
+        });
+
+        // second, push the outcome name if current is not working on itable
+
+        // third, push the pdf highlight keywords in project settings
+        tmp.push({
+            keywords: srv_extractor.project.settings.pdf_keywords.main,
+            color: 'yellow'
+        });
+
+        return tmp;
     },
 
     upload_pdfs: function() {
