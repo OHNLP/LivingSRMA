@@ -385,16 +385,30 @@ def get_extracts():
     Get all of the extracts by the project_id
     '''
     project_id = request.args.get('project_id')
+    with_data = request.args.get('with_data')
+
+    if with_data == 'yes':
+        with_data = True
+    else:
+        with_data = False
     
     # get the exisiting extracts
     extracts = dora.get_extracts_by_project_id(project_id)
 
     # build the return obj
-    ret = {
-        'success': True,
-        'msg': '',
-        'extracts': [ extr.as_dict() for extr in extracts ]
-    }
+    if with_data:
+        ret = {
+            'success': True,
+            'msg': '',
+            'extracts': [ extr.as_dict() for extr in extracts ]
+        }
+    else:
+        ret = {
+            'success': True,
+            'msg': '',
+            'extracts': [ extr.as_simple_dict() for extr in extracts ]
+        }
+        
     return jsonify(ret)
 
 

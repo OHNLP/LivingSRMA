@@ -211,7 +211,8 @@ class Paper(db.Model):
 
     
     def as_simple_dict(self):
-        '''Return the simple data of this paper
+        '''
+        Return the simple data of this paper
 
         Reduce the object size
         '''
@@ -237,7 +238,8 @@ class Paper(db.Model):
 
 
     def as_very_simple_dict(self):
-        '''Return the simple data of this paper
+        '''
+        Return the simple data of this paper
 
         Reduce the object size by remove the abstract
         '''
@@ -434,5 +436,19 @@ class Extract(db.Model):
         return '<Extract {0} {1}: {2}>'.format(
             self.oc_type, self.abbr, self.extract_id)
 
+
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+
+    def as_simple_dict(self):
+        '''
+        Return the simple data of this extract
+
+        Reduce the object size
+        '''
+        full_dict = self.as_dict()
+        if 'data' in full_dict:
+            del full_dict['data']
+
+        return full_dict

@@ -179,19 +179,17 @@
 
 
                     <div class="form-group col-md-4">
-                        <label for="input_measure_of_effect">Fixed or Random</label>
+                        <label for="input_fixed_or_random">Fixed or Random</label>
 
-                        <select v-model="extract.meta.measure_of_effect"
-                            class="form-control" id="input_measure_of_effect" 
-                            aria-describedby="input_measure_of_effect_help">
-                            <option value="HR">Hazard Ratio (HR)</option>
-                            <option value="RR">Relative Risk (RR)</option>
-                            <option value="OR">Odds Ratio (OR)</option>
-                            <option value="RD">Risk Difference (RD)</option>
+                        <select v-model="extract.meta.fixed_or_random"
+                            class="form-control" id="input_fixed_or_random" 
+                            aria-describedby="input_fixed_or_random_help">
+                            <option value="fixed">Fixed</option>
+                            <option value="random">Random</option>
                         </select>
 
-                        <small id="input_measure_of_effect_help" class="form-text text-muted">
-                            The measure of effects
+                        <small id="input_fixed_or_random_help" class="form-text text-muted">
+                            Fixed effect or random.
                         </small>
                     </div>
 

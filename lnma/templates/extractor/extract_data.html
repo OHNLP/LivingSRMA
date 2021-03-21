@@ -6,10 +6,11 @@ Extract Data
 
 {% block page_name %}
 <i class="fa fa-edit"></i>
-Extract Data of 
+Extract Data 
+<!-- of 
 <a href="javascript:void(0);" onclick="alert('test')">
     []
-</a>
+</a> -->
 {% endblock %}
 
 {% block active_nav_link %}extractor-extract-data{% endblock %}
@@ -151,7 +152,6 @@ html {
 #pan_ocpapers_ctx_menu {
     border: 2px solid #EFEFEF;
     box-shadow: 0px 0px 15px #cccccc;
-
     z-index: 99;
 }
 #pan_ocpapers_ctx_menu_txt {
@@ -171,6 +171,18 @@ html {
     width: 280px; 
     max-width: 320px;
 }
+
+
+#pan_ocpapers_ocs_menu {
+    border: 1px solid #dddddd;
+    box-shadow: 5px 5px 10px #cccccc;
+    z-index: 99;
+}
+#pan_ocpapers_ocs_menu .ui-menu { 
+    width: 280px; 
+    max-width: 320px;
+}
+
 
 #pan_collector {
 
@@ -273,6 +285,11 @@ html {
 </ul>
 
 
+<ul id="pan_ocpapers_ocs_menu" style="display: none;">
+
+</ul>
+
+
 <div id="win_collector">
     <div style="position: absolute; top: 0; left: -40px; width: 40px; height: 40px; background-color: white;">
         <div style="font-size: large; width: 40px; height: 40px; line-height: 40px; text-align: center; cursor: pointer;"
@@ -305,13 +322,16 @@ html {
 srv_extractor.project = [[ project_json_str|safe ]];
 
 
-
 var pan_ocpapers = {
     vpp_id: "#pan_ocpapers",
     vpp: null,
 
     // the working abbr
     extract_abbr: null,
+
+    // all extracts, a list and a dictionary
+    extracts: [],
+    extract_dict: {},
 
     MIN_INPUT_AUTO_SIZE: 4,
     MAX_INPUT_AUTO_SIZE: 16,
@@ -536,6 +556,48 @@ var pan_ocpapers = {
 
     set_mode: function(mode) {
         this.vpp.$data.mode = mode;
+    },
+
+    load_all_outcomes: function() {
+        var project_id = Cookies.get('project_id');
+
+        srv_extractor.get_extracts(project_id, function(data) {
+            // update the outcome selection menu
+            console.log(data);
+            pan_ocpapers.extracts = data.extracts;
+
+            // update the outcome dictionary
+            for (let i = 0; i < data.extracts.length; i++) {
+                const extract = data.extracts[i];
+                var oc_type = extract.oc_type;
+                var group = extract.meta.group;
+                var cate = extract.meta.category;
+
+                // add oc_type
+                if (!pan_ocpapers.extract_dict.hasOwnProperty(oc_type)) {
+                    pan_ocpapers.extract_dict[oc_type] = {}
+                }
+
+                // add group
+                if (!pan_ocpapers.extract_dict[oc_type].hasOwnProperty(group)) {
+                    pan_ocpapers.extract_dict[oc_type][group] = {}
+                }
+
+                // add cate
+                if (!pan_ocpapers.extract_dict[oc_type][group].hasOwnProperty(cate)) {
+                    pan_ocpapers.extract_dict[oc_type][group][cate] = [];
+                }
+
+                // put this ext into cate
+                pan_ocpapers.extract_dict[oc_type][group][cate].push(
+                    extract.meta
+                );
+
+            }
+
+            // update the ocs_menu according to the extracts
+            pan_ocpapers.update_ocs_menu(data.extracts);
+        });
     },
 
     update: function(data) {
@@ -769,6 +831,11 @@ var pan_ocpapers = {
     show_extract_and_papers: function(abbr) {
         this.extract_abbr = abbr;
 
+        // update the url if not equal
+        var url = srv_extractor.url.extract_data + "?abbr=" + abbr;
+        window.history.pushState("", "", url);
+
+        // get the data 
         var project_id = Cookies.get('project_id');
         $.get(
             srv_extractor.url.get_extract_and_papers,
@@ -802,6 +869,104 @@ var pan_ocpapers = {
                 );
             }
         );
+    },
+
+    show_ocs_menu: function() {
+        var top = 40;
+        var left = 90;
+        $("#pan_ocpapers_ocs_menu").css({
+            position: 'absolute',
+            display: "block",
+            top: top,
+            left: left
+        }).addClass("show").menu();
+
+        $("#pan_ocpapers_ocs_menu").menu('refresh');
+
+        $('#pan_ocpapers_ocs_menu .ui-menu-item').on('click', function() {
+            $("#pan_ocpapers_ocs_menu").hide();
+        });
+    },
+
+    update_ocs_menu: function(extracts) {
+        // loop on the cate_attrs
+        var html = [];
+
+        // first item is the itable
+        html.push('<li class="oc-menu-item"><div onclick="pan_ocpapers.show_extract_and_papers(\'itable\');">Interactive Table</div></li>')
+
+        // then, add the pwma
+        html.push('<li class="oc-menu-item"><div>PWMA Outcomes</div><ul>');
+        
+        // then the primary analysis
+        html.push('<li class="oc-menu-item"><div>Primary Analysis</div><ul>');
+        if (pan_ocpapers.extract_dict.hasOwnProperty('pwma') &&
+            pan_ocpapers.extract_dict.pwma.hasOwnProperty('primary')) {
+            
+            // loop on cates
+            for (const cate in pan_ocpapers.extract_dict['pwma']['primary']) {
+                const exts = pan_ocpapers.extract_dict['pwma']['primary'][cate];
+                html.push(
+                    '<li class="oc-menu-item"><div>'+cate+'</div><ul>'
+                );
+                // loop on each one
+                for (let i = 0; i < exts.length; i++) {
+                    const ext = exts[i];
+                    html.push(
+                        '<li class="oc-menu-item"><div onclick="pan_ocpapers.show_extract_and_papers(\''+ext.abbr+'\');">'+ext.full_name+'</div></li>'
+                    );
+                }
+                html.push(
+                    '</ul></li>'
+                );
+            }
+        }
+        html.push('</ul></li>'); // end of the primary analysis
+
+        // then the sensitivity analysis
+        if (pan_ocpapers.extract_dict.hasOwnProperty('pwma') &&
+            pan_ocpapers.extract_dict.pwma.hasOwnProperty('sensitivity')) {
+            
+            html.push('<li class="oc-menu-item"><div>Sensitivity Analysis</div><ul>');
+
+            html.push('</ul></li>'); // end of the primary analysis
+
+        }
+
+        // then the subgroup
+        if (pan_ocpapers.extract_dict.hasOwnProperty('subg') &&
+            pan_ocpapers.extract_dict.subg.hasOwnProperty('default')) {
+
+            html.push('<li class="oc-menu-item"><div>Subgroup Analysis</div><ul>');
+
+            html.push('</ul></li>'); // end of the nma
+        }
+
+        html.push('</ul></li>'); // end of the pwma
+
+
+        // last is the NMA
+        if (pan_ocpapers.extract_dict.hasOwnProperty('nma')) {
+            html.push('<li class="oc-menu-item"><div>NMA Outcomes</div><ul>');
+            html.push('</ul></li>'); // end of the nma
+        }
+
+        // put the new html into box
+        $('#pan_ocpapers_ocs_menu').html(
+            html.join('')
+        );
+    },
+
+    __update_ocs_menu_html: function(html, name, abbr) {
+        // add a new oc
+        html.push(
+            '<li class="oc-menu-item">'+
+            '<div onclick="pan_ocpapers.show_extract_and_papers(\''+abbr+'\');">'+ 
+                name +
+            '</div></li>'
+        );
+
+        return html;
     },
     
     ///////////////////////////////////////////////////////////////////////////
@@ -1008,7 +1173,14 @@ var pan_collector = {
             } else if (document.selection && document.selection.type != "Control") {
                 text = document.selection.createRange().text;
             }
+            // remove the white paddings
+            text = text.trim();
             console.log('* found highlighted text', text);
+
+            // no need to show the menu when no text is selected
+            if (text.length == 0) {
+                return false;
+            }
 
             // update the context menu content based on the selected attributes.
             // all of the details about this paper is need to generate the menu.
@@ -1232,11 +1404,20 @@ var jarvis = {
         // resize
         pan_ocpapers.resize();
 
+        // load all outcomes for generating the selection menu
+        pan_ocpapers.load_all_outcomes();
+
         // the load the init outcomes
-        pan_ocpapers.show_extract_and_papers(oc_abbr);
+        if (oc_abbr == '') {
+
+        } else {
+            pan_ocpapers.show_extract_and_papers(oc_abbr);
+
+        }
 
         this.bind_resize();
 
+        // remove the context menu for 
         document.addEventListener('click', function(event) {
 
             // close the menu when click anywhere

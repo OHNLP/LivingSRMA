@@ -20,6 +20,18 @@ var srv_extractor = {
         extract_data: "[[ url_for('extractor.extract_data') ]]"
     },
 
+    get_extracts: function(project_id, callback) {
+        $.get(
+            this.url.get_extracts,
+            {
+                project_id: project_id,
+                rnd: Math.random()
+            },
+            callback,
+            'json'
+        );
+    },
+
     // the project is binded when running extracting
     project: null,
 
