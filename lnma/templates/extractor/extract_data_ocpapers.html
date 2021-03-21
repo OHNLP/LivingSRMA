@@ -216,6 +216,10 @@
                                 v-bind:abbr="attr_sub.abbr"
                                 v-bind:size="get_input_size(extract.data[working_paper.pid].attrs.main[attr_sub.abbr])"
                                 v-model="extract.data[working_paper.pid].attrs.main[attr_sub.abbr]"> 
+                            <span class="w-remove-content"
+                                v-on:click="extract.data[working_paper.pid].attrs.main[attr_sub.abbr] = ''">
+                                <i class="fa fa-close"></i>
+                            </span>
                         </div>
                     </div>
                 </div>

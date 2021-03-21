@@ -204,7 +204,7 @@ html {
 }
 
 #pan_ocpapers_working_paper {
-    width: 160px;
+    width: 180px;
     padding: 5px;
     height: auto;
     position: absolute;
@@ -246,6 +246,17 @@ html {
 
 #pan_ocpapers_working_paper_attr_list div.w-attr-item:nth-child(even) {background: white; }
 #pan_ocpapers_working_paper_attr_list div.w-attr-item:nth-child(odd) {background: whitesmoke; }
+
+.w-remove-content {
+    padding: 5px 5px;
+    color: grey;
+    font-size: 9px;
+    cursor: pointer;
+}
+.w-remove-content:hover {
+    background-color: lightcoral;
+    color: white;
+}
 .w-attr-item {
     border-bottom: 1px dotted #dedede;
     padding: 3px 0;
@@ -263,6 +274,48 @@ html {
 }
 .ui-menu-item-wrapper {
     font-size: .9em;
+}
+
+.txt-red {
+    color: rgb(250, 89, 89);
+    background: rgb(255, 205, 205);
+    padding: 0;
+    margin: 0;
+}
+
+.txt-yellow {
+    background: rgb(238, 219, 171);
+    color: darkgoldenrod;
+    padding: 0;
+    margin: 0;
+}
+
+.txt-orange {
+    background: rgb(247, 226, 188);
+    color: orange;
+    padding: 0;
+    margin: 0;
+}
+
+.txt-green {
+    color: rgb(1, 56, 1);
+    background: rgb(223, 245, 223);
+    padding: 0;
+    margin: 0;
+}
+
+.txt-blue {
+    background: rgb(214, 214, 255);
+    color: darkblue;
+    padding: 0;
+    margin: 0;
+}
+
+.txt-purple {
+    background: rgb(250, 183, 250);
+    color: purple;
+    padding: 0;
+    margin: 0;
 }
 </style>
 
@@ -309,6 +362,9 @@ html {
 
 
 {% block script %}
+<!-- mark.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js"></script>
+
 <script>
 
 {% include "js/srv_extractor.js" %}
@@ -1116,12 +1172,21 @@ var pan_collector = {
         extract_paper: null
     },
 
+    mark_keywords_as_color: function(keywords, color) {
+        $('#pan_collector_basic_info').mark(
+            keywords,
+            { className: 'txt-' + color, separateWordSearch: false }
+        );
+    },
+
     init: function() {
         this.vpp = new Vue({
             el: this.vpp_id,
             data: {
                 paper: null,
                 show_tab: null
+            },
+            updated: function() {
             },
             methods: {
                 switch_tab: function(tab_name) {
@@ -1261,6 +1326,15 @@ var pan_collector = {
         // update the normal UI
         this.vpp.show_tab = 'basic_info';
         this.vpp.$forceUpdate();
+
+        // update the keywords highlight
+        this.vpp.$nextTick(function () {
+            console.log('* pan_collector UI updated');
+            pan_collector.mark_keywords_as_color(
+                srv_extractor.project.settings.highlight_keywords.inclusion,
+                'green'
+            );
+        });
 
         // update the PDF viewer
         // this.load_pdf();
