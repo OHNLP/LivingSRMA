@@ -997,32 +997,59 @@ var pan_ocpapers = {
         html.push('</ul></li>'); // end of the primary analysis
 
         // then the sensitivity analysis
+        html.push('<li class="oc-menu-item"><div>Sensitivity Analysis</div>');
         if (pan_ocpapers.extract_dict.hasOwnProperty('pwma') &&
             pan_ocpapers.extract_dict.pwma.hasOwnProperty('sensitivity')) {
             
-            html.push('<li class="oc-menu-item"><div>Sensitivity Analysis</div><ul>');
+            html.push('<ul>');
 
-            html.push('</ul></li>'); // end of the primary analysis
+            // loop on cates
+            for (const cate in pan_ocpapers.extract_dict['pwma']['sensitivity']) {
+                const exts = pan_ocpapers.extract_dict['pwma']['sensitivity'][cate];
+                html.push(
+                    '<li class="oc-menu-item"><div>'+cate+'</div><ul>'
+                );
+                // loop on each one
+                for (let i = 0; i < exts.length; i++) {
+                    const ext = exts[i];
+                    html.push(
+                        '<li class="oc-menu-item"><div onclick="pan_ocpapers.show_extract_and_papers(\''+ext.abbr+'\');">'+ext.full_name+'</div></li>'
+                    );
+                }
+                html.push(
+                    '</ul></li>'
+                );
+            }
+
+            html.push('</ul>'); // end of the list
 
         }
+        html.push('</li>'); // end of the sensitivity analysis
+
 
         // then the subgroup
+        html.push('<li class="oc-menu-item"><div>Subgroup Analysis</div>');
         if (pan_ocpapers.extract_dict.hasOwnProperty('subg') &&
             pan_ocpapers.extract_dict.subg.hasOwnProperty('default')) {
 
-            html.push('<li class="oc-menu-item"><div>Subgroup Analysis</div><ul>');
+            html.push('<ul>');
 
-            html.push('</ul></li>'); // end of the nma
+            html.push('</ul>'); // end of the list
         }
+        html.push('</li>'); // end of the subgroup analysis
+
 
         html.push('</ul></li>'); // end of the pwma
 
 
         // last is the NMA
+        html.push('<li class="oc-menu-item"><div>NMA Outcomes</div>');
         if (pan_ocpapers.extract_dict.hasOwnProperty('nma')) {
-            html.push('<li class="oc-menu-item"><div>NMA Outcomes</div><ul>');
-            html.push('</ul></li>'); // end of the nma
+            html.push('<ul>')
+            html.push('</ul>'); // end of the list
         }
+        html.push('</li>'); // end of the subgroup analysis
+
 
         // put the new html into box
         $('#pan_ocpapers_ocs_menu').html(
