@@ -841,8 +841,10 @@ var pan_ocpapers = {
 
             var thr1 = {
                 name: cate.name,
+                abbr: cate.abbr,
                 cols: 0
             }
+            this.vpp.show_attrs[cate.abbr] = true;
             for (let j = 0; j < cate.attrs.length; j++) {
                 const attr = cate.attrs[j];
                 
@@ -850,6 +852,7 @@ var pan_ocpapers = {
 
                 var thr2 = {
                     name: attr.name,
+                    abbr: attr.abbr,
                     cols: 0
                 }
                 if (attr.subs == null) {

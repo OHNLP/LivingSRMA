@@ -36,6 +36,7 @@
                     <div style="background: #dddddd;"
                         class="mr-2 pr-2">
                         <input type="checkbox" v-bind:id="'toggle-cate-' + cate.abbr"
+                            v-model="show_attrs[cate.abbr]"
                             v-on:change="on_toggle_itable_select_category(cate_idx, $event)">
                         <label :for="'toggle-cate-' + cate.abbr" class="extract-attr-label">
                             <b>{{ cate.name }}</b>
