@@ -47,6 +47,19 @@ iframe {
     z-index: 9999;
     border: 3px solid #efefef;
 }
+#pan_datasync {
+    position: fixed;
+    top: 10px;
+    min-width: 1000px;
+    min-height: 400px;
+    padding: 42px 5px 5px 5px;
+    background-color: rgba(249, 249, 250, 1);;
+    z-index: 9999;
+    border: 3px solid #efefef;
+}
+.datasync-textarea {
+    width: 100%;
+}
 #pan_pdfviewer_btns {
     width: 100%;
 }
@@ -194,6 +207,7 @@ Screener Overview
     </div>
 </div>
 
+
 <div id="pan_pdfviewer" class="shadow-sm" :class="{offscreen:is_hide}">
     <div style="position: absolute; left: 5px; top: 5px;" class="d-flex flex-row">
         <div class="mt-1 mr-5 ml-1">
@@ -211,6 +225,70 @@ Screener Overview
     <iframe id="ifr_pdfviewer" src="/pdfworker/view_pdf" 
         width="100%" scrolling="yes"
         frameborder="0"></iframe>
+</div>
+
+
+<div id="pan_datasync" class="shadow-sm" :class="{offscreen:is_hide}">
+    <div style="position: absolute; left: 5px; top: 5px;" class="d-flex flex-row">
+        <div class="mt-1 mr-5 ml-1">
+            <a href="javascript:void(0);"
+                v-on:click="toggle();">
+                <i class="fa fa-close"></i>
+            </a>
+        </div>
+
+        <div id="pan_datasync_btns" class="d-flex flex-row">
+            
+        </div>
+    </div>
+
+    <div v-if="new_data != null"
+        style="padding: 5px 10px;">
+        <div class="form-group row">
+            <label for="ds_title" class="col-sm-2 col-form-label">Title</label>
+            <div class="col-sm-10">
+                <textarea name="ds_title" id="ds_title" rows="2"
+                    class="datasync-textarea"
+                    v-model="new_data.title"></textarea>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label for="ds_authors" class="col-sm-2 col-form-label">Authors</label>
+            <div class="col-sm-10">
+                <textarea name="ds_authors" id="ds_authors" rows="2"
+                    class="datasync-textarea"
+                    v-model="new_data.authors"></textarea>
+            </div>
+        </div>
+
+        <div class="form-group row">
+
+            <label for="ds_journal" class="col-sm-2 col-form-label">Journal</label>
+            <div class="col-sm-4">
+                <textarea name="ds_journal" id="ds_journal" rows="1"
+                    class="datasync-textarea"
+                    v-model="new_data.journal"></textarea>
+            </div>
+
+            <label for="ds_pub_date" class="col-sm-2 col-form-label">Publication Date</label>
+            <div class="col-sm-4">
+                <textarea name="ds_pub_date" id="ds_pub_date" rows="1"
+                    class="datasync-textarea"
+                    v-model="new_data.pub_date"></textarea>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label for="ds_pub_date" class="col-sm-2 col-form-label">Abstract</label>
+            <div class="col-sm-10">
+                <textarea name="ds_pub_date" id="ds_pub_date" rows="10"
+                    class="datasync-textarea"
+                    v-model="new_data.abstract"></textarea>
+            </div>
+        </div>
+
+    </div>
 </div>
 
 
@@ -894,6 +972,13 @@ var tbjs_paperlist = {
     table_id: '#tbjs_paperlist',
     table: null,
 
+    // the list of all papers
+    data: null,
+
+    // for the full content of a paper
+    // key is the pid
+    papers: {},
+
     cfg: {
         number_of_rows: 10
     },
@@ -1126,7 +1211,6 @@ var tbjs_paperlist = {
             }
         });
 
-
         // add highlight event to the title
         this.table.on('draw', function () {
             // console.log( 'Redraw occurred at: '+new Date().getTime() );
@@ -1199,8 +1283,12 @@ var tbjs_paperlist = {
     update_paper_detail: function(d) {
         // send a request to get more information
         srv_screener.get_paper_by_id(d.paper_id, function(data) {
+            // update the local database
+            tbjs_paperlist.papers[data.paper.pid] = data.paper;
+
             // update the abstract
             $('#tb-rowext-abstract-' + data.paper.paper_id).html(data.paper.abstract);
+
             // trigger the highlight
             tbjs_paperlist._mark_element('#tb-rowext-abstract-' + data.paper.paper_id);
         });
@@ -2375,12 +2463,32 @@ var tbjs_paperlist = {
     sync_data_from_pubmed: function(paper_id, pmid) {
         toast('Getting data from PubMed to update this study ['+pmid+'] information ...');
 
+        // show the panel
+        pan_datasync.show();
+
+        // show the data for this study
+        pan_datasync.set_current_paper(
+            tbjs_paperlist.papers[pmid]
+        );
+
+        // get the details from pubmed
         srv_pubmed.efetch([pmid], function(data) {
             srv_pubmed.ret = data;
             console.log(data);
+
+            // convert the data to a paper object
             var paper_dict = srv_pubmed.parse_efetch_data(data);
             console.log(paper_dict);
             srv_pubmed.paper_dict = paper_dict;
+
+            // get the only one paper in the dictionary
+            var pmid = Object.keys(paper_dict)[0];
+            var pubmed_paper = paper_dict[pmid];
+
+            // set the data
+            pan_datasync.set_pubmed_paper(
+                pubmed_paper
+            );
 
             toast('Parsed the data from PubMed successfully!');
         });
@@ -2609,6 +2717,79 @@ var pan_pdfviewer = {
 };
 
 
+var pan_datasync = {
+    vpp_id: '#pan_datasync',
+    vpp: null,
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                is_hide: true,
+                current_paper: null,
+                pubmed_paper: null,
+                new_data: null
+            },
+            methods: {
+                toggle: function() {
+                    pan_datasync.toggle();
+                }
+            }
+        });
+    },
+
+    set_current_paper: function(paper) {
+        this.vpp.current_paper = paper;
+    },
+
+    set_pubmed_paper: function(paper) {
+        this.vpp.pubmed_paper = paper;
+        
+        // update content
+        this.vpp.new_data = {
+            title: paper.title,
+            abstract: paper.abstract,
+            pub_date: paper.pub_date,
+            journal: paper.journal,
+            authors: paper.authors.join('; ')
+        };
+    },
+
+    toggle: function() {
+        this.vpp.$data.is_hide = !this.vpp.$data.is_hide;
+    },
+
+    hide: function() {
+        this.vpp.$data.is_hide = true;
+    },
+
+    show: function() {
+        this.vpp.$data.is_hide = false;
+
+        // resize
+        var w = $('#tbjs_paperlist_tools').width();
+        var h = $(window).height() - 25;
+
+        $(this.vpp_id).css('width', w);
+        $(this.vpp_id).css('height', h);
+
+        // relocate
+        $(this.vpp_id).css('left', '330px');
+    },
+
+    update_toolbar: function(paper_id) {
+        $('#pan_pdfviewer_btns').html(
+            tbjs_paperlist._get_pdfview_toolbar({paper_id:paper_id})
+        );
+    },
+
+    load_pdf: function(folder, file_id) {
+        var pdf_url = "/pdfworker/pdf/" + folder + "/" + file_id + '.pdf';
+        document.getElementById("ifr_pdfviewer").contentWindow.PDFViewerApplication.open(pdf_url);
+    }
+};
+
+
 var srv_pdfworker = {
     api_url: {
         upload_pdfs: '[[ url_for("pdfworker.upload_pdfs") ]]',
@@ -2787,10 +2968,14 @@ var jarvis = {
         // load unscreened papers by default
         tbjs_paperlist.load_by_stage(srv_screener.STAGE_UNSCREENED);
 
+        // load the Inc/Exc criteria panel
         pan_iecriteria.init();
 
         // load the pdf workers
         pan_pdfviewer.init();
+
+        // load the sync panel
+        pan_datasync.init();
     },
 
     sort_rct_seq: function() {
