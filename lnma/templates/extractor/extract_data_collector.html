@@ -71,12 +71,12 @@
                             </button>
                             <div class="dropdown-menu dropdown-menu-right">
                                 <a class="dropdown-item" href="javascript:void(0);" 
-                                    v-on:click="download_pdf(pdf.file_id, pdf.folder)">
+                                    v-on:click="download_pdf(paper.paper_id, pdf.file_id, pdf.folder, pdf.display_name)">
                                     <i class="fa fa-download"></i>
                                     Download this PDF
                                 </a>
                                 <a class="dropdown-item" href="javascript:void(0);" 
-                                    v-on:click="remove_pdf(pdf.display_name, pdf.file_id, pdf.folder)">
+                                    v-on:click="remove_pdf(paper.paper_id, pdf.file_id, pdf.folder, pdf.display_name)">
                                     <i class="far fa-trash-alt"></i>
                                     Delete this PDF
                                 </a>
