@@ -43,8 +43,8 @@ var srv_pdfworker = {
         window.open(url);
     },
 
-    remove_pdf: function(paper_id, file_id, folder, callback) {
-        var ret = window.confirm('Deleted files could NOT be recovered. Are you sure to continue?');
+    remove_pdf: function(paper_id, file_id, folder, display_name, callback) {
+        var ret = window.confirm('Deleted files could NOT be recovered. Are you sure to delete [' + display_name + ']?');
 
         if (!ret) {
             return;

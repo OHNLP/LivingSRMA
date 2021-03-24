@@ -346,7 +346,7 @@ html {
 <div id="win_collector">
     <div style="position: absolute; top: 0; left: -40px; width: 40px; height: 40px; background-color: white;">
         <div style="font-size: large; width: 40px; height: 40px; line-height: 40px; text-align: center; cursor: pointer;"
-            onclick="$('#win_collector').css('right', 5000)">
+            onclick="pan_collector.hide(); pan_ocpapers.hide_working_paper_pan();">
             <i class="fa fa-close"></i>
         </div>
     </div>
@@ -407,7 +407,7 @@ var pan_ocpapers = {
 
                 // working pmid when clicking on paper
                 working_paper: null,
-                show_working_paper_pan: true,
+                show_working_paper_pan: false,
 
                 // mode
                 mode: 'extract_data',
@@ -517,6 +517,7 @@ var pan_ocpapers = {
                 on_click_paper: function(paper) {
                     // set the working pmid ?
                     this.working_paper = paper;
+                    this.show_working_paper_pan = true;
 
                     // get the pid / pmid
                     var pmid = paper.pid;
@@ -533,7 +534,9 @@ var pan_ocpapers = {
 
                     // the draggable 
                     $( "#pan_ocpapers_working_paper" ).draggable({ 
-                        handle: "div#pan_ocpapers_working_paper_title" 
+                        handle: "div#pan_ocpapers_working_paper_title",
+                        containment: "#pan_ocpapers", 
+                        scroll: false
                     });
                 },
 
@@ -662,6 +665,8 @@ var pan_ocpapers = {
         this.vpp.papers = data.papers;
 
         // update the all_attrs and show_attrs variables for display
+        this.hide_working_paper_pan();
+        pan_collector.hide();
 
         // shortcut
         if (this.vpp.extract.oc_type == 'itable') {
@@ -678,6 +683,13 @@ var pan_ocpapers = {
         $('.input-auto-complete').each(function(idx, elem) {
             var abbr = $(elem).attr('abbr');
             var values = pan_ocpapers.get_values_by_abbr(abbr);
+
+            // console.log('* found abbr '+ abbr+' values ' + values);
+
+            if (values.length == 0) {
+                // no value for this abbr yet
+                return;
+            }
 
             $(elem).autocomplete({
                 source: values,
@@ -730,8 +742,10 @@ var pan_ocpapers = {
         var distinct_vals = Object.keys(v);
 
         distinct_vals = distinct_vals.filter(function(item) {
-            return item !== ''
-        })
+            return item !== '' && item !== 'null' && item !== 'undefined'
+        });
+
+        // console.log('* got distinct_vals', distinct_vals)
 
         return distinct_vals;
     },
@@ -1133,9 +1147,10 @@ var pan_ocpapers = {
 
     show_working_paper: function() {
         var w_win_collector = $('#win_collector').width();
-        $('#pan_ocpapers_working_paper').css('right', w_win_collector + 20);
+        $('#pan_ocpapers_working_paper').css('top', 50);
+        $('#pan_ocpapers_working_paper').css('right', '65%');
+        $('#pan_ocpapers_working_paper').css('left', '');
     },
-
 
     show: function() {
         $(this.vpp_id).show();
@@ -1143,6 +1158,10 @@ var pan_ocpapers = {
 
     hide: function() {
         $(this.vpp_id).hide();
+    },
+
+    hide_working_paper_pan: function() {
+        this.vpp.show_working_paper_pan = false;
     },
 
     set_size: function(size) {
@@ -1202,11 +1221,19 @@ var pan_collector = {
                 },
 
                 download_pdf: function(file_id, folder) {
-
+                    srv_pdfworker.download_pdf(null, file_id, folder);
                 },
 
-                remove_pdf: function(display_name, file_id, folder) {
-
+                remove_pdf: function(paper_id, file_id, folder, display_name) {
+                    srv_pdfworker.remove_pdf(
+                        paper_id, file_id, folder, display_name,
+                        function(data) {
+                            console.log('* removed', data)
+                            jarvis.toast('Removed PDF file successfully');
+                            // update display
+                            pan_collector.update(data.paper);
+                        }
+                    );
                 },
 
                 get_year: function(s) {
@@ -1370,7 +1397,7 @@ var pan_collector = {
     },
 
     hide: function() {
-        $(this.vpp_id).hide();
+        $('#win_collector').css('right', 5000); 
     },
 
     view_pdf: function(paper_id, file_id, folder) {
