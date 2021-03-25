@@ -224,6 +224,10 @@ def e_fetch(ids, db='pubmed'):
         paper = {
             'uid': '',
             'sortpubdate': [],
+            'date_pub': [],
+            'date_epub': [],
+            'date_revised': [],
+            'date_completed': [],
             'source': '',
             'title': '',
             'authors': [],
@@ -254,9 +258,31 @@ def e_fetch(ids, db='pubmed'):
             elif node.tag == 'ISOAbbreviation':
                 paper['source'] = node.text
 
+            # 2021-03-24: there are four types of date
+            # take this for example: https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=27717298&retmode=xml
+            # I guess
+            # - ArticleDate is the ePub date
+            # - PubDate is the journal physical publication date
+            # - DateCompleted is ... I don't know
+            # - DateRevised is the online revision date
+            # in the last, if ArticleDate is available, just use ArticleDate
+            # if not, follow the order above
+
+            elif node.tag == 'ArticleDate':
+                for c in node:
+                    paper['date_epub'].append(c.text)
+
+            elif node.tag == 'PubDate':
+                for c in node:
+                    paper['date_pub'].append(c.text)
+
+            elif node.tag == 'DateCompleted':
+                for c in node:
+                    paper['date_completed'].append(c.text)
+
             elif node.tag == 'DateRevised':
                 for c in node:
-                    paper['sortpubdate'].append(c.text)
+                    paper['date_revised'].append(c.text)
                 
             elif node.tag == 'AuthorList':
                 for c in node:
@@ -271,7 +297,23 @@ def e_fetch(ids, db='pubmed'):
                     })
         # merge abstract
         paper['abstract'] = ' '.join(paper['abstract'])
-        paper['sortpubdate'] = '-'.join(paper['sortpubdate'])
+
+        # try to find the good date
+        paper['date_epub'] = '-'.join(paper['date_epub'])
+        paper['date_pub'] = '-'.join(paper['date_pub'])
+        paper['date_completed'] = '-'.join(paper['date_completed'])
+        paper['date_revised'] = '-'.join(paper['date_revised'])
+
+        if paper['date_epub'] != '':
+            paper['sortpubdate'] = paper['date_epub']
+        elif paper['date_pub'] != '':
+            paper['sortpubdate'] = paper['date_pub']
+        elif paper['date_pub'] != '':
+            paper['sortpubdate'] = paper['date_completed']
+        elif paper['date_pub'] != '':
+            paper['sortpubdate'] = paper['date_revised']
+        else:
+            paper['sortpubdate'] = ''
 
         # append to return
         if paper['uid'] != '':
