@@ -359,9 +359,9 @@ a {
 
                         <td v-if="r.is_show['sm']" class="col-flipable"
                             v-on:click="flip_cell(r, 'sm')">
-                            {{ get_a_measure(r) }} {{ r.oc.result[get_a_measure(r)].random.model.sm.toFixed(2) }}<br>
-                            ({{ r.oc.result[get_a_measure(r)].random.model.lower.toFixed(2) }} to 
-                            {{ r.oc.result[get_a_measure(r)].random.model.upper.toFixed(2) }})
+                            {{ get_a_measure(r) }} {{ _round2(r.oc.result[get_a_measure(r)].random.model.sm) }}<br>
+                            ({{ _round2(r.oc.result[get_a_measure(r)].random.model.lower) }} to 
+                            {{ _round2(r.oc.result[get_a_measure(r)].random.model.upper) }})
                         </td>
                         <td v-else class="col-ta-left col-flipable"
                             v-on:click="flip_cell(r, 'sm')">

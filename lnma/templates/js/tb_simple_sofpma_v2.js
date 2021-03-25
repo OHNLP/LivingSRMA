@@ -261,6 +261,10 @@ var tb_simple_sofpma = {
                 show_ctrl_options: function(oc_name) {
                     this.set_ctrl_oc_name = oc_name;
                     tb_simple_sofpma.show_ctrl_options(oc_name);
+                },
+
+                _round2: function(v) {
+                    return (Math.round(v * 100) / 100).toFixed(2);
                 }
             },
         });
