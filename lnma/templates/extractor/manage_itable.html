@@ -335,6 +335,24 @@ html {
 <!-- /#pan_itbuilder -->
 
 
+<div id="pan_itbuilder_previewer" class="shadow-sm" :class="{offscreen:is_hide_previewer}">
+    <div style="position: absolute; left: 5px; top: 5px;" class="d-flex flex-row">
+        <div class="mt-1 mr-5 ml-1">
+            <a href="javascript:void(0);"
+                class="mr-3"
+                v-on:click="close_itable_preview();">
+                <i class="fa fa-close"></i>
+            </a>
+
+            <i class="fa fa-table"></i>
+            Interactive Table Preivew
+        </div>
+    </div>
+
+    <iframe id="ifr_itable_previewer" src="" 
+        width="100%" scrolling="yes"
+        frameborder="0"></iframe>
+</div>
     
 </div>
 <!-- /#main -->
@@ -1046,6 +1064,68 @@ var pan_itbuilder = {
     },
 };
 
+var pan_itable_previewer = {
+    vpp_id: '#pan_itbuilder_previewer',
+    vpp: null,
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                is_hide_previewer: true
+            },
+            methods: {
+                show_itable_preview: function() {
+                    pan_itable_previewer.show_itable_preview();
+                },
+
+                close_itable_preview: function() {
+                    this.is_hide_previewer = true;
+                },
+            }
+        });
+    },
+
+
+    show_itable_preview: function() {
+
+        var project_id = Cookies.get('project_id');
+        var project_keystr = jarvis.project.keystr;
+
+        // update url
+        var url = '/pub/itable.html?src=db&prj=' + project_keystr;
+
+        // reload the iframe
+        if (url == $('#ifr_itable_previewer').prop('src')) {
+            // reload 
+            document.getElementById('ifr_itable_previewer').contentWindow.location.reload();
+        } else {
+            // load url
+            $('#ifr_itable_previewer').prop('src', url);
+        }
+
+        // resize
+        pan_itable_previewer.resize_itable_previewer();
+
+        // show the panel
+        pan_itable_previewer.vpp.$data.is_hide_previewer = false;
+
+        this.vpp.$forceUpdate();
+    },
+
+
+    resize_itable_previewer: function() {
+        var h = $(window).height() - 25;
+
+        // resize the popup
+        $('#pan_itbuilder_previewer').height(h)
+
+        // resize the iframe
+        $('#ifr_itable_previewer').height(h - 40);
+    }
+};
+
+
 
 var jarvis = {
     goto_screener: function(project_id, title) {
@@ -1058,6 +1138,7 @@ var jarvis = {
     init: function() {
         pan_itbuilder.init();
         pan_ocpapers.init();
+        pan_itable_previewer.init();
 
         // the load the init outcomes
         pan_itbuilder.load();

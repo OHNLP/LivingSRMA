@@ -319,10 +319,10 @@ a {
                                 ({{ get_ARDp_txt(r, 'lower')}} to {{ get_ARDp_txt(r, 'upper')}})
                             </td>
                             <td>
-                                High
+                                &nbsp;
                             </td>
                             <td>
-                                Critical
+                                &nbsp;
                             </td>
                         </tr>
                     </tbody>
@@ -537,10 +537,7 @@ var jarvis = {
 
         // OK, 
         var prj = jarvis.getUrlParameter('prj');
-        if (prj == null) {
-            jarvis.ssmsg('Project information error.')
-            return;
-        }
+        prj = 'IO';
 
         $.when(
             $.get(

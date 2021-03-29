@@ -84,9 +84,9 @@ def prisma_IO():
 
 # the ITable for IO is the same version as others
 
-@bp.route('/pwmagraph_IO.html')
-def pwmagraph_IO():
-    return render_template('pub/IO/pub.pwmagraph_IO.html')
+@bp.route('/graph_pma_IO.html')
+def graph_pma_IO():
+    return render_template('pub/IO/pub.graph_pma_IO.html')
 
 
 @bp.route('/softable_pma_IO.html')
@@ -555,7 +555,7 @@ def graphdata_softable_pma_json(prj):
     ret = {}
 
     if v is None or v == '' or v == '1':
-        if prj == 'IOTOX':
+        if prj == 'IO':
             fn = 'ALL_DATA.xlsx'
             full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
             ret = get_ae_pma_data(full_fn, is_getting_sms=True)

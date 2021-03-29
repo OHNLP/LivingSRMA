@@ -231,6 +231,66 @@ var tb_simple_sofpma = {
                     return jarvis.txt[t];
                 },
 
+                get_cieclr_v2: function(which_is_better, model, cie) {
+                    // use the two digits rounded value instead of the real value
+                    var sm = parseFloat(this._round2(model.sm));
+                    var lower = parseFloat(this._round2(model.lower));
+                    var upper = parseFloat(this._round2(model.upper));
+
+                    var delta_sm = Math.abs(1 - sm);
+                    var is_ci_cross_one = lower <= 1 && upper >= 1;
+                    var ci_diff = upper - lower;
+
+                    var _d2c = function(wib, sm, cie) {
+                        if (sm == 1) { return 'cie-nner-' + cie; }
+                        if (wib == 'lower') {
+                            if (sm < 1) { return 'cie-bene-' + cie; }
+                            else { return 'cie-harm-' + cie; }
+                        } else {
+                            if (sm > 1) { return 'cie-bene-' + cie; }
+                            else { return 'cie-harm-' + cie; }
+                        }
+                    }
+
+                    /**
+                     * 2021-03-28: update the rule for color
+                        1. if sm = 1 -> grey
+                        2. if sm not = 1 then:
+                            a. if CI not cross -> red / green depends on direction of sm
+                            b. if CI cross 1 then:
+                                i. if the difference between upper and lower < 0.3, then
+                                    1. if the 1- sm =<0.1 -> grey
+                                    2. if the 1- sm >0.1 -> depends on direction of sm
+                                ii. if the difference between upper and lower >= 0.3, then
+                                    1. depends upon direction of sm
+                     */
+
+                    // Rule 1
+                    if (sm == 1) {
+                        return 'cie-nner-' + cie;
+                    }
+
+                    // small is green, big is red
+                    if (is_ci_cross_one) {
+                        // Rule 2b
+                        if (ci_diff < 0.3) {
+                            // Rule 2bi
+                            if (delta_sm <= 0.1) {
+                                return 'cie-nner-' + cie; 
+                            } else {
+                                return _d2c(which_is_better, sm, cie);
+                            }
+                        } else {
+                            // Rule 2bii
+                            return _d2c(which_is_better, sm, cie);
+                        }
+                    } else {
+                        // Rule 2a
+                        return _d2c(which_is_better, sm, cie);
+                    }
+       
+                },
+
                 get_cieclr: function(which_is_better, sm, cie) {
                     var delta_sm = Math.abs(1 - sm);
 
