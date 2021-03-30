@@ -549,6 +549,19 @@ def graphdata_softable_pma_json(prj):
     fn_json = 'SOFTABLE_PMA.json'
     full_fn_json = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn_json)
 
+    src = request.args.get('src')
+
+    if src == 'db':
+        ret = get_itable_attr_rs_cfg_from_db(prj)
+
+        if ret is None:
+            ret = {
+                'success': False,
+                'msg': 'ITABLE DATA NOT EXISTS FOR THIS PROJECT'
+            }
+
+        return jsonify(ret)
+
     # get the version of this file
     # v1 is for IOTOX, v2 for others
     v = request.args.get('v')
@@ -2852,6 +2865,11 @@ def get_ae_nma_data(full_fn, backend):
 
     return ret
 
+
+def get_sof_pma_data_from_db(prj):
+    '''
+    The SoF Table of PWMA DATA
+    '''
 
 def get_sof_pma_data(full_fn):
     '''

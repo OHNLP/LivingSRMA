@@ -39,3 +39,21 @@ class Project:
                 ','.join(map(lambda u: u.first_name, project.related_users))
             ])
         print(table)
+
+
+    @command
+    @argument("keystr", type=str, description="The keystr for a project")
+    @argument("are_you_sure", type=str, description="yes for final confirmation")
+
+    def delete_all_extracts(self, keystr:str, are_you_sure:str):
+        '''
+        Delete all extracts for a project
+        '''
+        if are_you_sure != 'yes':
+            print('* deletion cancelled')
+            return 
+
+        projects = dora.list_all_projects()
+        dora.delete_all_extracts_by_keystr(keystr)
+
+        print('* deleted all extracts!')

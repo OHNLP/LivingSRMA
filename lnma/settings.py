@@ -110,7 +110,7 @@ INPUT_FORMAT_TPL = {
                 'subs': None
             }, {
                 'abbr': 'GA_Ec',
-                'name': 'Control',
+                'name': 'Placebo',
                 'subs': None
             }, {
                 'abbr': 'GA_Nc',
@@ -125,8 +125,8 @@ INPUT_FORMAT_TPL = {
                 'name': 'Tx',
                 'subs': None
             }, {
-                'abbr': 'G34_Nt',
-                'name': 'Control',
+                'abbr': 'G34_Ec',
+                'name': 'Placebo',
                 'subs': None
             }]
         }, {
@@ -137,8 +137,8 @@ INPUT_FORMAT_TPL = {
                 'name': 'Tx',
                 'subs': None
             }, {
-                'abbr': 'G3H_Nt',
-                'name': 'Control',
+                'abbr': 'G3H_Ec',
+                'name': 'Placebo',
                 'subs': None
             }]
         }, {
@@ -149,8 +149,8 @@ INPUT_FORMAT_TPL = {
                 'name': 'Tx',
                 'subs': None
             }, {
-                'abbr': 'G5N_Nt',
-                'name': 'Control',
+                'abbr': 'G5N_Ec',
+                'name': 'Placebo',
                 'subs': None
             }]
         }]
