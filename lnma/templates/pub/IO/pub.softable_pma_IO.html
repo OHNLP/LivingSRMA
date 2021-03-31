@@ -808,7 +808,7 @@ var jarvis = {
             ),
             $.get(
                 '/pub/graphdata/'+prj+'/SOFTABLE_PMA.json',
-                {rnd: Math.random()},
+                {rnd: Math.random(), src: 'db'},
             )
         ).done(function(r1, r2) {
             var data1 = r1[0];

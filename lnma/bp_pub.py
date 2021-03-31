@@ -3152,7 +3152,7 @@ def get_sof_pma_data_IO(full_fn, is_calc_pma=True):
     return ret
 
 
-def get_sof_pma_data_from_db_IO():
+def get_sof_pma_data_from_db_IO(is_calc_pma=True):
     '''
     The SoF Table of PWMA DATA
     '''
@@ -3211,9 +3211,6 @@ def get_sof_pma_data_from_db_IO():
         oc_cate = extract.meta['category']
         oc_name = extract.meta['full_name']
 
-        # create a new oc
-        oc_dict[oc_name] = {}
-
         # build the dataframe for this outcome / extract
         oc_rs = []
 
@@ -3243,15 +3240,120 @@ def get_sof_pma_data_from_db_IO():
             r['oc_name'] = oc_name
 
             rs.append(r)
+            oc_rs.append(r)
+
+            # other arms
+            for arm_idx in range(ext_pp_data['n_arms'] - 2):
+                r = ext_pp_data['attrs']['other'][arm_idx].copy()
+                r['has_GA']  = __notna(ext_pp_data['attrs']['main']['GA_Et'])
+                r['has_G34'] = __notna(ext_pp_data['attrs']['main']['G34_Et'])
+                r['has_G3H'] = __notna(ext_pp_data['attrs']['main']['G3H_Et'])
+                r['has_G5N'] = __notna(ext_pp_data['attrs']['main']['G5N_Et'])
+                r['author'] = paper.get_short_name() + ' Arm %s' % (arm_idx + 2)
+                r['year'] = paper.get_year()
+                r['pid'] = paper.pid
+                r['oc_cate'] = oc_cate
+                r['oc_name'] = oc_name
+
+                rs.append(r)
+                oc_rs.append(r)
 
         # now do the PWMA
-        # for grade in grades:
+        if not is_calc_pma: continue
+
+        # create a new oc
+        oc_dict[oc_name] = {}
+
+        # create a temp dataframe for this outcome
+        dft = pd.DataFrame(oc_rs)
+
+        for grade in grades:
+            dftt = dft[dft['has_%s' % grade]==True]
+
+            oc_dict[oc_name][grade] = {
+                'grade': grade,
+                'stus': dftt['author'].values.tolist(),
+                'Et': int(dftt['%s_Et' % grade].sum()),
+                'Nt': int(dftt['GA_Nt'].sum()),
+                'Ec': int(dftt['%s_Ec' % grade].sum()),
+                'Nc': int(dftt['GA_Nc'].sum()),
+                'result': {}
+            }
+
+            # prepare the dataset for PWMA
+            # the `ds` will looks like a matrix:
+            # [
+            #    [ Et, Nt, Ec, Nc, author1 ],
+            #    [ Et, Nt, Ec, Nc, author2 ],
+            #    ...
+            # ]
+            # this `ds` is prepared the pymeta package
+            # the GA_Nt and GA_Nc are shared in all grades
+            ds = []
+            for idx, r in dftt.iterrows():
+                Et = r['%s_Et' % grade]
+                Nt = r['GA_Nt']
+                Ec = r['%s_Ec' % grade]
+                Nc = r['GA_Nc']
+                author = r['author']
+
+                # a data fix for PythonMeta
+                if Et == 0: Et = 0.4
+                if Ec == 0: Ec = 0.4
+
+                # convert data to PythonMeta Format
+                ds.append([
+                    Et,
+                    Nt,
+                    Ec, 
+                    Nc,
+                    author
+                ])
+
+            # for each sm, get the PMA result
+            for sm in sms:
+                # get the pma result
+                try:
+                    # use Python package to calculate the OR/RR
+                    pma_r = get_pma_by_py(ds, datatype="CAT_RAW", sm=sm, fixed_or_random='random')
+                    # pma_f = get_pma_by_py(ds, datatype="CAT_RAW", sm=sm, fixed_or_random='fixed')
+ 
+                    # validate the result, if isNaN, just set None
+                    if np.isnan(pma_r['model']['sm']):
+                        pma_r = None
+
+                    # if np.isnan(pma_f['model']['sm']):
+                    #     pma_f = None
+
+                    # use R package to calculate the OR/RR
+                    # pma_r = get_pma_by_rplt(ds, datetype="CAT_RAW", sm=sm, fixed_or_random='random')
+                    # pma_f = get_pma_by_rplt(ds, datetype="CAT_RAW", sm=sm, fixed_or_random='fixed')
+                    
+                except:
+                    print('* %s: [%s] [%s] [%s]' % (
+                        'ISSUE Data cause error'.ljust(25, ' '),
+                        oc_name.rjust(35, ' '), 
+                        grade.rjust(3, ' '),
+                        ds
+                    ))
+                    pma_r = None
+                    # pma_f = None
+
+                oc_dict[oc_name][grade]['result'][sm] = {
+                    'random': pma_r,
+                    # 'fixed': pma_f
+                }
 
 
+    # OK, get the final dictionary
     ret = {
         'oc_list': oc_list,
         'rs': rs
     }
+
+    # put the oc_dict if for SoF table
+    if is_calc_pma:
+        ret['oc_dict'] = oc_dict
 
     return ret
 
