@@ -3199,10 +3199,22 @@ def get_sof_pma_data_from_db_IO(is_calc_pma=True):
     sms = ['OR', 'RR']
     # the grades for AEs
     grades = ['GA', 'G3H', 'G5N']
+    # columns for int type
+    int_cols = [
+        'GA_Et', 'GA_Nt', 'GA_Ec', 'GA_Nc',
+        'G34_Et', 'G34_Ec',
+        'G3H_Et', 'G3H_Ec',
+        'G5N_Et', 'G5N_Ec'
+    ]
 
     # a helper function
     def __notna(v):
         return not (v is None or v == '' or v == 'null')
+
+    # a helper function to make sure the value is int if possible
+    def __int(v):
+        try: return int(v)
+        except: return v
 
     # Second, build the oc_dict
     rs = []
@@ -3229,6 +3241,12 @@ def get_sof_pma_data_from_db_IO(is_calc_pma=True):
             # first arm
             # shallow copy is good enough for this case
             r = ext_pp_data['attrs']['main'].copy()
+            
+            # make sure the data type is int
+            for col in int_cols:
+                r[col] = __int(r[col])
+            
+            # add more attributes
             r['has_GA']  = __notna(ext_pp_data['attrs']['main']['GA_Et'])
             r['has_G34'] = __notna(ext_pp_data['attrs']['main']['G34_Et'])
             r['has_G3H'] = __notna(ext_pp_data['attrs']['main']['G3H_Et'])
@@ -3245,6 +3263,12 @@ def get_sof_pma_data_from_db_IO(is_calc_pma=True):
             # other arms
             for arm_idx in range(ext_pp_data['n_arms'] - 2):
                 r = ext_pp_data['attrs']['other'][arm_idx].copy()
+            
+                # make sure the data type is int
+                for col in int_cols:
+                    r[col] = __int(r[col])
+                
+                # add more attributes
                 r['has_GA']  = __notna(ext_pp_data['attrs']['main']['GA_Et'])
                 r['has_G34'] = __notna(ext_pp_data['attrs']['main']['G34_Et'])
                 r['has_G3H'] = __notna(ext_pp_data['attrs']['main']['G3H_Et'])
