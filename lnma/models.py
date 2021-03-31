@@ -7,6 +7,7 @@ from werkzeug.security import check_password_hash
 
 from sqlalchemy.dialects.mysql import LONGTEXT
 
+from lnma import util
 
 # for the relationship between project and user
 rel_project_users = db.Table(
@@ -205,6 +206,30 @@ class Paper(db.Model):
     date_created = db.Column(db.DateTime, index=False)
     date_updated = db.Column(db.DateTime, index=False)
     is_deleted = db.Column(db.String(8), index=False)
+
+
+    def get_short_name(self, style=None):
+        '''
+        Get a short name for this study
+
+        For example,
+
+        He et al 2021
+        Huan He et al 2021
+
+        '''
+        year = util.get_year(self.pub_date)
+        fau_etal = util.get_author_etal_from_authors(self.authors)
+
+        return '%s %s' % (fau_etal, year)
+
+
+    def get_year(self):
+        '''
+        Get the year from this record
+        '''
+        return util.get_year(self.pub_date)
+
 
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}

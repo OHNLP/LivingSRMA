@@ -24,7 +24,7 @@ from .analyzer import nma_analyzer
 from .analyzer import freq_analyzer
 from .analyzer import bayes_analyzer
 
-from lnma import settings
+from lnma import settings, ss_state
 from lnma import util
 from lnma import dora
 
@@ -552,7 +552,10 @@ def graphdata_softable_pma_json(prj):
     src = request.args.get('src')
 
     if src == 'db':
-        ret = get_itable_attr_rs_cfg_from_db(prj)
+        ret = None
+
+        if prj == 'IO':
+            ret = get_sof_pma_data_from_db_IO()
 
         if ret is None:
             ret = {
@@ -571,7 +574,7 @@ def graphdata_softable_pma_json(prj):
         if prj == 'IO':
             fn = 'ALL_DATA.xlsx'
             full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
-            ret = get_ae_pma_data(full_fn, is_getting_sms=True)
+            ret = get_sof_pma_data_IO(full_fn, is_calc_pma=True)
         else:
             fn = 'SOFTABLE_PMA_DATA.xlsx'
             full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
@@ -2866,10 +2869,392 @@ def get_ae_nma_data(full_fn, backend):
     return ret
 
 
-def get_sof_pma_data_from_db(prj):
+def get_sof_pma_data_IO(full_fn, is_calc_pma=True):
+    '''
+    Get the data for SoF / Plots (IO project only)
+    '''
+    # load data
+    xls = pd.ExcelFile(full_fn)
+
+    # build AE Category data
+    first_sheet_name = 'Adverse events'
+    dft = xls.parse(first_sheet_name)
+    oc_dict = {}
+    oc_list = []
+
+    for col in dft.columns:
+        oc_cate = col
+        # get those rows not NaN, which means containing adverse event name
+        oc_names = dft[col][~dft[col].isna()]
+        oc_item = {
+            'oc_cate': oc_cate,
+            'oc_names': []
+        }
+        # build ae_name dict
+        for oc_name in oc_names:
+            # remove the white space
+            oc_name = oc_name.strip()
+            if oc_name in oc_dict:
+                cate1 = oc_dict[oc_name]
+                print('! duplicate oc_name %s in [%s] and [%s]' % (oc_name, cate1, oc_cate))
+                continue
+
+            oc_dict[oc_name] = oc_cate
+            oc_item['oc_names'].append(oc_name)
+
+        oc_list.append(oc_item)
+            
+        print('* parsed oc_cate %s with %s names' % (col, len(oc_names)))
+
+    print('* created oc_dict %s terms' % (len(oc_dict)))
+
+    # build AE details
+    cols = ['author', 'year', 'GA_Et', 'GA_Nt', 'GA_Ec', 'GA_Nc', 
+            'G34_Et', 'G34_Ec', 'G3H_Et', 'G3H_Ec', 'G5N_Et', 'G5N_Ec', 
+            'drug_used', 'malignancy']
+    # sms = ['OR', 'RR', 'RD']
+    sms = ['OR', 'RR']
+    # grades = ['GA', 'G34', 'G3H', 'G5N']
+    grades = ['GA', 'G3H', 'G5N']
+
+    oc_dfts = []
+    oc_rsts = {}
+
+    # add detailed AE
+    # the detailed AE starts from 3rd sheet
+    # each sheet_name is an AE
+    for sheet_name in xls.sheet_names[2:]:
+        oc_name = sheet_name
+        # the first row is no use
+        # the second row is used as column name, but replaced with `cols` from A to N
+        dft = xls.parse(sheet_name, skiprows=1, usecols='A:N', names=cols)
+        
+        # remove those empty lines based on author
+        dft = dft[~dft.author.isna()]
+
+        if len(dft) == 0: 
+            print('* %s: [%s]' % (
+                'EMPTY AE Tab'.ljust(25, ' '),
+                oc_name.rjust(35, ' ')
+            ))
+            continue
+        
+        # add ae name here
+        oc_name = oc_name.strip()
+        oc_cate = oc_dict[oc_name]
+        dft.loc[:, 'oc_cate'] = oc_cate
+        dft.loc[:, 'oc_name'] = oc_name
+        
+        # add flag for each one, but need to be modified later
+        dft.loc[:, 'has_GA'] = dft.GA_Et.notna()
+        dft.loc[:, 'has_G34'] = dft.G34_Et.notna()
+        dft.loc[:, 'has_G3H'] = dft.G3H_Et.notna()
+        dft.loc[:, 'has_G5N'] = dft.G5N_Et.notna()
+
+        # re-mark some flags to remove some studies
+        for idx, r in dft.iterrows():
+            # first, check the total number
+            Nt = r['GA_Nt']
+            Nc = r['GA_Nc']
+            author = r['author']
+            if np.isnan(Nt) or np.isnan(Nc):
+                print('* %s: [%s] [%s] [%s] ' % (
+                    'NaN Value Nt or Nc'.ljust(25, ' '),
+                    oc_name.rjust(35, ' '), 
+                    grade.rjust(3, ' '),
+                    author
+                ))
+                # when Nt or Nc is NaN, the whole shouldn't appear
+                for grade in grades:
+                    dft.loc[idx, 'has_%s' % grade] = False
+                continue
+
+            for grade in grades:
+                Et = r['%s_Et' % grade]
+                Ec = r['%s_Ec' % grade]
+
+                # second, check the Et, Ec NaN
+                if np.isnan(Et) or np.isnan(Ec):
+                    # print('* %s: [%s] [%s] [%s] ' % (
+                    #     'Et or Ec is NaN'.ljust(25, ' '),
+                    #     ae_name.rjust(35, ' '), 
+                    #     grade.rjust(3, ' '), 
+                    #     author
+                    # ))
+                    dft.loc[idx, 'has_%s' % grade] = False
+
+                # third, check the Et Ec is 0
+                if Et == 0 and Ec == 0:
+                    # print('* %s: [%s] [%s] [%s]' % (
+                    #     'ZERO Et and Ec'.ljust(25, ' '),
+                    #     ae_name.rjust(35, ' '), 
+                    #     grade.rjust(3, ' '), 
+                    #     author
+                    # ))
+                    dft.loc[idx, 'has_%s' % grade] = False
+
+        # add the AE model result
+        # for each grade of each AE, the structure of rsts is as follows:
+        # {
+        #    'grade': grade,
+        #    'stus': ['Name 1', 'Name 2'],
+        #    'result': {
+        #       'OR': {
+        #          'random': pma_result,
+        #          'fixed': pma_result
+        #       } 
+        #    }
+        # }
+        oc_rsts[oc_name] = {}
+
+        # check each grade, GA, G3H, G5N
+        for grade in grades:
+            # create the result object for this grade
+            oc_rsts[oc_name][grade] = {
+                'grade': grade,
+                'stus': [],
+                'Et': 0,
+                'Nt': 0,
+                'Ec': 0,
+                'Nc': 0,
+                'result': {}
+            }
+            # get records of this grade
+            dftt = dft[dft['has_%s' % grade]==True]
+            
+            # for those don't have at least 2 records, skip
+            # because couldn't do analysis with less than 2 records
+            if len(dftt) < 2:
+                # print('* %s: [%s] [%s]' % (
+                #     'LESS than 2 studies'.ljust(25, ' '),
+                #     ae_name.rjust(35, ' '), 
+                #     grade.rjust(3, ' ')
+                # ))
+                continue 
+            
+            # ok, use the existing data to calcuate the result
+            oc_rsts[oc_name][grade]['Et'] = int(dftt['%s_Et' % grade].sum())
+            oc_rsts[oc_name][grade]['Nt'] = int(dftt['GA_Nt'].sum())
+            oc_rsts[oc_name][grade]['Ec'] = int(dftt['%s_Ec' % grade].sum())
+            oc_rsts[oc_name][grade]['Nc'] = int(dftt['GA_Nc'].sum())
+
+            # fill the studies list with author names
+            oc_rsts[oc_name][grade]['stus'] = dftt['author'].values.tolist()
+
+            # get the dataset of this grade
+            # from here, getting the OR/RR values of each AE of each grade
+            if is_calc_pma:
+                pass
+            else: 
+                continue
+
+            # prepare the dataset for PWMA
+            # the `ds` will looks like a matrix:
+            # [
+            #    [ Et, Nt, Ec, Nc, author1 ],
+            #    [ Et, Nt, Ec, Nc, author2 ],
+            #    ...
+            # ]
+            # this `ds` is prepared the pymeta package
+            # the GA_Nt and GA_Nc are shared in all grades
+            ds = []
+
+            for idx, r in dftt.iterrows():
+                Et = r['%s_Et' % grade]
+                Nt = r['GA_Nt']
+                Ec = r['%s_Ec' % grade]
+                Nc = r['GA_Nc']
+                author = r['author']
+
+                # a data fix for PythonMeta
+                if Et == 0: Et = 0.4
+                if Ec == 0: Ec = 0.4
+
+                # convert data to PythonMeta Format
+                ds.append([
+                    Et,
+                    Nt,
+                    Ec, 
+                    Nc,
+                    author
+                ])
+
+            # for each sm, get the PMA result
+            for sm in sms:
+                # get the pma result
+                try:
+                    # use Python package to calculate the OR/RR
+                    pma_r = get_pma_by_py(ds, datatype="CAT_RAW", sm=sm, fixed_or_random='random')
+                    # pma_f = get_pma_by_py(ds, datatype="CAT_RAW", sm=sm, fixed_or_random='fixed')
+ 
+                    # validate the result, if isNaN, just set None
+                    if np.isnan(pma_r['model']['sm']):
+                        pma_r = None
+
+                    # if np.isnan(pma_f['model']['sm']):
+                    #     pma_f = None
+
+                    # use R package to calculate the OR/RR
+                    # pma_r = get_pma_by_rplt(ds, datetype="CAT_RAW", sm=sm, fixed_or_random='random')
+                    # pma_f = get_pma_by_rplt(ds, datetype="CAT_RAW", sm=sm, fixed_or_random='fixed')
+                    
+                except:
+                    print('* %s: [%s] [%s] [%s]' % (
+                        'ISSUE Data cause error'.ljust(25, ' '),
+                        oc_name.rjust(35, ' '), 
+                        grade.rjust(3, ' '),
+                        ds
+                    ))
+                    pma_r = None
+                    # pma_f = None
+
+                oc_rsts[oc_name][grade]['result'][sm] = {
+                    'random': pma_r,
+                    # 'fixed': pma_f
+                }
+        
+        # add to aes list
+        oc_dfts.append(dft)
+
+    # convert all small AE dft to a big one df_aes
+    df_aes = pd.concat(oc_dfts)
+
+    # fix data type
+    df_aes['year'] = df_aes['year'].astype('int')
+    def _asint(v):
+        # if v is NaN
+        if v!=v: return v
+        # convert value to int
+        try:
+            v1 = int(v)
+            return v1
+        except:
+            # convert other string to 0
+            return 0
+    for col in cols[2: -3]:
+        df_aes[col] = df_aes[col].apply(_asint)
+        df_aes[col] = df_aes[col].astype('Int64')
+
+    # set index as a column
+    df_aes = df_aes.reset_index()
+    df_aes.rename(columns={'index': 'pid'}, inplace=True)
+    rs = json.loads(df_aes.to_json(orient='records'))
+
+    # build the return object
+    ret = {
+        'rs': rs,
+        'oc_list': oc_list
+    }
+
+    if is_calc_pma:
+        ret['oc_dict'] = oc_rsts
+
+    return ret
+
+
+def get_sof_pma_data_from_db_IO():
     '''
     The SoF Table of PWMA DATA
     '''
+
+    # First, get all extracts of pwma
+    # For IO project, the pwma type only contains the primary
+    # But for other projects, need to double check the input type
+    keystr = 'IO'
+    project = dora.get_project_by_keystr(keystr)
+    extracts = dora.get_extracts_by_keystr_and_oc_type(keystr, 'pwma')
+    papers = dora.get_papers_by_stage(
+        project.project_id, 
+        ss_state.SS_STAGE_INCLUDED_SR
+    )
+    
+    # make a dictionary for lookup
+    paper_dict = {}
+    for paper in papers:
+        paper_dict[paper.pid] = paper
+
+    # Then, we need to build the oc_list for the navigation
+    cate_oc_dict = {}
+    for extract in extracts:
+        oc_cate = extract.meta['category']
+        oc_name = extract.meta['full_name']
+
+        # put the cate into dict
+        if oc_cate not in cate_oc_dict:
+            cate_oc_dict[oc_cate] = []
+        
+        # put the oc into dict
+        cate_oc_dict[oc_cate].append(oc_name)
+
+    # convert the dict to list style
+    oc_list = []
+    for cate in cate_oc_dict:
+        cate_oc_dict[cate] = sorted(cate_oc_dict[cate])
+        oc_list.append({
+            'oc_cate': cate,
+            'oc_names': cate_oc_dict[cate]
+        })
+
+    # the measures
+    sms = ['OR', 'RR']
+    # the grades for AEs
+    grades = ['GA', 'G3H', 'G5N']
+
+    # a helper function
+    def __notna(v):
+        return not (v is None or v == '' or v == 'null')
+
+    # Second, build the oc_dict
+    rs = []
+    oc_dict = {}
+    for extract in extracts:
+        oc_cate = extract.meta['category']
+        oc_name = extract.meta['full_name']
+
+        # create a new oc
+        oc_dict[oc_name] = {}
+
+        # build the dataframe for this outcome / extract
+        oc_rs = []
+
+        # the extract['data'] con
+        for pid in extract.data:
+            # get the extraction 
+            ext_pp_data = extract.data[pid]
+
+            # if this paper is not selected, just skip
+            if not ext_pp_data['is_selected']: continue
+
+            # get the paper
+            paper = paper_dict[pid]
+
+            # OK, this studis is selected, put the extracted result
+            # first arm
+            # shallow copy is good enough for this case
+            r = ext_pp_data['attrs']['main'].copy()
+            r['has_GA']  = __notna(ext_pp_data['attrs']['main']['GA_Et'])
+            r['has_G34'] = __notna(ext_pp_data['attrs']['main']['G34_Et'])
+            r['has_G3H'] = __notna(ext_pp_data['attrs']['main']['G3H_Et'])
+            r['has_G5N'] = __notna(ext_pp_data['attrs']['main']['G5N_Et'])
+            r['author'] = paper.get_short_name()
+            r['year'] = paper.get_year()
+            r['pid'] = paper.pid
+            r['oc_cate'] = oc_cate
+            r['oc_name'] = oc_name
+
+            rs.append(r)
+
+        # now do the PWMA
+        # for grade in grades:
+
+
+    ret = {
+        'oc_list': oc_list,
+        'rs': rs
+    }
+
+    return ret
+
 
 def get_sof_pma_data(full_fn):
     '''

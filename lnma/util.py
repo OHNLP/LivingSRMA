@@ -729,17 +729,27 @@ def get_year(s):
         return rs[0]
 
 
+def get_author_etal_from_authors(authors):
+    '''
+    Get the "First author name et al" format
+    '''
+    aus = authors.split(';')
+    if len(aus) == 1:
+        aus = authors.split(',')
+
+    if len(aus[0]) > 20:
+        aus = aus[0].split(',')
+    
+    fau_etal = aus[0] + ' et al'
+
+    return fau_etal
+
+
 def get_author_etal_from_paper(paper):
     '''
     Get the "First author name et al" format
     '''
-    aus = paper.authors.split(';')
-    if len(aus) == 1:
-        aus = paper.authors.split(',')
-    
-    au_etal = aus[0] + ' et al'
-
-    return au_etal
+    return get_author_etal_from_authors(paper.authors)
 
 
 def save_pdf(file):

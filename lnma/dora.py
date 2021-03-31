@@ -865,7 +865,8 @@ def get_papers_by_pmids(project_id, pmids):
 
 
 def get_papers_by_stage(project_id, stage):
-    '''Get all papers of specified stage
+    '''
+    Get all papers of specified stage
     '''
     print('* get_papers_by_stage [%s]' % stage)
     if stage == ss_state.SS_STAGE_ALL_OF_THEM:
@@ -1619,6 +1620,41 @@ def get_extracts_by_project_id(project_id):
     '''
     extracts = Extract.query.filter(
         Extract.project_id == project_id
+    ).all()
+
+    return extracts
+
+
+def get_extracts_by_keystr(keystr:str):
+    '''
+    Get all of the extract detail of a project
+    '''
+    project = get_project_by_keystr(keystr)
+
+    if project is None:
+        # what???
+        return None
+
+    extracts = Extract.query.filter(
+        Extract.project_id == project.project_id
+    ).all()
+
+    return extracts
+
+
+def get_extracts_by_keystr_and_oc_type(keystr:str, oc_type:str):
+    '''
+    Get all of the extract detail of a project
+    '''
+    project = get_project_by_keystr(keystr)
+
+    if project is None:
+        # what???
+        return None
+
+    extracts = Extract.query.filter(
+        Extract.project_id == project.project_id,
+        Extract.oc_type == oc_type
     ).all()
 
     return extracts
