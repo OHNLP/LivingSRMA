@@ -491,6 +491,42 @@ def graphdata_itable_json(prj):
     return jsonify(ret)
 
 
+@bp.route('/graphdata/<prj>/OPLOTS.json')
+def graphdata_oplots(prj):
+    '''
+    Deprecated
+    Special rule for the OPLOTS.json which does not exist
+    
+    The input file is OPLOTS.xls with multiple sheets
+
+    S.1: Adverse events
+    S.2: ?
+    S.3: All SEs
+    S.4: AE_NAME_1 
+    S.n: AE_NAME_2
+
+    '''
+    fn = 'ALL_DATA.xlsx'
+    full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
+    ret = get_ae_pma_data(full_fn, is_getting_sms=False)
+
+    return jsonify(ret)
+
+
+@bp.route('/graphdata/<prj>/GRAPH_PMA.json')
+def graphdata_graph_pma_json(prj):
+    '''
+    Special rule for the GRAPH_PMA.json which does not exist
+
+    This JSON is designed for the PWMA results.
+    It is the first pure DB-based export, no XLS file required.
+    '''
+    if prj == 'IO':
+        ret = get_sof_pma_data_from_db_IO(is_calc_pma=False)
+
+    return jsonify(ret)
+
+
 @bp.route('/graphdata/<prj>/GRAPH.json')
 def graphdata_graph_json(prj):
     '''
@@ -631,27 +667,6 @@ def graphdata_softable_nma_json(prj):
         ret = get_sof_nma_data(full_fn)
         # cache the result
         json.dump(ret, open(full_fn_json, 'w'))
-
-    return jsonify(ret)
-
-
-@bp.route('/graphdata/<prj>/OPLOTS.json')
-def graphdata_oplots(prj):
-    '''
-    Special rule for the OPLOTS.json which does not exist
-    
-    The input file is OPLOTS.xls with multiple sheets
-
-    S.1: Adverse events
-    S.2: ?
-    S.3: All SEs
-    S.4: AE_NAME_1 
-    S.n: AE_NAME_2
-
-    '''
-    fn = 'ALL_DATA.xlsx'
-    full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
-    ret = get_ae_pma_data(full_fn, is_getting_sms=False)
 
     return jsonify(ret)
 

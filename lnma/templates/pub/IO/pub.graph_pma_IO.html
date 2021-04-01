@@ -8,7 +8,7 @@
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
 
-<title>Outcome Plots v2</title>
+<title>Pairwise MA Plots for IO</title>
 
 <link rel="icon" href="/static/img/favicon.png" type="image/png">
 <script src="https://kit.fontawesome.com/cb45cc91b0.js" crossorigin="anonymous"></script>
@@ -33,7 +33,7 @@ a {
 }
 #wrapper {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     width: 100%;
     height: 100%;
 }
@@ -167,22 +167,171 @@ a {
 .oc-plot-tab-page-selected {
     display: block;
 }
+
+.sfilter {
+    margin-right: 15px;
+}
+.sfilter-name {
+    font-size: 1.1em;
+    padding: 2px 0;
+}
+.sfilter-select {
+    width: 100%;
+}
 </style>
 </head>
 <body>
 <div id="start-screen">
     <h1>
         <i class="fa fa-chart-bar"></i>
-        Outcome Plots
+        Pairwise MA Plots
     </h1>
     <div id="ss-msg">Loading data and initializing ...</div>
 </div>
 
 <div id="wrapper">
 
+    <div id="vw_studyfilter" class="d-flex fx-row">
+        <div v-for="dropdown, dpd_idx in dropdowns"
+            class="sfilter d-flex fx-col mr-3">
+            <div class="sfilter-name">
+                {{ dropdown.name }}
+            </div>
+            <div>
+                <select class="sfilter-select"
+                    v-bind:value="dropdown.value"
+                    v-bind:disabled="is_filter_disabled(dpd_idx)"
+                    v-on:change="on_filter_value_change($event, dpd_idx)">
+                    <option v-for="opt in dropdown.options" 
+                        v-bind:value="opt.value">
+                        {{ opt.name }}
+                    </option>
+                </select>
+            </div>
+        </div>
+    </div>
+
 <div id="app" class="d-flex fx-row">
 
-    {% include 'pub/pub._vw_oclist.html' %}
+    <div id="vw_oclist">
+        <div class="box" style="height: 100%;">
+            <div class="box-header">
+                <h4>
+                    <i class="fa fa-search"></i>
+                    Outcome List | 
+                </h4>
+                <!-- <div>
+                    <input type="text" class="box-input" style="background-color: transparent;">
+                </div> -->
+                <div>
+                    <button v-on:click="toggle_all_cates(false)">
+                        <i class="fa fa-expand-alt"></i>
+                        Expand / All
+                    </button>
+                    <button v-on:click="toggle_all_cates(true)">
+                        <i class="fa fa-compress-alt"></i>
+                        Collapse All
+                    </button>
+                </div>
+            </div>
+            <div class="box-body" style="height: calc(100% - 70px);">
+                
+                <div class="d-flex fx-col">
+                    <div class="d-flex fx-row ">
+                        <div class="oc-name" style="font-weight: bold;">
+                            &nbsp;
+                        </div>
+                        <div style="font-weight: bold; width: 90px; text-align: center; border-bottom: 1px solid #555555;">
+                            Grade
+                        </div>
+                    </div>
+                </div>
+    
+                <div class="oc-cate d-flex fx-col">
+                    <div class="oc-cate-info d-flex fx-row">
+                        <div class="oc-name" style="font-weight: bold;">
+                            {{ rs_stat.cnt_aes }} Outcomes
+                        </div>
+                        <div class="oc-type" title="All Grades">
+                            ALL
+                        </div>
+                        <div class="oc-type" title="Grade 3 or Higher">
+                            3+
+                        </div>
+                        <div class="oc-type" title="Grade 5 Only">
+                            5
+                        </div>
+                    </div>
+                </div>
+    
+                <div id="vw_oclist_aespanel">
+                    <div class="oc-cate d-flex fx-col"
+                        v-for="r in rs">
+                        <div class="oc-cate-info d-flex fx-row"
+                            v-on:click="toggle_cate(r.oc_cate)">
+                            <div class="oc-name">
+                                <i class="far fa-folder" v-if="r.is_close"></i>
+                                <i class="far fa-folder-open" v-else></i>
+                                {{ r.oc_cate }}
+                            </div>
+                        </div>
+                        <div class="oc-items d-flex fx-col"
+                            v-bind:class="{'oc-items-hide': r.is_close}">
+                            <div class="oc-item"
+                                v-for="ae in r.aes">
+                                <div class="oc-item-info d-flex fx-row">
+                                    <div class="oc-name">
+                                        <i class="far fa-clipboard"></i>
+                                        {{ ae.oc_name }}
+                                    </div>
+                                    <div class="oc-type"
+                                        v-bind:title="ae.cnt_ga + ' studies'"
+                                        v-bind:oc_cate="r.oc_cate"
+                                        v-bind:oc_name="ae.oc_name"
+                                        v-bind:ae_grade="'GA'"
+                                        v-on:click="toggle_oc">
+                                        {{ ae.cnt_ga }}
+                                    </div>
+                                    <div class="oc-type"
+                                        v-if="ae.cnt_g3h<2">
+                                        -
+                                    </div>
+                                    <div class="oc-type"
+                                        v-else
+                                        v-bind:title="ae.cnt_g3h + ' studies'"
+                                        v-bind:oc_cate="r.oc_cate"
+                                        v-bind:oc_name="ae.oc_name"
+                                        v-bind:ae_grade="'G3H'"
+                                        v-on:click="toggle_oc">
+                                        {{ ae.cnt_g3h }}
+                                    </div>
+                                    <div class="oc-type"
+                                        v-if="ae.cnt_g5n<2">
+                                        -
+                                    </div>
+                                    <div class="oc-type"
+                                        v-else
+                                        v-bind:title="ae.cnt_g5n + ' studies'"
+                                        v-bind:oc_cate="r.oc_cate"
+                                        v-bind:oc_name="ae.oc_name"
+                                        v-bind:ae_grade="'G5N'"
+                                        v-on:click="toggle_oc">
+                                        {{ ae.cnt_g5n }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+    
+                </div>
+                
+            </div>
+    
+            <div class="box-footer">
+    
+            </div>
+        </div>
+    </div>
 
     <div id="vw_ocplot">
         <div class="box" style="height: 100%;">
@@ -306,9 +455,434 @@ if (isIE) {
 
 <script>
 
-{% include 'js/vw_oclist.js' %}
 {% include 'js/fg_prim_forest.js' %}
 {% include 'js/fg_cumu_forest.js' %}
+
+var vw_studyfilter = {
+    vpp: null,
+    vpp_id: "#vw_studyfilter",
+    blank_val: '%',
+
+    // attrs
+    attrs: [{
+        name: 'Class of ICI',
+        values: [
+            'PD1',
+            'PD-L1',
+            'CTLA-4'
+        ]
+    }, {
+        name: 'Name of ICI',
+        values: [
+            'Atezolizumab',
+            'Avelumab',
+            'Cemiplimab',
+            'Durvalumab',
+            'Ipilimumab',
+            'Nivolumab',
+            'Pembrolizumab',
+            'Tremelimumab'
+        ]
+    }, {
+        name: 'Monotherapy/combination',
+        values: [
+            'Combination',
+            'Monotherapy'
+        ]
+    }, {
+        name: 'Type of combination',
+        values: [
+            'ICI+ICI',
+            'ICI+Chemo',
+            'ICI+TKI',
+            'ICI+MEKi',
+            'ICI+Anti-VEGF',
+            'ICI+RadiatICIn',
+            'ICI+Vaccine',
+            'ICI+BRAFi+MEKi',
+            'ICI+Chemo+Anti-VEGF',
+            'ICI+ICI+Chemo',
+        ]
+    }, {
+        name: 'Type of control',
+        values: [
+            'Chemo',
+            'TKI',
+            'Interferon',
+            'Multikinase inhibitor',
+            'mTOR inhibitor',
+            'Radiation',
+            'Vaccine',
+            'Placebo',
+            'Chemo/Anti-EGFR',
+            'Chemo+Anti-VEGF',
+            'Chemo/TKI',
+            'BRAFi+MEKi',
+            'Best supportive care'
+        ]
+    }, {
+        name: 'Cancer type',
+        values: [
+            'Bladder',
+            'Breast',
+            'Colorectal',
+            'Esophageal/GEJ',
+            'Gastric/GEJ',
+            'Head and Neck ',
+            'Hepatocellular',
+            'Melanoma',
+            'Mesothelioma',
+            'Multiple Myeloma',
+            'Non-Small Cell Lung',
+            'Pancreatic',
+            'Prostate',
+            'Renal cell',
+            'Small Cell Lung',
+            'Urothelial'
+        ]
+    }],
+
+    // the data is for the 
+    init: function(data) {
+        // init the local db for the papers
+        alasql('create table papers');
+        alasql('select * into papers from ?', [data.rs]);
+
+        // create a new list of attrs
+        var dropdowns = [];
+        for (let i = 0; i < this.attrs.length; i++) {
+            const attr = this.attrs[i];
+            dropdowns.push({
+                name: attr.name,
+                value: '%',
+                options: this._get_options(i, true)
+            });
+        }
+
+        // put the default values
+
+
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                dropdowns: dropdowns
+            },
+            methods: {
+                is_filter_disabled: function(idx) {
+                    if (idx == 0) {
+                        return false;
+                    } else {
+                        if (idx == 1 || idx == 2 || idx == 5) {
+                            
+                            if (this.dropdowns[idx-1].value == '%') {
+                                return true;
+                            } else {
+                                return false;
+                            }
+                        }
+
+                        // for the Type of combination
+                        // this dropdown depends on the value of previous
+                        if (idx == 3) {
+                            if (this.dropdowns[2].value.toLocaleLowerCase() == 'combination') {
+                                return false;
+                            } else {
+                                return true;
+                            }
+                        }
+
+                        // for the next, it depends on the m/c value
+                        // and also the choose of type of comb
+                        if (idx == 4) {
+                            if (this.dropdowns[2].value == '%') {
+                                return true;
+                            } else if (this.dropdowns[2].value.toLocaleLowerCase() == 'monotherapy') {
+                                return false;  
+                            } else {
+                                // depends on the value of 
+                                if (this.dropdowns[3].value == '%') {
+                                    return true;
+                                } else {
+                                    return false;
+                                }
+                            }
+                        }
+                    }
+                },
+
+                on_filter_value_change: function(event, idx) {
+                    var new_val = event.target.value;
+                    this.dropdowns[idx].value = new_val;
+
+                    if (idx < this.dropdowns.length - 1) {
+                        // now, reset all of the following options
+                        for (let i = idx + 1; i < this.dropdowns.length; i++) {
+                            // reset the value
+                            this.dropdowns[i].value = '%';
+                            // reset the options
+                            this.dropdowns[i].options = vw_studyfilter._get_options(i, true);
+                        }
+                        
+                        if (new_val != '%') {
+                            // now, update the options of the next dropdown
+                            var next = 1;
+                            if (idx == 2 &&
+                                new_val.toLocaleLowerCase() == 'monotherapy') {
+                                next = 2;
+                            }
+                            var next_options = vw_studyfilter._get_options(idx + next);
+                            console.log(next_options);
+                            this.dropdowns[idx + next].options = next_options;
+                        }
+                    }
+
+                    this.$forceUpdate();
+
+
+                }
+            }
+        });
+    },
+
+    update: function() {
+        this.vpp.$data.attrs = attrs;
+    },
+
+    _get_options: function(idx, skip) {
+        if (typeof(skip) == 'undefined') {
+            // use this option to skip checking, just return the default options
+            skip = false;
+        }
+        var options = [{
+            name: '',
+            value: '%'
+        }];
+        var name_idx = this.attrs[idx].name;
+        var vals_idx = this.attrs[idx].values;
+
+        if (idx == 0) {
+            for (let i = 0; i < this.attrs[idx].values.length; i++) {
+                const val = this.attrs[idx].values[i];
+                options.push({
+                    name: val,
+                    value: val
+                })
+            }
+        } else {
+            if (skip) {
+                return options;
+            }
+            // for all other dropdown, the option is decided by ALL of the selections
+            // of dependencies for example:
+            // for the 2nd dropdown, the options are decided by the 1st selection
+            // for the 3rd dropdown, the options are decided by the selections of the 1st and 2nd.
+            // for the 4th, by 1st, 2nd, and 3rd
+            // etc.
+            // So, first, need to generate the condition by all previous 
+            var conditions = [];
+            for (let j = 0; j < idx; j++) {
+                var name_j = this.vpp.$data.dropdowns[j].name;
+                var val_j = this.vpp.$data.dropdowns[j].value;
+
+                if (val_j == this.blank_val) {
+                    // skip the blank dropdown
+                } else {
+                    conditions.push(
+                        '`' + name_j + '` like "%' + val_j + '%"'
+                    );
+                }
+            }
+            var sql_cond = conditions.join(' and \n');
+
+            // then, use these conditions to query the itable data to get the available records
+            var sql = "select `" + name_idx + '` as attr, count(PMID) as cnt ' + '\n' +
+                'from papers ' + '\n' +
+                'where ' + sql_cond + '\n' +
+                'group by `' + name_idx + '` ';
+
+            console.log(sql);
+            var rs = alasql(sql);
+            console.log(rs);
+
+            // last, check each value whether available in the rs
+            for (let i = 0; i < this.attrs[idx].values.length; i++) {
+                const val = this.attrs[idx].values[i];
+                var val_upper = val.toLocaleUpperCase();
+
+                // check whether this val in rs or not
+                for (let j = 0; j < rs.length; j++) {
+                    const r = rs[j];
+
+                    if (typeof(r.attr) == 'undefined') {
+                        continue;
+                    }
+                    
+                    var R_VAL = r.attr.toLocaleUpperCase();
+                    
+                    if (R_VAL.lastIndexOf(val_upper)>=0) {
+                        // which means this value exists in the selection
+                        // Then we could put this val in the result
+                        options.push({
+                            name: val,
+                            value: val
+                        });
+                        
+                        // since we already found this value
+                        // just break and check next value
+                        break;
+
+                    } else {
+                        
+                    }
+                }
+            }
+        }
+
+        return options;
+    }
+};
+
+var vw_oclist = {
+    vpp: null,
+    vpp_id: '#vw_oclist',
+    select_mode: 'checkbox', // radio, checkbox
+    pids: [],
+
+    init: function(data) {
+        // bind local data
+        this.data = data;
+
+        // init local db
+        alasql('create table aes');
+        alasql('select * into aes from ?', [this.data.rs])
+        
+        this.rs = {},
+        this.rs_stat = {
+            cnt_cates: 0,
+            cnt_aes: 0,
+        };
+        
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                rs: this.rs,
+                select_mode: this.select_mode,
+                rs_stat: this.rs_stat
+            },
+            methods: {
+                toggle_oc: function(event) {
+                    var oc_cate = event.target.getAttribute('oc_cate');
+                    var oc_name = event.target.getAttribute('oc_name');
+                    var ae_grade = event.target.getAttribute('ae_grade');
+
+                    // add effect
+                    if (this.select_mode == 'checkbox') {
+                        $(event.target).toggleClass('oc-type-selected');
+                    } else {
+                        $('.oc-type').removeClass('oc-type-selected');
+                        $(event.target).addClass('oc-type-selected');
+                    }
+
+                    // call the worker to update everything related
+                    // jarvis will do this task accordingly
+                    jarvis.toggle_oc(oc_cate, oc_name, ae_grade);
+                },
+
+                get_grade_label: function(g) {
+                    return jarvis.texts[g];
+                },
+
+                toggle_cate: function(cate) {
+                    this.rs[cate].is_close = !this.rs[cate].is_close;
+                },
+
+                toggle_all_cates: function(flag) {
+                    for (var key in this.rs) {
+                        this.rs[key].is_close = flag;
+                    }
+                },
+
+                clear: function() {
+                    $('.oc-type').removeClass('oc-type-selected');
+                    jarvis.clear_all_ae();
+                }
+            }
+        });
+
+        this.update([]);
+    },
+
+    get_pid_condition: function() {
+        if (this.pids.length == 0) {
+            return 'pid is not null ';
+        } else {
+            var cond = this.pids.map(function(v) { return '' + v}).join(',');
+            return 'pid in (' + cond + ') '
+        }
+    },
+    
+
+    update: function(pids) {
+        // update the pid
+        this.pids = pids;
+        var sql = 'select oc_cate, oc_name, ' +
+            '  count(case when has_GA = true then pid else null end) as cnt_ga, ' +
+            '  count(case when has_G3H = true then pid else null end) as cnt_g3h, ' +
+            '  count(case when has_G5N = true then pid else null end) as cnt_g5n ' +
+            'from aes ' + 
+            'where ' +
+            this.get_pid_condition() + ' ' + 
+            'group by oc_cate, oc_name ' + 
+            'order by oc_cate asc, oc_name asc';
+        console.log(sql);
+        // init the result
+        var raw_rs = alasql(sql);
+        var rs = {};
+        var rs_stat = {
+            cnt_cates: 0,
+            cnt_aes: 0,
+        };
+        for (var i = 0; i < raw_rs.length; i++) {
+            var r = raw_rs[i];
+            if (rs.hasOwnProperty(r.oc_cate)) {
+                //
+            } else {
+                rs[r.oc_cate] = {
+                    oc_cate: r.oc_cate,
+                    is_close: false,
+                    aes: []
+                }
+                rs_stat.cnt_cates += 1;
+            }
+            // put this ae into cate
+            rs[r.oc_cate]['aes'].push({
+                oc_name: r.oc_name,
+                cnt_ga: r.cnt_ga,
+                cnt_g3h: r.cnt_g3h,
+                cnt_g5n: r.cnt_g5n
+            });
+            rs_stat.cnt_aes += 1;
+        }
+        // bind results 
+        this.raw_rs = raw_rs;
+        this.rs = rs;
+        this.rs_stat = rs_stat;
+
+        // update vpp data
+        this.vpp.rs = this.rs;
+        this.vpp.rs_stat = this.rs_stat;
+
+        // update tips
+        $(document).tooltip({
+            position: {
+                my: "left top",
+                at: "right+5 top-5",
+                collision: "none"
+            }
+        });
+    }
+};
+
 
 var vw_ocplot = {
     vpp: null,
@@ -337,8 +911,8 @@ var vw_ocplot = {
                 },
 
                 current: {
-                    ae_cate: '',
-                    ae_name: '',
+                    oc_cate: '',
+                    oc_name: '',
                     ae_grade: '',
                     cnt_studies: 0, 
                     has_img: false,
@@ -488,21 +1062,25 @@ var jarvis = {
             return;
         }
 
+        prj = 'IO';
+
         // set the vw_oclist to radio button model
         vw_oclist.select_mode = 'radio';
 
+
         $.when(
             $.get(
-                '/pub/graphdata/' + prj + '/ITABLE_CFG.json',
-                {}
+                '/pub/graphdata/' + prj + '/ITABLE.json',
+                {rnd: Math.random(), src: 'db'}
             ),
             $.get(
-                '/pub/graphdata/'+prj+'/OPLOTS.json',
-                {ver: Math.random()},
+                '/pub/graphdata/'+prj+'/GRAPH_PMA.json',
+                {ver: Math.random(), src: 'db'},
             )
         ).done(function(r1, r2) {
             var data1 = r1[0];
             var data2 = r2[0];
+
             jarvis.data1 = data1;
             jarvis.data2 = data2;
 
@@ -510,6 +1088,10 @@ var jarvis = {
             console.log(data1);
             console.log(data2);
 
+            // init the filter with ITABLE data
+            vw_studyfilter.init(data1);
+
+            // init the list and plots with outcome data
             vw_oclist.init(data2);
             vw_ocplot.init(data2);
 
@@ -530,8 +1112,8 @@ var jarvis = {
         return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
     },
 
-    toggle_ae: function(ae_cate, ae_name, ae_grade) {
-        console.log('* toggle_ae ' + ae_cate + ', ' + ae_name + ', ' + ae_grade);
+    toggle_oc: function(oc_cate, oc_name, ae_grade) {
+        console.log('* toggle_oc ' + oc_cate + ', ' + oc_name + ', ' + ae_grade);
         vw_ocplot.show_plot(ae_cate, ae_name, ae_grade);
     },
 
