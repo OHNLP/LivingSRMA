@@ -234,14 +234,24 @@ var fg_prim_forest = {
                 .attr('y', 0)
                 .attr('width', this.width)
                 .attr('height', this.row_height);
+
             for (var j = 0; j < this.cols.length; j++) {
                 var col = this.cols[j];
+                var txt = this.get_txt_by_col(stu, j);
+
+                // special rule for the study name
+                var _txt = txt;
+                if (j == 0) {
+                    if (txt.length > 21) {
+                        _txt = txt.substring(0, 21) + ' ...'
+                    }
+                }
                 g.append('text')
                     .attr('class', this.css.txt_nm)
                     .attr('x', col.x + (col.align=='start'? 0 : col.width))
                     .attr('y', this.row_height - this.row_txtmb)
                     .attr('text-anchor', col.align)
-                    .text(this.get_txt_by_col(stu, j));
+                    .text(_txt);
             }
         }
 

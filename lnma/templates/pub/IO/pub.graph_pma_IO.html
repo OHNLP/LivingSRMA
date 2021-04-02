@@ -195,7 +195,7 @@ a {
         <div v-for="dropdown, dpd_idx in dropdowns"
             class="sfilter d-flex fx-col mr-3">
             <div class="sfilter-name">
-                {{ dropdown.name }}
+                {{ dropdown.display_name }}
             </div>
             <div>
                 <select class="sfilter-select"
@@ -207,6 +207,15 @@ a {
                         {{ opt.name }}
                     </option>
                 </select>
+            </div>
+        </div>
+
+        <div class="d-flex fx-col mr-3">
+            <div class="sfilter-name">
+                Number of studies
+            </div>
+            <div style="height: 20px; line-height: 20px;">
+                {{ n_papers }}
             </div>
         </div>
     </div>
@@ -338,7 +347,7 @@ a {
             <div class="box-header">
                 <h4>
                     <i class="fa fa-chart-bar"></i>
-                    PLOTS | 
+                    Plots | 
                 </h4>
                 <div class="d-flex fx-row">
                     <div class="box-radio-group d-flex fx-row">
@@ -395,7 +404,7 @@ a {
 
                 <div id="vw_ocplots_plotpanel"
                     v-if="current.has_img">
-                    <h5>The forest plots of {{ current.cnt_studies }} studies of {{ current.ae_cate }} - {{ current.ae_name }}, {{ get_grade_label(current.ae_grade) }}</h5>
+                    <h5>The forest plots of {{ current.cnt_studies }} studies of {{ current.oc_cate }} - {{ current.oc_name }}, {{ get_grade_label(current.ae_grade) }}</h5>
                     <div class="d-flex fx-row">
                         <div class="oc-plot-tab"
                             v-bind:class="{'oc-plot-tab-selected': current.is_prim_plot}"
@@ -410,12 +419,14 @@ a {
                             Cumulative Meta-Analysis with {{ params.sm }}
                         </div>
                     </div>
+
                     <div class="oc-plot-tab-page"
                         v-bind:class="{'oc-plot-tab-page-selected': current.is_prim_plot}">
                         <div id="fg_prim_forest" style="width: 100%; height: 100%;">
                             <svg id="fg_prim_forest_svg"></svg>
                         </div>
                     </div>
+                    
                     <div class="oc-plot-tab-page"
                         v-bind:class="{'oc-plot-tab-page-selected': current.is_cumu_plot}">
                         <div id="fg_cumu_forest" style="width: 100%; height: 100%;">
@@ -465,6 +476,7 @@ var vw_studyfilter = {
 
     // attrs
     attrs: [{
+        display_name: 'ICI Class (Rx)',
         name: 'Class of ICI',
         values: [
             'PD1',
@@ -472,6 +484,7 @@ var vw_studyfilter = {
             'CTLA-4'
         ]
     }, {
+        display_name: 'ICI Name (Rx)',
         name: 'Name of ICI',
         values: [
             'Atezolizumab',
@@ -484,12 +497,14 @@ var vw_studyfilter = {
             'Tremelimumab'
         ]
     }, {
+        display_name: 'Type of Therapy (Rx)',
         name: 'Monotherapy/combination',
         values: [
             'Combination',
             'Monotherapy'
         ]
     }, {
+        display_name: 'Type of combination (Rx)',
         name: 'Type of combination',
         values: [
             'ICI+ICI',
@@ -504,6 +519,7 @@ var vw_studyfilter = {
             'ICI+ICI+Chemo',
         ]
     }, {
+        display_name: 'Control Arm',
         name: 'Type of control',
         values: [
             'Chemo',
@@ -521,6 +537,7 @@ var vw_studyfilter = {
             'Best supportive care'
         ]
     }, {
+        display_name: 'Cancer Type',
         name: 'Cancer type',
         values: [
             'Bladder',
@@ -553,6 +570,7 @@ var vw_studyfilter = {
         for (let i = 0; i < this.attrs.length; i++) {
             const attr = this.attrs[i];
             dropdowns.push({
+                display_name: attr.display_name,
                 name: attr.name,
                 value: '%',
                 options: this._get_options(i, true)
@@ -565,7 +583,8 @@ var vw_studyfilter = {
         this.vpp = new Vue({
             el: this.vpp_id,
             data: {
-                dropdowns: dropdowns
+                dropdowns: dropdowns,
+                n_papers: data.rs.length
             },
             methods: {
                 is_filter_disabled: function(idx) {
@@ -614,6 +633,7 @@ var vw_studyfilter = {
                     var new_val = event.target.value;
                     this.dropdowns[idx].value = new_val;
 
+                    // update the affected
                     if (idx < this.dropdowns.length - 1) {
                         // now, reset all of the following options
                         for (let i = idx + 1; i < this.dropdowns.length; i++) {
@@ -636,9 +656,31 @@ var vw_studyfilter = {
                         }
                     }
 
+                    // now need to get the pmids
+                    // so, first, get the current values of all dropdowns
+                    var conditions = [];
+                    for (let i = 0; i < this.dropdowns.length; i++) {
+                        const dropdown = this.dropdowns[i];
+                        var name_i = dropdown.name;
+                        var val_i = dropdown.value;
+                        if (val_i == '%') {
+                            // skip the default
+                        } else {
+                            conditions.push(
+                                '`' + name_i + '` like "%' + val_i + '%"'
+                            );
+                        }
+                    }
+                    
+                    // second, use the conditions to search for the 
+                    var pmids = vw_studyfilter._get_pmids_by_conditions(conditions);
+                    this.n_papers = pmids.length;
+
+                    // send these pmids to the oclist
+                    vw_oclist.update(pmids);
+
+                    // finally, update the filter UI
                     this.$forceUpdate();
-
-
                 }
             }
         });
@@ -646,6 +688,23 @@ var vw_studyfilter = {
 
     update: function() {
         this.vpp.$data.attrs = attrs;
+    },
+
+    _get_pmids_by_conditions: function(conditions) {
+        var sql_conds = conditions.join(' and \n');
+        var sql = "select PMID from papers " + '\n' +
+            "where " + sql_conds + '\n';
+        
+        var rs = alasql(sql);
+        
+        var pmids = [];
+        for (let i = 0; i < rs.length; i++) {
+            const r = rs[i];
+            // make sure the PMID is a string
+            pmids.push(""+r.PMID);
+        }
+
+        return pmids;
     },
 
     _get_options: function(idx, skip) {
@@ -816,7 +875,7 @@ var vw_oclist = {
         if (this.pids.length == 0) {
             return 'pid is not null ';
         } else {
-            var cond = this.pids.map(function(v) { return '' + v}).join(',');
+            var cond = this.pids.map(function(v) { return '"' + v + '"'}).join(',');
             return 'pid in (' + cond + ') '
         }
     },
@@ -825,14 +884,14 @@ var vw_oclist = {
     update: function(pids) {
         // update the pid
         this.pids = pids;
-        var sql = 'select oc_cate, oc_name, ' +
-            '  count(case when has_GA = true then pid else null end) as cnt_ga, ' +
-            '  count(case when has_G3H = true then pid else null end) as cnt_g3h, ' +
-            '  count(case when has_G5N = true then pid else null end) as cnt_g5n ' +
-            'from aes ' + 
-            'where ' +
-            this.get_pid_condition() + ' ' + 
-            'group by oc_cate, oc_name ' + 
+        var sql = 'select oc_cate, oc_name, ' + '\n' +
+            '  count(case when has_GA = true then pid else null end) as cnt_ga, ' + '\n' +
+            '  count(case when has_G3H = true then pid else null end) as cnt_g3h, ' + '\n' +
+            '  count(case when has_G5N = true then pid else null end) as cnt_g5n ' + '\n' +
+            'from aes ' + '\n' +
+            'where ' + '\n' +
+            this.get_pid_condition() + ' ' + '\n' +
+            'group by oc_cate, oc_name ' + '\n' +
             'order by oc_cate asc, oc_name asc';
         console.log(sql);
         // init the result
@@ -941,14 +1000,14 @@ var vw_ocplot = {
                 },
 
                 update_plot: function() {
-                    if (this.current.ae_cate == '') {
+                    if (this.current.oc_cate == '') {
                         // nothing to update
                         return;
                     }
                     // update 
                     vw_ocplot.show_plot(
-                        this.current.ae_cate,
-                        this.current.ae_name,
+                        this.current.oc_cate,
+                        this.current.oc_name,
                         this.current.ae_grade
                     );
                 }
@@ -979,7 +1038,7 @@ var vw_ocplot = {
         }
     },
 
-    show_plot: function(ae_cate, ae_name, ae_grade) {
+    show_plot: function(oc_cate, oc_name, ae_grade) {
         // set no img and try to load
         this.vpp.current.has_img = false;
 
@@ -989,16 +1048,16 @@ var vw_ocplot = {
             'GA_Nt as Nt, GA_Nc as Nc ' +
             'from aes ' +
             'where ' + this.get_pid_condition() + ' ' +
-            "  and ae_cate='" + ae_cate + "' " +
-            "  and ae_name='" + ae_name + "' " +
+            "  and oc_cate='" + oc_cate + "' " +
+            "  and oc_name='" + oc_name + "' " +
             "  and has_" + ae_grade + " = true";
 
          var rs = alasql(sql);
          console.log(rs);
 
          // update the data in vpp
-         this.vpp.current.ae_cate = ae_cate;
-         this.vpp.current.ae_name = ae_name;
+         this.vpp.current.oc_cate = oc_cate;
+         this.vpp.current.oc_name = oc_name;
          this.vpp.current.ae_grade = ae_grade;
          this.vpp.current.cnt_studies = rs.length;
 
@@ -1114,7 +1173,7 @@ var jarvis = {
 
     toggle_oc: function(oc_cate, oc_name, ae_grade) {
         console.log('* toggle_oc ' + oc_cate + ', ' + oc_name + ', ' + ae_grade);
-        vw_ocplot.show_plot(ae_cate, ae_name, ae_grade);
+        vw_ocplot.show_plot(oc_cate, oc_name, ae_grade);
     },
 
     clear_all_ae: function() {
