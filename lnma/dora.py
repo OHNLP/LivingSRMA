@@ -917,6 +917,15 @@ def get_papers_by_stage(project_id, stage):
             Paper.is_deleted == IS_DELETED_NO
         )).order_by(Paper.date_updated.desc()).all()
 
+    elif stage == ss_state.SS_RS_INCLUDED_ONLY_SR:
+        papers = Paper.query.filter(and_(
+            Paper.project_id == project_id,
+            Paper.ss_rs.in_([
+                ss_state.SS_RS_INCLUDED_ONLY_SR
+            ]),
+            Paper.is_deleted == IS_DELETED_NO
+        )).order_by(Paper.date_updated.desc()).all()
+
     elif stage == ss_state.SS_STAGE_INCLUDED_SRMA:
         papers = Paper.query.filter(and_(
             Paper.project_id == project_id,

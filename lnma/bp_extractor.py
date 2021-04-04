@@ -60,6 +60,23 @@ def manage_outcomes():
     )
 
 
+@bp.route('/manage_selections')
+@login_required
+def manage_selections():
+    project_id = request.cookies.get('project_id')
+
+    if project_id is None:
+        return redirect(url_for('project.mylist'))
+
+    project = dora.get_project(project_id)
+
+    return render_template(
+        template_base + 'manage_selections.html',
+        project=project,
+        project_json_str=json.dumps(project.as_dict())
+    )
+
+
 @bp.route('/manage_itable')
 @login_required
 def manage_itable():
@@ -92,6 +109,9 @@ def extract_data():
         project_json_str=json.dumps(project.as_dict())
     )
 
+###########################################################
+# APIs for extraction
+###########################################################
 
 @bp.route('/get_paper')
 @login_required
@@ -124,6 +144,56 @@ def get_papers_by_stage():
         'papers': json_papers
     }
     return jsonify(ret)
+
+
+@bp.route('/get_included_papers_and_selections')
+@login_required
+def get_included_papers_and_selections():
+    '''
+    Get the included papers and the decisions of selection for outcomes
+    '''
+    project_id = request.args.get('project_id')
+    project_id = request.cookies.get('project_id')
+
+    # get all papers
+    papers = dora.get_papers_by_stage(
+        project_id, 
+        ss_state.SS_STAGE_INCLUDED_SR
+    )
+
+    # extend the paper meta with a new attribute
+    # outcome_selections
+    # and make a pid -> sequence mapping
+    pid2seq = {}
+    for i, paper in enumerate(papers):
+        papers[i].meta['outcome_selections'] = []
+        pid2seq[paper.pid] = i
+    
+    # get all extracts
+    # itable, pwma, subg, nma
+    extracts = dora.get_extracts_by_project_id(project_id)
+
+    # check each extract
+    for extract in extracts:
+        for pid in extract.data:
+            seq = pid2seq[pid]
+            if extract.data[pid]['is_selected']:
+                # this paper is selected for this outcome
+                papers[seq].meta['outcome_selections'].append(
+                    extract.abbr
+                )
+    
+    json_papers = [ p.as_very_simple_dict() for p in papers ]
+    json_extracts = [ extr.as_simple_dict() for extr in extracts ]
+
+    ret = {
+        'success': True,
+        'msg': '',
+        'papers': json_papers,
+        'extracts': json_extracts
+    }
+    return jsonify(ret)
+
 
 
 @bp.route('/create_extract', methods=['POST'])
@@ -431,6 +501,11 @@ def test():
     }
     return jsonify(ret)
 
+
+
+###############################################################################
+# Importers 
+###############################################################################
 
 @bp.route('/import_itable_meta_and_data_from_xls')
 @login_required

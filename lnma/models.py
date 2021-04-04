@@ -443,6 +443,24 @@ class Extract(db.Model):
 
     Some attributes are designed for the public site only.
     More information would be added in the future.
+
+    The `data` attribute contains all the extraction results.
+    It's a pid based (e.g., PMID) dictionary.
+    {
+        pid: {
+            is_selected: true / false,
+            is_checked: true / false,
+            n_arms: 2 / 3 / 4 / 5,
+            attrs: {
+                main: {
+                    attr_sub_abbr: value
+                },
+                other: [{
+                    attr_sub_abbr: value
+                }, ...]
+            }
+        }
+    }
     """
     
     __tablename__ = 'extracts'
