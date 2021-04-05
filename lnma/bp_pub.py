@@ -3258,7 +3258,11 @@ def get_sof_pma_data_from_db_IO(is_calc_pma=True):
             if not ext_pp_data['is_selected']: continue
 
             # get the paper
-            paper = paper_dict[pid]
+            if pid in paper_dict:
+                paper = paper_dict[pid]
+            else:
+                # which means this study is not included in SR
+                continue
 
             # OK, this studis is selected, put the extracted result
             # first arm
