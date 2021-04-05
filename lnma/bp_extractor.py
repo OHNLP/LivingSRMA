@@ -176,12 +176,18 @@ def get_included_papers_and_selections():
     # check each extract
     for extract in extracts:
         for pid in extract.data:
-            seq = pid2seq[pid]
-            if extract.data[pid]['is_selected']:
-                # this paper is selected for this outcome
-                papers[seq].meta['outcome_selections'].append(
-                    extract.abbr
-                )
+            if pid in pid2seq:
+                seq = pid2seq[pid]
+                if extract.data[pid]['is_selected']:
+                    # this paper is selected for this outcome
+                    papers[seq].meta['outcome_selections'].append(
+                        extract.abbr
+                    )
+            else:
+                # something wrong, this study should be there
+                # but also maybe excluded
+                # so, just ignore
+                pass
     
     json_papers = [ p.as_very_simple_dict() for p in papers ]
     json_extracts = [ extr.as_simple_dict() for extr in extracts ]
