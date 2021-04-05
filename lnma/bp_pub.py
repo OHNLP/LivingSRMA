@@ -3273,10 +3273,10 @@ def get_sof_pma_data_from_db_IO(is_calc_pma=True):
                     r[col] = ''
             
             # add more attributes
-            r['has_GA']  = __notna(ext_pp_data['attrs']['main']['GA_Et'])
-            r['has_G34'] = __notna(ext_pp_data['attrs']['main']['G34_Et'])
-            r['has_G3H'] = __notna(ext_pp_data['attrs']['main']['G3H_Et'])
-            r['has_G5N'] = __notna(ext_pp_data['attrs']['main']['G5N_Et'])
+            r['has_GA']  = __notna(r['GA_Et'])
+            r['has_G34'] = __notna(r['G34_Et'])
+            r['has_G3H'] = __notna(r['G3H_Et'])
+            r['has_G5N'] = __notna(r['G5N_Et'])
             r['author'] = paper.get_short_name()
             r['year'] = paper.get_year()
             r['pid'] = paper.pid
