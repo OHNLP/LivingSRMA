@@ -67,6 +67,30 @@ def mk_number_str(length=6):
     return ''.join(random.choice('0123456789') for i in range(length))
 
 
+def fill_extract_data_arm(arm, cate_attrs):
+    '''
+    Fill the extract data arm with empty values
+    The arm could be main (arm 1) or other arm
+    '''
+    for cate in cate_attrs:
+        for attr in cate['attrs']:
+            attr_abbr = attr['abbr']
+            if attr['subs'] is None:
+                if attr_abbr not in arm:
+                    arm[attr_abbr] = ''
+                else:
+                    # which means this attr exsits
+                    pass
+            else:
+                # have multiple subs
+                for sub in attr['subs']:
+                    sub_abbr = sub['abbr']
+                    if sub_abbr not in arm:
+                        arm[sub_abbr] = ''
+
+    return arm
+
+
 def is_valid_pmid(pmid):
     '''Check if a pmid is valid PMID
 

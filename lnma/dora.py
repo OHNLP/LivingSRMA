@@ -1,3 +1,4 @@
+from operator import contains
 import uuid
 import datetime
 
@@ -1642,7 +1643,30 @@ def update_paper_selections(project_id, pid, abbrs):
         oc_abbr = extract.abbr
         is_selected = oc_abbr in abbrs
 
-        if pid not in extract.data:
+        if pid in extract.data:
+            db_is_selected = extract.data[pid]['is_selected']
+            # print('* %s in %s (%s vs %s)' % (
+            #     pid, oc_abbr, is_selected, db_is_selected
+            # ))
+            if is_selected == db_is_selected:
+                # OK, no need to change the value
+                pass
+            else:
+                # user changed the option, ok, update
+                extract.data[pid]['is_selected'] = is_selected
+
+                # add to session
+                flag_modified(extract, "data")
+                db.session.add(extract)
+                
+                print('* found %s in %s is_selected updated to %s' % (
+                    pid, extract.meta['full_name'], is_selected
+                ))
+
+        else:
+            # print('* %s NOT in %s (%s vs %s)' % (
+            #     pid, oc_abbr, is_selected, None
+            # ))
             # this is very very very rare, but possible?
             if is_selected:
                 # well, have to add this pid to this outcome
@@ -1655,26 +1679,19 @@ def update_paper_selections(project_id, pid, abbrs):
                         'other': []
                     }
                 }
+                extract.data[pid]['attrs']['main'] = util.fill_extract_data_arm(
+                    extract.data[pid]['attrs']['main'],
+                    extract.meta['cate_attrs']
+                )
+                flag_modified(extract, "data")
+                db.session.add(extract)
+
+                print('* created %s in %s is_selected updated to %s' % (
+                    pid, extract.meta['full_name'], is_selected
+                ))
             else:
                 # since it is not selected, just ignore is fine
                 pass
-
-        else:
-            db_is_selected = extract.data[pid]['is_selected']
-
-            if is_selected == db_is_selected:
-                # OK, no need to change the value
-                pass
-            else:
-                # user changed the option, ok, update
-                extract.data[pid]['is_selected'] = is_selected
-                print('* found %s in %s is_selected updated to %s' % (
-                    pid, extract.meta['full_name'], is_selected
-                ))
-
-                # add to session
-                flag_modified(extract, "data")
-                db.session.add(extract)
 
     # commit all changes if any
     db.session.commit()

@@ -190,7 +190,8 @@ def get_included_papers_and_selections():
                 pass
     
     json_papers = [ p.as_very_simple_dict() for p in papers ]
-    json_extracts = [ extr.as_simple_dict() for extr in extracts ]
+    json_extracts = [ extr.as_dict() for extr in extracts ]
+    # json_extracts = [ extr.as_simple_dict() for extr in extracts ]
 
     ret = {
         'success': True,
@@ -312,19 +313,21 @@ def get_extract_and_papers():
             'main': {},
             'other': []
         }
-        for cate in extract.meta['cate_attrs']:
-            for attr in cate['attrs']:
-                attr_abbr = attr['abbr']
-                if attr['subs'] is None:
-                    extract.data[pid]['attrs']['main'][attr_abbr] = ''
-                else:
-                    # have multiple subs
-                    for sub in attr['subs']:
-                        sub_abbr = sub['abbr']
-                        extract.data[pid]['attrs']['main'][sub_abbr] = ''
-        # else:
-        #     for attr in extract.meta['attrs']:
-        #         extract.data[pid]['attrs']['main'][attr] = ''
+        # fill the main track with empty values
+        extract.data[pid]['attrs']['main'] = util.fill_extract_data_arm(
+            extract.data[pid]['attrs']['main'],
+            extract.meta['cate_attrs']
+        )
+        # for cate in extract.meta['cate_attrs']:
+        #     for attr in cate['attrs']:
+        #         attr_abbr = attr['abbr']
+        #         if attr['subs'] is None:
+        #             extract.data[pid]['attrs']['main'][attr_abbr] = ''
+        #         else:
+        #             # have multiple subs
+        #             for sub in attr['subs']:
+        #                 sub_abbr = sub['abbr']
+        #                 extract.data[pid]['attrs']['main'][sub_abbr] = ''
 
     # reverse search, unselect those are not in papers
     for pid in extract.data:
