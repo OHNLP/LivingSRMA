@@ -245,7 +245,7 @@ a {
             </div>
             <!-- /.box-header -->
             <div class="box-body">
-                <svg id="tb_lgtbd3"></svg>
+                <svg id="tb_lgtbd3" style="transform: translate(-10px, -10px);"></svg>
 
                 <p id="league_table_explain" class="txt-explain">
                     The values in each cell represent the relative treatment effect (and 95% CI) of the treatment on the top, compared to the treatment on the left. Green color suggests relative treatment benefit. Light green suggests non-significant benefit and dark green suggests significant benefit. Red color suggests relative treatment harm. Light red suggests non-significant harm and dark red suggests significant harm.
@@ -495,6 +495,16 @@ var jarvis = {
         // update the league table
         tb_lgtbd3.draw(data.league);
 
+        // resize for lgtb screen shot
+        // var scale = 0.9;
+        // tb_lgtbd3.width = tb_lgtbd3.width * scale;
+        // $(tb_lgtbd3.box_id).css('width', tb_lgtbd3.width);
+        // $(tb_lgtbd3.box_id).css('height', tb_lgtbd3.height);
+        // tb_lgtbd3.svg.attr('style', "transform: translate(-6%, -8%) scale(0.9);");
+        // $('#league_table_explain').css(
+        //     'margin-top', '-82px'
+        // );
+
         // update the forest plot
         data.forest.subtitle = '';
         // data.forest.sm = 'RR';
@@ -571,7 +581,7 @@ var jarvis = {
             function(data) {
                 jarvis.draw(data);
                 jarvis.ssmsg('Data loaded!');
-                setTimeout('jarvis.ssclose();', 300);
+                setTimeout('jarvis.ssclose(); jarvis.resize_parentframe();', 300);
             }, 'json'
         );
     },
@@ -655,6 +665,10 @@ var jarvis = {
         console.log(forest);
 
         fg_frsplt.draw(forest);
+    },
+
+    resize_parentframe: function() {
+        var h = $(document).height();
     }
 };
 

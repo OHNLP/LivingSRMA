@@ -109,6 +109,11 @@ def ADJRCC():
     return render_template('pub/pub.ADJRCC.html', pwma=pwma)
 
 
+###############################################################################
+# For RCC project
+# Special designed pages
+###############################################################################
+
 @bp.route('/RCC.html')
 def RCC():
     prj = 'RCC'
@@ -146,8 +151,7 @@ def RCC():
     full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, 'EVMAP.json')
     evmap = json.load(open(full_fn))
 
-    return render_template('pub/pub.RCC.html', nma=nma, pwma=pwma, evmap=evmap)
-
+    return render_template('pub/RCC/pub.RCC.html', nma=nma, pwma=pwma, evmap=evmap)
 
 
 @bp.route('/mRCC.html')
@@ -187,8 +191,25 @@ def mRCC():
     full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, 'EVMAP.json')
     evmap = json.load(open(full_fn))
 
-    return render_template('pub/pub.mRCC.html', nma=nma, pwma=pwma, evmap=evmap)
+    return render_template('pub/RCC/pub.mRCC.html', nma=nma, pwma=pwma, evmap=evmap)
 
+
+@bp.route('/graph_nma_RCC.html')
+def graph_nma_RCC():
+    return render_template('pub/RCC/graph_nma.html')
+
+
+@bp.route('/ida_RCC.html')
+def ida_RCC():
+    '''
+    A special module for the RCC
+    '''
+    return render_template('pub/RCC/ida.html')
+
+###############################################################################
+# For CAT project
+# Special designed pages
+###############################################################################
 
 @bp.route('/CAT.html')
 def CAT():
@@ -279,14 +300,6 @@ def prisma_v3():
     return render_template('pub/pub.prisma_v3.html')
 
 
-@bp.route('/ida_RCC.html')
-def ida_RCC():
-    '''
-    A special module for the RCC
-    '''
-    return render_template('pub/RCC/ida.html')
-
-
 @bp.route('/itable.html')
 def itable():
     return render_template('pub/pub.itable.html')
@@ -320,11 +333,6 @@ def graph_v2_2():
 @bp.route('/graph_v3.html')
 def graph_v3():
     return render_template('pub/pub.graph_v3.html')
-
-
-@bp.route('/graph_RCC.html')
-def graph_RCC():
-    return render_template('pub/pub.graph_RCC.html')
 
 
 @bp.route('/oplot.html')
@@ -3259,7 +3267,10 @@ def get_sof_pma_data_from_db_IO(is_calc_pma=True):
             
             # make sure the data type is int
             for col in int_cols:
-                r[col] = __int(r[col])
+                if col in r:
+                    r[col] = __int(r[col])
+                else:
+                    r[col] = ''
             
             # add more attributes
             r['has_GA']  = __notna(ext_pp_data['attrs']['main']['GA_Et'])

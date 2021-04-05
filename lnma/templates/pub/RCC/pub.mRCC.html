@@ -151,7 +151,7 @@
         <div class="col">
             <iframe id="iframe-nma-[[ tp[:4] ]]" class="auto-height" 
                 src="" scrolling="no" frameborder="0"
-                style="width: 100%; height: 920px; min-height: 700px;"></iframe>
+                style="width: 100%; height: 940px; min-height: 700px;"></iframe>
         </div>
     </div>
 </div>
@@ -257,7 +257,7 @@ function switch_nma_data(tag, oc_name, oc_fullname, tr) {
         tr = default_treat;
     }
     var oc = tag;
-    var url = "[[ url_for('pub.graph_RCC') ]]";
+    var url = "[[ url_for('pub.graph_nma_RCC') ]]";
     url += '?prj=' + prj + '&oc=' + oc_name + '&tr=' + tr;
     console.log('* switch nma: ' + url);
     $('#iframe-nma-' + tag).attr('src', url);

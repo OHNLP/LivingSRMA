@@ -201,6 +201,8 @@ var fg_evmap = {
                 title: this.cfg.xaxis_title,
                 type: 'category',
                 autorange: true,
+                // 2021-04-05: fix the margin
+                // https://plotly.com/javascript/reference/layout/xaxis/
                 automargin: true,
                 tickvals: oc_list,
                 tickangle: 270
