@@ -15,6 +15,7 @@ Manage Selections
 <style>
 html {
     overflow-x: hidden;
+    overflow-y: hidden;
 }
 /* badge */
 .badge-ckl {
@@ -89,6 +90,7 @@ html {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    cursor: pointer;
 }
 
 .paper-table-body-cell {
@@ -108,6 +110,154 @@ html {
 .n-arms-hr {
     margin: 1px 0 !important;
 }
+#pan_ocpapers_paperlist {
+    overflow-x: hidden;
+    overflow-y: auto;
+    height: 300px;
+    font-size: 0.9em;
+    max-width: calc(100% - 15px);
+}
+#pan_ocpapers_paperlist thead th{
+    position: sticky;
+    top: 0;
+    background-color: #acacac;
+}
+
+#pan_ocpapers_paperlist tbody td{
+    padding: 3px 3px;
+}
+#pan_ocpapers_paperlist tr:nth-child(even) {background: rgb(232, 232, 232)}
+#pan_ocpapers_paperlist tr:nth-child(odd) {background: whitesmoke}
+
+.paper-table-row:hover {
+    background: #cccccc;
+}
+.paper-table-row-clicked {
+    background-color: rgb(189, 228, 238) !important;
+}
+.paper-table-row-clicked .paper-name {
+    font-weight: bold;
+}
+
+.paper-meta-selected-oc {
+    padding: 0 4px;
+    margin: 0 3px;
+    background-color: #cfcece;
+}
+
+#pan_ocpapers_working_paper {
+    width: 240px;
+    padding: 5px;
+    height: auto;
+    position: absolute;
+    z-index: 95;
+    top: 50px;
+    right: 65%;
+    background: white;
+    font-size: .9em;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+#pan_ocpapers_working_paper_title {
+    height: 38px;
+    line-height: 18px;
+    overflow: hidden;
+    text-align: center;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    background-color: #dedede;
+
+    cursor: move;
+    cursor: grab;
+    cursor: -moz-grab;
+    cursor: -webkit-grab;
+}
+#pan_ocpapers_working_paper_oc_tree {
+    overflow-y: auto;
+}
+
+.chk-oc {
+    border-bottom: 1px dotted #cfcfcf;
+}
+.chk-oc:hover {
+    background-color: #bedce0;
+}
+.chk-oc-input {
+    margin: 3px;
+}
+.chk-oc-label {
+    width: 100%;
+    font-weight: normal !important;
+}
+.chk-oc-h1 {
+    background-color: #777777;
+}
+.chk-oc-h2 {
+    background-color: #acacac;
+}
+.chk-oc-h3 {
+    background-color: #c9c5c5;
+}
+
+#win_selector {
+    min-width: 1100px;
+    width: 65%;
+    height: 100%;
+    position: absolute;
+    right: 5000px;
+    background-color: #ffffff;
+    padding: 5px 10px;
+}
+
+#ifr_pdfviewer {
+    width: 100%;
+    height: 400px;
+    min-height: 400px;
+}
+
+.txt-red {
+    color: rgb(250, 89, 89);
+    background: rgb(255, 205, 205);
+    padding: 0;
+    margin: 0;
+}
+
+.txt-yellow {
+    background: rgb(238, 219, 171);
+    color: darkgoldenrod;
+    padding: 0;
+    margin: 0;
+}
+
+.txt-orange {
+    background: rgb(247, 226, 188);
+    color: orange;
+    padding: 0;
+    margin: 0;
+}
+
+.txt-green {
+    color: rgb(1, 56, 1);
+    background: rgb(223, 245, 223);
+    padding: 0;
+    margin: 0;
+}
+
+.txt-blue {
+    background: rgb(214, 214, 255);
+    color: darkblue;
+    padding: 0;
+    margin: 0;
+}
+
+.txt-purple {
+    background: rgb(250, 183, 250);
+    color: purple;
+    padding: 0;
+    margin: 0;
+}
 </style>
 {% endblock %}
 
@@ -117,7 +267,130 @@ html {
 
 
 <div id="pan_ocpapers">
+<div v-if="papers.length != 0 && extract_dict != null">
+    <div class="panel-info">
+        <div class="oc-attr d-flex flex-row">
+            <span style="font-size: 1.2em;" class="mr-2">
+                {{ papers.length }} studies included in SR
+            </span>
+
+            <!-- <div class="btn-group mr-2">
+                <button v-on:click="update_extract();"
+                    type="button" class="btn btn-default btn-sm">
+                    <i class="fa fa-save"></i>
+                    Save all
+                </button>
+            </div> -->
+        </div>
+    </div>
+
+    <div id="pan_ocpapers_paperlist" class="mt-1">
+        <table style="max-width: 100%;">
+            <thead id="pan_ocpapers_paperlist_thead">
+                <tr>
+                    <th>#</th>
+                    <th>&nbsp;</th>
+                    <th>Outcomes</th>
+                    <th>&nbsp;</th>
+                </tr>
+            </thead>
+
+            <tbody id="pan_ocpapers_paperlist_tbody">
+                <tr v-for="paper in papers"
+                    v-bind:id="'paper-table-row-' + paper.pid"
+                    class="paper-table-row">
+                    <td>{{ paper.seq_num }}</td>
+                    <td class="paper-table-body-td-author"
+                        v-on:click="on_click_paper(paper)">
+                        <div class="paper-table-body-td-author">
+                            {{ get_first_author(paper.authors) }} {{ get_year(paper.pub_date) }}
+                        </div>
+                    </td>
+                    <td>
+                        {{ paper.meta.outcome_selections.length }}
+                    </td>
+                    <td>
+                        <span v-for="abbr in paper.meta.outcome_selections"
+                            class="paper-meta-selected-oc">
+                            {{ extract_dict[abbr].meta.full_name }}
+                        </span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
     
+    </div>
+
+    <div id="pan_ocpapers_working_paper"
+        v-show="show_working_paper_pan">
+        <div v-if="working_paper != null">
+            <div id="pan_ocpapers_working_paper_title">
+                {{ get_first_author(working_paper.authors) }} {{ get_year(working_paper.pub_date) }}<br>
+                is selected in <b>{{ n_selected_ocs() }}</b> outcomes
+            </div>
+
+            <div class="mt-1 mb-1">
+                <button class="btn btn-sm btn-default"
+                    v-on:click="save_working_paper_selections">
+                    <i class="fa fa-save"></i>
+                    Save Selections
+                </button>
+            </div>
+
+            <div id="pan_ocpapers_working_paper_oc_tree">
+
+                <div class="d-flex flex-row chk-oc">
+                    <div>
+                        <input type="checkbox" 
+                            id="chk-oc-itable" class="chk-oc-input"
+                            v-model="working_paper_oc_selections['itable']">
+                    </div>
+                    <div>
+                        <label class="chk-oc-label" for="chk-oc-itable">Interactive Table</label>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-column">
+                    <div class="chk-oc-h1">
+                        Pairwise Meta-Analysis
+                    </div>
+                    <div v-for="(group, group_name) in extract_tree.pwma">
+
+                        <div class="chk-oc-h2">
+                            {{ group_name }}
+                        </div>
+                        <div v-for="(cate, cate_name) in group">
+
+                            <div class="chk-oc-h3">
+                                {{ cate_name }}
+                            </div>
+                            <div v-for="oc in cate"
+                                class="chk-oc d-flex flex-row">
+                                <div>
+                                    <input type="checkbox" 
+                                        class="chk-oc-input"
+                                        v-model="working_paper_oc_selections[oc.abbr]"
+                                        v-bind:id="'chk-oc-' + oc.abbr">
+                                </div>
+                                <div>
+                                    <label class="chk-oc-label" 
+                                        v-bind:for="'chk-oc-' + oc.abbr">
+                                        {{ oc.meta.full_name }}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+<div v-else>
+    No studies are included yet.
+</div>
 </div>
 
 <div id="config_outcome">
@@ -130,6 +403,136 @@ html {
     
 </div>
 
+
+<div id="win_selector">
+    <div style="position: absolute; top: 0; left: -40px; width: 40px; height: 40px; background-color: white;">
+        <div style="font-size: large; width: 40px; height: 40px; line-height: 40px; text-align: center; cursor: pointer;"
+            onclick="pan_selector.hide(); pan_ocpapers.hide_working_paper();">
+            <i class="fa fa-close"></i>
+        </div>
+    </div>
+    
+    <div id="pan_selector" class="panel-m panel-container">
+        <div v-if="paper == null">
+            Click the paper name to show details
+        </div>
+    
+        <!-- details of paper -->
+        <div v-else
+            class="d-flex flex-row">
+    
+            <div style="flex: 1;">
+    
+                <div class="panel-info">
+                
+                    <ul class="nav nav-tabs">
+                        <li class="nav-item">
+                            <a class="nav-link" 
+                                v-bind:class="{active: show_tab == 'basic_info'}"
+                                href="javascript:void(0);"
+                                v-on:click="switch_tab('basic_info');">
+                                <i class="fa fa-info-circle"></i>
+                                Abstract
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="javascript:void(0);"
+                                v-bind:class="{active: show_tab == 'pdf'}"
+                                v-on:click="switch_tab('pdf');">
+                                <i class="far fa-file-pdf"></i>
+                                PDFs
+                            </a>
+                        </li>
+                    </ul>
+                
+                </div>
+                <!-- /.panel-info -->
+    
+                <!-- the Abstract page -->
+                <div id="pan_selector_basic_info"  
+                    class="border-top-0 pan-normal"
+                    v-show="show_tab == 'basic_info'">
+    
+                    <div class="panel-info">
+                        <p style="font-size: 0.9em; color: #777777; ">{{ paper.pub_date }} - {{ paper.journal }}</p>
+                        <p style="font-size: 1.5em; font-weight: bold; line-height: 1.2em;">{{ paper.title }}</p>
+                        <p styel="font-size: 1em;">{{ paper.authors }}</p>
+                        <p>
+                            PMID: 
+                            <a target="_blank" title="Show in " :href="'https://pubmed.ncbi.nlm.nih.gov/' + paper.pid ">{{ paper.pid }}</a> ({{ paper.pid_type }})
+                        </p>
+                        <p style="font-size: 1.2em; font-weight: bold;">Abstract</p>
+                        <div style="font-size: 1em;" v-html="paper.abstract"></div>
+                    </div>
+                    
+                </div>
+    
+                <!-- the PDF page -->
+                <div id="pan_selector_pdf" v-show="show_tab == 'pdf'">
+                    <div class="d-flex flex-row mt-2 mb-2 mr-2">
+                        
+                        <!-- display the buttons for each pdf file -->
+                        <div class="btn-group mr-2"
+                            v-for="pdf in paper.meta.pdfs">
+                            <button type="button" class="btn btn-default btn-sm"
+                            v-on:click="view_pdf(paper.paper_id, pdf.file_id, pdf.folder);">
+                                <i class="far fa-file-pdf"></i>
+                                {{ pdf.display_name }}
+                            </button>
+    
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-right">
+                                    <a class="dropdown-item" href="javascript:void(0);" 
+                                        v-on:click="download_pdf(paper.paper_id, pdf.file_id, pdf.folder, pdf.display_name)">
+                                        <i class="fa fa-download"></i>
+                                        Download this PDF
+                                    </a>
+                                    <a class="dropdown-item" href="javascript:void(0);" 
+                                        v-on:click="remove_pdf(paper.paper_id, pdf.file_id, pdf.folder, pdf.display_name)">
+                                        <i class="far fa-trash-alt"></i>
+                                        Delete this PDF
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                                        
+                        <form id="form_pdf_files" method="post" 
+                            class="ml-1"
+                            enctype="multipart/form-data">
+                            <input type="hidden" name="paper_id" v-bind:value="paper.paper_id">
+                            <input type="file" name="files[]" multiple="" accept=".pdf"
+                                    style="width: 210px;" id="input_pdf_files">
+                        </form>
+    
+                        <button class="btn btn-default btn-sm mr-2"
+                            v-on:click="upload_pdfs();">
+                            <i class="fa fa-upload"></i>
+                            Upload
+                        </button>
+    
+                    </div>
+    
+    
+                    <iframe v-if="paper.meta.hasOwnProperty('pdfs') && paper.meta.pdfs.length > 0"
+                        id="ifr_pdfviewer" src="/pdfworker/view_pdf" 
+                        width="100%" scrolling="yes"
+                        frameborder="0">
+                    </iframe>
+                </div>
+                
+    
+            </div>
+            
+        </div>
+        
+    </div>
+    <!-- /#pan_selector -->
+
+</div>
+
+
     
 </div>
 <!-- /#main -->
@@ -141,6 +544,7 @@ html {
 <script>
 
 {% include "js/srv_extractor.js" %}
+{% include "js/srv_pdfworker.js" %}
 
 
 var pan_ocpapers = {
@@ -153,75 +557,23 @@ var pan_ocpapers = {
             data: {
                 // flags
                 show_settings: true,
-                only_show_selected: true,
-                show_col_nct: false,
-
-                // for display:
-                thr1s: [],
-                thr2s: [],
-
-                // mode
-                mode: 'manage_outcomes',
+                show_working_paper_pan: false,
 
                 // data
-                all_attrs: null,
-                show_attrs: null,
-                extract: null,
-                papers: []
-            },
-            computed: {
-                n_selected: function() {
-                    var n = 0;
-                    for (const pmid in this.extract.data) {
-                        if (Object.hasOwnProperty.call(this.extract.data, pmid)) {
-                            if (this.extract.data[pmid].is_selected) {
-                                n += 1;
-                            };
-                        }
-                    }
-                    return n;
-                }
+                papers: [],
+                extracts: null,
+                extract_dict: null,
+                extract_tree: null,
+
+                // working paper
+                working_paper: null,
+                working_paper_oc_selections: null
             },
             methods: {
-                toggle_show_settings: function() {
-                    this.show_settings = !this.show_settings;
-                },
-
-                toggle_on_all_attributes: function() {
-                    for (const key in this.show_attrs) {
-                        if (Object.hasOwnProperty.call(this.show_attrs, key)) {
-                            this.show_attrs[key] = true;
-                        }
-                    }
-                    this.$forceUpdate();
-                },
-
-                toggle_off_all_attributes: function() {
-                    for (const key in this.show_attrs) {
-                        if (Object.hasOwnProperty.call(this.show_attrs, key)) {
-                            this.show_attrs[key] = false;
-                        }
-                    }
-                    this.$forceUpdate();
-                },
-
-                goto_extract_data: function(extract) {
-                    location.href = srv_extractor.url.extract_data + 
-                        '?abbr=' + extract.abbr;
-                },
-
-                goto_analysis: function(extract) {
-
-                },
 
                 // save all!
                 update_extract: function() {
                     pan_ocpapers.update_extract();
-                },
-                
-                // copy 
-                copy_extract: function() {
-                    pan_ocpapers.copy_extract();
                 },
 
                 get_input_size: function(str) {
@@ -254,240 +606,170 @@ var pan_ocpapers = {
                     return aus[0];
                 },
 
-                on_change_input_format: function(event) {
-                    let val = event.target.value;
-                    console.log('Changed input_format: ' + val);
-
-                    // update the attrs
-                    this.extract.meta.cate_attrs = srv_extractor.tpl.input_format[
-                        this.extract.oc_type
-                    ][val];
-                    
-                    // update the papers setting
-                    pan_ocpapers.update_all_and_show_attrs();
-                },
-
-                on_toggle_attr_selection: function(event) {
-                    this.$forceUpdate();
-                },
-
-                on_click_paper: function(pmid) {
+                on_click_paper: function(paper) {
                     // set the working pmid ?
-                    // no need to set
+                    this.working_paper = paper;                    
 
                     // highlight this line
                     $('.paper-table-row').removeClass('paper-table-row-clicked');
-                    $('#paper-table-row-' + pmid).addClass('paper-table-row-clicked');
+                    $('#paper-table-row-' + paper.pid).addClass('paper-table-row-clicked');
+
+                    // notifiy the ocpaper to show the working paper
+                    pan_ocpapers.show_working_paper(paper);
 
                     // call collector to do something
-                    pan_collector.show_paper(
-                        pmid, 
-                        pan_ocpapers.vpp.$data.extract.data[pmid]
+                    pan_selector.show_paper(
+                        paper.pid
                     );
                 },
 
-                toggle_select_all_papers: function(event) {
-                    let val = event.srcElement.checked;
-                    console.log('* set all papers selected: ', val);
-                    for (const pmid in this.extract.data) {
-                        if (Object.hasOwnProperty.call(this.extract.data, pmid)) {
-                            this.extract.data[pmid].is_selected = val;
+                n_selected_ocs: function() {
+                    var n = 0;
+                    for (const abbr in this.working_paper_oc_selections) {
+                        if (this.working_paper_oc_selections[abbr]) {
+                            n += 1;
                         }
                     }
-                    // this.$forceUpdate();
+                    return n;
                 },
 
-                on_toggle_itable_select_category: function(cate_idx, event) {
-                    let val = event.srcElement.checked;
+                save_working_paper_selections: function() {
+                    var pid = this.working_paper.pid;
 
-                    for (let i = 0; i < this.extract.meta.cate_attrs[cate_idx].attrs.length; i++) {
-                        const attr = this.extract.meta.cate_attrs[cate_idx].attrs[i];
-
-                        if (attr.subs == null) {
-                            this.show_attrs[attr.abbr] = val;
-                        } else {
-                            for (let j = 0; j < attr.subs.length; j++) {
-                                const sub = attr.subs[j];
-                                this.show_attrs[sub.abbr] = val;
-                            }
-                        }
-                    }
-                    // force update the UI because change a lot
-                    this.$forceUpdate();
-                },
-
-                on_change_itable_n_arms: function(pmid, event) {
-                    let val = event.target.value;
-                    console.log('* change ' + pmid + ' n_arms to ' + val);
-
-                    var new_n_others = val - 2;
-                    if (new_n_others == this.extract.data[pmid].attrs.other.length) {
-                        // which means the number of arms doesn't change
-
-                    } else if (new_n_others > this.extract.data[pmid].attrs.other.length) {
-                        // the number of arms increases, need to put more elements
-                        var delta = new_n_others - this.extract.data[pmid].attrs.other.length;
-                        for (let i = 0; i < delta; i++) {
-                            // just copy the keys from main track
-                            var obj = JSON.parse(JSON.stringify(this.extract.data[pmid].attrs.main));
-                            // and clear the exising data
-                            for (const key in obj) {
-                                if (Object.hasOwnProperty.call(obj, key)) {
-                                    obj[key] = '';
-                                }
-                            }
-                            this.extract.data[pmid].attrs.other.push(obj);
-                        }
-                    } else {
-                        // the number of arms decreases, need to remove
-                        var delta = this.extract.data[pmid].attrs.other.length - new_n_others;
-                        for (let i = 0; i < delta; i++) {
-                            this.extract.data[pmid].attrs.other.pop();
-                        }
-                    }
-                    this.$forceUpdate();
-                },
-
-                on_change_only_show_selected: function(event) {
-                    // let val = event.srcElement.checked;                    
-                    // this.only_show_selected = val;
-                    this.$forceUpdate();
+                    pan_ocpapers.save_working_paper_selections(
+                        pid, this.working_paper_oc_selections
+                    );
                 }
+            },
+            updated: function() {
+                pan_ocpapers.resize();
             }
         });
     },
 
-    set_mode: function(mode) {
-        this.vpp.$data.mode = mode;
+    load: function() {
+        var project_id = Cookies.get('project_id');
+        srv_extractor.get_included_papers_and_selections(
+            project_id,
+            function(data) {
+                console.log(data)
+                pan_ocpapers.update(data);
+            }
+        )
     },
 
     update: function(data) {
         // the data is a combo of extract and papers
-        this.vpp.extract = data.extract;
+        this.vpp.extracts = data.extracts;
         this.vpp.papers = data.papers;
 
-        // update the all_attrs and show_attrs variables for display
-        this.update_all_and_show_attrs();
+        // update the extract dict for display
+        this.vpp.$data.extract_dict = this.update_extract_dict(data);
+        this.vpp.$data.extract_tree = this.update_extract_tree(data);
 
         // update
         this.vpp.$forceUpdate();
+
+        pan_ocpapers.resize();
     },
 
-    update_all_and_show_attrs: function() {
-        // init the all_attrs which for list all the nested attrs
-        this.vpp.all_attrs = [];
-
-        // init the show_attrs
-        this.vpp.show_attrs = {}
-
-        // for display
-        this.vpp.thr1s = [];
-        this.vpp.thr2s = [];
-
-        // loop on the cate_attrs
-        for (let i = 0; i < this.vpp.extract.meta.cate_attrs.length; i++) {
-            const cate = this.vpp.extract.meta.cate_attrs[i];
-
-            var thr1 = {
-                name: cate.name,
-                cols: 0
-            }
-            for (let j = 0; j < cate.attrs.length; j++) {
-                const attr = cate.attrs[j];
-                
-                thr1.cols += 1;
-
-                var thr2 = {
-                    name: attr.name,
-                    cols: 0
-                }
-                if (attr.subs == null) {
-                    // which means this attr doesn't have a sub
-                    this.vpp.all_attrs.push(attr);
-                    this.vpp.show_attrs[attr.abbr] = true;
-                    
-                    // update the display row count
-                    thr2.cols += 1;
-
-                } else {
-                    for (let k = 0; k < attr.subs.length; k++) {
-                        const sub = attr.subs[k];
-                        this.vpp.all_attrs.push(sub);
-                        this.vpp.show_attrs[sub.abbr] = true;
-
-                        // update the display count
-                        thr2.cols += 1;
-
-                        // also increase the first row
-                        thr1.cols += 1;
-                    }
-                }
-                this.vpp.thr2s.push(thr2);
-            }
-
-            this.vpp.thr1s.push(thr1);
+    update_extract_dict: function(data) {
+        /**
+        The extract dict is just a dictionary structure for searching
+        */
+        var extract_dict = {};
+        for (let i = 0; i < data.extracts.length; i++) {
+            var extract = data.extracts[i];
+            
+            var abbr = extract.abbr;
+            var cate = extract.meta;
+            extract_dict[abbr] = extract;
         }
-
-        // update
-        this.vpp.$forceUpdate();
+    
+        // update the vpp data
+        return extract_dict;
     },
 
+    update_extract_tree: function(data) {
+        /**
+        the extract tree is a tree-shape data structure
+        {
+            itable:
+            pwma: {
+                group1: {
+                    cate1: [oc1, oc2, ...],
+                    cate2: [oc1, oc2, ...]
+                },
+                group2: {
 
-    get_current_extract_and_papers: function() {
-        if (this.vpp.$data.extract == null) {
-            return null;
+                }
+            }
+            subg:
+            nma:
         }
-        
-        // build a object
-        var ret = {
-            extract: this.vpp.$data.extract,
-            papers: this.vpp.$data.papers
+
+        The first level is the oc_type.
+        The second level is the group.
+        The third level is the cate.
+        In each cate, there are outcomes as list.
+        */
+        var extract_tree = {
+            itable: null,
+            pwma: {},
+            subg: {},
+            nma: {}
         };
+        
+        for (let i = 0; i < data.extracts.length; i++) {
+            const ext = data.extracts[i];
+            
+            var oc_type = ext.oc_type;
+            var group = ext.meta.group;
+            var cate = ext.meta.category;
 
-        return ret;
-    },
-
-    show_extract_and_papers: function(oc_type, abbr) {
-        var project_id = Cookies.get('project_id');
-        $.get(
-            srv_extractor.url.get_extract_and_papers,
-            {project_id:project_id, abbr:abbr, rnd:Math.random()},
-            function(data) {
-                pan_ocpapers.update(data);
-
-            }, 'json'
-        );
-    },
-
-    copy_extract: function() {
-        var project_id = Cookies.get('project_id');
-        var oc_type = this.vpp.$data.extract.oc_type;
-        var full_name = this.vpp.$data.extract.meta.full_name;
-        var abbr = this.vpp.$data.extract.abbr;
-        var meta = this.vpp.$data.extract.meta;
-        var data = this.vpp.$data.extract.data;
-
-        var new_full_name = jarvis.prompt('Copy current outcome [' + full_name + '] and make a new outcome. The new outcome full name is: ', full_name);
-        if (new_full_name == null) { return; }
-        new_full_name = new_full_name.trim();
-        if (new_full_name == '') { return; }
-
-        // save this new 
-        var new_abbr = srv_extractor.mk_oc_abbr();
-
-        // send request!
-        $.post(
-            srv_extractor.url.copy_extract,
-            {project_id:project_id, oc_type:oc_type, abbr:abbr,
-             new_abbr:new_abbr, new_full_name: new_full_name,
-             meta:JSON.stringify(meta), data:JSON.stringify(data)},
-            function(data) {
-                // show
-                toast('Copied the new outcome [' + data.extract.meta.full_name + ']');
-                // reload the outcomes
-                pan_outcomes.load();
+            if (ext.oc_type == 'itable') {
+                extract_tree.itable = ext;
+            } else {
+                // check the group
+                if (!extract_tree[oc_type].hasOwnProperty(group)) {
+                    extract_tree[oc_type][group] = {}
+                }
+                // check the cate
+                if (!extract_tree[oc_type][group].hasOwnProperty(cate)) {
+                    extract_tree[oc_type][group][cate] = []
+                }
+                // put this outcome to the cate
+                extract_tree[oc_type][group][cate].push(ext);
             }
-        );
+        }
+
+        return extract_tree;
+    },
+
+    save_working_paper_selections: function(pid, oc_selections) {
+        // first, find those selections
+        var ocs_selected = [];
+
+        for (const abbr in oc_selections) {
+            if (oc_selections[abbr]) {
+                ocs_selected.push(abbr)
+            }
+        }
+
+        // second, send those to backend for update
+        var project_id = Cookies.get('project_id');
+        srv_extractor.update_paper_selections(
+            project_id, pid, ocs_selected, 
+            function(data) {
+                // the data contain a paer
+                console.log(data);
+
+                jarvis.toast('Update [' + data.paper.seq_num + '] selected in ' + data.paper.meta.outcome_selections.length + ' outcomes.');
+
+                // update everything!
+                pan_ocpapers.load();
+            }
+        )
     },
 
     update_extract: function() {
@@ -512,6 +794,34 @@ var pan_ocpapers = {
         );
     },
 
+    show_working_paper: function(paper) {
+        this.vpp.working_paper = paper;  
+        this.vpp.show_working_paper_pan = true;
+
+        // create a selection binding
+        // which is a dictionary based on oc abbr
+        var oc_selections = {};
+        for (const abbr in this.vpp.extract_dict) {
+            oc_selections[abbr] = false;
+        }
+
+        // set the bindings
+        for (let i = 0; i < paper.meta.outcome_selections.length; i++) {
+            const abbr = paper.meta.outcome_selections[i];
+            // update the binding
+            oc_selections[abbr] = true;
+        }
+
+        // bind the oc_selection
+        this.vpp.working_paper_oc_selections = oc_selections;
+
+        this.vpp.$forceUpdate();
+    },
+
+    hide_working_paper: function() {
+        this.vpp.show_working_paper_pan = false;
+    },
+
     show: function() {
         $(this.vpp_id).show();
     },
@@ -520,102 +830,202 @@ var pan_ocpapers = {
         $(this.vpp_id).hide();
     },
 
-    set_size: function(size) {
-        $(this.vpp_id).removeClass('panel-s panel-m panel-l')
-            .addClass('panel-' + size);
+    resize: function() {
+        var h = $(window).height() - 90;
+        $('#pan_ocpapers_paperlist').css('height', h);
+        $('#pan_ocpapers_working_paper_oc_tree').css('max-height', h - 90);
     }
 };
 
 
-Vue.component('outcome-list', {
-    data: function () {
-        return {
-            update: 0
+var pan_selector = {
+    vpp_id: "#pan_selector",
+    vpp: null,
+    pdfviewer_id: '#ifr_pdfviewer',
+
+    mark_keywords_as_color: function(keywords, color) {
+        $('#pan_selector_basic_info').mark(
+            keywords,
+            { className: 'txt-' + color, separateWordSearch: false }
+        );
+    },
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                paper: null,
+                show_tab: null
+            },
+            updated: function() {
+            },
+            methods: {
+                switch_tab: function(tab_name) {
+                    this.show_tab = tab_name;
+                },
+
+                view_pdf: function(paper_id, file_id, folder) {
+                    pan_selector.view_pdf(paper_id, file_id, folder);
+                },
+
+                upload_pdfs: function() {
+                    pan_selector.upload_pdfs();
+                },
+
+                download_pdf: function(paper_id, file_id, folder, display_name) {
+                    srv_pdfworker.download_pdf(null, file_id, folder);
+                },
+
+                remove_pdf: function(paper_id, file_id, folder, display_name) {
+                    srv_pdfworker.remove_pdf(
+                        paper_id, file_id, folder, display_name,
+                        function(data) {
+                            console.log('* removed', data)
+                            jarvis.toast('Removed PDF file successfully');
+                            // update display
+                            pan_selector.update(data.paper);
+                        }
+                    );
+                },
+
+                get_year: function(s) {
+                    return jarvis.get_year(s);
+                },
+
+                get_first_author: function(s) {
+                    return jarvis.get_first_author(s);
+                },
+            },
+            updated: function() {
+                // pan_selector.bind_txt_ctx_menu();
+            }
+        });
+
+        this.resize();
+
+    },
+
+    update: function(paper) {
+        // update data
+        this.vpp.$data.paper = paper;
+
+        // update the normal UI
+        this.vpp.show_tab = 'basic_info';
+        this.vpp.$forceUpdate();
+
+        // update the keywords highlight
+        // this.vpp.$nextTick(function () {
+        //     console.log('* pan_selector UI updated');
+        //     pan_selector.mark_keywords_as_color(
+        //         srv_extractor.project.settings.highlight_keywords.inclusion,
+        //         'green'
+        //     );
+        // });
+
+        // update the PDF viewer
+        // this.load_pdf();
+    },
+
+    show_paper: function(pid) {
+        // set loc to show
+        $('#win_selector').css("right", 0);
+
+        // resize
+        pan_selector.resize();
+
+        // get the paper
+        srv_extractor.get_paper(pid, function(data) {
+            pan_selector.update(data.paper);
+        });
+    },
+
+    show: function() {
+        $(this.vpp_id).show();
+        // bind the context menu
+        // this.bind_txt_ctx_menu();
+    },
+
+    hide: function() {
+        $('#win_selector').css('right', 5000); 
+    },
+
+    view_pdf: function(paper_id, file_id, folder) {
+        // update the pdf viewer size
+        this.resize();
+
+        // load the pdf
+        this.load_pdf(folder, file_id);
+    },
+
+    load_pdf: function(folder, file_id) {
+        var pdf_url = "/pdfworker/pdf/" + folder + "/" + file_id + '.pdf';
+
+        // just load the blank page
+        if (typeof(folder) == 'undefined') {
+            pdf_url = '/pdfworker/view_pdf';
         }
-    },
-    methods: {
-        create_extract: function(oc_type, tpl, group, category) {
-            pan_outcomes.create_extract(oc_type, tpl, group, category);
-        },
 
-        show_extract_data: function(oc_type, abbr) {
-            // highlight this line
-            $('.cate-extract-line').removeClass('cate-extract-line-clicked');
-            $('#cate-extract-line-' + abbr).addClass('cate-extract-line-clicked');
+        // get the highlight_keywords
+        // var highlight_keywords = pan_selector.get_pdf_highlight_keywords();
+        // document.getElementById("ifr_pdfviewer").contentWindow.LNMA.open_pdf(pdf_url, highlight_keywords);
 
-            // show it
-            pan_outcomes.show_extract_data(oc_type, abbr);
-        },
-
-        delete_extract: function(oc_type, abbr, full_name) {
-            pan_outcomes.delete_extract(oc_type, abbr, full_name);
-        },
-
-
-        toggle_cate: function(event) {
-            var elem = $(event.target);
-            elem.next().toggle();
-        },
+        // show the pdf without keywords
+        document.getElementById("ifr_pdfviewer").contentWindow.LNMA.open_pdf(pdf_url, []);
     },
 
-    props: [
-        'oc_type',
-        'outcomes',
-        'group',
-        'force_update'
-    ],
+    /**
+     * Get the keywords and color for highlighting in PDF
+     */
+    get_pdf_highlight_keywords: function() {
+        var tmp = [];
 
-    template: `
-<div v-if="Object.keys(outcomes).length != 0" :force_update="force_update">
-<div v-for="ocs, cate in outcomes" v-show="ocs.length>0">
-    <div class="cate-line"
-        v-on:click="toggle_cate(event)">
-            <i class="far fa-folder-open"></i>
-            {{ cate }} 
-        <button class="btn btn-default btn-xs"
-            v-on:click="create_extract(oc_type, 'default', group, cate)">
-            <i class="fa fa-plus"></i>
-            Add outcome to <b>{{ cate }}</b>
-        </button>
-    </div>
+        // first, the keywords from the project
+        tmp.push({
+            keywords: srv_extractor.project.settings.highlight_keywords.inclusion,
+            color: 'green'
+        });
 
-    <div class="cate-extracts cate-extracts-pwma">
-        <div v-for="oc in ocs" 
-            v-bind:id="'cate-extract-line-' + oc.abbr"
-            class="cate-extract-line d-flex flex-row"
-            v-if="oc.group == group">
-                
-            <div class="cate-extract-name"
-                v-on:click="show_extract_data(oc_type, oc.abbr)">
-                {{ oc.full_name }}
-            </div>
+        // second, push the outcome name if current is not working on itable
 
-            <div class="cate-extract-col">
-                {{ oc.measure_of_effect }}
-            </div>
+        // third, push the pdf highlight keywords in project settings
+        tmp.push({
+            keywords: srv_extractor.project.settings.pdf_keywords.main,
+            color: 'yellow'
+        });
 
-            <div class="cate-extract-col">
-                <span v-if="oc.included_in_plots=='yes'" class="badge badge-success">In Plot</span>
-                <span v-else class="badge badge-light">Plot</span>
-            </div>
+        return tmp;
+    },
 
-            <div class="cate-extract-col">
-                <span v-if="oc.included_in_sof=='yes'" class="badge badge-success">In SoF</span>
-                <span v-else class="badge badge-light">SoF</span>
-            </div>
+    upload_pdfs: function() {
+        var paper_id = this.vpp.paper.paper_id;
+        // call pdfworker service to upload
+        srv_pdfworker.update_form_data(
+            '#form_pdf_files',
+            function(data) {
+                console.log(data);
+                if (data.success) {
 
-            <div class="cate-extract-delete">
-                <button class="btn btn-default btn-xs"
-                    v-on:click="delete_extract(oc.oc_type, oc.abbr, oc.full_name)">
-                    <i class="far fa-trash-alt"></i>
-                </a>
-            </div>
-        </div>
-    </div>
+                    jarvis.toast('Uploaded PDF for paper!');
+                    
+                    // update display
+                    pan_selector.update(data.paper);
+                } else {
+                    toast('Error when uploading PDF, try later.', 'error')
+                }
+            }
+        );
+    },
 
-</div>
-`
-});
+    resize: function() {
+        // set the height for the window
+        var h = $(window).height() - 50;
+        $('#win_selector').css("height", h);
+
+        // set the height for the pdf viewer
+        var h = $(window).height() - 150;
+        $(this.pdfviewer_id).css('height', h + 'px');
+    },
+};
 
 
 var jarvis = {
@@ -628,12 +1038,10 @@ var jarvis = {
 
     init: function() {
         pan_ocpapers.init();
-
-        // resize
-        pan_outcomes.resize();
+        pan_selector.init();
 
         // the load the init outcomes
-        pan_outcomes.load();
+        pan_ocpapers.load();
 
         this.bind_resize();
     },
@@ -672,7 +1080,8 @@ var jarvis = {
 
     bind_resize: function() {
         $(window).on('resize', function(){
-            pan_outcomes.resize();
+            pan_ocpapers.resize();
+            pan_selector.resize();
         });
     }
 };

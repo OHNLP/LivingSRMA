@@ -10,14 +10,37 @@ var srv_extractor = {
         create_extract: "[[ url_for('extractor.create_extract') ]]",
         update_extract: "[[ url_for('extractor.update_extract') ]]",
         update_extract_meta: "[[ url_for('extractor.update_extract_meta') ]]",
+
         copy_extract: "[[ url_for('extractor.copy_extract') ]]",
         delete_extract: "[[ url_for('extractor.delete_extract') ]]",
+
         get_paper: "[[ url_for('extractor.get_paper') ]]",
         get_extract: "[[ url_for('extractor.get_extract') ]]",
         get_extracts: "[[ url_for('extractor.get_extracts') ]]",
         get_extract_and_papers: "[[ url_for('extractor.get_extract_and_papers') ]]",
 
+        get_included_papers_and_selections: "[[ url_for('extractor.get_included_papers_and_selections') ]]",
+        update_paper_selections: "[[ url_for('extractor.update_paper_selections') ]]",
+
         extract_data: "[[ url_for('extractor.extract_data') ]]"
+    },
+
+    get_paper: function(pid, callback) {
+        $.ajax({
+            type: 'GET',
+            dataType: "json",
+            url: this.url.get_paper,
+            data: {
+                pid: pid,
+                rnd: Math.random(),
+            },
+            cache: false,
+            success: callback,
+            error: function(jqXHR, textStatus, errorThrown) {
+                jarvis.toast('Something wrong when getting included papers', 'alert');
+                console.error(textStatus, errorThrown);
+            }
+        });
     },
 
     get_extracts: function(project_id, callback) {
@@ -30,6 +53,44 @@ var srv_extractor = {
             callback,
             'json'
         );
+    },
+
+    get_included_papers_and_selections: function(project_id, callback) {
+        $.ajax({
+            type: 'GET',
+            dataType: "json",
+            url: this.url.get_included_papers_and_selections,
+            data: {
+                rnd: Math.random(),
+                project_id: project_id
+            },
+            cache: false,
+            success: callback,
+            error: function(jqXHR, textStatus, errorThrown) {
+                jarvis.toast('Something wrong when getting included papers', 'alert');
+                console.error(textStatus, errorThrown);
+            }
+        });
+    },
+
+    update_paper_selections: function(project_id, pid, abbrs, callback) {
+        $.ajax({
+            type: 'POST',
+            dataType: "json",
+            url: this.url.update_paper_selections,
+            data: {
+                rnd: Math.random(),
+                project_id: project_id,
+                pid: pid,
+                abbrs: abbrs
+            },
+            cache: false,
+            success: callback,
+            error: function(jqXHR, textStatus, errorThrown) {
+                jarvis.toast('Something wrong when getting included papers', 'alert');
+                console.error(textStatus, errorThrown);
+            }
+        });
     },
 
     // the project is binded when running extracting

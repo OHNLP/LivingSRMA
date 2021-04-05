@@ -195,6 +195,29 @@ def get_included_papers_and_selections():
     return jsonify(ret)
 
 
+@bp.route('/update_paper_selections', methods=['POST'])
+@login_required
+def update_paper_selections():
+    project_id = request.form.get('project_id')
+    abbrs = request.form.getlist('abbrs[]')
+    pid = request.form.get('pid')
+
+    # update the extract with given info
+    paper, outcome_selections = dora.update_paper_selections(
+        project_id, pid, abbrs
+    )
+
+    # bind the outcome selections to meta
+    paper.meta['outcome_selections'] = outcome_selections
+
+    # build the return obj
+    ret = {
+        'success': True,
+        'msg': '',
+        'paper': paper.as_dict()
+    }
+    return jsonify(ret)
+
 
 @bp.route('/create_extract', methods=['POST'])
 @login_required

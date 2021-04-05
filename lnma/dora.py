@@ -1623,6 +1623,65 @@ def update_extract_meta_and_data(project_id, oc_type, abbr, meta, data):
     return extract
     
 
+def update_paper_selections(project_id, pid, abbrs):
+    '''
+    Update the paper outcome selection in a project
+    '''
+    # first, get all extracts
+    extracts = Extract.query.filter(
+        Extract.project_id == project_id
+    ).all()
+
+    # get the paper
+    paper = get_paper_by_project_id_and_pid(
+        project_id, pid
+    )
+
+    # then do a loop checking
+    for extract in extracts:
+        oc_abbr = extract.abbr
+        is_selected = oc_abbr in abbrs
+
+        if pid not in extract.data:
+            # this is very very very rare, but possible?
+            if is_selected:
+                # well, have to add this pid to this outcome
+                extract.data[pid] = {
+                    'is_selected': is_selected,
+                    'is_checked': False,
+                    'n_arms': 2,
+                    'attrs': {
+                        'main': {},
+                        'other': []
+                    }
+                }
+            else:
+                # since it is not selected, just ignore is fine
+                pass
+
+        else:
+            db_is_selected = extract.data[pid]['is_selected']
+
+            if is_selected == db_is_selected:
+                # OK, no need to change the value
+                pass
+            else:
+                # user changed the option, ok, update
+                extract.data[pid]['is_selected'] = is_selected
+                print('* found %s in %s is_selected updated to %s' % (
+                    pid, extract.meta['full_name'], is_selected
+                ))
+
+                # add to session
+                flag_modified(extract, "data")
+                db.session.add(extract)
+
+    # commit all changes if any
+    db.session.commit()
+
+    return paper, abbrs
+
+
 def get_extracts_by_project_id(project_id):
     '''
     Get all of the extract detail of a project
