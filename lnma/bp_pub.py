@@ -3323,6 +3323,7 @@ def get_sof_pma_data_from_db_IO(is_calc_pma=True):
         dft = pd.DataFrame(oc_rs)
 
         for grade in grades:
+            print(dft)
             dftt = dft[dft['has_%s' % grade]==True]
 
             oc_dict[oc_name][grade] = {
