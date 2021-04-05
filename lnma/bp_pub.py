@@ -3262,6 +3262,7 @@ def get_sof_pma_data_from_db_IO(is_calc_pma=True):
                 paper = paper_dict[pid]
             else:
                 # which means this study is not included in SR
+                # or was included in SR but removed
                 continue
 
             # OK, this studis is selected, put the extracted result
