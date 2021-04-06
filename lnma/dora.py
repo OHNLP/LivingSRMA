@@ -1459,7 +1459,7 @@ def get_prisma_bef(project_id):
             rct_id = paper.pid
 
         stages = paper.get_ss_stages()
-        print(paper.ss_rs, stages)
+        # print(paper.ss_rs, stages)
 
         if ss_state.SS_STAGE_INCLUDED_SR in stages:
             f1_study_list.append(rct_id)
