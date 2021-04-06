@@ -291,14 +291,15 @@ a {
                             <div class="oc-item"
                                 v-for="ae in r.aes">
                                 <div class="oc-item-info d-flex fx-row"
-                                    v-show="ae.cnt_ga>=2 || ae.cnt_g3h >=2 || ae.cnt_g5n>=2">
+                                    v-show="ae.cnt_ga>=1 || ae.cnt_g3h >=1 || ae.cnt_g5n>=1">
                                     <div class="oc-name">
                                         <i class="far fa-clipboard"></i>
                                         {{ ae.oc_name }}
                                     </div>
 
                                     <div class="oc-type"
-                                        v-if="ae.cnt_ga<2">
+                                        v-if="ae.cnt_ga<2"
+                                        title="Not enough studies">
                                         -
                                     </div>
                                     <div class="oc-type"
@@ -312,7 +313,8 @@ a {
                                     </div>
 
                                     <div class="oc-type"
-                                        v-if="ae.cnt_g3h<2">
+                                        v-if="ae.cnt_g3h<2"
+                                        title="Not enough studies">
                                         -
                                     </div>
                                     <div class="oc-type"
@@ -326,7 +328,8 @@ a {
                                     </div>
 
                                     <div class="oc-type"
-                                        v-if="ae.cnt_g5n<2">
+                                        v-if="ae.cnt_g5n<2"
+                                        title="Not enough studies">
                                         -
                                     </div>
                                     <div class="oc-type"
@@ -623,7 +626,8 @@ var vw_studyfilter = {
                         if (idx == 4) {
                             if (this.dropdowns[2].value == '%') {
                                 return true;
-                            } else if (this.dropdowns[2].value.toLocaleLowerCase() == 'monotherapy') {
+                            } else if ( this.dropdowns[2].value == 'all' ||
+                                this.dropdowns[2].value.toLocaleLowerCase() == 'monotherapy') {
                                 return false;  
                             } else {
                                 // depends on the value of 
@@ -655,9 +659,14 @@ var vw_studyfilter = {
                             // now, update the options of the next dropdown
                             var next = 1;
                             if (idx == 2 &&
+                                new_val.toLocaleLowerCase() == 'all') {
+                                next = 2;
+                            }
+                            if (idx == 2 &&
                                 new_val.toLocaleLowerCase() == 'monotherapy') {
                                 next = 2;
                             }
+                            
                             var next_options = vw_studyfilter._get_options(idx + next);
                             console.log(next_options);
                             this.dropdowns[idx + next].options = next_options;
@@ -671,7 +680,7 @@ var vw_studyfilter = {
                         const dropdown = this.dropdowns[i];
                         var name_i = dropdown.name;
                         var val_i = dropdown.value;
-                        if (val_i == '%') {
+                        if (val_i == '%' || val_i == 'all') {
                             // skip the default
                             // but we still need a condition, so this one
                             conditions.push(
@@ -727,6 +736,9 @@ var vw_studyfilter = {
         var options = [{
             name: '',
             value: '%'
+        }, {
+            name: 'All',
+            value: 'all'
         }];
         var name_idx = this.attrs[idx].name;
         var vals_idx = this.attrs[idx].values;
@@ -755,7 +767,7 @@ var vw_studyfilter = {
                 var name_j = this.vpp.$data.dropdowns[j].name;
                 var val_j = this.vpp.$data.dropdowns[j].value;
 
-                if (val_j == this.blank_val) {
+                if (val_j == this.blank_val || val_j == 'all') {
                     // skip the blank dropdown
                     // but we still need a condition, so this one
                     conditions.push(
@@ -788,7 +800,8 @@ var vw_studyfilter = {
                 for (let j = 0; j < rs.length; j++) {
                     const r = rs[j];
 
-                    if (typeof(r.attr) == 'undefined') {
+                    if (typeof(r.attr) == 'undefined' ||
+                        r.attr == null) {
                         continue;
                     }
                     
@@ -910,6 +923,8 @@ var vw_oclist = {
         console.log(sql);
         // init the result
         var raw_rs = alasql(sql);
+        console.log("* raw_rs", raw_rs);
+
         var rs = {};
         var rs_stat = {
             cnt_cates: 0,
@@ -917,6 +932,12 @@ var vw_oclist = {
         };
         for (var i = 0; i < raw_rs.length; i++) {
             var r = raw_rs[i];
+
+            if (typeof(r.oc_cate) == 'undefined' ||
+                r.oc_cate == null) {
+                continue;
+            }
+            
             if (rs.hasOwnProperty(r.oc_cate)) {
                 //
             } else {
