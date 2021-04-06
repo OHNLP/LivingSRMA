@@ -754,7 +754,6 @@ var pan_itbuilder = {
             el: this.vpp_id,
             data: {
                 itable: null,
-
             },
             methods: {
                 save_itable: function() {
@@ -903,8 +902,12 @@ var pan_itbuilder = {
         // // send back to server
         $.post(
             srv_extractor.url.update_extract_meta,
-            {project_id:project_id, oc_type:oc_type, abbr:abbr,
-             meta:JSON.stringify(meta)},
+            {
+                project_id:project_id, 
+                oc_type:oc_type, 
+                abbr:abbr,
+                meta:JSON.stringify(meta)
+            },
             function(data) {
                 // show
                 toast('Saved the interactive table');

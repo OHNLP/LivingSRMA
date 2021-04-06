@@ -1318,6 +1318,7 @@ def get_itable_attr_rs_cfg_from_db(prj):
     meta = extract.meta
     data = extract.data
 
+    # the data needed for the itable frontend
     rs = []
     cfg = {}
     attrs = []
@@ -1456,17 +1457,32 @@ def get_itable_attr_rs_cfg_from_db(prj):
 
         rs.append(r)
 
-    # last thing is the filter
-    # filter is in the meta
+    # cols for display
     cfg['cols'] = {
         'default': ['Authors'],
         'fixed': ['Authors']
     }
-    # 
+    # add the default attrs
+    if 'default_attrs' in meta:
+        cfg['cols']['default'] += meta['default_attrs']
+    
+    # last thing is the filter
+    # filter is in the meta
+    # add the filters
     if 'filters' in meta:
         cfg['filters'] = meta['filters']
     else:
         cfg['filters'] = []
+
+    # add the default filter All 
+    for filter in cfg['filters']:
+        if 'ALL' not in filter['values'][0]['display_name'].upper():
+            filter['values'].insert(0, {
+                'default': True,
+                'display_name': 'All',
+                'sql_cond': '1=1',
+                'value': 0
+            })
 
     # finally, finished!
     ret = {
