@@ -7,7 +7,7 @@ from werkzeug.security import check_password_hash
 
 from sqlalchemy.dialects.mysql import LONGTEXT
 
-from lnma import util
+from lnma import ss_state, util
 
 # for the relationship between project and user
 rel_project_users = db.Table(
@@ -183,7 +183,32 @@ class Project(db.Model):
 
 
 class Paper(db.Model):
-    """Data model for papers
+    """
+    Data model for papers
+
+    The `meta` could contain a lot things:
+    {
+        all_rct_ids: Array(1)
+        paper: Object
+        pdfs: [{
+            display_name: '',
+            file_id: ''
+            folder: ''
+        }]
+        pred: [{
+            is_rct: true
+            model: "svm_cnn_ptyp"
+            preds: Object
+            ptyp_rct: 0
+            score: 3.472353767624721
+            threshold_type: "balanced"
+            threshold_value: 2.1057231048584675
+        }]
+        rct_id: "NCT01668784"
+        rct_seq: 1
+        study_type: "followup"
+        tags: ['tag',]
+    }
     """
     __tablename__ = 'papers'
     __table_args__ = {'extend_existing': True}
@@ -206,6 +231,50 @@ class Paper(db.Model):
     date_created = db.Column(db.DateTime, index=False)
     date_updated = db.Column(db.DateTime, index=False)
     is_deleted = db.Column(db.String(8), index=False)
+
+
+    def get_ss_stages(self):
+        '''
+        Get the screen status stages of this paper
+        '''
+        stages = []
+
+        if self.ss_pr == ss_state.SS_PR_NA and \
+            self.ss_rs == ss_state.SS_RS_NA:
+            stages.append(ss_state.SS_STAGE_UNSCREENED)
+
+        if self.ss_pr != ss_state.SS_PR_NA or \
+            self.ss_rs != ss_state.SS_RS_NA:
+            stages.append(ss_state.SS_STAGE_DECIDED)
+
+        if self.ss_rs == ss_state.SS_RS_EXCLUDED_TITLE:
+            stages.append(ss_state.SS_STAGE_EXCLUDED_BY_TITLE)
+
+        if self.ss_rs == ss_state.SS_RS_EXCLUDED_ABSTRACT:
+            stages.append(ss_state.SS_STAGE_EXCLUDED_BY_ABSTRACT)
+
+        if self.ss_rs == ss_state.SS_RS_EXCLUDED_FULLTEXT:
+            stages.append(ss_state.SS_STAGE_EXCLUDED_BY_FULLTEXT)
+
+        if self.ss_rs == ss_state.SS_RS_INCLUDED_ONLY_SR:
+            stages.append(ss_state.SS_STAGE_INCLUDED_ONLY_SR)
+            stages.append(ss_state.SS_STAGE_INCLUDED_SR)
+
+        if self.ss_rs == ss_state.SS_RS_INCLUDED_SRMA:
+            stages.append(ss_state.SS_STAGE_INCLUDED_SRMA)
+            stages.append(ss_state.SS_STAGE_INCLUDED_SR)
+
+        return stages
+
+
+    def get_rct_id(self):
+        '''
+        Get the RCT ID (NCT) or other number
+        '''
+        if 'rct_id' in self.meta:
+            return self.meta['rct_id']
+        else:
+            return ''
 
 
     def get_short_name(self, style=None):

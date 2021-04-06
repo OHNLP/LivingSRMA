@@ -825,7 +825,8 @@ def get_paper_by_keystr_and_seq(keystr, seq_num):
 
 def get_papers(project_id):
     papers = Paper.query.filter(and_(
-        Paper.project_id == project_id
+        Paper.project_id == project_id,
+        Paper.is_deleted == IS_DELETED_NO
     )).order_by(Paper.date_created.desc()).all()
 
     return papers
@@ -973,7 +974,8 @@ def get_papers_by_stage(project_id, stage):
 
 
 def get_papers_by_stage_v1(project_id, stage):
-    '''Deprecated.
+    '''
+    Deprecated.
     '''
     if stage == 'a1':
         papers = Paper.query.filter(and_(
@@ -1420,8 +1422,118 @@ def get_current_max_seq_num(project_id):
     return max_cur_seq
 
 
-def get_prisma(project_id):
-    '''Get the statistics of the project for the PRISMA
+def get_prisma_bef(project_id):
+    '''
+    Get the statistics for the PRISMA
+    Including:
+
+    - b: batch number
+    - e: excluded
+    - f: final number
+
+    '''
+    # get the basic stats
+    stat = get_screener_stat_by_project_id(project_id)
+
+    # get the NCT number states
+    papers = get_papers(project_id)
+    b1_study_list = []
+    b4_study_list = []
+    b5_study_list = []
+    e1_study_list = []
+    e2_study_list = []
+    e3_study_list = []
+    f1_study_list = []
+    f2_study_list = []
+    
+    f1_paper_list = []
+    f2_paper_list = []
+
+    for paper in papers:
+        rct_id = ''
+        if 'rct_id' in paper.meta:
+            rct_id = paper.meta['rct_id']
+        
+        # use the pid as rct id if it is missing
+        if rct_id == '':
+            rct_id = paper.pid
+
+        stages = paper.get_ss_stages()
+        print(paper.ss_rs, stages)
+
+        if ss_state.SS_STAGE_INCLUDED_SR in stages:
+            f1_study_list.append(rct_id)
+            f1_paper_list.append(paper.pid)
+
+        if ss_state.SS_STAGE_INCLUDED_SRMA in stages:
+            f2_study_list.append(rct_id)
+            f2_paper_list.append(paper.pid)
+
+    prisma = {
+        'b1': {
+            "n_ctids": len(b1_study_list),
+            "n_pmids": stat[ss_state.SS_STAGE_ALL_OF_THEM],
+        },
+        'b2': {
+            "n_ctids": 0,
+            "n_pmids": 0,
+        },
+        'b3': {
+            "n_ctids": 0,
+            "n_pmids": 0,
+        },
+        'b4': {
+            "n_ctids": len(b4_study_list),
+            "n_pmids": stat[ss_state.SS_STAGE_DECIDED]
+                - stat[ss_state.SS_STAGE_EXCLUDED_BY_FULLTEXT],
+        },
+        'b5': {
+            "n_ctids": len(b5_study_list),
+            "n_pmids": stat[ss_state.SS_STAGE_INCLUDED_SR]
+                + stat[ss_state.SS_STAGE_EXCLUDED_BY_ABSTRACT]
+        },
+
+        'e1': {
+            "n_ctids": len(e1_study_list),
+            "n_pmids": stat[ss_state.SS_STAGE_EXCLUDED_BY_TITLE],
+        },
+        'e2': {
+            "n_ctids": len(e2_study_list),
+            "n_pmids": stat[ss_state.SS_STAGE_EXCLUDED_BY_ABSTRACT],
+        },
+        'e3': {
+            "n_ctids": len(e3_study_list),
+            "n_pmids": stat[ss_state.SS_STAGE_EXCLUDED_BY_FULLTEXT],
+        },
+
+        'f1': {
+            "n_ctids": len(f1_study_list),
+            "n_pmids": stat[ss_state.SS_STAGE_INCLUDED_SR],
+            "study_list": f1_study_list,
+            "paper_list": f1_paper_list
+        },
+        'f2': {
+            "n_ctids": len(f2_study_list),
+            "n_pmids": stat[ss_state.SS_STAGE_INCLUDED_SRMA],
+            "study_list": f2_study_list,
+            "paper_list": f2_paper_list
+        }
+    }
+
+    return prisma, stat
+
+
+def get_prisma_abeuf(project_id):
+    '''
+    Get the statistics of the project for the PRISMA
+    Including:
+
+    - a auto update
+    - b batch number
+    - e excluded
+    - u updated
+    - f final
+
     '''
     stages = [
         { "stage": "b1", "text": "Records retrieved from database search" },

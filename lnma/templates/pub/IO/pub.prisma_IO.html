@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-<title>Study Selection for IO</title>
+<title>PRISMA for IO</title>
 <link rel="icon" href="/static/img/favicon.png" type="image/png">
 <link rel="stylesheet" href="/static/lib/font-awesome/css/all.css">
 <link rel="stylesheet" href="/static/lib/jquery-ui/jquery-ui.min.css">
@@ -342,7 +342,7 @@ a {
 
 <div id="fg_prisma" class="box" style="width: 500px; min-width: 500px;">
 
-    {% include 'svg/PRISMA_IO_v3.svg' %}
+    {% include 'svg/PRISMA_IO_v2.svg' %}
 
 </div><!-- /#fg_prisma -->
 
@@ -379,11 +379,9 @@ a {
                 <span class="study-journal">{{ r.journal }}</span class="">. 
                     
                 <a class="study-pmid" target="_blank" title="Open the page in ClinicalTrials.gov" 
-                    v-if="r.pid_type=='nct8'"
-                    v-bind:href="url.ctgov.view_ct + r.pid">{{ r.pid }}</a>
+                    v-bind:href="url.ctgov.view_ct + r.ctid">{{ r.ctid }}</a> 
                 <a class="study-pmid" target="_blank" title="Open the page in PubMed" 
-                    v-else
-                    v-bind:href="url.pubmed.view_pmid + r.pid">{{ r.pid }}</a>
+                    v-bind:href="url.pubmed.view_pmid + r.pmid">{{ r.pmid }}</a>
             </div>
 
         </div>
@@ -504,10 +502,12 @@ var tb_studylist = {
         console.log("* update study list " + sn + ', ' + stage);
         // filter the studies
         var studies = [];
-        for (var i = 0; i < this.data.studylist[sn][stage].length; i++) {
-            var pid = this.data.studylist[sn][stage][i];
+
+        for (var i = 0; i < this.data.prisma_data.studylist[sn][stage].length; i++) {
+            var pid = this.data.prisma_data.studylist[sn][stage][i];
+            console.log(pid);
             // it should be there ...
-            var study = this.data.study[pid];
+            var study = this.data.study_paper.paper_dict[pid];
             studies.push(study);
         }
         this.vpp.studies = studies;
@@ -518,9 +518,250 @@ var tb_studylist = {
     }
 }
 
+var prisma_data = {
+    "search": {
+        "s1": { "date": "09/11/2018" },
+        "s2": { "date": "01/13/2019" },
+        "s3": { "date": "03/16/2019" },
+        "s4": { "date": "06/04/2019" },
+        "s5": { "date": "10/04/2019" },
+        "s6": { "date": "04/06/2020" },
+        "s7": { "date": "08/04/2020" }
+    },
+    "prisma": {
+        "s1": { "b1": 5663, "b2": 0, "b3": 5648, "b4": 5648, "b5": 2022, "f1": 39, "f2": 37, "e1": 3626, "e2": 1938, "e3": 0},
+        "s2": { "b1": 824, "b2": 0, "b3":  802, "b4":  802, "b5":  292, "f1":  7, "f2":  5, "e1":  510, "e2":  285, "e3": 0},
+        "s3": { "b1": 406, "b2": 0, "b3":  386, "b4":  386, "b5":  237, "f1":  7, "f2":  6, "e1":  149, "e2":  230, "e3": 0},
+        "s4": { "b1": 444, "b2": 0, "b3":  444, "b4":  444, "b5":  282, "f1":  6, "f2":  5, "e1":  162, "e2":  276, "e3": 0},
+        "s5": { "b1": 663, "b2": 0, "b3":  663, "b4":  663, "b5":  404, "f1":  6, "f2":  6, "e1":  259, "e2":  398, "e3": 0},
+        "s6": { "b1": 1218, "b2": 0, "b3": 1196, "b4": 1196, "b5":  802, "f1": 12, "f2":  7, "e1":  394, "e2":  790, "e3": 0},
+        "s7": { "b1": 539, "b2": 0, "b3": 539, "b4": 539, "b5":  356, "f1": 16, "f2":  13, "e1":  183, "e2":  340, "e3": 0}
+    },
+    "studylist": {
+        "s1": {
+            "sr": [
+                "29268948",
+                "28212060",
+                "28655793",
+                "28993052",
+                "30052729",
+                "29880231",
+                "27718784",
+                "29884413",
+                "26406148",
+                "29867230",
+                "29562145",
+                "22547592",
+                "22858559",
+                "26412456",
+                "26028407",
+                "26712084",
+                "26970723",
+                "27458307",
+                "28636851",
+                "28854067",
+                "28885881",
+                "27745820",
+                "27979383",
+                "29777823",
+                "29658856",
+                "29863955",
+                "21639810",
+                "20525992",
+                "23295794",
+                "29658430",
+                "26115796",
+                "28961465",
+                "27717298",
+                "25795410",
+                "28671856",
+                "25399552",
+                "28729154",
+                "24831977",
+                "28034081"
+            ],
+            "ma": [
+                "29268948",
+                "28212060",
+                "28655793",
+                "28993052",
+                "30052729",
+                "29880231",
+                "27718784",
+                "29884413",
+                "26406148",
+                "29562145",
+                "22547592",
+                "22858559",
+                "26412456",
+                "26028407",
+                "26712084",
+                "26970723",
+                "27458307",
+                "28636851",
+                "28854067",
+                "28885881",
+                "27745820",
+                "29777823",
+                "29658856",
+                "29863955",
+                "21639810",
+                "20525992",
+                "23295794",
+                "29658430",
+                "26115796",
+                "28961465",
+                "27717298",
+                "25795410",
+                "28671856",
+                "25399552",
+                "28729154",
+                "24831977",
+                "28034081"
+            ]
+        },
+        "s2": {
+            "sr": [
+                "30345906",
+                "30509740",
+                "30280658",
+                "30262187",
+                "30280641",
+                "30280635",
+                "29658845"
+            ],
+            "ma": [
+                "30345906",
+                "30509740",
+                "30262187",
+                "30280641",
+                "29658845"
+            ]
+        },
+        "s3": {
+            "sr": [
+                "30779531",
+                "30779529",
+                "30138764",
+                "30664989",
+                "30620668",
+                "30659987",
+                "30763730"
+            ],
+            "ma": [
+                "30779531",
+                "30779529",
+                "30138764",
+                "30664989",
+                "30620668",
+                "30659987"
+            ]
+        },
+        "s4": {
+            "sr": [
+                "31050707",
+                "31095287",
+                "31003911",
+                "31079938",
+                "30955977",
+                "31122901"
+            ],
+            "ma": [
+                "31050707",
+                "31095287",
+                "31079938",
+                "30955977",
+                "31122901"
+            ]
+        },
+        "s5": {
+            "sr": [
+                "31427204",
+                "31562796",
+                "31171878",
+                "30422243",
+                "31327687",
+                "31327689"
+            ],
+            "ma": [
+                "31427204",
+                "31562796",
+                "31171878",
+                "30422243",
+                "31327687",
+                "31327689"
+            ]
+        },
+        "s6": {
+            "sr": [
+                "31863227",
+                "31790344",
+                "31582355",
+                "32053137",
+                "31590988",
+                "31786121",
+                "31679945",
+                "31959349",
+                "32114502",
+                "32201234",
+                "32101663",
+                "31880964"
+            ],
+            "ma": [
+                "31863227",
+                "31790344",
+                "31582355",
+                "31590988",
+                "31679945",
+                "32201234",
+                "31880964"
+            ]
+        },
+        "s7": {
+            "sr": [
+                "32416781",
+                "32591464",
+                "32468956",
+                "32271377",
+                "32661118",
+                "32302702",
+                "32534646",
+                "32437507",
+                "32271672",
+                "32416780",
+                "32402160",
+                "32294530",
+                "32379280",
+                "32271354",
+                "32673417",
+                "32339648"
+            ],
+            "ma": [
+                "32416781",
+                "32468956",
+                "32271377",
+                "32661118",
+                "32302702",
+                "32534646",
+                "32437507",
+                "32271672",
+                "32416780",
+                "32402160",
+                "32294530",
+                "32271354",
+                "32673417"
+            ]
+        }
+    },
+}
+
 var jarvis = {
     data: null,
-    tokens: ['b1', 'b2', 'b3', 'b4', 'b5', 'b6', 'b7', 'e1', 'e2'],
+    tokens: [
+        'b1', 'b2', 'b3', 'b4', 'b5', 
+        'e1', 'e2', 'e3',
+        'f1', 'f2', 
+    ],
     url: {
         sel_pred: './hsra_pred',
         ctgov: {
@@ -577,39 +818,54 @@ var jarvis = {
         var prj = jarvis.getUrlParameter('prj');
 
         $.get(
-            '/pub/graphdata/IO/PRISMA_K.json',
-            { ver: Math.random() },
+            '/pub/graphdata/IO/PRISMA.json',
+            { 
+                rnd: Math.random(),
+                src: 'db'
+            },
             function(data) {
                 console.log(data);
-                // update the data and add the st
+
+                // update the data and add the st by merging
                 var st_sr_pids = [];
                 var st_ma_pids = [];
                 var sns = ['st'];
                 var st_prisma = { 
-                    "b1": 0, "b2": 0, "b3": 0, "b4": 0, "b5":  0, 
-                    "b6": 0, "b7": 0, "e1": 0, "e2": 0
+                    "b1": 0, "b2": 0, "b3": 0, "b4": 0, "b5": 0, 
+                    "e1": 0, "e2": 0, "e3": 0,
+                    "f1": 0, "f2": 0, 
                 };
+
                 for (var i = 1; i <= jarvis.current.total; i++) {
                     var sn = 's' + i;
-                    st_sr_pids = st_sr_pids.concat(data.studylist[sn]['sr']);
-                    st_ma_pids = st_ma_pids.concat(data.studylist[sn]['ma']);
+                    st_sr_pids = st_sr_pids.concat(prisma_data.studylist[sn]['sr']);
+                    st_ma_pids = st_ma_pids.concat(prisma_data.studylist[sn]['ma']);
                     sns.push(sn);
+
                     for (var j = 0; j < jarvis.tokens.length; j++) {
                         var token = jarvis.tokens[j];
-                        st_prisma[token] += data.prisma[sn][token];
+                        st_prisma[token] += prisma_data.prisma[sn][token];
                     }
                 }
+
+                for (let i = 0; i < jarvis.tokens.length; i++) {
+                    var token = jarvis.tokens[i];
+                    st_prisma[token] += data.prisma[token].n_pmids;
+                }
+
                 // update the st for the data
-                data.search['st'] = {'date': 'latest'}
-                data.prisma['st'] = st_prisma;
-                data.studylist['st'] = {
+                prisma_data.search['st'] = {'date': 'Latest'}
+                prisma_data.studylist['st'] = {
                     sr: st_sr_pids,
                     ma: st_ma_pids
                 };
-                data['sns'] = sns;
+                st_prisma['f1'] = prisma_data.studylist['st']['sr'].length;
+                st_prisma['f2'] = prisma_data.studylist['st']['ma'].length;
+                prisma_data.prisma['st'] = st_prisma;
+                prisma_data['sns'] = sns;
 
                 // bind data to jarvis
-                jarvis.data = data;
+                jarvis.data = prisma_data;
 
                 // init the figure
                 // replace the $$ with jquery findable tag
@@ -621,12 +877,9 @@ var jarvis = {
                 // replace the numbers
                 for (var i = 0; i < sns.length; i++) {
                     var sn = sns[i];
-                    svgtxt = svgtxt.replace('$'+sn+'_cnt_sr$', '' + data.studylist[sn]['sr'].length);
-                    svgtxt = svgtxt.replace('$'+sn+'_cnt_ma$', '' + data.studylist[sn]['ma'].length);
-
-                    if (sn != 'st') {
-                        svgtxt = svgtxt.replace('$'+sn+'_date$', '' + data.search[sn].date);
-                    }
+                    svgtxt = svgtxt.replace('$'+sn+'_cnt_sr$', '' + prisma_data.studylist[sn]['sr'].length);
+                    svgtxt = svgtxt.replace('$'+sn+'_cnt_ma$', '' + prisma_data.studylist[sn]['ma'].length);
+                    svgtxt = svgtxt.replace('$'+sn+'_date$', '' + prisma_data.search[sn].date);
                 }
 
                 // replace the PRISMA token
@@ -638,8 +891,13 @@ var jarvis = {
 
                 jarvis.update_prisma('s6');
 
-                tb_studylist.init(data);
-                tb_studylist.update_study_list('s6', 'ma');
+                tb_studylist.init({
+                    prisma_data: prisma_data,
+                    study_paper: data
+                });
+
+                // set the default view
+                tb_studylist.update_study_list('s7', 'ma');
 
                 // bind the click event
                 $('svg a').on('click', function(evt) {
@@ -698,6 +956,7 @@ var jarvis = {
         $('#' + jarvis.prisma_title_id).html(title);
 
         for (let i = 0; i < jarvis.tokens.length; i++) {
+
             var token = jarvis.tokens[i];
             var val = jarvis.data.prisma[sn][token];
             $('#val_' + token).html(val);

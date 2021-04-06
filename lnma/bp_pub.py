@@ -536,6 +536,7 @@ def graphdata_graph_pma_json(prj):
 
 
 @bp.route('/graphdata/<prj>/GRAPH.json')
+@bp.route('/graphdata/<prj>/GRAPH_NMA.json')
 def graphdata_graph_json(prj):
     '''
     Special rule for the graphs.
@@ -679,20 +680,6 @@ def graphdata_softable_nma_json(prj):
     return jsonify(ret)
 
 
-@bp.route('/graphdata/<prj>/PRISMA_v2.json')
-def graphdata_prisma_json_v2(prj):
-    '''
-    Get the prisma data from database
-    '''
-    ret = {
-        "paper_dict": {},
-        "study_dict": {},
-        "prisma": {}
-    }
-
-    return jsonify(ret)
-
-
 @bp.route('/graphdata/<prj>/PRISMA.json')
 def graphdata_prisma_json(prj):
     '''
@@ -760,29 +747,70 @@ def get_prisma_from_db(prj):
     Get PRISMA JSON data from database
     '''
     project = dora.get_project_by_keystr(prj)
+    project_id = project.project_id
 
     # get the fixed number from project settings
     # this depends on whether this project 
     past_prisma = {}
 
     # get the living prisma from database
-    prisma = {}
+    prisma, stat = dora.get_prisma_bef(project_id)
 
     # get the paper information from database
+    # the paper dict is PMID based
+    paper_dict = {}
 
     # the study dict is NCT based
     study_dict = {}
 
-    # the paper dict is PMID based
-    paper_dict = {}
+    # fill the pmid
+    papers = dora.get_papers_by_stage(
+        project.project_id,
+        ss_state.SS_STAGE_INCLUDED_SR
+    )
+    for paper in papers:
+        rct_id = paper.get_rct_id()
 
+        # add this paper to the paper dict
+        paper_dict[paper.pid] = {
+            "authors": paper.authors,
+            "ctid": rct_id,
+            "date": paper.pub_date,
+            "journal": paper.journal,
+            "pmid": paper.pid,
+            "pid_type": paper.pid_type,
+            "title": paper.title,
+        }
+
+        # add this RCT to the study dict
+        if rct_id not in study_dict:
+            study_dict[rct_id] = {
+                "authors": paper.authors,
+                "ctid": rct_id,
+                "date": paper.pub_date,
+                "journal": paper.journal,
+                "pmid": paper.pid,
+                "title": paper.title,
+
+                # the followings are for RCT
+                "study_id": rct_id,
+                "latest_pmid": '',
+                "pmids": [],
+            }
+        
+        # then add this paper to the study list
+        study_dict[rct_id]['latest_pmid'] = paper.pid
+        study_dict[rct_id]['pmids'].append(paper.pid)
+
+    # finally, we present this object
     ret = {
         "prisma": prisma,
+        "stat": stat,
+        "paper_dict": paper_dict,
         "study_dict": study_dict,
-        "paper_dict": paper_dict
     }
 
-    return jsonify(ret)
+    return ret
 
 
 def get_prisma_from_xls(prj):

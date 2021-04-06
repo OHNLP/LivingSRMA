@@ -646,6 +646,7 @@ var jarvis = {
             '/pub/graphdata/' + prj + '/PRISMA.json',
             {ver: Math.random()},
             function(data) {
+                console.log(data);
                 fg_prisma.init(data);
                 tb_studylist.init(data);
 
