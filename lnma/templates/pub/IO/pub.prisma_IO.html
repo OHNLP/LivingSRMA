@@ -825,6 +825,7 @@ var jarvis = {
             },
             function(data) {
                 console.log(data);
+                jarvis.raw_prisma = data;
 
                 // update the data and add the st by merging
                 var st_sr_pids = [];
@@ -873,6 +874,11 @@ var jarvis = {
 
                 // replace the prisma title
                 svgtxt = svgtxt.replace('$prisma_title$', '<span id="'+jarvis.prisma_title_id+'">&nbsp;</span>');
+
+                // replace the total numbers
+                svgtxt = svgtxt.replace('$tt_f1$', prisma_data.prisma.st.f1);
+                svgtxt = svgtxt.replace('$tt_b1$', prisma_data.prisma.st.b1);
+                svgtxt = svgtxt.replace('$tt_stage_screening$', jarvis.raw_prisma.stat.unscreened);
 
                 // replace the numbers
                 for (var i = 0; i < sns.length; i++) {
