@@ -857,8 +857,8 @@ var jarvis = {
                 // update the st for the data
                 prisma_data.search['st'] = {'date': 'Latest'}
                 prisma_data.studylist['st'] = {
-                    sr: st_sr_pids,
-                    ma: st_ma_pids
+                    sr: data.prisma.f1.paper_list,
+                    ma: data.prisma.f2.paper_list
                 };
                 st_prisma['f1'] = prisma_data.studylist['st']['sr'].length;
                 st_prisma['f2'] = prisma_data.studylist['st']['ma'].length;
@@ -895,7 +895,7 @@ var jarvis = {
                 }
                 document.getElementById('fg_prisma').innerHTML = svgtxt;
 
-                jarvis.update_prisma('s6');
+                jarvis.update_prisma('s7');
 
                 tb_studylist.init({
                     prisma_data: prisma_data,
