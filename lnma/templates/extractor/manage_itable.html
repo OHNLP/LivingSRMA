@@ -200,136 +200,139 @@ html {
                 <i class="fa fa-table"></i>
                 Preview
             </button>
+
+            <button class="btn btn-default btn-xs" v-on:click="update_itable_default_attrs();">
+                <i class="fa fa-edit"></i>
+                Update columns for default display
+            </button>
         </div>
     </div>
     <!-- /.panel-info -->
 
     <div class="d-flex flex-row">
 
-    <div v-if="itable != null" class="panel-m">
+        <div v-if="itable != null" class="panel-m">
 
-        <div class="panel-info">
-            <div class="oc-attr">
-                <span style="font-size: 1.2em;">
-                    <i class="fa fa-table"></i>
-                    Table Columns
-                </span>
-            </div>
-            <div class="oc-attr">
-                <button class="btn btn-default btn-xs" 
-                    v-on:click="create_category();">
-                    <i class="fa fa-bars"></i>
-                    Add Category
-                </button>
-            </div>
-        </div>
-        <!-- /.panel-info -->
-
-        <div v-for="cate, cate_idx in itable.meta.cate_attrs"
-            class="panel-info" style="margin: 10px 0; border-bottom: 1px dotted grey;">
-            
-            <div class="oc-attr">
-                <i class="fa fa-bars"></i>
-                <input class="oc-attr-value" type="text" v-model="cate.name">
-
-                <button class="btn btn-default btn-xs"
-                    v-on:click="create_attribute(cate.abbr);">
-                    <i class="fa fa-plus"></i>
-                    Add Attribute
-                </button>
-
-                <button class="btn btn-default btn-xs"
-                    v-on:click="remove_category(cate.abbr, cate.name);">
-                    <i class="fa fa-minus"></i>
-                    Remove Category
-                </button>
-
-            </div>
-
-            <div style="margin: 0 0 10px 10px; padding: 0 0 10px 10px; border-left: 1px solid #777777;">
-                <div v-for="attr, attr_idx in cate.attrs"
-                    style="padding: 3px 0; border-bottom: 1px dotted #efefef;">
-                    <i class="far fa-check-circle"></i>
-                    <input class="oc-attr-value" type="text"
-                        v-model="attr.name"
-                        v-bind:id="'cate_attr_' + attr.abbr">
-
-                    <span v-if="attr.subs != null">
-                        [
-                        <span v-for="sub, sub_idx in attr.subs">
-                            <input class="oc-attr-value oc-attr-value-sm" type="text" 
-                                v-model="sub.name"
-                                v-bind:id="'cate_attr_sub_' + sub.abbr">
-                        </span>
-                        ]
+            <div class="panel-info">
+                <div class="oc-attr">
+                    <span style="font-size: 1.2em;">
+                        <i class="fa fa-table"></i>
+                        Table Columns
                     </span>
-
-                    <a v-on:click="create_sub(cate.abbr, attr.abbr);"
-                        href="javascript:void(0);"
-                        :title="'Add sub-attribute to [' + attr.name + ']'">
-                        <i class="fa fa-plus"></i>
-                    </a>
-
-                    <a v-on:click="remove_attribute(cate.abbr, attr.abbr, attr.name);"
-                        href="javascript:void(0);"
-                        class="text-danger"
-                        :title="'Remove this attribute [' + attr.name + ']'">
-                        <i class="fa fa-minus"></i>
-                    </a>
+                </div>
+                <div class="oc-attr">
+                    <button class="btn btn-default btn-xs" 
+                        v-on:click="create_category();">
+                        <i class="fa fa-bars"></i>
+                        Add Category
+                    </button>
                 </div>
             </div>
+            <!-- /.panel-info -->
 
-        </div>
-    </div>
-
-
-    <div v-if="itable != null" class="panel-m">
-
-        <div class="panel-info">
-            <div class="oc-attr">
-                <span style="font-size: 1.2em;">
-                    <i class="fa fa-filter"></i>
-                    Filters
-                </span>
-            </div>
-            <div class="oc-attr">
-                <button class="btn btn-default btn-xs"
-                    v-on:click="create_filter();">
-                    <i class="fa fa-bars"></i>
-                    Add Filter
-                </button>
-            </div>
-        </div>
-        <!-- /.panel-info -->
-
-        <div v-if="itable.meta.hasOwnProperty('filters')">
-            <div v-for="filter, filter_idx in itable.meta.filters"
-                class="filter-div pt-2 pb-2 mb-2 mt-2">
-                <h6 class="filter-title">
-                    Filter {{ filter_idx + 1 }}
-                </h6>
-                <label for="">Filter Label: </label>
-                <input type="text" class="oc-attr-value" v-model="filter.display_name">
+            <div v-for="cate, cate_idx in itable.meta.cate_attrs"
+                class="panel-info" style="margin: 10px 0; border-bottom: 1px dotted grey;">
                 
-                <label for="">Display Style: </label>
-                <select v-model="filter.type">
-                    <option value="radio">Radio Buttons</option>
-                    <option value="select">Dropdown Selections</option>
-                    <option value="text">Text Box</option>
-                </select>
+                <div class="oc-attr">
+                    <i class="fa fa-bars"></i>
+                    <input class="oc-attr-value" type="text" v-model="cate.name">
 
-                <br>
+                    <button class="btn btn-default btn-xs"
+                        v-on:click="create_attribute(cate.abbr);">
+                        <i class="fa fa-plus"></i>
+                        Add Attribute
+                    </button>
 
-                <label for="">Attribute name for this filter: </label>
-                <input type="text" class="oc-attr-value" v-model="filter.attr">
+                    <button class="btn btn-default btn-xs"
+                        v-on:click="remove_category(cate.abbr, cate.name);">
+                        <i class="fa fa-minus"></i>
+                        Remove Category
+                    </button>
+
+                </div>
+
+                <div style="margin: 0 0 10px 10px; padding: 0 0 10px 10px; border-left: 1px solid #777777;">
+                    <div v-for="attr, attr_idx in cate.attrs"
+                        style="padding: 3px 0; border-bottom: 1px dotted #efefef;">
+                        <i class="far fa-check-circle"></i>
+                        <input class="oc-attr-value" type="text"
+                            v-model="attr.name"
+                            v-bind:id="'cate_attr_' + attr.abbr">
+
+                        <span v-if="attr.subs != null">
+                            [
+                            <span v-for="sub, sub_idx in attr.subs">
+                                <input class="oc-attr-value oc-attr-value-sm" type="text" 
+                                    v-model="sub.name"
+                                    v-bind:id="'cate_attr_sub_' + sub.abbr">
+                            </span>
+                            ]
+                        </span>
+
+                        <a v-on:click="create_sub(cate.abbr, attr.abbr);"
+                            href="javascript:void(0);"
+                            :title="'Add sub-attribute to [' + attr.name + ']'">
+                            <i class="fa fa-plus"></i>
+                        </a>
+
+                        <a v-on:click="remove_attribute(cate.abbr, attr.abbr, attr.name);"
+                            href="javascript:void(0);"
+                            class="text-danger"
+                            :title="'Remove this attribute [' + attr.name + ']'">
+                            <i class="fa fa-minus"></i>
+                        </a>
+                    </div>
+                </div>
+
             </div>
         </div>
-    </div>
-    <!-- /#filter -->
-        
-    </div>
 
-    
+
+        <div v-if="itable != null" class="panel-m">
+
+            <div class="panel-info">
+                <div class="oc-attr">
+                    <span style="font-size: 1.2em;">
+                        <i class="fa fa-filter"></i>
+                        Filters
+                    </span>
+                </div>
+                <div class="oc-attr">
+                    <button class="btn btn-default btn-xs"
+                        v-on:click="create_filter();">
+                        <i class="fa fa-bars"></i>
+                        Add Filter
+                    </button>
+                </div>
+            </div>
+            <!-- /.panel-info -->
+
+            <div v-if="itable.meta.hasOwnProperty('filters')">
+                <div v-for="filter, filter_idx in itable.meta.filters"
+                    class="filter-div pt-2 pb-2 mb-2 mt-2">
+                    <h6 class="filter-title">
+                        Filter {{ filter_idx + 1 }}
+                    </h6>
+                    <label for="">Filter Label: </label>
+                    <input type="text" class="oc-attr-value" v-model="filter.display_name">
+                    
+                    <label for="">Display Style: </label>
+                    <select v-model="filter.type">
+                        <option value="radio">Radio Buttons</option>
+                        <option value="select">Dropdown Selections</option>
+                        <option value="text">Text Box</option>
+                    </select>
+
+                    <br>
+
+                    <label for="">Attribute name for this filter: </label>
+                    <input type="text" class="oc-attr-value" v-model="filter.attr">
+                </div>
+            </div>
+        </div>
+        <!-- /#filter -->
+            
+    </div>
 
 </div>
 <!-- /#pan_itbuilder -->
@@ -768,6 +771,10 @@ var pan_itbuilder = {
                     pan_itbuilder.show_itable_preview();
                 },
 
+                update_itable_default_attrs: function() {
+                    pan_itbuilder.update_itable_default_attrs();
+                },
+
                 create_category: function() {
                     pan_itbuilder.create_category();
                 },
@@ -915,6 +922,41 @@ var pan_itbuilder = {
                 pan_itbuilder.load();
             }
         );
+    },
+
+    update_itable_default_attrs: function() {
+        // get current value
+        var txt_default_attrs = '';
+        if (this.vpp.$data.itable.meta.hasOwnProperty('default_attrs')) {
+            txt_default_attrs = this.vpp.$data.itable.meta.default_attrs.join(',')
+        } else {
+            this.vpp.$data.itable.meta['default_attrs'] = [];
+        }
+        
+        // show UI
+        var new_txt_default_attrs = window.prompt(
+            'Please list the column/attribute names for the default display in iTable (separated by comma):',
+            txt_default_attrs
+        );
+
+        if (new_txt_default_attrs == null) {
+            return;
+        }
+
+        // do a little pre-processing
+        var default_attrs = new_txt_default_attrs.split(',');
+        var vs = [];
+        for (let i = 0; i < default_attrs.length; i++) {
+            var a = default_attrs[i];
+            a = a.trim();
+            vs.push(a);
+        }
+
+        // update the setting
+        this.vpp.$data.itable.meta.default_attrs = vs;
+        
+        // update the UI
+        this.vpp.$forceUpdate();
     },
 
     create_category: function() {
