@@ -54,13 +54,106 @@ def index():
     return 'RPLT Service'
 
 
-@bp.route('/IOTOX', methods=['GET', 'POST'])
+@bp.route('/PWMA_INCD', methods=['GET', 'POST'])
 @apikey_required
-def iotox():
+def pwma_incd():
     if request.method=='GET':
-        return render_template('rplt.IOTOX.html')
-    # define the pro ject name
-    prj = 'IOTOX'
+        return render_template('rplt/PWMA_INCD.html')
+
+    # prepare the return object
+    ret = {
+        'success': False,
+        'msg': '',
+        'img': {
+            'outplt1': { 'url': '' },
+            'cumuplt': { 'url': '' }
+        }
+    }
+
+    # measure_of_effect
+    sm = request.form.get('sm', '').strip()
+    # is_hakn
+    hk = request.form.get('hk', '').strip()
+    # is_create_figure
+    cf = request.form.get('cf', '').strip()
+
+    # check rs
+    if sm not in set(['PLOGIT', 'PAS', "PFT", "PLN", "PRAW"]):
+        ret['msg'] = 'Unsupported measure of effect'
+        return jsonify(ret)
+    
+    # check hk
+    if hk not in set(['TRUE', 'FALSE']):
+        ret['msg'] = 'Unsupported value for Hartung-Knapp adjustment'
+        return jsonify(ret)
+    
+    # check cf
+    if cf not in set(['YES', 'NO']):
+        ret['msg'] = 'Unsupported value for figure creation'
+        return jsonify(ret)
+
+    # extract data
+    try:
+        rs = request.form.get('rs')
+        rs = json.loads(rs)
+    except Exception as err:
+        print('wrong rs:', err)
+        ret['msg'] = 'Input data is missing or not valid JSON format.'
+        return jsonify(ret) 
+
+    # create a config
+    cfg = {
+        'analyzer_model': 'PWMA_INCD',
+        'measure_of_effect': sm,
+        'input_format': 'CAT_RAW',
+        'fixed_or_random': 'random',
+        'is_fixed': 'FALSE',
+        'is_random': 'TRUE',
+        'pooling_method': 'Inverse',
+        'tau_estimation_method': 'DL',
+        'is_hakn': hk,
+        'hakn_adjustment': hk,
+        'adhoc_hakn': '',
+        'is_create_figure': cf,
+        'sort_by': 'year',
+        'assumed_baseline': 100
+    }
+
+    try:
+        result = rplt_analyzer.analyze(rs, cfg)
+        # TODO the return should be checked here
+        # but most of time, the figure will be generated.
+        if result['success']:
+            ret['success'] = True
+            if cf == 'YES':
+                ret['img']['outplt1']['url'] = url_for('index.f', fn=result['params']['fn_outplt1'])
+                ret['img']['cumuplt']['url'] = url_for('index.f', fn=result['params']['fn_cumuplt'])
+            else:
+                ret['data'] = result['data']
+        else:
+            ret['msg'] = result['msg']
+
+    except Exception as err:
+        print('Handling run-time error:', err)
+
+        if current_app.config['DEBUG']:
+            raise err
+
+        ret['msg'] = 'System error, please check input data.'
+
+    print(ret)
+
+    return jsonify(ret)
+
+
+@bp.route('/PWMA_PRCM', methods=['GET', 'POST'])
+@apikey_required
+def pwma_prcm():
+    '''
+    Pairwise Meta-Analysis for primary and cumulative
+    '''
+    if request.method=='GET':
+        return render_template('rplt/PWMA_PRCM.html')
 
     # prepare the return object
     ret = {
@@ -105,10 +198,12 @@ def iotox():
 
     # create a config
     cfg = {
-        'prj': prj,
-        'analyzer_model': am,
+        'analyzer_model': 'PWMA_PRCM',
         'measure_of_effect': sm,
         'is_hakn': hk,
+        'input_format': 'CAT_RAW',
+        'sort_by': 'year',
+        'assumed_baseline': 100
     }
 
     # set the params for callback usage
