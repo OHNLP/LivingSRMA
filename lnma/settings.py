@@ -196,9 +196,11 @@ RSCRIPT_TPL = {
 
 
     # for R Plots (RPLT)
-    'rplt_IOTOX_FOREST': 'lnma_rplt_IOTOX_FOREST.tpl.r',
-    'rplt_IOTOX_FORESTDATA': 'lnma_rplt_IOTOX_FORESTDATA.tpl.r',
-    'rplt_ALL_PRIM_CAT_RAW': 'lnma_rplt_ALL_PRIM_CAT_RAW.tpl.r',
+    #'rplt_IOTOX_FOREST': 'lnma_rplt_IOTOX_FOREST.tpl.r',
+    #'rplt_IOTOX_FORESTDATA': 'lnma_rplt_IOTOX_FORESTDATA.tpl.r',
+    #'rplt_ALL_PRIM_CAT_RAW': 'lnma_rplt_ALL_PRIM_CAT_RAW.tpl.r',
+    'rplt_PWMA_PRCM_CAT_RAW': 'lnma_rplt_PWMA_PRCM_CAT_RAW.tpl.r',
+    'rplt_PWMA_INCD_CAT_RAW': 'lnma_rplt_PWMA_INCD_CAT_RAW.tpl.r',
 }
 
 R_BUGSNET_MEASURE2LINK = {
@@ -228,7 +230,14 @@ DIS_TEXT = {
         "RD": "Risk Difference",
         "IRR": "Incidence Rate Ratio",
         "MD": "Mean Difference",
-        "SMD": "Standardized Mean Difference"
+        "SMD": "Standardized Mean Difference",
+
+        # incidence analysis
+        "PLOGIT": "Logit Transformation",
+        "PAS": "Arcsine Transformation ",
+        "PFT": "Freeman-Tukey Double Arcsine Transformation",
+        "PLN": "Log Transformation",
+        "PRAW": "Raw Proportions",
     }
 }
 

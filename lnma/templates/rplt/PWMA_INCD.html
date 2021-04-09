@@ -1,0 +1,145 @@
+{% extends '_layout_bs.html' %}
+
+{% block title %}
+RPLT PWMA API Demo
+{% endblock %}
+
+{% block style %}
+<style>
+.code {
+    font-family: 'Courier New', Courier, monospace;
+    background-color: #eeeeee;
+    font-size: 13px;
+}
+</style>
+{% endblock %}
+
+{% block main %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-5">
+            <h2>RPLT PWMA Incidence Analysis Figure API Demo</h2>
+            <p>
+                RPLT PWMA Incidence Analysis Figure API Test for <span class="code">/rplt/PWMA_INCD</span>. <br>
+                The return URL is the relative path to root, please add to absolute path in your own code. The server supports cross-domain access and HTTP header "Access-Control-Allow-Origin" has been added, so this service can be accessed from any server.
+                The usage of this web API in JavaScript is also available in the source code of this page for reference. <br>
+                There are 4 parameters:
+            </p>
+            <div>
+                <div class="form-group row">
+                    <label for="cf" class="col-sm-3 col-form-label">cf
+                    </label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" id="cf" value="YES">
+                        <small id="cfHelp" class="form-text text-muted">
+                            Create Figures: Create PNG plots or not<br>
+                        </small>
+                    </div>
+ 
+                </div>
+
+                <div class="form-group row">
+                    <label for="sm" class="col-sm-3 col-form-label">sm</label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" id="sm" value="PLOGIT">
+                        <small id="smHelp" class="form-text text-muted">The measure of effect. Available values include: <br>
+                            PLOGIT, PAS, PFT, PLN, and PRAW.</small>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label for="rs" class="col-sm-3 col-form-label">rs</label>
+                    <div class="col-sm-9">
+                        <textarea class="form-control code" id="rs" rows="20" style="font-size: 9px;"></textarea>
+                        <small id="rsHelp" class="form-text text-muted">The JSON data for generating plots. Each study is an object, with 4 attributes (case sensitive). The value of this parameter is a stringified JSON object.</small>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label for="hk" class="col-sm-3 col-form-label">hk</label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" id="hk" value="FALSE">
+                        <small id="hkHelp" class="form-text text-muted">The Hartung-Knapp adjustment setting, TRUE or FALSE</small>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label for="apikey" class="col-sm-3 col-form-label">apikey
+                    </label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" id="apikey" value="7323590e-577b-4f46-b19f-3ec401829bd6">
+                        <small id="apikeyHelp" class="form-text text-muted">
+                            For the security of this service, API Key is required for authentication.
+                        </small>
+                    </div>
+ 
+                </div>
+                
+                <div class="form-group row">
+                    <div class="col-sm-10">
+                        <button onclick="get_data();" class="btn btn-primary">
+                            Request figure URLs with above parameters
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-md-7" style="padding-top: 20px;">
+            
+            <h4>Server Response: </h4>
+            <pre id="resp" style="width: 100%; max-height: 500px;" class="code">
+
+            </pre>
+            <img id="img-1" style="width: 100%; border: 3px solid #cccccc; margin: 5px 0;" src="">
+            <img id="img-2" style="width: 100%; border: 3px solid #cccccc; margin: 5px 0;" src="">
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+<script>
+var rs_sample = [{
+    study: 'Raskob et al', year: 2017, E: 41, N: 522
+}, {
+    study: 'Young et al', year: 2018, E: 8, N: 203
+}, {
+    study: 'McBane et al', year: 2019, E: 1, N: 145
+}, {
+    study: 'Young et al', year: 2020, E:32, N: 576
+}];
+
+function get_data() {
+    var params = {
+        sm: $('#sm').val(),
+        rs: $('#rs').val(),
+        hk: $('#hk').val(),
+        cf: $('#cf').val(),
+        apikey: $('#apikey').val()
+    };
+    console.log(params);
+
+    // clear the response area
+    $('#resp').html('Waiting for response ....');
+    $('#img-1').attr('src', '');
+    $('#img-2').attr('src', '');
+
+    var base = '';
+    $.post(
+        base + '/rplt/PWMA_INCD',
+        params,
+        function(data) {
+            console.log('* get return', data);
+            $('#resp').html(JSON.stringify(data, null, 2));
+            $('#img-1').attr('src', base + data.img['outplt1'].url);
+            $('#img-2').attr('src', base + data.img['cumuplt'].url);
+        }, 'json'
+    )
+}
+// show the JSON content of rs in textarea
+$('#rs').val(JSON.stringify(rs_sample, null, 2));
+</script>
+{% endblock %}

@@ -15,11 +15,12 @@ from .data_helper import run_rscript
 from lnma.settings import *
 
 from .rpadapter import _meta_trans_metabin
+from .rpadapter import _meta_trans_metaprop
 from .rpadapter import _meta_trans_metacum
 
 
 def analyze(rs, cfg):
-    subtype = 'rplt_%s_%s' % (cfg['prj'], cfg['analyzer_model'])
+    subtype = 'rplt_%s_%s' % (cfg['analyzer_model'], cfg['input_format'])
     if subtype not in RSCRIPT_TPL:
         return { 'success': False, 'msg': 'Incorrect analyzer'}
     # TODO check if data is valid
@@ -74,7 +75,7 @@ def analyze(rs, cfg):
     run_rscript(params['fn_rscript'])
 
     # if use FORESTDATA model, need to convert the results
-    if cfg['analyzer_model'] == 'FORESTDATA':
+    if cfg['analyzer_model'] == 'PWMA_PRCM':
         full_filename_jsonret = os.path.join(TMP_FOLDER, params['fn_jsonret'])
         jrst = json.load(open(full_filename_jsonret))
         ret = {
@@ -87,7 +88,7 @@ def analyze(rs, cfg):
             }
         }
 
-    elif cfg['analyzer_model'] == 'PRIM_CAT_RAW':
+    elif cfg['analyzer_model'] == 'PWMA_PRIM':
         full_filename_jsonret = os.path.join(TMP_FOLDER, params['fn_jsonret'])
         jrst = json.load(open(full_filename_jsonret))
         ret = {
@@ -96,6 +97,19 @@ def analyze(rs, cfg):
             'success': True,
             'data': {
                 'primma': _meta_trans_metabin(jrst, params)
+            }
+        }
+
+    elif cfg['analyzer_model'] == 'PWMA_INCD':
+        full_filename_jsonret = os.path.join(TMP_FOLDER, params['fn_jsonret'])
+        jrst = json.load(open(full_filename_jsonret))
+        ret = {
+            'submission_id': params['submission_id'],
+            'params': params,
+            'success': True,
+            'data': {
+                'primma': _meta_trans_metaprop(jrst, params),
+                'cumuma': _meta_trans_metacum(jrst, params),
             }
         }
 

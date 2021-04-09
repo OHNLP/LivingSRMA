@@ -495,7 +495,7 @@ function switch_nma_data(tag, oc_name, oc_fullname, tr) {
         tr = default_treat;
     }
     var oc = tag;
-    var url = "[[ url_for('pub.graph_RCC') ]]";
+    var url = "[[ url_for('pub.graph_nma_RCC') ]]";
     url += '?prj=' + prj + '&oc=' + oc_name + '&tr=' + tr;
     console.log('* switch nma: ' + url);
     $('#iframe-nma-' + tag).attr('src', url);

@@ -738,11 +738,15 @@ def _meta_trans_metabin(j, params):
     return ret
     
 
-def _meta_trans_metacum(j, params):
-    '''Convert the metacum result for forest plot
-    In IOTOX project, this can be used for cumulative meta-analysis
+def _meta_trans_metacum(j, params, ):
+    '''
+    Convert the metacum result for forest plot
+
     '''
     data = j['cumuma']
+    data_prim = j['primma']
+    assumed_baseline = params['assumed_baseline']
+    
     # first, put the basic values
     ret = {
         'model': {
@@ -750,6 +754,18 @@ def _meta_trans_metacum(j, params):
                 'name': 'Random effects model',
                 'TE': data['TE'][-1],
                 'seTE': data['seTE'][-1],
+                'proportion': round(sum(data_prim['event']) / sum(data_prim['n']), 4),
+                'incidence': round(sum(data_prim['event']) / sum(data_prim['n']) * assumed_baseline, 0),
+                'sm': round(np.e ** data['TE'][-1], 3),
+                'lower': round(np.e ** data['lower'][-1], 3),
+                'upper': round(np.e ** data['upper'][-1], 3)
+            },
+            'fixed': {
+                'name': 'Fixed effects model',
+                'TE': data['TE'][-1],
+                'seTE': data['seTE'][-1],
+                'proportion': round(sum(data_prim['event']) / sum(data_prim['n']), 4),
+                'incidence': round(sum(data_prim['event']) / sum(data_prim['n']) * assumed_baseline, 0),
                 'sm': round(np.e ** data['TE'][-1], 3),
                 'lower': round(np.e ** data['lower'][-1], 3),
                 'upper': round(np.e ** data['upper'][-1], 3)
@@ -764,6 +780,8 @@ def _meta_trans_metacum(j, params):
             'name': stu,
             'TE': data['TE'][i],
             'seTE': data['seTE'][i],
+            'proportion': round(data_prim['event'][i] / data_prim['n'][i], 4),
+            'incidence': round(data_prim['event'][i] / data_prim['n'][i] * assumed_baseline, 0),
             'sm': round(np.e ** data['TE'][i], 3),
             'lower': round(np.e ** data['lower'][i], 3),
             'upper': round(np.e ** data['upper'][i], 3)
@@ -810,4 +828,70 @@ def _meta_trans_metagen(j, params):
             'w.fixed': round(data['w.fixed'][i] / np.sum(data['w.fixed']), 4)
         })
 
+    return ret
+
+
+def _meta_trans_metaprop(j, params):
+    '''
+    Convert the metaprop result of PWMA Incidence Analysis
+    '''
+    data = j['primma']
+    assumed_baseline = params['assumed_baseline']
+
+    # first, put the basic values
+    ret = {
+        'model': {
+            'random': {
+                'name': 'Random effects model',
+                'E': sum(data['event']),
+                'N': sum(data['n']),
+                'proportion': round(sum(data['event']) / sum(data['n']), 4),
+                'incidence': round(sum(data['event']) / sum(data['n']) * assumed_baseline, 0),
+                'TE': data['TE.random'][0],
+                'seTE': data['seTE.random'][0],
+                'sm': round(np.e ** data['TE.random'][0], 3),
+                'lower': round(np.e ** data['lower.random'][0], 3),
+                'upper': round(np.e ** data['upper.random'][0], 3),
+                'w': 1 
+            },
+            'fixed': {
+                'name': 'Fixed effects model',
+                'E': sum(data['event']),
+                'N': sum(data['n']),
+                'proportion': round(sum(data['event']) / sum(data['n']), 4),
+                'incidence': round(sum(data['event']) / sum(data['n']) * assumed_baseline, 0),
+                'TE': data['TE.fixed'][0],
+                'seTE': data['seTE.fixed'][0],
+                'sm': round(np.e ** data['TE.fixed'][0], 3),
+                'lower': round(np.e ** data['lower.fixed'][0], 3),
+                'upper': round(np.e ** data['upper.fixed'][0], 3),
+                'w': 1
+            }
+        },
+        'heterogeneity': {
+            'i2': data['I2'][0],
+            'tau2': data['tau2'][0],
+            'p': data['pval.Q'][0]
+        },
+        'stus': []
+    }
+
+    # second, add all the studies
+    stus = data['studlab']
+    for i, stu in enumerate(stus):
+        ret['stus'].append({
+            'name': stu,
+            'E': data['event'][i],
+            'N': data['n'][i],
+            'proportion': round(data['event'][i] / data['n'][i], 4),
+            'incidence': round(data['event'][i] / data['n'][i] * assumed_baseline, 0),
+            'TE': data['TE'][i],
+            'seTE': data['seTE'][i],
+            'sm': round(np.e ** data['TE'][i], 3),
+            'lower': data['lower'][i],
+            'upper': data['upper'][i],
+            'w.random': round(data['w.random'][i] / np.sum(data['w.random']), 4),
+            'w.fixed': round(data['w.fixed'][i] / np.sum(data['w.fixed']), 4)
+        })
+    
     return ret

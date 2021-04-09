@@ -1,4 +1,5 @@
 ## PWMA: Primary Meta-Analysis of raw data categorical (binary: events/total)
+# this script won't generate plots
 # Load meta package.
 library (meta)
 

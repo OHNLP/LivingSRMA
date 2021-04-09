@@ -1,7 +1,7 @@
 {% extends '_layout_bs.html' %}
 
 {% block title %}
-RPLT IOTOX Figure API Demo
+RPLT PWMA API Demo
 {% endblock %}
 
 {% block style %}
@@ -18,9 +18,9 @@ RPLT IOTOX Figure API Demo
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-5">
-            <h2>RPLT IOTOX Figure API Demo</h2>
+            <h2>RPLT PWMA Figure API Demo</h2>
             <p>
-                RPLT IOTOX Figure API Test for <span class="code">/rplt/IOTOX</span>. <br>
+                RPLT PWMA Figure API Test for <span class="code">/rplt/PWMA</span>. <br>
                 The return URL is the relative path to root, please add to absolute path in your own code. The server supports cross-domain access and HTTP header "Access-Control-Allow-Origin" has been added, so this service can be accessed from any server.
                 The usage of this web API in JavaScript is also available in the source code of this page for reference. <br>
                 There are 4 parameters:
@@ -132,7 +132,7 @@ function get_data() {
     var base = '';
     // var base = 'https://workspace.network-meta-analysis.com/';
     $.post(
-        base + '/rplt/IOTOX',
+        base + '/rplt/PWMA_PRCM',
         params,
         function(data) {
             console.log('* get return', data);

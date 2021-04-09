@@ -621,19 +621,20 @@ def import_IO_aes_from_xls():
     '''
     import pandas as pd
     prj = 'IO'
-    fn = 'ALL_DATA.xlsx'
+    fn = 'ALL_DATA.xls'
     full_fn = os.path.join(current_app.instance_path, settings.PATH_PUBDATA, prj, fn)
     # ret = get_ae_pma_data(full_fn, is_getting_sms=False)
 
     # First, create a row->pmid dictionary
+    # Use the second tab
     xls = pd.ExcelFile(full_fn)
-    df = xls.parse(xls.sheet_names[0], skiprows=1)
+    df = xls.parse(xls.sheet_names[1], skiprows=1)
     idx2pmid = {}
     for idx, row in df.iterrows():
         idx2pmid[idx] = row['PMID']
 
     # Second, create tab->cate+tab dictionary
-    dft = xls.parse(xls.sheet_names[1])
+    dft = xls.parse(xls.sheet_names[4])
     ae_dict = {}
     ae_list = []
     for col in dft.columns:
@@ -665,8 +666,10 @@ def import_IO_aes_from_xls():
             'drug_used', 'malignancy']
 
     # each sheet is an AE/OC
+    # the data tab starts from 8th
     outcomes = []
-    for sheet_name in xls.sheet_names[2:]:
+    for sheet_name in xls.sheet_names[7:]:
+        print('* parsing %s' % (sheet_name))
         ae_name = sheet_name
 
         # create an empty meta
@@ -692,7 +695,14 @@ def import_IO_aes_from_xls():
         dft = dft[~dft.author.isna()]
         ae_data = {}
         for idx, row in dft.iterrows():
-            pmid = idx2pmid[idx]
+            if idx in idx2pmid:
+                pmid = idx2pmid[idx]
+            else:
+                print('* ERROR!! Study row %s %s not defined in all studies' % (
+                    idx, row[cols[0]]
+                ))
+                continue
+
             is_main = False
             if pmid not in ae_data:
                 # ok, new record
