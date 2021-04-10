@@ -15,6 +15,11 @@ var fg_cumu_forest = {
     default_height: 300,
     mark_size: 6,
 
+    // the attribute name for drawing
+    attr_TE: 'bt_TE',
+    attr_lower: 'bt_lower',
+    attr_upper: 'bt_upper',
+
     css: {
         txt_bd: 'cumu-frst-txt-bd',
         txt_nm: 'cumu-frst-txt-nm',
@@ -84,7 +89,17 @@ var fg_cumu_forest = {
             "upper": 0.858
           }
         ]
-      },
+    },
+
+    _x_scale: function(v) {
+        var x = this.x_scale(v);
+
+        if (x.toString() == 'NaN') {
+            return 0;
+        } else {
+            return x;
+        }
+    },
 
     init: function() {
         // add CSS classes
@@ -114,6 +129,16 @@ var fg_cumu_forest = {
         // bind new data
         this.data = data;
         this.cfg = cfg;
+
+        if (this.cfg.mode == 'pwma_incd') {
+            this.attr_TE = 'bt_ab_TE';
+            this.attr_lower = 'bt_ab_lower';
+            this.attr_upper = 'bt_ab_upper';
+        } else {
+            this.attr_TE = 'bt_TE';
+            this.attr_lower = 'bt_lower';
+            this.attr_upper = 'bt_upper';
+        }
 
         // update the height of svg according to number of studies
         // 6 is the number of lines of header and footers
@@ -228,10 +253,11 @@ var fg_cumu_forest = {
 
         g_forest.append('path')
             .datum([ [1, -0.5], [1, this.data.stus.length + 2.5] ])
+            .attr('id', 'middle_line')
             .attr('stroke', 'black')
             .attr('stroke-width', .8)
             .attr('d', d3.line()
-                .x(function(d) { return fg_cumu_forest.x_scale(d[0]); })
+                .x(function(d) { return fg_cumu_forest._x_scale(d[0]); })
                 .y(function(d) { return fg_cumu_forest.y_scale(d[1]); })
             );
 
@@ -249,7 +275,7 @@ var fg_cumu_forest = {
                 // console.log(i, d);
                 // add the rect
                 var s = fg_cumu_forest.mark_size;
-                var x = fg_cumu_forest.x_scale(d.bt_TE) - s/2;
+                var x = fg_cumu_forest._x_scale(d[fg_cumu_forest.attr_TE]) - s/2;
                 var y = - s / 2;
                 d3.select(this)
                     .append('rect')
@@ -260,8 +286,8 @@ var fg_cumu_forest = {
                     .attr('height', s);
 
                 // add the line
-                var x1 = fg_cumu_forest.x_scale(d.bt_lower);
-                var x2 = fg_cumu_forest.x_scale(d.bt_upper);
+                var x1 = fg_cumu_forest._x_scale(d[fg_cumu_forest.attr_lower]);
+                var x2 = fg_cumu_forest._x_scale(d[fg_cumu_forest.attr_upper]);
                 d3.select(this)
                     .append('line')
                     .attr('class', 'cumu-frst-stu-line')
@@ -272,7 +298,7 @@ var fg_cumu_forest = {
             });
 
         // draw the model ref line
-        var xr1 = this.x_scale(this.data.model.random.bt_TE);
+        var xr1 = this._x_scale(this.data.model.random[fg_cumu_forest.attr_TE]);
         var xr2 = xr1;
         var yr1 = this.y_scale(-0.5);
         var yr2 = this.y_scale(this.data.stus.length + 2.5)
@@ -287,9 +313,9 @@ var fg_cumu_forest = {
             .attr('y2', yr2);
 
         // draw the model diamond
-        var x0 = this.x_scale(this.data.model.random.bt_lower);
-        var xc = this.x_scale(this.data.model.random.bt_TE);
-        var x1 = this.x_scale(this.data.model.random.bt_upper);
+        var x0 = this._x_scale(this.data.model.random[fg_cumu_forest.attr_lower]);
+        var xc = this._x_scale(this.data.model.random[fg_cumu_forest.attr_TE]);
+        var x1 = this._x_scale(this.data.model.random[fg_cumu_forest.attr_upper]);
         var y0 = this.row_txtmb;
         var yc = this.row_height / 2;
         var y1 = this.row_height - this.row_txtmb;
@@ -301,7 +327,7 @@ var fg_cumu_forest = {
             'Z';
 
         this.svg.append('g')
-            .attr('transform', 'translate('+(this.cols[1].x + this.row_frstml)+', '+(this.row_height * (4 + this.data.stus.length))+')')
+            .attr('transform', 'translate('+(this.cols[1].x + this.row_frstml)+', '+(this.row_height * (3 + this.data.stus.length))+')')
             .append('path')
             .attr('d', path_d)
             .attr('class', 'cumu-frst-stu-model');
@@ -312,8 +338,8 @@ var fg_cumu_forest = {
             case 0: return obj.name;
             // case 1 is the figure, so no text
             case 1: return '';
-            case 2: return obj.bt_TE.toFixed(2);
-            case 3: return '['+obj.bt_lower.toFixed(2)+'; '+obj.bt_upper.toFixed(2)+']';
+            case 2: return obj[this.attr_TE].toFixed(2);
+            case 3: return '['+obj[this.attr_lower].toFixed(2)+'; '+obj[this.attr_upper].toFixed(2)+']';
         }
         return '';
     },

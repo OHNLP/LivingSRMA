@@ -1522,7 +1522,6 @@ def get_itable_attr_rs_cfg_from_db(prj):
     return ret
 
 
-
 def get_attr_pack_from_itable(full_fn):
     # read data, hope it is xlsx format ...
     if full_fn.endswith('csv'):
@@ -3326,6 +3325,27 @@ def get_sof_pma_data_from_db_IO(is_calc_pma=True):
             r['has_G34'] = __notna(r['G34_Et'])
             r['has_G3H'] = __notna(r['G3H_Et'])
             r['has_G5N'] = __notna(r['G5N_Et'])
+
+            # add flag for incidence analysis
+            # to conduct incidence analysis, 2 columns are required
+            # E, N
+            r['has_GA_incd']  = __notna(r['GA_Et']) and __notna(r['GA_Nt'])
+            r['has_G34_incd'] = __notna(r['G34_Et']) and __notna(r['GA_Nt'])
+            r['has_G3H_incd'] = __notna(r['G3H_Et']) and __notna(r['GA_Nt'])
+            r['has_G5N_incd'] = __notna(r['G5N_Et']) and __notna(r['GA_Nt'])
+
+            # add flag for prim+cumu analysis
+            # to conduct prim+cumu analysis, 4 columns are required
+            # Et, Nt, Ec, Nc
+            r['has_GA_prim']  = __notna(r['GA_Et']) and __notna(r['GA_Nt']) and \
+                                __notna(r['GA_Ec']) and __notna(r['GA_Nc'])
+            r['has_G34_prim'] = __notna(r['G34_Et']) and __notna(r['GA_Nt'])and \
+                                __notna(r['G34_Ec']) and __notna(r['GA_Nc'])
+            r['has_G3H_prim'] = __notna(r['G3H_Et']) and __notna(r['GA_Nt'])and \
+                                __notna(r['G3H_Ec']) and __notna(r['GA_Nc'])
+            r['has_G5N_prim'] = __notna(r['G5N_Et']) and __notna(r['GA_Nt'])and \
+                                __notna(r['G5N_Ec']) and __notna(r['GA_Nc'])
+
             r['author'] = paper.get_short_name()
             r['year'] = paper.get_year()
             r['pid'] = paper.pid
@@ -3344,10 +3364,31 @@ def get_sof_pma_data_from_db_IO(is_calc_pma=True):
                     r[col] = __int(r[col])
                 
                 # add more attributes
-                r['has_GA']  = __notna(ext_pp_data['attrs']['main']['GA_Et'])
-                r['has_G34'] = __notna(ext_pp_data['attrs']['main']['G34_Et'])
-                r['has_G3H'] = __notna(ext_pp_data['attrs']['main']['G3H_Et'])
-                r['has_G5N'] = __notna(ext_pp_data['attrs']['main']['G5N_Et'])
+                r['has_GA']  = __notna(r['GA_Et'])
+                r['has_G34'] = __notna(r['G34_Et'])
+                r['has_G3H'] = __notna(r['G3H_Et'])
+                r['has_G5N'] = __notna(r['G5N_Et'])
+
+                # add flag for incidence analysis
+                # to conduct incidence analysis, 2 columns are required
+                # E, N
+                r['has_GA_incd']  = __notna(r['GA_Et']) and __notna(r['GA_Nt'])
+                r['has_G34_incd'] = __notna(r['G34_Et']) and __notna(r['GA_Nt'])
+                r['has_G3H_incd'] = __notna(r['G3H_Et']) and __notna(r['GA_Nt'])
+                r['has_G5N_incd'] = __notna(r['G5N_Et']) and __notna(r['GA_Nt'])
+
+                # add flag for prim+cumu analysis
+                # to conduct prim+cumu analysis, 4 columns are required
+                # Et, Nt, Ec, Nc
+                r['has_GA_prim']  = __notna(r['GA_Et']) and __notna(r['GA_Nt']) and \
+                                    __notna(r['GA_Ec']) and __notna(r['GA_Nc'])
+                r['has_G34_prim'] = __notna(r['G34_Et']) and __notna(r['GA_Nt'])and \
+                                    __notna(r['G34_Ec']) and __notna(r['GA_Nc'])
+                r['has_G3H_prim'] = __notna(r['G3H_Et']) and __notna(r['GA_Nt'])and \
+                                    __notna(r['G3H_Ec']) and __notna(r['GA_Nc'])
+                r['has_G5N_prim'] = __notna(r['G5N_Et']) and __notna(r['GA_Nt'])and \
+                                    __notna(r['G5N_Ec']) and __notna(r['GA_Nc'])
+                                    
                 r['author'] = paper.get_short_name() + ' Arm %s' % (arm_idx + 2)
                 r['year'] = paper.get_year()
                 r['pid'] = paper.pid

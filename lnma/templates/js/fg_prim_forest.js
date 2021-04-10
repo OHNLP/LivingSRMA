@@ -43,6 +43,16 @@ var fg_prim_forest = {
         "</style>"
     ].join('\n'),
 
+    _x_scale: function(v) {
+        var x = this.x_scale(v);
+
+        if (x.toString() == 'NaN') {
+            return 0;
+        } else {
+            return x;
+        }
+    },
+
     init: function() {
         // add CSS classes
         $(this.box_id).append(this.css_html);
@@ -245,7 +255,7 @@ var fg_prim_forest = {
             .attr('stroke', 'black')
             .attr('stroke-width', .8)
             .attr('d', d3.line()
-                .x(function(d) { return fg_prim_forest.x_scale(d[0]); })
+                .x(function(d) { return fg_prim_forest._x_scale(d[0]); })
                 .y(function(d) { return fg_prim_forest.y_scale(d[1]); })
             );
 
@@ -263,7 +273,7 @@ var fg_prim_forest = {
                 // console.log(i, d);
                 // add the rect
                 var s = Math.sqrt(d.Et) + 2;
-                var x = fg_prim_forest.x_scale(d.bt_TE) - s/2;
+                var x = fg_prim_forest._x_scale(d.bt_TE) - s/2;
                 var y = - s / 2;
                 d3.select(this)
                     .append('rect')
@@ -274,8 +284,8 @@ var fg_prim_forest = {
                     .attr('height', s);
 
                 // add the line
-                var x1 = fg_prim_forest.x_scale(d.bt_lower);
-                var x2 = fg_prim_forest.x_scale(d.bt_upper);
+                var x1 = fg_prim_forest._x_scale(d.bt_lower);
+                var x2 = fg_prim_forest._x_scale(d.bt_upper);
                 d3.select(this)
                     .append('line')
                     .attr('class', 'prim-frst-stu-line')
@@ -286,7 +296,7 @@ var fg_prim_forest = {
             });
 
         // draw the model ref line
-        var xr1 = this.x_scale(this.data.model.random.bt_TE);
+        var xr1 = this._x_scale(this.data.model.random.bt_TE);
         var xr2 = xr1;
         var yr1 = this.y_scale(-0.5);
         var yr2 = this.y_scale(this.data.stus.length + 2.5)
@@ -301,9 +311,9 @@ var fg_prim_forest = {
             .attr('y2', yr2);
 
         // draw the model diamond
-        var x0 = this.x_scale(this.data.model.random.bt_lower);
-        var xc = this.x_scale(this.data.model.random.bt_TE);
-        var x1 = this.x_scale(this.data.model.random.bt_upper);
+        var x0 = this._x_scale(this.data.model.random.bt_lower);
+        var xc = this._x_scale(this.data.model.random.bt_TE);
+        var x1 = this._x_scale(this.data.model.random.bt_upper);
         var y0 = this.row_txtmb;
         var yc = this.row_height / 2;
         var y1 = this.row_height - this.row_txtmb;

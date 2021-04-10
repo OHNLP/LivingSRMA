@@ -808,6 +808,7 @@ def _meta_trans_metacum(j, params, ):
     data = j['cumuma']
     data_prim = j['primma']
     sm = params['measure_of_effect']
+    ab = params['assumed_baseline']
 
     # first, put the basic values
     ret = {
@@ -821,7 +822,10 @@ def _meta_trans_metacum(j, params, ):
                 'bt_TE': round(backtransf(data['TE'][-1], sm), 4),
                 'bt_lower': round(backtransf(data['lower'][-1], sm), 4),
                 'bt_upper': round(backtransf(data['upper'][-1], sm), 4),
-                'proportion': round(backtransf(data['TE'][-1], sm), 4),
+                
+                'bt_ab_TE': round(backtransf(data['TE'][-1], sm) * ab, 2),
+                'bt_ab_lower': round(backtransf(data['lower'][-1], sm) * ab, 2),
+                'bt_ab_upper': round(backtransf(data['upper'][-1], sm) * ab, 2),
             },
             'fixed': {
                 'name': 'Fixed effects model',
@@ -832,7 +836,10 @@ def _meta_trans_metacum(j, params, ):
                 'bt_TE': round(backtransf(data['TE'][-1], sm), 4),
                 'bt_lower': round(backtransf(data['lower'][-1], sm), 4),
                 'bt_upper': round(backtransf(data['upper'][-1], sm), 4),
-                'proportion': round(backtransf(data['TE'][-1], sm), 4),
+                
+                'bt_ab_TE': round(backtransf(data['TE'][-1], sm) * ab, 2),
+                'bt_ab_lower': round(backtransf(data['lower'][-1], sm) * ab, 2),
+                'bt_ab_upper': round(backtransf(data['upper'][-1], sm) * ab, 2),
             }
         },
         'stus': []
@@ -849,7 +856,10 @@ def _meta_trans_metacum(j, params, ):
             'bt_TE': round(backtransf(data['TE'][i], sm), 4),
             'bt_lower': round(backtransf(data['lower'][i], sm), 4),
             'bt_upper': round(backtransf(data['upper'][i], sm), 4),
-            'proportion': round(backtransf(data['TE'][i], sm), 4),
+            
+            'bt_ab_TE': round(backtransf(data['TE'][i], sm) * ab, 2),
+            'bt_ab_lower': round(backtransf(data['lower'][i], sm) * ab, 2),
+            'bt_ab_upper': round(backtransf(data['upper'][i], sm) * ab, 2),
         })
 
     return ret

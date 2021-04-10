@@ -299,12 +299,12 @@ a {
 
                                     <div class="oc-type"
                                         v-if="ae.cnt_ga<2"
-                                        title="Not enough studies">
+                                        title="Not enough records">
                                         -
                                     </div>
                                     <div class="oc-type"
                                         v-else
-                                        v-bind:title="ae.cnt_ga + ' studies'"
+                                        v-bind:title="ae.cnt_ga + ' records'"
                                         v-bind:oc_cate="r.oc_cate"
                                         v-bind:oc_name="ae.oc_name"
                                         v-bind:ae_grade="'GA'"
@@ -314,12 +314,12 @@ a {
 
                                     <div class="oc-type"
                                         v-if="ae.cnt_g3h<2"
-                                        title="Not enough studies">
+                                        title="Not enough records">
                                         -
                                     </div>
                                     <div class="oc-type"
                                         v-else
-                                        v-bind:title="ae.cnt_g3h + ' studies'"
+                                        v-bind:title="ae.cnt_g3h + ' records'"
                                         v-bind:oc_cate="r.oc_cate"
                                         v-bind:oc_name="ae.oc_name"
                                         v-bind:ae_grade="'G3H'"
@@ -329,12 +329,12 @@ a {
 
                                     <div class="oc-type"
                                         v-if="ae.cnt_g5n<2"
-                                        title="Not enough studies">
+                                        title="Not enough records">
                                         -
                                     </div>
                                     <div class="oc-type"
                                         v-else
-                                        v-bind:title="ae.cnt_g5n + ' studies'"
+                                        v-bind:title="ae.cnt_g5n + ' records'"
                                         v-bind:oc_cate="r.oc_cate"
                                         v-bind:oc_name="ae.oc_name"
                                         v-bind:ae_grade="'G5N'"
@@ -385,10 +385,10 @@ a {
                         </div>
                         <div class="box-radio-item">
                             <input type="radio" name="vw_ocplots_input_sm"
-                                value="PLOGIT" id="vw_ocplots_input_sm_rd"
+                                value="PLOGIT" id="vw_ocplots_input_sm_plogit"
                                 v-on:change="update_plot"
                                 v-model="params.sm">
-                            <label for="vw_ocplots_input_sm_rd">Incidence</label>
+                            <label for="vw_ocplots_input_sm_plogit">Incidence</label>
                         </div>
                     </div>
                     <div class="box-radio-group d-flex fx-row">
@@ -1097,8 +1097,12 @@ var vw_ocplot = {
     },
 
     show_plot: function(oc_cate, oc_name, ae_grade, pids) {
-        // update the current pids
-        this.pids = pids;
+        if (typeof(pids) == 'undefined') {
+            // which means no pids update, just use current
+        } else {
+            // update the current pids
+            this.pids = pids;
+        }
 
         // set no img and try to load
         this.vpp.current.has_img = false;
@@ -1123,7 +1127,7 @@ var vw_ocplot = {
                 'where ' + this.get_pid_condition() + ' ' + '\n' +
                 "  and oc_cate='" + oc_cate + "' " + '\n' +
                 "  and oc_name='" + oc_name + "' " + '\n' +
-                "  and has_" + ae_grade + " = true";
+                "  and has_" + ae_grade + "_incd = true";
 
         } else {
             // this is primary analysis
@@ -1136,7 +1140,7 @@ var vw_ocplot = {
                 'where ' + this.get_pid_condition() + ' ' + '\n' +
                 "  and oc_cate='" + oc_cate + "' " + '\n' +
                 "  and oc_name='" + oc_name + "' " + '\n' +
-                "  and has_" + ae_grade + " = true";
+                "  and has_" + ae_grade + "_prim = true";
         }
 
         console.log(sql);
@@ -1194,13 +1198,19 @@ var vw_ocplot = {
     draw_plots: function() {
         
         var cfg = {
-            sm: vw_ocplot.sms[vw_ocplot.data.params.sm]
+            sm: vw_ocplot.sms[vw_ocplot.data.params.sm],
+            mode: 'pwma_prcm'
         }
 
         if (this.data.analysis_method == 'pwma_prcm') {
             fg_prim_forest.draw(vw_ocplot.data.data.primma, cfg);
             fg_cumu_forest.draw(vw_ocplot.data.data.cumuma, cfg);
         } else {
+            cfg.sm = {
+                name: 'Event Rate',
+                sm: 'Incidence (%)'
+            };
+            cfg.mode = 'pwma_incd';
             fg_incd_forest.draw(vw_ocplot.data.data.incdma, cfg);
             fg_cumu_forest.draw(vw_ocplot.data.data.cumuma, cfg);
         }
