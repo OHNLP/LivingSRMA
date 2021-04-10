@@ -7,11 +7,9 @@ var fg_incd_forest = {
         {width: 120, align: 'start',  name: 'Study', x: 0, row: 2},
         {width: 50,  align: 'end',    name: 'Events', row: 2},
         {width: 50,  align: 'end',    name: 'Total', row: 2},
-        {width: 50,  align: 'end',    name: 'Events', row: 2},
-        {width: 50,  align: 'end',    name: 'Total', row: 2},
-        {width: 50,  align: 'end',    name: '$SM$', row: 2},
+        {width: 100,  align: 'end',    name: 'Incidence (%)', row: 2},
         {width: 100, align: 'end',    name: '95% CI', row: 2},
-        {width: 200, align: 'middle', name: '$SM_NAME$ (95% CI)', row: 2},
+        {width: 200, align: 'middle', name: 'Event Rate (95% CI)', row: 2},
         {width: 100, align: 'end',    name: 'Relative weight', row: 2}
     ],
     row_height: 15,
@@ -98,13 +96,6 @@ var fg_incd_forest = {
             .attr('y', this.row_height)
             .attr('text-anchor', "end")
             .text('Treatment');
-        
-        this.svg.append('text')
-            .attr('class', this.css.txt_bd)
-            .attr('x', this.cols[5].x)
-            .attr('y', this.row_height)
-            .attr('text-anchor', "end")
-            .text('Control');
         
         for (var i = 0; i < this.cols.length; i++) {
             var col = this.cols[i];
@@ -222,7 +213,7 @@ var fg_incd_forest = {
         // first, make the scale to map values to x value
         this.x_scale = d3.scaleLog()
             .domain([1e-2, 1e2])
-            .range([0, this.cols[7].width]);
+            .range([0, this.cols[5].width]);
 
         this.y_scale = function(i) {
             return fg_incd_forest.row_height * (3.5 + i);
@@ -233,12 +224,12 @@ var fg_incd_forest = {
             .ticks(5, '~g')
             .tickValues([1e-2,1e-1,1e0,1e1,1e2]);
         this.svg.append('g')
-            .attr('transform', 'translate('+(this.cols[7].x + this.row_frstml)+', '+(this.row_height * (6 + this.data.stus.length))+')')
+            .attr('transform', 'translate('+(this.cols[5].x + this.row_frstml)+', '+(this.row_height * (6 + this.data.stus.length))+')')
             .call(this.xAxis);
 
         // draw the middle line
         var g_forest = this.svg.append('g')
-            .attr('transform', 'translate('+(this.cols[7].x + this.row_frstml)+', 0)');
+            .attr('transform', 'translate('+(this.cols[5].x + this.row_frstml)+', 0)');
 
         g_forest.append('path')
             .datum([ [1, -0.5], [1, this.data.stus.length + 2.5] ])
@@ -255,15 +246,16 @@ var fg_incd_forest = {
             .join("g")
             .attr('class', 'prim-frst-stu-item')
             .attr('transform', function(d, i) {
-                var trans_x = fg_incd_forest.cols[7].x + fg_incd_forest.row_frstml;
+                var trans_x = fg_incd_forest.cols[5].x + fg_incd_forest.row_frstml;
                 var trans_y = fg_incd_forest.y_scale(i);
                 return 'translate('+trans_x+','+trans_y+')';
             })
             .each(function(d, i) {
                 // console.log(i, d);
                 // add the rect
-                var s = Math.sqrt(d.Et) + 2;
-                var x = fg_incd_forest.x_scale(d.bt_TE) - s/2;
+                var s = fg_incd_forest.row_height * d.w_random;
+                s = s > 2? s : 2;
+                var x = fg_incd_forest.x_scale(d.bt_ab_TE) - s/2;
                 var y = - s / 2;
                 d3.select(this)
                     .append('rect')
@@ -274,8 +266,8 @@ var fg_incd_forest = {
                     .attr('height', s);
 
                 // add the line
-                var x1 = fg_incd_forest.x_scale(d.bt_lower);
-                var x2 = fg_incd_forest.x_scale(d.bt_upper);
+                var x1 = fg_incd_forest.x_scale(d.bt_ab_lower);
+                var x2 = fg_incd_forest.x_scale(d.bt_ab_upper);
                 d3.select(this)
                     .append('line')
                     .attr('class', 'prim-frst-stu-line')
@@ -286,12 +278,12 @@ var fg_incd_forest = {
             });
 
         // draw the model ref line
-        var xr1 = this.x_scale(this.data.model.random.bt_TE);
+        var xr1 = this.x_scale(this.data.model.random.bt_ab_TE);
         var xr2 = xr1;
         var yr1 = this.y_scale(-0.5);
         var yr2 = this.y_scale(this.data.stus.length + 2.5)
         this.svg.append('g')
-            .attr('transform', 'translate('+(this.cols[7].x + this.row_frstml)+', 0)')
+            .attr('transform', 'translate('+(this.cols[5].x + this.row_frstml)+', 0)')
             .append('line')
             .attr('class', 'prim-frst-stu-model-refline')
             .attr('stroke-dasharray', '3,3')
@@ -301,9 +293,9 @@ var fg_incd_forest = {
             .attr('y2', yr2);
 
         // draw the model diamond
-        var x0 = this.x_scale(this.data.model.random.bt_lower);
-        var xc = this.x_scale(this.data.model.random.bt_TE);
-        var x1 = this.x_scale(this.data.model.random.bt_upper);
+        var x0 = this.x_scale(this.data.model.random.bt_ab_lower);
+        var xc = this.x_scale(this.data.model.random.bt_ab_TE);
+        var x1 = this.x_scale(this.data.model.random.bt_ab_upper);
         var y0 = this.row_txtmb;
         var yc = this.row_height / 2;
         var y1 = this.row_height - this.row_txtmb;
@@ -315,7 +307,7 @@ var fg_incd_forest = {
             'Z';
 
         this.svg.append('g')
-            .attr('transform', 'translate('+(this.cols[7].x + this.row_frstml)+', '+(this.row_height * (4 + this.data.stus.length))+')')
+            .attr('transform', 'translate('+(this.cols[5].x + this.row_frstml)+', '+(this.row_height * (4 + this.data.stus.length))+')')
             .append('path')
             .attr('d', path_d)
             .attr('class', 'prim-frst-stu-model');
@@ -324,21 +316,19 @@ var fg_incd_forest = {
     get_txt_by_col: function(obj, idx) {
         switch(idx) {
             case 0: return obj.name;
-            case 1: return obj.Et;
-            case 2: return obj.Nt;
-            case 3: return obj.Ec;
-            case 4: return obj.Nc;
-            case 5: return obj.bt_TE.toFixed(2);
-            case 6: return '['+obj.bt_lower.toFixed(2)+'; '+obj.bt_upper.toFixed(2)+']';
+            case 1: return obj.E;
+            case 2: return obj.N;
+            case 3: return obj.bt_ab_TE.toFixed(2);
+            case 4: return '['+obj.bt_ab_lower.toFixed(2)+'; '+obj.bt_ab_upper.toFixed(2)+']';
 
             // case 7 is the figure, so no text
-            case 7: return ''; 
-            case 8: 
+            case 5: return ''; 
+            case 6: 
                 if (obj.hasOwnProperty('w')) {
                     // this is the model
                     return '100%';
                 } else {
-                    return (obj['w.random'] * 100).toFixed(1) + '%';
+                    return (obj['w_random'] * 100).toFixed(1) + '%';
                 }
         }
         return '';

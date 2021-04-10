@@ -108,7 +108,7 @@ def analyze(rs, cfg):
             'params': params,
             'success': True,
             'data': {
-                'primma': _meta_trans_metaprop(jrst, params),
+                'incdma': _meta_trans_metaprop(jrst, params),
                 'cumuma': _meta_trans_metacum(jrst, params),
             }
         }

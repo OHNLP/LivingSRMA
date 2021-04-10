@@ -906,7 +906,7 @@ def _meta_trans_metaprop(j, params):
     # 2021-04-09: the meta package doesn't give the 
     # when getting the result, need to make sure the value is transback to normaled
     sm = params['measure_of_effect']
-    assumed_baseline = params['assumed_baseline']
+    ab = params['assumed_baseline']
 
     # first, put the basic values
     ret = {
@@ -922,15 +922,15 @@ def _meta_trans_metaprop(j, params):
                 'bt_TE': round(backtransf(data['TE.random'][0], sm), 4),
                 'bt_lower': round(backtransf(data['lower.random'][0], sm), 4),
                 'bt_upper': round(backtransf(data['upper.random'][0], sm), 4),
-                'proportion': backtransf(data['TE.random'][0], sm),
+                'bt_ab_TE': round(backtransf(data['TE.random'][0], sm) * ab, 2),
+                'bt_ab_lower': round(backtransf(data['lower.random'][0], sm) * ab, 2),
+                'bt_ab_upper': round(backtransf(data['upper.random'][0], sm) * ab, 2),
                 'w': 1 
             },
             'fixed': {
                 'name': 'Fixed effects model',
                 'E': sum(data['event']),
                 'N': sum(data['n']),
-                'proportion': backtransf(data['TE.fixed'][0], sm),
-                'incidence': round(backtransf(data['TE.fixed'][0], sm) * assumed_baseline, 2),
                 'TE': data['TE.fixed'][0],
                 'seTE': data['seTE.fixed'][0],
                 'lower': data['lower.fixed'][0],
@@ -938,7 +938,9 @@ def _meta_trans_metaprop(j, params):
                 'bt_TE': round(backtransf(data['TE.fixed'][0], sm), 4),
                 'bt_lower': round(backtransf(data['lower.fixed'][0], sm), 4),
                 'bt_upper': round(backtransf(data['upper.fixed'][0], sm), 4),
-                'proportion': backtransf(data['TE.random'][0], sm),
+                'bt_ab_TE': round(backtransf(data['TE.fixed'][0], sm) * ab, 2),
+                'bt_ab_lower': round(backtransf(data['lower.fixed'][0], sm) * ab, 2),
+                'bt_ab_upper': round(backtransf(data['upper.fixed'][0], sm) * ab, 2),
                 'w': 1
             }
         },
@@ -957,17 +959,21 @@ def _meta_trans_metaprop(j, params):
             'name': stu,
             'E': data['event'][i],
             'N': data['n'][i],
-            'proportion': backtransf(data['TE'][i], sm),
-            'incidence': round(backtransf(data['TE'][i], sm) * assumed_baseline, 2),
             'TE': data['TE'][i],
             'seTE': data['seTE'][i],
             'lower': data['lower'][i],
             'upper': data['upper'][i],
             'bt_TE': round(backtransf(data['TE'][i], sm), 4),
-            'bt_lower': round(backtransf(data['lower'][i], sm), 4),
-            'bt_upper': round(backtransf(data['upper'][i], sm), 4),
-            'w.random': round(data['w.random'][i] / np.sum(data['w.random']), 4),
-            'w.fixed': round(data['w.fixed'][i] / np.sum(data['w.fixed']), 4)
+            'bt_ab_TE': round(backtransf(data['TE'][i], sm) * ab, 2),
+
+            # the lower and upper in incidence analysis is already the backtransf parsed
+            'bt_lower': round(data['lower'][i], 4),
+            'bt_upper': round(data['upper'][i], 4),
+            'bt_ab_lower': round(data['lower'][i] * ab, 2),
+            'bt_ab_upper': round(data['upper'][i] * ab, 2),
+
+            'w_random': round(data['w.random'][i] / np.sum(data['w.random']), 4),
+            'w_fixed': round(data['w.fixed'][i] / np.sum(data['w.fixed']), 4)
         })
     
     return ret

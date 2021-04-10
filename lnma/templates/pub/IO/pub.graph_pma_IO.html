@@ -421,10 +421,18 @@ a {
                     <h5>The forest plots of {{ current.cnt_studies }} studies of {{ current.oc_cate }} - {{ current.oc_name }}, {{ get_grade_label(current.ae_grade) }}</h5>
                     <div class="d-flex fx-row">
                         <div class="oc-plot-tab"
+                            v-show="is_prcm_analysis()"
                             v-bind:class="{'oc-plot-tab-selected': current.is_prim_plot}"
                             v-on:click="switch_plot('is_prim_plot')">
                             <i class="fa fa-chart-bar"></i>
                             Primary Meta-Analysis with {{ params.sm }} and HK={{ params.hk }}
+                        </div>
+                        <div class="oc-plot-tab"
+                            v-show="is_incd_analysis()"
+                            v-bind:class="{'oc-plot-tab-selected': current.is_incd_plot}"
+                            v-on:click="switch_plot('is_incd_plot')">
+                            <i class="fa fa-chart-bar"></i>
+                            Incidence Analysis and HK={{ params.hk }}
                         </div>
                         <div class="oc-plot-tab"
                             v-bind:class="{'oc-plot-tab-selected': current.is_cumu_plot}"
@@ -438,6 +446,13 @@ a {
                         v-bind:class="{'oc-plot-tab-page-selected': current.is_prim_plot}">
                         <div id="fg_prim_forest" style="width: 100%; height: 100%;">
                             <svg id="fg_prim_forest_svg"></svg>
+                        </div>
+                    </div>
+
+                    <div class="oc-plot-tab-page"
+                        v-bind:class="{'oc-plot-tab-page-selected': current.is_incd_plot}">
+                        <div id="fg_incd_forest" style="width: 100%; height: 100%;">
+                            <svg id="fg_incd_forest_svg"></svg>
                         </div>
                     </div>
 
@@ -481,6 +496,7 @@ if (isIE) {
 <script>
 
 {% include 'js/fg_prim_forest.js' %}
+{% include 'js/fg_incd_forest.js' %}
 {% include 'js/fg_cumu_forest.js' %}
 
 var vw_studyfilter = {
@@ -990,6 +1006,7 @@ var vw_ocplot = {
         'RR': { sm: 'RR', name: 'Risk Ratio'},
         'HR': { sm: 'HR', name: 'Hazard Ratio'},
         'RD': { sm: 'RD', name: 'Risk Difference'},
+        'PLOGIT': { sm: 'PLOGIT', name: 'Logit Trans.'},
     },
 
     init: function(data) {
@@ -1016,10 +1033,20 @@ var vw_ocplot = {
                     },
                     title: '',
                     is_prim_plot: true,
+                    is_incd_plot: false,
                     is_cumu_plot: false
                 }
             },
             methods: {
+
+                is_prcm_analysis: function() {
+                    return this.params.sm == 'OR' ||
+                           this.params.sm == 'RR';
+                },
+
+                is_incd_analysis: function() {
+                    return this.params.sm == 'PLOGIT';
+                },
 
                 get_grade_label: function(g) {
                     return jarvis.texts[g];
@@ -1029,6 +1056,7 @@ var vw_ocplot = {
                     // set all to false
                     this.current.is_cumu_plot = false;
                     this.current.is_prim_plot = false;
+                    this.current.is_incd_plot = false;
 
                     // set the selected as true
                     this.current[plot] = true;
@@ -1049,15 +1077,7 @@ var vw_ocplot = {
             },
             updated: function() {
                 if (this.current.has_img) {
-                    console.log('* render plot')
-                    var cfg = {
-                        sm: vw_ocplot.sms[this.params.sm]
-                    }
-                    fg_prim_forest.draw(vw_ocplot.data.data.primma, cfg);
-                    fg_cumu_forest.draw(vw_ocplot.data.data.cumuma, cfg);
-
-                    // resize?
-                    vw_ocplot.resize_panels();
+                    vw_ocplot.draw_plots();
                 }
             }
         });
@@ -1083,42 +1103,52 @@ var vw_ocplot = {
         // set no img and try to load
         this.vpp.current.has_img = false;
 
-        var sql = 'select author as study, year, ' + '\n' +
-            ae_grade + '_Et as Et, ' + '\n' +
-            ae_grade + '_Ec as Ec, ' + '\n' +
-            'GA_Nt as Nt, GA_Nc as Nc ' + '\n' +
-            'from aes ' + '\n' +
-            'where ' + this.get_pid_condition() + ' ' + '\n' +
-            "  and oc_cate='" + oc_cate + "' " + '\n' +
-            "  and oc_name='" + oc_name + "' " + '\n' +
-            "  and has_" + ae_grade + " = true";
-
-        console.log(sql);
-        var rs = alasql(sql);
-        console.log(rs);
-
         // update the data in vpp
         this.vpp.current.oc_cate = oc_cate;
         this.vpp.current.oc_name = oc_name;
         this.vpp.current.ae_grade = ae_grade;
-        this.vpp.current.cnt_studies = rs.length;
+        this.vpp.current.cnt_studies = '-';
 
         // here, we need to decide which analysis API to use
+        // and generate the records for analysis
         var url = '';
+        var sql = '';
         if (this.vpp.params.sm == 'PLOGIT') {
             // this is incidence analysis
             url = "[[ url_for('rplt.pwma_incd') ]]";
+            sql = 'select author as study, year, ' + '\n' +
+                ae_grade + '_Et as E, ' + '\n' +
+                'GA_Nt as N' + '\n' +
+                'from aes ' + '\n' +
+                'where ' + this.get_pid_condition() + ' ' + '\n' +
+                "  and oc_cate='" + oc_cate + "' " + '\n' +
+                "  and oc_name='" + oc_name + "' " + '\n' +
+                "  and has_" + ae_grade + " = true";
 
         } else {
             // this is primary analysis
             url = "[[ url_for('rplt.pwma_prcm') ]]";
+            sql = 'select author as study, year, ' + '\n' +
+                ae_grade + '_Et as Et, ' + '\n' +
+                ae_grade + '_Ec as Ec, ' + '\n' +
+                'GA_Nt as Nt, GA_Nc as Nc ' + '\n' +
+                'from aes ' + '\n' +
+                'where ' + this.get_pid_condition() + ' ' + '\n' +
+                "  and oc_cate='" + oc_cate + "' " + '\n' +
+                "  and oc_name='" + oc_name + "' " + '\n' +
+                "  and has_" + ae_grade + " = true";
         }
+
+        console.log(sql);
+        var rs = alasql(sql);
+        console.log(rs);
 
         // send ajax to server
         var params = {
             am: 'FORESTDATA',
             sm: this.vpp.params.sm,
             rs: JSON.stringify(rs),
+            cf: 'NO',
             hk: this.vpp.params.hk,
             apikey: this.apikey
         };
@@ -1138,13 +1168,45 @@ var vw_ocplot = {
         if (data.success) {
              // great! show images
              this.data = data;
+
+             // due to the lazy update, draw plots will be 
+             // triggered when Vue DOM is updated.
+             if (this.data.analysis_method == 'pwma_prcm') {
+                 this.vpp.current.is_prim_plot = true;
+                 this.vpp.current.is_incd_plot = false;
+                 this.vpp.current.is_cumu_plot = false;
+             } else if (this.data.analysis_method == 'pwma_incd'){
+                 this.vpp.current.is_prim_plot = false;
+                 this.vpp.current.is_incd_plot = true;
+                 this.vpp.current.is_cumu_plot = false;
+             }
+
+             // finally, set has_img to true
              this.vpp.current.has_img = true;
          } else {
-             // update message
+             // update message to show the error
          }
 
          // resize the panel
          vw_ocplot.resize_panels();
+    },
+
+    draw_plots: function() {
+        
+        var cfg = {
+            sm: vw_ocplot.sms[vw_ocplot.data.params.sm]
+        }
+
+        if (this.data.analysis_method == 'pwma_prcm') {
+            fg_prim_forest.draw(vw_ocplot.data.data.primma, cfg);
+            fg_cumu_forest.draw(vw_ocplot.data.data.cumuma, cfg);
+        } else {
+            fg_incd_forest.draw(vw_ocplot.data.data.incdma, cfg);
+            fg_cumu_forest.draw(vw_ocplot.data.data.cumuma, cfg);
+        }
+
+        // resize?
+        vw_ocplot.resize_panels();
     },
 
     resize_panels: function() {
