@@ -385,10 +385,10 @@ a {
                         </div>
                         <div class="box-radio-item">
                             <input type="radio" name="vw_ocplots_input_sm"
-                                value="RD" id="vw_ocplots_input_sm_rd"
+                                value="PLOGIT" id="vw_ocplots_input_sm_rd"
                                 v-on:change="update_plot"
                                 v-model="params.sm">
-                            <label for="vw_ocplots_input_sm_rd">RD</label>
+                            <label for="vw_ocplots_input_sm_rd">Incidence</label>
                         </div>
                     </div>
                     <div class="box-radio-group d-flex fx-row">
@@ -1103,6 +1103,17 @@ var vw_ocplot = {
         this.vpp.current.ae_grade = ae_grade;
         this.vpp.current.cnt_studies = rs.length;
 
+        // here, we need to decide which analysis API to use
+        var url = '';
+        if (this.vpp.params.sm == 'PLOGIT') {
+            // this is incidence analysis
+            url = "[[ url_for('rplt.pwma_incd') ]]";
+
+        } else {
+            // this is primary analysis
+            url = "[[ url_for('rplt.pwma_prcm') ]]";
+        }
+
         // send ajax to server
         var params = {
             am: 'FORESTDATA',
@@ -1112,17 +1123,15 @@ var vw_ocplot = {
             apikey: this.apikey
         };
 
-        var base = '';
-        // var base = 'https://workspace.network-meta-analysis.com/';
-
         $.post(
-            base + '/rplt/PWMA_PRCM',
+            url,
             params,
             function(data) {
                 console.log('* get return', data);
                 vw_ocplot._show_plot(data);
             }, 'json'
         );
+        
     },
 
     _show_plot: function(data) {

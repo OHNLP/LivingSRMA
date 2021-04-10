@@ -249,7 +249,7 @@ var fg_cumu_forest = {
                 // console.log(i, d);
                 // add the rect
                 var s = fg_cumu_forest.mark_size;
-                var x = fg_cumu_forest.x_scale(d.sm) - s/2;
+                var x = fg_cumu_forest.x_scale(d.bt_TE) - s/2;
                 var y = - s / 2;
                 d3.select(this)
                     .append('rect')
@@ -260,8 +260,8 @@ var fg_cumu_forest = {
                     .attr('height', s);
 
                 // add the line
-                var x1 = fg_cumu_forest.x_scale(d.lower);
-                var x2 = fg_cumu_forest.x_scale(d.upper);
+                var x1 = fg_cumu_forest.x_scale(d.bt_lower);
+                var x2 = fg_cumu_forest.x_scale(d.bt_upper);
                 d3.select(this)
                     .append('line')
                     .attr('class', 'cumu-frst-stu-line')
@@ -272,7 +272,7 @@ var fg_cumu_forest = {
             });
 
         // draw the model ref line
-        var xr1 = this.x_scale(this.data.model.random.sm);
+        var xr1 = this.x_scale(this.data.model.random.bt_TE);
         var xr2 = xr1;
         var yr1 = this.y_scale(-0.5);
         var yr2 = this.y_scale(this.data.stus.length + 2.5)
@@ -287,9 +287,9 @@ var fg_cumu_forest = {
             .attr('y2', yr2);
 
         // draw the model diamond
-        var x0 = this.x_scale(this.data.model.random.lower);
-        var xc = this.x_scale(this.data.model.random.sm);
-        var x1 = this.x_scale(this.data.model.random.upper);
+        var x0 = this.x_scale(this.data.model.random.bt_lower);
+        var xc = this.x_scale(this.data.model.random.bt_TE);
+        var x1 = this.x_scale(this.data.model.random.bt_upper);
         var y0 = this.row_txtmb;
         var yc = this.row_height / 2;
         var y1 = this.row_height - this.row_txtmb;
@@ -312,8 +312,8 @@ var fg_cumu_forest = {
             case 0: return obj.name;
             // case 1 is the figure, so no text
             case 1: return '';
-            case 2: return obj.sm.toFixed(2);
-            case 3: return '['+obj.lower.toFixed(2)+'; '+obj.upper.toFixed(2)+']';
+            case 2: return obj.bt_TE.toFixed(2);
+            case 3: return '['+obj.bt_lower.toFixed(2)+'; '+obj.bt_upper.toFixed(2)+']';
         }
         return '';
     },

@@ -1,9 +1,56 @@
 import re
 import math
-
 import numpy as np
+from scipy.special import expit, logit
+
 
 TPN_NETMETA_LGTB_VALUES = r"(\-?\d+\.\d+)\s+\((\-?\d+\.\d+)\;\s+(\-?\d+\.\d+)\)"
+
+def backtransf(x, sm):
+    '''
+    Convert the x back to value according to the measure of effects.
+
+    More details could be found in https://github.com/guido-s/meta/blob/master/R/backtransf.R
+    '''
+    # print('* backtransf %s %s' % (sm, x))
+
+    # for most effects
+    if sm in [
+        # relative effects
+        "HR", "OR", "RR", "IRR", "ROM", "DOR",
+        # and log effect
+        "PLN", "IRLN", "MLN"]:
+        ret = np.e ** x
+
+    elif sm == 'PLOGIT':
+        ret = expit(x)
+
+    elif sm == 'PAS':
+        ret = x
+
+    elif sm == 'PFT':
+        ret = x
+
+    elif sm == 'IRS':
+        ret = x ** 2
+
+    elif sm == 'IRFT':
+        ret = x
+
+    elif sm == 'PRAW':
+        ret = x
+
+    elif sm == 'PLN':
+        ret = x
+
+    elif sm == 'IR':
+        ret = x
+
+    else:
+        ret = x
+
+    return ret
+
 
 
 ###############################################################
@@ -676,10 +723,13 @@ def _gemtc_trans_netplt(j, params):
 ###############################################################
 
 def _meta_trans_metabin(j, params):
-    '''Convert the metabin result for forest plot
+    '''
+    Convert the metabin result for forest plot
     In IOTOX project, this can be used for primary meta-analysis
     '''
     data = j['primma']
+    sm = params['measure_of_effect']
+
     # first, put the basic values
     ret = {
         'model': {
@@ -691,9 +741,13 @@ def _meta_trans_metabin(j, params):
                 'Nc': sum(data['n.c']),
                 'TE': data['TE.random'][0],
                 'seTE': data['seTE.random'][0],
-                'sm': round(np.e ** data['TE.random'][0], 3),
-                'lower': round(np.e ** data['lower.random'][0], 3),
-                'upper': round(np.e ** data['upper.random'][0], 3),
+                'lower': data['lower.random'][0],
+                'upper': data['upper.random'][0],
+
+                # backtransf the TE and other values
+                'bt_TE': round(backtransf(data['TE.random'][0], sm), 4),
+                'bt_lower': round(backtransf(data['lower.random'][0], sm), 4),
+                'bt_upper': round(backtransf(data['upper.random'][0], sm), 4),
                 'w': 1
             },
             'fixed': {
@@ -704,9 +758,13 @@ def _meta_trans_metabin(j, params):
                 'Nc': sum(data['n.c']),
                 'TE': data['TE.fixed'][0],
                 'seTE': data['seTE.fixed'][0],
-                'sm': round(np.e ** data['TE.fixed'][0], 3),
-                'lower': round(np.e ** data['lower.fixed'][0], 3),
-                'upper': round(np.e ** data['upper.fixed'][0], 3),
+                'lower': data['lower.fixed'][0],
+                'upper': data['upper.fixed'][0],
+
+                # backtransf the TE and other values
+                'bt_TE': round(backtransf(data['TE.fixed'][0], sm), 4),
+                'bt_lower': round(backtransf(data['lower.fixed'][0], sm), 4),
+                'bt_upper': round(backtransf(data['upper.fixed'][0], sm), 4),
                 'w': 1
             }
         },
@@ -728,9 +786,13 @@ def _meta_trans_metabin(j, params):
             'Nc': data['n.c'][i],
             'TE': data['TE'][i],
             'seTE': data['seTE'][i],
-            'sm': round(np.e ** data['TE'][i], 3),
-            'lower': round(np.e ** data['lower'][i], 3),
-            'upper': round(np.e ** data['upper'][i], 3),
+            'lower': data['lower'][i],
+            'upper': data['upper'][i],
+
+            'bt_TE': round(backtransf(data['TE'][i], sm), 4),
+            'bt_lower': round(backtransf(data['lower'][i], sm), 4),
+            'bt_upper': round(backtransf(data['upper'][i], sm), 4),
+
             'w.random': round(data['w.random'][i] / np.sum(data['w.random']), 4),
             'w.fixed': round(data['w.fixed'][i] / np.sum(data['w.fixed']), 4)
         })
@@ -745,8 +807,8 @@ def _meta_trans_metacum(j, params, ):
     '''
     data = j['cumuma']
     data_prim = j['primma']
-    assumed_baseline = params['assumed_baseline']
-    
+    sm = params['measure_of_effect']
+
     # first, put the basic values
     ret = {
         'model': {
@@ -754,21 +816,23 @@ def _meta_trans_metacum(j, params, ):
                 'name': 'Random effects model',
                 'TE': data['TE'][-1],
                 'seTE': data['seTE'][-1],
-                'proportion': round(sum(data_prim['event']) / sum(data_prim['n']), 4),
-                'incidence': round(sum(data_prim['event']) / sum(data_prim['n']) * assumed_baseline, 0),
-                'sm': round(np.e ** data['TE'][-1], 3),
-                'lower': round(np.e ** data['lower'][-1], 3),
-                'upper': round(np.e ** data['upper'][-1], 3)
+                'lower': data['lower'][-1],
+                'upper': data['upper'][-1],
+                'bt_TE': round(backtransf(data['TE'][-1], sm), 4),
+                'bt_lower': round(backtransf(data['lower'][-1], sm), 4),
+                'bt_upper': round(backtransf(data['upper'][-1], sm), 4),
+                'proportion': round(backtransf(data['TE'][-1], sm), 4),
             },
             'fixed': {
                 'name': 'Fixed effects model',
                 'TE': data['TE'][-1],
                 'seTE': data['seTE'][-1],
-                'proportion': round(sum(data_prim['event']) / sum(data_prim['n']), 4),
-                'incidence': round(sum(data_prim['event']) / sum(data_prim['n']) * assumed_baseline, 0),
-                'sm': round(np.e ** data['TE'][-1], 3),
-                'lower': round(np.e ** data['lower'][-1], 3),
-                'upper': round(np.e ** data['upper'][-1], 3)
+                'lower': data['lower'][-1],
+                'upper': data['upper'][-1],
+                'bt_TE': round(backtransf(data['TE'][-1], sm), 4),
+                'bt_lower': round(backtransf(data['lower'][-1], sm), 4),
+                'bt_upper': round(backtransf(data['upper'][-1], sm), 4),
+                'proportion': round(backtransf(data['TE'][-1], sm), 4),
             }
         },
         'stus': []
@@ -780,18 +844,20 @@ def _meta_trans_metacum(j, params, ):
             'name': stu,
             'TE': data['TE'][i],
             'seTE': data['seTE'][i],
-            'proportion': round(data_prim['event'][i] / data_prim['n'][i], 4),
-            'incidence': round(data_prim['event'][i] / data_prim['n'][i] * assumed_baseline, 0),
-            'sm': round(np.e ** data['TE'][i], 3),
-            'lower': round(np.e ** data['lower'][i], 3),
-            'upper': round(np.e ** data['upper'][i], 3)
+            'lower': data['lower'][i],
+            'upper': data['upper'][i],
+            'bt_TE': round(backtransf(data['TE'][i], sm), 4),
+            'bt_lower': round(backtransf(data['lower'][i], sm), 4),
+            'bt_upper': round(backtransf(data['upper'][i], sm), 4),
+            'proportion': round(backtransf(data['TE'][i], sm), 4),
         })
 
     return ret
 
 
 def _meta_trans_metagen(j, params):
-    '''Convert the metagen result for PWMA
+    '''
+    Convert the metagen result for PWMA
     In RCC project, this can be used for SoF table PWMA
     '''
     data = j['primma']
@@ -836,6 +902,10 @@ def _meta_trans_metaprop(j, params):
     Convert the metaprop result of PWMA Incidence Analysis
     '''
     data = j['primma']
+
+    # 2021-04-09: the meta package doesn't give the 
+    # when getting the result, need to make sure the value is transback to normaled
+    sm = params['measure_of_effect']
     assumed_baseline = params['assumed_baseline']
 
     # first, put the basic values
@@ -845,26 +915,30 @@ def _meta_trans_metaprop(j, params):
                 'name': 'Random effects model',
                 'E': sum(data['event']),
                 'N': sum(data['n']),
-                'proportion': round(sum(data['event']) / sum(data['n']), 4),
-                'incidence': round(sum(data['event']) / sum(data['n']) * assumed_baseline, 0),
                 'TE': data['TE.random'][0],
                 'seTE': data['seTE.random'][0],
-                'sm': round(np.e ** data['TE.random'][0], 3),
-                'lower': round(np.e ** data['lower.random'][0], 3),
-                'upper': round(np.e ** data['upper.random'][0], 3),
+                'lower': data['lower.random'][0],
+                'upper': data['upper.random'][0],
+                'bt_TE': round(backtransf(data['TE.random'][0], sm), 4),
+                'bt_lower': round(backtransf(data['lower.random'][0], sm), 4),
+                'bt_upper': round(backtransf(data['upper.random'][0], sm), 4),
+                'proportion': backtransf(data['TE.random'][0], sm),
                 'w': 1 
             },
             'fixed': {
                 'name': 'Fixed effects model',
                 'E': sum(data['event']),
                 'N': sum(data['n']),
-                'proportion': round(sum(data['event']) / sum(data['n']), 4),
-                'incidence': round(sum(data['event']) / sum(data['n']) * assumed_baseline, 0),
+                'proportion': backtransf(data['TE.fixed'][0], sm),
+                'incidence': round(backtransf(data['TE.fixed'][0], sm) * assumed_baseline, 2),
                 'TE': data['TE.fixed'][0],
                 'seTE': data['seTE.fixed'][0],
-                'sm': round(np.e ** data['TE.fixed'][0], 3),
-                'lower': round(np.e ** data['lower.fixed'][0], 3),
-                'upper': round(np.e ** data['upper.fixed'][0], 3),
+                'lower': data['lower.fixed'][0],
+                'upper': data['upper.fixed'][0],
+                'bt_TE': round(backtransf(data['TE.fixed'][0], sm), 4),
+                'bt_lower': round(backtransf(data['lower.fixed'][0], sm), 4),
+                'bt_upper': round(backtransf(data['upper.fixed'][0], sm), 4),
+                'proportion': backtransf(data['TE.random'][0], sm),
                 'w': 1
             }
         },
@@ -883,13 +957,15 @@ def _meta_trans_metaprop(j, params):
             'name': stu,
             'E': data['event'][i],
             'N': data['n'][i],
-            'proportion': round(data['event'][i] / data['n'][i], 4),
-            'incidence': round(data['event'][i] / data['n'][i] * assumed_baseline, 0),
+            'proportion': backtransf(data['TE'][i], sm),
+            'incidence': round(backtransf(data['TE'][i], sm) * assumed_baseline, 2),
             'TE': data['TE'][i],
             'seTE': data['seTE'][i],
-            'sm': round(np.e ** data['TE'][i], 3),
             'lower': data['lower'][i],
             'upper': data['upper'][i],
+            'bt_TE': round(backtransf(data['TE'][i], sm), 4),
+            'bt_lower': round(backtransf(data['lower'][i], sm), 4),
+            'bt_upper': round(backtransf(data['upper'][i], sm), 4),
             'w.random': round(data['w.random'][i] / np.sum(data['w.random']), 4),
             'w.fixed': round(data['w.fixed'][i] / np.sum(data['w.fixed']), 4)
         })

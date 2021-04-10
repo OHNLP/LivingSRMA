@@ -68,6 +68,7 @@ results_raw <- metaprop(E,
                        method = "{{ pooling_method }}", 
                        method.tau = "{{ tau_estimation_method }}", 
                        hakn = {{ hakn_adjustment }},
+                    #    backtransf = FALSE,
                        adhoc = "{{ adhoc_hakn }}")
 
 {% if is_create_figure == 'YES' %}
@@ -87,9 +88,9 @@ forest.meta(results_raw,
             fontsize = 10, 
             squaresize = 0.5, 
             print.pval = TRUE, 
-            pooled.totals = TRUE, 
             pooled.events = TRUE, 
-            smlab = "LOGIT (95% CI)", 
+            pooled.totals = TRUE, 
+            smlab = "PLOGIT (95% CI)", 
             weight.study = "random", 
             plotwidth = "08cm",  
             leftcols = c("studlab", "event", "n", "effect", "ci"), 
@@ -98,7 +99,7 @@ forest.meta(results_raw,
             rightlabs = c("Relative weight"), 
             prediction = FALSE, 
             col.predict = "blue",
-            # pscale = 100
+            pscale = 100
             )
 
 dev.off()
@@ -137,8 +138,8 @@ forest.meta(results_cum,
             # colgap.forest.left = "1cm", 
             # colgap.forest.right = "0.1cm", 
             colgap.left = "0.5cm",
-            smlab = "LOGIT (95% CI)",
-            # pscale = 100
+            smlab = "PLOGIT (95% CI)",
+            pscale = 100
             )
 
 {% endif %}

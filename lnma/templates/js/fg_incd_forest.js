@@ -1,6 +1,6 @@
-var fg_prim_forest = {
-    box_id: '#fg_prim_forest',
-    plot_id: '#fg_prim_forest_svg',
+var fg_incd_forest = {
+    box_id: '#fg_incd_forest',
+    plot_id: '#fg_incd_forest_svg',
     plot_type: 'd3js',
     svg: null,
     cols: [
@@ -225,11 +225,11 @@ var fg_prim_forest = {
             .range([0, this.cols[7].width]);
 
         this.y_scale = function(i) {
-            return fg_prim_forest.row_height * (3.5 + i);
+            return fg_incd_forest.row_height * (3.5 + i);
         }
 
         // draw the x axis
-        this.xAxis = d3.axisBottom(fg_prim_forest.x_scale)
+        this.xAxis = d3.axisBottom(fg_incd_forest.x_scale)
             .ticks(5, '~g')
             .tickValues([1e-2,1e-1,1e0,1e1,1e2]);
         this.svg.append('g')
@@ -245,8 +245,8 @@ var fg_prim_forest = {
             .attr('stroke', 'black')
             .attr('stroke-width', .8)
             .attr('d', d3.line()
-                .x(function(d) { return fg_prim_forest.x_scale(d[0]); })
-                .y(function(d) { return fg_prim_forest.y_scale(d[1]); })
+                .x(function(d) { return fg_incd_forest.x_scale(d[0]); })
+                .y(function(d) { return fg_incd_forest.y_scale(d[1]); })
             );
 
         // draw each study
@@ -255,15 +255,15 @@ var fg_prim_forest = {
             .join("g")
             .attr('class', 'prim-frst-stu-item')
             .attr('transform', function(d, i) {
-                var trans_x = fg_prim_forest.cols[7].x + fg_prim_forest.row_frstml;
-                var trans_y = fg_prim_forest.y_scale(i);
+                var trans_x = fg_incd_forest.cols[7].x + fg_incd_forest.row_frstml;
+                var trans_y = fg_incd_forest.y_scale(i);
                 return 'translate('+trans_x+','+trans_y+')';
             })
             .each(function(d, i) {
                 // console.log(i, d);
                 // add the rect
                 var s = Math.sqrt(d.Et) + 2;
-                var x = fg_prim_forest.x_scale(d.bt_TE) - s/2;
+                var x = fg_incd_forest.x_scale(d.bt_TE) - s/2;
                 var y = - s / 2;
                 d3.select(this)
                     .append('rect')
@@ -274,8 +274,8 @@ var fg_prim_forest = {
                     .attr('height', s);
 
                 // add the line
-                var x1 = fg_prim_forest.x_scale(d.bt_lower);
-                var x2 = fg_prim_forest.x_scale(d.bt_upper);
+                var x1 = fg_incd_forest.x_scale(d.bt_lower);
+                var x2 = fg_incd_forest.x_scale(d.bt_upper);
                 d3.select(this)
                     .append('line')
                     .attr('class', 'prim-frst-stu-line')

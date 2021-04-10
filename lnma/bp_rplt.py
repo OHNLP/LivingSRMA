@@ -64,6 +64,7 @@ def pwma_incd():
     ret = {
         'success': False,
         'msg': '',
+        'analysis_method': 'pwma_incd',
         'img': {
             'outplt1': { 'url': '' },
             'cumuplt': { 'url': '' }
@@ -119,6 +120,12 @@ def pwma_incd():
         'assumed_baseline': 100
     }
 
+    # set the params for callback usage
+    ret['params'] = {
+        'sm': sm,
+        'hk': hk
+    }
+
     try:
         result = rplt_analyzer.analyze(rs, cfg)
         # TODO the return should be checked here
@@ -128,6 +135,7 @@ def pwma_incd():
             if cf == 'YES':
                 ret['img']['outplt1']['url'] = url_for('index.f', fn=result['params']['fn_outplt1'])
                 ret['img']['cumuplt']['url'] = url_for('index.f', fn=result['params']['fn_cumuplt'])
+                ret['data'] = result['data']
             else:
                 ret['data'] = result['data']
         else:
@@ -159,6 +167,7 @@ def pwma_prcm():
     ret = {
         'success': False,
         'msg': '',
+        'analysis_method': 'pwma_prcm',
         'img': {
             'outplt1': { 'url': '' },
             'cumuplt': { 'url': '' }
