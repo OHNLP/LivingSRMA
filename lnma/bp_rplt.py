@@ -149,7 +149,7 @@ def pwma_incd():
 
         ret['msg'] = 'System error, please check input data.'
 
-    print(ret)
+    # print(ret)
 
     return jsonify(ret)
 
@@ -243,7 +243,7 @@ def pwma_prcm():
 
         ret['msg'] = 'System error, please check input data.'
 
-    print(ret)
+    # print(ret)
 
     return jsonify(ret)
     
