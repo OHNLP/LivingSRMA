@@ -3277,10 +3277,27 @@ def get_sof_pma_data_from_db_IO(is_calc_pma=True):
     def __notna(v):
         return not (v is None or v == '' or v == 'null')
 
+    # a helper function
+    def __notzero(v):
+        return v != 0
+
     # a helper function to make sure the value is int if possible
     def __int(v):
         try: return int(v)
         except: return v
+
+    # a helper function to make sure the value is good for pwma
+    def __is_pwmable(r, gr):
+        # the first condition is all numbers are not null
+        f1 = __notna(r['%s_Et'%gr]) and __notna(r['GA_Nt']) and \
+             __notna(r['%s_Ec'%gr]) and __notna(r['GA_Nc'])
+            
+        # the second condition is not both 
+        f2 = (__notna(r['%s_Et'%gr]) and __notzero(r['%s_Et'%gr])) or \
+             (__notna(r['%s_Ec'%gr]) and __notzero(r['%s_Ec'%gr]))
+
+        # final combine two
+        return f1 and f2
 
     # Second, build the oc_dict
     rs = []
@@ -3337,14 +3354,10 @@ def get_sof_pma_data_from_db_IO(is_calc_pma=True):
             # add flag for prim+cumu analysis
             # to conduct prim+cumu analysis, 4 columns are required
             # Et, Nt, Ec, Nc
-            r['has_GA_prim']  = __notna(r['GA_Et']) and __notna(r['GA_Nt']) and \
-                                __notna(r['GA_Ec']) and __notna(r['GA_Nc'])
-            r['has_G34_prim'] = __notna(r['G34_Et']) and __notna(r['GA_Nt'])and \
-                                __notna(r['G34_Ec']) and __notna(r['GA_Nc'])
-            r['has_G3H_prim'] = __notna(r['G3H_Et']) and __notna(r['GA_Nt'])and \
-                                __notna(r['G3H_Ec']) and __notna(r['GA_Nc'])
-            r['has_G5N_prim'] = __notna(r['G5N_Et']) and __notna(r['GA_Nt'])and \
-                                __notna(r['G5N_Ec']) and __notna(r['GA_Nc'])
+            r['has_GA_prim']  = __is_pwmable(r, 'GA')
+            r['has_G34_prim'] = __is_pwmable(r, 'G34')
+            r['has_G3H_prim'] = __is_pwmable(r, 'G3H')
+            r['has_G5N_prim'] = __is_pwmable(r, 'G5N')
 
             r['author'] = paper.get_short_name()
             r['year'] = paper.get_year()
@@ -3380,14 +3393,10 @@ def get_sof_pma_data_from_db_IO(is_calc_pma=True):
                 # add flag for prim+cumu analysis
                 # to conduct prim+cumu analysis, 4 columns are required
                 # Et, Nt, Ec, Nc
-                r['has_GA_prim']  = __notna(r['GA_Et']) and __notna(r['GA_Nt']) and \
-                                    __notna(r['GA_Ec']) and __notna(r['GA_Nc'])
-                r['has_G34_prim'] = __notna(r['G34_Et']) and __notna(r['GA_Nt'])and \
-                                    __notna(r['G34_Ec']) and __notna(r['GA_Nc'])
-                r['has_G3H_prim'] = __notna(r['G3H_Et']) and __notna(r['GA_Nt'])and \
-                                    __notna(r['G3H_Ec']) and __notna(r['GA_Nc'])
-                r['has_G5N_prim'] = __notna(r['G5N_Et']) and __notna(r['GA_Nt'])and \
-                                    __notna(r['G5N_Ec']) and __notna(r['GA_Nc'])
+                r['has_GA_prim']  = __is_pwmable(r, 'GA')
+                r['has_G34_prim'] = __is_pwmable(r, 'G34')
+                r['has_G3H_prim'] = __is_pwmable(r, 'G3H')
+                r['has_G5N_prim'] = __is_pwmable(r, 'G5N')
                                     
                 r['author'] = paper.get_short_name() + ' Arm %s' % (arm_idx + 2)
                 r['year'] = paper.get_year()
