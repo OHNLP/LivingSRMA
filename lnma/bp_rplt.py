@@ -138,6 +138,11 @@ def pwma_incd():
                 ret['data'] = result['data']
             else:
                 ret['data'] = result['data']
+
+            # merge the rs value
+            for i, r in enumerate(rs):
+                for k in r:
+                    ret['data']['incdma']['stus'][i][k] = r[k]
         else:
             ret['msg'] = result['msg']
 
@@ -233,6 +238,12 @@ def pwma_prcm():
                 ret['img']['cumuplt']['url'] = url_for('index.f', fn=result['params']['fn_cumuplt'])
             elif am == 'FORESTDATA': 
                 ret['data'] = result['data']
+
+            # merge the rs value
+            for i, r in enumerate(rs):
+                for k in r:
+                    ret['data']['primma']['stus'][i][k] = r[k]
+                    
         else:
             ret['msg'] = result['msg']
     except Exception as err:

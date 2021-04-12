@@ -69,7 +69,7 @@ PWMA Primary + Cumulative Analysis API Demo
                     <label for="apikey" class="col-sm-3 col-form-label">apikey
                     </label>
                     <div class="col-sm-9">
-                        <input type="text" class="form-control" id="apikey" value="">
+                        <input type="text" class="form-control" id="apikey" value="7323590e-577b-4f46-b19f-3ec401829bd6">
                         <small id="apikeyHelp" class="form-text text-muted">
                             For the security of this service, API Key is required for authentication.
                         </small>
@@ -105,13 +105,13 @@ PWMA Primary + Cumulative Analysis API Demo
 {% block script %}
 <script>
 var rs_sample = [{
-    study: 'Raskob et al', year: 2017, Et: 41, Nt: 522, Ec: 59, Nc: 524
+    study: 'Raskob et al', year: 2017, Et: 41, Nt: 522, Ec: 59, Nc: 524, pid: '1234'
 }, {
-    study: 'Young et al', year: 2018, Et: 8, Nt: 203, Ec: 18, Nc: 203
+    study: 'Young et al', year: 2018, Et: 8, Nt: 203, Ec: 18, Nc: 203, pid: '2345'
 }, {
-    study: 'McBane et al', year: 2019, Et: 1, Nt: 145, Ec: 9, Nc: 142
+    study: 'McBane et al', year: 2019, Et: 1, Nt: 145, Ec: 9, Nc: 142, pid: '3456'
 }, {
-    study: 'Young et al', year: 2020, Et:32, Nt: 576, Ec: 46, Nc: 579
+    study: 'Young et al', year: 2020, Et:32, Nt: 576, Ec: 46, Nc: 579, pid: '4567'
 }];
 
 function get_data() {

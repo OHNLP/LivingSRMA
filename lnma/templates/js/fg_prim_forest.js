@@ -165,12 +165,26 @@ var fg_prim_forest = {
                         _txt = txt.substring(0, 21) + ' ...'
                     }
                 }
-                g.append('text')
+                var elem = g.append('text')
                     .attr('class', this.css.txt_nm)
                     .attr('x', col.x + (col.align=='start'? 0 : col.width))
                     .attr('y', this.row_height - this.row_txtmb)
                     .attr('text-anchor', col.align)
                     .text(_txt);
+
+                // bind event to the firt item
+                if (j == 0) {
+                    // this is the first item
+                    elem.attr('pid', stu.pid);
+
+                    // bind click
+                    elem.on('click', function() {
+                        // var d = d3.select(this);
+                        // console.log('* clicked', d);
+                        var e = $(this);
+                        console.log('* clicked paper', e.attr('pid'));
+                    });
+                }
             }
         }
 
@@ -275,7 +289,7 @@ var fg_prim_forest = {
             .each(function(d, i) {
                 // console.log(i, d);
                 // add the rect
-                var s = fg_incd_forest.row_height * d.w_random;
+                var s = fg_prim_forest.row_height * d.w_random;
                 s = s > 2? s : 2;
                 var x = fg_prim_forest._x_scale(d.bt_TE) - s/2;
                 var y = - s / 2;
@@ -352,7 +366,7 @@ var fg_prim_forest = {
                     // this is the model
                     return '100%';
                 } else {
-                    return (obj['w.random'] * 100).toFixed(1) + '%';
+                    return (obj['w_random'] * 100).toFixed(1) + '%';
                 }
         }
         return '';

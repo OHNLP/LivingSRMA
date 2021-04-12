@@ -793,8 +793,8 @@ def _meta_trans_metabin(j, params):
             'bt_lower': round(backtransf(data['lower'][i], sm), 4),
             'bt_upper': round(backtransf(data['upper'][i], sm), 4),
 
-            'w.random': round(data['w.random'][i] / np.sum(data['w.random']), 4),
-            'w.fixed': round(data['w.fixed'][i] / np.sum(data['w.fixed']), 4)
+            'w_random': round(data['w.random'][i] / np.sum(data['w.random']), 4),
+            'w_fixed': round(data['w.fixed'][i] / np.sum(data['w.fixed']), 4)
         })
 
     return ret

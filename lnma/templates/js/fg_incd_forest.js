@@ -160,12 +160,17 @@ var fg_incd_forest = {
                     .attr('text-anchor', col.align)
                     .text(_txt);
                 
-                // bind event to
+                // bind event to the firt item
                 if (j == 0) {
                     // this is the first item
+                    elem.attr('pid', stu.pid);
+
+                    // bind click
                     elem.on('click', function() {
-                        var d = d3.select(this);
-                        console.log('* clicked', d);
+                        // var d = d3.select(this);
+                        // console.log('* clicked', d);
+                        var e = $(this);
+                        console.log('* clicked paper', e.attr('pid'));
                     });
                 }
             }

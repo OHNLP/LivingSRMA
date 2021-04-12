@@ -1120,7 +1120,7 @@ var vw_ocplot = {
         if (this.vpp.params.sm == 'PLOGIT') {
             // this is incidence analysis
             url = "[[ url_for('rplt.pwma_incd') ]]";
-            sql = 'select author as study, year, ' + '\n' +
+            sql = 'select author as study, year, pid, ' + '\n' +
                 ae_grade + '_Et as E, ' + '\n' +
                 'GA_Nt as N' + '\n' +
                 'from aes ' + '\n' +
@@ -1132,7 +1132,7 @@ var vw_ocplot = {
         } else {
             // this is primary analysis
             url = "[[ url_for('rplt.pwma_prcm') ]]";
-            sql = 'select author as study, year, ' + '\n' +
+            sql = 'select author as study, year, pid, ' + '\n' +
                 ae_grade + '_Et as Et, ' + '\n' +
                 ae_grade + '_Ec as Ec, ' + '\n' +
                 'GA_Nt as Nt, GA_Nc as Nc ' + '\n' +
