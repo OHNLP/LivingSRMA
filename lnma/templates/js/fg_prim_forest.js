@@ -49,6 +49,9 @@ var fg_prim_forest = {
         if (x.toString() == 'NaN') {
             return 0;
         } else {
+            if (x < 0) {
+                return 0;
+            }
             return x;
         }
     },
@@ -272,7 +275,8 @@ var fg_prim_forest = {
             .each(function(d, i) {
                 // console.log(i, d);
                 // add the rect
-                var s = Math.sqrt(d.Et) + 2;
+                var s = fg_incd_forest.row_height * d.w_random;
+                s = s > 2? s : 2;
                 var x = fg_prim_forest._x_scale(d.bt_TE) - s/2;
                 var y = - s / 2;
                 d3.select(this)
