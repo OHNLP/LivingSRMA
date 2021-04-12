@@ -108,6 +108,23 @@ html {
 .n-arms-hr {
     margin: 1px 0 !important;
 }
+.txt-col-stype-o {
+    background: goldenrod;
+}
+.txt-col-stype-f {
+    background: greenyellow;
+}
+.txt-col-stype-n {
+    background: grey;
+}
+
+.paper-table-row-fade {
+    opacity: 0.25;
+}
+.paper-table-row-emph {
+    opacity: 1 !important;
+    background-color: beige;
+}
 </style>
 {% endblock %}
 
@@ -438,6 +455,7 @@ var pan_ocpapers = {
                 show_settings: true,
                 only_show_selected: true,
                 show_col_nct: false,
+                show_col_stype: true,
 
                 // for display:
                 thr1s: [],
@@ -488,6 +506,10 @@ var pan_ocpapers = {
                     this.$forceUpdate();
                 },
 
+                toggle_trial_studies: function(paper) {
+                    pan_ocpapers.toggle_trial_studies(paper);
+                },
+
                 goto_extract_data: function(extract) {
                     location.href = srv_extractor.url.extract_data + 
                         '?abbr=' + extract.abbr;
@@ -535,6 +557,27 @@ var pan_ocpapers = {
                         aus = s.split(',');
                     }
                     return aus[0];
+                },
+
+                get_stype_badge: function(paper) {
+                    if (paper.meta.hasOwnProperty('study_type')) {
+                        if (paper.meta.study_type == 'followup') {
+                            return { 
+                                label: 'F' + paper.meta.rct_seq,
+                                cls: 'f'
+                            };
+                        } else {
+                            return { 
+                                label: 'O',
+                                cls: 'o'
+                            };
+                        }
+                    } else {
+                        return { 
+                            label: 'N',
+                            cls: 'n'
+                        };
+                    }
                 },
 
                 on_change_input_format: function(event) {
@@ -793,6 +836,29 @@ var pan_ocpapers = {
                 pan_outcomes.load();
             }
         );
+    },
+
+    toggle_trial_studies: function(paper) {
+        if (!paper.meta.hasOwnProperty('rct_id')) {
+            return;
+        }
+
+        var rct_id = paper.meta.rct_id;
+
+        // the check current rows
+        var flag_has = $('tr.paper-table-row[rct_id='+rct_id+']').hasClass('paper-table-row-emph');
+
+        // first, just remove all
+        $('tr.paper-table-row').removeClass('paper-table-row-fade');
+        $('tr.paper-table-row').removeClass('paper-table-row-emph');
+
+        // console.log('* found trial ' + rct_id + ': ' + flag_has);
+        if (flag_has) {
+
+        } else {
+            $('tr.paper-table-row').addClass('paper-table-row-fade');
+            $('tr.paper-table-row[rct_id='+rct_id+']').addClass('paper-table-row-emph');
+        }
     },
 
     show: function() {
