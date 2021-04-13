@@ -80,6 +80,52 @@ OC_TYPE_TPL = {
             "attrs": None,
             "cate_attrs": None
         }
+    },
+    "itable": {
+        "default": {
+            'abbr': 'itable',
+            'oc_type': 'itable',
+            'category': 'default',
+            'group': 'itable',
+            'full_name': 'Interactive Table',
+            'input_format': 'custom',
+            'filters': [{
+                'display_name': 'Included in MA',
+                'type': 'radio',
+                'attr': 'Included in MA',
+                'value': 0,
+                'values': [{
+                    'display_name': 'All',
+                    'value': 0,
+                    'sql_cond': "1=1",
+                    'default': True
+                }]
+            }],
+            'cate_attrs': [
+            {
+                'abbr': 'ITABLECAT000',
+                'name': "TRIAL CHARACTERISTICS",
+                'attrs': [{
+                    'abbr': 'ITABLEATT000',
+                    'name': 'Phase',
+                    'subs': None
+                }]
+            },
+            {
+                'abbr': 'ITABLECATSYS',
+                'name': "_SYS",
+                'attrs': [{
+                    'abbr': 'ITABLEECATSYS001',
+                    'name': 'URL',
+                    'subs': None
+                }, {
+                    'abbr': 'ITABLEECATSYSSUB002',
+                    'name': 'Included in MA',
+                    'subs': None
+                }]
+            }
+            ]
+        }
     }
 }
 

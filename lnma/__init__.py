@@ -25,6 +25,10 @@ def create_app(test_config=None):
     app.jinja_env.variable_start_string = '[['
     app.jinja_env.variable_end_string = ']]'
 
+    # put all settings for jinja2 and other access
+    from lnma import settings
+    app.config['settings'] = settings
+
     if test_config is not None:
         app.config.update(test_config)
 

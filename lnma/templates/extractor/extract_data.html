@@ -398,7 +398,7 @@ var pan_ocpapers = {
             data: {
                 // flags
                 show_settings: true,
-                only_show_selected: true,
+                only_show_selected: false,
                 show_col_nct: false,
 
                 // for display:
@@ -438,8 +438,8 @@ var pan_ocpapers = {
                 pan_ocpapers.update_autocomplete();
             },
             methods: {
-                toggle_show_settings: function() {
-                    this.show_settings = !this.show_settings;
+                toggle_only_show_selected: function() {
+                    this.only_show_selected = !this.only_show_selected;
                 },
 
                 toggle_on_all_attributes: function() {

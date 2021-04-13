@@ -1908,3 +1908,57 @@ def delete_all_extracts_by_keystr(keystr):
     db.session.commit()
 
     return True
+
+
+###############################################################################
+# Piece Related Functions
+###############################################################################
+
+def create_piece(project_id, abbr, pid, data):
+    '''
+    Create a new piece for an extract in a project
+    '''
+    # create the id
+    piece_id = str(uuid.uuid1())
+    date_created = datetime.datetime.now()
+    date_updated = datetime.datetime.now()
+
+    piece = Piece(
+        piece_id = piece_id,
+        project_id = project_id,
+        abbr = abbr,
+        pid = pid,
+        data = data,
+        date_created = date_created,
+        date_updated = date_updated
+    )
+
+    db.session.add(piece)
+    db.session.commit()
+
+    return piece
+
+
+def get_pieces_by_project_id_and_abbr(project_id, abbr):
+    '''
+    Get all pieces in an extract of a project
+    '''
+    pieces = Piece.query.filter(
+        Piece.project_id == project_id,
+        Piece.abbr == abbr
+    ).all()
+
+    return pieces
+
+
+def get_piece_by_project_id_and_abbr_and_pid(project_id, abbr, pid):
+    '''
+    Get one piece in an extract of a project
+    '''
+    piece = Piece.query.filter(
+        Piece.project_id == project_id,
+        Piece.abbr == abbr,
+        Piece.pid == pid
+    ).first()
+
+    return piece

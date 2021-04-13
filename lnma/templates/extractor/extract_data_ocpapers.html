@@ -14,9 +14,9 @@
                 </span>
 
                 <div class="btn-group mr-2">
-                    <button v-on:click="toggle_show_settings();"
+                    <button v-on:click="toggle_only_show_selected();"
                         type="button" class="btn btn-default btn-sm">
-                        <i class="fa" v-bind:class="{'fa-toggle-on': show_settings, 'fa-toggle-off': !show_settings}"></i>
+                        <i class="fa" v-bind:class="{'fa-toggle-on': only_show_selected, 'fa-toggle-off': !only_show_selected}"></i>
                         Toggle all studies
                     </button>
                 </div>
@@ -108,8 +108,7 @@
 
                     <tr>
                         <th class="paper-table-header-th" style="width: 20px;">
-                            <input type="checkbox" title="Toggle selection"
-                                v-on:click="toggle_select_all_papers($event);">
+                            &nbsp;
                         </th>
                         <th class="paper-table-header-th" style="width: 40px;">
                             #
@@ -143,7 +142,9 @@
                         v-bind:id="'paper-table-row-' + paper.pid"
                         v-show="!only_show_selected || extract.data[paper.pid].is_selected">
                         <td class="paper-table-body-td">
-                            <input type="checkbox" v-model="extract.data[paper.pid].is_selected" >
+                            <input type="checkbox" 
+                                v-model="extract.data[paper.pid].is_selected"
+                                disabled="disabled">
                         </td>
 
                         <td class="paper-table-body-td"

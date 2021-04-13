@@ -5,6 +5,8 @@ from re import template
 import string
 from collections import OrderedDict
 
+import pandas as pd
+
 from flask import request
 from flask import flash
 from flask import render_template
@@ -514,81 +516,9 @@ def get_extracts():
     return jsonify(ret)
 
 
-@bp.route('/test')
-@login_required
-def test():
-    '''
-    Test function
-    '''
-    project_id = request.args.get('project_id')
-    
-    # get the exisiting extracts
-    cad, cal, i2a, data = get_itable_from_itable_data_xls('IOTOX')
-
-    # build the return obj
-    ret = {
-        'success': True,
-        'meta': cal,
-        'data': data
-    }
-    return jsonify(ret)
-
-
-
 ###############################################################################
-# Importers 
+# Update the RCT sequence for a project 
 ###############################################################################
-
-@bp.route('/import_itable_meta_and_data_from_xls')
-@login_required
-def import_itable_meta_and_data_from_xls():
-    '''
-    Create the meta for itable
-    '''
-    prj = request.args.get('prj')
-    project = dora.get_project_by_keystr(prj)
-
-    if project is None:
-        project_id = request.cookies.get('project_id')
-        project = dora.get_project(project_id)
-
-    if project is None:
-        return jsonify({
-            'success': False,
-            'msg': 'NO SUCH PROJECT'
-        })
-    prj = project.keystr
-
-    project_id = project.project_id
-    oc_type = 'itable'
-    abbr = 'itable'
-
-    # get the exisiting extracts
-    extract = dora.get_extract_by_project_id_and_abbr(
-        project.project_id, abbr
-    )
-
-    # get the itable data
-    cad, cate_attrs, i2a, data = get_itable_from_itable_data_xls(project.keystr)
-
-    # update the meta
-    meta = extract.meta
-    meta['cate_attrs'] = cate_attrs
-
-    # get the filters
-    filters = get_itable_filters_from_xls(project.keystr)
-    meta['filters'] = filters
-
-    # update the extract
-    extract = dora.update_extract_meta_and_data(project_id, oc_type, abbr, meta, data)
-
-    # build the return obj
-    ret = {
-        'success': True,
-        'extract': extract.as_dict()
-    }
-    return jsonify(ret)
-
 
 @bp.route('/sort_rct_seq')
 @login_required
@@ -608,22 +538,431 @@ def sort_rct_seq():
     return jsonify(ret)
 
 
-
 ###############################################################################
-# Speciall importer for IO project due to the 
+# Importers 
 ###############################################################################
 
-@bp.route('/import_IO_aes_from_xls')
+@bp.route('/import_itable')
 @login_required
-def import_IO_aes_from_xls():
+def import_itable():
+    '''
+    Import or update the meta for itable
+
+    Including:
+
+    1. meta data for attributes
+    2. data of extraction
+    3. filters
+    '''
+    prj = request.args.get('prj')
+    itable = import_itable_from_xls(prj)
+
+    # build the return obj
+    ret = {
+        'success': True,
+        'extract': itable.as_dict()
+    }
+    return jsonify(ret)
+
+
+@bp.route('/import_softable_pma')
+@login_required
+def import_softable_pma():
     '''
     Create the meta for itable
     '''
+    prj = request.args.get('prj')
+    extracts = import_softable_pma_from_xls(prj)
+
+    ret = {
+        'success': True,
+        'extracts': [ ext.as_dict() for ext in extracts ]
+    }
+
+    return jsonify(ret)
+
+
+###############################################################################
+# Utils for the itable import
+###############################################################################
+
+def import_itable_from_xls(keystr):
+    '''
+    Import itable all data from xls file
+
+    Including:
+
+    1. meta data for attributes
+    2. data of extraction
+    3. filters
+    '''
+    project = dora.get_project_by_keystr(keystr)
+
+    # if project is None:
+    #     project_id = request.cookies.get('project_id')
+    #     project = dora.get_project(project_id)
+
+    if project is None:
+        return jsonify({
+            'success': False,
+            'msg': 'NO SUCH PROJECT %s' % keystr
+        })
+    
+    project_id = project.project_id
+    oc_type = 'itable'
+    abbr = 'itable'
+
+    # get the exisiting extracts
+    extract = dora.get_extract_by_project_id_and_abbr(
+        project.project_id, abbr
+    )
+
+    # if not exist, create a new one which is empty
+    if extract is None:
+        extract = dora.create_extract(
+            project_id, oc_type, abbr, {}, {}
+        )
+
+    # get the itable data
+    cad, cate_attrs, i2a, data = get_itable_from_itable_data_xls(project.keystr)
+
+    # update the meta
+    meta = extract.meta
+    meta['cate_attrs'] = cate_attrs
+
+    # get the filters
+    filters = get_itable_filters_from_xls(project.keystr)
+    meta['filters'] = filters
+
+    # update the extract
+    itable = dora.update_extract_meta_and_data(
+        project_id, oc_type, abbr, meta, data
+    )
+
+    return itable
+
+
+def get_itable_from_itable_data_xls(keystr):
+    '''
+    Get the itable extract from ITABLE_ATTR_DATA.xlsx
+    '''
+
+    # get the ca list first
+    ca_dict, ca_list, i2a = get_cate_attr_subs_from_itable_data_xls(keystr)
+
     import pandas as pd
+
+    fn = 'ITABLE_ATTR_DATA.xlsx'
+    full_fn = os.path.join(
+        current_app.instance_path, 
+        settings.PATH_PUBDATA, 
+        keystr, 
+        fn
+    )
+    if not os.path.exists(full_fn):
+        # try the xls file
+        full_fn = full_fn[:-1]
+
+    # read the first sheet, but skip the first two rows
+    xls = pd.ExcelFile(full_fn)
+    first_sheet_name = xls.sheet_names[0]
+    df = xls.parse(first_sheet_name, skiprows=1)
+
+    cols = df.columns
+    n_cols = len(df.columns)
+
+    data = {}
+    # begin loop 
+    for _, row in df.iterrows():
+        # find the pmid first
+        if 'PMID' in row:
+            pmid = row['PMID']
+        else:
+            pmid = row['PubMed ID']
+
+        # check if this pmid exists
+        is_main = False
+        if pmid not in data:
+            # ok, this is a new study
+            # by default not selected and not checked
+            # 
+            # `main` is for the main records
+            # `other` is for other arms, by default, other is empty
+            data[pmid] = {
+                'is_selected': True,
+                'is_checked': True,
+                'n_arms': 2,
+                'attrs': {
+                    'main': {},
+                    'other': []
+                }
+            }
+            is_main = True
+        else:
+            # which means this row is an multi arm
+            # add a new object in other
+            data[pmid]['n_arms'] += 1
+            data[pmid]['attrs']['other'].append({})
+
+        # check each column
+        for idx in range(n_cols):
+            col = cols[idx]
+
+            # skip the pmid column
+            if col.upper() == 'PMID': continue
+
+            # get the value in this column
+            val = row[col]
+
+            # try to clear the blanks
+            try: val = val.strip()
+            except: pass
+            
+            # for NaN value
+            if pd.isna(val): val = None
+
+            abbr = i2a[idx]
+
+            if is_main:
+                data[pmid]['attrs']['main'][abbr] = val
+            else:
+                # check if this value is same in the main track
+                if val == data[pmid]['attrs']['main'][abbr]: 
+                    # for the same value, also set ...
+                    data[pmid]['attrs']['other'][-1][abbr] = val
+                else:
+                    # just save the different values
+                    data[pmid]['attrs']['other'][-1][abbr] = val
+
+    return ca_dict, ca_list, i2a, data
+
+
+def get_cate_attr_subs_from_itable_data_xls(keystr):
+    '''
+    Get the cate, attr, and subs from
+    '''
+    import pandas as pd
+
+    fn = 'ITABLE_ATTR_DATA.xlsx'
+    full_fn = os.path.join(
+        current_app.instance_path, 
+        settings.PATH_PUBDATA, 
+        keystr, 
+        fn
+    )
+
+    if not os.path.exists(full_fn):
+        # try the xls file
+        full_fn = full_fn[:-1]
+
+    # read the first sheet
+    xls = pd.ExcelFile(full_fn)
+    first_sheet_name = xls.sheet_names[0]
+    df = xls.parse(first_sheet_name, header=None, nrows=2)
+
+    # df = pd.read_excel(full_fn)
+
+    # convert to other shape
+    dft = df.T
+    df_attrs = dft.rename(columns={0: 'cate', 1: 'attr'})
+
+    # not conver to tree format
+    cate_attr_dict = OrderedDict()
+    idx2abbr = {}
+
+    for idx, row in df_attrs.iterrows():
+        vtype = 'text'
+        print(row)
+        # found cate!
+        cate = row['cate'].strip()
+        
+        # put this cate if not exists
+        if cate not in cate_attr_dict:
+            cate_attr_dict[cate] = {
+                'abbr': _gen_abbr_12(),
+                'name': cate,
+                'attrs': {}
+            }
+
+        attr = row['attr'].strip()
+        # split the name into different parts
+        attr_subs = attr.split('|')
+        if len(attr_subs) > 1:
+            attr = attr_subs[0].strip()
+            sub = attr_subs[1].strip()
+        else:
+            attr = attr
+            sub = None
+
+        # put this attr if not exists
+        if attr not in cate_attr_dict[cate]['attrs']:
+            cate_attr_dict[cate]['attrs'][attr] = {
+                'abbr': _gen_abbr_12(),
+                'name': attr,
+                'subs': None
+            }
+        
+        # put this sub
+        if sub is not None:
+            if cate_attr_dict[cate]['attrs'][attr]['subs'] is None:
+                cate_attr_dict[cate]['attrs'][attr]['subs'] = [{
+                    'abbr': _gen_abbr_12(),
+                    'name': sub
+                }]
+            else:
+                cate_attr_dict[cate]['attrs'][attr]['subs'].append({
+                    'abbr': _gen_abbr_12(),
+                    'name': sub
+                })
+            # point the idx to the last sub in current attr
+            idx2abbr[idx] = cate_attr_dict[cate]['attrs'][attr]['subs'][-1]['abbr']
+        else:
+            # point the idx to the attr
+            idx2abbr[idx] = cate_attr_dict[cate]['attrs'][attr]['abbr']
+    
+    # convert the dict to list
+    cate_attr_list = []
+    for _i in cate_attr_dict:
+        cate = cate_attr_dict[_i]
+        # put this cate
+        _cate = {
+            'abbr': cate['abbr'],
+            'name': cate['name'],
+            'attrs': []
+        }
+
+        for _j in cate['attrs']:
+            attr = cate['attrs'][_j]
+            # put this attr
+            _attr = {
+                'abbr': attr['abbr'],
+                'name': attr['name'],
+                'subs': attr['subs']
+            }
+            _cate['attrs'].append(_attr)
+
+        cate_attr_list.append(_cate)
+
+    return cate_attr_dict, cate_attr_list, idx2abbr
+
+
+def get_itable_filters_from_xls(keystr):
+    '''
+    Get the filters from ITABLE_FILTER.xlsx
+    '''
+    import pandas as pd
+
+    fn = 'ITABLE_FILTERS.xlsx'
+    full_fn = os.path.join(
+        current_app.instance_path, 
+        settings.PATH_PUBDATA, 
+        keystr, fn
+    )
+    if not os.path.exists(full_fn):
+        # try the xls file
+        full_fn = full_fn[:-1]
+
+    # load the data file
+    xls = pd.ExcelFile(full_fn)
+    # load the Filters tab
+    sheet_name = 'Filters'
+    dft = xls.parse(sheet_name)
+
+    # build Filters data
+    ft_list = []
+    for col in dft.columns[1:]:
+        display_name = col
+        tmp = dft[col].tolist()
+        # the first line of dft is the column name / attribute name
+        ft_attr = tmp[0]
+        # the second line of dft is the filter type: radio or select
+        ft_type = tmp[1].strip().lower()
+        # get those rows not NaN, which means containing option
+        ft_opts = dft[col][~dft[col].isna()].tolist()[3:]
+        # get the default label
+        ft_def_opt_label = tmp[2].strip()
+
+        # set the default option
+        ft_item = {
+            'display_name': display_name,
+            'type': ft_type,
+            'attr': ft_attr,
+            'value': 0,
+            'values': [{
+                "display_name": ft_def_opt_label,
+                "value": 0,
+                "sql_cond": "{$col} is not NULL",
+                "default": True
+            }]
+        }
+        # build ae_name dict
+        for i, ft_opt in enumerate(ft_opts):
+            ft_opt = str(ft_opt)
+            # remove the white space
+            ft_opt = ft_opt.strip()
+            ft_item['values'].append({
+                "display_name": ft_opt,
+                "value": i+1,
+                "sql_cond": "{$col} like '%%%s%%'" % ft_opt,
+                "default": False
+            })
+
+        ft_list.append(ft_item)
+            
+        print('* parsed ft_attr %s with %s options' % (ft_attr, len(ft_opts)))
+    print('* created ft_list %s filters' % (len(ft_list)))
+
+    return ft_list
+
+
+###############################################################################
+# Utils for the softable import
+###############################################################################
+
+
+def import_softable_pma_from_xls(keystr):
+    '''
+    Import the softable data from XLS
+    '''
+    if keystr == 'IO':
+        return import_softable_pma_from_xls_for_IO()
+
+    raise Exception('Not implemented')
+
+
+def import_softable_nma_from_xls(keystr):
+    '''
+    Import the softable data from XLS
+    '''
+    raise Exception('Not implemented')
+
+
+def import_softable_pma_from_xls_for_IO():
+    '''
+    A special tool for importing the data file for IO project
+
+    The data must follow this order:
+
+    0. filters (skip)
+    1. itable data (USED)
+    2. no use
+    3. All SEs (no use)
+    4. Only Included AE (no use)
+    5. Adverse events (USED)
+    6. AE Reporting (no use)
+    7. Bronchits (USED, and all of followings)
+
+    '''
     prj = 'IO'
     fn = 'ALL_DATA.xls'
-    full_fn = os.path.join(current_app.instance_path, settings.PATH_PUBDATA, prj, fn)
+    full_fn = os.path.join(
+        current_app.instance_path, 
+        settings.PATH_PUBDATA, 
+        prj, fn
+    )
     # ret = get_ae_pma_data(full_fn, is_getting_sms=False)
+    project = dora.get_project_by_keystr(prj)
+    project_id = project.project_id
 
     # First, create a row->pmid dictionary
     # Use the second tab
@@ -737,7 +1076,6 @@ def import_IO_aes_from_xls():
         ])
 
     # finally, save all
-    project_id = request.cookies.get('project_id')
     oc_type = 'pwma'
 
     extracts = []
@@ -749,270 +1087,13 @@ def import_IO_aes_from_xls():
             oc[0],
             oc[1]
         )
-
+        print('* imported pwma extract %s' % (
+            extract.meta['full_name']
+        ))
         extracts.append(extract)
 
     # return!
-
-    ret = {
-        'success': True,
-        'n_extracts': len(extracts),
-        'extracts': [ ext.as_dict() for ext in extracts ]
-    }
-
-    return jsonify(ret)
-
-
-###############################################################################
-# Utils for the extraction
-###############################################################################
-
-def get_itable_filters_from_xls(keystr):
-    '''
-    Get the filters from ITABLE_FILTER.xlsx
-    '''
-    import pandas as pd
-
-    fn = 'ITABLE_FILTERS.xlsx'
-    full_fn = os.path.join(current_app.instance_path, settings.PATH_PUBDATA, keystr, fn)
-    # load the data file
-    xls = pd.ExcelFile(full_fn)
-    # load the Filters tab
-    sheet_name = 'Filters'
-    dft = xls.parse(sheet_name)
-
-    # build Filters data
-    ft_list = []
-    for col in dft.columns[1:]:
-        display_name = col
-        tmp = dft[col].tolist()
-        # the first line of dft is the column name / attribute name
-        ft_attr = tmp[0]
-        # the second line of dft is the filter type: radio or select
-        ft_type = tmp[1].strip().lower()
-        # get those rows not NaN, which means containing option
-        ft_opts = dft[col][~dft[col].isna()].tolist()[3:]
-        # get the default label
-        ft_def_opt_label = tmp[2].strip()
-
-        # set the default option
-        ft_item = {
-            'display_name': display_name,
-            'type': ft_type,
-            'attr': ft_attr,
-            'value': 0,
-            'values': [{
-                "display_name": ft_def_opt_label,
-                "value": 0,
-                "sql_cond": "{$col} is not NULL",
-                "default": True
-            }]
-        }
-        # build ae_name dict
-        for i, ft_opt in enumerate(ft_opts):
-            ft_opt = str(ft_opt)
-            # remove the white space
-            ft_opt = ft_opt.strip()
-            ft_item['values'].append({
-                "display_name": ft_opt,
-                "value": i+1,
-                "sql_cond": "{$col} like '%%%s%%'" % ft_opt,
-                "default": False
-            })
-
-        ft_list.append(ft_item)
-            
-        print('* parsed ft_attr %s with %s options' % (ft_attr, len(ft_opts)))
-    print('* created ft_list %s filters' % (len(ft_list)))
-
-    return ft_list
-
-
-def get_itable_from_itable_data_xls(keystr):
-    '''
-    Get the itable extract from ITABLE_ATTR_DATA.xlsx
-    '''
-
-    # get the ca list first
-    ca_dict, ca_list, i2a = get_cate_attr_subs_from_itable_data_xls(keystr)
-
-    import pandas as pd
-
-    fn = 'ITABLE_ATTR_DATA.xlsx'
-    full_fn = os.path.join(current_app.instance_path, settings.PATH_PUBDATA, keystr, fn)
-
-    # read the first sheet, but skip the first two rows
-    xls = pd.ExcelFile(full_fn)
-    first_sheet_name = xls.sheet_names[0]
-    df = xls.parse(first_sheet_name, skiprows=1)
-
-    cols = df.columns
-    n_cols = len(df.columns)
-
-    data = {}
-    # begin loop 
-    for _, row in df.iterrows():
-        # find the pmid first
-        if 'PMID' in row:
-            pmid = row['PMID']
-        else:
-            pmid = row['PubMed ID']
-
-        # check if this pmid exists
-        is_main = False
-        if pmid not in data:
-            # ok, this is a new study
-            # by default not selected and not checked
-            # 
-            # `main` is for the main records
-            # `other` is for other arms, by default, other is empty
-            data[pmid] = {
-                'is_selected': True,
-                'is_checked': True,
-                'n_arms': 2,
-                'attrs': {
-                    'main': {},
-                    'other': []
-                }
-            }
-            is_main = True
-        else:
-            # which means this row is an multi arm
-            # add a new object in other
-            data[pmid]['n_arms'] += 1
-            data[pmid]['attrs']['other'].append({})
-
-        # check each column
-        for idx in range(n_cols):
-            col = cols[idx]
-
-            # skip the pmid column
-            if col.upper() == 'PMID': continue
-
-            # get the value in this column
-            val = row[col]
-
-            # try to clear the blanks
-            try: val = val.strip()
-            except: pass
-            
-            # for NaN value
-            if pd.isna(val): val = None
-
-            abbr = i2a[idx]
-
-            if is_main:
-                data[pmid]['attrs']['main'][abbr] = val
-            else:
-                # check if this value is same in the main track
-                if val == data[pmid]['attrs']['main'][abbr]: 
-                    # for the same value, also set ...
-                    data[pmid]['attrs']['other'][-1][abbr] = val
-                else:
-                    # just save the different values
-                    data[pmid]['attrs']['other'][-1][abbr] = val
-
-    return ca_dict, ca_list, i2a, data
-
-
-def get_cate_attr_subs_from_itable_data_xls(keystr):
-    '''
-    Get the cate, attr, and subs from
-    '''
-    import pandas as pd
-
-    fn = 'ITABLE_ATTR_DATA.xlsx'
-    full_fn = os.path.join(current_app.instance_path, settings.PATH_PUBDATA, keystr, fn)
-
-    # read the first sheet
-    xls = pd.ExcelFile(full_fn)
-    first_sheet_name = xls.sheet_names[0]
-    df = xls.parse(first_sheet_name, header=None, nrows=2)
-
-    # df = pd.read_excel(full_fn)
-
-    # convert to other shape
-    dft = df.T
-    df_attrs = dft.rename(columns={0: 'cate', 1: 'attr'})
-
-    # not conver to tree format
-    cate_attr_dict = OrderedDict()
-    idx2abbr = {}
-
-    for idx, row in df_attrs.iterrows():
-        vtype = 'text'
-        print(row)
-        # found cate!
-        cate = row['cate'].strip()
-        
-        # put this cate if not exists
-        if cate not in cate_attr_dict:
-            cate_attr_dict[cate] = {
-                'abbr': _gen_abbr_12(),
-                'name': cate,
-                'attrs': {}
-            }
-
-        attr = row['attr'].strip()
-        # split the name into different parts
-        attr_subs = attr.split('|')
-        if len(attr_subs) > 1:
-            attr = attr_subs[0].strip()
-            sub = attr_subs[1].strip()
-        else:
-            attr = attr
-            sub = None
-
-        # put this attr if not exists
-        if attr not in cate_attr_dict[cate]['attrs']:
-            cate_attr_dict[cate]['attrs'][attr] = {
-                'abbr': _gen_abbr_12(),
-                'name': attr,
-                'subs': None
-            }
-        
-        # put this sub
-        if sub is not None:
-            if cate_attr_dict[cate]['attrs'][attr]['subs'] is None:
-                cate_attr_dict[cate]['attrs'][attr]['subs'] = [{
-                    'abbr': _gen_abbr_12(),
-                    'name': sub
-                }]
-            else:
-                cate_attr_dict[cate]['attrs'][attr]['subs'].append({
-                    'abbr': _gen_abbr_12(),
-                    'name': sub
-                })
-            # point the idx to the last sub in current attr
-            idx2abbr[idx] = cate_attr_dict[cate]['attrs'][attr]['subs'][-1]['abbr']
-        else:
-            # point the idx to the attr
-            idx2abbr[idx] = cate_attr_dict[cate]['attrs'][attr]['abbr']
-    
-    # convert the dict to list
-    cate_attr_list = []
-    for _i in cate_attr_dict:
-        cate = cate_attr_dict[_i]
-        # put this cate
-        _cate = {
-            'abbr': cate['abbr'],
-            'name': cate['name'],
-            'attrs': []
-        }
-
-        for _j in cate['attrs']:
-            attr = cate['attrs'][_j]
-            # put this attr
-            _attr = {
-                'abbr': attr['abbr'],
-                'name': attr['name'],
-                'subs': attr['subs']
-            }
-            _cate['attrs'].append(_attr)
-
-        cate_attr_list.append(_cate)
-
-    return cate_attr_dict, cate_attr_list, idx2abbr
+    return extracts
 
 
 def _gen_abbr_12():

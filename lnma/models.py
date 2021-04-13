@@ -564,3 +564,50 @@ class Extract(db.Model):
             del full_dict['data']
 
         return full_dict
+
+
+class Piece(db.Model):
+    """
+    The extracted data piece details
+
+    It uses three IDs to locate:
+
+    1. project_id: decide which project is working on
+    2. abbr: decide which extract is working on
+    3. pid: decide which paper
+
+    The piece contains the information related to an outcome (or AE).
+    The `data` attribute contains all the extraction results.
+    {
+        is_selected: true / false,
+        is_checked: true / false,
+        n_arms: 2 / 3 / 4 / 5,
+        attrs: {
+            main: {
+                attr_sub_abbr: value
+            },
+            other: [{
+                attr_sub_abbr: value
+            }, ...]
+        }
+    }
+    """
+    
+    __tablename__ = 'pieces'
+    __table_args__ = {'extend_existing': True}
+
+    piece_id = db.Column(db.String(48), primary_key=True, nullable=False)
+    project_id = db.Column(db.String(48), index=False)
+    abbr = db.Column(db.String(48), index=False)
+    pid = db.Column(db.String(settings.PAPER_PID_MAX_LENGTH), index=False)
+    data = db.Column(db.JSON, index=False)
+    date_created = db.Column(db.DateTime, index=False)
+    date_updated = db.Column(db.DateTime, index=False)
+
+    def __repr__(self):
+        return '<Piece {0} in {1}: {2}>'.format(
+            self.pid, self.abbr, self.piece_id)
+
+
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}

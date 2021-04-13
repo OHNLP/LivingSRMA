@@ -4,6 +4,8 @@
  * This is a service agent for using extractor services
  */
 
+
+
 var srv_extractor = {
 
     url: {
@@ -176,57 +178,7 @@ var srv_extractor = {
                     }
                 }
             },
-            itable: {
-                default: {
-                    abbr: 'itable',
-                    oc_type: 'itable',
-                    category: 'default',
-                    group: 'itable',
-                    full_name: 'Interactive Table',
-                    input_format: 'custom',
-                    filters: [{
-                        display_name: 'Included in MA',
-                        type: 'radio',
-                        attr: 'Included in MA',
-                        value: 0,
-                        values: [{
-                            display_name: 'All',
-                            value: 0,
-                            sql_cond: "{$col} is not NULL",
-                            default: true
-                        }]
-                    }],
-                    /**
-                     * To make sure the order of the cate and attr list
-                     * the attrs are saved as a hierarchical list structure.
-                     * As a result, need to implement serval functions
-                     */
-                    cate_attrs: [
-                    {
-                        abbr: 'ITABLECAT000',
-                        name: "TRIAL CHARACTERISTICS",
-                        attrs: [{
-                            abbr: 'ITABLEATT000',
-                            name: 'Phase',
-                            subs: null
-                        }]
-                    },
-                    {
-                        abbr: 'ITABLECATSYS',
-                        name: "_SYS",
-                        attrs: [{
-                            abbr: 'ITABLEECATSYS001',
-                            name: 'URL',
-                            subs: null
-                        }, {
-                            abbr: 'ITABLEECATSYSSUB002',
-                            name: 'Included in MA',
-                            subs: null
-                        }]
-                    }
-                    ]
-                }
-            }
+            itable: [[ config['settings']['OC_TYPE_TPL']['itable']|tojson ]]
         },
         input_format: {
             pwma: {
