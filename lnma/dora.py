@@ -430,6 +430,10 @@ def sort_paper_rct_seq_in_project(project_id):
     Based on 
     '''
     papers = get_papers(project_id)
+    papers = get_papers_by_stage(
+        project_id, 
+        ss_state.SS_STAGE_INCLUDED_SR
+    )
 
     # get all nct
     ncts = {}
@@ -970,125 +974,6 @@ def get_papers_by_stage(project_id, stage):
         print('* NOT found specified stage [%s]' % stage)
         papers = []
         
-    return papers
-
-
-def get_papers_by_stage_v1(project_id, stage):
-    '''
-    Deprecated.
-    '''
-    if stage == 'a1':
-        papers = Paper.query.filter(and_(
-            Paper.project_id == project_id,
-            Paper.ss_st.in_([
-                ss_state.SS_ST_AUTO_EMAIL,
-                ss_state.SS_ST_AUTO_SEARCH,
-                ss_state.SS_ST_AUTO_OTHER
-            ])
-        )).order_by(Paper.date_created.desc()).all()
-    elif stage == 'a1_na_na':
-        papers = Paper.query.filter(and_(
-            Paper.project_id == project_id,
-            Paper.ss_pr == ss_state.SS_PR_NA,
-            Paper.ss_rs == ss_state.SS_RS_NA
-        )).order_by(Paper.date_created.desc()).all()
-    elif stage == 'a1_p2_na':
-        papers = Paper.query.filter(and_(
-            Paper.project_id == project_id,
-            Paper.ss_pr == ss_state.SS_PR_PASSED_TITLE,
-            Paper.ss_rs == ss_state.SS_RS_NA
-        )).order_by(Paper.date_created.desc()).all()
-    elif stage == 'a2':
-        papers = Paper.query.filter(and_(
-            Paper.project_id == project_id,
-            Paper.ss_st.in_([
-                ss_state.SS_ST_AUTO_EMAIL,
-                ss_state.SS_ST_AUTO_SEARCH,
-                ss_state.SS_ST_AUTO_OTHER
-            ]),
-            Paper.ss_rs.in_([
-                ss_state.SS_RS_INCLUDED_ONLY_SR,
-                ss_state.SS_RS_INCLUDED_SRMA
-            ])
-        )).order_by(Paper.date_created.desc()).all()
-    elif stage == 'a3':
-        papers = Paper.query.filter(and_(
-            Paper.project_id == project_id,
-            Paper.ss_st.in_([
-                ss_state.SS_ST_AUTO_EMAIL,
-                ss_state.SS_ST_AUTO_SEARCH,
-                ss_state.SS_ST_AUTO_OTHER
-            ]),
-            Paper.ss_rs.in_([
-                ss_state.SS_RS_INCLUDED_SRMA
-            ])
-        )).order_by(Paper.date_created.desc()).all()
-    elif stage == 'u1':
-        papers = Paper.query.filter(and_(
-            Paper.project_id == project_id,
-            Paper.ss_st.in_([
-                ss_state.SS_ST_AUTO_EMAIL,
-                ss_state.SS_ST_AUTO_SEARCH,
-                ss_state.SS_ST_AUTO_OTHER
-            ]),
-            Paper.ss_pr == ss_state.SS_PR_UPDATE_EXIST,
-            Paper.ss_rs.in_([
-                ss_state.SS_RS_INCLUDED_ONLY_SR,
-                ss_state.SS_RS_INCLUDED_SRMA
-            ])
-        )).order_by(Paper.date_created.desc()).all()
-    elif stage == 'u2':
-        papers = Paper.query.filter(and_(
-            Paper.project_id == project_id,
-            Paper.ss_st.in_([
-                ss_state.SS_ST_AUTO_EMAIL,
-                ss_state.SS_ST_AUTO_SEARCH,
-                ss_state.SS_ST_AUTO_OTHER
-            ]),
-            Paper.ss_pr == ss_state.SS_PR_UPDATE_EXIST,
-            Paper.ss_rs.in_([
-                ss_state.SS_RS_INCLUDED_SRMA
-            ])
-        )).order_by(Paper.date_created.desc()).all()
-    elif stage == 'f1':
-        papers = Paper.query.filter(and_(
-            Paper.project_id == project_id,
-            Paper.ss_rs.in_([
-                ss_state.SS_RS_INCLUDED_ONLY_SR,
-                ss_state.SS_RS_INCLUDED_SRMA
-            ])
-        )).order_by(Paper.date_created.desc()).all()
-    elif stage == 'f2':
-        papers = Paper.query.filter(and_(
-            Paper.project_id == project_id,
-            Paper.ss_rs.in_([
-                ss_state.SS_RS_INCLUDED_SRMA
-            ])
-        )).order_by(Paper.date_created.desc()).all()
-    elif stage == 'e1':
-        papers = Paper.query.filter(and_(
-            Paper.project_id == project_id,
-            Paper.ss_rs.in_([
-                ss_state.SS_RS_EXCLUDED_TITLE
-            ])
-        )).order_by(Paper.date_created.desc()).all()
-    elif stage == 'e2':
-        papers = Paper.query.filter(and_(
-            Paper.project_id == project_id,
-            Paper.ss_rs.in_([
-                ss_state.SS_RS_EXCLUDED_FULLTEXT
-            ])
-        )).order_by(Paper.date_created.desc()).all()
-    elif stage == 'e3':
-        papers = Paper.query.filter(and_(
-            Paper.project_id == project_id,
-            Paper.ss_rs.in_([
-                ss_state.SS_RS_INCLUDED_ONLY_SR
-            ])
-        )).order_by(Paper.date_created.desc()).all()
-    else:
-        papers = []
-
     return papers
 
 
