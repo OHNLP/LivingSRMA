@@ -94,33 +94,6 @@ class Project(db.Model):
         }
 
 
-    def get_study_type(self):
-        '''
-        Get the study type (original / follow-up)
-        '''
-        if 'study_type' in self.meta:
-            return self.meta['study_type']
-        else:
-            return ''
-
-
-    def get_rct_id(self):
-        '''
-        Get the rct_id
-        '''
-        if 'rct_id' in self.meta:
-            return self.meta['rct_id']
-        else:
-            return ''
-
-
-    def get_year(self):
-        '''
-        Get the publication year
-        '''
-        return util.get_year(self.pub_date)
-
-
     def is_user_in(self, uid):
         for u in self.related_users:
             if u.uid == uid:
@@ -300,6 +273,16 @@ class Paper(db.Model):
         '''
         if 'rct_id' in self.meta:
             return self.meta['rct_id']
+        else:
+            return ''
+
+
+    def get_study_type(self):
+        '''
+        Get the study type (original / follow-up)
+        '''
+        if 'study_type' in self.meta:
+            return self.meta['study_type']
         else:
             return ''
 
