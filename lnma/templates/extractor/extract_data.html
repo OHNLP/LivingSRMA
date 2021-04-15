@@ -1546,11 +1546,11 @@ var jarvis = {
 
         }
 
-        this.bind_resize();
+        // bind resize event
+        this.bind_resize_event();
 
         // remove the context menu for 
         document.addEventListener('click', function(event) {
-
             // close the menu when click anywhere
             $("#pan_ocpapers_ctx_menu").hide();
         });
@@ -1596,7 +1596,7 @@ var jarvis = {
         a.remove();
     },
 
-    bind_resize: function() {
+    bind_resize_event: function() {
         $(window).on('resize', function(){
             pan_ocpapers.resize();
             pan_collector.resize();

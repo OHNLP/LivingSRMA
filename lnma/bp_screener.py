@@ -148,6 +148,23 @@ def set_pmid():
     return jsonify(ret)
 
 
+@bp.route('/set_pub_date', methods=['GET', 'POST'])
+@login_required
+def set_pub_date():
+    paper_id = request.form.get('paper_id')
+    pub_date = request.form.get('pub_date')
+    # TODO check the pub_date
+
+    is_success, paper = dora.set_paper_pub_date(paper_id, pub_date)
+
+    ret = {
+        'success': is_success,
+        'paper': paper.as_very_simple_dict()
+    }
+    
+    return jsonify(ret)
+
+
 @bp.route('/add_tag', methods=['GET', 'POST'])
 @login_required
 def add_tag():

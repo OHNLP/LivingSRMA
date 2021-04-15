@@ -237,8 +237,9 @@ Screener Overview
             </a>
         </div>
 
-        <div id="pan_datasync_btns" class="d-flex flex-row">
-            
+        <div id="pan_datasync_btns" class="d-flex flex-row"
+            v-if="new_data != null">
+            {{ new_data.pmid }}
         </div>
     </div>
 
@@ -285,6 +286,17 @@ Screener Overview
                 <textarea name="ds_pub_date" id="ds_pub_date" rows="10"
                     class="datasync-textarea"
                     v-model="new_data.abstract"></textarea>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-12 text-right">
+                <button class="btn btn-primary"
+                    v-bind:disabled="is_btn_disabled"
+                    v-on:click="update_paper_detail">
+                    <i class="fa fa-save"></i>
+                    Update the information for paper [ {{ new_data.pmid }} ]
+                </button>
             </div>
         </div>
 
@@ -569,365 +581,11 @@ Screener Overview
 <!-- my scripts -->
 <script>
 
-var srv_screener = {
+{% include 'js/srv_pubmed.js' %}
+{% include 'js/srv_screener.js' %}
 
-    api_url: {
-        get_stat: '[[ url_for("screener.get_stat") ]]',
-        get_paper_by_id: '[[ url_for("screener.get_paper_by_id") ]]',
-        get_papers_by_stage: '[[ url_for("screener.get_papers_by_stage") ]]',
-
-        // for screening
-        set_unscreened: '[[ url_for("screener.sspr_set_papers_unscreened") ]]',
-        set_needchkft: '[[ url_for("screener.sspr_set_papers_needchkft") ]]',
-        exclude_ta: '[[ url_for("screener.sspr_exclude_papers_ta") ]]',
-        exclude_tt: '[[ url_for("screener.sspr_exclude_papers_tt") ]]',
-        exclude_ab: '[[ url_for("screener.sspr_exclude_papers_ab") ]]',
-        exclude_ft: '[[ url_for("screener.sspr_exclude_papers_ft") ]]',
-        include_sr: '[[ url_for("screener.sspr_include_papers_sr") ]]',
-        include_srma: '[[ url_for("screener.sspr_include_papers_srma") ]]',
-
-        // for labeling 
-        set_label_ckl: '[[ url_for("screener.sspr_set_label_ckl") ]]',
-        unset_label_ckl: '[[ url_for("screener.sspr_unset_label_ckl") ]]',
-        set_rct_feedback: '[[ url_for("screener.sspr_set_rct_feedback") ]]',
-
-        // for NCT8
-        set_rct_id: '[[ url_for("screener.set_rct_id") ]]',
-
-        // for PMID
-        set_pmid: '[[ url_for("screener.set_pmid") ]]',
-
-        // for tag
-        add_tag: '[[ url_for("screener.add_tag") ]]',
-        toggle_tag: '[[ url_for("screener.toggle_tag") ]]'
-    },
-
-    project: [[ project_json_str|safe ]],
-
-    stage: {
-        // view stage
-        all_of_them: { title: 'All References' },
-        decided: { title: 'Decided References' },
-
-        // main stages
-        unscreened: { title: 'Unscreened References' },
-        passed_title_not_fulltext: { title: 'Full-text review' },
-        excluded_by_title: { title: 'Excluded after checking title' },
-        excluded_by_abstract: { title: 'Excluded after checking abstract' },
-        excluded_by_fulltext: { title: 'Excluded after checking fulltext' },
-        included_sr: { title: 'Included in SR' },
-        included_srma: { title: 'Included in Both SR and MA' },
-        
-        // extended stages
-        included_only_sr: { title: 'Included only in SR' },
-        excluded_by_title_abstract: { title: 'Excluded after checking title and abstract' },
-        excluded_by_rct_classifier: { title: 'Excluded by RCT classifier' },
-    },
-
-    // current stages
-    STAGE_UNSCREENED: 'unscreened',
-    STAGE_EXCLUDED_BY_TITLE: 'excluded_by_title',
-    STAGE_EXCLUDED_BY_ABSTRACT: 'excluded_by_abstract',
-    STAGE_EXCLUDED_BY_FULLTEXT: 'excluded_by_fulltext',
-    STAGE_INCLUDED_SR: 'included_sr',
-    STAGE_INCLUDED_SRMA: 'included_srma',
-    
-    // Not used stages
-    // STAGE_INCLUDED_ONLY_SR: 'included_only_sr',
-    STAGE_EXCLUDED_BY_TITLE_ABSTRACT: 'excluded_by_title_abstract',
-    STAGE_EXCLUDED_BY_RCT_CLASSIFIER: 'excluded_by_rct_classifier',
-
-    // just for display purpose, not a real stage
-    STAGE_ALL_OF_THEM: 'all_of_them',
-    STAGE_DECIDED: 'decided',
-    STAGE_UNKNOWN: 'unknown',
-
-    // attribute name for the user feedback
-    ATTR_PRED_RCT_USR_FB: 'usr_fb',
-    RCT_USER_FEEDBACK: {
-        '0': '<b class="text-danger">NOT RCT</b>',
-        '1': '<b class="text-success"><i class="fa fa-bong"></i> RCT</b>',
-        '': '?'
-    },
-
-    // stage states
-    ss: {
-        rs: {
-            e1:  { name: 'Duplicate record(s)', color: 'grey' },
-            e2:  { name: 'Excluded by title', color: 'grey' },
-            e21: { name: 'Excluded by RCT classifier', color: 'grey' },
-            e22: { name: 'Excluded by abstract', color: 'grey' },
-            e3:  { name: 'Excluded by full-text review', color: 'grey' },
-            e4:  { name: 'Excluded due to study update', color: 'grey' },
-
-            f1:  { name: 'Included in SR', color: '#007bff' },
-            f3:  { name: 'Included in SR and MA', color: 'green' },
-
-            na:  { name: 'Not decided', color: 'white' }
-        }
-    },
-
-    get_stage: function(paper) {
-        if (paper.ss_rs == 'na' && paper.ss_pr == 'na') {
-            return this.STAGE_UNSCREENED;
-        } else if (paper.ss_rs == 'f1') {
-            return this.STAGE_INCLUDED_SR;
-        } else if (paper.ss_rs == 'f3') {
-            return this.STAGE_INCLUDED_SRMA;
-        } else if (paper.ss_rs == 'e2') {
-            return this.STAGE_EXCLUDED_BY_TITLE;
-        } else if (paper.ss_rs == 'e22') {
-            return this.STAGE_EXCLUDED_BY_ABSTRACT;
-        } else if (paper.ss_rs == 'e3') {
-            return this.STAGE_EXCLUDED_BY_FULLTEXT;
-        } else {
-            return this.STAGE_UNKNOWN;
-        }
-    },
-
-    get_stat: function(callback) {
-        var url = this.api_url.get_stat;
-        var project_id = Cookies.get('project_id');
-
-        $.get(
-            url,
-            {project_id: project_id, ver: Math.random()},
-            callback, 
-            'json'
-        );
-    },
-
-    get_paper_by_id: function(paper_id, callback) {
-        var project_id = Cookies.get('project_id');
-        var url = this.api_url.get_paper_by_id;
-
-        $.get(
-            url,
-            {project_id: project_id, paper_id: paper_id},
-            callback, 
-            'json'
-        );
-    },
-
-    get_papers: function(stage, callback) {
-        var project_id = Cookies.get('project_id');
-        var url = this.api_url.get_papers_by_stage;
-
-        $.get(
-            url,
-            {project_id: project_id, stage: stage},
-            callback, 
-            'json'
-        );
-    },
-
-    ///////////////////////////////////////////////////////////////////////////
-    // the functions related to screening
-    ///////////////////////////////////////////////////////////////////////////
-
-    set_rct_id: function(paper_id, rct_id, callback) {
-        // send request to backend
-        var project_id = Cookies.get('project_id');
-        
-        var url = this.api_url.set_rct_id;
-        $.post(
-            url,
-            {project_id: project_id, paper_id: paper_id, rct_id: rct_id},
-            callback,
-            'json'
-        );  
-
-    },
-
-    set_pmid: function(paper_id, pmid, callback) {
-        // send request to backend
-        var project_id = Cookies.get('project_id');
-        
-        var url = this.api_url.set_pmid;
-        $.post(
-            url,
-            {project_id: project_id, paper_id: paper_id, pmid: pmid},
-            callback,
-            'json'
-        );  
-
-    },
-
-    add_tag: function(paper_id, tag, callback) {
-        // send request to backend
-        var project_id = Cookies.get('project_id');
-        
-        var url = this.api_url.add_tag;
-        $.post(
-            url,
-            {paper_id: paper_id, tag: tag},
-            callback,
-            'json'
-        );  
-    },
-
-    toggle_tag: function(paper_id, tag, callback) {
-        // send request to backend
-        var project_id = Cookies.get('project_id');
-        
-        var url = this.api_url.toggle_tag;
-        $.post(
-            url,
-            {paper_id: paper_id, tag: tag},
-            callback,
-            'json'
-        );  
-    },
-
-    set_unscreened: function(paper_id, callback) {
-        // send request to backend
-        var project_id = Cookies.get('project_id');
-        var paper_ids = [paper_id].join(',');
-        
-        var url = this.api_url.set_unscreened;
-        $.post(
-            url,
-            {paper_ids: paper_ids, project_id: project_id},
-            callback,
-            'json'
-        );
-    },
-
-    set_needchkft: function(paper_id, callback) {
-        // send request to backend
-        var project_id = Cookies.get('project_id');
-        var paper_ids = [paper_id].join(',');
-        
-        var url = this.api_url.set_needchkft;
-        $.post(
-            url,
-            {paper_ids: paper_ids, project_id: project_id},
-            callback,
-            'json'
-        );
-    },
-
-    exclude_by_tt: function(paper_id, callback) {
-        // send request to backend
-        var project_id = Cookies.get('project_id');
-        var paper_ids = [paper_id].join(',');
-        
-        var url = this.api_url.exclude_tt;
-        $.post(
-            url,
-            {paper_ids: paper_ids, project_id: project_id},
-            callback,
-            'json'
-        );
-    },
-
-    exclude_by_ab: function(paper_id, callback) {
-        // send request to backend
-        var project_id = Cookies.get('project_id');
-        var paper_ids = [paper_id].join(',');
-        
-        var url = this.api_url.exclude_ab;
-        $.post(
-            url,
-            {paper_ids: paper_ids, project_id: project_id},
-            callback,
-            'json'
-        );
-    },
-
-    exclude_by_ft: function(paper_id, reason, callback) {
-        // send request to backend
-        var project_id = Cookies.get('project_id');
-        var paper_ids = [paper_id].join(',');
-        
-        var url = this.api_url.exclude_ft;
-        $.post(
-            url,
-            {paper_ids: paper_ids, project_id: project_id, reason: reason},
-            callback,
-            'json'
-        );
-    },
-
-    include_in_sr: function(paper_id, reason, callback) {
-        // send request to backend
-        var project_id = Cookies.get('project_id');
-        var paper_ids = [paper_id].join(',');
-        
-        var url = this.api_url.include_sr;
-        $.post(
-            url,
-            {paper_ids: paper_ids, project_id: project_id, reason: reason},
-            callback,
-            'json'
-        );
-    },
-
-    include_in_srma: function(paper_id, callback) {
-        // send request to backend
-        var project_id = Cookies.get('project_id');
-        var paper_ids = [paper_id].join(',');
-        
-        var url = this.api_url.include_srma;
-        $.post(
-            url,
-            {paper_ids: paper_ids, project_id: project_id},
-            callback,
-            'json'
-        );
-    },
-    
-    set_label_check_later: function(paper_id, callback) {
-        // send request
-        var project_id = Cookies.get('project_id');
-        var paper_ids = [paper_id].join(',');
-        
-        var url = this.api_url.set_label_ckl;
-        $.post(
-            url,
-            {paper_ids: paper_ids, project_id: project_id},
-            callback,
-            'json'
-        );
-    },
-    
-    unset_label_check_later: function(paper_id, callback) {
-        // send request
-        var project_id = Cookies.get('project_id');
-        var paper_ids = [paper_id].join(',');
-        
-        var url = this.api_url.unset_label_ckl;
-        $.post(
-            url,
-            {paper_ids: paper_ids, project_id: project_id},
-            callback,
-            'json'
-        );
-    },
-    
-    set_rct_feedback: function(paper_id, feedback, callback) {
-        // send request
-        var project_id = Cookies.get('project_id');
-        var paper_ids = [paper_id].join(',');
-        
-        var url = this.api_url.set_rct_feedback;
-        $.post(
-            url,
-            {paper_ids: paper_ids, project_id: project_id, feedback: feedback},
-            callback,
-            'json'
-        );
-    },
-
-    has_label_ckl: function(d) {
-        if (d.ss_ex.hasOwnProperty('label')) {
-            if (d.ss_ex.label.hasOwnProperty('CKL')) {
-                return true;
-            }
-        }
-        return false;
-    }
-};
+// update the project information
+srv_screener.project = [[ project_json_str|safe ]];
 
 
 var ui_category_stat = {
@@ -2030,8 +1688,28 @@ var tbjs_paperlist = {
         return this.__get_span_rct_id(d) + ' | ' +
             this.__get_span_pmid(d) + ' | ' +
             '<span>' + d.journal + '</span> | ' + 
-            '<span class="mr-2">' + d.pub_date + '</span>' + 
+            this.__get_span_pub_date(d) + ' | ' +
             '<a href="javascript:void(0);" class="text-sm" onclick="tbjs_paperlist.sync_data_from_pubmed(\''+d.paper_id+'\', \''+d.pid+'\')"><i class="fa fa-sync"></i> Sync</a>';
+    },
+
+    /**
+     * Generate span for the pub_date
+     */
+    __get_span_pub_date: function(d) {
+        var html = '';
+        if (d.pub_date == '') {
+            html = [
+                '<a href="javascript:void(0);" onclick="tbjs_paperlist.set_pub_date(\''+d.paper_id+'\', \'\')" title="Click to set the publication date">Add Publication Date</a>'
+            ].join('');
+        } else {
+            html = [
+                '<a href="javascript:void(0);" onclick="tbjs_paperlist.set_pub_date(\''+d.paper_id+'\', \''+d.pub_date+'\')" title="Click to update the publication date for this study">',
+                    d.pub_date,
+                '</a>'
+            ].join('');
+        }
+
+        return html;
     },
 
     /**
@@ -2280,6 +1958,36 @@ var tbjs_paperlist = {
         this.remove_paper_from_tbjs(paper_id);
     },
 
+    set_pub_date: function(paper_id, rct_id) {
+        var txt = jarvis.prompt(
+            'Please input the NCT number (e.g., 2021-03-01)', 
+            rct_id
+        );
+
+        if (txt == null) {
+            return;
+        }
+        txt = txt.trim();
+
+        if (txt == '') {
+            return;
+        }
+
+        srv_screener.set_pub_date(paper_id, txt, function(data) {
+            // console.log('* set RCT_ID!', data);
+            toast("Updated publication date [" + data.paper.pub_date + '] for ' + data.paper.seq_num);
+            var paper = data.paper;
+
+            // update the UI, well, just update the whole line of info
+            $('#tb-rowext-info-' + paper.paper_id).html(
+                tbjs_paperlist.__get_line_info(paper)
+            );
+
+            // update the tb data list
+            tbjs_paperlist.update_data_by_paper(data.paper);
+        });
+    },
+
     set_rct_id: function(paper_id, rct_id) {
         var txt = jarvis.prompt('Please input the NCT number (e.g., NCT12345678)', rct_id);
 
@@ -2463,9 +2171,6 @@ var tbjs_paperlist = {
     sync_data_from_pubmed: function(paper_id, pmid) {
         toast('Getting data from PubMed to update this study ['+pmid+'] information ...');
 
-        // show the panel
-        pan_datasync.show();
-
         // show the data for this study
         pan_datasync.set_current_paper(
             tbjs_paperlist.papers[pmid]
@@ -2474,11 +2179,19 @@ var tbjs_paperlist = {
         // get the details from pubmed
         srv_pubmed.efetch([pmid], function(data) {
             srv_pubmed.ret = data;
-            console.log(data);
+            console.log('* efetch return', data);
 
             // convert the data to a paper object
             var paper_dict = srv_pubmed.parse_efetch_data(data);
-            console.log(paper_dict);
+            console.log('* paper_dict', paper_dict);
+            if (Object.keys(paper_dict).length == 0) {
+                toast('Not found in PubMed', 'warning');
+                return;
+            }
+
+            // show the panel
+            pan_datasync.show();
+
             srv_pubmed.paper_dict = paper_dict;
 
             // get the only one paper in the dictionary
@@ -2492,146 +2205,6 @@ var tbjs_paperlist = {
 
             toast('Parsed the data from PubMed successfully!');
         });
-    }
-};
-
-var srv_pubmed = {
-    ret: null,
-    paper_dict: null,
-    url: {
-        esearch: 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed',
-        esummary: 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed',
-        efetch: "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed",
-        view_pmid: 'https://www.ncbi.nlm.nih.gov/pubmed/?term='
-    },
-    
-    efetch: function(ids, callback) {
-        $.get(
-            this.url.efetch,
-            {id: ids.join(','), retmode:'xml'},
-            callback, 'xml'
-        );
-    },
-
-    parse_efetch_data: function(data) {
-        var xml = $(data);
-        var docs = xml.find('PubmedArticle');
-        
-        var paper_dict = {};
-        for (var i = 0; i < docs.length; i++) {
-            var doc = $(docs[i]);
-
-            // get PMID
-            var pmid = doc.find('PMID')[0].textContent;
-
-            // get title
-            var title = doc.find('ArticleTitle')[0].textContent;
-            title = title.trim();
-
-            // get title
-            var abstract = doc.find('Abstract')[0].textContent;
-            abstract = abstract.trim();
-
-            // get authors
-            var authors = [];
-            var authors_elems = doc.find('Author');
-            for (var j = 0; j < authors_elems.length; j++) {
-                var elem = $(authors_elems[j]);
-                var last_name = elem.find('LastName')[0].textContent;
-                var fore_name = elem.find('ForeName')[0].textContent;
-                var initials = elem.find('Initials')[0].textContent;
-                var name = fore_name + ' ' + last_name;
-                authors.push(name);
-            }
-
-            // get journal
-            var journal = doc.find('Journal Title')[0].textContent;
-
-            // get date
-            var pub_date = '';
-            try {
-                const y = doc.find('ArticleDate Year')[0].textContent;
-                const m = doc.find('ArticleDate Month')[0].textContent;
-                const d = doc.find('ArticleDate Day')[0].textContent;
-                pub_date = y + '-' + m + '-' + d;
-            } catch {
-                try {
-                    const y = doc.find('DateCompleted Year')[0].textContent;
-                    const m = doc.find('DateCompleted Month')[0].textContent;
-                    const d = doc.find('DateCompleted Day')[0].textContent;
-                    pub_date = y + '-' + m + '-' + d;
-                } catch {
-                    try {
-                        const y = doc.find('PubDate Year')[0].textContent;
-                        const m = doc.find('PubDate Month')[0].textContent;
-                        pub_date = y + '-' + m;
-                    } catch {
-                        pub_date = doc.find('Year')[0].textContent;
-                    }
-                }
-            }
-            pub_date = pub_date.trim();
-
-            // update the record
-            paper_dict[pmid] = {};
-            paper_dict[pmid].pmid = pmid;
-            paper_dict[pmid].title = title;
-            paper_dict[pmid].abstract = abstract;
-            paper_dict[pmid].authors = authors;
-            paper_dict[pmid].journal = journal;
-            paper_dict[pmid].pub_date = pub_date;
-
-            // most important, bind this doc to paper
-            paper_dict[pmid].xml = doc;
-        }
-
-        return paper_dict;
-    },
-
-    esummary: function(ids, callback) {
-        $.get(
-            this.url.esummary,
-            {id: ids.join(',')},
-            callback, 'xml'
-        );
-    },
-
-    parse_esummary_data: function(data) {
-        var xml = $(data);
-        var docsums = xml.find('DocSum');
-        
-        var paper_dict = {};
-        for (var i = 0; i < docsums.length; i++) {
-            var docsum_xml = $(docsums[i]);
-
-            // get PMID
-            var pmid = docsum_xml.find('Id')[0].textContent;
-
-            // get title
-            var title = docsum_xml.find('Item[Name="Title"]')[0].textContent;
-
-            // get authors
-            var authors = [];
-            var authors_elems = docsum_xml.find('Item[Name="Author"]');
-            for (var j = 0; j < authors_elems.length; j++) {
-                var elem = authors_elems[j];
-                authors.push(elem.textContent);
-            }
-
-            // get journal
-            var journal = docsum_xml.find('Item[Name="FullJournalName"]')[0].textContent;
-
-            // get date
-            var pub_date = docsum_xml.find('Item[Name="PubDate"]')[0].textContent;
-
-            // update the record
-            paper_dict[pmid] = {};
-            paper_dict[pmid].title = title;
-            paper_dict[pmid].journal = journal;
-            paper_dict[pmid].pub_date = pub_date;
-            paper_dict[pmid].authors = authors;
-        }
-        return paper_dict;
     }
 };
 
@@ -2726,6 +2299,7 @@ var pan_datasync = {
             el: this.vpp_id,
             data: {
                 is_hide: true,
+                is_btn_disabled: false,
                 current_paper: null,
                 pubmed_paper: null,
                 new_data: null
@@ -2733,6 +2307,11 @@ var pan_datasync = {
             methods: {
                 toggle: function() {
                     pan_datasync.toggle();
+                },
+
+                update_paper_detail: function() {
+                    // first, disable button
+                    this.is_btn_disabled = true;
                 }
             }
         });
@@ -2746,13 +2325,8 @@ var pan_datasync = {
         this.vpp.pubmed_paper = paper;
         
         // update content
-        this.vpp.new_data = {
-            title: paper.title,
-            abstract: paper.abstract,
-            pub_date: paper.pub_date,
-            journal: paper.journal,
-            authors: paper.authors.join('; ')
-        };
+        this.vpp.new_data = paper 
+        this.vpp.new_data.authors =  paper.authors.join('; ');
     },
 
     toggle: function() {
@@ -2765,27 +2339,23 @@ var pan_datasync = {
 
     show: function() {
         this.vpp.$data.is_hide = false;
+        this.vpp.$data.is_btn_disabled = false;
 
         // resize
-        var w = $('#tbjs_paperlist_tools').width();
-        var h = $(window).height() - 25;
-
-        $(this.vpp_id).css('width', w);
-        $(this.vpp_id).css('height', h);
+        this.resize();
 
         // relocate
         $(this.vpp_id).css('left', '330px');
     },
 
-    update_toolbar: function(paper_id) {
-        $('#pan_pdfviewer_btns').html(
-            tbjs_paperlist._get_pdfview_toolbar({paper_id:paper_id})
-        );
-    },
+    resize: function() {
+        // resize
+        var w = $('#tbjs_paperlist_tools').width();
+        var h = $(window).height() - 25;
+        h = 620;
 
-    load_pdf: function(folder, file_id) {
-        var pdf_url = "/pdfworker/pdf/" + folder + "/" + file_id + '.pdf';
-        document.getElementById("ifr_pdfviewer").contentWindow.PDFViewerApplication.open(pdf_url);
+        $(this.vpp_id).css('width', w);
+        $(this.vpp_id).css('height', h);
     }
 };
 
@@ -2976,6 +2546,9 @@ var jarvis = {
 
         // load the sync panel
         pan_datasync.init();
+
+        // bind resize event
+        this.bind_resize_event();
     },
 
     sort_rct_seq: function() {
@@ -3002,6 +2575,12 @@ var jarvis = {
     confirm: function(text) {
         return window.confirm(text);
     },
+
+    bind_resize_event: function() {
+        $(window).on('resize', function(){
+            // pan_outcomes.resize();
+        });
+    }
 };
 
 $(document).ready(function () {

@@ -1188,7 +1188,7 @@ var jarvis = {
         // the load the init outcomes
         pan_itbuilder.load();
 
-        this.bind_resize();
+        this.bind_resize_event();
     },
 
     prompt: function(text, value) {
@@ -1223,7 +1223,7 @@ var jarvis = {
         a.remove();
     },
 
-    bind_resize: function() {
+    bind_resize_event: function() {
         $(window).on('resize', function(){
             // pan_outcomes.resize();
         });
