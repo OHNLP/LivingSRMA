@@ -250,7 +250,11 @@ a {
                 <div class="d-flex fx-col">
                     <div class="d-flex fx-row ">
                         <div class="oc-name" style="font-weight: bold;">
-                            &nbsp;
+                            <select v-model="group"
+                                v-on:change="update_oclist()">
+                                <option value="primary">Treatment Analysis</option>
+                                <option value="sensitivity">Other Analysis</option>
+                            </select>
                         </div>
                         <div style="font-weight: bold; width: 90px; text-align: center; border-bottom: 1px solid #555555;">
                             Grade
@@ -866,6 +870,7 @@ var vw_oclist = {
         this.vpp = new Vue({
             el: this.vpp_id,
             data: {
+                group: 'primary',
                 rs: this.rs,
                 select_mode: this.select_mode,
                 rs_stat: this.rs_stat
@@ -906,6 +911,10 @@ var vw_oclist = {
                 clear: function() {
                     $('.oc-type').removeClass('oc-type-selected');
                     jarvis.clear_all_ae();
+                },
+
+                update_oclist: function() {
+                    vw_oclist.update();
                 }
             }
         });
@@ -914,18 +923,33 @@ var vw_oclist = {
     },
 
     get_pid_condition: function() {
+        var conditions = '';
+        // so first condition is the pid
         if (this.pids.length == 0) {
-            return 'pid is not null ';
+            conditions += 'pid is not null ';
         } else {
             var cond = this.pids.map(function(v) { return '"' + v + '"'}).join(',');
-            return 'pid in (' + cond + ') '
+            conditions += 'pid in (' + cond + ') ';
         }
+
+        // second condition is the group
+        var group = this.vpp.$data.group;
+        conditions += '\n';
+        conditions += 'and oc_group = "'+group+'" ';
+
+        return conditions;
     },
     
 
     update: function(pids) {
-        // update the pid
-        this.pids = pids;
+        if (typeof(pid) == 'undefined') {
+
+        } else {
+            // update the pid
+            this.pids = pids;
+        }
+
+        // create a SQL for 
         var sql = 'select oc_cate, oc_name, ' + '\n' +
             '  count(case when has_GA = true then pid else null end) as cnt_ga, ' + '\n' +
             '  count(case when has_G3H = true then pid else null end) as cnt_g3h, ' + '\n' +

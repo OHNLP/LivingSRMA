@@ -3303,6 +3303,7 @@ def get_sof_pma_data_from_db_IO(is_calc_pma=True):
     rs = []
     oc_dict = {}
     for extract in extracts:
+        oc_group = extract.meta['group']
         oc_cate = extract.meta['category']
         oc_name = extract.meta['full_name']
 
@@ -3364,6 +3365,7 @@ def get_sof_pma_data_from_db_IO(is_calc_pma=True):
             r['pid'] = paper.pid
             r['oc_cate'] = oc_cate
             r['oc_name'] = oc_name
+            r['oc_group'] = oc_group
 
             rs.append(r)
             oc_rs.append(r)
@@ -3403,6 +3405,7 @@ def get_sof_pma_data_from_db_IO(is_calc_pma=True):
                 r['pid'] = paper.pid
                 r['oc_cate'] = oc_cate
                 r['oc_name'] = oc_name
+                r['oc_group'] = oc_group
 
                 rs.append(r)
                 oc_rs.append(r)
