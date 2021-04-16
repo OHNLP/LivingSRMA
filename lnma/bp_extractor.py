@@ -620,7 +620,9 @@ def import_itable_from_xls(keystr):
     # if not exist, create a new one which is empty
     if extract is None:
         extract = dora.create_extract(
-            project_id, oc_type, abbr, {}, {}
+            project_id, oc_type, abbr, 
+            settings.OC_TYPE_TPL['itable']['default'], 
+            {}
         )
 
     # get the itable data

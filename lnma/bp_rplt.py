@@ -114,7 +114,7 @@ def pwma_incd():
         'tau_estimation_method': 'DL',
         'is_hakn': hk,
         'hakn_adjustment': hk,
-        'adhoc_hakn': '',
+        'adhoc_hakn': '' if hk == 'FALSE' else 'se',
         'is_create_figure': cf,
         'sort_by': 'year',
         'assumed_baseline': 100

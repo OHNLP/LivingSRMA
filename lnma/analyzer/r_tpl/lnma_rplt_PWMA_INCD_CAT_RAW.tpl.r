@@ -71,6 +71,8 @@ results_raw <- metaprop(E,
                     #    backtransf = FALSE,
                        adhoc = "{{ adhoc_hakn }}")
 
+print("* R | finished metaprop")
+
 {% if is_create_figure == 'YES' %}
 
 # output the primary ma result in forest plot
@@ -113,6 +115,7 @@ dev.off()
 results_cum <- metacum(results_raw, 
                        sortvar = PRI_SINARM_PROP${{ sort_by }})
 
+print("* R | finished metacum")
 
 {% if is_create_figure == 'YES' %}
 
