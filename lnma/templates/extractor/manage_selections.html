@@ -267,7 +267,7 @@ html {
 
 
 <div id="pan_ocpapers">
-<div v-if="papers.length != 0 && extract_dict != null">
+<div v-if="papers != null && papers.length != 0 && extract_dict != null">
     <div class="panel-info">
         <div class="oc-attr d-flex flex-row">
             <span style="font-size: 1.2em;" class="mr-2">
@@ -330,10 +330,16 @@ html {
             </div>
 
             <div class="mt-1 mb-1">
-                <button class="btn btn-sm btn-default"
+                <button class="btn btn-sm btn-default mr-1"
                     v-on:click="save_working_paper_selections">
                     <i class="fa fa-save"></i>
                     Save Selections
+                </button>
+                <button class="btn btn-sm btn-default"
+                    title="Toggle display selected only"
+                    v-on:click="toggle_only_show_selected">
+                    <i class="fa" v-bind:class="{'fa-toggle-on': only_show_selected, 'fa-toggle-off': !only_show_selected}"></i>
+                    Toggle
                 </button>
             </div>
 
@@ -365,6 +371,7 @@ html {
                                 {{ cate_name }}
                             </div>
                             <div v-for="oc in cate"
+                                v-if="!only_show_selected || working_paper_oc_selections[oc.abbr]"
                                 class="chk-oc d-flex flex-row">
                                 <div>
                                     <input type="checkbox" 
@@ -372,11 +379,20 @@ html {
                                         v-model="working_paper_oc_selections[oc.abbr]"
                                         v-bind:id="'chk-oc-' + oc.abbr">
                                 </div>
-                                <div>
-                                    <label class="chk-oc-label" 
-                                        v-bind:for="'chk-oc-' + oc.abbr">
-                                        {{ oc.meta.full_name }}
-                                    </label>
+                                <div class="d-flex flex-row justify-content-between flex-fill">
+                                    <div>
+                                        <label class="chk-oc-label" 
+                                            v-bind:for="'chk-oc-' + oc.abbr">
+                                            {{ oc.meta.full_name }}
+                                        </label>
+                                    </div>
+                                    <div>
+                                        <button v-if="working_paper_oc_selections[oc.abbr]"
+                                            v-on:click="extract(oc)"
+                                            class="btn btn-default btn-xs">
+                                            <i class="fa fa-edit"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -385,12 +401,47 @@ html {
 
             </div>
         </div>
+
+        <div id="pan_ocpapers_working_paper_collector"
+            v-show="show_working_paper_collector">
+            <div v-if="working_paper != null">
+                <div id="pan_ocpapers_working_paper_collector_title">
+                    
+                </div>
+
+                <div id="pan_ocpapers_working_paper_attr_list">
+                    <div v-for="attr_sub in all_attrs"
+                        v-show="show_attrs[attr_sub.abbr]"
+                        class="w-attr-item">
+                        <div class="w-attr-item-name">
+                            {{ attr_sub.name }}
+                        </div>
+                        <div class="w-attr-item-value">
+                            <input class="paper-extract-input-auto input-auto-complete" type="text" 
+                                v-bind:abbr="attr_sub.abbr"
+                                v-bind:size="get_input_size(extract.data[working_paper.pid].attrs.main[attr_sub.abbr])"
+                                v-model="extract.data[working_paper.pid].attrs.main[attr_sub.abbr]"> 
+                            <span class="w-remove-content"
+                                v-on:click="extract.data[working_paper.pid].attrs.main[attr_sub.abbr] = ''">
+                                <i class="fa fa-close"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        
     </div>
 
 </div>
-<div v-else>
-    No studies are included yet.
+<div v-else-if="papers == null">
+    Loading ...
 </div>
+<div v-else-if="papers.length == 0">
+    No studies are included in SR.
+</div>
+
 </div>
 
 <div id="config_outcome">
@@ -532,7 +583,6 @@ html {
 
 </div>
 
-
     
 </div>
 <!-- /#main -->
@@ -557,23 +607,32 @@ var pan_ocpapers = {
             data: {
                 // flags
                 show_settings: true,
+                only_show_selected: false,
                 show_working_paper_pan: false,
+                show_working_paper_collector: false,
 
                 // data
-                papers: [],
+                papers: null,
                 extracts: null,
                 extract_dict: null,
                 extract_tree: null,
 
                 // working paper
                 working_paper: null,
-                working_paper_oc_selections: null
+                working_paper_oc_selections: null,
+
+                // the attrs for extraction
+                all_attrs: []
             },
             methods: {
 
                 // save all!
                 update_extract: function() {
                     pan_ocpapers.update_extract();
+                },
+
+                toggle_only_show_selected: function() {
+                    this.only_show_selected = !this.only_show_selected;
                 },
 
                 get_input_size: function(str) {
@@ -639,6 +698,10 @@ var pan_ocpapers = {
                     pan_ocpapers.save_working_paper_selections(
                         pid, this.working_paper_oc_selections
                     );
+                },
+
+                extract: function(oc) {
+                    console.log('* extract', this.working_paper, 'for', oc);
                 }
             },
             updated: function() {
