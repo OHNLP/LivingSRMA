@@ -69,7 +69,7 @@ results_raw <- metaprop(E,
                        method.tau = "{{ tau_estimation_method }}", 
                        hakn = {{ hakn_adjustment }},
                     #    backtransf = FALSE,
-                       adhoc = "{{ adhoc_hakn }}")
+                       adhoc.hakn = "{{ adhoc_hakn }}")
 
 print("* R | finished metaprop")
 
