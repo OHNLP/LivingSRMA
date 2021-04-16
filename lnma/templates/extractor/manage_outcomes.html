@@ -32,6 +32,8 @@ html {
 }
 #pan_outcomes {
     height: 100%;
+    width: 400px;
+    overflow-x: hidden;
     overflow-y: auto;
 }
 .cate-line {
@@ -58,7 +60,7 @@ html {
 }
 .cate-extract-col {
     min-width: 60px;
-    width: 100px;
+    /* width: 100px; */
     max-width: 200px;
     font-size: .9em;
     padding: 0 .5em;
@@ -76,7 +78,7 @@ html {
 
 #config_outcome {
     min-width: 1100px;
-    width: 70%;
+    width: calc(100% - 500px);
     height: 100%;
     position: absolute;
     right: 5000px;
@@ -132,7 +134,7 @@ html {
 
 <div id="main">
 
-<div id="pan_outcomes" class="panel-m panel-container">
+<div id="pan_outcomes" class="panel-container">
 
     <h5>
         PWMA Outcomes
@@ -924,7 +926,6 @@ Vue.component('outcome-list', {
         <button class="btn btn-default btn-xs"
             v-on:click="create_extract(oc_type, 'default', group, cate)">
             <i class="fa fa-plus"></i>
-            Add outcome to <b>{{ cate }}</b>
         </button>
     </div>
 
@@ -940,10 +941,6 @@ Vue.component('outcome-list', {
             </div>
 
             <div class="cate-extract-col">
-                {{ oc.measure_of_effect }}
-            </div>
-
-            <div class="cate-extract-col">
                 <span v-if="oc.included_in_plots=='yes'" class="badge badge-success">In Plot</span>
                 <span v-else class="badge badge-light">Plot</span>
             </div>
@@ -953,18 +950,19 @@ Vue.component('outcome-list', {
                 <span v-else class="badge badge-light">SoF</span>
             </div>
 
-            <div class="cate-extract-delete">
-                <button class="btn btn-default btn-xs"
-                    v-on:click="delete_extract(oc.oc_type, oc.abbr, oc.full_name)">
-                    <i class="far fa-trash-alt"></i>
-                </a>
-            </div>
         </div>
     </div>
 
 </div>
 `
 });
+
+// <div class="cate-extract-delete">
+//     <button class="btn btn-default btn-xs"
+//         v-on:click="delete_extract(oc.oc_type, oc.abbr, oc.full_name)">
+//         <i class="far fa-trash-alt"></i>
+//     </a>
+// </div>
 
 
 var jarvis = {
