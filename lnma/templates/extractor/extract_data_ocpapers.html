@@ -3,13 +3,13 @@
     
 
     <div class="d-flex flex-column" style="height: 100%;"
-        v-if="extract != null">
+        v-if="working_oc != null">
 
         <div id="pan_ocpapers_toolbar" class="panel-info">
             <div class="oc-attr d-flex flex-row">
                 <span style="font-size: 1.2em;" class="mr-2">
                     <a href="javascript:void(0);" onclick="pan_ocpapers.show_ocs_menu();">
-                        <b>[{{ extract.meta.full_name }}]</b>
+                        <b>[{{ working_oc.meta.full_name }}]</b>
                     </a>
                 </span>
 
@@ -33,8 +33,8 @@
         </div>
         
         <div id="pan_ocpapers_attrs" class="panel-info d-flex flex-column" 
-            v-if="extract != null">
-            <div v-for="cate, cate_idx in extract.meta.cate_attrs"
+            v-if="working_oc != null">
+            <div v-for="cate, cate_idx in working_oc.meta.cate_attrs"
                 style="border-bottom: 1px dotted #dddddd; margin: 5px 0 5px 0;"
                 class="d-flex flex-column">
 
@@ -91,7 +91,7 @@
         <div id="pan_ocpapers_paperlist" style="overflow: auto;">
 
             <!-- table for itable -->
-            <table class="extract-table">
+            <table class="paper-table">
                 <thead class="paper-table-header">
                     <tr>
                         <th class="paper-table-header-th" colspan="5">
@@ -140,10 +140,10 @@
                     <tr class="paper-table-row" 
                         v-for="paper in papers"
                         v-bind:id="'paper-table-row-' + paper.pid"
-                        v-show="!only_show_selected || extract.data[paper.pid].is_selected">
+                        v-show="!only_show_selected || working_oc.data[paper.pid].is_selected">
                         <td class="paper-table-body-td">
                             <input type="checkbox" 
-                                v-model="extract.data[paper.pid].is_selected"
+                                v-model="working_oc.data[paper.pid].is_selected"
                                 disabled="disabled">
                         </td>
 
@@ -163,10 +163,10 @@
                         <td class="paper-table-body-td">
                             <input type="checkbox" 
                                 v-bind:id="'paper-row-checked'+paper.pid"
-                                v-model="extract.data[paper.pid].is_checked">
+                                v-model="working_oc.data[paper.pid].is_checked">
                         </td>
                         <td class="paper-table-body-td">
-                            <select name="" id="" v-model="extract.data[paper.pid].n_arms"
+                            <select name="" id="" v-model="working_oc.data[paper.pid].n_arms"
                                 v-on:change="on_change_itable_n_arms(paper.pid, $event)">
                                 <option value="2">2</option>
                                 <option value="3">3</option>
@@ -184,19 +184,19 @@
                             <span class="cell-input">
                                 <input class="paper-extract-input-auto" type="text" 
                                     v-bind:abbr="attr_sub.abbr"
-                                    v-bind:size="get_input_size(extract.data[paper.pid].attrs.main[attr_sub.abbr])"
-                                    v-model="extract.data[paper.pid].attrs.main[attr_sub.abbr]">    
+                                    v-bind:size="get_input_size(working_oc.data[paper.pid].attrs.main[attr_sub.abbr])"
+                                    v-model="working_oc.data[paper.pid].attrs.main[attr_sub.abbr]">    
                             </span>
 
                             <!-- the other tracks if n_arms > 2 -->
-                            <hr class="n-arms-hr" v-if="extract.data[paper.pid].n_arms > 2">
+                            <hr class="n-arms-hr" v-if="working_oc.data[paper.pid].n_arms > 2">
 
-                            <span v-for="other, other_idx in extract.data[paper.pid].attrs.other"
+                            <span v-for="other, other_idx in working_oc.data[paper.pid].attrs.other"
                                 class="cell-input">
                                 <br v-if="other_idx > 0">
                                 <input class="paper-extract-input-auto" type="text" 
-                                    v-bind:size="get_input_size(extract.data[paper.pid].attrs.other[other_idx][attr_sub.abbr])"
-                                    v-model="extract.data[paper.pid].attrs.other[other_idx][attr_sub.abbr]">  
+                                    v-bind:size="get_input_size(working_oc.data[paper.pid].attrs.other[other_idx][attr_sub.abbr])"
+                                    v-model="working_oc.data[paper.pid].attrs.other[other_idx][attr_sub.abbr]">  
                             </span>                        
 
                         </td>
@@ -208,71 +208,12 @@
         <!-- /.panel-paperlist -->
 
         <div id="pan_ocpapers_working_paper"
-            v-show="show_working_paper_pan">
-            <div v-if="working_paper != null">
-                <div id="pan_ocpapers_working_paper_title">
-                    {{ get_first_author(working_paper.authors) }} {{ get_year(working_paper.pub_date) }}
-                </div>
+            class="d-flex flex-row"
+            v-if="show_working_paper_pan">
 
-                <div id="pan_ocpapers_working_paper_attr_list">
-                    <div v-for="cate in extract.meta.cate_attrs"
-                        class="w-cate-item mb-1 mt-1">
-                        <div class="w-cate-item-name">
-                            {{ cate.name }}
-                        </div>
-
-                        <div class="w-cate-attrs">
-                            <div v-for="attr in cate.attrs"
-                                v-show="show_attrs[attr.abbr]"
-                                class="w-attr-item">
-                                <div class="w-attr-item-name"
-                                    v-bind:title="attr.name">
-                                    {{ attr.name }}
-                                </div>
-
-                                <div class="w-attr-item-value"
-                                    v-if="attr.subs == null">
-                                    <input class="paper-extract-input-auto input-auto-complete" type="text" 
-                                        v-bind:abbr="attr.abbr"
-                                        v-bind:size="get_input_size(extract.data[working_paper.pid].attrs.main[attr.abbr])"
-                                        v-model="extract.data[working_paper.pid].attrs.main[attr.abbr]"> 
-                                    <span class="w-remove-content"
-                                        v-on:click="extract.data[working_paper.pid].attrs.main[attr.abbr] = ''">
-                                        <i class="fa fa-close"></i>
-                                    </span>
-                                </div>
-
-                                <div class="w-attr-subs"
-                                    v-else>
-                                    <div class="w-sub-item-value"
-                                        v-for="sub, sub_idx in attr.subs">
-
-                                        <div class="w-sub-item-name">
-                                            {{ sub.name }}
-                                        </div>
-
-                                        <div class="w-sub-item-value">
-                                            <input class="paper-extract-input-auto input-auto-complete"     
-                                                type="text" 
-                                                v-bind:abbr="sub.abbr"
-                                                v-bind:size="get_input_size(extract.data[working_paper.pid].attrs.main[sub.abbr])"
-                                                v-model="extract.data[working_paper.pid].attrs.main[sub.abbr]"> 
-                                            <span class="w-remove-content"
-                                                v-on:click="extract.data[working_paper.pid].attrs.main[sub.abbr] = ''">
-                                                <i class="fa fa-close"></i>
-                                            </span>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
-            </div>
+        {% include 'extractor/__pan_ocpapers_working_paper_collector.html' %}
         </div>
-
+        <!-- /#pan_ocpapers_working_paper -->
 
     </div>
 

@@ -1,0 +1,61 @@
+/**********************************************************
+ * For texts
+ *********************************************************/
+.txt-red {
+    color: rgb(250, 89, 89);
+    background: rgb(255, 205, 205);
+    padding: 0;
+    margin: 0;
+}
+
+.txt-yellow {
+    background: rgb(238, 219, 171);
+    color: darkgoldenrod;
+    padding: 0;
+    margin: 0;
+}
+
+.txt-orange {
+    background: rgb(247, 226, 188);
+    color: orange;
+    padding: 0;
+    margin: 0;
+}
+
+.txt-green {
+    color: rgb(1, 56, 1);
+    background: rgb(223, 245, 223);
+    padding: 0;
+    margin: 0;
+}
+
+.txt-blue {
+    background: rgb(214, 214, 255);
+    color: darkblue;
+    padding: 0;
+    margin: 0;
+}
+
+.txt-purple {
+    background: rgb(250, 183, 250);
+    color: purple;
+    padding: 0;
+    margin: 0;
+}
+
+
+/**********************************************************
+ * For bootstrap styles
+ *********************************************************/
+.btn-xs {
+    padding: .15rem .5rem;
+    font-size: .8rem;
+    line-height: 1.2;
+    border-radius: .2rem;
+}
+
+/* badge */
+.badge-ckl {
+    color: #fff;
+    background-color: #b88d17;
+}

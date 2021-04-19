@@ -13,14 +13,15 @@ Manage Selections
 
 {% block style %}
 <style>
+
+{% include 'css/basic.css' %}
+{% include 'css/extractor.css' %}
+{% include 'css/util.css' %}
+
+/* local styles */
 html {
     overflow-x: hidden;
     overflow-y: hidden;
-}
-/* badge */
-.badge-ckl {
-    color: #fff;
-    background-color: #b88d17;
 }
 
 #main {
@@ -31,149 +32,7 @@ html {
     margin: 0 0 0 10px;
     overflow: hidden;
 }
-#pan_outcomes {
-    height: 100%;
-    overflow-y: auto;
-}
-.cate-line {
-    cursor: pointer;
-}
-.cate-extract-line {
-    border-left: 1px solid black;
-    padding: 0 0 0 10px;
-    margin: 0 0 0 10px;
-}
-.cate-extract-line:hover {
-    background-color: aquamarine;
-}
-.cate-extract-line-clicked {
-    background-color: aquamarine;
-}
-.cate-extract-name {
-    width: 250px;
-    min-width: 250px;
-    max-width: 250px;
-}
-.cate-extract-name:hover {
-    cursor: pointer;
-}
-.cate-extract-col {
-    min-width: 60px;
-    width: 100px;
-    max-width: 200px;
-    font-size: .9em;
-    padding: 0 .5em;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
 
-.btn-xs {
-    padding: .15rem .5rem;
-    font-size: .8rem;
-    line-height: 1.2;
-    border-radius: .2rem;
-}
-
-#config_outcome {
-    min-width: 1100px;
-    width: 70%;
-    height: 100%;
-    position: absolute;
-    right: 5000px;
-    background-color: #ffffff;
-    padding: 5px;
-}
-
-.paper-table-body-td-author {
-    width: 190px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    cursor: pointer;
-}
-
-.paper-table-body-cell {
-    display: block;
-    max-width: 180px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.paper-table-header-th {
-    background-color: whitesmoke;
-    border-left: 1px solid rgb(211, 211, 211);
-    border-right: 1px solid rgb(211, 211, 211);    
-}
-
-.n-arms-hr {
-    margin: 1px 0 !important;
-}
-#pan_ocpapers_paperlist {
-    overflow-x: hidden;
-    overflow-y: auto;
-    height: 300px;
-    font-size: 0.9em;
-    max-width: calc(100% - 15px);
-}
-#pan_ocpapers_paperlist thead th{
-    position: sticky;
-    top: 0;
-    background-color: #acacac;
-}
-
-#pan_ocpapers_paperlist tbody td{
-    padding: 3px 3px;
-}
-#pan_ocpapers_paperlist tr:nth-child(even) {background: rgb(232, 232, 232)}
-#pan_ocpapers_paperlist tr:nth-child(odd) {background: whitesmoke}
-
-.paper-table-row:hover {
-    background: #cccccc;
-}
-.paper-table-row-clicked {
-    background-color: rgb(189, 228, 238) !important;
-}
-.paper-table-row-clicked .paper-name {
-    font-weight: bold;
-}
-
-.paper-meta-selected-oc {
-    padding: 0 4px;
-    margin: 0 3px;
-    background-color: #cfcece;
-}
-
-#pan_ocpapers_working_paper {
-    /* width: 240px; */
-    padding: 5px;
-    height: auto;
-    position: absolute;
-    z-index: 95;
-    top: 50px;
-    right: 65%;
-    background: white;
-    font-size: .9em;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-}
-.working_title {
-    height: 38px;
-    line-height: 18px;
-    overflow: hidden;
-    text-align: center;
-
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-
-    background-color: #dedede;
-
-    cursor: move;
-    cursor: grab;
-    cursor: -moz-grab;
-    cursor: -webkit-grab;
-}
 #pan_ocpapers_working_paper_oc_tree {
     overflow-y: auto;
 }
@@ -208,6 +67,7 @@ html {
 .chk-oc-extracting {
     background-color: rgb(204, 224, 228) !important;
 }
+
 #win_selector {
     min-width: 1100px;
     width: 65%;
@@ -216,106 +76,6 @@ html {
     right: 5000px;
     background-color: #ffffff;
     padding: 5px 10px;
-}
-
-#ifr_pdfviewer {
-    width: 100%;
-    height: 400px;
-    min-height: 400px;
-}
-
-.txt-red {
-    color: rgb(250, 89, 89);
-    background: rgb(255, 205, 205);
-    padding: 0;
-    margin: 0;
-}
-
-.txt-yellow {
-    background: rgb(238, 219, 171);
-    color: darkgoldenrod;
-    padding: 0;
-    margin: 0;
-}
-
-.txt-orange {
-    background: rgb(247, 226, 188);
-    color: orange;
-    padding: 0;
-    margin: 0;
-}
-
-.txt-green {
-    color: rgb(1, 56, 1);
-    background: rgb(223, 245, 223);
-    padding: 0;
-    margin: 0;
-}
-
-.txt-blue {
-    background: rgb(214, 214, 255);
-    color: darkblue;
-    padding: 0;
-    margin: 0;
-}
-
-.txt-purple {
-    background: rgb(250, 183, 250);
-    color: purple;
-    padding: 0;
-    margin: 0;
-}
-div.w-attr-item:nth-child(even) {background: white; }
-div.w-attr-item:nth-child(odd) {background: whitesmoke; }
-
-.w-cate-item {
-    padding: 3px 0;
-}
-.w-cate-item-name {
-    font-size: .9em;
-    font-weight: bold;
-    background-color: rgb(209, 209, 209);
-    width: 100%;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-.w-attr-item {
-    border-bottom: 1px dotted #dedede;
-    padding: 3px 0;
-}
-.w-attr-item-name {
-    font-size: .9em;
-    width: 100%;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-.w-attr-subs {
-    padding: 0 0 0 5px;
-    border-left: 2px dashed rgb(155, 155, 155);
-}
-.w-sub-item-name {
-    font-style: italic;
-}
-.w-remove-content {
-    padding: 5px 5px;
-    color: grey;
-    font-size: 9px;
-    cursor: pointer;
-}
-.w-remove-content:hover {
-    background-color: lightcoral;
-    color: white;
-}
-
-.paper-extract-input-auto {
-    font-family: 'Courier New', Courier, monospace;
-    font-size: .9em;
-    padding: 0 3px;
-    height: 20px;
-    line-height: 20px;
-    border: 1px solid #cccccc;
 }
 </style>
 {% endblock %}
@@ -572,7 +332,6 @@ div.w-attr-item:nth-child(odd) {background: whitesmoke; }
                 </div>
             </div>
         </div>
-
         
     </div>
 
@@ -600,128 +359,12 @@ div.w-attr-item:nth-child(odd) {background: whitesmoke; }
 <div id="win_selector">
     <div style="position: absolute; top: 0; left: -40px; width: 40px; height: 40px; background-color: white;">
         <div style="font-size: large; width: 40px; height: 40px; line-height: 40px; text-align: center; cursor: pointer;"
-            onclick="pan_selector.hide(); pan_ocpapers.hide_working_paper();">
+            onclick="pan_collector.hide(); pan_ocpapers.hide_working_paper();">
             <i class="fa fa-close"></i>
         </div>
     </div>
     
-    <div id="pan_selector" class="panel-m panel-container">
-        <div v-if="paper == null">
-            Click the paper name to show details
-        </div>
-    
-        <!-- details of paper -->
-        <div v-else
-            class="d-flex flex-row">
-    
-            <div style="flex: 1;">
-    
-                <div class="panel-info">
-                
-                    <ul class="nav nav-tabs">
-                        <li class="nav-item">
-                            <a class="nav-link" 
-                                v-bind:class="{active: show_tab == 'basic_info'}"
-                                href="javascript:void(0);"
-                                v-on:click="switch_tab('basic_info');">
-                                <i class="fa fa-info-circle"></i>
-                                Abstract
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="javascript:void(0);"
-                                v-bind:class="{active: show_tab == 'pdf'}"
-                                v-on:click="switch_tab('pdf');">
-                                <i class="far fa-file-pdf"></i>
-                                PDFs
-                            </a>
-                        </li>
-                    </ul>
-                
-                </div>
-                <!-- /.panel-info -->
-    
-                <!-- the Abstract page -->
-                <div id="pan_selector_basic_info"  
-                    class="border-top-0 pan-normal"
-                    v-show="show_tab == 'basic_info'">
-    
-                    <div class="panel-info">
-                        <p style="font-size: 0.9em; color: #777777; ">{{ paper.pub_date }} - {{ paper.journal }}</p>
-                        <p style="font-size: 1.5em; font-weight: bold; line-height: 1.2em;">{{ paper.title }}</p>
-                        <p styel="font-size: 1em;">{{ paper.authors }}</p>
-                        <p>
-                            PMID: 
-                            <a target="_blank" title="Show in " :href="'https://pubmed.ncbi.nlm.nih.gov/' + paper.pid ">{{ paper.pid }}</a> ({{ paper.pid_type }})
-                        </p>
-                        <p style="font-size: 1.2em; font-weight: bold;">Abstract</p>
-                        <div style="font-size: 1em;" v-html="paper.abstract"></div>
-                    </div>
-                    
-                </div>
-    
-                <!-- the PDF page -->
-                <div id="pan_selector_pdf" v-show="show_tab == 'pdf'">
-                    <div class="d-flex flex-row mt-2 mb-2 mr-2">
-                        
-                        <!-- display the buttons for each pdf file -->
-                        <div class="btn-group mr-2"
-                            v-for="pdf in paper.meta.pdfs">
-                            <button type="button" class="btn btn-default btn-sm"
-                            v-on:click="view_pdf(paper.paper_id, pdf.file_id, pdf.folder);">
-                                <i class="far fa-file-pdf"></i>
-                                {{ pdf.display_name }}
-                            </button>
-    
-                            <div class="btn-group" role="group">
-                                <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                </button>
-                                <div class="dropdown-menu dropdown-menu-right">
-                                    <a class="dropdown-item" href="javascript:void(0);" 
-                                        v-on:click="download_pdf(paper.paper_id, pdf.file_id, pdf.folder, pdf.display_name)">
-                                        <i class="fa fa-download"></i>
-                                        Download this PDF
-                                    </a>
-                                    <a class="dropdown-item" href="javascript:void(0);" 
-                                        v-on:click="remove_pdf(paper.paper_id, pdf.file_id, pdf.folder, pdf.display_name)">
-                                        <i class="far fa-trash-alt"></i>
-                                        Delete this PDF
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                                        
-                        <form id="form_pdf_files" method="post" 
-                            class="ml-1"
-                            enctype="multipart/form-data">
-                            <input type="hidden" name="paper_id" v-bind:value="paper.paper_id">
-                            <input type="file" name="files[]" multiple="" accept=".pdf"
-                                    style="width: 210px;" id="input_pdf_files">
-                        </form>
-    
-                        <button class="btn btn-default btn-sm mr-2"
-                            v-on:click="upload_pdfs();">
-                            <i class="fa fa-upload"></i>
-                            Upload
-                        </button>
-    
-                    </div>
-    
-    
-                    <iframe v-if="paper.meta.hasOwnProperty('pdfs') && paper.meta.pdfs.length > 0"
-                        id="ifr_pdfviewer" src="/pdfworker/view_pdf" 
-                        width="100%" scrolling="yes"
-                        frameborder="0">
-                    </iframe>
-                </div>
-                
-    
-            </div>
-            
-        </div>
-        
-    </div>
-    <!-- /#pan_selector -->
+    {% include 'extractor/_pan_collector.html' %}
 
 </div>
 
@@ -742,38 +385,39 @@ div.w-attr-item:nth-child(odd) {background: whitesmoke; }
 var pan_ocpapers = {
     vpp_id: "#pan_ocpapers",
     vpp: null,
+    vpp_data: {
+        // flags
+        show_settings: true,
+        only_show_selected: false,
+        show_working_paper_pan: false,
+        show_working_paper_collector: false,
+
+        // data
+        papers: null,
+        extracts: null,
+        extract_dict: null,
+        extract_tree: null,
+
+        // working paper
+        working_paper: null,
+        working_paper_oc_selections: null,
+
+        // working arm
+        // null means main arm
+        // numbers mean other arm
+        working_paper_arm: null,
+
+        // working oc
+        working_oc: null,
+
+        // the attrs for extraction
+        all_attrs: []
+    },
 
     init: function() {
         this.vpp = new Vue({
             el: this.vpp_id,
-            data: {
-                // flags
-                show_settings: true,
-                only_show_selected: false,
-                show_working_paper_pan: false,
-                show_working_paper_collector: false,
-
-                // data
-                papers: null,
-                extracts: null,
-                extract_dict: null,
-                extract_tree: null,
-
-                // working paper
-                working_paper: null,
-                working_paper_oc_selections: null,
-
-                // working arm
-                // null means main arm
-                // numbers mean other arm
-                working_paper_arm: null,
-
-                // working oc
-                working_oc: null,
-
-                // the attrs for extraction
-                all_attrs: []
-            },
+            data: this.vpp_data,
             methods: {
 
                 // save all!
@@ -830,7 +474,7 @@ var pan_ocpapers = {
                     this.show_working_paper_collector = false;
 
                     // call collector to do something
-                    pan_selector.show_paper(
+                    pan_collector.show_paper(
                         paper.pid
                     );
 
@@ -852,12 +496,40 @@ var pan_ocpapers = {
                     return n;
                 },
 
+                extract: function(oc) {
+                    // add this working paper to the oc
+                    if (oc.data.hasOwnProperty(this.working_paper.pid)) {
+
+                    } else {
+                        oc.data[this.working_paper.pid] = srv_extractor.mk_oc_data(oc)
+                    }
+
+                    console.log('* extract', this.working_paper, 'for', oc);
+
+                    // show the panel
+                    this.show_working_paper_collector = true;
+
+                    // set the working oc
+                    this.working_oc = oc;
+
+                    // highlight the oc in list
+                    $('.chk-oc').removeClass('chk-oc-extracting');
+                    $('#chk_oc_line_' + oc.abbr).addClass('chk-oc-extracting');
+                },
+
                 save_working_paper_selections: function() {
                     var pid = this.working_paper.pid;
 
                     pan_ocpapers.save_working_paper_selections(
                         pid, this.working_paper_oc_selections
                     );
+                },
+
+                /////////////////////////////////////////////////////
+                // For the working paper extraction
+                /////////////////////////////////////////////////////
+                is_show_attr: function(abbr) {
+                    return true;
                 },
 
                 save_working_paper_extraction: function() {
@@ -902,27 +574,6 @@ var pan_ocpapers = {
                         ];
                     }
                 },
-
-                extract: function(oc) {
-                    // add this working paper to the oc
-                    if (oc.data.hasOwnProperty(this.working_paper.pid)) {
-
-                    } else {
-                        oc.data[this.working_paper.pid] = srv_extractor.mk_oc_data(oc)
-                    }
-
-                    console.log('* extract', this.working_paper, 'for', oc);
-
-                    // show the panel
-                    this.show_working_paper_collector = true;
-
-                    // set the working oc
-                    this.working_oc = oc;
-
-                    // highlight the oc in list
-                    $('.chk-oc').removeClass('chk-oc-extracting');
-                    $('#chk_oc_line_' + oc.abbr).addClass('chk-oc-extracting');
-                }
             },
             updated: function() {
                 pan_ocpapers.resize();
@@ -1171,13 +822,13 @@ var pan_ocpapers = {
 };
 
 
-var pan_selector = {
-    vpp_id: "#pan_selector",
+var pan_collector = {
+    vpp_id: "#pan_collector",
     vpp: null,
     pdfviewer_id: '#ifr_pdfviewer',
 
     mark_keywords_as_color: function(keywords, color) {
-        $('#pan_selector_basic_info').mark(
+        $('#pan_collector_basic_info').mark(
             keywords,
             { className: 'txt-' + color, separateWordSearch: false }
         );
@@ -1198,11 +849,11 @@ var pan_selector = {
                 },
 
                 view_pdf: function(paper_id, file_id, folder) {
-                    pan_selector.view_pdf(paper_id, file_id, folder);
+                    pan_collector.view_pdf(paper_id, file_id, folder);
                 },
 
                 upload_pdfs: function() {
-                    pan_selector.upload_pdfs();
+                    pan_collector.upload_pdfs();
                 },
 
                 download_pdf: function(paper_id, file_id, folder, display_name) {
@@ -1216,7 +867,7 @@ var pan_selector = {
                             console.log('* removed', data)
                             jarvis.toast('Removed PDF file successfully');
                             // update display
-                            pan_selector.update(data.paper);
+                            pan_collector.update(data.paper);
                         }
                     );
                 },
@@ -1230,7 +881,7 @@ var pan_selector = {
                 },
             },
             updated: function() {
-                // pan_selector.bind_txt_ctx_menu();
+                // pan_collector.bind_txt_ctx_menu();
             }
         });
 
@@ -1248,8 +899,8 @@ var pan_selector = {
 
         // update the keywords highlight
         // this.vpp.$nextTick(function () {
-        //     console.log('* pan_selector UI updated');
-        //     pan_selector.mark_keywords_as_color(
+        //     console.log('* pan_collector UI updated');
+        //     pan_collector.mark_keywords_as_color(
         //         srv_extractor.project.settings.highlight_keywords.inclusion,
         //         'green'
         //     );
@@ -1264,11 +915,11 @@ var pan_selector = {
         $('#win_selector').css("right", 0);
 
         // resize
-        pan_selector.resize();
+        pan_collector.resize();
 
         // get the paper
         srv_extractor.get_paper(pid, function(data) {
-            pan_selector.update(data.paper);
+            pan_collector.update(data.paper);
         });
     },
 
@@ -1299,7 +950,7 @@ var pan_selector = {
         }
 
         // get the highlight_keywords
-        // var highlight_keywords = pan_selector.get_pdf_highlight_keywords();
+        // var highlight_keywords = pan_collector.get_pdf_highlight_keywords();
         // document.getElementById("ifr_pdfviewer").contentWindow.LNMA.open_pdf(pdf_url, highlight_keywords);
 
         // show the pdf without keywords
@@ -1341,7 +992,7 @@ var pan_selector = {
                     jarvis.toast('Uploaded PDF for paper!');
                     
                     // update display
-                    pan_selector.update(data.paper);
+                    pan_collector.update(data.paper);
                 } else {
                     toast('Error when uploading PDF, try later.', 'error')
                 }
@@ -1371,7 +1022,7 @@ var jarvis = {
 
     init: function() {
         pan_ocpapers.init();
-        pan_selector.init();
+        pan_collector.init();
 
         // the load the init outcomes
         pan_ocpapers.load();
@@ -1388,10 +1039,12 @@ var jarvis = {
         return window.confirm(text);
     },
 
-    toast: function(s) {
-        toast(s);
+    toast: function(s, s_type) {
+        if (typeof(s_type) == 'undefined') {
+            s_type = 'info';
+        }
+        toast(s, s_type);
     },
-
 
     get_year: function(s) {
         const regex = /\d{4}/gm;
@@ -1400,6 +1053,14 @@ var jarvis = {
             return m[0];
         }
         return '';
+    },
+
+    get_first_author: function(s) {
+        var aus = s.split(';');
+        if (aus.length == 1) {
+            aus = s.split(',');
+        }
+        return aus[0];
     },
 
     download_file: function(fn) {
@@ -1415,7 +1076,7 @@ var jarvis = {
     bind_resize_event: function() {
         $(window).on('resize', function(){
             pan_ocpapers.resize();
-            pan_selector.resize();
+            pan_collector.resize();
         });
     }
 };

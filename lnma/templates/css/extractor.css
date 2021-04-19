@@ -1,0 +1,286 @@
+/**********************************************************
+ * For the pan_ocpapers attr list
+*********************************************************/
+
+.n-arms-hr {
+    margin: 1px 0 !important;
+}
+.cell-input {
+    margin: 0 0 2px 0 !important;
+}
+.extract-attr-label {
+    font-weight: normal !important;
+}
+.extract-attr-sub-label {
+    font-weight: normal !important;
+}
+
+/**********************************************************
+ * For the pan_ocpapers
+*********************************************************/
+
+#pan_ocpapers_paperlist {
+    overflow-x: hidden;
+    overflow-y: auto;
+    height: 300px;
+    font-size: 0.9em;
+    max-width: calc(100% - 15px);
+}
+#pan_ocpapers_paperlist thead th{
+    position: sticky;
+    top: 0;
+    background-color: #acacac;
+}
+
+#pan_ocpapers_paperlist tbody td{
+    padding: 3px 3px;
+}
+
+.paper-table {
+    font-size: 0.9em;
+}
+.paper-table th, 
+.paper-table td{
+    border-bottom: 1px dotted #dfdfdf;
+}
+
+.paper-table-row:hover {
+    background: #cccccc;
+}
+.paper-table-row-clicked {
+    background-color: rgb(189, 228, 238) !important;
+}
+.paper-table-row-clicked .paper-name {
+    font-weight: bold;
+}
+.paper-table-body-td-author {
+    width: 190px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+}
+.paper-table-body-cell {
+    display: block;
+    max-width: 180px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.paper-meta-selected-oc {
+    padding: 0 4px;
+    margin: 0 3px;
+    background-color: #cfcece;
+}
+
+.paper-table-header-th {
+    
+    border-left: 1px solid rgb(211, 211, 211);
+    border-right: 1px solid rgb(211, 211, 211);    
+}
+
+.paper-list tr:nth-child(even) {background: rgb(232, 232, 232)}
+.paper-list tr:nth-child(odd) {background: whitesmoke}
+
+.paper-table-row {
+    min-height: 24px;
+}
+.paper-table-row:hover {
+    background: #cccccc;
+}
+.paper-table-row-clicked {
+    background-color: rgb(189, 228, 238) !important;
+}
+.paper-table-row-clicked .paper-name {
+    font-weight: bold;
+}
+
+/**********************************************************
+ * For the pan_ocpapers_working_paper
+*********************************************************/
+
+#pan_ocpapers_working_paper {
+    /* width: 240px; */
+    padding: 5px;
+    height: auto;
+    position: absolute;
+    z-index: 95;
+    top: 50px;
+    right: 65%;
+    background: white;
+    font-size: .9em;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+.working_title {
+    height: 38px;
+    line-height: 18px;
+    overflow: hidden;
+    text-align: center;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    background-color: #dedede;
+
+    cursor: move;
+    cursor: grab;
+    cursor: -moz-grab;
+    cursor: -webkit-grab;
+}
+
+/**********************************************************
+ * For the pan_ocpapers_working_paper_collector
+*********************************************************/
+
+#pan_ocpapers_working_paper_collector {
+    max-width: 190px;
+}
+#pan_ocpapers_working_paper_collector_attr_list {
+    overflow-y: auto;
+}
+div.w-attr-item:nth-child(even) {background: white; }
+div.w-attr-item:nth-child(odd) {background: whitesmoke; }
+.w-cate-item {
+    padding: 3px 0;
+}
+.w-cate-item-name {
+    font-size: .9em;
+    font-weight: bold;
+    background-color: rgb(209, 209, 209);
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.w-attr-item {
+    border-bottom: 1px dotted #dedede;
+    padding: 3px 0;
+}
+.w-attr-item-name {
+    font-size: .9em;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.w-attr-subs {
+    padding: 0 0 0 5px;
+    border-left: 2px dashed rgb(155, 155, 155);
+}
+.w-sub-item-name {
+    font-style: italic;
+}
+.w-remove-content {
+    padding: 5px 5px;
+    color: grey;
+    font-size: 9px;
+    cursor: pointer;
+}
+.w-remove-content:hover {
+    background-color: lightcoral;
+    color: white;
+}
+
+.paper-extract-input-auto {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: .9em;
+    padding: 0 3px;
+    height: 20px;
+    line-height: 20px;
+    border: 1px solid #cccccc;
+}
+
+.ui-autocomplete {
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+.ui-menu-item-wrapper {
+    font-size: .9em;
+}
+
+
+/**********************************************************
+ * For the pan_ocpapers_ctx_menu
+*********************************************************/
+
+#pan_ocpapers_ctx_menu {
+    border: 2px solid #EFEFEF;
+    box-shadow: 0px 0px 15px #cccccc;
+    z-index: 99;
+}
+#pan_ocpapers_ctx_menu_txt {
+    color: black;
+}
+#pan_ocpapers_ctx_menu .menu-header {
+    font-size: .8em;
+    background-color: #ececec;
+}
+#pan_ocpapers_ctx_menu .menu-info {
+    font-size: .8em;
+}
+#pan_ocpapers_ctx_menu .menu-item {
+    font-size: .9em;
+}
+#pan_ocpapers_ctx_menu .ui-menu { 
+    width: 280px; 
+    max-width: 320px;
+}
+#pan_ocpapers_ocs_menu {
+    border: 1px solid #dddddd;
+    box-shadow: 5px 5px 10px #cccccc;
+    z-index: 99;
+}
+#pan_ocpapers_ocs_menu .ui-menu { 
+    width: 280px; 
+    max-width: 320px;
+}
+
+/**********************************************************
+ * For the pan_collector
+*********************************************************/
+#win_collector {
+    min-width: 1100px;
+    width: 65%;
+    height: 100%;
+    position: absolute;
+    right: 5000px;
+    background-color: #ffffff;
+    padding: 5px 10px;
+}
+#ifr_pdfviewer {
+    width: 100%;
+    height: 400px;
+    min-height: 400px;
+}
+.cate-line {
+    cursor: pointer;
+}
+.cate-extract-line {
+    border-left: 1px solid black;
+    padding: 0 0 0 10px;
+    margin: 0 0 0 10px;
+}
+.cate-extract-line:hover {
+    background-color: aquamarine;
+}
+.cate-extract-line-clicked {
+    background-color: aquamarine;
+}
+.cate-extract-name {
+    width: 250px;
+    min-width: 250px;
+    max-width: 250px;
+}
+.cate-extract-name:hover {
+    cursor: pointer;
+}
+.cate-extract-col {
+    min-width: 60px;
+    width: 100px;
+    max-width: 200px;
+    font-size: .9em;
+    padding: 0 .5em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

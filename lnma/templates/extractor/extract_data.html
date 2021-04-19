@@ -17,14 +17,14 @@ Extract Data
 
 {% block style %}
 <style>
+    
+{% include 'css/basic.css' %}
+{% include 'css/extractor.css' %}
+{% include 'css/util.css' %}
+
 html {
     overflow-x: hidden;
     overflow-y: hidden;
-}
-/* badge */
-.badge-ckl {
-    color: #fff;
-    background-color: #b88d17;
 }
 
 #main {
@@ -35,307 +35,7 @@ html {
     margin: 0 0 0 10px;
     overflow: hidden;
 }
-#pan_outcomes {
-    height: 100%;
-    overflow-y: auto;
-}
-.cate-line {
-    cursor: pointer;
-}
-.cate-extract-line {
-    border-left: 1px solid black;
-    padding: 0 0 0 10px;
-    margin: 0 0 0 10px;
-}
-.cate-extract-line:hover {
-    background-color: aquamarine;
-}
-.cate-extract-line-clicked {
-    background-color: aquamarine;
-}
-.cate-extract-name {
-    width: 250px;
-    min-width: 250px;
-    max-width: 250px;
-}
-.cate-extract-name:hover {
-    cursor: pointer;
-}
-.cate-extract-col {
-    min-width: 60px;
-    width: 100px;
-    max-width: 200px;
-    font-size: .9em;
-    padding: 0 .5em;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
 
-.btn-xs {
-    padding: .15rem .5rem;
-    font-size: .8rem;
-    line-height: 1.2;
-    border-radius: .2rem;
-}
-.paper-table-body-td-author {
-    width: 190px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    cursor: pointer;
-}
-
-.paper-table-body-cell {
-    display: block;
-    max-width: 180px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.paper-table-header-th {
-    
-    border-left: 1px solid rgb(211, 211, 211);
-    border-right: 1px solid rgb(211, 211, 211);    
-}
-
-.paper-list tr:nth-child(even) {background: rgb(232, 232, 232)}
-.paper-list tr:nth-child(odd) {background: whitesmoke}
-
-.paper-table-row {
-    min-height: 24px;
-}
-.paper-table-row:hover {
-    background: #cccccc;
-}
-.paper-table-row-clicked {
-    background-color: rgb(189, 228, 238) !important;
-}
-.paper-table-row-clicked .paper-name {
-    font-weight: bold;
-}
-
-
-.paper-extract-input-auto {
-    font-family: 'Courier New', Courier, monospace;
-    font-size: .9em;
-    padding: 0 3px;
-    height: 20px;
-    line-height: 20px;
-    border: 1px solid #cccccc;
-}
-
-.n-arms-hr {
-    margin: 1px 0 !important;
-}
-.cell-input {
-    margin: 0 0 2px 0 !important;
-}
-.extract-attr-label {
-    font-weight: normal !important;
-}
-.extract-attr-sub-label {
-    font-weight: normal !important;
-}
-
-.extract-table {
-    font-size: 0.88em;
-}
-
-.extract-table th, 
-.extract-table td{
-    border-bottom: 1px dotted #dfdfdf;
-}
-
-
-#pan_ocpapers_ctx_menu {
-    border: 2px solid #EFEFEF;
-    box-shadow: 0px 0px 15px #cccccc;
-    z-index: 99;
-}
-#pan_ocpapers_ctx_menu_txt {
-    color: black;
-}
-#pan_ocpapers_ctx_menu .menu-header {
-    font-size: .8em;
-    background-color: #ececec;
-}
-#pan_ocpapers_ctx_menu .menu-info {
-    font-size: .8em;
-}
-#pan_ocpapers_ctx_menu .menu-item {
-    font-size: .9em;
-}
-#pan_ocpapers_ctx_menu .ui-menu { 
-    width: 280px; 
-    max-width: 320px;
-}
-
-
-#pan_ocpapers_ocs_menu {
-    border: 1px solid #dddddd;
-    box-shadow: 5px 5px 10px #cccccc;
-    z-index: 99;
-}
-#pan_ocpapers_ocs_menu .ui-menu { 
-    width: 280px; 
-    max-width: 320px;
-}
-
-
-#pan_collector {
-
-}
-#ifr_pdfviewer {
-    width: 100%;
-    height: 400px;
-    min-height: 400px;
-}
-
-#win_collector {
-    min-width: 1100px;
-    width: 65%;
-    height: 100%;
-    position: absolute;
-    right: 5000px;
-    background-color: #ffffff;
-    padding: 5px 10px;
-}
-
-#pan_ocpapers_working_paper {
-    width: 190px;
-    padding: 5px;
-    height: auto;
-    position: absolute;
-    z-index: 95;
-    top: 50px;
-    right: 65%;
-    background: white;
-    font-size: .9em;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-}
-#pan_ocpapers_working_paper_title {
-    height: 30px;
-    line-height: 30px;
-    overflow: hidden;
-    text-align: center;
-    font-weight: bold;
-
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-
-    background-color: #dedede;
-
-    cursor: move;
-    cursor: grab;
-    cursor: -moz-grab;
-    cursor: -webkit-grab;
-}
-#pan_ocpapers_working_paper_title:active {
-    cursor: grabbing;
-    cursor: -moz-grabbing;
-    cursor: -webkit-grabbing;
-}
-#pan_ocpapers_working_paper_attr_list {
-    height: 100%;
-    overflow-y: auto;
-    overflow-x: hidden;
-}
-
-div.w-attr-item:nth-child(even) {background: white; }
-div.w-attr-item:nth-child(odd) {background: whitesmoke; }
-
-.w-cate-item {
-    padding: 3px 0;
-}
-.w-cate-item-name {
-    font-size: .9em;
-    font-weight: bold;
-    background-color: rgb(209, 209, 209);
-    width: 100%;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-.w-attr-item {
-    border-bottom: 1px dotted #dedede;
-    padding: 3px 0;
-}
-.w-attr-item-name {
-    font-size: .9em;
-    width: 100%;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-.w-attr-subs {
-    padding: 0 0 0 5px;
-    border-left: 2px dashed rgb(155, 155, 155);
-}
-.w-sub-item-name {
-    font-style: italic;
-}
-.w-remove-content {
-    padding: 5px 5px;
-    color: grey;
-    font-size: 9px;
-    cursor: pointer;
-}
-.w-remove-content:hover {
-    background-color: lightcoral;
-    color: white;
-}
-
-.ui-autocomplete {
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-}
-.ui-menu-item-wrapper {
-    font-size: .9em;
-}
-
-.txt-red {
-    color: rgb(250, 89, 89);
-    background: rgb(255, 205, 205);
-    padding: 0;
-    margin: 0;
-}
-
-.txt-yellow {
-    background: rgb(238, 219, 171);
-    color: darkgoldenrod;
-    padding: 0;
-    margin: 0;
-}
-
-.txt-orange {
-    background: rgb(247, 226, 188);
-    color: orange;
-    padding: 0;
-    margin: 0;
-}
-
-.txt-green {
-    color: rgb(1, 56, 1);
-    background: rgb(223, 245, 223);
-    padding: 0;
-    margin: 0;
-}
-
-.txt-blue {
-    background: rgb(214, 214, 255);
-    color: darkblue;
-    padding: 0;
-    margin: 0;
-}
-
-.txt-purple {
-    background: rgb(250, 183, 250);
-    color: purple;
-    padding: 0;
-    margin: 0;
-}
 </style>
 
 <!-- jQuery UI Theme -->
@@ -396,6 +96,11 @@ div.w-attr-item:nth-child(odd) {background: whitesmoke; }
 
 srv_extractor.project = [[ project_json_str|safe ]];
 
+///////////////////////////////////////////////////////////
+// pan_collector for viewing basic information and PDF
+///////////////////////////////////////////////////////////
+
+{% include "js/pan_collector.js" %}
 
 var pan_ocpapers = {
     vpp_id: "#pan_ocpapers",
@@ -425,8 +130,19 @@ var pan_ocpapers = {
                 thr2s: [],
 
                 // working pmid when clicking on paper
-                working_paper: null,
                 show_working_paper_pan: false,
+                show_working_paper_collector: false,
+
+                // the working paper
+                working_paper: null,
+
+                // working arm
+                // null means main arm
+                // numbers mean other arm
+                working_paper_arm: null,
+
+                // working oc
+                working_oc: null,
 
                 // mode
                 mode: 'extract_data',
@@ -440,9 +156,9 @@ var pan_ocpapers = {
             computed: {
                 n_selected: function() {
                     var n = 0;
-                    for (const pmid in this.extract.data) {
-                        if (Object.hasOwnProperty.call(this.extract.data, pmid)) {
-                            if (this.extract.data[pmid].is_selected) {
+                    for (const pmid in this.working_oc.data) {
+                        if (Object.hasOwnProperty.call(this.working_oc.data, pmid)) {
+                            if (this.working_oc.data[pmid].is_selected) {
                                 n += 1;
                             };
                         }
@@ -521,8 +237,8 @@ var pan_ocpapers = {
                     console.log('Changed input_format: ' + val);
 
                     // update the attrs
-                    this.extract.meta.cate_attrs = srv_extractor.tpl.input_format[
-                        this.extract.oc_type
+                    this.working_oc.meta.cate_attrs = srv_extractor.tpl.input_format[
+                        this.working_oc.oc_type
                     ][val];
                     
                     // update the papers setting
@@ -537,6 +253,7 @@ var pan_ocpapers = {
                     // set the working pmid ?
                     this.working_paper = paper;
                     this.show_working_paper_pan = true;
+                    this.show_working_paper_collector = true;
 
                     // get the pid / pmid
                     var pmid = paper.pid;
@@ -548,23 +265,23 @@ var pan_ocpapers = {
                     // call collector to do something
                     pan_collector.show_paper(
                         pmid, 
-                        pan_ocpapers.vpp.$data.extract.data[pmid]
+                        pan_ocpapers.vpp.$data.working_oc.data[pmid]
                     );
 
                     // the draggable 
-                    $( "#pan_ocpapers_working_paper" ).draggable({ 
-                        handle: "div#pan_ocpapers_working_paper_title",
-                        containment: "#pan_ocpapers", 
-                        scroll: false
-                    });
+                    // $( "#pan_ocpapers_working_paper" ).draggable({ 
+                    //     handle: "div#pan_ocpapers_working_paper_title",
+                    //     containment: "#pan_ocpapers", 
+                    //     scroll: false
+                    // });
                 },
 
                 toggle_select_all_papers: function(event) {
                     let val = event.srcElement.checked;
                     console.log('* set all papers selected: ', val);
-                    for (const pmid in this.extract.data) {
-                        if (Object.hasOwnProperty.call(this.extract.data, pmid)) {
-                            this.extract.data[pmid].is_selected = val;
+                    for (const pmid in this.working_oc.data) {
+                        if (Object.hasOwnProperty.call(this.working_oc.data, pmid)) {
+                            this.working_oc.data[pmid].is_selected = val;
                         }
                     }
                     // this.$forceUpdate();
@@ -573,8 +290,8 @@ var pan_ocpapers = {
                 on_toggle_itable_select_category: function(cate_idx, event) {
                     let val = event.srcElement.checked;
 
-                    for (let i = 0; i < this.extract.meta.cate_attrs[cate_idx].attrs.length; i++) {
-                        const attr = this.extract.meta.cate_attrs[cate_idx].attrs[i];
+                    for (let i = 0; i < this.working_oc.meta.cate_attrs[cate_idx].attrs.length; i++) {
+                        const attr = this.working_oc.meta.cate_attrs[cate_idx].attrs[i];
 
                         if (attr.subs == null) {
                             this.show_attrs[attr.abbr] = val;
@@ -596,33 +313,33 @@ var pan_ocpapers = {
                     console.log('* change ' + pmid + ' n_arms to ' + n_arms);
 
                     // var new_n_others = n_arms - 2;
-                    // if (new_n_others == this.extract.data[pmid].attrs.other.length) {
+                    // if (new_n_others == this.working_oc.data[pmid].attrs.other.length) {
                     //     // which means the number of arms doesn't change
 
-                    // } else if (new_n_others > this.extract.data[pmid].attrs.other.length) {
+                    // } else if (new_n_others > this.working_oc.data[pmid].attrs.other.length) {
                     //     // the number of arms increases, need to put more elements
-                    //     var delta = new_n_others - this.extract.data[pmid].attrs.other.length;
+                    //     var delta = new_n_others - this.working_oc.data[pmid].attrs.other.length;
                     //     for (let i = 0; i < delta; i++) {
                     //         // just copy the keys from main track
-                    //         var obj = JSON.parse(JSON.stringify(this.extract.data[pmid].attrs.main));
+                    //         var obj = JSON.parse(JSON.stringify(this.working_oc.data[pmid].attrs.main));
                     //         // and clear the exising data
                     //         for (const key in obj) {
                     //             if (Object.hasOwnProperty.call(obj, key)) {
                     //                 obj[key] = '';
                     //             }
                     //         }
-                    //         this.extract.data[pmid].attrs.other.push(obj);
+                    //         this.working_oc.data[pmid].attrs.other.push(obj);
                     //     }
                     // } else {
                     //     // the number of arms decreases, need to remove
-                    //     var delta = this.extract.data[pmid].attrs.other.length - new_n_others;
+                    //     var delta = this.working_oc.data[pmid].attrs.other.length - new_n_others;
                     //     for (let i = 0; i < delta; i++) {
-                    //         this.extract.data[pmid].attrs.other.pop();
+                    //         this.working_oc.data[pmid].attrs.other.pop();
                     //     }
                     // }
                     
-                    this.extract.data[pmid] = srv_extractor.set_n_arms(
-                        this.extract.data[pmid], n_arms
+                    this.working_oc.data[pmid] = srv_extractor.set_n_arms(
+                        this.working_oc.data[pmid], n_arms
                     );
                     this.$forceUpdate();
                 },
@@ -631,7 +348,57 @@ var pan_ocpapers = {
                     // let val = event.srcElement.checked;                    
                     // this.only_show_selected = val;
                     this.$forceUpdate();
-                }
+                },
+
+                /////////////////////////////////////////////////////
+                // For the working paper extraction
+                /////////////////////////////////////////////////////
+                is_show_attr: function(abbr) {
+                    return this.show_attrs[abbr];
+                },
+
+                save_working_paper_extraction: function() {
+                    var pid = this.working_paper.pid;
+                    var oc = this.working_oc;
+
+                    pan_ocpapers.save_working_paper_extraction(
+                        pid, oc
+                    );
+                },
+
+                set_n_arms: function() {
+                    var n_arms = this.working_oc.data[this.working_paper.pid].n_arms;
+                    console.log('* set n_arms to', n_arms);
+
+                    // update the other to match the number
+                    this.working_oc.data[this.working_paper.pid] = srv_extractor.set_n_arms(
+                        this.working_oc.data[this.working_paper.pid], n_arms
+                    );
+
+                    // update current working arm to main
+                    this.switch_working_arm(null);
+                    
+                    this.$forceUpdate();
+                },
+
+                switch_working_arm: function(arm_idx) {
+                    console.log('* switch_working_arm', arm_idx);
+                    this.working_paper_arm = arm_idx;
+
+                    // update the working arm
+                    $('.w-arm-tab').removeClass('btn-primary');
+                    $('#working_paper_arm_tab_' + arm_idx).addClass('btn-primary');
+                },
+
+                get_working_arm_attrs: function() {
+                    if (this.working_paper_arm == null) {
+                        return this.working_oc.data[this.working_paper.pid].attrs.main;
+                    } else {
+                        return this.working_oc.data[this.working_paper.pid].attrs.other[
+                            this.working_paper_arm
+                        ];
+                    }
+                },
             }
         });
     
@@ -686,7 +453,7 @@ var pan_ocpapers = {
 
     update: function(data) {
         // the data is a combo of extract and papers
-        this.vpp.extract = data.extract;
+        this.vpp.working_oc = data.extract;
         this.vpp.papers = data.papers;
 
         // update the all_attrs and show_attrs variables for display
@@ -694,7 +461,7 @@ var pan_ocpapers = {
         pan_collector.hide();
 
         // shortcut
-        if (this.vpp.extract.oc_type == 'itable') {
+        if (this.vpp.working_oc.oc_type == 'itable') {
             this.update_all_and_show_attrs_for_itable();
         } else {
             this.update_all_and_show_attrs_for_outcome();
@@ -729,7 +496,7 @@ var pan_ocpapers = {
                     console.log('* selected', val, 'for', abbr, 'of', pid);
 
                     // set the value
-                    pan_ocpapers.vpp.$data.extract.data[pid].attrs.main[abbr] = val;
+                    pan_ocpapers.vpp.$data.working_oc.data[pid].attrs.main[abbr] = val;
                 },
 
                 change: function (e, ui) {
@@ -746,8 +513,8 @@ var pan_ocpapers = {
     get_values_by_abbr: function(abbr) {
         var v = {};
 
-        for (const pid in this.vpp.$data.extract.data) {
-            const paper = this.vpp.$data.extract.data[pid];                
+        for (const pid in this.vpp.$data.working_oc.data) {
+            const paper = this.vpp.$data.working_oc.data[pid];                
             if (paper.is_selected) {
                 // get the main values
                 var val = paper.attrs.main[abbr];
@@ -789,8 +556,8 @@ var pan_ocpapers = {
         this.vpp.thr2s = [];
 
         // loop on the cate_attrs
-        for (let i = 0; i < this.vpp.extract.meta.cate_attrs.length; i++) {
-            const cate = this.vpp.extract.meta.cate_attrs[i];
+        for (let i = 0; i < this.vpp.working_oc.meta.cate_attrs.length; i++) {
+            const cate = this.vpp.working_oc.meta.cate_attrs[i];
 
             for (let j = 0; j < cate.attrs.length; j++) {
                 const attr = cate.attrs[j];
@@ -863,8 +630,8 @@ var pan_ocpapers = {
         this.vpp.thr2s = [];
 
         // loop on the cate_attrs
-        for (let i = 0; i < this.vpp.extract.meta.cate_attrs.length; i++) {
-            const cate = this.vpp.extract.meta.cate_attrs[i];
+        for (let i = 0; i < this.vpp.working_oc.meta.cate_attrs.length; i++) {
+            const cate = this.vpp.working_oc.meta.cate_attrs[i];
 
             var thr1 = {
                 name: cate.name,
@@ -939,23 +706,54 @@ var pan_ocpapers = {
 
         // get the data 
         var project_id = Cookies.get('project_id');
-        $.get(
-            srv_extractor.url.get_extract_and_papers,
-            {project_id:project_id, abbr:abbr, rnd:Math.random()},
+        srv_extractor.get_extract_and_papers(
+            project_id,
+            abbr,
             function(data) {
                 pan_ocpapers.update(data);
+            }
+        );
+    },
 
-            }, 'json'
+    save_working_paper_extraction: function(pid, oc) {
+        var project_id = Cookies.get('project_id');
+        var oc_type = oc.oc_type;
+        var abbr = oc.abbr;
+
+        // prepare the incremental data for update
+        var data = {};
+        data[pid] = oc.data[pid];
+
+        // and since we add this extraction
+        // this paper is also selected?
+        // no, the selected is for public site
+
+        srv_extractor.update_extract_incr_data(
+            project_id,
+            oc_type,
+            abbr,
+            data,
+            function(data) {
+                // the data contain a paer
+                console.log(data);
+
+                jarvis.toast('Update [' + data.extract.meta.full_name + '] with current extraction');
+
+                // update
+                pan_ocpapers.show_extract_and_papers(
+                    pan_ocpapers.extract_abbr
+                );
+            }
         );
     },
 
     update_extract: function() {
         // there are 
         var project_id = Cookies.get('project_id');
-        var oc_type = this.vpp.$data.extract.oc_type;
-        var abbr = this.vpp.$data.extract.abbr;
-        var meta = this.vpp.$data.extract.meta;
-        var data = this.vpp.$data.extract.data;
+        var oc_type = this.vpp.$data.working_oc.oc_type;
+        var abbr = this.vpp.$data.working_oc.abbr;
+        var meta = this.vpp.$data.working_oc.meta;
+        var data = this.vpp.$data.working_oc.data;
 
         // send request!
         srv_extractor.update_extract_incr_data(
@@ -1114,10 +912,10 @@ var pan_ocpapers = {
         // update the value for the specific paper
         if (seq == null) {
             // it means this is the main track
-            this.vpp.$data.extract.data[pid].attrs.main[attr_abbr] = highlight_text;
+            this.vpp.$data.working_oc.data[pid].attrs.main[attr_abbr] = highlight_text;
         } else {
             // this means the value is for other arms
-            this.vpp.$data.extract.data[pid].attrs.other[seq][attr_abbr] = highlight_text;
+            this.vpp.$data.working_oc.data[pid].attrs.other[seq][attr_abbr] = highlight_text;
         }
         // update UI
         this.vpp.$forceUpdate();
@@ -1155,9 +953,9 @@ var pan_ocpapers = {
 
     __update_ctx_menu_html: function(html, highlight_text, pid, seq) {
 
-        for (let i = 0; i < this.vpp.extract.meta.cate_attrs.length; i++) {
+        for (let i = 0; i < this.vpp.working_oc.meta.cate_attrs.length; i++) {
 
-            const cate = this.vpp.extract.meta.cate_attrs[i];
+            const cate = this.vpp.working_oc.meta.cate_attrs[i];
 
             // put a new cate
             html.push('<li class="ui-state-disabled menu-header"><div>'+cate.name+'</div></li>');
@@ -1206,6 +1004,21 @@ var pan_ocpapers = {
         return html;
     },
 
+    show_ctx_menu: function(top, left) {
+        $("#pan_ocpapers_ctx_menu").css({
+            position: 'absolute',
+            display: "block",
+            top: top,
+            left: left
+        }).addClass("show").menu();
+
+        $("#pan_ocpapers_ctx_menu").menu('refresh');
+
+        $('#pan_ocpapers_ctx_menu .ui-menu-item').on('click', function() {
+            $("#pan_ocpapers_ctx_menu").hide();
+        });
+    },
+
     show_working_paper: function() {
         var w_win_collector = $('#win_collector').width();
         $('#pan_ocpapers_working_paper').css('top', 50);
@@ -1237,305 +1050,12 @@ var pan_ocpapers = {
             .css('width', w)
             .css('height', h);
 
+        var h_attrs = $('#pan_ocpapers_attrs').height();
+        $('#pan_ocpapers_paperlist').css('height', h - h_attrs - 40);
+
         // resize the working paper panel
-        $('#pan_ocpapers_working_paper_attr_list').css('max-height', h - 80);
+        $('#pan_ocpapers_working_paper_collector_attr_list').css('max-height', h - 150);
     }
-};
-
-
-var pan_collector = {
-    vpp_id: "#pan_collector",
-    vpp: null,
-    pdfviewer_id: '#ifr_pdfviewer',
-    current: {
-        paper: null,
-        extract_paper: null
-    },
-
-    mark_keywords_as_color: function(keywords, color) {
-        $('#pan_collector_basic_info').mark(
-            keywords,
-            { className: 'txt-' + color, separateWordSearch: false }
-        );
-    },
-
-    init: function() {
-        this.vpp = new Vue({
-            el: this.vpp_id,
-            data: {
-                paper: null,
-                show_tab: null
-            },
-            updated: function() {
-            },
-            methods: {
-                switch_tab: function(tab_name) {
-                    this.show_tab = tab_name;
-                },
-
-                view_pdf: function(paper_id, file_id, folder) {
-                    pan_collector.view_pdf(paper_id, file_id, folder);
-                },
-
-                upload_pdfs: function() {
-                    pan_collector.upload_pdfs();
-                },
-
-                download_pdf: function(paper_id, file_id, folder, display_name) {
-                    srv_pdfworker.download_pdf(null, file_id, folder);
-                },
-
-                remove_pdf: function(paper_id, file_id, folder, display_name) {
-                    srv_pdfworker.remove_pdf(
-                        paper_id, file_id, folder, display_name,
-                        function(data) {
-                            console.log('* removed', data)
-                            jarvis.toast('Removed PDF file successfully');
-                            // update display
-                            pan_collector.update(data.paper);
-                        }
-                    );
-                },
-
-                get_year: function(s) {
-                    return jarvis.get_year(s);
-                },
-
-                get_first_author: function(s) {
-                    return jarvis.get_first_author(s);
-                },
-            },
-            updated: function() {
-                // pan_collector.bind_txt_ctx_menu();
-            }
-        });
-
-        this.resize();
-
-        // bind the context menu
-        this.bind_txt_ctx_menu();
-    },
-
-    bind_txt_ctx_menu: function() {
-        // $(this.vpp_id + '_basic_info').on('contextmenu', function(event) {
-        $(this.vpp_id).on('contextmenu', function(event) {
-            // get the highlighted text
-            var text = "";
-            if (window.getSelection) {
-                text = window.getSelection().toString();
-            } else if (document.selection && document.selection.type != "Control") {
-                text = document.selection.createRange().text;
-            }
-            // remove the white paddings
-            text = text.trim();
-            console.log('* found highlighted text', text);
-
-            // no need to show the menu when no text is selected
-            if (text.length == 0) {
-                return false;
-            }
-
-            // update the context menu content based on the selected attributes.
-            // all of the details about this paper is need to generate the menu.
-            // but since the attrs are only available in pan_ocpapers,
-            // we have to use pan_oc
-            pan_ocpapers.update_ctx_menu(
-                text, 
-                pan_collector.current.paper.pid,
-                pan_collector.current.extract_paper.n_arms
-            );
-
-            // show the context menu at where clicked
-            var top = event.pageY - 20;
-            var left = event.pageX;
-            
-            $("#pan_ocpapers_ctx_menu").css({
-                position: 'absolute',
-                display: "block",
-                top: top,
-                left: left
-            }).addClass("show").menu();
-
-            $("#pan_ocpapers_ctx_menu").menu('refresh');
-
-            $('#pan_ocpapers_ctx_menu .ui-menu-item').on('click', function() {
-                $("#pan_ocpapers_ctx_menu").hide();
-            });
-
-            //blocks default Webbrowser right click menu
-            return false; 
-        });
-        console.log('* binded ctx menu')
-    },
-
-    on_contextmenu_pdfviewer: function(event) {
-        // get text
-        var text = this.get_pdf_selection_text();
-        
-        // update the menu
-        pan_ocpapers.update_ctx_menu(
-            text, 
-            pan_collector.current.paper.pid,
-            pan_collector.current.extract_paper.n_arms
-        );
-
-        // show the context menu at where clicked
-        // need to calculate the offset for the iframe
-        var offset = $('#ifr_pdfviewer').offset();
-        var top = offset.top + event.pageY - 20;
-        var left = offset.left + event.pageX;
-        
-        $("#pan_ocpapers_ctx_menu").css({
-            position: 'absolute',
-            display: "block",
-            top: top,
-            left: left
-        }).addClass("show").menu();
-
-        $("#pan_ocpapers_ctx_menu").menu('refresh');
-
-        $('#pan_ocpapers_ctx_menu .ui-menu-item').on('click', function() {
-            $("#pan_ocpapers_ctx_menu").hide();
-        });
-    },
-
-    get_pdf_selection_text: function() {
-        var txt = '';
-        txt = document.getElementById('ifr_pdfviewer').contentWindow.getSelection().toString();
-
-        return txt;
-    },
-
-    update: function(paper) {
-        // update data
-        this.vpp.paper = paper;
-        this.current.paper = paper;
-
-        // update the normal UI
-        this.vpp.show_tab = 'basic_info';
-        this.vpp.$forceUpdate();
-
-        // update the keywords highlight
-        this.vpp.$nextTick(function () {
-            console.log('* pan_collector UI updated');
-            pan_collector.mark_keywords_as_color(
-                srv_extractor.project.settings.highlight_keywords.inclusion,
-                'green'
-            );
-        });
-
-        // update the PDF viewer
-        // this.load_pdf();
-
-        // notifiy the ocpaper to show the working paper
-        pan_ocpapers.show_working_paper();
-    },
-
-    show_paper: function(pid, extract_paper) {
-        // set loc to show
-        $('#win_collector').css("right", 0);
-
-        // resize
-        pan_collector.resize();
-
-        // set the extract info
-        this.current.extract_paper = extract_paper;
-
-        // get the paper
-        $.get(
-            srv_extractor.url.get_paper,
-            {pid: pid, rnd:Math.random()},
-            function(data) {
-                pan_collector.update(data.paper);
-            }, 'json'
-        );
-    },
-
-    show: function() {
-        $(this.vpp_id).show();
-        // bind the context menu
-        // this.bind_txt_ctx_menu();
-    },
-
-    hide: function() {
-        $('#win_collector').css('right', 5000); 
-    },
-
-    view_pdf: function(paper_id, file_id, folder) {
-        // update the pdf viewer size
-        this.resize();
-
-        // load the pdf
-        this.load_pdf(folder, file_id);
-    },
-
-    load_pdf: function(folder, file_id) {
-        var pdf_url = "/pdfworker/pdf/" + folder + "/" + file_id + '.pdf';
-
-        // just load the blank page
-        if (typeof(folder) == 'undefined') {
-            pdf_url = '/pdfworker/view_pdf';
-        }
-
-        // get the highlight_keywords
-        var highlight_keywords = pan_collector.get_pdf_highlight_keywords();
-
-        // show the pdf by the 
-        document.getElementById("ifr_pdfviewer").contentWindow.LNMA.open_pdf(pdf_url, highlight_keywords);
-    },
-
-    /**
-     * Get the keywords and color for highlighting in PDF
-     */
-    get_pdf_highlight_keywords: function() {
-        var tmp = [];
-
-        // first, the keywords from the project
-        tmp.push({
-            keywords: srv_extractor.project.settings.highlight_keywords.inclusion,
-            color: 'green'
-        });
-
-        // second, push the outcome name if current is not working on itable
-
-        // third, push the pdf highlight keywords in project settings
-        tmp.push({
-            keywords: srv_extractor.project.settings.pdf_keywords.main,
-            color: 'yellow'
-        });
-
-        return tmp;
-    },
-
-    upload_pdfs: function() {
-        var paper_id = this.vpp.paper.paper_id;
-        // call pdfworker service to upload
-        srv_pdfworker.update_form_data(
-            '#form_pdf_files',
-            function(data) {
-                console.log(data);
-                if (data.success) {
-
-                    jarvis.toast('Uploaded PDF for paper!');
-                    
-                    // update display
-                    pan_collector.update(data.paper);
-                } else {
-                    toast('Error when uploading PDF, try later.', 'error')
-                }
-            }
-        );
-    },
-
-    resize: function() {
-        // set the height for the window
-        var h = $(window).height() - 50;
-        $('#win_collector').css("height", h);
-
-        // set the height for the pdf viewer
-        var h = $(window).height() - 150;
-        $(this.pdfviewer_id).css('height', h + 'px');
-    },
 };
 
 

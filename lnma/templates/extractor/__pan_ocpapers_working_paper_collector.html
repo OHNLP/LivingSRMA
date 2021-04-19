@@ -1,0 +1,99 @@
+<div id="pan_ocpapers_working_paper_collector"
+    v-if="show_working_paper_collector">
+    <div v-if="working_paper != null && working_oc != null">
+        <div class="working_title">
+            {{ working_oc.meta.group }}<br>
+            {{ working_oc.meta.full_name }}
+        </div>
+
+        <div class="mt-1 mb-1 d-flex flex-row">
+            <button class="btn btn-sm btn-default mr-1"
+                v-on:click="save_working_paper_extraction">
+                <i class="fa fa-save"></i>
+                Save Extraction
+            </button>
+
+            <select class="form-control form-control-sm"
+                style="width: 50px;"
+                v-on:change="set_n_arms"
+                v-model="working_oc.data[working_paper.pid].n_arms">
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+            </select>
+        </div>
+
+        <div class="mb-1 d-flex flex-row">
+            <button class="w-arm-tab btn btn-xs btn-primary"
+                id="working_paper_arm_tab_null"
+                v-on:click="switch_working_arm(null)">
+                Arm 1
+            </button>
+            <button class="ml-1 w-arm-tab btn btn-xs"
+                v-for="arm_seq in (working_oc.data[working_paper.pid].n_arms - 2)"
+                v-bind:id="'working_paper_arm_tab_' + (arm_seq-1)"
+                v-on:click="switch_working_arm(arm_seq-1)">
+                Arm {{ arm_seq + 1 }}
+            </button>
+        </div>
+
+        <div id="pan_ocpapers_working_paper_collector_attr_list">
+            <div class="w-cate-item mb-1"
+                v-for="cate in working_oc.meta.cate_attrs">
+                <div class="w-cate-item-name">
+                    {{ cate.name }}
+                </div>
+
+                <div class="w-cate-attrs">
+                    <div class="w-attr-item"
+                        v-for="attr in cate.attrs"
+                        v-show="is_show_attr(attr.abbr)">
+                        <div class="w-attr-item-name"
+                            v-bind:title="attr.name">
+                            {{ attr.name }}
+                        </div>
+
+                        <div class="w-attr-item-value"
+                            v-if="attr.subs == null">
+                            <input class="paper-extract-input-auto input-auto-complete" type="text" 
+                                v-bind:abbr="attr.abbr"
+                                v-bind:size="get_input_size(get_working_arm_attrs()[attr.abbr])"
+                                v-model="get_working_arm_attrs()[attr.abbr]"> 
+                            <span class="w-remove-content"
+                                v-on:click="get_working_arm_attrs()[attr.abbr] = ''">
+                                <i class="fa fa-close"></i>
+                            </span>
+                        </div>
+                        
+                        <div class="w-attr-subs"
+                            v-else>
+                            <div class="w-sub-item-value"
+                                v-for="sub, sub_idx in attr.subs">
+
+                                <div class="w-sub-item-name">
+                                    - {{ sub.name }}
+                                </div>
+
+                                <div class="w-sub-item-value">
+                                    <input class="paper-extract-input-auto input-auto-complete"     
+                                        type="text" 
+                                        v-bind:abbr="sub.abbr"
+                                        v-bind:size="get_input_size(get_working_arm_attrs()[sub.abbr])"
+                                        v-model="get_working_arm_attrs()[sub.abbr]"> 
+                                    <span class="w-remove-content"
+                                        v-on:click="get_working_arm_attrs()[sub.abbr] = ''">
+                                        <i class="fa fa-close"></i>
+                                    </span>
+                                </div>
+                            </div>
+
+                        </div>
+                        
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
