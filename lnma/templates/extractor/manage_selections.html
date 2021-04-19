@@ -482,17 +482,41 @@ div.w-attr-item:nth-child(odd) {background: whitesmoke; }
                     {{ working_oc.meta.full_name }}
                 </div>
 
-                <div class="mt-1 mb-1">
+                <div class="mt-1 mb-1 d-flex flex-row">
                     <button class="btn btn-sm btn-default mr-1"
                         v-on:click="save_working_paper_extraction">
                         <i class="fa fa-save"></i>
                         Save Extraction
                     </button>
+
+                    <select class="form-control form-control-sm"
+                        style="width: 50px;"
+                        v-on:change="set_n_arms"
+                        v-model="working_oc.data[working_paper.pid].n_arms">
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                    </select>
+                </div>
+
+                <div class="mb-1 d-flex flex-row">
+                    <button class="w-arm-tab btn btn-xs btn-primary"
+                        id="working_paper_arm_tab_null"
+                        v-on:click="switch_working_arm(null)">
+                        Arm 1
+                    </button>
+                    <button class="ml-1 w-arm-tab btn btn-xs"
+                        v-for="arm_seq in (working_oc.data[working_paper.pid].n_arms - 2)"
+                        v-bind:id="'working_paper_arm_tab_' + (arm_seq-1)"
+                        v-on:click="switch_working_arm(arm_seq-1)">
+                        Arm {{ arm_seq + 1 }}
+                    </button>
                 </div>
 
                 <div id="pan_ocpapers_working_paper_collector_attr_list">
                     <div v-for="cate in working_oc.meta.cate_attrs"
-                        class="w-cate-item mt-1 mb-1">
+                        class="w-cate-item mb-1">
                         <div class="w-cate-item-name">
                             {{ cate.name }}
                         </div>
@@ -509,10 +533,10 @@ div.w-attr-item:nth-child(odd) {background: whitesmoke; }
                                     v-if="attr.subs == null">
                                     <input class="paper-extract-input-auto input-auto-complete" type="text" 
                                         v-bind:abbr="attr.abbr"
-                                        v-bind:size="get_input_size(working_oc.data[working_paper.pid].attrs.main[attr.abbr])"
-                                        v-model="working_oc.data[working_paper.pid].attrs.main[attr.abbr]"> 
+                                        v-bind:size="get_input_size(get_working_arm_attrs()[attr.abbr])"
+                                        v-model="get_working_arm_attrs()[attr.abbr]"> 
                                     <span class="w-remove-content"
-                                        v-on:click="working_oc.data[working_paper.pid].attrs.main[attr.abbr] = ''">
+                                        v-on:click="get_working_arm_attrs()[attr.abbr] = ''">
                                         <i class="fa fa-close"></i>
                                     </span>
                                 </div>
@@ -530,10 +554,10 @@ div.w-attr-item:nth-child(odd) {background: whitesmoke; }
                                             <input class="paper-extract-input-auto input-auto-complete"     
                                                 type="text" 
                                                 v-bind:abbr="sub.abbr"
-                                                v-bind:size="get_input_size(working_oc.data[working_paper.pid].attrs.main[sub.abbr])"
-                                                v-model="working_oc.data[working_paper.pid].attrs.main[sub.abbr]"> 
+                                                v-bind:size="get_input_size(get_working_arm_attrs()[sub.abbr])"
+                                                v-model="get_working_arm_attrs()[sub.abbr]"> 
                                             <span class="w-remove-content"
-                                                v-on:click="working_oc.data[working_paper.pid].attrs.main[sub.abbr] = ''">
+                                                v-on:click="get_working_arm_attrs()[sub.abbr] = ''">
                                                 <i class="fa fa-close"></i>
                                             </span>
                                         </div>
@@ -739,6 +763,11 @@ var pan_ocpapers = {
                 working_paper: null,
                 working_paper_oc_selections: null,
 
+                // working arm
+                // null means main arm
+                // numbers mean other arm
+                working_paper_arm: null,
+
                 // working oc
                 working_oc: null,
 
@@ -797,6 +826,9 @@ var pan_ocpapers = {
                     // notifiy the ocpaper to show the working paper
                     pan_ocpapers.show_working_paper(paper);
 
+                    // close the extraction
+                    this.show_working_paper_collector = false;
+
                     // call collector to do something
                     pan_selector.show_paper(
                         paper.pid
@@ -835,6 +867,40 @@ var pan_ocpapers = {
                     pan_ocpapers.save_working_paper_extraction(
                         pid, oc
                     );
+                },
+
+                set_n_arms: function() {
+                    var n_arms = this.working_oc.data[this.working_paper.pid].n_arms;
+                    console.log('* set n_arms to', n_arms);
+
+                    // update the other to match the number
+                    this.working_oc.data[this.working_paper.pid] = srv_extractor.set_n_arms(
+                        this.working_oc.data[this.working_paper.pid], n_arms
+                    );
+
+                    // update current working arm to main
+                    this.switch_working_arm(null);
+                    
+                    this.$forceUpdate();
+                },
+
+                switch_working_arm: function(arm_idx) {
+                    console.log('* switch_working_arm', arm_idx);
+                    this.working_paper_arm = arm_idx;
+
+                    // update the working arm
+                    $('.w-arm-tab').removeClass('btn-primary');
+                    $('#working_paper_arm_tab_' + arm_idx).addClass('btn-primary');
+                },
+
+                get_working_arm_attrs: function() {
+                    if (this.working_paper_arm == null) {
+                        return this.working_oc.data[this.working_paper.pid].attrs.main;
+                    } else {
+                        return this.working_oc.data[this.working_paper.pid].attrs.other[
+                            this.working_paper_arm
+                        ];
+                    }
                 },
 
                 extract: function(oc) {

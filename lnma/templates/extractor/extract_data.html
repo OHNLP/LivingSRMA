@@ -592,34 +592,38 @@ var pan_ocpapers = {
                 },
 
                 on_change_itable_n_arms: function(pmid, event) {
-                    let val = event.target.value;
-                    console.log('* change ' + pmid + ' n_arms to ' + val);
+                    let n_arms = event.target.value;
+                    console.log('* change ' + pmid + ' n_arms to ' + n_arms);
 
-                    var new_n_others = val - 2;
-                    if (new_n_others == this.extract.data[pmid].attrs.other.length) {
-                        // which means the number of arms doesn't change
+                    // var new_n_others = n_arms - 2;
+                    // if (new_n_others == this.extract.data[pmid].attrs.other.length) {
+                    //     // which means the number of arms doesn't change
 
-                    } else if (new_n_others > this.extract.data[pmid].attrs.other.length) {
-                        // the number of arms increases, need to put more elements
-                        var delta = new_n_others - this.extract.data[pmid].attrs.other.length;
-                        for (let i = 0; i < delta; i++) {
-                            // just copy the keys from main track
-                            var obj = JSON.parse(JSON.stringify(this.extract.data[pmid].attrs.main));
-                            // and clear the exising data
-                            for (const key in obj) {
-                                if (Object.hasOwnProperty.call(obj, key)) {
-                                    obj[key] = '';
-                                }
-                            }
-                            this.extract.data[pmid].attrs.other.push(obj);
-                        }
-                    } else {
-                        // the number of arms decreases, need to remove
-                        var delta = this.extract.data[pmid].attrs.other.length - new_n_others;
-                        for (let i = 0; i < delta; i++) {
-                            this.extract.data[pmid].attrs.other.pop();
-                        }
-                    }
+                    // } else if (new_n_others > this.extract.data[pmid].attrs.other.length) {
+                    //     // the number of arms increases, need to put more elements
+                    //     var delta = new_n_others - this.extract.data[pmid].attrs.other.length;
+                    //     for (let i = 0; i < delta; i++) {
+                    //         // just copy the keys from main track
+                    //         var obj = JSON.parse(JSON.stringify(this.extract.data[pmid].attrs.main));
+                    //         // and clear the exising data
+                    //         for (const key in obj) {
+                    //             if (Object.hasOwnProperty.call(obj, key)) {
+                    //                 obj[key] = '';
+                    //             }
+                    //         }
+                    //         this.extract.data[pmid].attrs.other.push(obj);
+                    //     }
+                    // } else {
+                    //     // the number of arms decreases, need to remove
+                    //     var delta = this.extract.data[pmid].attrs.other.length - new_n_others;
+                    //     for (let i = 0; i < delta; i++) {
+                    //         this.extract.data[pmid].attrs.other.pop();
+                    //     }
+                    // }
+                    
+                    this.extract.data[pmid] = srv_extractor.set_n_arms(
+                        this.extract.data[pmid], n_arms
+                    );
                     this.$forceUpdate();
                 },
 

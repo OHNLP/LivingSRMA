@@ -550,5 +550,54 @@ var srv_extractor = {
         }
 
         return d;
+    },
+
+    /**
+     * Set number of arms to a paper_data according to oc meta
+     */
+    set_n_arms: function(paper_data, n_arms, is_copy_main) {
+        // get the is_copy_main default value
+        if (typeof(is_copy_main) == 'undefined') {
+            is_copy_main = true;
+        }
+        
+        // set the n_arms
+        paper_data.n_arms = n_arms;
+
+        // update the others
+        var new_n_others = n_arms - 2;
+        if (new_n_others == paper_data.attrs.other.length) {
+            // which means the number of arms doesn't change
+
+        } else if (new_n_others > paper_data.attrs.other.length) {
+            // the number of arms increases, need to put more elements
+            var delta = new_n_others - paper_data.attrs.other.length;
+            // add each as a new ext
+            for (let i = 0; i < delta; i++) {
+                // just copy the keys from main track
+                var obj = JSON.parse(JSON.stringify(paper_data.attrs.main));
+                if (is_copy_main) {
+                    // nothing to do when copy main
+
+                } else {
+                    // clear
+                    for (const key in obj) {
+                        if (Object.hasOwnProperty.call(obj, key)) {
+                            obj[key] = '';
+                        }
+                    }
+                }
+                paper_data.attrs.other.push(obj);
+            }
+
+        } else {
+            // the number of arms decreases, need to remove
+            var delta = paper_data.attrs.other.length - new_n_others;
+            for (let i = 0; i < delta; i++) {
+                paper_data.attrs.other.pop();
+            }
+        }
+
+        return paper_data;
     }
 };

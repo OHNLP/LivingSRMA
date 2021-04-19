@@ -340,7 +340,6 @@
                                 <span v-for="other, other_idx in extract.data[paper.pid].attrs.other"
                                     class="paper-table-body-cell"
                                     v-bind:title="extract.data[paper.pid].attrs.other[other_idx][attr_sub.abbr]">
-                                    <br v-if="other_idx > 0">
                                     {{ extract.data[paper.pid].attrs.other[other_idx][attr_sub.abbr] }}&nbsp;
                                 </span>                        
         
