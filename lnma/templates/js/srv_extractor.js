@@ -12,6 +12,8 @@ var srv_extractor = {
         create_extract: "[[ url_for('extractor.create_extract') ]]",
         update_extract: "[[ url_for('extractor.update_extract') ]]",
         update_extract_meta: "[[ url_for('extractor.update_extract_meta') ]]",
+        update_extract_data: "[[ url_for('extractor.update_extract_data') ]]",
+        update_extract_incr_data: "[[ url_for('extractor.update_extract_incr_data') ]]",
 
         copy_extract: "[[ url_for('extractor.copy_extract') ]]",
         delete_extract: "[[ url_for('extractor.delete_extract') ]]",
@@ -25,6 +27,60 @@ var srv_extractor = {
         update_paper_selections: "[[ url_for('extractor.update_paper_selections') ]]",
 
         extract_data: "[[ url_for('extractor.extract_data') ]]"
+    },
+
+    update_extract: function(
+        project_id,
+        oc_type,
+        abbr,
+        meta,
+        data,
+        callback
+    ) {
+        $.ajax({
+            type: 'POST',
+            dataType: 'json',
+            url: this.url.update_extract,
+            data: {
+                project_id:project_id, 
+                oc_type:oc_type, 
+                abbr:abbr,
+                meta:JSON.stringify(meta), 
+                data:JSON.stringify(data)
+            },
+            cache: false,
+            success: callback,
+            error: function(jqXHR, textStatus, errorThrown) {
+                jarvis.toast('Something wrong when saving the extraction.', 'alert');
+                console.error(textStatus, errorThrown);
+            }
+        });
+    },
+
+    update_extract_incr_data: function(
+        project_id,
+        oc_type,
+        abbr,
+        data,
+        callback
+    ) {
+        $.ajax({
+            type: 'POST',
+            dataType: 'json',
+            url: this.url.update_extract_incr_data,
+            data: {
+                project_id:project_id, 
+                oc_type:oc_type, 
+                abbr:abbr,
+                data:JSON.stringify(data)
+            },
+            cache: false,
+            success: callback,
+            error: function(jqXHR, textStatus, errorThrown) {
+                jarvis.toast('Something wrong when saving the updated data.', 'alert');
+                console.error(textStatus, errorThrown);
+            }
+        });
     },
 
     get_paper: function(pid, callback) {
@@ -437,4 +493,62 @@ var srv_extractor = {
         }
         return result;
     },
+
+    /**
+     * Make the empty extraction data for a paper
+     */
+    mk_oc_data: function(oc, is_selected, is_checked) {
+        if (typeof(is_selected) == 'undefined') {
+            is_selected = false;
+        }
+        if (typeof(is_checked) == 'undefined') {
+            is_checked = true;
+        }
+        
+        // create an empty item
+        var d = {
+            is_selected: is_selected,
+            is_checked: is_checked,
+            n_arms: 2,
+            attrs: {
+                main: {},
+                other: []
+            }
+        };
+        
+        // fill the main track of the oc extraction.
+        d.attrs.main = this.mk_oc_data_attr(oc);
+
+        return d;
+    },
+
+    /**
+     * Make the empty attrs
+     */
+    mk_oc_data_attr: function(oc) {
+        var d = {};
+
+        for (let i = 0; i < oc.meta.cate_attrs.length; i++) {
+            // check each category
+            const cate = oc.meta.cate_attrs[i];
+            for (let j = 0; j < cate.attrs.length; j++) {
+                // check each attribute
+                const attr = cate.attrs[j];
+                
+                if (attr.subs == null) {
+                    // if there is no sub, just use this attr
+                    d[attr.abbr] = '';
+
+                } else {
+                    // check each sub in the attribute
+                    for (let k = 0; k < attr.subs.length; k++) {
+                        const sub = attr.subs[k];
+                        d[sub.abbr] = '';
+                    }
+                }
+            }
+        }
+
+        return d;
+    }
 };

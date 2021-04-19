@@ -146,7 +146,7 @@ html {
 }
 
 #pan_ocpapers_working_paper {
-    width: 240px;
+    /* width: 240px; */
     padding: 5px;
     height: auto;
     position: absolute;
@@ -157,7 +157,7 @@ html {
     font-size: .9em;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
-#pan_ocpapers_working_paper_title {
+.working_title {
     height: 38px;
     line-height: 18px;
     overflow: hidden;
@@ -177,7 +177,12 @@ html {
 #pan_ocpapers_working_paper_oc_tree {
     overflow-y: auto;
 }
-
+#pan_ocpapers_working_paper_collector {
+    max-width: 190px;
+}
+#pan_ocpapers_working_paper_collector_attr_list {
+    overflow-y: auto;
+}
 .chk-oc {
     border-bottom: 1px dotted #cfcfcf;
 }
@@ -200,7 +205,9 @@ html {
 .chk-oc-h3 {
     background-color: #c9c5c5;
 }
-
+.chk-oc-extracting {
+    background-color: rgb(204, 224, 228) !important;
+}
 #win_selector {
     min-width: 1100px;
     width: 65%;
@@ -257,6 +264,58 @@ html {
     color: purple;
     padding: 0;
     margin: 0;
+}
+div.w-attr-item:nth-child(even) {background: white; }
+div.w-attr-item:nth-child(odd) {background: whitesmoke; }
+
+.w-cate-item {
+    padding: 3px 0;
+}
+.w-cate-item-name {
+    font-size: .9em;
+    font-weight: bold;
+    background-color: rgb(209, 209, 209);
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.w-attr-item {
+    border-bottom: 1px dotted #dedede;
+    padding: 3px 0;
+}
+.w-attr-item-name {
+    font-size: .9em;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.w-attr-subs {
+    padding: 0 0 0 5px;
+    border-left: 2px dashed rgb(155, 155, 155);
+}
+.w-sub-item-name {
+    font-style: italic;
+}
+.w-remove-content {
+    padding: 5px 5px;
+    color: grey;
+    font-size: 9px;
+    cursor: pointer;
+}
+.w-remove-content:hover {
+    background-color: lightcoral;
+    color: white;
+}
+
+.paper-extract-input-auto {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: .9em;
+    padding: 0 3px;
+    height: 20px;
+    line-height: 20px;
+    border: 1px solid #cccccc;
 }
 </style>
 {% endblock %}
@@ -322,9 +381,12 @@ html {
     </div>
 
     <div id="pan_ocpapers_working_paper"
-        v-show="show_working_paper_pan">
-        <div v-if="working_paper != null">
-            <div id="pan_ocpapers_working_paper_title">
+        class="d-flex flex-row"
+        v-if="show_working_paper_pan">
+        <div id="pan_ocpapers_working_paper_selector" 
+            class="mr-1"
+            v-if="working_paper != null">
+            <div class="working_title">
                 {{ get_first_author(working_paper.authors) }} {{ get_year(working_paper.pub_date) }}<br>
                 is selected in <b>{{ n_selected_ocs() }}</b> outcomes
             </div>
@@ -348,11 +410,20 @@ html {
                 <div class="d-flex flex-row chk-oc">
                     <div>
                         <input type="checkbox" 
-                            id="chk-oc-itable" class="chk-oc-input"
+                            id="chk_oc_itable" class="chk-oc-input"
                             v-model="working_paper_oc_selections['itable']">
                     </div>
-                    <div>
-                        <label class="chk-oc-label" for="chk-oc-itable">Interactive Table</label>
+                    <div class="d-flex flex-row justify-content-between flex-fill">
+                        <div>
+                            <label class="chk-oc-label" for="chk-oc-itable">Interactive Table</label>
+                        </div>
+                        <div>
+                            <button 
+                                v-on:click="extract(extract_dict['itable'])"
+                                class="btn btn-default btn-xs">
+                                <i class="fa fa-edit"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -368,16 +439,17 @@ html {
                         <div v-for="(cate, cate_name) in group">
 
                             <div class="chk-oc-h3">
-                                {{ cate_name }}
+                                - {{ cate_name }}
                             </div>
                             <div v-for="oc in cate"
                                 v-if="!only_show_selected || working_paper_oc_selections[oc.abbr]"
+                                v-bind:id="'chk_oc_line_' + oc.abbr"
                                 class="chk-oc d-flex flex-row">
                                 <div>
                                     <input type="checkbox" 
                                         class="chk-oc-input"
                                         v-model="working_paper_oc_selections[oc.abbr]"
-                                        v-bind:id="'chk-oc-' + oc.abbr">
+                                        v-bind:id="'chk_oc_input_' + oc.abbr">
                                 </div>
                                 <div class="d-flex flex-row justify-content-between flex-fill">
                                     <div>
@@ -387,7 +459,7 @@ html {
                                         </label>
                                     </div>
                                     <div>
-                                        <button v-if="working_paper_oc_selections[oc.abbr]"
+                                        <button 
                                             v-on:click="extract(oc)"
                                             class="btn btn-default btn-xs">
                                             <i class="fa fa-edit"></i>
@@ -403,28 +475,74 @@ html {
         </div>
 
         <div id="pan_ocpapers_working_paper_collector"
-            v-show="show_working_paper_collector">
-            <div v-if="working_paper != null">
-                <div id="pan_ocpapers_working_paper_collector_title">
-                    
+            v-if="show_working_paper_collector">
+            <div v-if="working_paper != null && working_oc != null">
+                <div class="working_title">
+                    {{ working_oc.meta.group }}<br>
+                    {{ working_oc.meta.full_name }}
                 </div>
 
-                <div id="pan_ocpapers_working_paper_attr_list">
-                    <div v-for="attr_sub in all_attrs"
-                        v-show="show_attrs[attr_sub.abbr]"
-                        class="w-attr-item">
-                        <div class="w-attr-item-name">
-                            {{ attr_sub.name }}
+                <div class="mt-1 mb-1">
+                    <button class="btn btn-sm btn-default mr-1"
+                        v-on:click="save_working_paper_extraction">
+                        <i class="fa fa-save"></i>
+                        Save Extraction
+                    </button>
+                </div>
+
+                <div id="pan_ocpapers_working_paper_collector_attr_list">
+                    <div v-for="cate in working_oc.meta.cate_attrs"
+                        class="w-cate-item mt-1 mb-1">
+                        <div class="w-cate-item-name">
+                            {{ cate.name }}
                         </div>
-                        <div class="w-attr-item-value">
-                            <input class="paper-extract-input-auto input-auto-complete" type="text" 
-                                v-bind:abbr="attr_sub.abbr"
-                                v-bind:size="get_input_size(extract.data[working_paper.pid].attrs.main[attr_sub.abbr])"
-                                v-model="extract.data[working_paper.pid].attrs.main[attr_sub.abbr]"> 
-                            <span class="w-remove-content"
-                                v-on:click="extract.data[working_paper.pid].attrs.main[attr_sub.abbr] = ''">
-                                <i class="fa fa-close"></i>
-                            </span>
+
+                        <div class="w-cate-attrs">
+                            <div v-for="attr in cate.attrs"
+                                class="w-attr-item">
+                                <div class="w-attr-item-name"
+                                    v-bind:title="attr.name">
+                                    {{ attr.name }}
+                                </div>
+
+                                <div class="w-attr-item-value"
+                                    v-if="attr.subs == null">
+                                    <input class="paper-extract-input-auto input-auto-complete" type="text" 
+                                        v-bind:abbr="attr.abbr"
+                                        v-bind:size="get_input_size(working_oc.data[working_paper.pid].attrs.main[attr.abbr])"
+                                        v-model="working_oc.data[working_paper.pid].attrs.main[attr.abbr]"> 
+                                    <span class="w-remove-content"
+                                        v-on:click="working_oc.data[working_paper.pid].attrs.main[attr.abbr] = ''">
+                                        <i class="fa fa-close"></i>
+                                    </span>
+                                </div>
+                                
+                                <div class="w-attr-subs"
+                                    v-else>
+                                    <div class="w-sub-item-value"
+                                        v-for="sub, sub_idx in attr.subs">
+
+                                        <div class="w-sub-item-name">
+                                            - {{ sub.name }}
+                                        </div>
+
+                                        <div class="w-sub-item-value">
+                                            <input class="paper-extract-input-auto input-auto-complete"     
+                                                type="text" 
+                                                v-bind:abbr="sub.abbr"
+                                                v-bind:size="get_input_size(working_oc.data[working_paper.pid].attrs.main[sub.abbr])"
+                                                v-model="working_oc.data[working_paper.pid].attrs.main[sub.abbr]"> 
+                                            <span class="w-remove-content"
+                                                v-on:click="working_oc.data[working_paper.pid].attrs.main[sub.abbr] = ''">
+                                                <i class="fa fa-close"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                
+                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -447,7 +565,7 @@ html {
 <div id="config_outcome">
     <div style="position: absolute; top: 0; left: -40px; width: 40px; height: 40px; background-color: white;">
         <div style="font-size: large; width: 40px; height: 40px; line-height: 40px; text-align: center; cursor: pointer;"
-            onclick="$('#config_outcome').css('right', 5000)">
+            onclick="$('#config_outcome').css('right', 5000);pan_ocpapers.hide_working_paper();">
             <i class="fa fa-close"></i>
         </div>
     </div>
@@ -621,6 +739,9 @@ var pan_ocpapers = {
                 working_paper: null,
                 working_paper_oc_selections: null,
 
+                // working oc
+                working_oc: null,
+
                 // the attrs for extraction
                 all_attrs: []
             },
@@ -680,6 +801,13 @@ var pan_ocpapers = {
                     pan_selector.show_paper(
                         paper.pid
                     );
+
+                    // make it draggable
+                    // $( "#pan_ocpapers_working_paper" ).draggable({ 
+                    //     handle: "div.working_title",
+                    //     containment: "#pan_ocpapers", 
+                    //     scroll: false
+                    // });
                 },
 
                 n_selected_ocs: function() {
@@ -700,8 +828,34 @@ var pan_ocpapers = {
                     );
                 },
 
+                save_working_paper_extraction: function() {
+                    var pid = this.working_paper.pid;
+                    var oc = this.working_oc;
+
+                    pan_ocpapers.save_working_paper_extraction(
+                        pid, oc
+                    );
+                },
+
                 extract: function(oc) {
+                    // add this working paper to the oc
+                    if (oc.data.hasOwnProperty(this.working_paper.pid)) {
+
+                    } else {
+                        oc.data[this.working_paper.pid] = srv_extractor.mk_oc_data(oc)
+                    }
+
                     console.log('* extract', this.working_paper, 'for', oc);
+
+                    // show the panel
+                    this.show_working_paper_collector = true;
+
+                    // set the working oc
+                    this.working_oc = oc;
+
+                    // highlight the oc in list
+                    $('.chk-oc').removeClass('chk-oc-extracting');
+                    $('#chk_oc_line_' + oc.abbr).addClass('chk-oc-extracting');
                 }
             },
             updated: function() {
@@ -716,17 +870,35 @@ var pan_ocpapers = {
             project_id,
             function(data) {
                 console.log(data)
-                pan_ocpapers.update(data);
+                pan_ocpapers.on_load(data);
             }
         )
     },
 
-    update: function(data) {
+    on_load: function(data) {
         // the data is a combo of extract and papers
         this.vpp.extracts = data.extracts;
         this.vpp.papers = data.papers;
 
         // update the extract dict for display
+        this.vpp.$data.extract_dict = this.update_extract_dict(data);
+        this.vpp.$data.extract_tree = this.update_extract_tree(data);
+
+        // update
+        this.vpp.$forceUpdate();
+
+        pan_ocpapers.resize();
+    },
+
+    re_load: function(extract) {
+        // update the given extract
+        for (let i = 0; i < this.vpp.extracts.length; i++) {
+            if (extract.abbr == this.vpp.extracts[i].abbr) {
+                this.vpp.extracts[i] = extract;
+            }
+        }
+
+        // update dict and tree
         this.vpp.$data.extract_dict = this.update_extract_dict(data);
         this.vpp.$data.extract_tree = this.update_extract_tree(data);
 
@@ -835,6 +1007,37 @@ var pan_ocpapers = {
         )
     },
 
+    save_working_paper_extraction: function(pid, oc) {
+        var project_id = Cookies.get('project_id');
+        var oc_type = oc.oc_type;
+        var abbr = oc.abbr;
+
+        // prepare the incremental data for update
+        var data = {};
+        data[pid] = oc.data[pid];
+
+        // and since we add this extraction
+        // this paper is also selected?
+        // no, the selected is for public site
+
+        srv_extractor.update_extract_incr_data(
+            project_id,
+            oc_type,
+            abbr,
+            data,
+            function(data) {
+                // the data contain a paer
+                console.log(data);
+
+                jarvis.toast('Update [' + data.extract.meta.full_name + '] with current extraction');
+
+                // reload the page
+                // pan_ocpapers.re_load(data.extract);
+                pan_ocpapers.load();
+            }
+        );
+    },
+
     update_extract: function() {
         // there are 
         var project_id = Cookies.get('project_id');
@@ -897,6 +1100,7 @@ var pan_ocpapers = {
         var h = $(window).height() - 90;
         $('#pan_ocpapers_paperlist').css('height', h);
         $('#pan_ocpapers_working_paper_oc_tree').css('max-height', h - 90);
+        $('#pan_ocpapers_working_paper_collector_attr_list').css('max-height', h - 90);
     }
 };
 

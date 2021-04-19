@@ -350,9 +350,40 @@ def get_extract_and_papers():
     return jsonify(ret)
 
 
+@bp.route('/update_extract', methods=['POST'])
+@login_required
+def update_extract():
+    '''
+    Update the extract meta and data
+    '''
+    project_id = request.form.get('project_id')
+    oc_type = request.form.get('oc_type')
+    abbr = request.form.get('abbr')
+    # the meta of the extract settings
+    meta = json.loads(request.form.get('meta'))
+    # the data of the extracted infos
+    data = json.loads(request.form.get('data'))
+    
+    # update the extract with given info
+    extract = dora.update_extract_meta_and_data(
+        project_id, oc_type, abbr, meta, data
+    )
+
+    # build the return obj
+    ret = {
+        'success': True,
+        'msg': '',
+        'extract': extract.as_dict()
+    }
+    return jsonify(ret)
+
+
 @bp.route('/update_extract_meta', methods=['POST'])
 @login_required
 def update_extract_meta():
+    '''
+    Update the extract meta
+    '''
     project_id = request.form.get('project_id')
     oc_type = request.form.get('oc_type')
     abbr = request.form.get('abbr')
@@ -373,20 +404,47 @@ def update_extract_meta():
     return jsonify(ret)
 
 
-@bp.route('/update_extract', methods=['POST'])
+@bp.route('/update_extract_data', methods=['POST'])
 @login_required
-def update_extract():
+def update_extract_data():
+    '''
+    Update the extract data
+    '''
     project_id = request.form.get('project_id')
     oc_type = request.form.get('oc_type')
     abbr = request.form.get('abbr')
     # the meta of the extract settings
-    meta = json.loads(request.form.get('meta'))
-    # the data of the extracted infos
     data = json.loads(request.form.get('data'))
     
     # update the extract with given info
-    extract = dora.update_extract_meta_and_data(
-        project_id, oc_type, abbr, meta, data
+    extract = dora.update_extract_data(
+        project_id, oc_type, abbr, data
+    )
+
+    # build the return obj
+    ret = {
+        'success': True,
+        'msg': '',
+        'extract': extract.as_dict()
+    }
+    return jsonify(ret)
+
+
+@bp.route('/update_extract_incr_data', methods=['POST'])
+@login_required
+def update_extract_incr_data():
+    '''
+    Update the extract data
+    '''
+    project_id = request.form.get('project_id')
+    oc_type = request.form.get('oc_type')
+    abbr = request.form.get('abbr')
+    # the meta of the extract settings
+    data = json.loads(request.form.get('data'))
+    
+    # update the extract with given info
+    extract = dora.update_extract_incr_data(
+        project_id, oc_type, abbr, data
     )
 
     # build the return obj

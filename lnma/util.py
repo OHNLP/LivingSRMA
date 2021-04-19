@@ -67,6 +67,21 @@ def mk_number_str(length=6):
     return ''.join(random.choice('0123456789') for i in range(length))
 
 
+def mk_empty_extract_paper_data(is_selected=False):
+    '''
+    Make an empty extract paper data
+    '''
+    return {
+        'is_selected': is_selected,
+        'is_checked': False,
+        'n_arms': 2,
+        'attrs': {
+            'main': {},
+            'other': []
+        }
+    }
+
+
 def fill_extract_data_arm(arm, cate_attrs):
     '''
     Fill the extract data arm with empty values
@@ -90,6 +105,48 @@ def fill_extract_data_arm(arm, cate_attrs):
 
     return arm
 
+
+def is_same_extraction(ea, eb):
+    '''
+    Compare two extractions attr by attr
+    '''
+    if ea['is_selected'] != eb['is_selected']:
+        return False
+    
+    if ea['is_checked'] != eb['is_checked']:
+        return False
+    
+    if ea['n_arms'] != eb['n_arms']:
+        return False
+
+    # check the main arm
+    for attr in ea['attrs']['main']:
+        if attr not in eb['attrs']['main']:
+            # which means eb use different meta???
+            return False
+        
+        if ea['attrs']['main'][attr] != eb['attrs']['main'][attr]:
+            return False
+
+    # check other arms
+    if len(ea['attrs']['other']) != len(eb['attrs']['other']):
+        return False
+
+    # check each arm in other
+    for arm_idx, _ in enumerate(ea['attrs']['other']):
+        ea_arm = ea['attrs']['other'][arm_idx]
+        eb_arm = eb['attrs']['other'][arm_idx]
+        for attr in ea_arm:
+            if attr not in eb_arm:
+                # which means eb use different meta???
+                return False
+            
+            if ea_arm[attr] != eb_arm[attr]:
+                return False
+            
+    # wow, they are the same
+    return True
+    
 
 def is_valid_pmid(pmid):
     '''Check if a pmid is valid PMID

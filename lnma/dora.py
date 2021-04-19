@@ -1612,6 +1612,101 @@ def update_extract_meta(project_id, oc_type, abbr, meta):
     return extract
 
 
+def update_extract_data(project_id, oc_type, abbr, data):
+    '''
+    Update the existing extract data only
+    '''
+    extract = Extract.query.filter(and_(
+        Extract.project_id == project_id,
+        Extract.abbr == abbr
+    )).first()
+
+    # TODO check if not exists
+
+    # update
+    extract.data = data
+    extract.date_updated = datetime.datetime.now()
+
+    flag_modified(extract, "data")
+
+    # commit this
+    db.session.add(extract)
+    db.session.commit()
+
+    return extract
+
+
+def update_extract_incr_data(project_id, oc_type, abbr, data):
+    '''
+    Update the existing extract data by the increamental data
+
+    The input data should contains the updated part only.
+    The algorithm will also compare the given data with existing data.
+    '''
+    extract = Extract.query.filter(and_(
+        Extract.project_id == project_id,
+        Extract.abbr == abbr
+    )).first()
+
+    # TODO check if not exists
+
+    # update each paper if it is modified
+    flag_changed = False
+    n_changed = 0
+    pid_changed = {
+        'upd': [], 'new': []
+    }
+    n_compared = 0
+
+    for pid in data:
+        n_compared += 1
+        pid_ext = data[pid]
+
+        if pid in extract.data:
+            # OK, this is an existing paper
+            # let's check each attribute
+            is_same = util.is_same_extraction(
+                extract.data[pid],
+                pid_ext
+            )
+
+            if is_same:
+                # nice, no need to update this paper
+                pass
+            else:
+                # hmmm, this paper is updated
+                extract.data[pid] = pid_ext
+                flag_changed = True
+                n_changed += 1
+                pid_changed['upd'].append(pid)
+            
+        else:
+            # Great, this is a new paper
+            # It's the simplest case, just add this 
+            extract.data[pid] = pid_ext
+            flag_changed = True
+            n_changed += 1
+            pid_changed['new'].append(pid)
+    
+    print("* compared %s extractions, %s changed, %s new (%s), %s update (%s)" % (
+        n_compared, n_changed, 
+        len(pid_changed['new']), pid_changed['new'],
+        len(pid_changed['upd']), pid_changed['upd'],
+    ))
+
+    if flag_changed:
+        extract.date_updated = datetime.datetime.now()
+        flag_modified(extract, "data")
+
+        # commit this
+        db.session.add(extract)
+        db.session.commit()
+    else:
+        pass
+
+    return extract
+
+
 def update_extract_meta_and_data(project_id, oc_type, abbr, meta, data):
     '''
     Update the existing extract
@@ -1684,15 +1779,17 @@ def update_paper_selections(project_id, pid, abbrs):
             # this is very very very rare, but possible?
             if is_selected:
                 # well, have to add this pid to this outcome
-                extract.data[pid] = {
-                    'is_selected': is_selected,
-                    'is_checked': False,
-                    'n_arms': 2,
-                    'attrs': {
-                        'main': {},
-                        'other': []
-                    }
-                }
+                # make an empty extraction
+                # {
+                #     'is_selected': is_selected,
+                #     'is_checked': False,
+                #     'n_arms': 2,
+                #     'attrs': {
+                #         'main': {},
+                #         'other': []
+                #     }
+                # }
+                extract.data[pid] = util.mk_empty_extract_paper_data(is_selected)
                 extract.data[pid]['attrs']['main'] = util.fill_extract_data_arm(
                     extract.data[pid]['attrs']['main'],
                     extract.meta['cate_attrs']
@@ -1701,7 +1798,7 @@ def update_paper_selections(project_id, pid, abbrs):
                 db.session.add(extract)
 
                 print('* created %s in %s is_selected updated to %s' % (
-                    pid, extract.meta['full_name'], is_selected
+                    pid, extract.abbr, is_selected
                 ))
             else:
                 # since it is not selected, just ignore is fine

@@ -215,21 +215,58 @@
                 </div>
 
                 <div id="pan_ocpapers_working_paper_attr_list">
-                    <div v-for="attr_sub in all_attrs"
-                        v-show="show_attrs[attr_sub.abbr]"
-                        class="w-attr-item">
-                        <div class="w-attr-item-name">
-                            {{ attr_sub.name }}
+                    <div v-for="cate in extract.meta.cate_attrs"
+                        class="w-cate-item mb-1 mt-1">
+                        <div class="w-cate-item-name">
+                            {{ cate.name }}
                         </div>
-                        <div class="w-attr-item-value">
-                            <input class="paper-extract-input-auto input-auto-complete" type="text" 
-                                v-bind:abbr="attr_sub.abbr"
-                                v-bind:size="get_input_size(extract.data[working_paper.pid].attrs.main[attr_sub.abbr])"
-                                v-model="extract.data[working_paper.pid].attrs.main[attr_sub.abbr]"> 
-                            <span class="w-remove-content"
-                                v-on:click="extract.data[working_paper.pid].attrs.main[attr_sub.abbr] = ''">
-                                <i class="fa fa-close"></i>
-                            </span>
+
+                        <div class="w-cate-attrs">
+                            <div v-for="attr in cate.attrs"
+                                v-show="show_attrs[attr.abbr]"
+                                class="w-attr-item">
+                                <div class="w-attr-item-name"
+                                    v-bind:title="attr.name">
+                                    {{ attr.name }}
+                                </div>
+
+                                <div class="w-attr-item-value"
+                                    v-if="attr.subs == null">
+                                    <input class="paper-extract-input-auto input-auto-complete" type="text" 
+                                        v-bind:abbr="attr.abbr"
+                                        v-bind:size="get_input_size(extract.data[working_paper.pid].attrs.main[attr.abbr])"
+                                        v-model="extract.data[working_paper.pid].attrs.main[attr.abbr]"> 
+                                    <span class="w-remove-content"
+                                        v-on:click="extract.data[working_paper.pid].attrs.main[attr.abbr] = ''">
+                                        <i class="fa fa-close"></i>
+                                    </span>
+                                </div>
+
+                                <div class="w-attr-subs"
+                                    v-else>
+                                    <div class="w-sub-item-value"
+                                        v-for="sub, sub_idx in attr.subs">
+
+                                        <div class="w-sub-item-name">
+                                            {{ sub.name }}
+                                        </div>
+
+                                        <div class="w-sub-item-value">
+                                            <input class="paper-extract-input-auto input-auto-complete"     
+                                                type="text" 
+                                                v-bind:abbr="sub.abbr"
+                                                v-bind:size="get_input_size(extract.data[working_paper.pid].attrs.main[sub.abbr])"
+                                                v-model="extract.data[working_paper.pid].attrs.main[sub.abbr]"> 
+                                            <span class="w-remove-content"
+                                                v-on:click="extract.data[working_paper.pid].attrs.main[sub.abbr] = ''">
+                                                <i class="fa fa-close"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
                         </div>
                     </div>
                 </div>

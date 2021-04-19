@@ -204,7 +204,7 @@ html {
 }
 
 #pan_ocpapers_working_paper {
-    width: 180px;
+    width: 190px;
     padding: 5px;
     height: auto;
     position: absolute;
@@ -244,18 +244,20 @@ html {
     overflow-x: hidden;
 }
 
-#pan_ocpapers_working_paper_attr_list div.w-attr-item:nth-child(even) {background: white; }
-#pan_ocpapers_working_paper_attr_list div.w-attr-item:nth-child(odd) {background: whitesmoke; }
+div.w-attr-item:nth-child(even) {background: white; }
+div.w-attr-item:nth-child(odd) {background: whitesmoke; }
 
-.w-remove-content {
-    padding: 5px 5px;
-    color: grey;
-    font-size: 9px;
-    cursor: pointer;
+.w-cate-item {
+    padding: 3px 0;
 }
-.w-remove-content:hover {
-    background-color: lightcoral;
-    color: white;
+.w-cate-item-name {
+    font-size: .9em;
+    font-weight: bold;
+    background-color: rgb(209, 209, 209);
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .w-attr-item {
     border-bottom: 1px dotted #dedede;
@@ -267,6 +269,23 @@ html {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+.w-attr-subs {
+    padding: 0 0 0 5px;
+    border-left: 2px dashed rgb(155, 155, 155);
+}
+.w-sub-item-name {
+    font-style: italic;
+}
+.w-remove-content {
+    padding: 5px 5px;
+    color: grey;
+    font-size: 9px;
+    cursor: pointer;
+}
+.w-remove-content:hover {
+    background-color: lightcoral;
+    color: white;
 }
 
 .ui-autocomplete {
@@ -350,7 +369,7 @@ html {
             <i class="fa fa-close"></i>
         </div>
     </div>
-    {% include 'extractor/extract_data_collector.html' %}
+    {% include 'extractor/_pan_collector.html' %}
 </div>
 
 
@@ -559,7 +578,9 @@ var pan_ocpapers = {
 
                         if (attr.subs == null) {
                             this.show_attrs[attr.abbr] = val;
+
                         } else {
+                            this.show_attrs[attr.abbr] = val;
                             for (let j = 0; j < attr.subs.length; j++) {
                                 const sub = attr.subs[j];
                                 this.show_attrs[sub.abbr] = val;
@@ -794,6 +815,8 @@ var pan_ocpapers = {
                     this.vpp.thr2s.push(thr2);
 
                 } else {
+                    this.vpp.show_attrs[attr.abbr] = false;
+
                     for (let k = 0; k < attr.subs.length; k++) {
                         const sub = attr.subs[k];
                         this.vpp.all_attrs.push(sub);
@@ -864,6 +887,8 @@ var pan_ocpapers = {
                     thr2.cols += 1;
 
                 } else {
+                    this.vpp.show_attrs[attr.abbr] = true;
+
                     for (let k = 0; k < attr.subs.length; k++) {
                         const sub = attr.subs[k];
                         this.vpp.all_attrs.push(sub);
@@ -929,19 +954,21 @@ var pan_ocpapers = {
         var data = this.vpp.$data.extract.data;
 
         // send request!
-        $.post(
-            srv_extractor.url.update_extract,
-            {project_id:project_id, oc_type:oc_type, abbr:abbr,
-             meta:JSON.stringify(meta), data:JSON.stringify(data)},
+        srv_extractor.update_extract_incr_data(
+            project_id,
+            oc_type,
+            abbr,
+            data,
             function(data) {
-                // show
-                toast('Saved the outcome [' + data.extract.meta.full_name + ']');
+                // show result
+                jarvis.toast('Saved the outcome [' + data.extract.meta.full_name + ']');
+
                 // reload the outcomes
                 pan_ocpapers.show_extract_and_papers(
                     pan_ocpapers.extract_abbr
                 );
             }
-        );
+        )
     },
 
     show_ocs_menu: function() {
@@ -1207,7 +1234,7 @@ var pan_ocpapers = {
             .css('height', h);
 
         // resize the working paper panel
-        // $('#pan_ocpapers_working_paper').css('height', h-10);
+        $('#pan_ocpapers_working_paper_attr_list').css('max-height', h - 80);
     }
 };
 
@@ -1564,8 +1591,11 @@ var jarvis = {
         return window.confirm(text);
     },
 
-    toast: function(s) {
-        toast(s);
+    toast: function(s, s_type) {
+        if (typeof(s_type) == 'undefined') {
+            s_type = 'info';
+        }
+        toast(s, s_type);
     },
 
 
