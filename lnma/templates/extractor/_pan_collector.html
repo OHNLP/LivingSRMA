@@ -40,9 +40,15 @@
                 v-show="show_tab == 'basic_info'">
 
                 <div class="panel-info">
-                    <p style="font-size: 0.9em; color: #777777; ">{{ paper.pub_date }} - {{ paper.journal }}</p>
-                    <p style="font-size: 1.5em; font-weight: bold; line-height: 1.2em;">{{ paper.title }}</p>
-                    <p styel="font-size: 1em;">{{ paper.authors }}</p>
+                    <p style="font-size: 0.9em; color: #777777;"
+                        v-html="paper.pub_date + ' - ' + paper.journal">
+                    </p>
+                    <p style="font-size: 1.5em; font-weight: bold; line-height: 1.2em;"
+                        v-html="paper.title">
+                    </p>
+                    <p styel="font-size: 1em;"
+                        v-html="paper.authors">
+                    </p>
                     <p>
                         PMID: 
                         <a target="_blank" title="Show in " :href="'https://pubmed.ncbi.nlm.nih.gov/' + paper.pid ">{{ paper.pid }}</a> ({{ paper.pid_type }})

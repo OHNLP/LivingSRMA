@@ -311,32 +311,6 @@ var pan_ocpapers = {
                 on_change_itable_n_arms: function(pmid, event) {
                     let n_arms = event.target.value;
                     console.log('* change ' + pmid + ' n_arms to ' + n_arms);
-
-                    // var new_n_others = n_arms - 2;
-                    // if (new_n_others == this.working_oc.data[pmid].attrs.other.length) {
-                    //     // which means the number of arms doesn't change
-
-                    // } else if (new_n_others > this.working_oc.data[pmid].attrs.other.length) {
-                    //     // the number of arms increases, need to put more elements
-                    //     var delta = new_n_others - this.working_oc.data[pmid].attrs.other.length;
-                    //     for (let i = 0; i < delta; i++) {
-                    //         // just copy the keys from main track
-                    //         var obj = JSON.parse(JSON.stringify(this.working_oc.data[pmid].attrs.main));
-                    //         // and clear the exising data
-                    //         for (const key in obj) {
-                    //             if (Object.hasOwnProperty.call(obj, key)) {
-                    //                 obj[key] = '';
-                    //             }
-                    //         }
-                    //         this.working_oc.data[pmid].attrs.other.push(obj);
-                    //     }
-                    // } else {
-                    //     // the number of arms decreases, need to remove
-                    //     var delta = this.working_oc.data[pmid].attrs.other.length - new_n_others;
-                    //     for (let i = 0; i < delta; i++) {
-                    //         this.working_oc.data[pmid].attrs.other.pop();
-                    //     }
-                    // }
                     
                     this.working_oc.data[pmid] = srv_extractor.set_n_arms(
                         this.working_oc.data[pmid], n_arms
@@ -921,7 +895,7 @@ var pan_ocpapers = {
         this.vpp.$forceUpdate();
     },
 
-    update_ctx_menu: function(highlight_text, pid, n_arms) {
+    update_ctx_menu: function(highlight_text, pid) {
         // loop on the cate_attrs
         var html = [
             '<li class="ui-state-disabled menu-info"><div>',
@@ -933,6 +907,8 @@ var pan_ocpapers = {
         // this is for the main extracting
         // the last argument is null, means it's the main track
         html = this.__update_ctx_menu_html(html, highlight_text, pid, null);
+
+        var n_arms = this.vpp.$data.working_oc.data[pid].n_arms;
 
         // this is for the other extracting (i.e., multiple arms)
         if (n_arms > 2) {

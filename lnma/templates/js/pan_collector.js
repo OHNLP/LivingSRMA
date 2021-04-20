@@ -2,10 +2,6 @@ var pan_collector = {
     vpp_id: "#pan_collector",
     vpp: null,
     pdfviewer_id: '#ifr_pdfviewer',
-    current: {
-        paper: null,
-        extract_paper: null
-    },
 
     mark_keywords_as_color: function(keywords, color) {
         $('#pan_collector_basic_info').mark(
@@ -96,8 +92,7 @@ var pan_collector = {
             // we have to use pan_oc
             pan_ocpapers.update_ctx_menu(
                 text, 
-                pan_collector.current.paper.pid,
-                pan_collector.current.extract_paper.n_arms
+                pan_collector.vpp.paper.pid
             );
 
             // show the context menu at where clicked
@@ -146,7 +141,6 @@ var pan_collector = {
     update: function(paper) {
         // update data
         this.vpp.paper = paper;
-        this.current.paper = paper;
 
         // update the normal UI
         this.vpp.show_tab = 'basic_info';
@@ -163,20 +157,18 @@ var pan_collector = {
 
         // update the PDF viewer
         // this.load_pdf();
+        this.resize();
 
         // notifiy the ocpaper to show the working paper
         pan_ocpapers.show_working_paper();
     },
 
-    show_paper: function(pid, extract_paper) {
+    show_paper: function(pid) {
         // set loc to show
         $('#win_collector').css("right", 0);
 
         // resize
         pan_collector.resize();
-
-        // set the extract info
-        this.current.extract_paper = extract_paper;
 
         // get the paper
         srv_extractor.get_paper(
@@ -265,7 +257,9 @@ var pan_collector = {
     resize: function() {
         // set the height for the window
         var h = $(window).height() - 50;
-        $('#win_collector').css("height", h);
+        $('#pan_collector').css("height", h);
+
+        $('#pan_collector_basic_info').css("height", h - 50);
 
         // set the height for the pdf viewer
         var h = $(window).height() - 150;

@@ -284,3 +284,7 @@ div.w-attr-item:nth-child(odd) {background: whitesmoke; }
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+#pan_collector_basic_info {
+    overflow-y: auto;
+}
