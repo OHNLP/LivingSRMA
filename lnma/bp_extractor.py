@@ -980,12 +980,12 @@ def get_itable_filters_from_xls(keystr):
 ###############################################################################
 
 
-def import_softable_pma_from_xls(keystr):
+def import_softable_pma_from_xls(keystr, group='primary'):
     '''
     Import the softable data from XLS
     '''
     if keystr == 'IO':
-        return import_softable_pma_from_xls_for_IO()
+        return import_softable_pma_from_xls_for_IO(group=group)
 
     raise Exception('Not implemented')
 
@@ -997,7 +997,7 @@ def import_softable_nma_from_xls(keystr):
     raise Exception('Not implemented')
 
 
-def import_softable_pma_from_xls_for_IO():
+def import_softable_pma_from_xls_for_IO(group='primary'):
     '''
     A special tool for importing the data file for IO project
 
@@ -1079,6 +1079,9 @@ def import_softable_pma_from_xls_for_IO():
 
         # update the cate
         ae_meta['category'] = ae_dict[ae_name]
+
+        # update the group
+        ae_meta['group'] = group
 
         # update the full name
         ae_meta['full_name'] = ae_name

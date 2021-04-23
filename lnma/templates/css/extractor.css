@@ -207,6 +207,10 @@ div.w-attr-item:nth-child(odd) {background: whitesmoke; }
     border: 2px solid #EFEFEF;
     box-shadow: 0px 0px 15px #cccccc;
     z-index: 99;
+
+    overflow-x: hidden;
+    overflow-y: auto;
+    max-height: 500px;
 }
 #pan_ocpapers_ctx_menu_txt {
     color: black;
@@ -288,3 +292,4 @@ div.w-attr-item:nth-child(odd) {background: whitesmoke; }
 #pan_collector_basic_info {
     overflow-y: auto;
 }
+

@@ -68,16 +68,12 @@ html {
     background-color: rgb(204, 224, 228) !important;
 }
 
-#win_selector {
-    min-width: 1100px;
-    width: 65%;
-    height: 100%;
-    position: absolute;
-    right: 5000px;
-    background-color: #ffffff;
-    padding: 5px 10px;
-}
 </style>
+
+<!-- jQuery UI Theme -->
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css">
+
+
 {% endblock %}
 
 {% block content %}
@@ -179,7 +175,7 @@ html {
                         </div>
                         <div>
                             <button 
-                                v-on:click="extract(extract_dict['itable'])"
+                                v-on:click="on_click_oc(extract_dict['itable'])"
                                 class="btn btn-default btn-xs">
                                 <i class="fa fa-edit"></i>
                             </button>
@@ -220,7 +216,7 @@ html {
                                     </div>
                                     <div>
                                         <button 
-                                            v-on:click="extract(oc)"
+                                            v-on:click="on_click_oc(oc)"
                                             class="btn btn-default btn-xs">
                                             <i class="fa fa-edit"></i>
                                         </button>
@@ -355,6 +351,9 @@ html {
     
 </div>
 
+<ul id="pan_ocpapers_ctx_menu" style="display: none;">
+    
+</ul>
 
 <div id="win_collector">
     <div style="position: absolute; top: 0; left: -40px; width: 40px; height: 40px; background-color: white;">
@@ -426,167 +425,168 @@ var pan_ocpapers = {
         all_attrs: []
     },
 
+    vpp_methods: {
+        // save all!
+        update_extract: function() {
+            pan_ocpapers.update_extract();
+        },
+
+        toggle_only_show_selected: function() {
+            this.only_show_selected = !this.only_show_selected;
+        },
+
+        get_input_size: function(str) {
+            // convert null to empty
+            if (str == null) {
+                str = '';
+            }
+            // convert number to string
+            str = '' + str;
+            var s = str.length;
+            if (s<5) {
+                return 5;
+            } else if (s > 14) {
+                return 14;
+            } else {
+                return s;
+            }
+        },
+
+        // get year
+        get_year: function(s) {
+            return jarvis.get_year(s);
+        },
+
+        get_first_author: function(s) {
+            var aus = s.split(';');
+            if (aus.length == 1) {
+                aus = s.split(',');
+            }
+            return aus[0];
+        },
+
+        n_selected_ocs: function() {
+            var n = 0;
+            for (const abbr in this.working_paper_oc_selections) {
+                if (this.working_paper_oc_selections[abbr]) {
+                    n += 1;
+                }
+            }
+            return n;
+        },
+
+        on_click_paper: function(paper) {
+            // set the working pmid ?
+            this.working_paper = paper;                    
+
+            // highlight this line
+            $('.paper-table-row').removeClass('paper-table-row-clicked');
+            $('#paper-table-row-' + paper.pid).addClass('paper-table-row-clicked');
+
+            // notifiy the ocpaper to show the working paper
+            pan_ocpapers.show_working_paper(paper);
+
+            // close the extraction
+            this.show_working_paper_collector = false;
+
+            // call collector to do something
+            pan_collector.show_paper(
+                paper.pid
+            );
+
+            // make it draggable
+            // $( "#pan_ocpapers_working_paper" ).draggable({ 
+            //     handle: "div.working_title",
+            //     containment: "#pan_ocpapers", 
+            //     scroll: false
+            // });
+        },
+
+        on_click_oc: function(oc) {
+            // show the panel
+            this.show_working_paper_collector = true;
+
+            // set the working oc
+            this.working_oc = oc;
+
+            // add this working paper to the oc
+            if (oc.data.hasOwnProperty(this.working_paper.pid)) {
+
+            } else {
+                oc.data[this.working_paper.pid] = srv_extractor.mk_oc_data(oc)
+            }
+
+            console.log('* extract', this.working_paper, 'for', oc);
+
+            // highlight the oc in list
+            $('.chk-oc').removeClass('chk-oc-extracting');
+            $('#chk_oc_line_' + oc.abbr).addClass('chk-oc-extracting');
+        },
+
+        save_working_paper_selections: function() {
+            var pid = this.working_paper.pid;
+
+            pan_ocpapers.save_working_paper_selections(
+                pid, this.working_paper_oc_selections
+            );
+        },
+
+        /////////////////////////////////////////////////////
+        // For the working paper extraction
+        /////////////////////////////////////////////////////
+        is_show_attr: function(abbr) {
+            return true;
+        },
+
+        save_working_paper_extraction: function() {
+            var pid = this.working_paper.pid;
+            var oc = this.working_oc;
+
+            pan_ocpapers.save_working_paper_extraction(
+                pid, oc
+            );
+        },
+
+        set_n_arms: function() {
+            var n_arms = this.working_oc.data[this.working_paper.pid].n_arms;
+            console.log('* set n_arms to', n_arms);
+
+            // update the other to match the number
+            this.working_oc.data[this.working_paper.pid] = srv_extractor.set_n_arms(
+                this.working_oc.data[this.working_paper.pid], n_arms
+            );
+
+            // update current working arm to main
+            this.switch_working_arm(null);
+            
+            this.$forceUpdate();
+        },
+
+        switch_working_arm: function(arm_idx) {
+            console.log('* switch_working_arm', arm_idx);
+            this.working_paper_arm = arm_idx;
+
+            // update the working arm
+            $('.w-arm-tab').removeClass('btn-primary');
+            $('#working_paper_arm_tab_' + arm_idx).addClass('btn-primary');
+        },
+
+        get_working_arm_attrs: function() {
+            if (this.working_paper_arm == null) {
+                return this.working_oc.data[this.working_paper.pid].attrs.main;
+            } else {
+                return this.working_oc.data[this.working_paper.pid].attrs.other[
+                    this.working_paper_arm
+                ];
+            }
+        },
+    },
+
     init: function() {
         this.vpp = new Vue({
             el: this.vpp_id,
             data: this.vpp_data,
-            methods: {
-
-                // save all!
-                update_extract: function() {
-                    pan_ocpapers.update_extract();
-                },
-
-                toggle_only_show_selected: function() {
-                    this.only_show_selected = !this.only_show_selected;
-                },
-
-                get_input_size: function(str) {
-                    // convert null to empty
-                    if (str == null) {
-                        str = '';
-                    }
-                    // convert number to string
-                    str = '' + str;
-                    var s = str.length;
-                    if (s<5) {
-                        return 5;
-                    } else if (s > 14) {
-                        return 14;
-                    } else {
-                        return s;
-                    }
-                },
-
-                // get year
-                get_year: function(s) {
-                    return jarvis.get_year(s);
-                },
-
-                get_first_author: function(s) {
-                    var aus = s.split(';');
-                    if (aus.length == 1) {
-                        aus = s.split(',');
-                    }
-                    return aus[0];
-                },
-
-                on_click_paper: function(paper) {
-                    // set the working pmid ?
-                    this.working_paper = paper;                    
-
-                    // highlight this line
-                    $('.paper-table-row').removeClass('paper-table-row-clicked');
-                    $('#paper-table-row-' + paper.pid).addClass('paper-table-row-clicked');
-
-                    // notifiy the ocpaper to show the working paper
-                    pan_ocpapers.show_working_paper(paper);
-
-                    // close the extraction
-                    this.show_working_paper_collector = false;
-
-                    // call collector to do something
-                    pan_collector.show_paper(
-                        paper.pid
-                    );
-
-                    // make it draggable
-                    // $( "#pan_ocpapers_working_paper" ).draggable({ 
-                    //     handle: "div.working_title",
-                    //     containment: "#pan_ocpapers", 
-                    //     scroll: false
-                    // });
-                },
-
-                n_selected_ocs: function() {
-                    var n = 0;
-                    for (const abbr in this.working_paper_oc_selections) {
-                        if (this.working_paper_oc_selections[abbr]) {
-                            n += 1;
-                        }
-                    }
-                    return n;
-                },
-
-                extract: function(oc) {
-                    // add this working paper to the oc
-                    if (oc.data.hasOwnProperty(this.working_paper.pid)) {
-
-                    } else {
-                        oc.data[this.working_paper.pid] = srv_extractor.mk_oc_data(oc)
-                    }
-
-                    console.log('* extract', this.working_paper, 'for', oc);
-
-                    // show the panel
-                    this.show_working_paper_collector = true;
-
-                    // set the working oc
-                    this.working_oc = oc;
-
-                    // highlight the oc in list
-                    $('.chk-oc').removeClass('chk-oc-extracting');
-                    $('#chk_oc_line_' + oc.abbr).addClass('chk-oc-extracting');
-                },
-
-                save_working_paper_selections: function() {
-                    var pid = this.working_paper.pid;
-
-                    pan_ocpapers.save_working_paper_selections(
-                        pid, this.working_paper_oc_selections
-                    );
-                },
-
-                /////////////////////////////////////////////////////
-                // For the working paper extraction
-                /////////////////////////////////////////////////////
-                is_show_attr: function(abbr) {
-                    return true;
-                },
-
-                save_working_paper_extraction: function() {
-                    var pid = this.working_paper.pid;
-                    var oc = this.working_oc;
-
-                    pan_ocpapers.save_working_paper_extraction(
-                        pid, oc
-                    );
-                },
-
-                set_n_arms: function() {
-                    var n_arms = this.working_oc.data[this.working_paper.pid].n_arms;
-                    console.log('* set n_arms to', n_arms);
-
-                    // update the other to match the number
-                    this.working_oc.data[this.working_paper.pid] = srv_extractor.set_n_arms(
-                        this.working_oc.data[this.working_paper.pid], n_arms
-                    );
-
-                    // update current working arm to main
-                    this.switch_working_arm(null);
-                    
-                    this.$forceUpdate();
-                },
-
-                switch_working_arm: function(arm_idx) {
-                    console.log('* switch_working_arm', arm_idx);
-                    this.working_paper_arm = arm_idx;
-
-                    // update the working arm
-                    $('.w-arm-tab').removeClass('btn-primary');
-                    $('#working_paper_arm_tab_' + arm_idx).addClass('btn-primary');
-                },
-
-                get_working_arm_attrs: function() {
-                    if (this.working_paper_arm == null) {
-                        return this.working_oc.data[this.working_paper.pid].attrs.main;
-                    } else {
-                        return this.working_oc.data[this.working_paper.pid].attrs.other[
-                            this.working_paper_arm
-                        ];
-                    }
-                },
-            },
+            methods: this.vpp_methods,
             updated: function() {
                 pan_ocpapers.resize();
             }
@@ -832,6 +832,7 @@ var pan_ocpapers = {
     }
 };
 
+{% include "js/pan_ocpapers_ext_wpc.js" %}
 
 var jarvis = {
     goto_screener: function(project_id, title) {

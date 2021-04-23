@@ -308,7 +308,9 @@ var pan_outcomes = {
                 },
 
                 delete_extract: function(oc_type, abbr, full_name) {
-                    pan_outcomes.delete_extract(oc_type, abbr, full_name);
+                    pan_outcomes.delete_extract(
+                        oc_type, abbr, full_name
+                    );
                 },
 
                 close_all_cates: function(oc_type, event) {
@@ -519,6 +521,14 @@ var pan_ocpapers = {
 
                 goto_analysis: function(extract) {
 
+                },
+
+                delete_extract: function(extract) {
+                    pan_outcomes.delete_extract(
+                        extract.oc_type,
+                        extract.abbr,
+                        extract.meta.full_name,
+                    );
                 },
 
                 // save all!

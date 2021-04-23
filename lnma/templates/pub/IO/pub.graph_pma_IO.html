@@ -716,6 +716,7 @@ var vw_studyfilter = {
                     // second, use the conditions to search for the 
                     var pmids = vw_studyfilter._get_pmids_by_conditions(conditions);
                     this.n_papers = pmids.length;
+                    console.log('* filtered studies:', pmids);
 
                     // send these pmids to the oclist
                     vw_oclist.update(pmids);
@@ -942,7 +943,7 @@ var vw_oclist = {
     
 
     update: function(pids) {
-        if (typeof(pid) == 'undefined') {
+        if (typeof(pids) == 'undefined') {
 
         } else {
             // update the pid

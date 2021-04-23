@@ -105,6 +105,243 @@ srv_extractor.project = [[ project_json_str|safe ]];
 var pan_ocpapers = {
     vpp_id: "#pan_ocpapers",
     vpp: null,
+    vpp_data: {
+        // flags
+        show_settings: true,
+        only_show_selected: false,
+        show_col_nct: false,
+
+        // for display:
+        thr1s: [],
+        thr2s: [],
+
+        // working pmid when clicking on paper
+        show_working_paper_pan: false,
+        show_working_paper_collector: false,
+
+        // the working paper
+        working_paper: null,
+
+        // working arm
+        // null means main arm
+        // numbers mean other arm
+        working_paper_arm: null,
+
+        // working oc
+        working_oc: null,
+
+        // mode
+        mode: 'extract_data',
+
+        // data
+        all_attrs: null,
+        show_attrs: null,
+        extract: null,
+        papers: []
+    },
+
+    vpp_methods: {
+        toggle_only_show_selected: function() {
+            this.only_show_selected = !this.only_show_selected;
+        },
+
+        toggle_on_all_attributes: function() {
+            for (const key in this.show_attrs) {
+                if (Object.hasOwnProperty.call(this.show_attrs, key)) {
+                    this.show_attrs[key] = true;
+                }
+            }
+            this.$forceUpdate();
+        },
+
+        toggle_off_all_attributes: function() {
+            for (const key in this.show_attrs) {
+                if (Object.hasOwnProperty.call(this.show_attrs, key)) {
+                    this.show_attrs[key] = false;
+                }
+            }
+            this.$forceUpdate();
+        },
+
+        // save all!
+        update_extract: function() {
+            pan_ocpapers.update_extract();
+        },
+        
+        get_input_size: function(str) {
+            // convert null to empty
+            if (typeof(str) == 'undefined' || str == null) {
+                str = '';
+            }
+            // convert number to string
+            str = '' + str;
+            var s = str.length;
+            if (s<pan_ocpapers.MIN_INPUT_AUTO_SIZE) {
+                return pan_ocpapers.MIN_INPUT_AUTO_SIZE;
+            } else if (s > pan_ocpapers.MAX_INPUT_AUTO_SIZE) {
+                return pan_ocpapers.MAX_INPUT_AUTO_SIZE;
+            } else {
+                return s;
+            }
+        },
+
+        // update the value
+        on_change_input_value: function(event) {
+            let val = event.target.value;
+            console.log('Changed input_format: ' + val);
+        },
+
+        // get year
+        get_year: function(s) {
+            return jarvis.get_year(s);
+        },
+
+        get_first_author: function(s) {
+            return jarvis.get_first_author(s);
+        },
+
+        on_change_input_format: function(event) {
+            let val = event.target.value;
+            console.log('Changed input_format: ' + val);
+
+            // update the attrs
+            this.working_oc.meta.cate_attrs = srv_extractor.tpl.input_format[
+                this.working_oc.oc_type
+            ][val];
+            
+            // update the papers setting
+            pan_ocpapers.update_all_and_show_attrs();
+        },
+
+        on_toggle_attr_selection: function(attr_abbr, event) {
+            this.$forceUpdate();
+        },
+
+        on_click_paper: function(paper) {
+            // set the working pmid ?
+            this.working_paper = paper;
+            this.show_working_paper_pan = true;
+            this.show_working_paper_collector = true;
+
+            // get the pid / pmid
+            var pmid = paper.pid;
+
+            // highlight this line
+            $('.paper-table-row').removeClass('paper-table-row-clicked');
+            $('#paper-table-row-' + pmid).addClass('paper-table-row-clicked');
+
+            // call collector to do something
+            pan_collector.show_paper(
+                pmid, 
+                pan_ocpapers.vpp.$data.working_oc.data[pmid]
+            );
+
+            // the draggable 
+            // $( "#pan_ocpapers_working_paper" ).draggable({ 
+            //     handle: "div#pan_ocpapers_working_paper_title",
+            //     containment: "#pan_ocpapers", 
+            //     scroll: false
+            // });
+        },
+
+        toggle_select_all_papers: function(event) {
+            let val = event.srcElement.checked;
+            console.log('* set all papers selected: ', val);
+            for (const pmid in this.working_oc.data) {
+                if (Object.hasOwnProperty.call(this.working_oc.data, pmid)) {
+                    this.working_oc.data[pmid].is_selected = val;
+                }
+            }
+            // this.$forceUpdate();
+        },
+
+        on_toggle_itable_select_category: function(cate_idx, event) {
+            let val = event.srcElement.checked;
+
+            for (let i = 0; i < this.working_oc.meta.cate_attrs[cate_idx].attrs.length; i++) {
+                const attr = this.working_oc.meta.cate_attrs[cate_idx].attrs[i];
+
+                if (attr.subs == null) {
+                    this.show_attrs[attr.abbr] = val;
+
+                } else {
+                    this.show_attrs[attr.abbr] = val;
+                    for (let j = 0; j < attr.subs.length; j++) {
+                        const sub = attr.subs[j];
+                        this.show_attrs[sub.abbr] = val;
+                    }
+                }
+            }
+            // force update the UI because change a lot
+            this.$forceUpdate();
+        },
+
+        on_change_itable_n_arms: function(pmid, event) {
+            let n_arms = event.target.value;
+            console.log('* change ' + pmid + ' n_arms to ' + n_arms);
+            
+            this.working_oc.data[pmid] = srv_extractor.set_n_arms(
+                this.working_oc.data[pmid], n_arms
+            );
+            this.$forceUpdate();
+        },
+
+        on_change_only_show_selected: function(event) {
+            // let val = event.srcElement.checked;                    
+            // this.only_show_selected = val;
+            this.$forceUpdate();
+        },
+
+        /////////////////////////////////////////////////////
+        // For the working paper extraction
+        /////////////////////////////////////////////////////
+        is_show_attr: function(abbr) {
+            return this.show_attrs[abbr];
+        },
+
+        save_working_paper_extraction: function() {
+            var pid = this.working_paper.pid;
+            var oc = this.working_oc;
+
+            pan_ocpapers.save_working_paper_extraction(
+                pid, oc
+            );
+        },
+
+        set_n_arms: function() {
+            var n_arms = this.working_oc.data[this.working_paper.pid].n_arms;
+            console.log('* set n_arms to', n_arms);
+
+            // update the other to match the number
+            this.working_oc.data[this.working_paper.pid] = srv_extractor.set_n_arms(
+                this.working_oc.data[this.working_paper.pid], n_arms
+            );
+
+            // update current working arm to main
+            this.switch_working_arm(null);
+            
+            this.$forceUpdate();
+        },
+
+        switch_working_arm: function(arm_idx) {
+            console.log('* switch_working_arm', arm_idx);
+            this.working_paper_arm = arm_idx;
+
+            // update the working arm
+            $('.w-arm-tab').removeClass('btn-primary');
+            $('#working_paper_arm_tab_' + arm_idx).addClass('btn-primary');
+        },
+
+        get_working_arm_attrs: function() {
+            if (this.working_paper_arm == null) {
+                return this.working_oc.data[this.working_paper.pid].attrs.main;
+            } else {
+                return this.working_oc.data[this.working_paper.pid].attrs.other[
+                    this.working_paper_arm
+                ];
+            }
+        },
+    },
 
     // the working abbr
     extract_abbr: null,
@@ -119,40 +356,7 @@ var pan_ocpapers = {
     init: function() {
         this.vpp = new Vue({
             el: this.vpp_id,
-            data: {
-                // flags
-                show_settings: true,
-                only_show_selected: false,
-                show_col_nct: false,
-
-                // for display:
-                thr1s: [],
-                thr2s: [],
-
-                // working pmid when clicking on paper
-                show_working_paper_pan: false,
-                show_working_paper_collector: false,
-
-                // the working paper
-                working_paper: null,
-
-                // working arm
-                // null means main arm
-                // numbers mean other arm
-                working_paper_arm: null,
-
-                // working oc
-                working_oc: null,
-
-                // mode
-                mode: 'extract_data',
-
-                // data
-                all_attrs: null,
-                show_attrs: null,
-                extract: null,
-                papers: []
-            },
+            data: this.vpp_data,
             computed: {
                 n_selected: function() {
                     var n = 0;
@@ -172,208 +376,7 @@ var pan_ocpapers = {
                 // update the autocomplete
                 pan_ocpapers.update_autocomplete();
             },
-            methods: {
-                toggle_only_show_selected: function() {
-                    this.only_show_selected = !this.only_show_selected;
-                },
-
-                toggle_on_all_attributes: function() {
-                    for (const key in this.show_attrs) {
-                        if (Object.hasOwnProperty.call(this.show_attrs, key)) {
-                            this.show_attrs[key] = true;
-                        }
-                    }
-                    this.$forceUpdate();
-                },
-
-                toggle_off_all_attributes: function() {
-                    for (const key in this.show_attrs) {
-                        if (Object.hasOwnProperty.call(this.show_attrs, key)) {
-                            this.show_attrs[key] = false;
-                        }
-                    }
-                    this.$forceUpdate();
-                },
-
-                // save all!
-                update_extract: function() {
-                    pan_ocpapers.update_extract();
-                },
-                
-                get_input_size: function(str) {
-                    // convert null to empty
-                    if (typeof(str) == 'undefined' || str == null) {
-                        str = '';
-                    }
-                    // convert number to string
-                    str = '' + str;
-                    var s = str.length;
-                    if (s<pan_ocpapers.MIN_INPUT_AUTO_SIZE) {
-                        return pan_ocpapers.MIN_INPUT_AUTO_SIZE;
-                    } else if (s > pan_ocpapers.MAX_INPUT_AUTO_SIZE) {
-                        return pan_ocpapers.MAX_INPUT_AUTO_SIZE;
-                    } else {
-                        return s;
-                    }
-                },
-
-                // update the value
-                on_change_input_value: function(event) {
-                    let val = event.target.value;
-                    console.log('Changed input_format: ' + val);
-                },
-
-                // get year
-                get_year: function(s) {
-                    return jarvis.get_year(s);
-                },
-
-                get_first_author: function(s) {
-                    return jarvis.get_first_author(s);
-                },
-
-                on_change_input_format: function(event) {
-                    let val = event.target.value;
-                    console.log('Changed input_format: ' + val);
-
-                    // update the attrs
-                    this.working_oc.meta.cate_attrs = srv_extractor.tpl.input_format[
-                        this.working_oc.oc_type
-                    ][val];
-                    
-                    // update the papers setting
-                    pan_ocpapers.update_all_and_show_attrs();
-                },
-
-                on_toggle_attr_selection: function(attr_abbr, event) {
-                    this.$forceUpdate();
-                },
-
-                on_click_paper: function(paper) {
-                    // set the working pmid ?
-                    this.working_paper = paper;
-                    this.show_working_paper_pan = true;
-                    this.show_working_paper_collector = true;
-
-                    // get the pid / pmid
-                    var pmid = paper.pid;
-
-                    // highlight this line
-                    $('.paper-table-row').removeClass('paper-table-row-clicked');
-                    $('#paper-table-row-' + pmid).addClass('paper-table-row-clicked');
-
-                    // call collector to do something
-                    pan_collector.show_paper(
-                        pmid, 
-                        pan_ocpapers.vpp.$data.working_oc.data[pmid]
-                    );
-
-                    // the draggable 
-                    // $( "#pan_ocpapers_working_paper" ).draggable({ 
-                    //     handle: "div#pan_ocpapers_working_paper_title",
-                    //     containment: "#pan_ocpapers", 
-                    //     scroll: false
-                    // });
-                },
-
-                toggle_select_all_papers: function(event) {
-                    let val = event.srcElement.checked;
-                    console.log('* set all papers selected: ', val);
-                    for (const pmid in this.working_oc.data) {
-                        if (Object.hasOwnProperty.call(this.working_oc.data, pmid)) {
-                            this.working_oc.data[pmid].is_selected = val;
-                        }
-                    }
-                    // this.$forceUpdate();
-                },
-
-                on_toggle_itable_select_category: function(cate_idx, event) {
-                    let val = event.srcElement.checked;
-
-                    for (let i = 0; i < this.working_oc.meta.cate_attrs[cate_idx].attrs.length; i++) {
-                        const attr = this.working_oc.meta.cate_attrs[cate_idx].attrs[i];
-
-                        if (attr.subs == null) {
-                            this.show_attrs[attr.abbr] = val;
-
-                        } else {
-                            this.show_attrs[attr.abbr] = val;
-                            for (let j = 0; j < attr.subs.length; j++) {
-                                const sub = attr.subs[j];
-                                this.show_attrs[sub.abbr] = val;
-                            }
-                        }
-                    }
-                    // force update the UI because change a lot
-                    this.$forceUpdate();
-                },
-
-                on_change_itable_n_arms: function(pmid, event) {
-                    let n_arms = event.target.value;
-                    console.log('* change ' + pmid + ' n_arms to ' + n_arms);
-                    
-                    this.working_oc.data[pmid] = srv_extractor.set_n_arms(
-                        this.working_oc.data[pmid], n_arms
-                    );
-                    this.$forceUpdate();
-                },
-
-                on_change_only_show_selected: function(event) {
-                    // let val = event.srcElement.checked;                    
-                    // this.only_show_selected = val;
-                    this.$forceUpdate();
-                },
-
-                /////////////////////////////////////////////////////
-                // For the working paper extraction
-                /////////////////////////////////////////////////////
-                is_show_attr: function(abbr) {
-                    return this.show_attrs[abbr];
-                },
-
-                save_working_paper_extraction: function() {
-                    var pid = this.working_paper.pid;
-                    var oc = this.working_oc;
-
-                    pan_ocpapers.save_working_paper_extraction(
-                        pid, oc
-                    );
-                },
-
-                set_n_arms: function() {
-                    var n_arms = this.working_oc.data[this.working_paper.pid].n_arms;
-                    console.log('* set n_arms to', n_arms);
-
-                    // update the other to match the number
-                    this.working_oc.data[this.working_paper.pid] = srv_extractor.set_n_arms(
-                        this.working_oc.data[this.working_paper.pid], n_arms
-                    );
-
-                    // update current working arm to main
-                    this.switch_working_arm(null);
-                    
-                    this.$forceUpdate();
-                },
-
-                switch_working_arm: function(arm_idx) {
-                    console.log('* switch_working_arm', arm_idx);
-                    this.working_paper_arm = arm_idx;
-
-                    // update the working arm
-                    $('.w-arm-tab').removeClass('btn-primary');
-                    $('#working_paper_arm_tab_' + arm_idx).addClass('btn-primary');
-                },
-
-                get_working_arm_attrs: function() {
-                    if (this.working_paper_arm == null) {
-                        return this.working_oc.data[this.working_paper.pid].attrs.main;
-                    } else {
-                        return this.working_oc.data[this.working_paper.pid].attrs.other[
-                            this.working_paper_arm
-                        ];
-                    }
-                },
-            }
+            methods: this.vpp_methods
         });
     
         
@@ -443,77 +446,6 @@ var pan_ocpapers = {
 
         // update
         this.vpp.$forceUpdate();
-    },
-
-    update_autocomplete: function() {
-        $('.input-auto-complete').each(function(idx, elem) {
-            var abbr = $(elem).attr('abbr');
-            var values = pan_ocpapers.get_values_by_abbr(abbr);
-
-            // console.log('* found abbr '+ abbr+' values ' + values);
-
-            if (values.length == 0) {
-                // no value for this abbr yet
-                return;
-            }
-
-            $(elem).autocomplete({
-                source: values,
-                minLength: 0,
-
-                select: function (e, ui) {
-                    // console.log("selected!", e, ui);
-                    var abbr = $(e.target).attr('abbr');
-                    var pid = pan_ocpapers.vpp.$data.working_paper.pid;
-                    var val = ui.item.value;
-
-                    console.log('* selected', val, 'for', abbr, 'of', pid);
-
-                    // set the value
-                    pan_ocpapers.vpp.$data.working_oc.data[pid].attrs.main[abbr] = val;
-                },
-
-                change: function (e, ui) {
-                    // console.log("changed!", e, ui);
-                }
-
-            }).on('focus', function(event) {
-                $(this).autocomplete('search');
-            });
-        });
-        console.log('* updated autocomplete');
-    },
-
-    get_values_by_abbr: function(abbr) {
-        var v = {};
-
-        for (const pid in this.vpp.$data.working_oc.data) {
-            const paper = this.vpp.$data.working_oc.data[pid];                
-            if (paper.is_selected) {
-                // get the main values
-                var val = paper.attrs.main[abbr];
-                v[val] = 1;
-
-                // get the values from 
-                for (let i = 0; i < paper.attrs.other.length; i++) {
-                    const arm = paper.attrs.other[i];
-                    if (arm.hasOwnProperty(abbr)) {
-                        var arm_val = arm[abbr];
-                        v[arm_val] = 1;
-                    }
-                }
-            }
-        }
-
-        var distinct_vals = Object.keys(v);
-
-        distinct_vals = distinct_vals.filter(function(item) {
-            return item !== '' && item !== 'null' && item !== 'undefined'
-        });
-
-        // console.log('* got distinct_vals', distinct_vals)
-
-        return distinct_vals;
     },
 
     update_all_and_show_attrs_for_itable: function() {
@@ -656,20 +588,6 @@ var pan_ocpapers = {
         this.vpp.$forceUpdate();
     },
 
-
-    get_current_extract_and_papers: function() {
-        if (this.vpp.$data.extract == null) {
-            return null;
-        }
-        
-        // build a object
-        var ret = {
-            extract: this.vpp.$data.extract,
-            papers: this.vpp.$data.papers
-        };
-
-        return ret;
-    },
 
     show_extract_and_papers: function(abbr) {
         this.extract_abbr = abbr;
@@ -872,128 +790,6 @@ var pan_ocpapers = {
         return html;
     },
     
-    ///////////////////////////////////////////////////////////////////////////
-    // Functions related to collector
-    ///////////////////////////////////////////////////////////////////////////
-    /**
-     * Set the highlight text to pid in the box
-     * 
-     * seq: null means `main`, 0 to x means item index in `other`
-     */
-     set_highlight_text_to_attr: function(highlight_text, pid, attr_abbr, seq) {
-        console.log('* set_highlight_text_to_attr: ' + highlight_text + ', ' + pid + ', ' + attr_abbr + ', ' + seq);
-
-        // update the value for the specific paper
-        if (seq == null) {
-            // it means this is the main track
-            this.vpp.$data.working_oc.data[pid].attrs.main[attr_abbr] = highlight_text;
-        } else {
-            // this means the value is for other arms
-            this.vpp.$data.working_oc.data[pid].attrs.other[seq][attr_abbr] = highlight_text;
-        }
-        // update UI
-        this.vpp.$forceUpdate();
-    },
-
-    update_ctx_menu: function(highlight_text, pid) {
-        // loop on the cate_attrs
-        var html = [
-            '<li class="ui-state-disabled menu-info"><div>',
-                '<i class="fa fa-close"></i> ',
-                'Highlighted <b id="pan_ocpapers_ctx_menu_txt">'+highlight_text+'</b> is:',
-            '</div></li>'
-        ];
-
-        // this is for the main extracting
-        // the last argument is null, means it's the main track
-        html = this.__update_ctx_menu_html(html, highlight_text, pid, null);
-
-        var n_arms = this.vpp.$data.working_oc.data[pid].n_arms;
-
-        // this is for the other extracting (i.e., multiple arms)
-        if (n_arms > 2) {
-            html.push('<li class="ui-state-disabled menu-header"><div>Other Arms</div></li>');
-            
-            for (let a = 0; a < n_arms - 2; a++) {
-                html.push('<li class="menu-item"><div>Arm '+(a+1)+'</div><ul>');
-                html = this.__update_ctx_menu_html(html, highlight_text, pid, a);
-                html.push('</ul></li>')
-            }
-        }
-
-        // put the new html into box
-        $('#pan_ocpapers_ctx_menu').html(
-            html.join('')
-        );
-    },
-
-    __update_ctx_menu_html: function(html, highlight_text, pid, seq) {
-
-        for (let i = 0; i < this.vpp.working_oc.meta.cate_attrs.length; i++) {
-
-            const cate = this.vpp.working_oc.meta.cate_attrs[i];
-
-            // put a new cate
-            html.push('<li class="ui-state-disabled menu-header"><div>'+cate.name+'</div></li>');
-
-            var flag_has_shown_attr = false;
-            for (let j = 0; j < cate.attrs.length; j++) {
-                const attr = cate.attrs[j];
-                
-                if (attr.subs == null) {
-                    var is_show = this.vpp.show_attrs[attr.abbr];
-                    if (is_show) {
-                        html.push(
-                        '<li class="menu-item">' +
-                            '<div onclick="pan_ocpapers.set_highlight_text_to_attr(\''+highlight_text+'\', \''+pid+'\', \''+attr.abbr+'\', '+seq+')">' +
-                            attr.name +
-                            '</div>' +
-                        '</li>'
-                        );
-                        flag_has_shown_attr = true;
-                    }
-                } else {
-                    for (let k = 0; k < attr.subs.length; k++) {
-                        const sub = attr.subs[k];
-                        if (this.vpp.show_attrs[sub.abbr]) {
-                            html.push(
-                            '<li class="menu-item">' +
-                                '<div onclick="pan_ocpapers.set_highlight_text_to_attr(\''+highlight_text+'\', \''+pid+'\', \''+sub.abbr+'\', '+seq+')">' +
-                                attr.name + ' - ' + sub.name +
-                                '</div>' +
-                            '</li>'
-                            );
-                            flag_has_shown_attr = true;
-                        }
-                    }
-                }
-            }
-
-            if (flag_has_shown_attr) {
-                //
-            } else {
-                html.pop();
-            }
-            
-        }
-
-        return html;
-    },
-
-    show_ctx_menu: function(top, left) {
-        $("#pan_ocpapers_ctx_menu").css({
-            position: 'absolute',
-            display: "block",
-            top: top,
-            left: left
-        }).addClass("show").menu();
-
-        $("#pan_ocpapers_ctx_menu").menu('refresh');
-
-        $('#pan_ocpapers_ctx_menu .ui-menu-item').on('click', function() {
-            $("#pan_ocpapers_ctx_menu").hide();
-        });
-    },
 
     show_working_paper: function() {
         var w_win_collector = $('#win_collector').width();
@@ -1033,6 +829,9 @@ var pan_ocpapers = {
         $('#pan_ocpapers_working_paper_collector_attr_list').css('max-height', h - 150);
     }
 };
+
+
+{% include 'js/pan_ocpapers_ext_wpc.js' %}
 
 
 var jarvis = {

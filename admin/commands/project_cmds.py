@@ -61,8 +61,9 @@ class Project:
 
     @command
     @argument("keystr", type=str, description="The keystr for a project")
+    @argument("group", type=str, description="The default analysis group for a project")
     @argument("are_you_sure", type=str, description="yes for final confirmation")
-    def import_softable_pma(self, keystr:str, are_you_sure:str):
+    def import_softable_pma(self, keystr:str, group:str, are_you_sure:str):
         '''
         Import the SOFTABLE PWMA data from Excel file
         '''
@@ -70,7 +71,7 @@ class Project:
             print('* import cancelled')
             return 
 
-        extracts = bp_extractor.import_softable_pma_from_xls(keystr)
+        extracts = bp_extractor.import_softable_pma_from_xls(keystr, group)
 
         print('* imported %s extracts!' % (
             len(extracts)
