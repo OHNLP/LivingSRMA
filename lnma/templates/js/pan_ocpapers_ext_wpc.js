@@ -217,7 +217,7 @@ Object.assign(pan_ocpapers, {
 
         // loop on the cate_attrs
         var html = [
-            '<li class="ui-state-disabled menu-info"><div>',
+            '<li class="menu-info"><div>',
                 '<i class="fa fa-close"></i> ',
                 'Highlighted <b id="pan_ocpapers_ctx_menu_txt">'+highlight_text+'</b> is:',
             '</div></li>'
@@ -341,4 +341,8 @@ Object.assign(pan_ocpapers, {
             $("#pan_ocpapers_ctx_menu").hide();
         });
     },
+
+    hide_ctx_menu: function() {
+        $("#pan_ocpapers_ctx_menu").hide();
+    }
 });
