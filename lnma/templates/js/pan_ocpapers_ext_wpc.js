@@ -141,7 +141,7 @@ Object.assign(pan_ocpapers, {
 
         for (const pid in this.vpp.$data.working_oc.data) {
             const paper = this.vpp.$data.working_oc.data[pid];                
-            if (paper.is_selected) {
+            // if (paper.is_selected) {
                 // get the main values
                 var val = paper.attrs.main[abbr];
                 v[val] = 1;
@@ -154,7 +154,7 @@ Object.assign(pan_ocpapers, {
                         v[arm_val] = 1;
                     }
                 }
-            }
+            // }
         }
 
         var distinct_vals = Object.keys(v);
@@ -162,6 +162,7 @@ Object.assign(pan_ocpapers, {
         distinct_vals = distinct_vals.filter(function(item) {
             return item !== '' && item !== 'null' && item !== 'undefined'
         });
+        distinct_vals.sort();
 
         // console.log('* got distinct_vals', distinct_vals)
 
