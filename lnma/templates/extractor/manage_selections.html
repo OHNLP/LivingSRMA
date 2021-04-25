@@ -515,8 +515,14 @@ var pan_ocpapers = {
             } else {
                 oc.data[this.working_paper.pid] = srv_extractor.mk_oc_data(oc)
             }
-
             console.log('* extract', this.working_paper, 'for', oc);
+
+            // switch working arm to default
+            if (this.hasOwnProperty('switch_working_arm')) {
+                this.switch_working_arm(null);
+            } else {
+                // ?
+            }
 
             // highlight the oc in list
             $('.chk-oc').removeClass('chk-oc-extracting');
@@ -531,55 +537,6 @@ var pan_ocpapers = {
             );
         },
 
-        /////////////////////////////////////////////////////
-        // For the working paper extraction
-        /////////////////////////////////////////////////////
-        is_show_attr: function(abbr) {
-            return true;
-        },
-
-        save_working_paper_extraction: function() {
-            var pid = this.working_paper.pid;
-            var oc = this.working_oc;
-
-            pan_ocpapers.save_working_paper_extraction(
-                pid, oc
-            );
-        },
-
-        set_n_arms: function() {
-            var n_arms = this.working_oc.data[this.working_paper.pid].n_arms;
-            console.log('* set n_arms to', n_arms);
-
-            // update the other to match the number
-            this.working_oc.data[this.working_paper.pid] = srv_extractor.set_n_arms(
-                this.working_oc.data[this.working_paper.pid], n_arms
-            );
-
-            // update current working arm to main
-            this.switch_working_arm(null);
-            
-            this.$forceUpdate();
-        },
-
-        switch_working_arm: function(arm_idx) {
-            console.log('* switch_working_arm', arm_idx);
-            this.working_paper_arm = arm_idx;
-
-            // update the working arm
-            $('.w-arm-tab').removeClass('btn-primary');
-            $('#working_paper_arm_tab_' + arm_idx).addClass('btn-primary');
-        },
-
-        get_working_arm_attrs: function() {
-            if (this.working_paper_arm == null) {
-                return this.working_oc.data[this.working_paper.pid].attrs.main;
-            } else {
-                return this.working_oc.data[this.working_paper.pid].attrs.other[
-                    this.working_paper_arm
-                ];
-            }
-        },
     },
 
     init: function() {
@@ -589,6 +546,9 @@ var pan_ocpapers = {
             methods: this.vpp_methods,
             updated: function() {
                 pan_ocpapers.resize();
+
+                // update the autocomplete
+                pan_ocpapers.update_autocomplete();
             }
         });
     },

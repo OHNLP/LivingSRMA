@@ -49,7 +49,7 @@ Object.assign(pan_ocpapers.vpp_methods, {
     },
 
     set_n_arms: function() {
-        var n_arms = this.working_oc.data[this.working_paper.pid].n_arms;
+        var n_arms = parseInt(this.working_oc.data[this.working_paper.pid].n_arms);
         console.log('* set n_arms to', n_arms);
 
         // update the other to match the number
@@ -81,6 +81,10 @@ Object.assign(pan_ocpapers.vpp_methods, {
             ];
         }
     },
+
+    clear_input: function() {
+
+    }
 });
 
 // Extend the pan_ocpapers methods
