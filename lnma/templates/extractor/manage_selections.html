@@ -83,28 +83,13 @@ html {
 
 <div id="pan_ocpapers">
 <div v-if="papers != null && papers.length != 0 && extract_dict != null">
-    <div class="panel-info">
-        <div class="oc-attr d-flex flex-row">
-            <span style="font-size: 1.2em;" class="mr-2">
-                {{ papers.length }} studies included in SR
-            </span>
-
-            <!-- <div class="btn-group mr-2">
-                <button v-on:click="update_extract();"
-                    type="button" class="btn btn-default btn-sm">
-                    <i class="fa fa-save"></i>
-                    Save all
-                </button>
-            </div> -->
-        </div>
-    </div>
 
     <div id="pan_ocpapers_paperlist" class="mt-1">
         <table style="max-width: 100%;">
             <thead id="pan_ocpapers_paperlist_thead">
                 <tr>
                     <th>#</th>
-                    <th>&nbsp;</th>
+                    <th>{{ papers.length }} studies</th>
                     <th>Outcomes</th>
                     <th>&nbsp;</th>
                 </tr>
@@ -785,10 +770,10 @@ var pan_ocpapers = {
     },
 
     resize: function() {
-        var h = $(window).height() - 90;
+        var h = $(window).height() - 60;
         $('#pan_ocpapers_paperlist').css('height', h);
-        $('#pan_ocpapers_working_paper_oc_tree').css('max-height', h - 90);
-        $('#pan_ocpapers_working_paper_collector_attr_list').css('max-height', h - 115);
+        $('#pan_ocpapers_working_paper_oc_tree').css('max-height', h - 120);
+        $('#pan_ocpapers_working_paper_collector_attr_list').css('max-height', h - 145);
     }
 };
 

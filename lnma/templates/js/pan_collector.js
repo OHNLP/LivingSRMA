@@ -116,8 +116,7 @@ var pan_collector = {
         // update the menu
         pan_ocpapers.update_ctx_menu(
             text, 
-            pan_collector.current.paper.pid,
-            pan_collector.current.extract_paper.n_arms
+            pan_collector.vpp.$data.paper.pid
         );
 
         // show the context menu at where clicked
