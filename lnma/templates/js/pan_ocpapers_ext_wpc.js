@@ -102,10 +102,9 @@ Object.assign(pan_ocpapers, {
             var abbr = $(elem).attr('abbr');
             var values = pan_ocpapers._get_values_by_abbr(abbr);
 
-            // console.log('* found abbr '+ abbr+' values ' + values);
-
             if (values.length == 0) {
                 // no value for this abbr yet
+                // so, just stop update
                 return;
             }
 
@@ -119,10 +118,15 @@ Object.assign(pan_ocpapers, {
                     var pid = pan_ocpapers.vpp.$data.working_paper.pid;
                     var val = ui.item.value;
 
-                    console.log('* selected', val, 'for', abbr, 'of', pid);
-
                     // set the value
-                    pan_ocpapers.vpp.$data.working_oc.data[pid].attrs.main[abbr] = val;
+                    // pan_ocpapers.vpp.$data.working_oc.data[pid].attrs.main[abbr] = val;
+                    console.log('* selected [', val, '] for', abbr, 'of', pid);
+
+                    // 2021-04-24: finally fixed this issue!!!
+                    // the working arm may be main or other,
+                    // need to use the get_working_arm_attrs() to get the current arm
+                    // set the value to the working arm
+                    pan_ocpapers.vpp.get_working_arm_attrs()[abbr] = val;
                 },
 
                 change: function (e, ui) {
@@ -140,21 +144,37 @@ Object.assign(pan_ocpapers, {
         var v = {};
 
         for (const pid in this.vpp.$data.working_oc.data) {
-            const paper = this.vpp.$data.working_oc.data[pid];                
+            const paper = this.vpp.$data.working_oc.data[pid];
             // if (paper.is_selected) {
-                // get the main values
-                var val = paper.attrs.main[abbr];
-                v[val] = 1;
+            //     // get the main values
+            //     var val = paper.attrs.main[abbr];
+            //     v[val] = 1;
 
-                // get the values from 
-                for (let i = 0; i < paper.attrs.other.length; i++) {
-                    const arm = paper.attrs.other[i];
-                    if (arm.hasOwnProperty(abbr)) {
-                        var arm_val = arm[abbr];
-                        v[arm_val] = 1;
-                    }
-                }
+            //     // get the values from 
+            //     for (let i = 0; i < paper.attrs.other.length; i++) {
+            //         const arm = paper.attrs.other[i];
+            //         if (arm.hasOwnProperty(abbr)) {
+            //             var arm_val = arm[abbr];
+            //             v[arm_val] = 1;
+            //         }
+            //     }
             // }
+
+            // 2021-04-24: the rule is different now
+            // even the paper is not selected, we could still 
+            // extract info and save for later use
+            // get the main values
+            var val = paper.attrs.main[abbr];
+            v[val] = 1;
+
+            // get the values from 
+            for (let i = 0; i < paper.attrs.other.length; i++) {
+                const arm = paper.attrs.other[i];
+                if (arm.hasOwnProperty(abbr)) {
+                    var arm_val = arm[abbr];
+                    v[arm_val] = 1;
+                }
+            }
         }
 
         var distinct_vals = Object.keys(v);
