@@ -18,6 +18,10 @@ var pan_collector = {
                 show_tab: null
             },
             updated: function() {
+                // resize the pan_collector_basic_info
+                // 2021-04-24: the abstract maybe very long
+                // so make it rezie
+                pan_collector.resize();
             },
             methods: {
                 switch_tab: function(tab_name) {
@@ -55,9 +59,6 @@ var pan_collector = {
                 get_first_author: function(s) {
                     return jarvis.get_first_author(s);
                 },
-            },
-            updated: function() {
-                // pan_collector.bind_txt_ctx_menu();
             }
         });
 
