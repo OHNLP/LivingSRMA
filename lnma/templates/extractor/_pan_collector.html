@@ -99,9 +99,16 @@
                     </form>
 
                     <button class="btn btn-default btn-sm mr-2"
+                        v-bind:disabled="is_uploading_pdf"
                         v-on:click="upload_pdfs();">
                         <i class="fa fa-upload"></i>
-                        Upload
+                        <span v-if="is_uploading_pdf">
+                            <i class="fa fa-spiner"></i> 
+                            Uploading ...
+                        </span>
+                        <span v-else>
+                            Upload
+                        </span>
                     </button>
 
                 </div>

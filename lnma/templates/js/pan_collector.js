@@ -15,7 +15,9 @@ var pan_collector = {
             el: this.vpp_id,
             data: {
                 paper: null,
-                show_tab: null
+                show_tab: null,
+
+                is_uploading_pdf: false,
             },
             updated: function() {
                 // resize the pan_collector_basic_info
@@ -33,6 +35,7 @@ var pan_collector = {
                 },
 
                 upload_pdfs: function() {
+                    this.is_uploading_pdf = true;
                     pan_collector.upload_pdfs();
                 },
 
@@ -241,10 +244,11 @@ var pan_collector = {
             '#form_pdf_files',
             function(data) {
                 console.log(data);
-                if (data.success) {
+                // enable the upload button
+                pan_collector.vpp.$data.is_uploading_pdf = false;
 
+                if (data.success) {
                     jarvis.toast('Uploaded PDF for paper!');
-                    
                     // update display
                     pan_collector.update(data.paper);
                 } else {
