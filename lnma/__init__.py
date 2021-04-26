@@ -54,6 +54,7 @@ def create_app(test_config=None):
     from lnma import bp_extractor
     from lnma import bp_exporter
     from lnma import bp_pdfworker
+    from lnma import bp_webfonts
 
     login_manager = LoginManager()
     login_manager.init_app(app)
@@ -84,6 +85,7 @@ def create_app(test_config=None):
     app.register_blueprint(bp_extractor.bp)
     app.register_blueprint(bp_exporter.bp)
     app.register_blueprint(bp_pdfworker.bp)
+    app.register_blueprint(bp_webfonts.bp)
 
     # make url_for('index') == url_for('blog.index')
     # in another app, you might define a separate main index here with
