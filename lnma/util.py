@@ -905,6 +905,11 @@ def allowed_file(filename):
 	return '.' in filename and filename.rsplit('.', 1)[1].lower() in settings.ALLOWED_PDF_UPLOAD_EXTENSIONS
 
 
+###########################################################
+# Shared data functions
+###########################################################
+
+
 ###############################################################################
 # Check the input field to avoid invaild input values
 ###############################################################################

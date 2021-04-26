@@ -21,6 +21,7 @@ from lnma import dora
 from lnma.analyzer import freq_analyzer
 from lnma.analyzer import bayes_analyzer
 from lnma.analyzer import pwma_analyzer
+from lnma import ss_state
 
 PATH_PUBDATA = 'pubdata'
 
@@ -31,6 +32,170 @@ bp = Blueprint("analyzer", __name__, url_prefix="/analyzer")
 def index():
     return render_template('analyzer/index.html')
 
+
+@bp.route('/azoc')
+@login_required
+def azoc():
+    '''
+    Analyze an outcome in a project by the abbr
+
+    According to the oc_type and the input,
+    The analyzer UI would be different.
+
+    For example, when analyzing the NMA, it should be network plot, league table.
+    When analyzing the pwma - primary or sensitivity, it should be the forest.
+    When analyzing the pwma - AEs, it should have more.
+    When analyzing the subg, the forest is different.
+
+    So, for different case, we will use different page to show.
+    '''
+    project_id = request.cookies.get('project_id')
+    abbr = request.args.get('abbr')
+    project = dora.get_project(project_id)
+
+    if abbr == '':
+        # which means it's a navigation
+        return render_template(
+            'analyzer/azoc.html',
+            project=project,
+            project_json_str=json.dumps(project.as_dict())
+        )
+    
+    # then, get the extract first
+    extract = dora.get_extract_by_project_id_and_abbr(
+        project_id, abbr
+    )
+
+    if extract is None:
+        # what??
+        pass
+
+    return render_template(
+        'analyzer/azoc.html',
+        project=project,
+        project_json_str=json.dumps(project.as_dict())
+    )
+
+###############################################################################
+# APIs for analyzing extract
+###############################################################################
+
+@bp.route('/get_paper')
+@login_required
+def get_paper():
+    project_id = request.args.get('project_id')
+    project_id = request.cookies.get('project_id')
+    pid = request.args.get('pid')
+
+    paper = dora.get_paper(project_id, pid)
+    json_paper = paper.as_dict()
+
+    ret = {
+        'success': True,
+        'paper': json_paper
+    }
+    return jsonify(ret)
+
+
+@bp.route('/get_extract')
+@login_required
+def get_extract():
+    '''
+    Get one extract by the project_id and the abbr
+    '''
+    project_id = request.args.get('project_id')
+    abbr = request.args.get('abbr')
+    
+    # get the exisiting extracts
+    extract = dora.get_extract_by_project_id_and_abbr(project_id, abbr)
+
+    if extract is None:
+        # this is a new extract
+        ret = {
+            'success': False,
+            'msg': 'not exist extract %s' % abbr
+        }
+        return jsonify(ret)
+
+    ret = {
+        'success': True,
+        'msg': '',
+        'extract': extract.as_dict()
+    }
+    return jsonify(ret)
+
+
+@bp.route('/get_extracts')
+@login_required
+def get_extracts():
+    '''
+    Get all of the extracts by the project_id
+    '''
+    project_id = request.args.get('project_id')
+    with_data = request.args.get('with_data')
+
+    if with_data == 'yes':
+        with_data = True
+    else:
+        with_data = False
+    
+    # get the exisiting extracts
+    extracts = dora.get_extracts_by_project_id(project_id)
+
+    # build the return obj
+    if with_data:
+        ret = {
+            'success': True,
+            'msg': '',
+            'extracts': [ extr.as_dict() for extr in extracts ]
+        }
+    else:
+        ret = {
+            'success': True,
+            'msg': '',
+            'extracts': [ extr.as_simple_dict() for extr in extracts ]
+        }
+        
+    return jsonify(ret)
+
+
+@bp.route('/get_extract_and_papers')
+@login_required
+def get_extract_and_papers():
+    project_id = request.args.get('project_id')
+    abbr = request.args.get('abbr')
+    
+    # get the exisiting extracts
+    extract = dora.get_extract_by_project_id_and_abbr(project_id, abbr)
+
+    if extract is None:
+        # this is a new extract
+        ret = {
+            'success': False,
+            'msg': 'not exist extract %s' % abbr
+        }
+        return jsonify(ret)
+
+    # get papers
+    stage = ss_state.SS_STAGE_INCLUDED_SR
+    papers = dora.get_papers_by_stage(project_id, stage)
+        
+    # update the extract with papers
+    extract.update_data_by_papers(papers)
+
+    # make the return object
+    ret = {
+        'success': True,
+        'msg': '',
+        'extract': extract.as_dict(),
+        'papers': [ p.as_simple_dict() for p in papers ]
+    }
+    return jsonify(ret)
+
+
+###############################################################################
+# Static file analyzers
+###############################################################################
 
 @bp.route('/nma')
 @login_required

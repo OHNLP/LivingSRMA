@@ -554,6 +554,68 @@ class Extract(db.Model):
     date_created = db.Column(db.DateTime, index=False)
     date_updated = db.Column(db.DateTime, index=False)
 
+    def update_data_by_papers(self, papers):
+        '''
+        Extend the current extract with more papers
+        according to the given papers
+        '''
+        # merge the return obj
+        # make a ref in the extract for frontend display
+        # make sure every selected paper is listed in extract.data
+        pids = set([])
+        for paper in papers:
+            pid = paper.pid
+            # record this pid for next step
+            pids.add(pid)
+
+            # check if this pid exists in extract
+            if pid in self.data:
+                # nothing to do if has added
+                continue
+
+            # if not exist, add this paper
+            self.data[pid] = {
+                'is_selected': False,
+                'is_checked': False,
+                'n_arms': 2,
+                'attrs': {}
+            }
+
+            self.data[pid]['attrs'] = {
+                'main': {},
+                'other': []
+            }
+
+            # fill the main track with empty values
+            self.data[pid]['attrs']['main'] = util.fill_extract_data_arm(
+                self.data[pid]['attrs']['main'],
+                self.meta['cate_attrs']
+            )
+            # for cate in extract.meta['cate_attrs']:
+            #     for attr in cate['attrs']:
+            #         attr_abbr = attr['abbr']
+            #         if attr['subs'] is None:
+            #             extract.data[pid]['attrs']['main'][attr_abbr] = ''
+            #         else:
+            #             # have multiple subs
+            #             for sub in attr['subs']:
+            #                 sub_abbr = sub['abbr']
+            #                 extract.data[pid]['attrs']['main'][sub_abbr] = ''
+
+        # reverse search, unselect those are not in papers
+        for pid in self.data:
+            if pid in pids:
+                # which means this pid is in the SR stage
+                continue
+
+            # if not, just unselect this paper
+            # don't delete
+            self.data[pid]['selected'] = False
+
+        # in fact, we don't need to return much things
+        return pids
+
+
     def __repr__(self):
         return '<Extract {0} {1}: {2}>'.format(
             self.oc_type, self.abbr, self.extract_id)

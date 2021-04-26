@@ -8,6 +8,7 @@
 
 var srv_extractor = {
 
+    // all urls for extractor
     url: {
         create_extract: "[[ url_for('extractor.create_extract') ]]",
         update_extract: "[[ url_for('extractor.update_extract') ]]",

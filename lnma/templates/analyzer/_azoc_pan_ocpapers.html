@@ -1,0 +1,235 @@
+<div id="pan_ocpapers" class="d-flex flex-column" 
+    style="height: 500px;">
+    
+
+    <div class="d-flex flex-column" style="height: 100%;"
+        v-if="working_oc != null">
+
+        <div id="pan_ocpapers_toolbar" class="panel-info">
+            <div class="oc-attr d-flex flex-row">
+                <span style="font-size: 1.2em;" class="mr-2">
+                    <a href="javascript:void(0);" onclick="pan_ocpapers.show_ocs_menu();">
+                        <b>[{{ working_oc.meta.full_name }}]</b>
+                    </a>
+                </span>
+
+                <div class="btn-group mr-2">
+                    <button v-on:click="toggle_only_show_selected();"
+                        type="button" class="btn btn-default btn-sm">
+                        <i class="fa" v-bind:class="{'fa-toggle-on': only_show_selected, 'fa-toggle-off': !only_show_selected}"></i>
+                        Toggle all studies
+                    </button>
+                </div>
+
+                <div class="btn-group mr-2">
+                    <button v-on:click="update_extract();"
+                        type="button" class="btn btn-default btn-sm">
+                        <i class="fa fa-save"></i>
+                        Save all
+                    </button>
+                </div>
+
+            </div>
+        </div>
+        
+        <div id="pan_ocpapers_attrs" class="panel-info d-flex flex-column" 
+            v-if="working_oc != null">
+            <div v-for="cate, cate_idx in working_oc.meta.cate_attrs"
+                style="border-bottom: 1px dotted #dddddd; margin: 5px 0 5px 0;"
+                class="d-flex flex-column">
+
+                <div :id="'cate-' + cate.abbr"
+                    class="d-flex flex-row flex-wrap">
+
+                    <div style="background: #dddddd;"
+                        class="mr-2 pr-2">
+                        <input type="checkbox" v-bind:id="'toggle-cate-' + cate.abbr"
+                            v-model="show_attrs[cate.abbr]"
+                            v-on:change="on_toggle_itable_select_category(cate_idx, $event)">
+                        <label :for="'toggle-cate-' + cate.abbr" class="extract-attr-label">
+                            <b>{{ cate.name }}</b>
+                        </label>
+                    </div>
+
+                    <div v-for="attr, attr_idx in cate.attrs"
+                        class="mr-2 border-end">
+                        
+                        <span v-if="attr.subs == null" v-bind:abbr="attr.abbr">
+                            <input type="checkbox" 
+                                v-model="show_attrs[attr.abbr]"
+                                v-on:change="on_toggle_attr_selection(attr.abbr, $event)"
+                                :id="'attr-' + attr.abbr">
+                            <label class="extract-attr-label" :for="'attr-' + attr.abbr">{{ attr.name }}</label>
+                        </span>
+
+                        <span v-else v-bind:abbr="attr.abbr">
+                            <input type="checkbox" 
+                                v-model="show_attrs[attr.abbr]"
+                                v-on:change="on_toggle_attr_selection(attr.abbr, $event)"
+                                :id="'attr-' + attr.abbr">
+
+                            {{ attr.name }}
+                            [
+                            <span class="mr-2" v-for="sub, sub_idx in attr.subs">
+                                <input type="checkbox" v-model="show_attrs[sub.abbr]"
+                                    v-on:change="on_toggle_attr_selection(attr.abbr, $event)"
+                                    :id="'sub-' + sub.abbr">
+                                <label class="extract-attr-sub-label" :for="'sub-' + sub.abbr">
+                                    {{ sub.name }}
+                                </label>
+                            </span>
+                            ]
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <!-- /.panel-info -->
+
+
+        <div id="pan_ocpapers_paperlist" style="overflow: auto;">
+
+            <!-- table for itable -->
+            <table class="paper-table">
+                <thead class="paper-table-header">
+                    <tr>
+                        <th class="paper-table-header-th" colspan="5">
+                            &nbsp;
+                        </th>
+                        <th v-for="thr1 in thr1s"
+                            v-bind:colspan="thr1.cols"
+                            v-show="show_attrs[thr1.abbr]"
+                            class="paper-table-header-th"
+                            style="text-align: center;">
+                            {{ thr1.name }}
+                        </th>
+                    </tr>
+
+                    <tr>
+                        <th class="paper-table-header-th" style="width: 20px;">
+                            &nbsp;
+                        </th>
+                        <th class="paper-table-header-th" style="width: 40px;">
+                            #
+                        </th>
+                        <th class="paper-table-header-th" style="width: 130px;">
+                            ({{ n_selected }} selected)
+                        </th>
+                        <th class="paper-table-header-th" style="width: 90px;">
+                            Checked
+                        </th>
+                        <th class="paper-table-header-th" style="width: 50px;">
+                            Arms
+                        </th>
+                        
+                        <!-- the attributes need to collect -->
+                        <th class="paper-table-header-th" 
+                            style="text-align: center;"
+                            v-for="thr2 in thr2s"
+                            v-bind:colspan="thr2.cols"
+                            v-show="show_attrs[thr2.abbr]">
+                            <span>
+                                {{ thr2.name }}
+                            </span>
+                        </th>
+                    </tr>
+                </thead>
+
+                <tbody class="paper-list">
+                    <tr class="paper-table-row" 
+                        v-for="paper in papers"
+                        v-bind:id="'paper-table-row-' + paper.pid"
+                        v-show="!only_show_selected || working_oc.data[paper.pid].is_selected">
+                        <td class="paper-table-body-td">
+                            <input type="checkbox" 
+                                v-model="working_oc.data[paper.pid].is_selected"
+                                disabled="disabled">
+                        </td>
+
+                        <td class="paper-table-body-td"
+                            v-on:click="on_click_paper(paper)">
+                            {{ paper.seq_num }}
+                        </td>
+
+                        <td class="paper-table-body-td"
+                            v-on:click="on_click_paper(paper)">
+                            <div class="paper-table-body-td-author"
+                                v-bind:title="get_first_author(paper.authors)">
+                                {{ get_first_author(paper.authors) }} {{ get_year(paper.pub_date) }}
+                            </div>
+                        </td>
+
+                        <td class="paper-table-body-td">
+                            <input type="checkbox" 
+                                v-bind:id="'paper-row-checked'+paper.pid"
+                                v-model="working_oc.data[paper.pid].is_checked">
+                        </td>
+                        <td class="paper-table-body-td">
+                            <select name="" id="" v-model="working_oc.data[paper.pid].n_arms"
+                                v-on:change="on_change_itable_n_arms(paper.pid, $event)">
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                            </select>
+                        </td>
+                        
+                        <!-- the attributes of pwma -->
+                        <td v-for="attr_sub in all_attrs" 
+                            v-show="show_attrs[attr_sub.abbr]"
+                            class="paper-table-body-td paper-value">
+                            
+                            <!-- the main track -->
+                            <span class="cell-input">
+                                <input class="paper-extract-input-auto" type="text" 
+                                    v-bind:abbr="attr_sub.abbr"
+                                    v-bind:size="get_input_size(working_oc.data[paper.pid].attrs.main[attr_sub.abbr])"
+                                    v-model="working_oc.data[paper.pid].attrs.main[attr_sub.abbr]">    
+                            </span>
+
+                            <!-- the other tracks if n_arms > 2 -->
+                            <hr class="n-arms-hr" v-if="working_oc.data[paper.pid].n_arms > 2">
+
+                            <span v-for="other, other_idx in working_oc.data[paper.pid].attrs.other"
+                                class="cell-input">
+                                <br v-if="other_idx > 0">
+                                <input class="paper-extract-input-auto" type="text" 
+                                    v-bind:size="get_input_size(working_oc.data[paper.pid].attrs.other[other_idx][attr_sub.abbr])"
+                                    v-model="working_oc.data[paper.pid].attrs.other[other_idx][attr_sub.abbr]">  
+                            </span>                        
+
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </div>
+        <!-- /.panel-paperlist -->
+
+        <div id="pan_ocpapers_working_paper"
+            class="d-flex flex-row"
+            v-if="show_working_paper_pan">
+
+        {% include 'extractor/__pan_ocpapers_working_paper_collector.html' %}
+        </div>
+        <!-- /#pan_ocpapers_working_paper -->
+
+    </div>
+
+    <div v-else>
+        <div id="pan_ocpapers_toolbar" class="panel-info">
+            <div class="oc-attr d-flex flex-row">
+                <span style="font-size: 1.2em;" class="mr-2">
+                    <a href="javascript:void(0);" onclick="pan_ocpapers.show_ocs_menu();">
+                        <b>Select an outcome</b>
+                    </a>
+                </span>
+
+            </div>
+        </div>
+    </div>
+
+    
+</div>
+<!-- /#pan_ocpapers -->
