@@ -1,0 +1,181 @@
+<div id="pan_ocpapers_settings"
+    class="option-panel">
+    <div class="d-flex flex-row">
+        <div>
+            <i class="fa fa-sliders-h"></i>
+            Settings
+        </div>
+    </div>
+
+    <div class="d-flex flex-column">
+
+        <div class="option-item">
+            <div class="option-item-label">
+                <label>Measure of Effect:</label>
+            </div>
+            <div class="option-item-value">
+                <select v-model="cfgs.measure_of_effect.selected"
+                    v-bind:disabled="cfgs.measure_of_effect.is_disabled">
+                    <option 
+                        v-for="option in cfgs.measure_of_effect.options"
+                        v-bind:value="option.value"
+                        v-if="show_cfg_option('measure_of_effect', option.value)">
+                        {{ option.text }}
+                    </option>
+                </select>
+            </div>
+            
+        </div><!-- /.option-item -->
+
+        <div class="option-item">
+            <div class="option-item-label">
+                <label>Fixed or Random:</label>
+            </div>
+            <div class="option-item-value">
+                <select v-model="cfgs.fixed_or_random.selected"
+                    v-bind:disabled="cfgs.fixed_or_random.is_disabled">
+                    <option v-for="option in cfgs.fixed_or_random.options" v-bind:value="option.value">
+                        {{ option.text }}
+                    </option>
+                </select>
+            </div>
+            
+        </div><!-- /.option-item -->
+
+        <div class="option-item">
+            <div class="option-item-label">
+                <label>Pooling Method:</label>
+            </div>
+            <div class="option-item-value">
+                <select v-model="cfgs.pooling_method.selected"
+                    v-bind:disabled="cfgs.pooling_method.is_disabled">
+                    <option 
+                        v-for="option in cfgs.pooling_method.options"
+                        v-bind:value="option.value"
+                        v-if="show_cfg_option('pooling_method', option.value)">
+                        {{ option.text }}
+                    </option>
+                </select>
+            </div>
+            
+        </div><!-- /.option-item -->
+
+        <div class="option-item">
+            <div class="option-item-label">
+                <label>Tau Estimation Method:</label>
+            </div>
+            <div class="option-item-value">
+                <select v-model="cfgs.tau_estimation_method.selected"
+                    v-bind:disabled="cfgs.tau_estimation_method.is_disabled">
+                    <option v-for="option in cfgs.tau_estimation_method.options" v-bind:value="option.value">
+                        {{ option.text }}
+                    </option>
+                </select>
+            </div>
+            
+        </div><!-- /.option-item -->
+
+        <div class="option-item" v-if="show_cfg('hakn_adjustment')">
+            <div class="option-item-label">
+                <label>Hartung-Knapp Adjustment:</label>
+            </div>
+            <div class="option-item-value">
+                <select v-model="cfgs.hakn_adjustment.selected"
+                    v-bind:disabled="cfgs.hakn_adjustment.is_disabled">
+                    <option v-for="option in cfgs.hakn_adjustment.options" v-bind:value="option.value">
+                        {{ option.text }}
+                    </option>
+                </select>
+            </div>
+            
+        </div><!-- /.option-item -->
+
+        <div class="option-item" v-if="show_cfg('smd_estimation_method')">
+            <div class="option-item-label">
+                <label>SMD Estimation Method:</label>
+            </div>
+            <div class="option-item-value">
+                <select v-model="cfgs.smd_estimation_method.selected"
+                    v-bind:disabled="cfgs.smd_estimation_method.is_disabled">
+                    <option v-for="option in cfgs.smd_estimation_method.options" v-bind:value="option.value">
+                        {{ option.text }}
+                    </option>
+                </select>
+            </div>
+            
+        </div><!-- /.option-item -->
+
+        <div class="option-item"
+            v-if="show_cfg('prediction_interval')">
+            <div class="option-item-label">
+                <label>Prediction Interval:</label>
+            </div>
+            <div class="option-item-value">
+                <select v-model="cfgs.prediction_interval.selected"
+                    v-bind:disabled="cfgs.prediction_interval.is_disabled">
+                    <option v-for="option in cfgs.prediction_interval.options" v-bind:value="option.value">
+                        {{ option.text }}
+                    </option>
+                </select>
+            </div>
+            
+        </div><!-- /.option-item -->
+
+        <div class="option-item"
+            v-if="show_cfg('sensitivity_analysis')">
+            <div class="option-item-label">
+                <label>Sensitivity Analysis:</label>
+            </div>
+            <div class="option-item-value" style="padding-top: 3px;">
+                <input type="radio" id="cfgs_sensitivity_analysis_1" value="yes" 
+                    v-model="cfgs.sensitivity_analysis.selected">
+                <label style="padding: 0 5px;" for="cfgs_sensitivity_analysis_1">
+                    Yes
+                </label>&nbsp;&nbsp;&nbsp;&nbsp;
+                <input type="radio" id="cfgs_sensitivity_analysis_2" value="no" 
+                    v-model="cfgs.sensitivity_analysis.selected">
+                <label style="padding: 0 5px;" for="cfgs_sensitivity_analysis_2">
+                    No
+                </label>
+            </div>
+            
+        </div><!-- /.option-item -->
+
+        <div class="option-item"
+            v-if="show_cfg('cumulative_meta_analysis')">
+            <div class="option-item-label">
+                <label>Cumulative Meta-Analysis:</label>
+            </div>
+            <div class="option-item-value" style="padding-top: 3px;">
+                <input type="radio" id="cfgs_cumulative_meta_analysis_1" value="yes" 
+                    v-model="cfgs.cumulative_meta_analysis.selected">
+                <label style="padding: 0 5px;" for="cfgs_cumulative_meta_analysis_1">
+                    Yes
+                </label>&nbsp;&nbsp;&nbsp;&nbsp;
+                <input type="radio" id="cfgs_cumulative_meta_analysis_2" value="no" v-model="cfgs.cumulative_meta_analysis.selected">
+                <label style="padding: 0 5px;" for="cfgs_cumulative_meta_analysis_2">
+                    No
+                </label>
+            </div>
+            
+        </div><!-- /.option-item -->
+        
+        <div class="option-item d-flex flex-row"
+            v-if="show_cfg('cumulative_meta_analysis') && cfgs.cumulative_meta_analysis.selected == 'yes'">
+            <div class="option-item-label" style="text-indent: 1em;">
+                <label>Sort by:</label>
+            </div>
+            <div class="option-item-value" style="margin-top: -2px;">
+                <select v-model="cfgs.cumulative_meta_analysis_sortby.selected"
+                    v-bind:disabled="cfgs.cumulative_meta_analysis_sortby.is_disabled"
+                    class="option-item-sub-select">
+                    <option v-for="option in cfgs.cumulative_meta_analysis_sortby.options" v-bind:value="option.value">
+                        {{ option.text }}
+                    </option>
+                </select>
+            </div>
+            
+        </div><!-- /.option-item -->
+    </div>
+</div>
+<!-- /#pan_ocpapers_setting -->
