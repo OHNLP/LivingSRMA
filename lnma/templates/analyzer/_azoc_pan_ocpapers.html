@@ -9,212 +9,206 @@
             <div class="oc-attr d-flex flex-row">
                 <span style="font-size: 1.2em;" class="mr-2">
                     <a href="javascript:void(0);" onclick="pan_ocpapers.show_ocs_menu();">
-                        <b>[{{ working_oc.meta.full_name }}]</b>
+                        <b>
+                            [
+                                {{ working_oc.meta.group }} | 
+                                {{ working_oc.meta.full_name }}
+                            ]
+                        </b>
                     </a>
                 </span>
 
                 <div class="btn-group mr-2">
-                    <button v-on:click="toggle_only_show_selected();"
-                        type="button" class="btn btn-default btn-sm">
-                        <i class="fa" v-bind:class="{'fa-toggle-on': only_show_selected, 'fa-toggle-off': !only_show_selected}"></i>
-                        Toggle all studies
+                    <button type="button" class="btn btn-default btn-sm">
+                        <i class="fa fa-hat-wizard"></i>
+                        Analyze
                     </button>
                 </div>
 
-                <div class="btn-group mr-2">
-                    <button v-on:click="update_extract();"
-                        type="button" class="btn btn-default btn-sm">
-                        <i class="fa fa-save"></i>
-                        Save all
-                    </button>
-                </div>
+            </div>
+        </div>
 
+        <div id="pan_ocpapers_settings"
+            class="option-panel">
+            <div class="d-flex flex-row">
+                <div>
+                    <i class="fa fa-sliders-h"></i>
+                    Settings
+                </div>
+            </div>
+
+            <div class="d-flex flex-column">
+
+                <div class="option-item">
+                    <div class="option-item-label">
+                        <label>Measure of Effect:</label>
+                    </div>
+                    <div class="option-item-value">
+                        <select v-model="cfgs.measure_of_effect.selected"
+                            v-bind:disabled="cfgs.measure_of_effect.is_disabled">
+                            <option 
+                                v-for="option in cfgs.measure_of_effect.options"
+                                v-bind:value="option.value"
+                                v-if="show_cfg_option('measure_of_effect', option.value)">
+                                {{ option.text }}
+                            </option>
+                        </select>
+                    </div>
+                    
+                </div><!-- /.option-item -->
+
+                <div class="option-item">
+                    <div class="option-item-label">
+                        <label>Fixed or Random:</label>
+                    </div>
+                    <div class="option-item-value">
+                        <select v-model="cfgs.fixed_or_random.selected"
+                            v-bind:disabled="cfgs.fixed_or_random.is_disabled">
+                            <option v-for="option in cfgs.fixed_or_random.options" v-bind:value="option.value">
+                                {{ option.text }}
+                            </option>
+                        </select>
+                    </div>
+                    
+                </div><!-- /.option-item -->
+
+                <div class="option-item">
+                    <div class="option-item-label">
+                        <label>Pooling Method:</label>
+                    </div>
+                    <div class="option-item-value">
+                        <select v-model="cfgs.pooling_method.selected"
+                            v-bind:disabled="cfgs.pooling_method.is_disabled">
+                            <option 
+                                v-for="option in cfgs.pooling_method.options"
+                                v-bind:value="option.value"
+                                v-if="show_cfg_option('pooling_method', option.value)">
+                                {{ option.text }}
+                            </option>
+                        </select>
+                    </div>
+                    
+                </div><!-- /.option-item -->
+
+                <div class="option-item">
+                    <div class="option-item-label">
+                        <label>Tau Estimation Method:</label>
+                    </div>
+                    <div class="option-item-value">
+                        <select v-model="cfgs.tau_estimation_method.selected"
+                            v-bind:disabled="cfgs.tau_estimation_method.is_disabled">
+                            <option v-for="option in cfgs.tau_estimation_method.options" v-bind:value="option.value">
+                                {{ option.text }}
+                            </option>
+                        </select>
+                    </div>
+                    
+                </div><!-- /.option-item -->
+
+                <div class="option-item" v-if="show_cfg('hakn_adjustment')">
+                    <div class="option-item-label">
+                        <label>Hartung-Knapp Adjustment:</label>
+                    </div>
+                    <div class="option-item-value">
+                        <select v-model="cfgs.hakn_adjustment.selected"
+                            v-bind:disabled="cfgs.hakn_adjustment.is_disabled">
+                            <option v-for="option in cfgs.hakn_adjustment.options" v-bind:value="option.value">
+                                {{ option.text }}
+                            </option>
+                        </select>
+                    </div>
+                    
+                </div><!-- /.option-item -->
+
+                <div class="option-item" v-if="show_cfg('smd_estimation_method')">
+                    <div class="option-item-label">
+                        <label>SMD Estimation Method:</label>
+                    </div>
+                    <div class="option-item-value">
+                        <select v-model="cfgs.smd_estimation_method.selected"
+                            v-bind:disabled="cfgs.smd_estimation_method.is_disabled">
+                            <option v-for="option in cfgs.smd_estimation_method.options" v-bind:value="option.value">
+                                {{ option.text }}
+                            </option>
+                        </select>
+                    </div>
+                    
+                </div><!-- /.option-item -->
+
+                <div class="option-item"
+                    v-if="show_cfg('prediction_interval')">
+                    <div class="option-item-label">
+                        <label>Prediction Interval:</label>
+                    </div>
+                    <div class="option-item-value">
+                        <select v-model="cfgs.prediction_interval.selected"
+                            v-bind:disabled="cfgs.prediction_interval.is_disabled">
+                            <option v-for="option in cfgs.prediction_interval.options" v-bind:value="option.value">
+                                {{ option.text }}
+                            </option>
+                        </select>
+                    </div>
+                    
+                </div><!-- /.option-item -->
+
+                <div class="option-item"
+                    v-if="show_cfg('sensitivity_analysis')">
+                    <div class="option-item-label">
+                        <label>Sensitivity Analysis:</label>
+                    </div>
+                    <div class="option-item-value" style="padding-top: 3px;">
+                        <input type="radio" id="cfgs_sensitivity_analysis_1" value="yes" 
+                            v-model="cfgs.sensitivity_analysis.selected">
+                        <label style="padding: 0 5px;" for="cfgs_sensitivity_analysis_1">
+                            Yes
+                        </label>&nbsp;&nbsp;&nbsp;&nbsp;
+                        <input type="radio" id="cfgs_sensitivity_analysis_2" value="no" 
+                            v-model="cfgs.sensitivity_analysis.selected">
+                        <label style="padding: 0 5px;" for="cfgs_sensitivity_analysis_2">
+                            No
+                        </label>
+                    </div>
+                    
+                </div><!-- /.option-item -->
+
+                <div class="option-item"
+                    v-if="show_cfg('cumulative_meta_analysis')">
+                    <div class="option-item-label">
+                        <label>Cumulative Meta-Analysis:</label>
+                    </div>
+                    <div class="option-item-value" style="padding-top: 3px;">
+                        <input type="radio" id="cfgs_cumulative_meta_analysis_1" value="yes" 
+                            v-model="cfgs.cumulative_meta_analysis.selected">
+                        <label style="padding: 0 5px;" for="cfgs_cumulative_meta_analysis_1">
+                            Yes
+                        </label>&nbsp;&nbsp;&nbsp;&nbsp;
+                        <input type="radio" id="cfgs_cumulative_meta_analysis_2" value="no" v-model="cfgs.cumulative_meta_analysis.selected">
+                        <label style="padding: 0 5px;" for="cfgs_cumulative_meta_analysis_2">
+                            No
+                        </label>
+                    </div>
+                    
+                </div><!-- /.option-item -->
+                
+                <div class="option-item d-flex flex-row"
+                    v-if="show_cfg('cumulative_meta_analysis') && cfgs.cumulative_meta_analysis.selected == 'yes'">
+                    <div class="option-item-label" style="text-indent: 1em;">
+                        <label>Sort by:</label>
+                    </div>
+                    <div class="option-item-value" style="margin-top: -2px;">
+                        <select v-model="cfgs.cumulative_meta_analysis_sortby.selected"
+                            v-bind:disabled="cfgs.cumulative_meta_analysis_sortby.is_disabled"
+                            class="option-item-sub-select">
+                            <option v-for="option in cfgs.cumulative_meta_analysis_sortby.options" v-bind:value="option.value">
+                                {{ option.text }}
+                            </option>
+                        </select>
+                    </div>
+                    
+                </div><!-- /.option-item -->
             </div>
         </div>
         
-        <div id="pan_ocpapers_attrs" class="panel-info d-flex flex-column" 
-            v-if="working_oc != null">
-            <div v-for="cate, cate_idx in working_oc.meta.cate_attrs"
-                style="border-bottom: 1px dotted #dddddd; margin: 5px 0 5px 0;"
-                class="d-flex flex-column">
-
-                <div :id="'cate-' + cate.abbr"
-                    class="d-flex flex-row flex-wrap">
-
-                    <div style="background: #dddddd;"
-                        class="mr-2 pr-2">
-                        <input type="checkbox" v-bind:id="'toggle-cate-' + cate.abbr"
-                            v-model="show_attrs[cate.abbr]"
-                            v-on:change="on_toggle_itable_select_category(cate_idx, $event)">
-                        <label :for="'toggle-cate-' + cate.abbr" class="extract-attr-label">
-                            <b>{{ cate.name }}</b>
-                        </label>
-                    </div>
-
-                    <div v-for="attr, attr_idx in cate.attrs"
-                        class="mr-2 border-end">
-                        
-                        <span v-if="attr.subs == null" v-bind:abbr="attr.abbr">
-                            <input type="checkbox" 
-                                v-model="show_attrs[attr.abbr]"
-                                v-on:change="on_toggle_attr_selection(attr.abbr, $event)"
-                                :id="'attr-' + attr.abbr">
-                            <label class="extract-attr-label" :for="'attr-' + attr.abbr">{{ attr.name }}</label>
-                        </span>
-
-                        <span v-else v-bind:abbr="attr.abbr">
-                            <input type="checkbox" 
-                                v-model="show_attrs[attr.abbr]"
-                                v-on:change="on_toggle_attr_selection(attr.abbr, $event)"
-                                :id="'attr-' + attr.abbr">
-
-                            {{ attr.name }}
-                            [
-                            <span class="mr-2" v-for="sub, sub_idx in attr.subs">
-                                <input type="checkbox" v-model="show_attrs[sub.abbr]"
-                                    v-on:change="on_toggle_attr_selection(attr.abbr, $event)"
-                                    :id="'sub-' + sub.abbr">
-                                <label class="extract-attr-sub-label" :for="'sub-' + sub.abbr">
-                                    {{ sub.name }}
-                                </label>
-                            </span>
-                            ]
-                        </span>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-        <!-- /.panel-info -->
-
-
-        <div id="pan_ocpapers_paperlist" style="overflow: auto;">
-
-            <!-- table for itable -->
-            <table class="paper-table">
-                <thead class="paper-table-header">
-                    <tr>
-                        <th class="paper-table-header-th" colspan="5">
-                            &nbsp;
-                        </th>
-                        <th v-for="thr1 in thr1s"
-                            v-bind:colspan="thr1.cols"
-                            v-show="show_attrs[thr1.abbr]"
-                            class="paper-table-header-th"
-                            style="text-align: center;">
-                            {{ thr1.name }}
-                        </th>
-                    </tr>
-
-                    <tr>
-                        <th class="paper-table-header-th" style="width: 20px;">
-                            &nbsp;
-                        </th>
-                        <th class="paper-table-header-th" style="width: 40px;">
-                            #
-                        </th>
-                        <th class="paper-table-header-th" style="width: 130px;">
-                            ({{ n_selected }} selected)
-                        </th>
-                        <th class="paper-table-header-th" style="width: 90px;">
-                            Checked
-                        </th>
-                        <th class="paper-table-header-th" style="width: 50px;">
-                            Arms
-                        </th>
-                        
-                        <!-- the attributes need to collect -->
-                        <th class="paper-table-header-th" 
-                            style="text-align: center;"
-                            v-for="thr2 in thr2s"
-                            v-bind:colspan="thr2.cols"
-                            v-show="show_attrs[thr2.abbr]">
-                            <span>
-                                {{ thr2.name }}
-                            </span>
-                        </th>
-                    </tr>
-                </thead>
-
-                <tbody class="paper-list">
-                    <tr class="paper-table-row" 
-                        v-for="paper in papers"
-                        v-bind:id="'paper-table-row-' + paper.pid"
-                        v-show="!only_show_selected || working_oc.data[paper.pid].is_selected">
-                        <td class="paper-table-body-td">
-                            <input type="checkbox" 
-                                v-model="working_oc.data[paper.pid].is_selected"
-                                disabled="disabled">
-                        </td>
-
-                        <td class="paper-table-body-td"
-                            v-on:click="on_click_paper(paper)">
-                            {{ paper.seq_num }}
-                        </td>
-
-                        <td class="paper-table-body-td"
-                            v-on:click="on_click_paper(paper)">
-                            <div class="paper-table-body-td-author"
-                                v-bind:title="get_first_author(paper.authors)">
-                                {{ get_first_author(paper.authors) }} {{ get_year(paper.pub_date) }}
-                            </div>
-                        </td>
-
-                        <td class="paper-table-body-td">
-                            <input type="checkbox" 
-                                v-bind:id="'paper-row-checked'+paper.pid"
-                                v-model="working_oc.data[paper.pid].is_checked">
-                        </td>
-                        <td class="paper-table-body-td">
-                            <select name="" id="" v-model="working_oc.data[paper.pid].n_arms"
-                                v-on:change="on_change_itable_n_arms(paper.pid, $event)">
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                                <option value="4">4</option>
-                                <option value="5">5</option>
-                            </select>
-                        </td>
-                        
-                        <!-- the attributes of pwma -->
-                        <td v-for="attr_sub in all_attrs" 
-                            v-show="show_attrs[attr_sub.abbr]"
-                            class="paper-table-body-td paper-value">
-                            
-                            <!-- the main track -->
-                            <span class="cell-input">
-                                <input class="paper-extract-input-auto" type="text" 
-                                    v-bind:abbr="attr_sub.abbr"
-                                    v-bind:size="get_input_size(working_oc.data[paper.pid].attrs.main[attr_sub.abbr])"
-                                    v-model="working_oc.data[paper.pid].attrs.main[attr_sub.abbr]">    
-                            </span>
-
-                            <!-- the other tracks if n_arms > 2 -->
-                            <hr class="n-arms-hr" v-if="working_oc.data[paper.pid].n_arms > 2">
-
-                            <span v-for="other, other_idx in working_oc.data[paper.pid].attrs.other"
-                                class="cell-input">
-                                <br v-if="other_idx > 0">
-                                <input class="paper-extract-input-auto" type="text" 
-                                    v-bind:size="get_input_size(working_oc.data[paper.pid].attrs.other[other_idx][attr_sub.abbr])"
-                                    v-model="working_oc.data[paper.pid].attrs.other[other_idx][attr_sub.abbr]">  
-                            </span>                        
-
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-
-        </div>
-        <!-- /.panel-paperlist -->
-
-        <div id="pan_ocpapers_working_paper"
-            class="d-flex flex-row"
-            v-if="show_working_paper_pan">
-
-        {% include 'extractor/__pan_ocpapers_working_paper_collector.html' %}
-        </div>
-        <!-- /#pan_ocpapers_working_paper -->
-
     </div>
 
     <div v-else>

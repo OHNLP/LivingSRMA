@@ -1,12 +1,12 @@
 {% extends '_layout_adminlte.html' %}
 
 {% block title %}
-Analyzer
+Data Analyzer
 {% endblock %}
 
 {% block page_name %}
 <i class="fas fa-project-diagram"></i>
-Analyzer 
+Data Analyzer 
 {% endblock %}
 
 {% block active_nav_link %}analyzer{% endblock %}
@@ -17,6 +17,7 @@ Analyzer
 {% include 'css/basic.css' %}
 {% include 'css/extractor.css' %}
 {% include 'css/util.css' %}
+{% include 'css/analyzer.css' %}
 
 html {
     overflow-x: hidden;
@@ -88,10 +89,6 @@ var pan_ocpapers = {
         thr1s: [],
         thr2s: [],
 
-        // working pmid when clicking on paper
-        show_working_paper_pan: false,
-        show_working_paper_collector: false,
-
         // working oc
         working_oc: null,
 
@@ -136,9 +133,6 @@ var pan_ocpapers = {
         }
     },
 
-    // the working abbr
-    extract_abbr: null,
-
     // all extracts, a list and a dictionary
     extracts: [],
     extract_dict: {},
@@ -166,17 +160,11 @@ var pan_ocpapers = {
             updated: function() {
                 pan_ocpapers.resize();
 
-                // update the autocomplete
-                pan_ocpapers.update_autocomplete();
             },
             methods: this.vpp_methods
         });
     
         
-    },
-
-    set_mode: function(mode) {
-        this.vpp.$data.mode = mode;
     },
 
     load_all_outcomes: function() {
@@ -224,9 +212,6 @@ var pan_ocpapers = {
     update: function(data) {
         console.log('* update analyze data', data);
 
-        alert('Under development ...');
-
-        return;
         // the data is a combo of extract and papers
         this.vpp.working_oc = data.extract;
         this.vpp.papers = data.papers;
@@ -486,7 +471,7 @@ var pan_ocpapers = {
 };
 
 
-{% include 'js/pan_ocpapers_ext_wpc.js' %}
+{% include 'js/pan_ocpapers_ext_azcfg.js' %}
 
 
 var jarvis = {
