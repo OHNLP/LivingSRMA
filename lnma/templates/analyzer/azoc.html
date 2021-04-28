@@ -84,6 +84,7 @@ var pan_ocpapers = {
         // flags
         only_show_selected: false,
         show_col_nct: false,
+        is_btn_analyze_disabled: false,
 
         // for display:
         thr1s: [],
@@ -130,6 +131,10 @@ var pan_ocpapers = {
             // let val = event.srcElement.checked;                    
             // this.only_show_selected = val;
             this.$forceUpdate();
+        },
+
+        on_click_analyze: function() {
+            this.is_btn_analyze_disabled = true;
         }
     },
 
