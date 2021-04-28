@@ -50,7 +50,10 @@
 
             <div class="d-flex flex-column">
                 <div>
-                    <b>{{ n_selected }}</b> selected papers
+                    <a href="javascript:void(0);"
+                        v-on:click="on_click_show_papers">
+                        <b>{{ n_selected }}</b> selected papers
+                    </a>
                 </div>
                 <div>
                     {{ working_oc.meta.oc_type }}
