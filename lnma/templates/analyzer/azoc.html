@@ -52,7 +52,6 @@ html {
 
 </ul>
 
-
 </div>
 <!-- /#main -->
 
@@ -65,13 +64,19 @@ html {
 <script>
 
 
-{% include 'js/srv_analyzer.js' %}
+///////////////////////////////////////////////////////////
+// bind the project information to srv_extractor.js
+///////////////////////////////////////////////////////////
+{% include "js/srv_extractor.js" %}
+srv_extractor.project = [[ project_json_str|safe ]];
+
 
 ///////////////////////////////////////////////////////////
 // bind the project information to srv_analyzer.js
 ///////////////////////////////////////////////////////////
-
+{% include 'js/srv_analyzer.js' %}
 srv_analyzer.project = [[ project_json_str|safe ]];
+
 
 ///////////////////////////////////////////////////////////
 // pan_ocpapers for checking the paper data for this outcome
@@ -95,12 +100,46 @@ var pan_ocpapers = {
 
         // data
         all_attrs: null,
-        papers: []
+        papers: [],
+        paper_dict: {}
     },
 
     vpp_methods: {
         toggle_only_show_selected: function() {
             this.only_show_selected = !this.only_show_selected;
+        },
+
+        isna: function(v) {
+            if (v == null) {
+                return true;
+            } else if (isNaN(v)) {
+                return true;
+            } else if (v == '') {
+                return true;
+            } else if ((''+v).toLocaleUpperCase() == 'NA') {
+                return true;
+            } else if (v == '-') {
+                return true;
+            } else {
+                return false;
+            }
+        },
+
+        get_int: function(v) {
+            try {
+                var intv = parseInt(v);
+                return intv;
+            } catch {
+                return null;
+            }
+        },
+
+        get_paper_by_pid: function(pid) {
+            if (this.paper_dict.hasOwnProperty(pid)) { 
+                return this.paper_dict[pid];
+            } else {
+                return null;
+            }
         },
 
         // get year
@@ -133,12 +172,26 @@ var pan_ocpapers = {
             this.$forceUpdate();
         },
 
+        /**
+         * Analyze
+         * 
+         */
         on_click_analyze: function() {
+            // disable the UI
             this.is_btn_analyze_disabled = true;
+
+            // get confifgs and data rs
+
+            // send requests
+
         },
 
         on_click_show_papers: function() {
             alert('Under development');
+        },
+
+        on_click_extract: function(abbr) {
+            srv_extractor.goto_extract_data(abbr);
         }
     },
 
@@ -225,11 +278,21 @@ var pan_ocpapers = {
         this.vpp.working_oc = data.extract;
         this.vpp.papers = data.papers;
 
+        // update paper dict
+        this.update_paper_dict();
+
         // shortcut
         this.update_all_and_show_attrs_for_outcome();
 
         // update
         this.vpp.$forceUpdate();
+    },
+
+    update_paper_dict: function() {
+        for (let i = 0; i < this.vpp.papers.length; i++) {
+            var paper = this.vpp.papers[i];
+            this.vpp.paper_dict[paper.pid] = paper;
+        }
     },
 
     update_all_and_show_attrs_for_outcome: function() {
@@ -471,11 +534,6 @@ var pan_ocpapers = {
             .css('width', w)
             .css('height', h);
 
-        var h_attrs = $('#pan_ocpapers_attrs').height();
-        $('#pan_ocpapers_paperlist').css('height', h - h_attrs - 40);
-
-        // resize the working paper panel
-        $('#pan_ocpapers_working_paper_collector_attr_list').css('max-height', h - 150);
     }
 };
 
@@ -484,6 +542,8 @@ var pan_ocpapers = {
 
 
 var jarvis = {
+
+    INPUT_FORMAT_NAMES: [[ config['settings']['INPUT_FORMAT_NAMES'] | tojson_pretty | safe ]],
 
     getUrlParameter: function(name) {
         name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
@@ -575,6 +635,7 @@ var jarvis = {
 
     bind_resize_event: function() {
         $(window).on('resize', function(){
+            pan_ocpapers.resize();
         });
     }
 };

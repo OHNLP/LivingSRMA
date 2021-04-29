@@ -11,6 +11,7 @@
                     <a href="javascript:void(0);" onclick="pan_ocpapers.show_ocs_menu();">
                         <b>
                             [
+                                {{ working_oc.meta.oc_type }} | 
                                 {{ working_oc.meta.group }} | 
                                 {{ working_oc.meta.full_name }}
                             ]
@@ -35,6 +36,14 @@
                     </button>
                 </div>
 
+                <div class="btn-group mr-2">
+                    <button type="button" class="btn btn-default btn-sm"
+                        v-on:click="on_click_extract(working_oc.abbr)">
+                        <i class="fa fa-edit"></i>
+                        Extract Data
+                    </button>
+                </div>
+
             </div>
         </div>
         <!-- /#pan_ocpapers_toolbar -->
@@ -44,7 +53,7 @@
             <div class="d-flex flex-row">
                 <div>
                     <i class="fa fa-credit-card"></i>
-                    Outcome Summary
+                    Outcome Data Summary
                 </div>
             </div>
 
@@ -56,10 +65,36 @@
                     </a>
                 </div>
                 <div>
-                    {{ working_oc.meta.oc_type }}
-                </div>
-                <div>
                     {{ working_oc.meta.input_format }}
+                </div>
+                <div v-if="working_oc.meta.input_format == 'PRIM_CAT_RAW_G5'">
+                    <table class="table">
+                        <tr>
+                            <th>&nbsp;</th>
+                            <th>GRADE</th>
+                            <th>Available</th>
+                        </tr>
+                        <tr>
+                            <th><input id="cfg_ae_grade_ga" type="radio" value="ga" v-model="cfgs.ae_grade.selected"></th>
+                            <th><label for="cfg_ae_grade_ga">All Grade</label></th>
+                            <td>{{ get_rs('ga').length }}</td>
+                        </tr>
+                        <tr>
+                            <th><input id="cfg_ae_grade_g34" type="radio" value="g34" v-model="cfgs.ae_grade.selected"></th>
+                            <th><label for="cfg_ae_grade_g34">Grade 3/4</label></th>
+                            <td>{{ get_rs('g34').length }}</td>
+                        </tr>
+                        <tr>
+                            <th><input id="cfg_ae_grade_g3h" type="radio" value="g3h" v-model="cfgs.ae_grade.selected"></th>
+                            <th><label for="cfg_ae_grade_g3h">Grade 3+</label></th>
+                            <td>{{ get_rs('g3h').length }}</td>
+                        </tr>
+                        <tr>
+                            <th><input id="cfg_ae_grade_g5n" type="radio" value="g5n" v-model="cfgs.ae_grade.selected"></th>
+                            <th><label for="cfg_ae_grade_g5n">Grade 5 only</label></th>
+                            <td>{{ get_rs('g5n').length }}</td>
+                        </tr>
+                    </table>
                 </div>
             </div>
 

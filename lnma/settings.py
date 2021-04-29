@@ -47,6 +47,15 @@ STANDARD_DATA_COLS = {
                         'drug_used', 'malignancy']
 }
 
+INPUT_FORMAT_NAMES = {
+    "PRIM_CAT_PRE": "Categorical Precalculated Data",
+    "PRIM_CAT_RAW": "Categorical Raw Data",
+    "PRIM_CATIRR_RAW": "Categorical Raw (Incidence Rate Ratios) Data",
+    "PRIM_CONTD_PRE": "Continuous Precalculated Data",
+    "PRIM_CONTD_RAW": "Continuous Raw Data",
+    "PRIM_CAT_RAW_G5": "Categorical Raw Data of Adv Grades (for IO project use only)",
+}
+
 SOFTABLE_NMA_COLS = {
     'raw': ['A:D', ['study', 'treat', 'event', 'total' ]],
     'pre': ['A:L', ['t1', 't2', 'sm', 'lowerci', 'upperci', 

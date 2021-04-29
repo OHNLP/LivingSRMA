@@ -1,4 +1,5 @@
 import os
+import json
 
 from flask import Flask
 from flask_login import LoginManager
@@ -31,6 +32,13 @@ def create_app(test_config=None):
 
     if test_config is not None:
         app.config.update(test_config)
+
+    # a helper function for jinja2 to display json
+    def tojson_pretty(value):
+        return json.dumps(value, sort_keys=True,
+            indent=4, separators=(',', ': '))
+
+    app.jinja_env.filters['tojson_pretty'] = tojson_pretty
 
     # ensure the instance folder exists
     try:

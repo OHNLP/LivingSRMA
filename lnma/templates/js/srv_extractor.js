@@ -30,6 +30,10 @@ var srv_extractor = {
         extract_data: "[[ url_for('extractor.extract_data') ]]"
     },
 
+    goto_extract_data: function(abbr) {
+        location.href = this.url.extract_data + '?abbr=' + abbr;
+    },
+
     update_extract: function(
         project_id,
         oc_type,

@@ -44,6 +44,21 @@ Object.assign(pan_ocpapers.vpp_data, {
                 {text: 'Subg | Categorical + Raw (Incidence Rate Ratios)', value: 'SUBG_CATIRR_RAW'},
                 {text: 'Subg | Continuous + Precalculated', value: 'SUBG_CONTD_PRE'},
                 {text: 'Subg | Continuous + Raw', value: 'SUBG_CONTD_RAW'},
+
+                {text: 'ADEV | Categorical + Raw for Adverse Event', value: 'PRIM_CAT_RAW_G5'},
+            ]
+        },
+
+        // for AE analysis only
+        ae_grade: {
+            selected: 'ga',
+            is_used: true,
+            is_disabled: false,
+            options: [
+                {text: 'All Grade', value: 'ga'},
+                {text: 'Grade 3/4', value: 'g34'},
+                {text: 'Grade 3 or Higher', value: 'g3h'},
+                {text: 'Grade 5 Only', value: 'g5n'},
             ]
         },
 
@@ -75,7 +90,9 @@ Object.assign(pan_ocpapers.vpp_data, {
             disabled: false,
             options: [
                 {text: 'Primary Analysis', value: 'PRIM'},
-                {text: 'Subgroup Analysis', value: 'SUBG'}
+                {text: 'Subgroup Analysis', value: 'SUBG'},
+                {text: 'Incidence Analysis', value: 'INCD'},
+                {text: 'Adverse Event Analysis', value: 'ADEV'}
             ]
         },
 
@@ -292,6 +309,108 @@ Object.assign(pan_ocpapers.vpp_methods, {
         return true;
     },
 
+    /**
+     * Get the records for MA
+     * 
+     * For most of time, it only depends on the `extract.data`.
+     * But for IO project or AE input format, it is different.
+     * 
+     * We need to get the correct records and apply user selection
+     * to make sure the rs could be customized.
+     */
+    get_rs: function(grade) {
+        // try to build this rs
+        var rs = [];
+
+        // first of all, we need to support the IO project analysis
+        if (this.working_oc.oc_type == 'pwma' &&
+            this.working_oc.meta.input_format == 'PRIM_CAT_RAW_G5') {
+
+            if (typeof(grade) == 'undefined') {
+                // use the current selected grade
+                grade = this.cfgs.ae_grade.selected.toLocaleUpperCase();
+            } else {
+                grade = grade.toLocaleUpperCase();
+            }
+
+            // then depends on which grade is selected
+            for (const pid in this.working_oc.data) {
+                if (!Object.hasOwnProperty.call(this.working_oc.data, pid)) {
+                    continue;   
+                }
+
+                // get this paper by a parent method
+                var paper = this.get_paper_by_pid(pid);
+                if (paper == null) {
+                    // which means this study is not included is SR???
+                    paper = {
+                        authors: pid,
+                        year: ''
+                    }
+                }
+
+                // get some infomation
+                // create a record for analyze
+                var study = this.get_first_author(paper.authors) + ' ' +
+                            this.get_year(paper.pub_date);
+                var year = this.get_year(paper.pub_date);
+
+                // get this data
+                var d = this.working_oc.data[pid];
+
+                // get data from all arms
+                for (let i = 0; i < d.n_arms - 1; i++) {
+                    // when i == 0, the main
+                    // when i > 0, then other i-1
+                    var ext = null;
+                    if (i==0) {
+                        ext = d.attrs.main;
+                    } else {
+                        ext = d.attrs.other[i-1];
+                        study = study + ' Arm ' + (i + 1);
+                    }
+
+                    // now get data
+                    var Nt = this.get_int(d.attrs.main.GA_Nt);
+                    var Nc = this.get_int(d.attrs.main.GA_Nc);
+                    var Et = this.get_int(d.attrs.main[grade + '_Et']);
+                    var Ec = this.get_int(d.attrs.main[grade + '_Ec']);
+
+                    // Now need to check the value
+                    if (this.isna(Nt) || 
+                        this.isna(Nc) || 
+                        this.isna(Et) ||
+                        this.isna(Ec)) {
+                        
+                        console.log('* skip NULL ' + " " + pid + " " + study);
+                        continue;
+                    }
+
+                    if (Et == 0 && Ec == 0) {
+                        console.log('* skip 0t0c ' + " " + pid + " " + study);
+                        continue;
+                    }
+                    var r = {
+                        // the must attributes
+                        study: study,
+                        year: year,
+                        Et: Et,
+                        Nt: Nt,
+                        Ec: Ec,
+                        Nc: Nc,
+
+                        // other infomation
+                        grade: grade,
+                        pid: pid
+                    }
+
+                    rs.push(r);
+                }
+            }
+            return rs;
+        }
+    },
+
     analyze: function() {
         this.btn_analyze.is_disabled = false;
         jarvis.analyze();
@@ -301,4 +420,5 @@ Object.assign(pan_ocpapers.vpp_methods, {
 
 // Extend the pan_ocpapers methods
 Object.assign(pan_ocpapers, {
+
 });
