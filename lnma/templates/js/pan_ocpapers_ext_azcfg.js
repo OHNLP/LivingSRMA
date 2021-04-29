@@ -382,7 +382,7 @@ Object.assign(pan_ocpapers.vpp_methods, {
                         this.isna(Et) ||
                         this.isna(Ec)) {
                         
-                        console.log('* skip NULL ' + " " + pid + " " + study);
+                        // console.log('* skip NULL ' + " " + pid + " " + study);
                         continue;
                     }
 
@@ -409,6 +409,23 @@ Object.assign(pan_ocpapers.vpp_methods, {
             }
             return rs;
         }
+    },
+
+    get_cfg: function() {
+        var cfg = srv_analyzer.get_blank_cfg();
+
+        // copy each one
+        for (const cfg_name in cfg) {
+            if (!Object.hasOwnProperty.call(this.cfgs, cfg_name)) {
+                continue;    
+            }
+            var c = this.cfgs[cfg_name];
+
+            // put the config
+            cfg[cfg_name] = c.selected;
+        }
+
+        return cfg;
     },
 
     analyze: function() {

@@ -3,6 +3,7 @@ var srv_analyzer = {
     // all urls for analyzer
     url: {
         azoc: "[[ url_for('analyzer.azoc') ]]",
+        analyze: "[[ url_for('analyzer.analyze') ]]",
 
         get_paper: "[[ url_for('analyzer.get_paper') ]]",
         get_extract: "[[ url_for('analyzer.get_extract') ]]",
