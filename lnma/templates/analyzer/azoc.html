@@ -30,9 +30,13 @@ html {
     width: 100%;
     height: 100%;
     margin: 0 0 0 10px;
-    overflow: hidden;
+    overflow-y: auto;
 }
 
+#pan_ocpapers {
+    width: 240px;
+    max-width: 280px;
+}
 </style>
 
 <!-- jQuery UI Theme -->
@@ -52,6 +56,10 @@ html {
 
 </ul>
 
+
+{% include 'analyzer/_azoc_pan_maresults_pwma.html' %}
+
+
 </div>
 <!-- /#main -->
 
@@ -61,7 +69,31 @@ html {
 
 {% block script %}
 
+<!-- D3.js -->
+<script src="/static/lib/d3/d3.min.js"></script>
+<script src="/static/lib/d3/d3-tip.min.js"></script>
+
 <script>
+
+
+///////////////////////////////////////////////////////////
+// The plots for PWMA
+///////////////////////////////////////////////////////////
+{% include 'js/fg_prim_forest.js' %}
+{% include 'js/fg_incd_forest.js' %}
+{% include 'js/fgmk_cumu_forest.js' %}
+
+// Alias for the pwma plots
+var fg_pwma_prim_forest = fg_prim_forest;
+var fg_pwma_cumu_forest = fgmk_cumu_forest.make_fig(
+    'fg_pwma_cumu_forest'
+);
+
+// alias for the incidence plots
+var fg_incd_incd_forest = fg_incd_forest;
+var fg_incd_cumu_forest = fgmk_cumu_forest.make_fig(
+    'fg_incd_cumu_forest'
+);
 
 
 ///////////////////////////////////////////////////////////
@@ -134,6 +166,15 @@ var pan_ocpapers = {
             }
         },
 
+        get_str: function(v) {
+            try {
+                var strv = ""+v;
+                return strv;
+            } catch {
+                return '';
+            }
+        },
+
         get_paper_by_pid: function(pid) {
             if (this.paper_dict.hasOwnProperty(pid)) { 
                 return this.paper_dict[pid];
@@ -180,20 +221,58 @@ var pan_ocpapers = {
             // disable the UI
             this.is_btn_analyze_disabled = true;
 
-            // get confifgs and data rs
+            // get current confifgs and data rs
             var rs = this.get_rs();
             var cfg = this.get_cfg();
 
             // update the config here?
+            if (cfg.input_format == "PRIM_CAT_RAW_G5") {
+                // which means it's for IO or AE analysis
+                // for the selected grade, it's just the normal PRIM CAT RAW
+                cfg.input_format = 'PRIM_CAT_RAW';
 
-            // send requests
-            srv_analyzer.analyze(
-                cfg,
-                rs, 
-                function(data) {
-                    console.log(data);
+                // add the last config
+                cfg['_analyze_type'] = 'pwma';
+
+                // send requests
+                srv_analyzer.analyze(
+                    cfg,
+                    rs, 
+                    function(data) {
+                        pan_ocpapers.vpp.is_btn_analyze_disabled = false;
+                        console.log("* PWMA result:", data);
+                    }
+                )
+            }
+
+            // which means we will do incidence analysis
+            // it will be a seperate request
+            if (cfg.incidence_analysis == 'yes') {
+                // modify the input as INCD_CAT_RAW for incidence analysis
+                cfg.input_format = 'INCD_CAT_RAW';
+
+                // we only use PLOTIT
+                cfg.measure_of_effect = cfg.incd_sm;
+
+                // add the last config
+                cfg['_analyze_type'] = 'incd';
+
+                // copy E and N from Et and Nt
+                for (let i = 0; i < rs.length; i++) {
+                    rs[i]['E'] = rs[i]['Et'];
+                    rs[i]['N'] = rs[i]['Nt'];
+                    rs[i]['treat'] = rs[i]['treatment']
                 }
-            )
+
+                srv_analyzer.analyze(
+                    cfg,
+                    rs,
+                    function(data) {
+                        pan_ocpapers.vpp.is_btn_analyze_disabled = false;
+                        console.log("* INCD result:", data);
+                    }
+                );
+            }
         },
 
         on_click_show_papers: function() {
@@ -554,6 +633,12 @@ var pan_ocpapers = {
 {% include 'js/pan_ocpapers_ext_azcfg.js' %}
 
 
+///////////////////////////////////////////////////////////
+// pan_maresults for the plots and others
+///////////////////////////////////////////////////////////
+{% include 'js/pan_maresults.js' %}
+
+
 var jarvis = {
 
     INPUT_FORMAT_NAMES: [[ config['settings']['INPUT_FORMAT_NAMES'] | tojson_pretty | safe ]],
@@ -595,6 +680,9 @@ var jarvis = {
 
         // bind resize event
         this.bind_resize_event();
+
+        // make some alias
+        
 
         // remove the context menu for 
         document.addEventListener('click', function(event) {

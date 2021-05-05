@@ -12,41 +12,43 @@
                         <b>
                             [
                                 {{ working_oc.meta.oc_type }} | 
-                                {{ working_oc.meta.group }} | 
-                                {{ working_oc.meta.full_name }}
-                            ]
+                                {{ working_oc.meta.group }}
+                            ]<br>
+                            {{ working_oc.meta.full_name }}
                         </b>
                     </a>
                 </span>
 
-                <div class="btn-group mr-2">
-                    <button type="button" class="btn btn-default btn-sm"
-                        v-bind:disabled="is_btn_analyze_disabled"
-                        v-on:click="on_click_analyze">
-                        <span v-if="is_btn_analyze_disabled">
-                            <div class="spinner-border spinner-border-sm" role="status">
-                                <span class="sr-only">Analyzing...</span>
-                            </div>
-                            Analyzing ...
-                        </span>
-                        <span v-else>
-                            <i class="fa fa-hat-wizard"></i>
-                            Analyze
-                        </span>
-                    </button>
-                </div>
-
-                <div class="btn-group mr-2">
-                    <button type="button" class="btn btn-default btn-sm"
-                        v-on:click="on_click_extract(working_oc.abbr)">
-                        <i class="fa fa-edit"></i>
-                        Extract Data
-                    </button>
-                </div>
-
             </div>
         </div>
         <!-- /#pan_ocpapers_toolbar -->
+
+        <div class="panel-info mt-2">
+            <div class="btn-group mr-2">
+                <button type="button" class="btn btn-default btn-sm"
+                    v-bind:disabled="is_btn_analyze_disabled"
+                    v-on:click="on_click_analyze">
+                    <span v-if="is_btn_analyze_disabled">
+                        <div class="spinner-border spinner-border-sm" role="status">
+                            <span class="sr-only">Analyzing...</span>
+                        </div>
+                        Analyzing ...
+                    </span>
+                    <span v-else>
+                        <i class="fa fa-hat-wizard"></i>
+                        Analyze
+                    </span>
+                </button>
+            </div>
+
+            <div class="btn-group mr-2">
+                <button type="button" class="btn btn-default btn-sm"
+                    v-on:click="on_click_extract(working_oc.abbr)">
+                    <i class="fa fa-edit"></i>
+                    Extract Data
+                </button>
+            </div>
+        </div>
 
         <div id="pan_ocpapers_dsinfo"
             class="option-panel">
@@ -225,6 +227,27 @@
                 </div><!-- /.option-item -->
 
                 <div class="option-item"
+                    v-if="show_cfg('incidence_analysis')">
+                    <div class="option-item-label">
+                        <label>Incidence Analysis:</label>
+                    </div>
+                    <div class="option-item-value" style="padding-top: 3px;">
+                        <input type="radio" id="cfgs_incidence_analysis_1" value="yes" 
+                            v-model="cfgs.incidence_analysis.selected">
+                        <label style="padding: 0 5px;" for="cfgs_incidence_analysis_1">
+                            Yes
+                        </label>&nbsp;&nbsp;&nbsp;&nbsp;
+                        <input type="radio" id="cfgs_incidence_analysis_2" value="no" 
+                            v-model="cfgs.incidence_analysis.selected">
+                        <label style="padding: 0 5px;" for="cfgs_incidence_analysis_2">
+                            No
+                        </label>
+                    </div>
+                    
+                </div>
+                <!-- /.option-item -->
+
+                <!-- <div class="option-item"
                     v-if="show_cfg('sensitivity_analysis')">
                     <div class="option-item-label">
                         <label>Sensitivity Analysis:</label>
@@ -242,7 +265,8 @@
                         </label>
                     </div>
                     
-                </div><!-- /.option-item -->
+                </div> -->
+                <!-- /.option-item -->
 
                 <div class="option-item"
                     v-if="show_cfg('cumulative_meta_analysis')">

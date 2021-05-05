@@ -86,6 +86,7 @@ html {
 
 <script>
 
+{% include 'js/srv_analyzer.js' %}
 {% include "js/srv_extractor.js" %}
 
 {% include "js/srv_pdfworker.js" %}
@@ -166,6 +167,11 @@ var pan_ocpapers = {
         // save all!
         update_extract: function() {
             pan_ocpapers.update_extract();
+        },
+
+        goto_analysis: function() {
+            location.href = srv_analyzer.url.azoc + 
+                '?abbr=' + this.working_oc.abbr;
         },
         
         get_input_size: function(str) {

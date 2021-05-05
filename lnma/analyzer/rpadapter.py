@@ -800,13 +800,21 @@ def _meta_trans_metabin(j, params):
     return ret
     
 
-def _meta_trans_metacum(j, params, ):
+def _meta_trans_metacum(j, params):
     '''
     Convert the metacum result for forest plot
 
     '''
     data = j['cumuma']
-    data_prim = j['primma']
+
+    # this function could be used by both prim and incidence analysis
+    if 'primma' in j:
+        data_prim = j['primma']
+    elif 'incdma' in j:
+        data_prim = j['incdma']
+    else:
+        data_prim = j['primma']
+
     sm = params['measure_of_effect']
     ab = params['assumed_baseline']
 
@@ -911,7 +919,11 @@ def _meta_trans_metaprop(j, params):
     '''
     Convert the metaprop result of PWMA Incidence Analysis
     '''
-    data = j['primma']
+    if 'incdma' in j:
+        # by default, should use incdma
+        data = j['incdma']
+    else:
+        data = j['primma']
 
     # 2021-04-09: the meta package doesn't give the 
     # when getting the result, need to make sure the value is transback to normaled

@@ -32,8 +32,8 @@ def analyze(rs, cfg):
         # for R script
         'is_fixed': 'TRUE' if cfg['fixed_or_random'] == 'fixed' else 'FALSE',
         'is_random': 'TRUE' if cfg['fixed_or_random'] == 'random' else 'FALSE',
-        'is_hakn': cfg['hakn_adjustment'],
-        'is_prediction': cfg['prediction_interval'],
+        'is_hakn': 'TRUE' if cfg['hakn_adjustment'] == 'yes' else 'FALSE',
+        'is_prediction': 'TRUE' if cfg['prediction_interval'] == 'yes' else 'FALSE',
         'smlab_text':  DIS_TEXT['MOE'][cfg['measure_of_effect']],
 
         # for output
@@ -115,9 +115,5 @@ def analyze(rs, cfg):
             'primma': _meta_trans_metabin(jrst, params)
         }
     }
-
-    # add cumulative MA results if applied
-    if params['cumulative_meta_analysis'] == 'yes':
-        ret['data']['cumuma'] = _meta_trans_metacum(jrst, params)
 
     return ret

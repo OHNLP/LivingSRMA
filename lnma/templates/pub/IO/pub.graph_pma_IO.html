@@ -252,8 +252,8 @@ a {
                         <div class="oc-name" style="font-weight: bold;">
                             <select v-model="group"
                                 v-on:change="update_oclist()">
-                                <option value="primary">Treatment Analysis</option>
-                                <option value="sensitivity">Other Analysis</option>
+                                <option value="primary">Treatment Related AEs</option>
+                                <option value="sensitivity">Immune Related AEs</option>
                             </select>
                         </div>
                         <div style="font-weight: bold; width: 90px; text-align: center; border-bottom: 1px solid #555555;">
@@ -878,6 +878,7 @@ var vw_oclist = {
             },
             methods: {
                 toggle_oc: function(event) {
+                    var group = this.group;
                     var oc_cate = event.target.getAttribute('oc_cate');
                     var oc_name = event.target.getAttribute('oc_name');
                     var ae_grade = event.target.getAttribute('ae_grade');
@@ -892,7 +893,7 @@ var vw_oclist = {
 
                     // call the worker to update everything related
                     // jarvis will do this task accordingly
-                    jarvis.toggle_oc(oc_cate, oc_name, ae_grade, vw_oclist.pids);
+                    jarvis.toggle_oc(group, oc_cate, oc_name, ae_grade, vw_oclist.pids);
                 },
 
                 get_grade_label: function(g) {
@@ -1047,6 +1048,7 @@ var vw_ocplot = {
                 },
 
                 current: {
+                    oc_group: 'primary',
                     oc_cate: '',
                     oc_name: '',
                     ae_grade: '',
@@ -1121,7 +1123,7 @@ var vw_ocplot = {
         }
     },
 
-    show_plot: function(oc_cate, oc_name, ae_grade, pids) {
+    show_plot: function(oc_group, oc_cate, oc_name, ae_grade, pids) {
         if (typeof(pids) == 'undefined') {
             // which means no pids update, just use current
         } else {
@@ -1133,6 +1135,7 @@ var vw_ocplot = {
         this.vpp.current.has_img = false;
 
         // update the data in vpp
+        this.vpp.current.oc_group = oc_group;
         this.vpp.current.oc_cate = oc_cate;
         this.vpp.current.oc_name = oc_name;
         this.vpp.current.ae_grade = ae_grade;
@@ -1336,9 +1339,9 @@ var jarvis = {
         return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
     },
 
-    toggle_oc: function(oc_cate, oc_name, ae_grade, pids) {
-        console.log('* toggle_oc ' + oc_cate + ', ' + oc_name + ', ' + ae_grade, pids);
-        vw_ocplot.show_plot(oc_cate, oc_name, ae_grade, pids);
+    toggle_oc: function(group, oc_cate, oc_name, ae_grade, pids) {
+        console.log('* toggle_oc ' + group + ' | ' + oc_cate + ', ' + oc_name + ', ' + ae_grade, pids);
+        vw_ocplot.show_plot(group, oc_cate, oc_name, ae_grade, pids);
     },
 
     clear_all_ae: function() {

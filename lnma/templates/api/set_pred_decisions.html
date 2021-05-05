@@ -1,0 +1,132 @@
+{% extends '_layout_bs.html' %}
+
+{% block title %}
+Set Prediction Decisions API Demo
+{% endblock %}
+
+{% block style %}
+<style>
+.code {
+    font-family: 'Courier New', Courier, monospace;
+    background-color: #eeeeee;
+    font-size: 13px;
+}
+</style>
+{% endblock %}
+
+{% block main %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-5">
+            <h2>Set Prediction Decisions API Demo</h2>
+            <p>
+                API Test for <span class="code">/api/set_pred_decisions</span>. <br>
+                The return URL is the relative path to root, please add to absolute path in your own code. The server supports cross-domain access and HTTP header "Access-Control-Allow-Origin" has been added, so this service can be accessed from any server.
+                The usage of this web API in JavaScript is also available in the source code of this page for reference. <br>
+                There are 4 parameters:
+            </p>
+            <div>
+                <div class="form-group row">
+                    <label for="ks" class="col-sm-3 col-form-label">cf
+                    </label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" id="ks" value="CAT">
+                        <small id="ksHelp" class="form-text text-muted">
+                            The project token
+                        </small>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label for="mi" class="col-sm-3 col-form-label">mi
+                    </label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" id="mi" value="MIHIR">
+                        <small id="miHelp" class="form-text text-muted">
+                            The model identifier for this submission. This will be used for the display purpose in the website.
+                        </small>
+                    </div>
+                </div>
+                
+                <div class="form-group row">
+                    <label for="rs" class="col-sm-3 col-form-label">rs</label>
+                    <div class="col-sm-9">
+                        <textarea class="form-control code" id="rs" rows="20" style="font-size: 9px;"></textarea>
+                        <small id="rsHelp" class="form-text text-muted">The JSON data for the prediction results.</small>
+                    </div>
+                </div>
+
+
+                <div class="form-group row">
+                    <label for="apikey" class="col-sm-3 col-form-label">apikey
+                    </label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" id="apikey" value="7323590e-577b-4f46-b19f-3ec402829bd6">
+                        <small id="apikeyHelp" class="form-text text-muted">
+                            For the security of this service, API Key is required for authentication.
+                        </small>
+                    </div>
+                </div>
+                
+                <div class="form-group row">
+                    <div class="col-sm-10">
+                        <button onclick="get_data();" class="btn btn-primary">
+                            Send request with above parameters
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-md-7" style="padding-top: 20px;">
+            
+            <h4>Server Response: </h4>
+            <pre id="resp" style="width: 100%; max-height: 500px;" class="code">
+            </pre>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+<script>
+
+var pred_sample = [{
+    pid: '2005129117', pred: 'e'
+}, {
+    pid: '2003445890', pred: 'e'
+}, {
+    pid: '631410403', pred: 'e'
+}, {
+    pid: '2004525227', pred: 'i'
+}];
+
+function get_data() {
+    var params = {
+        ks: $('#ks').val(),
+        mi: $('#mi').val(),
+        rs: $('#rs').val(),
+        apikey: $('#apikey').val()
+    };
+    console.log(params);
+
+    // clear the response area
+    $('#resp').html('Waiting for response ....');
+
+    var base = '';
+    $.post(
+        base + '/api/set_pred_decisions',
+        params,
+        function(data) {
+            console.log('* get return', data);
+            $('#resp').html(JSON.stringify(data, null, 2));
+        }, 'json'
+    )
+}
+$('#rs').val(JSON.stringify(pred_sample, null, 2));
+
+</script>
+{% endblock %}

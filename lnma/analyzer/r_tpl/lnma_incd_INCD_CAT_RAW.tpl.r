@@ -68,12 +68,9 @@ results_raw <- metaprop(E,
                        method = "{{ pooling_method }}", 
                        method.tau = "{{ tau_estimation_method }}", 
                        hakn = {{ hakn_adjustment }},
-                    #    backtransf = FALSE,
                        adhoc.hakn = "{{ adhoc_hakn }}")
 
-print("* R | finished metaprop")
-
-{% if is_create_figure == 'YES' %}
+{% if is_create_figure == 'yes' %}
 
 # output the primary ma result in forest plot
 fig_width <- 10
@@ -113,11 +110,9 @@ dev.off()
 # x will be an object of class meta
 # sortvar can be indicated by an object of class meta or by an object of original data set
 results_cum <- metacum(results_raw, 
-                       sortvar = PRI_SINARM_PROP${{ sort_by }})
+                       sortvar = PRI_SINARM_PROP${{ cumulative_meta_analysis_sortby }})
 
-print("* R | finished metacum")
-
-{% if is_create_figure == 'YES' %}
+{% if is_create_figure == 'yes' %}
 
 # output the cumulative ma result in forest plot
 fig_width <- 10
@@ -153,7 +148,6 @@ forest.meta(results_cum,
 # The cumulative_ma contains all the data to produce the cumu plot
 all_ret <- list(
     incdma = results_raw,
-    primma = results_raw,
     cumuma = results_cum,
     version = list(
         jsonlite = packageVersion('jsonlite'),

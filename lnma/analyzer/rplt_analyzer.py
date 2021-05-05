@@ -75,9 +75,9 @@ def analyze(rs, cfg):
     run_rscript(params['fn_rscript'])
 
     # if use FORESTDATA model, need to convert the results
+    full_filename_jsonret = os.path.join(TMP_FOLDER, params['fn_jsonret'])
+    jrst = json.load(open(full_filename_jsonret))
     if cfg['analyzer_model'] == 'PWMA_PRCM':
-        full_filename_jsonret = os.path.join(TMP_FOLDER, params['fn_jsonret'])
-        jrst = json.load(open(full_filename_jsonret))
         ret = {
             'submission_id': params['submission_id'],
             'params': params,
@@ -89,8 +89,6 @@ def analyze(rs, cfg):
         }
 
     elif cfg['analyzer_model'] == 'PWMA_PRIM':
-        full_filename_jsonret = os.path.join(TMP_FOLDER, params['fn_jsonret'])
-        jrst = json.load(open(full_filename_jsonret))
         ret = {
             'submission_id': params['submission_id'],
             'params': params,
@@ -101,8 +99,6 @@ def analyze(rs, cfg):
         }
 
     elif cfg['analyzer_model'] == 'PWMA_INCD':
-        full_filename_jsonret = os.path.join(TMP_FOLDER, params['fn_jsonret'])
-        jrst = json.load(open(full_filename_jsonret))
         ret = {
             'submission_id': params['submission_id'],
             'params': params,

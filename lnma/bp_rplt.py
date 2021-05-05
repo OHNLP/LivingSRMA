@@ -23,7 +23,8 @@ bp = Blueprint("rplt", __name__, url_prefix="/rplt")
 
 
 def apikey_required(f):
-    '''Check the APIKEY 
+    '''
+    Check the APIKEY 
     '''
     @wraps(f)
     def wrap(*args, **kwargs):

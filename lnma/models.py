@@ -352,6 +352,21 @@ class Paper(db.Model):
 
         return simple_dict
 
+    
+    def as_extreme_simple_dict(self):
+        '''
+        Return the very very simple data of this paper
+        '''
+        d = self.as_simple_dict()
+        del d['meta']
+        del d['paper_id']
+        del d['pid_type']
+        del d['project_id']
+        del d['is_deleted']
+        del d['date_updated']
+
+        return d
+
 
     def as_endnote_xml(self):
         '''

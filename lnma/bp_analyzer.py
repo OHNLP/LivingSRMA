@@ -21,6 +21,8 @@ from lnma import dora
 from lnma.analyzer import freq_analyzer
 from lnma.analyzer import bayes_analyzer
 from lnma.analyzer import pwma_analyzer
+from lnma.analyzer import incd_analyzer
+from lnma.analyzer import subg_analyzer
 from lnma import ss_state
 
 PATH_PUBDATA = 'pubdata'
@@ -244,6 +246,10 @@ def read_data_file():
     return jsonify(ret)
 
 
+###############################################################################
+# Analyzer general endpoint
+###############################################################################
+
 @bp.route('/analyze', methods=['GET', 'POST'])
 @login_required
 def analyze():
@@ -262,13 +268,22 @@ def analyze():
     rs = json.loads(request.form.get('rs'))
     cfg = json.loads(request.form.get('cfg'))
 
-    # analyze
+    # analyze type is a code for identify which analysis
+    # current we support
+    # - pwma
+    # - incd
+    # - nma
     _analyze_type = cfg['_analyze_type']
 
     if _analyze_type == 'pwma':
         ret = _pwma_analyze(rs, cfg)
+
     elif _analyze_type == 'nma':
         ret = _nma_analyze(rs, cfg)
+
+    elif _analyze_type == 'incd':
+        ret = _incd_analyze(rs, cfg)
+
     else:
         ret = {
 
@@ -411,7 +426,8 @@ def _read_file(full_fn):
 
 
 def _nma_analyze(rs, cfg):
-    '''Run the network meta-analyze the rs with cfg
+    '''
+    Run the network meta-analyze the rs with cfg
     '''
     # get the analysis type for make static json
     input_format = cfg['input_format']
@@ -439,8 +455,27 @@ def _nma_analyze(rs, cfg):
 
 
 def _pwma_analyze(rs, cfg):
-    '''Run the pairwise meta-analyze the rs with cfg
+    '''
+    Run the pairwise meta-analyze the rs with cfg
     '''
     ret = pwma_analyzer.analyze(rs, cfg)
+
+    return ret
+
+
+def _incd_analyze(rs, cfg):
+    '''
+    Run the incidence analysis on the rs with cfg
+    '''
+    ret = incd_analyzer.analyze(rs, cfg)
+
+    return ret
+
+
+def _subg_analyze(rs, cfg):
+    '''
+    Run the subgroup analysis on the rs with cfg
+    '''
+    ret = subg_analyzer.analyze(rs, cfg)
 
     return ret

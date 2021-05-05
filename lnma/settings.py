@@ -44,7 +44,10 @@ STANDARD_DATA_COLS = {
                         'G34_Et', 'G34_Ec', 
                         'G3H_Et', 'G3H_Ec', 
                         'G5N_Et', 'G5N_Ec', 
-                        'drug_used', 'malignancy']
+                        'drug_used', 'malignancy'],
+
+    # for INCD - Incidence analysis
+    'INCD_CAT_RAW': ['study', 'year', 'Et', 'Nt', 'treat']
 }
 
 INPUT_FORMAT_NAMES = {
@@ -233,6 +236,9 @@ RSCRIPT_TPL = {
     'pwma_SUBG_CATIRR_RAW': 'lnma_pwma_SUBG_CATIRR_RAW.tpl.r',
     'pwma_SUBG_CONTD_PRE': 'lnma_pwma_SUBG_CONTD_PRE.tpl.r',
     'pwma_SUBG_CONTD_RAW': 'lnma_pwma_SUBG_CONTD_RAW.tpl.r',
+
+    # for incidence analysis
+    'incd_INCD_CAT_RAW': 'lnma_incd_INCD_CAT_RAW.tpl.r',
 
     # for PWMA v2
     'pwma_v2_PRIM_CAT_PRE': 'lnma_pwma_v2_PRIM_CAT_PRE.tpl.r',

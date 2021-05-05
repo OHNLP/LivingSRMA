@@ -178,16 +178,33 @@ forest.meta(results.cum,
             smlab = "{{ smlab_text }} (95% CI)")
 
 dev.off()
-{% endif %}
 
 # Merge all the results.
 all_ret <- list(
     results = resultsraw,
+    primma = resultsraw,
+    cumuma = results.cum,
     version = list(
         jsonlite = packageVersion('jsonlite'),
         meta = packageVersion('meta')
     )
 )
+
+{% else %}
+
+# Merge all the results.
+all_ret <- list(
+    results = resultsraw,
+    primma = resultsraw,
+    version = list(
+        jsonlite = packageVersion('jsonlite'),
+        meta = packageVersion('meta')
+    )
+)
+
+{% endif %}
+
+
 
 # Save results as json file!
 jsonstr <- toJSON(all_ret, pretty=TRUE, force=TRUE)

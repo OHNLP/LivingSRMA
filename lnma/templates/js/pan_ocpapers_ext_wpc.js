@@ -10,6 +10,10 @@ Object.assign(pan_ocpapers.vpp_data, {
     // the whether showing the working paper collector
     show_working_paper_collector: false,
 
+    // for the copy function
+    // this is a object for the itable
+    working_itable: null,
+
     // the working oc
     working_oc: null,
 
@@ -46,6 +50,10 @@ Object.assign(pan_ocpapers.vpp_methods, {
         pan_ocpapers.save_working_paper_extraction(
             pid, oc
         );
+    },
+
+    fill_working_paper_attrs: function() {
+
     },
 
     set_n_arms: function() {
@@ -93,6 +101,10 @@ Object.assign(pan_ocpapers, {
     ///////////////////////////////////////////////////////////////////////////
     // Functions related to collector
     ///////////////////////////////////////////////////////////////////////////
+
+    fill_working_paper_attrs: function() {
+
+    },
 
     /**
      * Update the auto-complete

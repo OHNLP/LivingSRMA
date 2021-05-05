@@ -252,6 +252,7 @@ html {
 {% block script %}
 <script>
 
+{% include 'js/srv_analyzer.js' %}
 {% include "js/srv_extractor.js" %}
 
 var pan_outcomes = {
@@ -520,7 +521,8 @@ var pan_ocpapers = {
                 },
 
                 goto_analysis: function(extract) {
-
+                    location.href = srv_analyzer.url.azoc + 
+                        '?abbr=' + extract.abbr;
                 },
 
                 delete_extract: function(extract) {

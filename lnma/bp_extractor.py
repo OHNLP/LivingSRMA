@@ -115,6 +115,26 @@ def extract_data():
 # APIs for extraction
 ###########################################################
 
+@bp.route('/get_fill_wp_attrs')
+@login_required
+def get_fill_wp_attrs():
+    '''
+    Get working paper auto fill
+
+    The auto fill is a tool copy the text from itable to an outcome.
+    So, in the backend, we need to get the followings:
+
+    1. the `from` and `to` pairs for a specific project
+    2. the `pids` which are working on
+    2. search the itable extraction and find the text
+    
+    But this is very difficult.
+    '''
+
+    return ''
+
+
+
 @bp.route('/get_paper')
 @login_required
 def get_paper():
