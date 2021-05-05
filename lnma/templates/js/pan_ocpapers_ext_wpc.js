@@ -53,7 +53,19 @@ Object.assign(pan_ocpapers.vpp_methods, {
     },
 
     fill_working_paper_attrs: function() {
-
+        var project_id = Cookies.get('project_id');
+        // first, try to get the latest itable
+        srv_extractor.get_extract(
+            project_id,
+            abbr,
+            function(data) {
+                console.log('* got itable:', data.extract)
+                // then, with the itable, try to fill?
+                pan_ocpapers.fill_working_paper_attrs(
+                    data.extract
+                );
+            }
+        );
     },
 
     set_n_arms: function() {
@@ -102,8 +114,10 @@ Object.assign(pan_ocpapers, {
     // Functions related to collector
     ///////////////////////////////////////////////////////////////////////////
 
-    fill_working_paper_attrs: function() {
-
+    fill_working_paper_attrs: function(itable) {
+        // so, there are some pairs
+        // from -> to
+        // and currently, we don't know what 
     },
 
     /**

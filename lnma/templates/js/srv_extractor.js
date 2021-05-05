@@ -106,6 +106,19 @@ var srv_extractor = {
         });
     },
 
+    get_extract: function(project_id, abbr, callback) {
+        $.get(
+            this.url.get_extracts,
+            {
+                project_id: project_id,
+                abbr: abbr,
+                rnd: Math.random()
+            },
+            callback,
+            'json'
+        );
+    },
+
     get_extracts: function(project_id, callback) {
         $.get(
             this.url.get_extracts,
