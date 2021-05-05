@@ -54,15 +54,19 @@ Object.assign(pan_ocpapers.vpp_methods, {
 
     fill_working_paper_attrs: function() {
         var project_id = Cookies.get('project_id');
+        var abbr = 'itable';
+        var pid = this.working_paper.pid;
+
         // first, try to get the latest itable
-        srv_extractor.get_extract(
+        srv_extractor.get_pdata_in_extract(
             project_id,
             abbr,
+            pid,
             function(data) {
-                console.log('* got itable:', data.extract)
+                console.log('* got itable pdata:', data)
                 // then, with the itable, try to fill?
                 pan_ocpapers.fill_working_paper_attrs(
-                    data.extract
+                    data
                 );
             }
         );

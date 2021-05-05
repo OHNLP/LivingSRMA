@@ -536,6 +536,53 @@ def delete_extract():
     return jsonify(ret)
 
 
+@bp.route('/get_pdata_in_extract')
+@login_required
+def get_pdata_in_extract():
+    '''
+    Get one paper in an extract by the project_id and the abbr and the pid
+    '''
+    project_id = request.args.get('project_id')
+    abbr = request.args.get('abbr')
+    pid = request.args.get('pid')
+    
+    # get the exisiting extracts
+    extract = dora.get_extract_by_project_id_and_abbr(project_id, abbr)
+
+    if extract is None:
+        # this is a new extract
+        ret = {
+            'success': False,
+            'abbr': abbr,
+            'pid': pid,
+            'msg': 'not exist extract %s' % abbr
+        }
+        return jsonify(ret)
+
+    if pid not in extract.data:
+        # this is a missing?
+        ret = {
+            'success': False,
+            'abbr': abbr,
+            'pid': pid,
+            'msg': 'no paper data in itable'
+        }
+        return jsonify(ret)
+
+    ret = {
+        'success': True,
+        'msg': '',
+        'extract': extract.as_dict(),
+    }
+
+    # just keep the pid in extract
+    ret['extract']['data'] = {
+        pid: ret['extract']['data'][pid]
+    }
+
+    return jsonify(ret)
+
+
 @bp.route('/get_extract')
 @login_required
 def get_extract():

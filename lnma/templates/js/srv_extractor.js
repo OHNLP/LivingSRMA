@@ -20,6 +20,7 @@ var srv_extractor = {
         delete_extract: "[[ url_for('extractor.delete_extract') ]]",
 
         get_paper: "[[ url_for('extractor.get_paper') ]]",
+        get_pdata_in_extract: "[[ url_for('extractor.get_pdata_in_extract') ]]",
         get_extract: "[[ url_for('extractor.get_extract') ]]",
         get_extracts: "[[ url_for('extractor.get_extracts') ]]",
         get_extract_and_papers: "[[ url_for('extractor.get_extract_and_papers') ]]",
@@ -106,9 +107,23 @@ var srv_extractor = {
         });
     },
 
+    get_pdata_in_extract: function(project_id, abbr, pid, callback) {
+        $.get(
+            this.url.get_pdata_in_extract,
+            {
+                project_id: project_id,
+                abbr: abbr,
+                pid: pid,
+                rnd: Math.random()
+            },
+            callback,
+            'json'
+        );
+    },
+
     get_extract: function(project_id, abbr, callback) {
         $.get(
-            this.url.get_extracts,
+            this.url.get_extract,
             {
                 project_id: project_id,
                 abbr: abbr,
