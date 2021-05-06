@@ -66,7 +66,7 @@ Object.assign(pan_ocpapers.vpp_methods, {
                 console.log('* got itable pdata:', data)
                 // then, with the itable, try to fill?
                 pan_ocpapers.fill_working_paper_attrs(
-                    data
+                    data.extract
                 );
             }
         );
@@ -106,6 +106,10 @@ Object.assign(pan_ocpapers.vpp_methods, {
         }
     },
 
+    set_working_arm_attr_value: function(abbr, value) {
+        this.get_working_arm_attrs()[abbr] = value;
+    },
+
     clear_input: function() {
 
     }
@@ -119,9 +123,46 @@ Object.assign(pan_ocpapers, {
     ///////////////////////////////////////////////////////////////////////////
 
     fill_working_paper_attrs: function(itable) {
+        // get working pid
+        var pid = this.vpp.working_paper.pid;
+        console.log('* found working paper pid:', pid);
+
         // so, there are some pairs
-        // from -> to
-        // and currently, we don't know what 
+        var afs = JSON.parse(JSON.stringify(
+            srv_extractor.project.settings.auto_fill
+        ));
+        console.log('* get auto fill:', afs);
+
+        // build a dictionary for finding the abbr
+        var dict_itable = srv_extractor.mk_oc_name2abbr_dict(itable);
+        var dict_oc = srv_extractor.mk_oc_name2abbr_dict(this.vpp.working_oc);
+
+        console.log('* created itable dict:', dict_itable);
+        console.log('* created working oc dict:', dict_oc);
+
+        // first, find the abbr for each attr_from
+        for (let i = 0; i < afs.length; i++) {            
+            afs[i].from_abbr = dict_itable[
+                afs[i].from.toLocaleUpperCase()
+            ];
+            afs[i].to_abbr = dict_oc[
+                afs[i].to.toLocaleUpperCase()
+            ];
+
+            // second, for each fill, get the values
+            afs[i].from_value = itable.data[pid].attrs.main[afs[i].from_abbr];
+
+            // now, put this value to the paper of this working oc
+            this.vpp.set_working_arm_attr_value(
+                afs[i].to_abbr,
+                afs[i].from_value
+            );
+        }
+        console.log('* get abbr for auto fill:', afs);
+
+        // last, update the ui
+        this.vpp.$forceUpdate();
+
     },
 
     /**

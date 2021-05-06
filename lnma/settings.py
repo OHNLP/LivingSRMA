@@ -145,14 +145,14 @@ INPUT_FORMAT_TPL = {
     "pwma": {
         'PRIM_CAT_RAW_G5': [{
             'abbr': 'default',
-            'name': 'Treatments',
+            'name': 'Regimen',
             'attrs': [{
-                'abbr': 'drug_used',
-                'name': 'Drug Used',
+                'abbr': 'treatment',
+                'name': 'Treatment',
                 'subs': None
             }, {
-                'abbr': 'malignancy',
-                'name': 'Malignancy',
+                'abbr': 'control',
+                'name': 'Control',
                 'subs': None
             }]
         },{

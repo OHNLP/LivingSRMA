@@ -1,4 +1,4 @@
-from flask import request
+from flask import json, request
 from flask import flash
 from flask import render_template
 from flask import Blueprint
@@ -80,6 +80,9 @@ def editor():
     # the pdf keywords
     form_textarea_pdf_keywords = project.get_pdf_keywords_text()
 
+    # the all settings JSON string
+    form_textarea_settings = project.get_settings_text()
+
     return render_template('project/editor.html', 
         project=project,
         form_textarea_tags=form_textarea_tags,
@@ -88,7 +91,8 @@ def editor():
         form_textarea_exclusion_reasons=form_textarea_exclusion_reasons,
         form_textarea_inclusion_keywords=form_textarea_inclusion_keywords,
         form_textarea_exclusion_keywords=form_textarea_exclusion_keywords,
-        form_textarea_pdf_keywords=form_textarea_pdf_keywords
+        form_textarea_pdf_keywords=form_textarea_pdf_keywords,
+        form_textarea_settings=form_textarea_settings
     )
 
 
@@ -300,7 +304,7 @@ def api_set_tags():
     return redirect(url_for('project.editor'))
 
 
-@bp.route('/api/pdf_keywords', methods=['GET', 'POST'])
+@bp.route('/api/set_pdf_keywords', methods=['GET', 'POST'])
 @login_required
 def api_set_pdf_keywords():
     if request.method == 'GET':
@@ -332,4 +336,40 @@ def api_set_pdf_keywords():
     is_success, project = dora.set_project_pdf_keywords(project_id, keywords_cleaned)
 
     flash('Saved %s PDF keywords!' % (len(keywords_cleaned)) )
+    return redirect(url_for('project.editor'))
+
+
+@bp.route('/api/set_settings', methods=['GET', 'POST'])
+@login_required
+def api_set_settings():
+    '''
+    Set the project settings directly
+
+    CAUTION! this function is VERY VERY dangerous.
+    Don't use unless you are 120% sure what you are doing.
+    '''
+    if request.method == 'GET':
+        return redirect(url_for('project_editor'))
+        
+    project_id = request.cookies.get('project_id')
+    if project_id is None or project_id == '':
+        flash('Set working project first')
+        return redirect(url_for('project.mylist'))
+
+    raw_txt = request.form.get('form_textarea_settings')
+
+    # convert to JSON
+    try:
+        settings = json.loads(raw_txt)
+
+    except Exception as err:
+        flash('ERROR! Invalid JSON format settings')
+        return redirect(url_for('project.editor'))
+
+    # update
+    is_success, project = dora.set_project_settings(
+        project_id, settings
+    )
+
+    flash('Saved new settings')
     return redirect(url_for('project.editor'))

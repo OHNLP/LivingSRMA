@@ -1133,7 +1133,7 @@ def import_softable_pma_from_xls_for_IO(group='primary'):
     # Third, loop on tabs
     cols = ['author', 'year', 'GA_Et', 'GA_Nt', 'GA_Ec', 'GA_Nc', 
             'G34_Et', 'G34_Ec', 'G3H_Et', 'G3H_Ec', 'G5N_Et', 'G5N_Ec', 
-            'drug_used', 'malignancy']
+            'treatment', 'control']
 
     # each sheet is an AE/OC
     # the data tab starts from 8th

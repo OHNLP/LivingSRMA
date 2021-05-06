@@ -423,6 +423,27 @@ def set_project_pdf_keywords(project_id, keywords, other_keywords=None):
     return True, project
 
 
+def set_project_settings(project_id, settings):
+    '''
+    Set the project settings directly.
+
+    CAUTION! this function is VERY VERY dangerous.
+    Don't use unless you are 120% sure what you are doing.
+    '''
+    project = get_project(project_id)
+    if project is None:
+        return False, None
+
+    project.settings = settings
+    flag_modified(project, "settings")
+
+    # commit this
+    db.session.add(project)
+    db.session.commit()
+
+    return True, project
+    
+
 def sort_paper_rct_seq_in_project(project_id):
     '''
     Sort the paper's rct seq

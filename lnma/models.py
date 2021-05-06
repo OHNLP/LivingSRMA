@@ -1,3 +1,4 @@
+import json
 from xml.sax.saxutils import escape
 
 from . import db
@@ -175,6 +176,14 @@ class Project(db.Model):
         if 'pdf_keywords' in self.settings:
             if 'main' in self.settings['pdf_keywords']:
                 txt = '\n'.join(self.settings['pdf_keywords']['main'])
+        return txt
+
+
+    def get_settings_text(self):
+        '''
+        Get all settings as a JSON string
+        '''
+        txt = json.dumps(self.settings, sort_keys=True, indent=4)
         return txt
 
 

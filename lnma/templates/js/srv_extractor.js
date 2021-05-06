@@ -651,5 +651,36 @@ var srv_extractor = {
         }
 
         return paper_data;
+    },
+
+    /**
+     * Create a ATTR NAME -> abbr dictionary
+     * 
+     * The attribute name is in upper case.
+     * 
+     * @param {Object} extract an Extract object
+     */
+    mk_oc_name2abbr_dict: function(extract) {
+        var dict = {};
+        for (let j = 0; j < extract.meta.cate_attrs.length; j++) {
+            const cate = extract.meta.cate_attrs[j];
+            for (let k = 0; k < cate.attrs.length; k++) {
+                const attr = cate.attrs[k];
+                var attr_name = cate.name.toLocaleUpperCase() + '|' + 
+                                attr.name.toLocaleUpperCase();
+                // check the subs 
+                if (attr.subs == null) {
+                    // this means this attr has no sub items
+                    dict[attr_name] = attr.abbr;
+                } else {
+                    for (let l = 0; l < attr.subs.length; l++) {
+                        const sub = attr.subs[l];
+                        var name = attr_name + '|' + sub.name.toLocaleUpperCase();
+                        dict[name] = sub.abbr;
+                    }
+                }
+            }
+        }
+        return dict;
     }
 };
