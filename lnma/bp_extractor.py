@@ -463,6 +463,7 @@ def update_extract_incr_data():
     project_id = request.form.get('project_id')
     oc_type = request.form.get('oc_type')
     abbr = request.form.get('abbr')
+    
     # the meta of the extract settings
     data = json.loads(request.form.get('data'))
     

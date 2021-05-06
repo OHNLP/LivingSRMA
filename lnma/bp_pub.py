@@ -1794,7 +1794,7 @@ def get_ae_pma_data(full_fn, is_getting_sms=False):
     # build AE details
     cols = ['author', 'year', 'GA_Et', 'GA_Nt', 'GA_Ec', 'GA_Nc', 
             'G34_Et', 'G34_Ec', 'G3H_Et', 'G3H_Ec', 'G5N_Et', 'G5N_Ec', 
-            'drug_used', 'malignancy']
+            'treatment', 'control']
     # sms = ['OR', 'RR', 'RD']
     sms = ['OR', 'RR']
     # grades = ['GA', 'G34', 'G3H', 'G5N']
@@ -2977,7 +2977,7 @@ def get_sof_pma_data_IO(full_fn, is_calc_pma=True):
     # build AE details
     cols = ['author', 'year', 'GA_Et', 'GA_Nt', 'GA_Ec', 'GA_Nc', 
             'G34_Et', 'G34_Ec', 'G3H_Et', 'G3H_Ec', 'G5N_Et', 'G5N_Ec', 
-            'drug_used', 'malignancy']
+            'treatment', 'control']
     # sms = ['OR', 'RR', 'RD']
     sms = ['OR', 'RR']
     # grades = ['GA', 'G34', 'G3H', 'G5N']

@@ -89,6 +89,7 @@ html {
             <thead id="pan_ocpapers_paperlist_thead">
                 <tr>
                     <th>#</th>
+                    <th>PID</th>
                     <th>{{ papers.length }} studies</th>
                     <th>Outcomes</th>
                     <th>&nbsp;</th>
@@ -100,6 +101,7 @@ html {
                     v-bind:id="'paper-table-row-' + paper.pid"
                     class="paper-table-row">
                     <td>{{ paper.seq_num }}</td>
+                    <td>{{ paper.pid }}</td>
                     <td class="paper-table-body-td-author"
                         v-on:click="on_click_paper(paper)">
                         <div class="paper-table-body-td-author">
@@ -110,6 +112,7 @@ html {
                         {{ paper.meta.outcome_selections.length }}
                     </td>
                     <td>
+                        <b v-html="paper.title"></b><br>
                         <span v-for="abbr in paper.meta.outcome_selections"
                             class="paper-meta-selected-oc">
                             {{ extract_dict[abbr].meta.full_name }}

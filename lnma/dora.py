@@ -442,7 +442,7 @@ def set_project_settings(project_id, settings):
     db.session.commit()
 
     return True, project
-    
+
 
 def sort_paper_rct_seq_in_project(project_id):
     '''
@@ -1683,6 +1683,7 @@ def update_extract_incr_data(project_id, oc_type, abbr, data):
         n_compared += 1
         pid_ext = data[pid]
 
+        # search for this pid in this extract first
         if pid in extract.data:
             # OK, this is an existing paper
             # let's check each attribute
@@ -1694,6 +1695,7 @@ def update_extract_incr_data(project_id, oc_type, abbr, data):
             if is_same:
                 # nice, no need to update this paper
                 pass
+            
             else:
                 # hmmm, this paper is updated
                 extract.data[pid] = pid_ext

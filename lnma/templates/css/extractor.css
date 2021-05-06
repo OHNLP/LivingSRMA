@@ -43,16 +43,6 @@
 .paper-table td{
     border-bottom: 1px dotted #dfdfdf;
 }
-
-.paper-table-row:hover {
-    background: #cccccc;
-}
-.paper-table-row-clicked {
-    background-color: rgb(189, 228, 238) !important;
-}
-.paper-table-row-clicked .paper-name {
-    font-weight: bold;
-}
 .paper-table-body-td-author {
     width: 190px;
     white-space: nowrap;
@@ -84,6 +74,7 @@
 
 .paper-table-row {
     min-height: 24px;
+    border-bottom: 1px dotted #aaaaaa;
 }
 .paper-table-row:hover {
     background: #cccccc;
@@ -134,7 +125,7 @@
 *********************************************************/
 
 #pan_ocpapers_working_paper_collector {
-    max-width: 190px;
+    max-width: 240px;
 }
 #pan_ocpapers_working_paper_collector_attr_list {
     overflow-y: auto;

@@ -94,8 +94,8 @@ Object.assign(pan_ocpapers.vpp_methods, {
                     var Nc = this.get_int(ext.GA_Nc);
                     var Et = this.get_int(ext[grade + '_Et']);
                     var Ec = this.get_int(ext[grade + '_Ec']);
-                    var treatment = this.get_str(ext.drug_used);
-                    var control = this.get_str(ext.malignancy);
+                    var treatment = this.get_str(ext.treatment);
+                    var control = this.get_str(ext.control);
 
                     // Now need to check the value
                     if (this.isna(Nt) || 

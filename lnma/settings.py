@@ -39,12 +39,12 @@ STANDARD_DATA_COLS = {
     'PRIM_CATIRR_RAW': ['study', 'year', 'Et', 'Tt', 'Ec', 'Tc', 'treatment', 'control'],
 
     # for PWMA - Special for IO project
-    'PRIM_CAT_RAW_G5': ['study', 'year', 'treatment', 'control', 
+    'PRIM_CAT_RAW_G5': ['study', 'year',
                         'GA_Et', 'GA_Nt', 'GA_Ec', 'GA_Nc', 
                         'G34_Et', 'G34_Ec', 
                         'G3H_Et', 'G3H_Ec', 
                         'G5N_Et', 'G5N_Ec', 
-                        'drug_used', 'malignancy'],
+                        'treatment', 'control'],
 
     # for INCD - Incidence analysis
     'INCD_CAT_RAW': ['study', 'year', 'Et', 'Nt', 'treat']
@@ -142,7 +142,353 @@ OC_TYPE_TPL = {
 }
 
 INPUT_FORMAT_TPL = {
+    "nma": {
+        'raw': [{
+            'abbr': 'nma_raw_regimen',
+            'name': 'Regimen',
+            'attrs': [{
+                'abbr': 't1',
+                'name': 'T1',
+                'subs': None
+            }, {
+                'abbr': 't2',
+                'name': 'T2',
+                'subs': None
+            }]
+        }, {
+            'abbr': 'nma_raw_t1',
+            'name': 'T1',
+            'attrs': [{
+                'abbr': 'event_t1',
+                'name': 'Event',
+                'subs': None
+            }, {
+                'abbr': 'total_t1',
+                'name': 'Total',
+                'subs': None
+            }]
+        }, {
+            'abbr': 'nma_raw_t2',
+            'name': 'T2',
+            'attrs': [{
+                'abbr': 'event_t2',
+                'name': 'Event',
+                'subs': None
+            }, {
+                'abbr': 'total_t2',
+                'name': 'Total',
+                'subs': None
+            }]
+        }],
+        'pre': [{
+            'abbr': 'nma_pre_regimen',
+            'name': 'Regimen',
+            'attrs': [{
+                'abbr': 't1',
+                'name': 'T1',
+                'subs': None
+            }, {
+                'abbr': 't2',
+                'name': 'T2',
+                'subs': None
+            }]
+        }, {
+            'abbr': 'nma_pre_result',
+            'name': 'Result',
+            'attrs': [{
+                'abbr': 'sm',
+                'name': 'SM',
+                'subs': None
+            }, {
+                'abbr': 'lowerci',
+                'name': 'Lower CI',
+                'subs': None
+            }, {
+                'abbr': 'upperci',
+                'name': 'Upper CI',
+                'subs': None
+            }]
+        }, {
+            'abbr': 'nma_pre_survival',
+            'name': 'Survival',
+            'attrs': [{
+                'abbr': 'survival_t1',
+                'name': 'T1',
+                'subs': None
+            }, {
+                'abbr': 'survival_t2',
+                'name': 'T2',
+                'subs': None
+            }]
+        }, {
+            'abbr': 'nma_pre_ecet',
+            'name': 'Ec & Et',
+            'attrs': [{
+                'abbr': 'Ec_t1',
+                'name': 'Ec T1',
+                'subs': None
+            }, {
+                'abbr': 'Et_t1',
+                'name': 'Et T1',
+                'subs': None
+            }, {
+                'abbr': 'Ec_t2',
+                'name': 'Ec T2',
+                'subs': None
+            }, {
+                'abbr': 'Et_t2',
+                'name': 'Et T2',
+                'subs': None
+            }]
+        }]
+    },
+
+    "subg": {
+        "SUBG_CATIRR_RAW": [{
+            'abbr': 'SUBG_CATIRR_RAW_default', 
+            'name': 'Default attributes', 
+            'attrs': [{
+                'abbr': 'Et', 
+                'name': 'Et',
+                'subs': None,
+            }, {
+                'abbr': 'Tt',
+                'name': 'Tt', 
+                'subs': None,
+            }, {
+                'abbr': 'Ec', 
+                'name': 'Ec',
+                'subs': None,
+            }, {
+                'abbr': 'Tc',
+                'name': 'Tc', 
+                'subs': None,
+            }]
+        }],
+
+        "SUBG_CAT_RAW": [{
+            'abbr': 'SUBG_CAT_RAW_treat',
+            'name': 'Treatment Arm',
+            'attrs': [{
+                'abbr': 'Et',
+                'name': 'Event',
+                'subs': None
+            }, {
+                'abbr': 'Nt',
+                'name': 'Total',
+                'subs': None
+            }, {
+                'abbr': 'treatment',
+                'name': 'Treatment',
+                'subs': None
+            }]
+        }, {
+            'abbr': 'SUBG_CAT_RAW_control',
+            'name': 'Control Arm',
+            'attrs': [{
+                'abbr': 'Ec',
+                'name': 'Event',
+                'subs': None
+            }, {
+                'abbr': 'Nc',
+                'name': 'Total',
+                'subs': None
+            }, {
+                'abbr': 'control',
+                'name': 'Control',
+                'subs': None
+            }]
+        }],
+
+        "SUBG_CAT_PRE": [{
+            'abbr': 'SUBG_CAT_PRE_default', 
+            'name': 'Result', 
+            'attrs': [{
+                'abbr': 'TE', 
+                'name': 'TE',
+                'subs': None,
+            }, {
+                'abbr': 'lowerci', 
+                'name': 'Lower CI', 
+                'subs': None,
+            }, {
+                'abbr': 'upperci', 
+                'name': 'Upper CI', 
+                'subs': None,
+            }]
+        }],
+
+        "SUBG_CONTD_RAW": [{
+            'abbr': 'SUBG_CONTD_RAW_treat', 
+            'name': 'Treatment Arm', 
+            'attrs': [{
+                'abbr': 'Nt', 
+                'name': 'Nt',
+                'subs': None,
+            }, {
+                'abbr': 'Mt', 
+                'name': 'Mt', 
+                'subs': None,
+            }, {
+                'abbr': 'SDt', 
+                'name': 'SDt', 
+                'subs': None,
+            }]
+        }, {
+            'abbr': 'SUBG_CONTD_RAW_control', 
+            'name': 'Control Arm', 
+            'attrs': [{
+                'abbr': 'Nc', 
+                'name': 'Nc',
+                'subs': None,
+            }, {
+                'abbr': 'Mc', 
+                'name': 'Mc', 
+                'subs': None,
+            }, {
+                'abbr': 'SDc', 
+                'name': 'SDc', 
+                'subs': None,
+            }]
+        }],
+
+        "SUBG_CONTD_PRE": [{
+            'abbr': 'SUBG_CONTD_PRE_default', 
+            'name': 'Result', 
+            'attrs': [{
+                'abbr': 'TE', 
+                'name': 'TE',
+                'subs': None,
+            }, {
+                'abbr': 'SE',
+                'name': 'SE', 
+                'subs': None,
+            }]
+        }],
+    },
+
     "pwma": {
+        "PRIM_CAT_RAW": [{
+            'abbr': 'PRIM_CAT_RAW_treat',
+            'name': 'Treatment Arm',
+            'attrs': [{
+                'abbr': 'Et',
+                'name': 'Event',
+                'subs': None
+            }, {
+                'abbr': 'Nt',
+                'name': 'Total',
+                'subs': None
+            }, {
+                'abbr': 'treatment',
+                'name': 'Treatment',
+                'subs': None
+            }]
+        }, {
+            'abbr': 'PRIM_CAT_RAW_control',
+            'name': 'Control Arm',
+            'attrs': [{
+                'abbr': 'Ec',
+                'name': 'Event',
+                'subs': None
+            }, {
+                'abbr': 'Nc',
+                'name': 'Total',
+                'subs': None
+            }, {
+                'abbr': 'control',
+                'name': 'Control',
+                'subs': None
+            }]
+        }],
+
+        "PRIM_CAT_PRE": [{
+            'abbr': 'PRIM_CAT_PRE_default', 
+            'name': 'Result', 
+            'attrs': [{
+                'abbr': 'TE', 
+                'name': 'TE',
+                'subs': None,
+            }, {
+                'abbr': 'lowerci', 
+                'name': 'Lower CI', 
+                'subs': None,
+            }, {
+                'abbr': 'upperci', 
+                'name': 'Upper CI', 
+                'subs': None,
+            }]
+        }],
+
+        "PRIM_CONTD_RAW": [{
+            'abbr': 'PRIM_CONTD_RAW_treat', 
+            'name': 'Treatment Arm', 
+            'attrs': [{
+                'abbr': 'Nt', 
+                'name': 'Nt',
+                'subs': None,
+            }, {
+                'abbr': 'Mt', 
+                'name': 'Mt', 
+                'subs': None,
+            }, {
+                'abbr': 'SDt', 
+                'name': 'SDt', 
+                'subs': None,
+            }]
+        }, {
+            'abbr': 'PRIM_CONTD_RAW_control', 
+            'name': 'Control Arm', 
+            'attrs': [{
+                'abbr': 'Nc', 
+                'name': 'Nc',
+                'subs': None,
+            }, {
+                'abbr': 'Mc', 
+                'name': 'Mc', 
+                'subs': None,
+            }, {
+                'abbr': 'SDc', 
+                'name': 'SDc', 
+                'subs': None,
+            }]
+        }],
+
+        "PRIM_CONTD_PRE": [{
+            'abbr': 'PRIM_CONTD_PRE_default', 
+            'name': 'Result', 
+            'attrs': [{
+                'abbr': 'TE', 
+                'name': 'TE',
+                'subs': None,
+            }, {
+                'abbr': 'SE',
+                'name': 'SE', 
+                'subs': None,
+            }]
+        }],
+
+        "PRIM_CATIRR_RAW": [{
+            'abbr': 'PRIM_CATIRR_RAW_default', 
+            'name': 'Result', 
+            'attrs': [{
+                'abbr': 'Et', 
+                'name': 'Et',
+                'subs': None,
+            }, {
+                'abbr': 'Tt',
+                'name': 'Tt', 
+                'subs': None,
+            }, {
+                'abbr': 'Ec', 
+                'name': 'Ec',
+                'subs': None,
+            }, {
+                'abbr': 'Tc',
+                'name': 'Tc', 
+                'subs': None,
+            }]
+        }],
         'PRIM_CAT_RAW_G5': [{
             'abbr': 'default',
             'name': 'Regimen',
