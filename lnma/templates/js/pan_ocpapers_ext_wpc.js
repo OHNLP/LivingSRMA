@@ -167,6 +167,8 @@ Object.assign(pan_ocpapers, {
         // last, update the ui
         this.vpp.$forceUpdate();
 
+        // show some information
+        jarvis.toast('Filled the data successfully.')
     },
 
     /**
