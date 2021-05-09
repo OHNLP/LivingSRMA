@@ -429,20 +429,20 @@ a {
                             v-bind:class="{'oc-plot-tab-selected': current.is_prim_plot}"
                             v-on:click="switch_plot('is_prim_plot')">
                             <i class="fa fa-chart-bar"></i>
-                            Primary Meta-Analysis with {{ params.sm }} and HK={{ params.hk }}
+                            Primary Meta-Analysis with {{ params.sm }}
                         </div>
                         <div class="oc-plot-tab"
                             v-show="is_incd_analysis()"
                             v-bind:class="{'oc-plot-tab-selected': current.is_incd_plot}"
                             v-on:click="switch_plot('is_incd_plot')">
                             <i class="fa fa-chart-bar"></i>
-                            Incidence Analysis and HK={{ params.hk }}
+                            Incidence Analysis
                         </div>
                         <div class="oc-plot-tab"
                             v-bind:class="{'oc-plot-tab-selected': current.is_cumu_plot}"
                             v-on:click="switch_plot('is_cumu_plot')">
                             <i class="fa fa-chart-bar"></i>
-                            Cumulative Meta-Analysis with {{ params.sm }}
+                            Cumulative Meta-Analysis
                         </div>
                     </div>
 
@@ -1094,6 +1094,7 @@ var vw_ocplot = {
                     }
                     // update 
                     vw_ocplot.show_plot(
+                        this.current.oc_group,
                         this.current.oc_cate,
                         this.current.oc_name,
                         this.current.ae_grade
