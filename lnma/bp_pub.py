@@ -3303,6 +3303,19 @@ def get_sof_pma_data_from_db_IO(is_calc_pma=True):
     rs = []
     oc_dict = {}
     for extract in extracts:
+        
+        # check if this extract is excluded from graph / sof
+        if is_calc_pma:
+            # for sof
+            if extract.meta['included_in_sof'] == 'no':
+                # which means not to be display in softable
+                continue
+        else:
+            # for graph
+            if extract.meta['included_in_plots'] == 'no':
+                # which means we don't display this on the website in graph
+                continue
+
         oc_group = extract.meta['group']
         oc_cate = extract.meta['category']
         oc_name = extract.meta['full_name']
