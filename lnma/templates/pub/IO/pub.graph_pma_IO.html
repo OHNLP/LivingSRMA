@@ -609,8 +609,6 @@ var vw_studyfilter = {
         }
 
         // put the default values
-
-
         this.vpp = new Vue({
             el: this.vpp_id,
             data: {
@@ -1115,12 +1113,20 @@ var vw_ocplot = {
     },
 
     get_pid_condition: function() {
+        var conditions = '';
         if (this.pids.length == 0) {
-            return 'pid is not null ';
+            conditions += 'pid is not null ';
         } else {
             var cond = this.pids.map(function(v) { return '"' + v + '"'}).join(',');
-            return 'pid in (' + cond + ') '
+            conditions += 'pid in (' + cond + ') ';
         }
+
+        // second condition is the group
+        var oc_group = this.vpp.$data.current.oc_group;
+        conditions += '\n';
+        conditions += 'and oc_group = "'+oc_group+'" ';
+
+        return conditions;
     },
 
     show_plot: function(oc_group, oc_cate, oc_name, ae_grade, pids) {
