@@ -238,7 +238,11 @@ a {
                 <div class="d-flex fx-col">
                     <div class="d-flex fx-row ">
                         <div class="oc-name" style="font-weight: bold;">
-                            &nbsp;
+                            <select v-model="group"
+                                v-on:change="update_oclist()">
+                                <option value="primary">Treatment Related AEs</option>
+                                <option value="sensitivity">Immune Related AEs</option>
+                            </select>
                         </div>
                         <div style="font-weight: bold; width: 90px; text-align: center; border-bottom: 1px solid #555555;">
                             Grade
@@ -491,6 +495,7 @@ var vw_oclist = {
         this.vpp = new Vue({
             el: this.vpp_id,
             data: {
+                group: 'primary',
                 rs: this.rs,
                 select_mode: this.select_mode,
                 rs_stat: this.rs_stat
@@ -531,6 +536,12 @@ var vw_oclist = {
                 clear: function() {
                     $('.oc-type').removeClass('oc-type-selected');
                     jarvis.clear_all_ae();
+                },
+
+                update_oclist: function() {
+                    vw_oclist.update();
+
+                    this.clear();
                 }
             }
         });
@@ -539,18 +550,40 @@ var vw_oclist = {
     },
 
     get_pid_condition: function() {
+        // if (this.pids.length == 0) {
+        //     return 'pid is not null ';
+        // } else {
+        //     var cond = this.pids.map(function(v) { return '' + v}).join(',');
+        //     return 'pid in (' + cond + ') '
+        // }
+
+        var conditions = '';
+        // so first condition is the pid
         if (this.pids.length == 0) {
-            return 'pid is not null ';
+            conditions += 'pid is not null ';
         } else {
-            var cond = this.pids.map(function(v) { return '' + v}).join(',');
-            return 'pid in (' + cond + ') '
+            var cond = this.pids.map(function(v) { return '"' + v + '"'}).join(',');
+            conditions += 'pid in (' + cond + ') ';
         }
+
+        // second condition is the group
+        var group = this.vpp.$data.group;
+        conditions += '\n';
+        conditions += 'and oc_group = "'+group+'" ';
+
+        return conditions;
     },
     
 
     update: function(pids) {
-        // update the pid
-        this.pids = pids;
+        // for update the group
+        if (typeof(pids) == 'undefined') {
+
+        } else {
+            // update the pid
+            this.pids = pids;
+        }
+        
         var sql = 'select oc_cate, oc_name, ' +
             '  count(case when has_GA = true then pid else null end) as cnt_ga, ' +
             '  count(case when has_G3H = true then pid else null end) as cnt_g3h, ' +
