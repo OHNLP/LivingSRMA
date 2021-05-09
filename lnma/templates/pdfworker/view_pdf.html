@@ -537,7 +537,7 @@ See https://github.com/adobe-type-tools/cmap-resources
 
 var LNMA = {
     // the max count for running the mark.js for one PDF
-    COUNT_MARKED_MAX: 99,
+    COUNT_MARKED_MAX: 3,
 
     /**
      * The keywords variable is a list of keywords for highlighting
@@ -558,29 +558,148 @@ var LNMA = {
     // for counting how many times the mark.js runs
     count_marked: 0,
 
+    // rendered pages counter
+    rendered_page_counter: {},
+
     // get the highlighted text
     get_selection_text: function() {
         return window.getSelection().toString();
     },
 
-    // mark the words
+    /**
+     * Mark the keywords in the document
+     * 
+     * This function is triggered when page is rendered
+     */
     mark_keywords: function(ignore_count) {
         if (typeof(ignore_count) == 'undefined') {
             ignore_count = false;
         }
 
-        if (LNMA.count_marked <= LNMA.COUNT_MARKED_MAX || ignore_count) {
-            for (let i = 0; i < LNMA.highlight_keywords.length; i++) {
-                const hk = LNMA.highlight_keywords[i];
-                
-                // highlight the words
-                $('.page').mark(
-                    hk.keywords,
-                    { className: 'txt-' + hk.color, separateWordSearch: false }
-                );
+        // first, when marking keywords, we need to how many pages in total
+        var num_pages = $('.page').length;
+        var cnt = {
+            loaded: [],
+            marked: []
+        };
+
+        // then we need to know which page is rendered
+        for (let i = 1; i < num_pages + 1; i++) {
+            // if this function run the first time, put the page into counter
+            if (!LNMA.rendered_page_counter.hasOwnProperty(i)) {
+                LNMA.rendered_page_counter[i] = {
+                    is_loaded: false,
+                    is_marked: false
+                }
             }
+
+            // now check if this page is loaded or not
+            var is_loaded = $('.page[data-page-number='+i+']').attr('data-loaded') == 'true';
+
+            // update the status
+            LNMA.rendered_page_counter[i].is_loaded = is_loaded;
+        }
+
+        if (LNMA.count_marked <= LNMA.COUNT_MARKED_MAX || ignore_count) {
+            // now let's check each page
+            // and only mark those rendered and not marked page
+            for (let i = 1; i < num_pages + 1; i++) {
+                if (LNMA.rendered_page_counter[i].is_loaded) {
+                    if (LNMA.rendered_page_counter[i].is_marked) {
+                        // when this page is marked, don't mark again
+                        continue
+
+                    } else {
+                        // ok, this page is rendered but not marked
+                        // find the DOM of this page and do marking
+                        // loop on each keyword list
+                        for (let j = 0; j < LNMA.highlight_keywords.length; j++) {
+                            const hk = LNMA.highlight_keywords[j];
+                            
+                            // highlight the words in page i only
+                            LNMA.mark_keywords_as_color_in_page(
+                                hk.keywords,
+                                hk.color,
+                                i
+                            )
+                            console.log('* markded '+hk.keywords.length+' words as '+hk.color+' in page '+ i);
+                        }
+
+                        // when finished marking, take a note
+                        LNMA.rendered_page_counter[i].is_marked = true;
+                    }
+                } else {
+                    // when page is not rendered, nothing to to
+                    continue;
+                }
+            }
+                        
             LNMA.count_marked += 1;
         }
+
+        // final count for display the result
+        for (let i = 1; i < num_pages + 1; i++) {
+            LNMA.rendered_page_counter[i].is_loaded? cnt.tt_loaded+=1 : 0;
+            LNMA.rendered_page_counter[i].is_marked? cnt.tt_marked+=1 : 0;
+        }
+        console.log('* found', num_pages, 'pages,', 
+                       cnt.tt_loaded, 'loaded',
+                       cnt.tt_marked, 'marked');
+    },
+
+    stat_marking_pages: function() {
+        var cnt_marked = 0;
+        for (const page_num in LNMA.rendered_page_counter) {
+            console.log('* PDF p', page_num, 'markded', LNMA.rendered_page_counter[page_num].n_marked);
+        }
+    },
+
+    mark_keywords_in_page: function(page_num) {
+        // put this page into counter
+        if (!LNMA.rendered_page_counter.hasOwnProperty(page_num)) {
+            LNMA.rendered_page_counter[page_num] = {
+                is_loaded: false,
+                is_marked: false,
+                n_marked: 0
+            }
+        }
+
+        // very rare, the page is not ready
+        if ($('.page[data-page-number='+page_num+']').length == 0) {
+            LNMA.rendered_page_counter[page_num].is_loaded = false;
+            console.log('* marking stoped due to not found page', num_pages);
+            return;
+        }
+        
+        // now check if this page is loaded or not
+        var is_loaded = $('.page[data-page-number='+page_num+']').attr('data-loaded') == 'true';
+
+        // update the status
+        LNMA.rendered_page_counter[page_num].is_loaded = is_loaded;
+
+        // sometime, the page is not loaded??
+        if (!is_loaded) {
+            console.log('* marking stoped due to not loaded page', num_pages);
+            return;
+        }
+        
+        if (LNMA.rendered_page_counter[page_num].n_marked<LNMA.COUNT_MARKED_MAX) {
+            // just do limited times of marking
+            for (let j = 0; j < LNMA.highlight_keywords.length; j++) {
+                const hk = LNMA.highlight_keywords[j];
+                // highlight the words in page i only
+                LNMA.mark_keywords_as_color_in_page(
+                    hk.keywords,
+                    hk.color,
+                    page_num
+                )
+            }
+
+            // when finished marking, take a note
+            LNMA.rendered_page_counter[page_num].is_marked = true;
+            LNMA.rendered_page_counter[page_num].n_marked += 1;
+        }
+
     },
 
     mark_keywords_as_color: function(keywords, color) {
@@ -588,6 +707,14 @@ var LNMA = {
             keywords,
             { className: 'txt-' + color, separateWordSearch: false }
         );
+    },
+
+    mark_keywords_as_color_in_page: function(keywords, color, page_num) {
+        $('.page[data-page-number='+page_num+']').mark(
+            keywords,
+            { className: 'txt-' + color, separateWordSearch: false }
+        );
+        console.log('* markded '+keywords.length+' words as '+color+' in page '+ page_num);
     },
 
     /**
@@ -616,8 +743,10 @@ var LNMA = {
 
 // the main function for the rendered page
 function lnma_on_rendered_page(data) {
-    console.log('* rendered page ' + data.pageNumber);
-    LNMA.mark_keywords();
+    console.log('\n*********************************************************************');
+    console.log('* lnma_on_rendered_page on ' + data.pageNumber);
+    LNMA.mark_keywords_in_page(data.pageNumber);
+    // LNMA.stat_marking_pages();
 }
 
 // trigger the right click event for main page
@@ -637,7 +766,7 @@ $(document).ready(function () {
             //   pageNumber: this.pageNumber,
             //   numTextDivs: this.textDivs.length
             // }
-            console.log('* rendered page ' + event.detail.pageNumber);
+            // console.log('* rendered page ' + event.detail.pageNumber);
         }
     );
 });
