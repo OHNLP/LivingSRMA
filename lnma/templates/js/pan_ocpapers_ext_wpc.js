@@ -65,9 +65,13 @@ Object.assign(pan_ocpapers.vpp_methods, {
             function(data) {
                 console.log('* got itable pdata:', data)
                 // then, with the itable, try to fill?
-                pan_ocpapers.fill_working_paper_attrs(
-                    data.extract
-                );
+                if (data.success) {
+                    pan_ocpapers.fill_working_paper_attrs(
+                        data.extract
+                    );
+                } else {
+                    jarvis.toast('Data are not available for this paper in the Interactive Table', 'warning');
+                }
             }
         );
     },
