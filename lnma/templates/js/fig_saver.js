@@ -1,6 +1,11 @@
 var fig_saver = {
     date_format: d3.timeFormat('%Y_%m_%d_%H%M%S'),
 
+    save: function(svg_id, fn) {
+        var svg = d3.select(svg_id);
+        this.save_png(svg, fn);
+    },
+
     save_csv: function(data, filename) {
         /* data should contain:
         {

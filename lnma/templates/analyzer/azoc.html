@@ -15,8 +15,9 @@ Data Analyzer
 <style>
     
 {% include 'css/basic.css' %}
-{% include 'css/extractor.css' %}
+{% include 'css/box.css' %}
 {% include 'css/util.css' %}
+{% include 'css/extractor.css' %}
 {% include 'css/analyzer.css' %}
 
 html {
@@ -29,14 +30,10 @@ html {
     flex-direction: row;
     width: 100%;
     height: 100%;
-    margin: 0 0 0 10px;
+    margin: 0 0 0 15px;
     overflow-y: auto;
 }
 
-#pan_ocpapers {
-    width: 240px;
-    max-width: 280px;
-}
 </style>
 
 <!-- jQuery UI Theme -->
@@ -72,25 +69,35 @@ html {
 <!-- D3.js -->
 <script src="/static/lib/d3/d3.min.js"></script>
 <script src="/static/lib/d3/d3-tip.min.js"></script>
+<!-- FileSavaer -->
+<script src="/static/lib/file-saver/FileSaver.min.js"></script>
 
 <script>
 
+///////////////////////////////////////////////////////////
+// Utils
+///////////////////////////////////////////////////////////
+{% include "js/fig_saver.js" %}
 
 ///////////////////////////////////////////////////////////
 // The plots for PWMA
 ///////////////////////////////////////////////////////////
-{% include 'js/fg_prim_forest.js' %}
-{% include 'js/fg_incd_forest.js' %}
+{% include 'js/fgmk_incd_forest.js' %}
+{% include 'js/fgmk_prim_forest.js' %}
 {% include 'js/fgmk_cumu_forest.js' %}
 
 // Alias for the pwma plots
-var fg_pwma_prim_forest = fg_prim_forest;
+var fg_pwma_prim_forest = fgmk_prim_forest.make_fig(
+    'fg_pwma_prim_forest'
+);
 var fg_pwma_cumu_forest = fgmk_cumu_forest.make_fig(
     'fg_pwma_cumu_forest'
 );
 
 // alias for the incidence plots
-var fg_incd_incd_forest = fg_incd_forest;
+var fg_incd_incd_forest = fgmk_incd_forest.make_fig(
+    'fg_incd_incd_forest'
+);
 var fg_incd_cumu_forest = fgmk_cumu_forest.make_fig(
     'fg_incd_cumu_forest'
 );
@@ -241,9 +248,13 @@ var pan_ocpapers = {
                     function(data) {
                         pan_ocpapers.vpp.is_btn_analyze_disabled = false;
                         console.log("* PWMA result:", data);
+                        pan_maresults.show_pwma_prim_plots(data);
                     }
                 )
             }
+
+            // clear the existing plots
+            pan_maresults.clear();
 
             // which means we will do incidence analysis
             // it will be a seperate request
@@ -270,6 +281,7 @@ var pan_ocpapers = {
                     function(data) {
                         pan_ocpapers.vpp.is_btn_analyze_disabled = false;
                         console.log("* INCD result:", data);
+                        pan_maresults.show_pwma_incd_plots(data);
                     }
                 );
             }
@@ -620,12 +632,8 @@ var pan_ocpapers = {
     },
 
     resize: function() {
-        var w = $(window).width() - 90;
         var h = $(window).height() - 50;
-        $(this.vpp_id)
-            .css('width', w)
-            .css('height', h);
-
+        $(this.vpp_id).css('height', h);
     }
 };
 
@@ -663,9 +671,11 @@ var jarvis = {
 
         // init the UI
         pan_ocpapers.init();
+        pan_maresults.init();
 
         // resize
         pan_ocpapers.resize();
+        pan_maresults.resize();
 
         // load all outcomes for generating the selection menu
         pan_ocpapers.load_all_outcomes();
@@ -680,9 +690,6 @@ var jarvis = {
 
         // bind resize event
         this.bind_resize_event();
-
-        // make some alias
-        
 
         // remove the context menu for 
         document.addEventListener('click', function(event) {
@@ -737,6 +744,7 @@ var jarvis = {
     bind_resize_event: function() {
         $(window).on('resize', function(){
             pan_ocpapers.resize();
+            pan_maresults.resize();
         });
     }
 };

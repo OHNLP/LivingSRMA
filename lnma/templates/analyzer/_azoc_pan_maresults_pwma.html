@@ -1,30 +1,86 @@
-<div id="pan_maresults">
+<div id="pan_maresults" class="pl-2">
 
-    <div id="fg_pwma_prim_forest_box" class="result-box"
+    <div id="fg_pwma_prim_forest_box" class="result-box box"
         v-if="has_pwma_prim_forest">
-        <div id="fg_pwma_prim_forest" style="width: 100%; height: 100%;">
-            <svg id="fg_pwma_prim_forest_svg"></svg>
+        <div class="box-header">
+            <h4>
+                <span class="fa fa-align-left"></span>
+                PWMA FOREST PLOT
+            </h4>
+            <div class="ml-2">
+                <button onclick="fig_saver.save('#fg_pwma_prim_forest_svg', 'pwma_forest_plot.png')">
+                    <i class="far fa-save"></i> Save PNG
+                </button>
+            </div>
+        </div>
+        <div class="box-body">
+            <div id="fg_pwma_prim_forest" style="width: 100%; height: 100%;">
+                <svg id="fg_pwma_prim_forest_svg" class="fig"></svg>
+            </div>
         </div>
     </div>
 
-    <div id="fg_pwma_cumu_forest_box" class="result-box"
+    <div id="fg_pwma_cumu_forest_box" class="result-box box"
         v-if="has_pwma_cumu_forest">
-        <div id="fg_pwma_cumu_forest" style="width: 100%; height: 100%;">
-            <svg id="fg_pwma_cumu_forest_svg"></svg>
+
+        <div class="box-header">
+            <h4>
+                <span class="fa fa-align-left"></span>
+                CUMULATIVE PLOT
+            </h4>
+            <div class="ml-2">
+                <button onclick="fig_saver.save('#fg_pwma_cumu_forest_svg', 'pwma_cumu_plot.png')">
+                    <i class="far fa-save"></i> Save PNG
+                </button>
+            </div>
+        </div>
+        <div class="box-body">
+            <div id="fg_pwma_cumu_forest" style="width: 100%; height: 100%;">
+                <svg id="fg_pwma_cumu_forest_svg" class="fig"></svg>
+            </div>
         </div>
     </div>
 
-    <div id="fg_incd_incd_forest_box" class="result-box"
+    <div id="fg_incd_incd_forest_box" class="result-box box"
         v-if="has_incd_incd_forest">
-        <div id="fg_incd_incd_forest" style="width: 100%; height: 100%;">
-            <svg id="fg_incd_incd_forest_svg"></svg>
+
+        <div class="box-header">
+            <h4>
+                <span class="fa fa-align-left"></span>
+                INCIDENCE FOREST PLOT
+            </h4>
+            <div class="ml-2">
+                <button onclick="fig_saver.save('#fg_incd_incd_forest_svg', 'incidence_forest_plot.png')">
+                    <i class="far fa-save"></i> Save PNG
+                </button>
+            </div>
         </div>
+        <div class="box-body">
+            <div id="fg_incd_incd_forest" style="width: 100%; height: 100%;">
+                <svg id="fg_incd_incd_forest_svg" class="fig"></svg>
+            </div>
+        </div>
+
     </div>
 
-    <div id="fg_incd_cumu_forest_box" class="result-box"
+    <div id="fg_incd_cumu_forest_box" class="result-box box"
         v-if="has_incd_cumu_forest">
-        <div id="fg_incd_cumu_forest" style="width: 100%; height: 100%;">
-            <svg id="fg_incd_cumu_forest_svg"></svg>
+
+        <div class="box-header">
+            <h4>
+                <span class="fa fa-align-left"></span>
+                INCIDENCE CUMULATIVE PLOT
+            </h4>
+            <div class="ml-2">
+                <button onclick="fig_saver.save('#fg_incd_cumu_forest_svg', 'incidence_cumu_plot.png')">
+                    <i class="far fa-save"></i> Save PNG
+                </button>
+            </div>
+        </div>
+        <div class="box-body">
+            <div id="fg_incd_cumu_forest" style="width: 100%; height: 100%;">
+                <svg id="fg_incd_cumu_forest_svg" class="fig"></svg>
+            </div>
         </div>
     </div>
 

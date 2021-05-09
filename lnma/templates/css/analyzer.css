@@ -18,3 +18,20 @@
     margin: 0 0 0 10px;
     font-size: 15px;
 }
+#pan_ocpapers {
+    width: 260px;
+    max-width: 260px;
+    overflow-y: auto;
+}
+#pan_maresults {
+    background-color: white;
+    width: calc(100% - 270px);
+    overflow-y: auto;
+}
+.result-box {
+    font-size: 12px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+.fig {
+    background-color: white;
+}

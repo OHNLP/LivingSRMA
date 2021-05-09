@@ -1,99 +1,51 @@
-var fgmk_cumu_forest = {
+var fgmk_prim_forest = {
 
 make_fig: function(box_id) {
 
 return {
-    box_id: '#' + box_id,
-    plot_id: '#' + box_id + '_svg',
+    box_id: '#'+box_id,
+    plot_id: '#'+box_id+'_svg',
     plot_type: 'd3js',
     svg: null,
     cols: [
-        {width: 200, align: 'start',  name: 'Study', x: 0, row: 1},
-        {width: 200, align: 'middle', name: '$SM_NAME$ (95% CI)', row: 1},
-        {width: 50,  align: 'end',    name: '$SM$', row: 1},
-        {width: 100, align: 'end',    name: '95% CI', row: 1}
+        {width: 120, align: 'start',  name: 'Study', x: 0, row: 2},
+        {width: 50,  align: 'end',    name: 'Events', row: 2},
+        {width: 50,  align: 'end',    name: 'Total', row: 2},
+        {width: 50,  align: 'end',    name: 'Events', row: 2},
+        {width: 50,  align: 'end',    name: 'Total', row: 2},
+        {width: 50,  align: 'end',    name: '$SM$', row: 2},
+        {width: 100, align: 'end',    name: '95% CI', row: 2},
+        {width: 200, align: 'middle', name: '$SM_NAME$ (95% CI)', row: 2},
+        {width: 100, align: 'end',    name: 'Relative weight', row: 2}
     ],
     row_height: 15,
     row_txtmb: 3,
     row_frstml: 20,
     default_height: 300,
-    mark_size: 6,
-
-    // the attribute name for drawing
-    attr_TE: 'bt_TE',
-    attr_lower: 'bt_lower',
-    attr_upper: 'bt_upper',
 
     css: {
-        txt_bd: 'cumu-frst-txt-bd',
-        txt_nm: 'cumu-frst-txt-nm',
-        txt_mt: 'cumu-frst-txt-mt',
-        txt_sm: 'cumu-frst-txt-sm',
-        stu_g: 'cumu-frst-stu-g',
-        stu_bg: 'cumu-frst-stu-bg',
-        stu_rect: 'cumu-frst-stu-rect'
+        txt_bd: 'prim-frst-txt-bd',
+        txt_nm: 'prim-frst-txt-nm',
+        txt_mt: 'prim-frst-txt-mt',
+        txt_sm: 'prim-frst-txt-sm',
+        stu_g: 'prim-frst-stu-g',
+        stu_bg: 'prim-frst-stu-bg',
+        stu_rect: 'prim-frst-stu-rect'
     },
     css_html: ["<style>",
-        ".cumu-frst-txt-bd{ font-weight: bold; }",
-        ".cumu-frst-txt-nm{ font-weight: normal; }",
-        ".cumu-frst-txt-mt{ font-family: Times; font-style: italic; }",
-        ".cumu-frst-txt-sm{ font-size: xx-small; }",
-        ".cumu-frst-stu-g text{ cursor: default; }",
-        ".cumu-frst-stu-bg{ fill: white; }",
-        ".cumu-frst-stu-rect{ fill: black; }",
-        ".cumu-frst-stu-line{ stroke: black; stroke-width: 1.5; }",
-        ".cumu-frst-stu-model{ fill: red; stroke: black; stroke-width: 1; }",
-        ".cumu-frst-stu-model-refline{ stroke: black; stroke-width: 1; }",
-        ".cumu-frst-stu-g:hover .cumu-frst-stu-bg{ fill: whitesmoke; }",
+        ".prim-frst-txt-bd{ font-weight: bold; }",
+        ".prim-frst-txt-nm{ font-weight: normal; }",
+        ".prim-frst-txt-mt{ font-family: Times; font-style: italic; }",
+        ".prim-frst-txt-sm{ font-size: xx-small; }",
+        ".prim-frst-stu-g text{ cursor: default; }",
+        ".prim-frst-stu-bg{ fill: white; }",
+        ".prim-frst-stu-rect{ fill: black; }",
+        ".prim-frst-stu-line{ stroke: black; stroke-width: 1.5; }",
+        ".prim-frst-stu-model{ fill: red; stroke: black; stroke-width: 1; }",
+        ".prim-frst-stu-model-refline{ stroke: black; stroke-width: 1; }",
+        ".prim-frst-stu-g:hover .prim-frst-stu-bg{ fill: whitesmoke; }",
         "</style>"
     ].join('\n'),
-
-    sample: {
-        "model": {
-        "random": {
-            "TE": -0.5217,
-            "lower": 0.411,
-            "name": "Random effects model",
-            "seTE": 0.1878,
-            "sm": 0.594,
-            "upper": 0.858
-        }
-        },
-        "stus": [
-        {
-            "TE": -0.3978,
-            "lower": 0.442,
-            "name": "Adding Raskob et al (k=1)",
-            "seTE": 0.2135,
-            "sm": 0.672,
-            "upper": 1.021
-        },
-        {
-            "TE": -0.4875,
-            "lower": 0.422,
-            "name": "Adding Young et al (k=2)",
-            "seTE": 0.1918,
-            "sm": 0.614,
-            "upper": 0.894
-        },
-        {
-            "TE": -0.7358,
-            "lower": 0.24,
-            "name": "Adding McBane et al (k=3)",
-            "seTE": 0.3526,
-            "sm": 0.479,
-            "upper": 0.956
-        },
-        {
-            "TE": -0.5217,
-            "lower": 0.411,
-            "name": "Adding Young et al (k=4)",
-            "seTE": 0.1878,
-            "sm": 0.594,
-            "upper": 0.858
-        }
-        ]
-    },
 
     _x_scale: function(v) {
         var x = this.x_scale(v);
@@ -101,6 +53,9 @@ return {
         if (x.toString() == 'NaN') {
             return 0;
         } else {
+            if (x < 0) {
+                return 0;
+            }
             return x;
         }
     },
@@ -134,19 +89,9 @@ return {
         this.data = data;
         this.cfg = cfg;
 
-        if (this.cfg.mode == 'pwma_incd') {
-            this.attr_TE = 'bt_ab_TE';
-            this.attr_lower = 'bt_ab_lower';
-            this.attr_upper = 'bt_ab_upper';
-        } else {
-            this.attr_TE = 'bt_TE';
-            this.attr_lower = 'bt_lower';
-            this.attr_upper = 'bt_upper';
-        }
-
         // update the height of svg according to number of studies
-        // 6 is the number of lines of header and footers
-        this.height = this.row_height * (this.data.stus.length + 6.5);
+        // 8 is the number of lines of header and footers
+        this.height = this.row_height * (this.data.stus.length + 8);
         this.svg.attr('height', this.height);
 
         // show header
@@ -154,6 +99,9 @@ return {
         
         // show studies
         this._draw_study_vals();
+        
+        // show the model text
+        this._draw_heter();
 
         // show the plot
         this._draw_forest();
@@ -161,6 +109,19 @@ return {
     },
 
     _draw_header: function() {
+        this.svg.append('text')
+            .attr('class', this.css.txt_bd)
+            .attr('x', this.cols[3].x)
+            .attr('y', this.row_height)
+            .attr('text-anchor', "end")
+            .text('Treatment');
+        
+        this.svg.append('text')
+            .attr('class', this.css.txt_bd)
+            .attr('x', this.cols[5].x)
+            .attr('y', this.row_height)
+            .attr('text-anchor', "end")
+            .text('Control');
         
         for (var i = 0; i < this.cols.length; i++) {
             var col = this.cols[i];
@@ -187,7 +148,7 @@ return {
             var stu = this.data.stus[i];
             var g = this.svg.append('g')
                 .attr('class', this.css.stu_g)
-                .attr('transform', 'translate(0, ' + (this.row_height * (2 + i)) + ')');
+                .attr('transform', 'translate(0, ' + (this.row_height * (3 + i)) + ')');
 
             // add a background for display
             g.append('rect')
@@ -196,14 +157,38 @@ return {
                 .attr('y', 0)
                 .attr('width', this.width)
                 .attr('height', this.row_height);
+
             for (var j = 0; j < this.cols.length; j++) {
                 var col = this.cols[j];
-                g.append('text')
+                var txt = this.get_txt_by_col(stu, j);
+
+                // special rule for the study name
+                var _txt = txt;
+                if (j == 0) {
+                    if (txt.length > 21) {
+                        _txt = txt.substring(0, 21) + ' ...'
+                    }
+                }
+                var elem = g.append('text')
                     .attr('class', this.css.txt_nm)
                     .attr('x', col.x + (col.align=='start'? 0 : col.width))
                     .attr('y', this.row_height - this.row_txtmb)
                     .attr('text-anchor', col.align)
-                    .text(this.get_txt_by_col(stu, j));
+                    .text(_txt);
+
+                // bind event to the firt item
+                if (j == 0) {
+                    // this is the first item
+                    elem.attr('pid', stu.pid);
+
+                    // bind click
+                    elem.on('click', function() {
+                        // var d = d3.select(this);
+                        // console.log('* clicked', d);
+                        var e = $(this);
+                        console.log('* clicked paper', e.attr('pid'));
+                    });
+                }
             }
         }
 
@@ -212,7 +197,7 @@ return {
             var stu = this.data.model.random;
             var g = this.svg.append('g')
                 .attr('class', this.css.stu_g)
-                .attr('transform', 'translate(0, ' + (this.row_height * (3 + this.data.stus.length)) + ')');
+                .attr('transform', 'translate(0, ' + (this.row_height * (4 + this.data.stus.length)) + ')');
 
             // add a background for display
             g.append('rect')
@@ -233,15 +218,46 @@ return {
         }
     },
 
+    _draw_heter: function() {
+        // show the heterogeneity
+        var g_heter = this.svg.append('g')
+            .attr('transform', 'translate(0, ' + (this.row_height * (5 + this.data.stus.length)) + ')');
+        var t_heter = g_heter.append('text')
+            .attr('class', this.css.txt_nm)
+            .attr('x', 0)
+            .attr('y', this.row_height - this.row_txtmb)
+            .attr('text-anchor', 'start');
+
+        // add the subtext
+        t_heter.append('tspan').text('Heterogeneity: ');
+        t_heter.append('tspan').text('I').attr('class', this.css.txt_mt);
+        t_heter.append('tspan').text('2').attr('class', this.css.txt_mt + ' ' + this.css.txt_sm).attr('baseline-shift', 'super');
+        var txt_i2 = (this.data.heterogeneity.i2 * 100).toFixed(0) + '%';
+        t_heter.append('tspan').text('=' + txt_i2);
+        t_heter.append('tspan').text(', ');
+
+        // add tau2
+        t_heter.append('tspan').text('τ');
+        t_heter.append('tspan').text('2').attr('class', this.css.txt_mt + ' ' + this.css.txt_sm).attr('baseline-shift', 'super');
+        var txt_tau2 = (this.data.heterogeneity.tau2).toFixed(4) 
+        t_heter.append('tspan').text('=' + txt_tau2);
+        t_heter.append('tspan').text(', ');
+
+        // add p
+        t_heter.append('tspan').text('p').attr('class', this.css.txt_mt);
+        var txt_p = (this.data.heterogeneity.p).toFixed(2) 
+        t_heter.append('tspan').text('=' + txt_p);
+    },
+
     _draw_forest: function() {
         // first, make the scale to map values to x value
         this.x_scale = d3.scaleLog()
             .domain([1e-2, 1e2])
-            .range([0, this.cols[1].width]);
+            .range([0, this.cols[7].width]);
 
-        this.y_scale = (function(fig) {
+        this.y_scale = (function(fig){
             return function(i) {
-                return fig.row_height * (2.5 + i);
+                return fig.row_height * (3.5 + i);
             }
         })(this);
 
@@ -250,16 +266,15 @@ return {
             .ticks(5, '~g')
             .tickValues([1e-2,1e-1,1e0,1e1,1e2]);
         this.svg.append('g')
-            .attr('transform', 'translate('+(this.cols[1].x + this.row_frstml)+', '+(this.row_height * (5 + this.data.stus.length))+')')
+            .attr('transform', 'translate('+(this.cols[7].x + this.row_frstml)+', '+(this.row_height * (6 + this.data.stus.length))+')')
             .call(this.xAxis);
 
         // draw the middle line
         var g_forest = this.svg.append('g')
-            .attr('transform', 'translate('+(this.cols[1].x + this.row_frstml)+', 0)');
+            .attr('transform', 'translate('+(this.cols[7].x + this.row_frstml)+', 0)');
 
         g_forest.append('path')
             .datum([ [1, -0.5], [1, this.data.stus.length + 2.5] ])
-            .attr('id', 'middle_line')
             .attr('stroke', 'black')
             .attr('stroke-width', .8)
             .attr('d', d3.line()
@@ -268,21 +283,21 @@ return {
                         return fig._x_scale(d[0]); 
                     }
                 })(this))
-                .y((function(fig) {
+                .y((function(fig){
                     return function(d) { 
-                        return fig.y_scale(d[1]); 
+                        return fig.y_scale(d[1]);
                     }
                 })(this))
             );
 
         // draw each study
-        this.svg.selectAll('g.cumu-frst-stu-item')
+        this.svg.selectAll('g.prim-frst-stu-item')
             .data(this.data.stus)
             .join("g")
-            .attr('class', 'cumu-frst-stu-item')
-            .attr('transform', (function(fig) {
+            .attr('class', 'prim-frst-stu-item')
+            .attr('transform', (function(fig){
                 return function(d, i) {
-                    var trans_x = fig.cols[1].x + fig.row_frstml;
+                    var trans_x = fig.cols[7].x + fig.row_frstml;
                     var trans_y = fig.y_scale(i);
                     return 'translate('+trans_x+','+trans_y+')';
                 }
@@ -291,23 +306,24 @@ return {
                 return function(d, i) {
                     // console.log(i, d);
                     // add the rect
-                    var s = fig.mark_size;
-                    var x = fig._x_scale(d[fig.attr_TE]) - s/2;
+                    var s = fig.row_height * d.w_random;
+                    s = s > 2? s : 2;
+                    var x = fig._x_scale(d.bt_TE) - s/2;
                     var y = - s / 2;
                     d3.select(this)
                         .append('rect')
-                        .attr('class', 'cumu-frst-stu-rect')
+                        .attr('class', 'prim-frst-stu-rect')
                         .attr('x', x)
                         .attr('y', y)
                         .attr('width', s)
                         .attr('height', s);
     
                     // add the line
-                    var x1 = fig._x_scale(d[fig.attr_lower]);
-                    var x2 = fig._x_scale(d[fig.attr_upper]);
+                    var x1 = fig._x_scale(d.bt_lower);
+                    var x2 = fig._x_scale(d.bt_upper);
                     d3.select(this)
                         .append('line')
-                        .attr('class', 'cumu-frst-stu-line')
+                        .attr('class', 'prim-frst-stu-line')
                         .attr('x1', x1)
                         .attr('x2', x2)
                         .attr('y1', 0)
@@ -316,14 +332,14 @@ return {
             })(this));
 
         // draw the model ref line
-        var xr1 = this._x_scale(this.data.model.random[this.attr_TE]);
+        var xr1 = this._x_scale(this.data.model.random.bt_TE);
         var xr2 = xr1;
         var yr1 = this.y_scale(-0.5);
         var yr2 = this.y_scale(this.data.stus.length + 2.5)
         this.svg.append('g')
-            .attr('transform', 'translate('+(this.cols[1].x + this.row_frstml)+', 0)')
+            .attr('transform', 'translate('+(this.cols[7].x + this.row_frstml)+', 0)')
             .append('line')
-            .attr('class', 'cumu-frst-stu-model-refline')
+            .attr('class', 'prim-frst-stu-model-refline')
             .attr('stroke-dasharray', '3,3')
             .attr('x1', xr1)
             .attr('x2', xr2)
@@ -331,9 +347,9 @@ return {
             .attr('y2', yr2);
 
         // draw the model diamond
-        var x0 = this._x_scale(this.data.model.random[this.attr_lower]);
-        var xc = this._x_scale(this.data.model.random[this.attr_TE]);
-        var x1 = this._x_scale(this.data.model.random[this.attr_upper]);
+        var x0 = this._x_scale(this.data.model.random.bt_lower);
+        var xc = this._x_scale(this.data.model.random.bt_TE);
+        var x1 = this._x_scale(this.data.model.random.bt_upper);
         var y0 = this.row_txtmb;
         var yc = this.row_height / 2;
         var y1 = this.row_height - this.row_txtmb;
@@ -345,19 +361,31 @@ return {
             'Z';
 
         this.svg.append('g')
-            .attr('transform', 'translate('+(this.cols[1].x + this.row_frstml)+', '+(this.row_height * (3 + this.data.stus.length))+')')
+            .attr('transform', 'translate('+(this.cols[7].x + this.row_frstml)+', '+(this.row_height * (4 + this.data.stus.length))+')')
             .append('path')
             .attr('d', path_d)
-            .attr('class', 'cumu-frst-stu-model');
+            .attr('class', 'prim-frst-stu-model');
     },
 
     get_txt_by_col: function(obj, idx) {
         switch(idx) {
             case 0: return obj.name;
-            // case 1 is the figure, so no text
-            case 1: return '';
-            case 2: return obj[this.attr_TE].toFixed(2);
-            case 3: return '['+obj[this.attr_lower].toFixed(2)+'; '+obj[this.attr_upper].toFixed(2)+']';
+            case 1: return obj.Et;
+            case 2: return obj.Nt;
+            case 3: return obj.Ec;
+            case 4: return obj.Nc;
+            case 5: return obj.bt_TE.toFixed(2);
+            case 6: return '['+obj.bt_lower.toFixed(2)+'; '+obj.bt_upper.toFixed(2)+']';
+
+            // case 7 is the figure, so no text
+            case 7: return ''; 
+            case 8: 
+                if (obj.hasOwnProperty('w')) {
+                    // this is the model
+                    return '100%';
+                } else {
+                    return (obj['w_random'] * 100).toFixed(1) + '%';
+                }
         }
         return '';
     },
@@ -366,6 +394,6 @@ return {
         $(this.plot_id).html('');
         this.init();
     }
-};// end of fig obj
-} // end of make_fig
-} // end of fgmk_cumu_forest
+};
+}
+}
