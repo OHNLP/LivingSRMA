@@ -725,7 +725,20 @@ def create_paper(project_id, pid,
     db.session.commit()
 
     return paper
-    
+
+
+def update_paper_pub_date(paper_id, pub_date):
+    '''
+    Update the paper pub_date
+    '''
+    paper = get_paper_by_id(paper_id)
+    paper.pub_date = pub_date
+
+    db.session.add(paper)
+    db.session.commit()
+
+    return paper
+
 
 def update_paper_rct_result_by_keystr_and_seq_num(keystr, seq_num):
     '''
@@ -861,6 +874,18 @@ def get_paper_by_keystr_and_seq(keystr, seq_num):
     if project is None:
         return None
     paper = get_paper_by_seq(project.project_id, seq_num)
+
+    return paper
+
+
+def get_paper_by_keystr_and_pid(keystr, pid):
+    '''
+    Get a paper detail by the keystr and its pid
+    '''
+    project = get_project_by_keystr(keystr)
+    if project is None:
+        return None
+    paper = get_paper_by_project_id_and_pid(project.project_id, pid)
 
     return paper
 

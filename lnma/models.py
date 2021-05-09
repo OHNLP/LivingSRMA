@@ -318,6 +318,26 @@ class Paper(db.Model):
         '''
         return util.get_year(self.pub_date)
 
+    
+    def is_pmid(self):
+        '''
+        Get the flag of is pmid
+
+        We could use pmid for a lot of things
+        '''
+        pid_type = self.pid_type.upper()
+
+        if 'OVID' in pid_type or \
+            'PMID' in pid_type or \
+            'PUBMED' in pid_type:
+
+            if util.is_valid_pmid(self.pid):
+                return True
+            else:
+                return False
+
+        return False
+        
 
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}

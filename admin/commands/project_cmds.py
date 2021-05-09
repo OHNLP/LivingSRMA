@@ -7,7 +7,7 @@ from nubia import command, argument, context
 from prettytable import PrettyTable
 
 # app settings
-from lnma import db, create_app
+from lnma import db, create_app, srv_paper
 from lnma.models import *
 from lnma import dora
 from lnma import ss_state
@@ -94,3 +94,19 @@ class Project:
         print('* imported %s studies in itable!' % (
             len(itable.data)
         ))
+    
+
+    @command
+    @argument("keystr", type=str, description="The keystr for a project")
+    @argument("are_you_sure", type=str, description="yes for final confirmation")
+    def update_pub_date(self, keystr:str, are_you_sure:str):
+        '''
+        Update the pub_date for those included in SR
+        '''
+        if are_you_sure != 'yes':
+            print('* update cancelled')
+            return 
+
+        srv_paper.update_all_srma_paper_pub_date(keystr)
+
+        print('* updated pub date!')
