@@ -387,7 +387,6 @@ class Paper(db.Model):
         Return the very very simple data of this paper
         '''
         d = self.as_simple_dict()
-        del d['meta']
         del d['paper_id']
         del d['pid_type']
         del d['project_id']

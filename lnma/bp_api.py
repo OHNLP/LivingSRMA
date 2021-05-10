@@ -66,6 +66,9 @@ def apikey_post_required(f):
 def index():
     return 'Data API Service'
 
+#####################################################################
+# RESTful APIs
+#####################################################################
 
 @bp.route('/r/paper/<keystr>/<pid>', methods=['GET'])
 @apikey_get_required
@@ -83,6 +86,10 @@ def r_paper(keystr, pid):
 
     return jsonify(paper.as_dict())
 
+
+#####################################################################
+# API for upload decisions
+#####################################################################
 
 @bp.route('/get_papers', methods=['GET', 'POST'])
 @apikey_post_required
