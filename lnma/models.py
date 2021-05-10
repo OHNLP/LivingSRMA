@@ -401,7 +401,7 @@ class Paper(db.Model):
         '''
         Return the EndNote XML format fragment
         '''
-        if self.meta['raw_type'] == 'endnote_xml':
+        if 'raw_type' in self.meta and self.meta['raw_type'] == 'endnote_xml':
             # this paper is imported by endnote
             return self.meta['xml']
             
