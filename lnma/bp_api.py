@@ -6,6 +6,7 @@ from flask import request
 from flask import jsonify
 from flask import render_template
 from flask import current_app
+from flask import abort
 
 
 from lnma.models import Paper
@@ -13,22 +14,40 @@ from lnma import dora
 
 bp = Blueprint("api", __name__, url_prefix="/api")
 
+apikey_set = set([
+    '7323590e-577b-4f46-b19f-3ec402829bd6',
+    '9bebaa87-983d-42e4-ad70-4430c29aa886',
+    'a8c0c749-7263-4072-a313-99ccc26569d3'
+])
 
-def apikey_required(f):
+
+def apikey_get_required(f):
     '''
     Check the APIKEY 
     '''
     @wraps(f)
     def wrap(*args, **kwargs):
-        if request.method=='GET':
-            return f(*args, **kwargs)
-
         # check the API Keys here
-        apikey_set = set([
-            '7323590e-577b-4f46-b19f-3ec402829bd6',
-            '9bebaa87-983d-42e4-ad70-4430c29aa886',
-            'a8c0c749-7263-4072-a313-99ccc26569d3'
-        ])
+        apikey = request.args.get('apikey', '').strip()
+        if apikey not in apikey_set:
+            ret = {
+                'success': False,
+                'msg': 'Unauthorized request'
+            }
+            return jsonify(ret)
+
+        return f(*args, **kwargs)
+
+    return wrap
+
+
+def apikey_post_required(f):
+    '''
+    Check the APIKEY 
+    '''
+    @wraps(f)
+    def wrap(*args, **kwargs):
+        # check the API Keys here
         apikey = request.form.get('apikey', '').strip()
         if apikey not in apikey_set:
             ret = {
@@ -47,8 +66,25 @@ def index():
     return 'Data API Service'
 
 
+@bp.route('/r/paper/<keystr>/<pid>', methods=['GET'])
+@apikey_get_required
+def r_paper(keystr, pid):
+    '''
+    Restful Style Resource API for paper
+    '''
+    paper = dora.get_paper_by_keystr_and_pid(
+        keystr, pid
+    )
+
+    # what?
+    if paper is None:
+        abort(404, description="Resource not found")
+
+    return jsonify(paper.as_simple_dict())
+
+
 @bp.route('/get_papers', methods=['GET', 'POST'])
-@apikey_required
+@apikey_post_required
 def get_papers():
     '''
     Get papers
@@ -82,7 +118,7 @@ def get_papers():
 
 
 @bp.route('/set_pred_decisions', methods=['GET', 'POST'])
-@apikey_required
+@apikey_post_required
 def set_pred_decisions():
     '''
     Set the prediction
@@ -112,9 +148,14 @@ def set_pred_decisions():
         return jsonify(ret)
     
     # extract data
+    # the rs is a list of predictions
+    # [
+    #   { 'pid': 12345678, 'pred': 'e' },
+    # ]
     try:
         rs = request.form.get('rs')
         rs = json.loads(rs)
+
     except Exception as err:
         print('wrong rs:', err)
         ret['msg'] = 'Input data is missing or not valid JSON format.'

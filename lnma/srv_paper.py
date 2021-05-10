@@ -6,6 +6,24 @@ from lnma import util
 from lnma import dora
 from lnma import ss_state
 
+
+def set_paper_pred(keystr, pid, model_id, rs):
+    '''
+    Set the paper prediction
+    '''
+    paper = dora.get_paper_by_keystr_and_pid(
+        keystr, pid
+    )
+
+    # hmmm ... why?
+    if paper is None:
+        return False, None
+
+    # set the 
+
+    return True, paper
+    
+
 def update_paper_pub_date(keystr, pid):
     '''
     Update the pub_date for the given paper in a project
