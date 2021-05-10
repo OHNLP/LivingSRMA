@@ -12,16 +12,12 @@ from flask import abort
 from lnma.models import Paper
 from lnma import dora
 from lnma import srv_paper
+from lnma import settings
 
 
 bp = Blueprint("api", __name__, url_prefix="/api")
 
-apikey_set = set([
-    '7323590e-577b-4f46-b19f-3ec402829bd6',
-    '9bebaa87-983d-42e4-ad70-4430c29aa886',
-    'a8c0c749-7263-4072-a313-99ccc26569d3'
-])
-
+apikey_set = settings.API_SYSTEM_APIKEYS
 
 def apikey_get_required(f):
     '''
@@ -105,7 +101,7 @@ def get_papers():
 
     # project keystr
     keystr = request.form.get('ks')
-    if keystr not in set(['IO', 'RCC', 'LBR', 'CAT']):
+    if keystr not in set(['IO', 'RCC', 'LBR', 'CAT', 'TEST']):
         ret['msg'] = 'Unsupported ks value'
         return jsonify(ret)
 
@@ -143,7 +139,7 @@ def set_pred_decisions():
     mi = request.form.get('mi', '').strip()
 
     # check the keystr
-    if keystr not in set(['IO', 'RCC', 'LBR', 'CAT']):
+    if keystr not in set(['IO', 'RCC', 'LBR', 'CAT', 'TEST']):
         ret['msg'] = 'Unsupported ks value'
         return jsonify(ret)
 
