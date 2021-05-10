@@ -147,131 +147,170 @@ canvas{
 
 </div>
 <!-- scripts -->
-<script src="./static/lib/particles-js/particles.min.js"></script>
+<!-- <script src="./static/lib/particles-js/particles.min.js"></script> -->
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+
 <script>
-particlesJS('particles-js', {
-    "particles": {
-      "number": {
-        "value": 80,
-        "density": {
-          "enable": true,
-          "value_area": 800
-        }
-      },
-      "color": {
-        "value": "#ffffff"
-      },
-      "shape": {
-        "type": "circle",
-        "stroke": {
-          "width": 0,
-          "color": "#000000"
-        },
-        "polygon": {
-          "nb_sides": 5
-        }
-      },
-      "opacity": {
-        "value": 0.5,
-        "random": false,
-        "anim": {
-          "enable": false,
-          "speed": 1,
-          "opacity_min": 0.1,
-          "sync": false
-        }
-      },
-      "size": {
-        "value": 8,
-        "random": true,
-        "anim": {
-          "enable": false,
-          "speed": 40,
-          "size_min": 0.1,
-          "sync": false
-        }
-      },
-      "line_linked": {
-        "enable": true,
-        "distance": 150,
-        "color": "#ffffff",
-        "opacity": 0.4,
-        "width": 1
-      },
-      "move": {
-        "enable": true,
-        "speed": 2,
-        "direction": "none",
-        "random": false,
-        "straight": false,
-        "out_mode": "out",
-        "attract": {
-          "enable": false,
-          "rotateX": 600,
-          "rotateY": 1200
-        }
-      }
-    },
-    "interactivity": {
-      "detect_on": "canvas",
-      "events": {
-        "onhover": {
-          "enable": true,
-          "mode": "repulse"
-        },
-        "onclick": {
-          "enable": true,
-          "mode": "push"
-        },
-        "resize": true
-      },
-      "modes": {
-        "grab": {
-          "distance": 400,
-          "line_linked": {
-            "opacity": 1
-          }
-        },
-        "bubble": {
-          "distance": 400,
-          "size": 40,
-          "duration": 2,
-          "opacity": 8,
-          "speed": 3
-        },
-        "repulse": {
-          "distance": 200
-        },
-        "push": {
-          "particles_nb": 4
-        },
-        "remove": {
-          "particles_nb": 2
-        }
-      }
-    },
-    "retina_detect": true,
-    "config_demo": {
-      "hide_card": false,
-      "background_color": "#b61924",
-      "background_image": "",
-      "background_position": "50% 50%",
-      "background_repeat": "no-repeat",
-      "background_size": "cover"
-    }
-  }
+// particlesJS('particles-js', {
+//     "particles": {
+//       "number": {
+//         "value": 80,
+//         "density": {
+//           "enable": true,
+//           "value_area": 800
+//         }
+//       },
+//       "color": {
+//         "value": "#ffffff"
+//       },
+//       "shape": {
+//         "type": "circle",
+//         "stroke": {
+//           "width": 0,
+//           "color": "#000000"
+//         },
+//         "polygon": {
+//           "nb_sides": 5
+//         }
+//       },
+//       "opacity": {
+//         "value": 0.5,
+//         "random": false,
+//         "anim": {
+//           "enable": false,
+//           "speed": 1,
+//           "opacity_min": 0.1,
+//           "sync": false
+//         }
+//       },
+//       "size": {
+//         "value": 8,
+//         "random": true,
+//         "anim": {
+//           "enable": false,
+//           "speed": 40,
+//           "size_min": 0.1,
+//           "sync": false
+//         }
+//       },
+//       "line_linked": {
+//         "enable": true,
+//         "distance": 150,
+//         "color": "#ffffff",
+//         "opacity": 0.4,
+//         "width": 1
+//       },
+//       "move": {
+//         "enable": true,
+//         "speed": 2,
+//         "direction": "none",
+//         "random": false,
+//         "straight": false,
+//         "out_mode": "out",
+//         "attract": {
+//           "enable": false,
+//           "rotateX": 600,
+//           "rotateY": 1200
+//         }
+//       }
+//     },
+//     "interactivity": {
+//       "detect_on": "canvas",
+//       "events": {
+//         "onhover": {
+//           "enable": true,
+//           "mode": "repulse"
+//         },
+//         "onclick": {
+//           "enable": true,
+//           "mode": "push"
+//         },
+//         "resize": true
+//       },
+//       "modes": {
+//         "grab": {
+//           "distance": 400,
+//           "line_linked": {
+//             "opacity": 1
+//           }
+//         },
+//         "bubble": {
+//           "distance": 400,
+//           "size": 40,
+//           "duration": 2,
+//           "opacity": 8,
+//           "speed": 3
+//         },
+//         "repulse": {
+//           "distance": 200
+//         },
+//         "push": {
+//           "particles_nb": 4
+//         },
+//         "remove": {
+//           "particles_nb": 2
+//         }
+//       }
+//     },
+//     "retina_detect": true,
+//     "config_demo": {
+//       "hide_card": false,
+//       "background_color": "#b61924",
+//       "background_image": "",
+//       "background_position": "50% 50%",
+//       "background_repeat": "no-repeat",
+//       "background_size": "cover"
+//     }
+//   }
 
-);
+// );
 
-var count_particles, stats, update;
-count_particles = document.querySelector('.js-count-particles');
-update = function() {
-    if (window.pJSDom[0].pJS.particles && window.pJSDom[0].pJS.particles.array) {
-        count_particles.innerText = window.pJSDom[0].pJS.particles.array.length;
+// var count_particles, stats, update;
+// count_particles = document.querySelector('.js-count-particles');
+// update = function() {
+//     if (window.pJSDom[0].pJS.particles && window.pJSDom[0].pJS.particles.array) {
+//         count_particles.innerText = window.pJSDom[0].pJS.particles.array.length;
+//     }
+//     requestAnimationFrame(update);
+// };
+// requestAnimationFrame(update);
+
+function reset_background() {
+
+    document.getElementById('particles-js').innerHTML = '';
+    var w = $(window).width();
+    var h = $(window).height();
+
+    for (let i = 0; i < 300; i++) {
+        var r = Math.round(Math.random() * 10 + 1);
+        var x = Math.round(Math.random() * w);
+        var y = Math.round(Math.random() * h);
+        var a = Math.random()/2 + 0.1;
+
+        // create a circle
+        var div = document.createElement('div');
+        var styles = [
+            'position:absolute;',
+            'background:white;',
+            'opacity:' + a + ';',
+            'top:' + y + 'px;',
+            'left:' + x + 'px;',
+            'width: ' + (r*2) + 'px;',
+            'height: ' + (r*2) + 'px;',
+            'border-radius:' + r + 'px;'
+        ];
+        styles = styles.join('');
+        div.setAttribute('style', styles);
+
+        document.getElementById('particles-js').appendChild(div);
     }
-    requestAnimationFrame(update);
-};
-requestAnimationFrame(update);
+}
+
+reset_background();
+
+$(window).on('resize', function(){
+    reset_background();
+});
 </script>
 
 </body>
