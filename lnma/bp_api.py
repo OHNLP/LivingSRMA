@@ -11,6 +11,8 @@ from flask import abort
 
 from lnma.models import Paper
 from lnma import dora
+from lnma import srv_paper
+
 
 bp = Blueprint("api", __name__, url_prefix="/api")
 
@@ -48,6 +50,9 @@ def apikey_post_required(f):
     @wraps(f)
     def wrap(*args, **kwargs):
         # check the API Keys here
+        if request.method == 'GET':
+            return f(*args, **kwargs)
+
         apikey = request.form.get('apikey', '').strip()
         if apikey not in apikey_set:
             ret = {
@@ -80,7 +85,7 @@ def r_paper(keystr, pid):
     if paper is None:
         abort(404, description="Resource not found")
 
-    return jsonify(paper.as_simple_dict())
+    return jsonify(paper.as_dict())
 
 
 @bp.route('/get_papers', methods=['GET', 'POST'])
@@ -161,19 +166,42 @@ def set_pred_decisions():
         ret['msg'] = 'Input data is missing or not valid JSON format.'
         return jsonify(ret) 
 
+    if len(rs) > 200:
+        ret['msg'] = 'Too many records.'
+        return jsonify(ret) 
+
     # do the implementation
     ps = []
-
+    cnt = 0
     try:
         for r in rs:
+            if 'pid' in r:
+                # what?
+                success, paper = srv_paper.set_paper_pred(
+                    keystr, 
+                    r['pid'],
+                    mi,
+                    r
+                )
+                if paper is None: 
+                    msg = 'paper not found'
+                else:
+                    msg = ''
+
+            else:
+                success = False
+                msg = 'pid is missing'
+
             ps.append({
                 'pid': r['pid'],
-                'pred': r['pred'],
-                'flag': True
+                'flag': success,
+                'msg': msg
             })
 
+            if success: cnt += 1
+
         ret['success'] = True
-        ret['msg'] = 'Not implemented yet'
+        ret['msg'] = 'Updated %s/%s records' % (cnt, len(rs))
         ret['data'] = ps
 
     except Exception as err:

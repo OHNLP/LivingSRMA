@@ -2,12 +2,13 @@ import time
 
 from tqdm import tqdm 
 
+from lnma import settings
 from lnma import util
 from lnma import dora
 from lnma import ss_state
 
 
-def set_paper_pred(keystr, pid, model_id, rs):
+def set_paper_pred(keystr, pid, model_id, result):
     '''
     Set the paper prediction
     '''
@@ -19,7 +20,19 @@ def set_paper_pred(keystr, pid, model_id, rs):
     if paper is None:
         return False, None
 
-    # set the 
+    # check the `pred_dict` attribute in meta
+    if 'pred_dict' not in paper.meta:
+        # ok, this is a new record
+        paper.meta['pred_dict'] = {}
+
+        # put the existing result
+        if 'pred' in paper.meta and len(paper.meta['pred'])>0:
+            paper.meta['pred_dict'][settings.AI_MODEL_ROBOTSEARCH_RCT] = \
+                paper.meta['pred'][0]
+
+    # update the meta
+    paper.meta['pred_dict'][model_id] = result
+    dora._update_paper_meta(paper)
 
     return True, paper
     

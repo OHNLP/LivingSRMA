@@ -52,16 +52,22 @@ Set Prediction Decisions API Demo
                     <label for="rs" class="col-sm-3 col-form-label">rs</label>
                     <div class="col-sm-9">
                         <textarea class="form-control code" id="rs" rows="20" style="font-size: 9px;"></textarea>
-                        <small id="rsHelp" class="form-text text-muted">The JSON data for the prediction results.</small>
+                        <small id="rsHelp" class="form-text text-muted">
+                            The JSON data for the prediction results. <br>
+                            Each record must contain <b>pid</b> for system to identify a paper.<br>
+                            If a record doesn't contain pid, it will be ignored. <br>
+                            The attribute <b>result</b> is the decision by your model for this paper.<br>
+                            <b>data</b>attribute is optional, you could put anything (but don't too large) for more details. The object in this sample is just a demo. <br>
+                            <b>ATTENTION!</b> due to a lot of factors, the rs size limitation is <b>[[ config['settings'].API_SET_PRED_DECISIONS_MAX_RS ]]</b>, don't submit more than [[ config['settings'].API_SET_PRED_DECISIONS_MAX_RS ]] records per request.
+                        </small>
                     </div>
                 </div>
-
 
                 <div class="form-group row">
                     <label for="apikey" class="col-sm-3 col-form-label">apikey
                     </label>
                     <div class="col-sm-9">
-                        <input type="text" class="form-control" id="apikey" value="7323590e-577b-4f46-b19f-3ec402829bd6">
+                        <input type="text" class="form-control" id="apikey" value="">
                         <small id="apikeyHelp" class="form-text text-muted">
                             For the security of this service, API Key is required for authentication.
                         </small>
@@ -95,13 +101,9 @@ Set Prediction Decisions API Demo
 <script>
 
 var pred_sample = [{
-    pid: '2005129117', pred: 'e'
+    pid: '2005129117', result: 'e', data: { score: 0.33, version: 1.0 }
 }, {
-    pid: '2003445890', pred: 'e'
-}, {
-    pid: '631410403', pred: 'e'
-}, {
-    pid: '2004525227', pred: 'i'
+    pid: '2004525395', result: 'i', data: { score: 0.73, version: 1.0 }
 }];
 
 function get_data() {

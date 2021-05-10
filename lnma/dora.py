@@ -765,6 +765,27 @@ def _update_paper_rct_result(paper):
     # TODO catch exception
     pred = pred_rct(paper.title, paper.abstract)
     paper.meta['pred'] = pred['pred']
+
+    # and add to pred_dict
+    if 'pred_dict' not in paper.meta:
+        # ok, this is a new record
+        paper.meta['pred_dict'] = {}
+
+    paper.meta['pred_dict'][settings.AI_MODEL_ROBOTSEARCH_RCT] = pred['pred'][0]
+    
+    flag_modified(paper, "meta")
+    
+    # commit this
+    db.session.add(paper)
+    db.session.commit()
+
+    return paper
+
+
+def _update_paper_meta(paper):
+    '''
+    The internal function of updating meta 
+    '''
     flag_modified(paper, "meta")
     
     # commit this
