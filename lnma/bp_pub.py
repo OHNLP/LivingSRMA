@@ -3389,7 +3389,10 @@ def get_sof_pma_data_from_db_IO(is_calc_pma=True):
             
                 # make sure the data type is int
                 for col in int_cols:
-                    r[col] = __int(r[col])
+                    if col in r:
+                        r[col] = __int(r[col])
+                    else:
+                        r[col] = ''
                 
                 # add more attributes
                 r['has_GA']  = __notna(r['GA_Et'])
