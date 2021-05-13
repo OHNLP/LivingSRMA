@@ -738,6 +738,18 @@ def graphdata_evmap_json(prj):
     return jsonify(ret)
 
 
+@bp.route('/graphdata/<prj>/LATEST.json')
+def graphdata_latest_json(prj):
+    '''
+    Special rule for the LATEST.json
+
+    which is used for displaying some latest information
+    '''
+    result = dora.get_project_latest_stat_by_keystr(prj)
+
+    return jsonify(result)
+
+
 ###########################################################
 # Other utils
 ###########################################################
