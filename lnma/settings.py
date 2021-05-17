@@ -506,19 +506,19 @@ INPUT_FORMAT_TPL = {
             'name': 'All Grade',
             'attrs': [{
                 'abbr': 'GA_Et',
-                'name': 'Tx',
+                'name': 'Et',
                 'subs': None
             }, {
                 'abbr': 'GA_Nt',
-                'name': 'N',
+                'name': 'Nt',
                 'subs': None
             }, {
                 'abbr': 'GA_Ec',
-                'name': 'Placebo',
+                'name': 'Ec',
                 'subs': None
             }, {
                 'abbr': 'GA_Nc',
-                'name': 'n',
+                'name': 'Nc',
                 'subs': None
             }]
         }, {
@@ -526,11 +526,11 @@ INPUT_FORMAT_TPL = {
             'name': 'Grade 3/4',
             'attrs': [{
                 'abbr': 'G34_Et',
-                'name': 'Tx',
+                'name': 'Et',
                 'subs': None
             }, {
                 'abbr': 'G34_Ec',
-                'name': 'Placebo',
+                'name': 'Ec',
                 'subs': None
             }]
         }, {
@@ -538,11 +538,11 @@ INPUT_FORMAT_TPL = {
             'name': 'Grade 3 or higher',
             'attrs': [{
                 'abbr': 'G3H_Et',
-                'name': 'Tx',
+                'name': 'Et',
                 'subs': None
             }, {
                 'abbr': 'G3H_Ec',
-                'name': 'Placebo',
+                'name': 'Ec',
                 'subs': None
             }]
         }, {
@@ -550,11 +550,11 @@ INPUT_FORMAT_TPL = {
             'name': 'Grade 5 only',
             'attrs': [{
                 'abbr': 'G5N_Et',
-                'name': 'Tx',
+                'name': 'Et',
                 'subs': None
             }, {
                 'abbr': 'G5N_Ec',
-                'name': 'Placebo',
+                'name': 'Ec',
                 'subs': None
             }]
         }]
