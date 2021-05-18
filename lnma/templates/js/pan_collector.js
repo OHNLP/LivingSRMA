@@ -46,11 +46,13 @@ var pan_collector = {
                 remove_pdf: function(paper_id, file_id, folder, display_name) {
                     srv_pdfworker.remove_pdf(
                         paper_id, file_id, folder, display_name,
+
                         function(data) {
                             console.log('* removed', data)
                             jarvis.toast('Removed PDF file successfully');
-                            // update display
-                            pan_collector.update(data.paper);
+
+                            // update display and set to pdf tab
+                            pan_collector.update(data.paper, 'pdf');
                         }
                     );
                 },
@@ -141,7 +143,12 @@ var pan_collector = {
         return txt;
     },
 
-    update: function(paper) {
+    update: function(paper, show_tab) {
+        // set the default show tab to basic_info
+        if (typeof(show_tab) == 'undefined') {
+            show_tab = 'basic_info';
+        }
+
         // update data
         this.vpp.paper = paper;
 
@@ -152,7 +159,7 @@ var pan_collector = {
         }
 
         // update the normal UI
-        this.vpp.show_tab = 'basic_info';
+        this.vpp.show_tab = show_tab;
         this.vpp.$forceUpdate();
 
         // update the keywords highlight
@@ -244,10 +251,14 @@ var pan_collector = {
     },
 
     upload_pdfs: function() {
+        // get the current working paper paper_id
         var paper_id = this.vpp.paper.paper_id;
+
         // call pdfworker service to upload
         srv_pdfworker.update_form_data(
             '#form_pdf_files',
+
+            // the callback function
             function(data) {
                 console.log(data);
                 // enable the upload button
@@ -255,8 +266,9 @@ var pan_collector = {
 
                 if (data.success) {
                     jarvis.toast('Uploaded PDF for paper!');
-                    // update display
-                    pan_collector.update(data.paper);
+                    // update display and set to pdf tab
+                    pan_collector.update(data.paper, 'pdf');
+
                 } else {
                     toast('Error when uploading PDF, try later.', 'error')
                 }

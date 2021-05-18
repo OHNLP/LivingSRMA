@@ -23,6 +23,32 @@ var srv_pdfworker = {
             cache: false,
             processData: false,
             success: callback,
+            
+            // 2021-05-17: add a callback for upload progress bar
+            // thanks to https://stackoverflow.com/questions/15410265/file-upload-progress-bar-with-jquery
+            xhr: function() {
+                var xhr = new window.XMLHttpRequest();
+
+                xhr.upload.addEventListener("progress", function(evt) {
+                    if (evt.lengthComputable) {
+                        var percentComplete = evt.loaded / evt.total;
+                        percentComplete = parseInt(percentComplete * 100);
+                        // console.log(percentComplete);
+
+                        // show a percentage
+                        $('#pdf_upload_progress').html(
+                            percentComplete + '%'
+                        );
+
+                        if (percentComplete === 100) {
+
+                        }
+
+                    }
+                }, false);
+
+                return xhr;
+            }
         });
     },
 
