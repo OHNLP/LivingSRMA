@@ -68,6 +68,9 @@ html {
     background-color: rgb(204, 224, 228) !important;
 }
 
+.cursor-pointer {
+    cursor: pointer;
+}
 </style>
 
 <!-- jQuery UI Theme -->
@@ -171,22 +174,49 @@ html {
                     </div>
                 </div>
 
-                <div class="d-flex flex-column">
-                    <div class="chk-oc-h1">
-                        Pairwise Meta-Analysis
-                    </div>
-                    <div v-for="(group, group_name) in extract_tree.pwma">
+                <div class="d-flex flex-column"
+                    v-for="(oc_type, oc_type_abbr) in extract_tree"
+                    v-if="oc_type_abbr != 'itable'">
 
-                        <div class="chk-oc-h2">
-                            {{ group_name }}
+                    <div class="chk-oc-h1 d-flex flex-row justify-content-between cursor-pointer"
+                        v-on:click="on_click_toggle(extract_tree[oc_type_abbr])">
+                        <div class="ml-1">
+                            <i v-if="oc_type._is_shown" class="far fa-folder-open"></i>
+                            <i v-else class="far fa-folder"></i>
+                            &nbsp;
+                            {{ oc_type_abbr }}
                         </div>
-                        <div v-for="(cate, cate_name) in group">
+                    </div>
 
-                            <div class="chk-oc-h3">
-                                - {{ cate_name }}
+                    <div v-for="(group, group_abbr) in oc_type.groups"
+                        class="mt-1 mb-1"
+                        v-show="oc_type._is_shown">
+
+                        <div class="chk-oc-h2 d-flex flex-row justify-content-between cursor-pointer"
+                            v-on:click="on_click_toggle(extract_tree[oc_type_abbr].groups[group_abbr])">
+                            <div class="ml-1 font-weight-bold">
+                                <i v-if="group._is_shown" class="far fa-folder-open"></i>
+                                <i v-else class="far fa-folder"></i>
+                                &nbsp; 
+                                Group: {{ group_abbr }}
                             </div>
-                            <div v-for="oc in cate"
-                                v-if="!only_show_selected || working_paper_oc_selections[oc.abbr]"
+                        </div>
+
+                        <div v-for="(cate, cate_name) in group.cates"
+                            v-show="group._is_shown">
+
+                            <div class="chk-oc-h3 d-flex flex-row justify-content-between cursor-pointer"
+                                v-on:click="on_click_toggle(extract_tree[oc_type_abbr].groups[group_abbr].cates[cate_name])">
+                                <div class="ml-1">
+                                    <i v-if="cate._is_shown" class="far fa-folder-open"></i>
+                                    <i v-else class="far fa-folder"></i>
+                                    &nbsp;
+                                    - {{ cate_name }}
+                                </div>
+                            </div>
+
+                            <div v-for="(oc, oc_abbr) in cate.ocs"
+                                v-if="cate._is_shown && (!only_show_selected || working_paper_oc_selections[oc.abbr])"
                                 v-bind:id="'chk_oc_line_' + oc.abbr"
                                 class="chk-oc d-flex flex-row">
                                 <div>
@@ -293,6 +323,9 @@ var pan_ocpapers = {
         only_show_selected: false,
         show_working_paper_pan: false,
         show_working_paper_collector: false,
+
+        // for for type
+        show_oc: {},
 
         // data
         papers: null,
@@ -420,6 +453,10 @@ var pan_ocpapers = {
             $('#chk_oc_line_' + oc.abbr).addClass('chk-oc-extracting');
         },
 
+        on_click_toggle: function(it) {
+            it._is_shown = !it._is_shown;
+        },
+
         save_working_paper_selections: function() {
             var pid = this.working_paper.pid;
 
@@ -530,9 +567,9 @@ var pan_ocpapers = {
         */
         var extract_tree = {
             itable: null,
-            pwma: {},
-            subg: {},
-            nma: {}
+            // pwma: {},
+            // subg: {},
+            // nma: {}
         };
         
         for (let i = 0; i < data.extracts.length; i++) {
@@ -542,19 +579,36 @@ var pan_ocpapers = {
             var group = ext.meta.group;
             var cate = ext.meta.category;
 
+            this.vpp.show_oc[oc_type] = true;
+
             if (ext.oc_type == 'itable') {
                 extract_tree.itable = ext;
             } else {
-                // check the group
-                if (!extract_tree[oc_type].hasOwnProperty(group)) {
-                    extract_tree[oc_type][group] = {}
+                // check the type
+                if (!extract_tree.hasOwnProperty(oc_type)) {
+                    extract_tree[oc_type] = {
+                        _is_shown: true,
+                        groups: {}
+                    }
                 }
+
+                // check the group
+                if (!extract_tree[oc_type].groups.hasOwnProperty(group)) {
+                    extract_tree[oc_type].groups[group] = {
+                        _is_shown: true,
+                        cates: {}
+                    };
+                }
+
                 // check the cate
-                if (!extract_tree[oc_type][group].hasOwnProperty(cate)) {
-                    extract_tree[oc_type][group][cate] = []
+                if (!extract_tree[oc_type].groups[group].cates.hasOwnProperty(cate)) {
+                    extract_tree[oc_type].groups[group].cates[cate] = {
+                        _is_shown: true,
+                        ocs: {}
+                    }
                 }
                 // put this outcome to the cate
-                extract_tree[oc_type][group][cate].push(ext);
+                extract_tree[oc_type].groups[group].cates[cate].ocs[ext.abbr] = ext;
             }
         }
 

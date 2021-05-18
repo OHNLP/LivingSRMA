@@ -69,8 +69,12 @@
 
                         <select v-model="extract.meta.group"
                             class="form-control" id="input_analysis_group">
-                            <option value="primary">Primary Analysis</option>
-                            <option value="sensitivity">Sensitivity Analysis</option>
+                            <!-- <option value="primary">Primary Analysis</option> -->
+                            <!-- <option value="sensitivity">Sensitivity Analysis</option> -->
+                            <option v-for="group in project.settings.outcome.analysis_groups"
+                                v-bind:value="group.abbr">
+                                {{ group.name }}
+                            </option>
                         </select>
 
                         <small id="input_analysis_group_help" class="form-text text-muted">
