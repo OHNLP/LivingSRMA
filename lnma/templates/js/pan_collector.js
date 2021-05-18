@@ -145,6 +145,12 @@ var pan_collector = {
         // update data
         this.vpp.paper = paper;
 
+        // add is_pmid
+        if (paper.pid_type.indexOf('MEDLINE')>=0 ||
+            paper.pid_type.indexOf('PMID')>=0) {
+            paper.is_pmid = true;
+        }
+
         // update the normal UI
         this.vpp.show_tab = 'basic_info';
         this.vpp.$forceUpdate();

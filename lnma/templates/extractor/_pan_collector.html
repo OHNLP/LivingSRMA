@@ -50,8 +50,17 @@
                         v-html="paper.authors">
                     </p>
                     <p>
-                        PMID: 
-                        <a target="_blank" title="Show in " :href="'https://pubmed.ncbi.nlm.nih.gov/' + paper.pid ">{{ paper.pid }}</a> ({{ paper.pid_type }})
+                        {{ paper.pid_type }}: 
+                        <a v-if="paper.is_pmid"
+                            target="_blank" title="Show in PubMed" 
+                            :href="'https://pubmed.ncbi.nlm.nih.gov/' + paper.pid ">
+                            {{ paper.pid }}
+                        </a>
+                        <a v-else 
+                            target="_blank" title="Show in EMBASE"
+                            href="https://www.embase.com/">
+                            {{ paper.pid}}
+                        </a>
                     </p>
                     <p style="font-size: 1.2em; font-weight: bold;">Abstract</p>
                     <div style="font-size: 1em;" v-html="paper.abstract"></div>

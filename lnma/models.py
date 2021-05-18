@@ -328,6 +328,7 @@ class Paper(db.Model):
         pid_type = self.pid_type.upper()
 
         if 'OVID' in pid_type or \
+            'MEDLINE' in pid_type or \
             'PMID' in pid_type or \
             'PUBMED' in pid_type:
 
@@ -340,7 +341,17 @@ class Paper(db.Model):
         
 
     def as_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        # convert all basic attributes
+        ret = {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+        # add other values that not directly converted
+        ret['is_pmid'] = self.is_pmid()
+        ret['year'] = self.get_year()
+        ret['rct_id'] = self.get_rct_id()
+        ret['short_name'] = self.get_short_name()
+        ret['study_type'] = self.get_study_type()
+
+        return ret
 
     
     def as_simple_dict(self):
