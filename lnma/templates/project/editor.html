@@ -93,9 +93,9 @@ Project Editor
                         </a>
                     </li>
 
-                    <li class="nav-item">
+                    <!-- <li class="nav-item">
                         <a class="nav-link"
-                            id="tag_info_tab"
+                            id="prisma_info_tab"
                             data-toggle="tab"
                             role="tab" 
                             href="#prisma_info_panel"
@@ -104,11 +104,11 @@ Project Editor
                             <i class="fa fa-project-diagram"></i>
                             PRISMA
                         </a>
-                    </li>
+                    </li> -->
 
                     <li class="nav-item">
                         <a class="nav-link"
-                            id="tag_info_tab"
+                            id="advanced_mode_tab"
                             data-toggle="tab"
                             role="tab" 
                             href="#advanced_mode_panel"
@@ -376,7 +376,7 @@ Project Editor
                         <b>DO NOT</b> edit anything below if you are not sure what would be affected.
                     </p>
                     <form method="POST" action="[[ url_for('project.api_set_settings') ]]"
-                        onsubmit="return confirm('Do you really want to submit the form?');">
+                        onsubmit="return jarvis.on_submit_advanced_mode()">
                         <div class="row">
                             <div class="col-9">
                                 <div class="form-group">
@@ -446,8 +446,36 @@ var jarvis = {
         var myTextArea = document.getElementById('form_textarea_settings');
         myCodeMirror = CodeMirror.fromTextArea(myTextArea, {
             lineWrapping: true,
-            mode: 'json'
+            mode: 'javascript'
         });
+
+        // switch tab
+        // ^ means starting, meaning only match the first hash
+        var hash = location.hash.replace(/^#/, '');
+        if (hash) {
+            $('#' + hash + '_tab').tab('show');
+        } 
+
+    },
+
+    on_submit_advanced_mode: function() {
+        // check the json format first
+        try {
+            JSON.parse(myCodeMirror.getValue());
+        } catch (err) {
+            console.log(err);
+            toast('The settings are not a valid JSON text, please review.\n' + err, 'error');
+            return false;
+        }
+
+        // final confirm
+        var ret = confirm('Do you really want to submit the settings?');
+
+        return ret;
+    },
+
+    is_valid_project_setting_json: function() {
+
     }
 };
 

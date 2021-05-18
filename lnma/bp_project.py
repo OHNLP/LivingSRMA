@@ -172,7 +172,7 @@ def api_set_criterias():
     )
 
     flash('Saved inclusion/exclusion criterias!')
-    return redirect(url_for('project.editor'))
+    return redirect(url_for('project.editor', _anchor="ie_criteria_info"))
 
 
 @bp.route('/api/set_exclusion_reasons', methods=['GET', 'POST'])
@@ -211,7 +211,7 @@ def api_set_exclusion_reasons():
     flash('Saved %s exclusion_reasons!' % (
         len(exclusion_reasons_cleaned),
     ))
-    return redirect(url_for('project.editor'))
+    return redirect(url_for('project.editor', _anchor="ex_reason_info"))
 
 
 @bp.route('/api/set_highlight_keywords', methods=['GET', 'POST'])
@@ -266,7 +266,7 @@ def api_set_highlight_keywords():
         len(highlight_keywords['inclusion']), 
         len(highlight_keywords['exclusion']), 
     ))
-    return redirect(url_for('project.editor'))
+    return redirect(url_for('project.editor', _anchor="ie_keywords_info"))
 
 
 @bp.route('/api/set_tags', methods=['GET', 'POST'])
@@ -301,7 +301,7 @@ def api_set_tags():
     is_success, project = dora.set_project_tags(project_id, tags_cleaned)
 
     flash('Saved %s tags!' % (len(tags_cleaned)) )
-    return redirect(url_for('project.editor'))
+    return redirect(url_for('project.editor', _anchor="tag_info"))
 
 
 @bp.route('/api/set_pdf_keywords', methods=['GET', 'POST'])
@@ -336,7 +336,7 @@ def api_set_pdf_keywords():
     is_success, project = dora.set_project_pdf_keywords(project_id, keywords_cleaned)
 
     flash('Saved %s PDF keywords!' % (len(keywords_cleaned)) )
-    return redirect(url_for('project.editor'))
+    return redirect(url_for('project.editor', _anchor="pdf_keywords"))
 
 
 @bp.route('/api/set_settings', methods=['GET', 'POST'])
@@ -372,4 +372,4 @@ def api_set_settings():
     )
 
     flash('Saved new settings')
-    return redirect(url_for('project.editor'))
+    return redirect(url_for('project.editor', _anchor="advanced_mode"))
