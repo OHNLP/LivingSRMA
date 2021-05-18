@@ -266,6 +266,13 @@ srv_analyzer.project = [[ project_json_str|safe ]];
 srv_extractor.project = [[ project_json_str|safe ]];
 
 var pan_outcomes = {
+
+    data_empty: {
+        pwma: { outcomes: {} },
+        subg: { outcomes: {} },
+        nma: { outcomes: {} },
+        itable: { outcomes: {} },
+    },
     vpp_id: '#pan_outcomes',
     vpp: null,
     vpp_data: {
@@ -275,20 +282,18 @@ var pan_outcomes = {
             nam: { total: 0 },
             itable: { total: 0 },
         },
-        data: JSON.parse(JSON.stringify(this.data_empty)),
+        data: {
+        pwma: { outcomes: {} },
+        subg: { outcomes: {} },
+        nma: { outcomes: {} },
+        itable: { outcomes: {} },
+    },
 
         // bind the project information to the outcome panel
         project: [[ project_json_str|safe ]],
 
         // for update sub-comp
         force_update: false
-    },
-
-    data_empty: {
-        pwma: { outcomes: {} },
-        subg: { outcomes: {} },
-        nma: { outcomes: {} },
-        itable: { outcomes: {} },
     },
 
     load: function() {
@@ -375,9 +380,15 @@ var pan_outcomes = {
         var meta = JSON.parse(JSON.stringify(srv_extractor.tpl.oc_type[oc_type][tpl]));
         meta.full_name = text;
         meta.abbr = abbr;
+
         // Primary, default or others
         meta.group = group;
         meta.category = category;
+
+        // set the default input format
+        if (srv_extractor.project.settings.outcome.default_setting.hasOwnProperty('input_format')) {
+            meta.input_format = srv_extractor.project.settings.outcome.default_setting.input_format;
+        }
 
         // copy the meta.cate_attr
         meta.cate_attrs = JSON.parse(JSON.stringify(srv_extractor.tpl.input_format[oc_type][meta.input_format]));
@@ -398,6 +409,12 @@ var pan_outcomes = {
                 console.log(data);
                 // update UI
                 pan_outcomes.add_extracts([data.extract]);
+
+                // and open this outcome directly
+                pan_outcomes.show_extract_data(
+                    data.extract.oc_type,
+                    data.extract.abbr
+                )
             }, 'json'
         );
     },

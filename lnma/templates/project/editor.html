@@ -5,6 +5,7 @@ Project Editor
 {% endblock %}
 
 {% block style %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.61.0/codemirror.min.css" />
 {% endblock %}
 
 {% block page_name %}
@@ -410,7 +411,7 @@ Project Editor
 {% block script %}
 <!-- Code Mirror -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.61.0/codemirror.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.61.0/codemirror.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.61.0/mode/javascript/javascript.min.js"></script>
 
 <script>
 var vw_prjeditor = {
@@ -446,7 +447,7 @@ var jarvis = {
         var myTextArea = document.getElementById('form_textarea_settings');
         myCodeMirror = CodeMirror.fromTextArea(myTextArea, {
             lineWrapping: true,
-            mode: 'javascript'
+            mode: 'application/json'
         });
 
         // switch tab
