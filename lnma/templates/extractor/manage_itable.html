@@ -339,7 +339,9 @@ html {
 
 
 <div id="pan_itbuilder_previewer" class="shadow-sm" :class="{offscreen:is_hide_previewer}">
-    <div style="position: absolute; left: 5px; top: 5px;" class="d-flex flex-row">
+    <div id="pan_itbuilder_previewer_title" 
+        style="position: absolute; left: 5px; top: 5px; width: 100%;" 
+        class="d-flex flex-row">
         <div class="mt-1 mr-5 ml-1">
             <a href="javascript:void(0);"
                 class="mr-3"
@@ -366,7 +368,16 @@ html {
 {% block script %}
 <script>
 
+
+///////////////////////////////////////////////////////////
+// bind the project information to srv_extractor.js
+///////////////////////////////////////////////////////////
+
 {% include "js/srv_extractor.js" %}
+srv_extractor.project = [[ project_json_str|safe ]];
+
+
+{% include "js/srv_pub.js" %}
 
 
 var pan_ocpapers = {
@@ -830,7 +841,8 @@ var pan_itbuilder = {
     },
 
     show_itable_preview: function() {
-
+        // srv_pub.goto_itable();
+        pan_itable_previewer.show_itable_preview();
     },
 
     extract_itable: function() {
@@ -1109,6 +1121,7 @@ var pan_itbuilder = {
     },
 };
 
+
 var pan_itable_previewer = {
     vpp_id: '#pan_itbuilder_previewer',
     vpp: null,
@@ -1135,7 +1148,7 @@ var pan_itable_previewer = {
     show_itable_preview: function() {
 
         var project_id = Cookies.get('project_id');
-        var project_keystr = jarvis.project.keystr;
+        var project_keystr = srv_extractor.project.keystr;
 
         // update url
         var url = '/pub/itable.html?src=db&prj=' + project_keystr;
@@ -1149,6 +1162,13 @@ var pan_itable_previewer = {
             $('#ifr_itable_previewer').prop('src', url);
         }
 
+        // bind a dragable?
+        $( this.vpp_id ).draggable({ 
+            handle: "div#pan_itbuilder_previewer_title",
+            containment: "#main", 
+            scroll: false
+        });
+
         // resize
         pan_itable_previewer.resize_itable_previewer();
 
@@ -1160,13 +1180,13 @@ var pan_itable_previewer = {
 
 
     resize_itable_previewer: function() {
-        var h = $(window).height() - 25;
+        var h = $(window).height();
 
         // resize the popup
-        $('#pan_itbuilder_previewer').height(h)
+        $('#pan_itbuilder_previewer').height(h - 110)
 
         // resize the iframe
-        $('#ifr_itable_previewer').height(h - 40);
+        $('#ifr_itable_previewer').height(h - 110);
     }
 };
 
@@ -1230,6 +1250,7 @@ var jarvis = {
     }
 
 };
+
 
 $(document).ready(function() {
     jarvis.init();

@@ -300,6 +300,7 @@ def prisma_v3():
     return render_template('pub/pub.prisma_v3.html')
 
 
+@bp.route('/itable')
 @bp.route('/itable.html')
 def itable():
     return render_template('pub/pub.itable.html')

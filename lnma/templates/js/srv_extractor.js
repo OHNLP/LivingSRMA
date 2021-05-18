@@ -4,8 +4,6 @@
  * This is a service agent for using extractor services
  */
 
-
-
 var srv_extractor = {
 
     // all urls for extractor
@@ -215,8 +213,8 @@ var srv_extractor = {
                     category: 'default',
                     group: 'primary',
                     full_name: 'pwma Outcome full name',
-                    included_in_plots: 'yes',
-                    included_in_sof: 'yes',
+                    included_in_plots: 'no',
+                    included_in_sof: 'no',
                     input_format: 'PRIM_CAT_RAW',
                     measure_of_effect: 'RR',
                     fixed_or_random: 'fixed',
@@ -243,8 +241,8 @@ var srv_extractor = {
                     category: 'default',
                     group: 'subgroup',
                     full_name: 'pwma Outcome full name',
-                    included_in_plots: 'yes',
-                    included_in_sof: 'yes',
+                    included_in_plots: 'no',
+                    included_in_sof: 'no',
                     input_format: 'SUBG_CAT_RAW',
                     measure_of_effect: 'RR',
                     fixed_or_random: 'fixed',

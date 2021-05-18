@@ -85,8 +85,17 @@ def manage_itable():
     '''
     Design the ITable
     '''
+    project_id = request.cookies.get('project_id')
+
+    if project_id is None:
+        return redirect(url_for('project.mylist'))
+
+    project = dora.get_project(project_id)
+    
     return render_template(
-        template_base + 'manage_itable.html'
+        template_base + 'manage_itable.html',
+        project=project,
+        project_json_str=json.dumps(project.as_dict())
     )
 
 
