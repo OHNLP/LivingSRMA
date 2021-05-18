@@ -252,12 +252,37 @@ html {
 {% block script %}
 <script>
 
+///////////////////////////////////////////////////////////
+// bind the project information to srv_analyzer.js
+///////////////////////////////////////////////////////////
 {% include 'js/srv_analyzer.js' %}
+srv_analyzer.project = [[ project_json_str|safe ]];
+
+
+///////////////////////////////////////////////////////////
+// bind the project information to srv_extractor.js
+///////////////////////////////////////////////////////////
 {% include "js/srv_extractor.js" %}
+srv_extractor.project = [[ project_json_str|safe ]];
 
 var pan_outcomes = {
     vpp_id: '#pan_outcomes',
     vpp: null,
+    vpp_data: {
+        stat: {
+            pwma: { total: 0 },
+            subg: { total: 0 },
+            nam: { total: 0 },
+            itable: { total: 0 },
+        },
+        data: JSON.parse(JSON.stringify(this.data_empty)),
+
+        // bind the project information to the outcome panel
+        project: [[ project_json_str|safe ]],
+
+        // for update sub-comp
+        force_update: false
+    },
 
     data_empty: {
         pwma: { outcomes: {} },
@@ -287,18 +312,7 @@ var pan_outcomes = {
     init: function() {
         this.vpp = new Vue({
             el: this.vpp_id,
-            data: {
-                stat: {
-                    pwma: { total: 0 },
-                    subg: { total: 0 },
-                    nam: { total: 0 },
-                    itable: { total: 0 },
-                },
-                data: JSON.parse(JSON.stringify(this.data_empty)),
-
-                // for update sub-comp
-                force_update: false
-            },
+            data: this.vpp_data,
             methods: {
                 create_extract: function(oc_type, tpl, group, category) {
                     pan_outcomes.create_extract(oc_type, tpl, group, category);
