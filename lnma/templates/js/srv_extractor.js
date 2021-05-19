@@ -288,18 +288,7 @@ var srv_extractor = {
         },
         input_format: [[ config['settings']['INPUT_FORMAT_TPL']|tojson ]],
 
-        filter: {
-            display_name: '',
-            type: 'radio',
-            attr: null,
-            value: 0,
-            values: [{
-                display_name: 'All',
-                value: 0,
-                sql_cond: "{$col} is not NULL",
-                default: true
-            }]
-        }
+        filter: [[ config['settings']['FILTER_TPL']|tojson ]],
     },
 
     /**

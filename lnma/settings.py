@@ -561,6 +561,22 @@ INPUT_FORMAT_TPL = {
     }
 }
 
+FILTER_TPL = {
+    'display_name': '',
+    'type': 'radio',
+    'attr': '',
+    'value': 0,
+    'values': [{
+        'display_name': 'All',
+        'value': 0,
+        'sql_cond': "{$col} is not NULL",
+        'default': True
+    }]
+}
+#####################################################################
+# for analyzers
+#####################################################################
+
 RSCRIPT_TPL = {
     # for frequentist NMA
     'freq_pairwise_netmeta': 'lnma_freq_pairwise_netmeta.tpl.r',

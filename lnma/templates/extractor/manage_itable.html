@@ -297,17 +297,22 @@ html {
                         Filters
                     </span>
                 </div>
-                <div class="oc-attr">
+                <!-- <div class="oc-attr">
                     <button class="btn btn-default btn-xs"
                         v-on:click="create_filter();">
                         <i class="fa fa-bars"></i>
                         Add Filter
                     </button>
-                </div>
+                </div> -->
             </div>
+
             <!-- /.panel-info -->
 
-            <div v-if="itable.meta.hasOwnProperty('filters')">
+            <div>
+                <v-jsoneditor ref="editor" v-model="itable.meta.filters" @error="onError"></v-jsoneditor>
+            </div>
+
+            <!-- <div v-if="itable.meta.hasOwnProperty('filters')">
                 <div v-for="filter, filter_idx in itable.meta.filters"
                     class="filter-div pt-2 pb-2 mb-2 mt-2">
                     <h6 class="filter-title">
@@ -328,7 +333,7 @@ html {
                     <label for="">Attribute name for this filter: </label>
                     <input type="text" class="oc-attr-value" v-model="filter.attr">
                 </div>
-            </div>
+            </div> -->
         </div>
         <!-- /#filter -->
             
@@ -366,8 +371,8 @@ html {
 {% endblock %}
 
 {% block script %}
+<script src="/static/lib/vue.js-jsoneditor/v-jsoneditor.min.js"></script>
 <script>
-
 
 ///////////////////////////////////////////////////////////
 // bind the project information to srv_extractor.js
@@ -769,6 +774,11 @@ var pan_itbuilder = {
             data: {
                 itable: null,
             },
+
+            updated: function() {
+                pan_itbuilder.resize();
+
+            },
             methods: {
                 save_itable: function() {
                     pan_itbuilder.save_itable();
@@ -835,6 +845,13 @@ var pan_itbuilder = {
 
                     // update the UI
                     this.$forceUpdate();
+                },
+
+                onError(err){
+                    console.log(err)
+                },
+                onClick () {
+                    console.log(this.$refs.editor.editor.get())
                 }
             }
         });
@@ -1119,6 +1136,11 @@ var pan_itbuilder = {
         $(this.vpp_id).removeClass('panel-s panel-m panel-l')
             .addClass('panel-' + size);
     },
+
+    resize: function() {
+        var h = $(window).height();
+        $('.jsoneditor-container').css('height', h - 150);
+    }
 };
 
 
@@ -1170,7 +1192,7 @@ var pan_itable_previewer = {
         });
 
         // resize
-        pan_itable_previewer.resize_itable_previewer();
+        pan_itable_previewer.resize();
 
         // show the panel
         pan_itable_previewer.vpp.$data.is_hide_previewer = false;
@@ -1179,7 +1201,7 @@ var pan_itable_previewer = {
     },
 
 
-    resize_itable_previewer: function() {
+    resize: function() {
         var h = $(window).height();
 
         // resize the popup
@@ -1245,7 +1267,7 @@ var jarvis = {
 
     bind_resize_event: function() {
         $(window).on('resize', function(){
-            // pan_outcomes.resize();
+            pan_itbuilder.resize();
         });
     }
 
