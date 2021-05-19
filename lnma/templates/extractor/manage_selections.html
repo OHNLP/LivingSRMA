@@ -350,10 +350,6 @@ var pan_ocpapers = {
     },
 
     vpp_methods: {
-        // save all!
-        update_extract: function() {
-            pan_ocpapers.update_extract();
-        },
 
         toggle_only_show_selected: function() {
             this.only_show_selected = !this.only_show_selected;
@@ -507,24 +503,6 @@ var pan_ocpapers = {
         pan_ocpapers.resize();
     },
 
-    re_load: function(extract) {
-        // update the given extract
-        for (let i = 0; i < this.vpp.extracts.length; i++) {
-            if (extract.abbr == this.vpp.extracts[i].abbr) {
-                this.vpp.extracts[i] = extract;
-            }
-        }
-
-        // update dict and tree
-        this.vpp.$data.extract_dict = this.update_extract_dict(data);
-        this.vpp.$data.extract_tree = this.update_extract_tree(data);
-
-        // update
-        this.vpp.$forceUpdate();
-
-        pan_ocpapers.resize();
-    },
-
     update_extract_dict: function(data) {
         /**
         The extract dict is just a dictionary structure for searching
@@ -633,10 +611,13 @@ var pan_ocpapers = {
                 // the data contain a paer
                 console.log(data);
 
-                jarvis.toast('Updated [' + data.paper.seq_num + '] selected in ' + data.paper.meta.outcome_selections.length + ' outcomes.');
+                jarvis.toast('Updated #' + data.paper.seq_num + ' selection of ' + data.paper.meta.outcome_selections.length + ' outcomes.');
 
                 // update everything!
-                pan_ocpapers.load();
+                // pan_ocpapers.load();
+
+                // just update this paper in the extraction?
+                pan_ocpapers.update_vpp_papers(data.paper);
             }
         )
     },
@@ -667,29 +648,9 @@ var pan_ocpapers = {
 
                 // reload the page
                 // pan_ocpapers.re_load(data.extract);
-                pan_ocpapers.load();
-            }
-        );
-    },
-
-    update_extract: function() {
-        // there are 
-        var project_id = Cookies.get('project_id');
-        var oc_type = this.vpp.$data.extract.oc_type;
-        var abbr = this.vpp.$data.extract.abbr;
-        var meta = this.vpp.$data.extract.meta;
-        var data = this.vpp.$data.extract.data;
-
-        // send request!
-        $.post(
-            srv_extractor.url.update_extract,
-            {project_id:project_id, oc_type:oc_type, abbr:abbr,
-             meta:JSON.stringify(meta), data:JSON.stringify(data)},
-            function(data) {
-                // show
-                toast('Saved the outcome [' + data.extract.meta.full_name + ']');
-                // reload the outcomes
-                pan_outcomes.load();
+                
+                // just update this extract?
+                pan_ocpapers.update_vpp_extracts(data.extract);
             }
         );
     },
@@ -715,6 +676,40 @@ var pan_ocpapers = {
         this.vpp.working_paper_oc_selections = oc_selections;
 
         this.vpp.$forceUpdate();
+    },
+
+    update_vpp_papers: function(paper) {
+        for (let i = 0; i < this.vpp.papers.length; i++) {
+            const p = this.vpp.papers[i];
+            if (p.pid == paper.pid) {
+                this.vpp.papers[i] = paper;
+                this.vpp.$forceUpdate();
+                break;
+            }
+
+        }
+    },
+
+    update_vpp_extracts: function(extract) {
+        // update the given extract
+        for (let i = 0; i < this.vpp.$data.extracts.length; i++) {
+            if (extract.abbr == this.vpp.$data.extracts[i].abbr) {
+                this.vpp.$data.extracts[i] = extract;
+
+                // then update the dict and tree
+                this.vpp.$data.extract_dict = this.update_extract_dict(
+                    this.vpp.$data
+                );
+
+                // then update the tree
+                this.vpp.$data.extract_tree = this.update_extract_tree(
+                    this.vpp.$data
+                );
+
+                this.vpp.$forceUpdate();
+                break;
+            }
+        }
     },
 
     hide_working_paper: function() {
