@@ -234,53 +234,79 @@ html {
                 class="panel-info" style="margin: 10px 0; border-bottom: 1px dotted grey;">
                 
                 <div class="oc-attr">
-                    <i class="fa fa-bars"></i>
-                    <input class="oc-attr-value" type="text" v-model="cate.name">
-
-                    <button class="btn btn-default btn-xs"
-                        v-on:click="create_attribute(cate.abbr);">
-                        <i class="fa fa-plus"></i>
-                        Add Attribute
-                    </button>
-
-                    <button class="btn btn-default btn-xs"
+                    
+                    <button class="btn btn-default btn-xs text-danger"
+                        :title="'Remove this category [' + cate.name + ']'"
                         v-on:click="remove_category(cate.abbr, cate.name);">
                         <i class="fa fa-minus"></i>
-                        Remove Category
+                    </button>
+
+                    <input class="oc-attr-value" type="text" v-model="cate.name">
+
+                    <button class="btn btn-default btn-xs text-primary"
+                        v-on:click="create_attribute(cate.abbr);"
+                        :title="'Add attribute to [' + cate.name + ']'">
+                        <i class="fa fa-plus"></i>
+                        Add Attribute
                     </button>
 
                 </div>
 
                 <div style="margin: 0 0 10px 10px; padding: 0 0 10px 10px; border-left: 1px solid #777777;">
                     <div v-for="attr, attr_idx in cate.attrs"
+                        class="ml-1"
                         style="padding: 3px 0; border-bottom: 1px dotted #efefef;">
-                        <i class="far fa-check-circle"></i>
-                        <input class="oc-attr-value" type="text"
-                            v-model="attr.name"
-                            v-bind:id="'cate_attr_' + attr.abbr">
+                        
+                        <div class="d-flex flex-row">
 
-                        <span v-if="attr.subs != null">
-                            [
-                            <span v-for="sub, sub_idx in attr.subs">
-                                <input class="oc-attr-value oc-attr-value-sm" type="text" 
-                                    v-model="sub.name"
-                                    v-bind:id="'cate_attr_sub_' + sub.abbr">
-                            </span>
-                            ]
-                        </span>
+                            <div class="mr-1">
+                                <a v-on:click="remove_attribute(cate.abbr, attr.abbr, attr.name);"
+                                    href="javascript:void(0);"
+                                    class="text-danger"
+                                    :title="'Remove this attribute [' + attr.name + ']'">
+                                    <i class="fa fa-minus"></i>
+                                </a>
+                            </div>
 
-                        <a v-on:click="create_sub(cate.abbr, attr.abbr);"
-                            href="javascript:void(0);"
-                            :title="'Add sub-attribute to [' + attr.name + ']'">
-                            <i class="fa fa-plus"></i>
-                        </a>
+                            <div class="mr-3">
+                                <input class="oc-attr-value" type="text"
+                                    v-model="attr.name"
+                                    v-bind:id="'cate_attr_' + attr.abbr">
+                            </div>
 
-                        <a v-on:click="remove_attribute(cate.abbr, attr.abbr, attr.name);"
-                            href="javascript:void(0);"
-                            class="text-danger"
-                            :title="'Remove this attribute [' + attr.name + ']'">
-                            <i class="fa fa-minus"></i>
-                        </a>
+                            <div class="mr-2">
+                                <a v-on:click="create_sub(cate.abbr, attr.abbr);"
+                                    href="javascript:void(0);"
+                                    :title="'Add sub-attribute to [' + attr.name + ']'">
+                                    <i class="fa fa-plus"></i>
+                                    Add Sub
+                                </a>
+                            </div>
+                        </div>
+
+
+                        <div v-if="attr.subs != null"
+                            class="d-flex flex-column">
+                            <div v-for="sub, sub_idx in attr.subs"
+                                class="ml-2 d-flex flex-row"
+                                style="padding: 2px 0; border-left: 1px dotted #ccc;">
+                                <div class="ml-2 mr-1">
+                                    <a v-on:click="remove_sub(cate.abbr, attr.abbr, sub.abbr, sub.name);"
+                                        class="text-danger"
+                                        href="javascript:void(0);"
+                                        :title="'Remove this sub-attribute to [' + sub.name + ']'">
+                                        <i class="fa fa-minus"></i>
+                                    </a>
+                                </div>
+                                <div class="mr-3">
+                                    <input class="oc-attr-value oc-attr-value-sm" type="text" 
+                                        v-model="sub.name"
+                                        v-bind:id="'cate_attr_sub_' + sub.abbr">
+                                </div>
+                            </div>
+                        </div>
+
+                        
                     </div>
                 </div>
 
@@ -816,8 +842,8 @@ var pan_itbuilder = {
                     pan_itbuilder.remove_attribute(cate_abbr, attr_abbr, attr_name);
                 },
 
-                remove_sub: function(cate_abbr, attr_abbr, sub_abbr) {
-                    pan_itbuilder.remove_sub(cate_abbr, attr_abbr, sub_abbr);
+                remove_sub: function(cate_abbr, attr_abbr, sub_abbr, sub_name) {
+                    pan_itbuilder.remove_sub(cate_abbr, attr_abbr, sub_abbr, sub_name);
                 },
 
                 ////////////////////////////////////////////////////////
@@ -1112,16 +1138,45 @@ var pan_itbuilder = {
                     if (attr.abbr == attr_abbr) {
                         // ok, found out this attr
                         this.vpp.$data.itable.meta.cate_attrs[i].attrs.splice(j, 1);
+                        console.log('* removed ' + attr_abbr + ' from ' + cate_abbr);
                         break;
                     }
                 }
                 break;
             }
         }
-        console.log('* removed ' + attr_abbr + ' from ' + cate_abbr);
     },
 
-    remove_sub: function(cate_abbr, attr_abbr, sub_abbr) {
+    remove_sub: function(cate_abbr, attr_abbr, sub_abbr, sub_name) {
+        var ret = jarvis.confirm('Remove sub attribute ['+sub_name+'], are you sure?');
+        if (ret == false) { return }
+
+        for (let i = 0; i < this.vpp.$data.itable.meta.cate_attrs.length; i++) {
+            var cate = this.vpp.$data.itable.meta.cate_attrs[i];
+            if (cate.abbr == cate_abbr) {
+                // check each attribute
+                for (let j = 0; j < cate.attrs.length; j++) {
+                    var attr = cate.attrs[j];
+                    if (attr.abbr == attr_abbr) {
+                        // check each sub
+                        if (attr.subs == null) {
+                            continue;
+                        }
+                        for (let k = 0; k < attr.subs.length; k++) {
+                            var sub = attr.subs[k];
+                            if (sub.abbr == sub_abbr) {
+                                // ok found the sub
+                                this.vpp.$data.itable.meta.cate_attrs[i].attrs[j].subs.splice(k, 1);
+                                console.log('* removed sub[' + sub_abbr + '] from attr[' + attr_abbr + '] in cate[' + cate_abbr + ']');
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                }
+                break;
+            }
+        }
     },
 
     show: function() {
