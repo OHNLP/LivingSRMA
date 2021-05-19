@@ -91,7 +91,7 @@ def manage_itable():
         return redirect(url_for('project.mylist'))
 
     project = dora.get_project(project_id)
-    
+
     return render_template(
         template_base + 'manage_itable.html',
         project=project,
@@ -317,59 +317,7 @@ def get_extract_and_papers():
     # get papers
     stage = ss_state.SS_STAGE_INCLUDED_SR
     papers = dora.get_papers_by_stage(project_id, stage)
-
-    # merge the return obj
-    # make a ref in the extract for frontend display
-    # make sure every selected paper is listed in extract.data
-    # pids = set([])
-    # for paper in papers:
-    #     pid = paper.pid
-    #     # record this pid for next step
-    #     pids.add(pid)
-
-    #     # check if this pid exists in extract
-    #     if pid in extract.data:
-    #         # nothing to do if has added
-    #         continue
-
-    #     # if not exist, add this paper
-    #     extract.data[pid] = {
-    #         'is_selected': False,
-    #         'is_checked': False,
-    #         'n_arms': 2,
-    #         'attrs': {}
-    #     }
-
-    #     extract.data[pid]['attrs'] = {
-    #         'main': {},
-    #         'other': []
-    #     }
-    #     # fill the main track with empty values
-    #     extract.data[pid]['attrs']['main'] = util.fill_extract_data_arm(
-    #         extract.data[pid]['attrs']['main'],
-    #         extract.meta['cate_attrs']
-    #     )
-    #     # for cate in extract.meta['cate_attrs']:
-    #     #     for attr in cate['attrs']:
-    #     #         attr_abbr = attr['abbr']
-    #     #         if attr['subs'] is None:
-    #     #             extract.data[pid]['attrs']['main'][attr_abbr] = ''
-    #     #         else:
-    #     #             # have multiple subs
-    #     #             for sub in attr['subs']:
-    #     #                 sub_abbr = sub['abbr']
-    #     #                 extract.data[pid]['attrs']['main'][sub_abbr] = ''
-
-    # # reverse search, unselect those are not in papers
-    # for pid in extract.data:
-    #     if pid in pids:
-    #         # which means this pid is in the SR stage
-    #         continue
-
-    #     # if not, just unselect this paper
-    #     # don't delete
-    #     extract.data[pid]['selected'] = False
-        
+    
     # update the extract with papers
     extract.update_data_by_papers(papers)
 
@@ -378,7 +326,7 @@ def get_extract_and_papers():
         'success': True,
         'msg': '',
         'extract': extract.as_dict(),
-        'papers': [ p.as_simple_dict() for p in papers ]
+        'papers': [ p.as_very_simple_dict() for p in papers ]
     }
     return jsonify(ret)
 

@@ -127,6 +127,10 @@ html {
     opacity: 1 !important;
     background-color: beige;
 }
+
+.badge-w-2em {
+    width: 2em;
+}
 </style>
 {% endblock %}
 
@@ -135,15 +139,9 @@ html {
 <div id="main">
 
 <div id="pan_outcomes" class="panel-container">
-
+    <!-- for pwma -->
     <h5>
         PWMA Outcomes
-        
-        <!-- <button class="btn btn-default btn-sm"
-            v-on:click="create_extract('subg', 'default')">
-            <i class="fa fa-plus"></i>
-            Add Subgroup Analysis
-        </button> -->
 
         <button class="btn btn-default btn-xs"
             v-on:click="close_all_cates('pwma', event)">
@@ -154,22 +152,26 @@ html {
 
     <div v-for="group in project.settings.outcome.analysis_groups"
         class="panel-box">
-        
-        <!-- for pwma -->
-        <div>
-            <span>{{ group.name }}</span>
+        <div class="d-flex flex-row">
+            <div class="mr-1">
+                {{ group.name }}
+            </div>
 
-            <button class="btn btn-default btn-xs"
-                v-on:click="create_extract('pwma', 'default', group.abbr, 'default')">
-                <i class="fa fa-plus"></i>
-                Add Outcome
-            </button>
+            <div>
+                <button class="btn btn-default btn-xs text-primary"
+                    v-on:click="create_extract('pwma', 'default', group.abbr, 'default')">
+                    <i class="fa fa-plus"></i>
+                    Add outcome to default category
+                </button>
+            </div>
+
         </div>
 
         <outcome-list 
+            v-if="extract_tree!=null && extract_tree.hasOwnProperty('pwma')"
             v-bind:force_update="force_update"
             v-bind:oc_type="'pwma'"
-            v-bind:outcomes="data.pwma.outcomes"
+            v-bind:cate_ocs="extract_tree.pwma.groups[group.abbr].cates"
             v-bind:group="group.abbr">
         </outcome-list>
 
@@ -194,21 +196,6 @@ html {
 </div>
 <!-- /#main -->
 
-<!-- <div class="dropdown-menu dropdown-menu-sm" id="pan_ocpapers_ctx_menu">
-    <h6 class="dropdown-header text-left">
-        <a href="javascript:void(0);"
-            title="Close this menu"
-            onclick="$('#pan_ocpapers_ctx_menu').hide();"
-            class="mr-2">
-            <i class="fa fa-times"></i>
-        </a><br>
-
-        Select text <b id="pan_ocpapers_ctx_menu_txt">&nbsp;</b> is:
-    </h6>
-    <div id="pan_ocpapers_ctx_menu_items">
-        &nbsp;
-    </div>
-</div> -->
 
 <ul id="pan_ocpapers_ctx_menu" style="display: none;">
     
@@ -235,26 +222,20 @@ srv_extractor.project = [[ project_json_str|safe ]];
 
 var pan_outcomes = {
 
-    data_empty: {
-        pwma: { outcomes: {} },
-        subg: { outcomes: {} },
-        nma: { outcomes: {} },
-        itable: { outcomes: {} },
-    },
     vpp_id: '#pan_outcomes',
     vpp: null,
     vpp_data: {
+
+        // the data structure for showing extracts
+        extracts: [],
+        extract_tree: null,
+
+        // others
         stat: {
             pwma: { total: 0 },
             subg: { total: 0 },
             nam: { total: 0 },
             itable: { total: 0 },
-        },
-        data: {
-            pwma: { outcomes: {} },
-            subg: { outcomes: {} },
-            nma: { outcomes: {} },
-            itable: { outcomes: {} },
         },
 
         // bind the project information to the outcome panel
@@ -272,7 +253,7 @@ var pan_outcomes = {
             {project_id:project_id},
             function(data) {
                 console.log(data);
-                pan_outcomes.show_extracts(data.extracts);
+                pan_outcomes.show_all_extracts(data.extracts);
             }, 'json'
         );
     },
@@ -286,6 +267,7 @@ var pan_outcomes = {
         this.vpp = new Vue({
             el: this.vpp_id,
             data: this.vpp_data,
+
             methods: {
                 create_extract: function(oc_type, tpl, group, category) {
                     pan_outcomes.create_extract(oc_type, tpl, group, category);
@@ -353,14 +335,15 @@ var pan_outcomes = {
         meta.group = group;
         meta.category = category;
 
+        // copy the meta.cate_attr
+        meta.cate_attrs = JSON.parse(JSON.stringify(srv_extractor.tpl.input_format[oc_type][meta.input_format]));
+
         // set the default input format
         if (srv_extractor.project.settings.outcome.default_setting.hasOwnProperty('input_format')) {
             meta.input_format = srv_extractor.project.settings.outcome.default_setting.input_format;
         }
 
-        // copy the meta.cate_attr
-        meta.cate_attrs = JSON.parse(JSON.stringify(srv_extractor.tpl.input_format[oc_type][meta.input_format]));
-
+        // send this extract to backend
         var data = {};
         var project_id = Cookies.get('project_id');
 
@@ -375,8 +358,9 @@ var pan_outcomes = {
             }, 
             function(data) {
                 console.log(data);
+
                 // update UI
-                pan_outcomes.add_extracts([data.extract]);
+                pan_outcomes.add_vpp_extracts([data.extract]);
 
                 // and open this outcome directly
                 pan_outcomes.show_extract_data(
@@ -387,49 +371,92 @@ var pan_outcomes = {
         );
     },
 
-    show_extracts: function(extracts) {
-        // clear existing
-        this.vpp.$data.data = JSON.parse(JSON.stringify(this.data_empty));
-        this.add_extracts(extracts);
+    show_all_extracts: function(extracts) {
+        // just re-build the tree with new extracts
+        this.vpp.$data.extract_tree = this.update_extract_tree(extracts);
+
         // update the vpp
         this.vpp.$forceUpdate();
     },
 
-    add_extracts: function(extracts) {
-        var cate_exts = {};
+    // add_extracts: function(extracts) {
+    //     var oc_data = {};
 
-        // build the sorted cate
+    //     // build the sorted cate
+    //     for (let i = 0; i < extracts.length; i++) {
+    //         const extract = extracts[i];
+    //         var oc_type = extract.oc_type;
+    //         var group = extract.meta.group;
+    //         var cate = extract.meta.category;
+
+    //         // check the group first
+    //         if (!this.vpp.$data.data[oc_type].outcomes.hasOwnProperty(cate)) {
+    //             this.vpp.$data.data[oc_type].outcomes[cate] = [];
+    //         }
+
+    //         // put this ext into cate
+    //         this.vpp.$data.data[oc_type].outcomes[cate].push(
+    //             extract.meta
+    //         );
+
+    //         // add number
+    //         this.vpp.$data.stat[oc_type].total += 1;
+    //     }
+
+    //     // update the vpp
+    //     this.vpp.$forceUpdate();
+
+    //     // update the sub-comp
+    //     this.vpp.$data.force_update = Math.random();
+    // },
+
+    add_vpp_extracts: function(extracts) {
+
+    },
+
+    update_extract_tree: function(extracts) {
+        var extract_tree = {};
+
         for (let i = 0; i < extracts.length; i++) {
-            const extract = extracts[i];
-            var oc_type = extract.oc_type;
-            var cate = extract.meta.category;
+            const ext = extracts[i];
+            
+            var oc_type = ext.oc_type;
+            var group = ext.meta.group;
+            var cate = ext.meta.category;
 
-            if (!this.vpp.$data.data[oc_type].outcomes.hasOwnProperty(cate)) {
-                this.vpp.$data.data[oc_type].outcomes[cate] = [];
+            if (ext.oc_type == 'itable') {
+                extract_tree.itable = ext;
+
+            } else {
+                // check the type
+                if (!extract_tree.hasOwnProperty(oc_type)) {
+                    extract_tree[oc_type] = {
+                        _is_shown: true,
+                        groups: {}
+                    }
+                }
+
+                // check the group
+                if (!extract_tree[oc_type].groups.hasOwnProperty(group)) {
+                    extract_tree[oc_type].groups[group] = {
+                        _is_shown: true,
+                        cates: {}
+                    };
+                }
+
+                // check the cate
+                if (!extract_tree[oc_type].groups[group].cates.hasOwnProperty(cate)) {
+                    extract_tree[oc_type].groups[group].cates[cate] = {
+                        _is_shown: true,
+                        ocs: {}
+                    }
+                }
+                // put this outcome to the cate
+                extract_tree[oc_type].groups[group].cates[cate].ocs[ext.abbr] = ext;
             }
-
-            // put this ext into cate
-            this.vpp.$data.data[oc_type].outcomes[cate].push(
-                extract.meta
-            );
-
-            // add number
-            this.vpp.$data.stat[oc_type].total += 1;
         }
 
-        // for (let i = 0; i < extracts.length; i++) {
-        //     var extract = extracts[i];
-        //     var oc_type = extract.oc_type;
-        //     var abbr = extract.abbr;
-        //     // add to the related type
-        //     this.vpp.data[oc_type].outcomes[abbr] = extract.meta;
-        // }
-
-        // update the vpp
-        this.vpp.$forceUpdate();
-
-        // update the sub-comp
-        this.vpp.$data.force_update = Math.random();
+        return extract_tree;
     },
 
     show: function() {
@@ -922,46 +949,62 @@ Vue.component('outcome-list', {
             var elem = $(event.target);
             elem.next().toggle();
         },
+        n_selected: function(extract) {
+            var n = 0;
+            for (const pmid in extract.data) {
+                if (Object.hasOwnProperty.call(extract.data, pmid)) {
+                    if (extract.data[pmid].is_selected) {
+                        n += 1;
+                    };
+                }
+            }
+            return n;
+            
+        }
+    },
+
+    computed: {
     },
 
     props: [
         'oc_type',
-        'outcomes',
+        'cate_ocs',
         'group',
         'force_update'
     ],
 
     template: `
-<div v-if="Object.keys(outcomes).length != 0" :force_update="force_update">
-<div v-for="ocs, cate in outcomes" v-show="ocs.length>0">
+<div v-if="Object.keys(cate_ocs).length != 0" :force_update="force_update">
+<div v-for="cate, cate_name in cate_ocs" v-show="Object.keys(cate.ocs).length>0">
     <div class="cate-line"
         v-on:click="toggle_cate(event)">
             <i class="far fa-folder-open"></i>
-            {{ cate }} 
-        <button class="btn btn-default btn-xs"
-            v-on:click="create_extract(oc_type, 'default', group, cate)">
+            {{ cate_name }} 
+        <button class="btn btn-default btn-xs text-primary"
+            v-on:click="create_extract(oc_type, 'default', group, cate_name)">
             <i class="fa fa-plus"></i>
+            Add outcome
         </button>
     </div>
 
     <div class="cate-extracts cate-extracts-pwma">
-        <div v-for="oc in ocs" 
+        <div v-for="oc in cate.ocs" 
             v-bind:id="'cate-extract-line-' + oc.abbr"
-            class="cate-extract-line d-flex flex-row"
-            v-if="oc.group == group">
+            class="cate-extract-line d-flex flex-row">
                 
             <div class="cate-extract-name"
                 v-on:click="show_extract_data(oc_type, oc.abbr)">
-                {{ oc.full_name }}
+                <span class="badge badge-light badge-w-2em">{{ oc.n_selected }}</span>
+                {{ oc.meta.full_name }}
             </div>
 
             <div class="cate-extract-col">
-                <span v-if="oc.included_in_plots=='yes'" class="badge badge-success">In Plot</span>
+                <span v-if="oc.meta.included_in_plots=='yes'" class="badge badge-success">In Plot</span>
                 <span v-else class="badge badge-light">Plot</span>
             </div>
 
             <div class="cate-extract-col">
-                <span v-if="oc.included_in_sof=='yes'" class="badge badge-success">In SoF</span>
+                <span v-if="oc.meta.included_in_sof=='yes'" class="badge badge-success">In SoF</span>
                 <span v-else class="badge badge-light">SoF</span>
             </div>
 

@@ -670,13 +670,30 @@ class Extract(db.Model):
         return pids
 
 
+    def get_n_selected(self):
+        '''
+        Get the number of selected papers
+        '''
+        n = 0
+        for pid in self.data:
+            if self.data[pid]['is_selected']:
+                n += 1
+
+        return n
+
+
     def __repr__(self):
         return '<Extract {0} {1}: {2}>'.format(
             self.oc_type, self.abbr, self.extract_id)
 
 
     def as_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        ret = {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+        # add how many selected
+        ret['n_selected'] = self.get_n_selected()
+
+        return ret
 
 
     def as_simple_dict(self):
