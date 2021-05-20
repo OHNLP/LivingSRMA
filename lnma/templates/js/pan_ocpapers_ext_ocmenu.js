@@ -115,6 +115,7 @@ Object.assign(pan_ocpapers, {
                         html.push(
                             '<li class="oc-menu-item">'+
                             '<div onclick="pan_ocpapers.show_extract_and_papers(\''+ext.abbr+'\');">'+
+                            '(' + ext.n_selected + ') ' + 
                             ext.meta.full_name+
                             '</div></li>'
                         );
