@@ -2120,6 +2120,9 @@ var tbjs_paperlist = {
                 // update the UI
                 var usr_fb = srv_screener.RCT_USER_FEEDBACK[usr_fb_val];
                 $('#tb-row-rct-feedback-' + d.paper_id).html(usr_fb);
+
+                // update the tb data list
+                tbjs_paperlist.update_data_by_paper(d);
             }
         });
     },
