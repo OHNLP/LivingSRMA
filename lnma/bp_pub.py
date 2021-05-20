@@ -3429,7 +3429,7 @@ def get_sof_pma_data_from_db_IO(is_calc_pma=True):
                 r['has_G3H_prim'] = __is_pwmable(r, 'G3H')
                 r['has_G5N_prim'] = __is_pwmable(r, 'G5N')
                                     
-                r['author'] = paper.get_short_name() + ' Arm %s' % (arm_idx + 2)
+                r['author'] = paper.get_short_name() + ' Comp %s' % (arm_idx + 2)
                 r['year'] = paper.get_year()
                 r['pid'] = paper.pid
                 r['oc_cate'] = oc_cate
