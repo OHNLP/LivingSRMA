@@ -67,10 +67,6 @@ html {
 .chk-oc-extracting {
     background-color: rgb(204, 224, 228) !important;
 }
-
-.cursor-pointer {
-    cursor: pointer;
-}
 </style>
 
 <!-- jQuery UI Theme -->
@@ -85,7 +81,29 @@ html {
 
 
 <div id="pan_ocpapers">
-<div v-if="papers != null && papers.length != 0 && extract_dict != null">
+<div v-if="papers != null && papers.length != 0 && extract_dict != null"
+    class="d-flex flex-column">
+
+    <div class="mb-1 d-flex flex-row">
+        <div class="mr-2">
+            <span style="font-size: 1.2em;">
+                {{ papers.length }} studies (included in SR)
+            </span>
+        </div>
+
+        <div class="input-group input-group-sm mr-2"
+            style="width: 250px">
+            <input type="text" class="form-control" placeholder="PMID, short #, first author name"
+                v-model="keywords">
+            <div class="input-group-append">
+                <button class="btn btn-outline-secondary" type="button"
+                    title="Reset search"
+                    v-on:click="reset_keywords()">
+                    <i class="fa fa-close"></i>
+                </button>
+            </div>
+        </div>
+    </div>
 
     <div id="pan_ocpapers_paperlist" class="mt-1">
         <table style="max-width: 100%;">
@@ -101,6 +119,7 @@ html {
 
             <tbody id="pan_ocpapers_paperlist_tbody">
                 <tr v-for="paper in papers"
+                    v-if="is_search_match(paper)"
                     v-bind:id="'paper-table-row-' + paper.pid"
                     class="paper-table-row">
                     <td>{{ paper.seq_num }}</td>
@@ -116,10 +135,10 @@ html {
                     </td>
                     <td>
                         <b v-html="paper.title"></b><br>
-                        <span v-for="abbr in paper.meta.outcome_selections"
+                        <!-- <span v-for="abbr in paper.meta.outcome_selections"
                             class="paper-meta-selected-oc">
                             {{ extract_dict[abbr].meta.full_name }}
-                        </span>
+                        </span> -->
                     </td>
                 </tr>
             </tbody>
@@ -346,10 +365,35 @@ var pan_ocpapers = {
         working_oc: null,
 
         // the attrs for extraction
-        all_attrs: []
+        all_attrs: [],
+
+        // search
+        keywords: ''
     },
 
     vpp_methods: {
+        ///////////////////////////////////////////////////
+        // for search
+        ///////////////////////////////////////////////////
+        reset_keywords: function() {
+            this.keywords = '';
+        },
+
+        is_search_match: function(paper) {
+            if (this.keywords == '') {
+                return true;
+            }
+
+            if (paper.pid.indexOf(this.keywords)>=0 ||
+                paper.seq_num == parseInt(this.keywords) ||
+                paper.short_name.toLocaleUpperCase().indexOf(this.keywords.toLocaleUpperCase())>=0
+            ) {
+                return true;
+            }
+
+            return false;
+        },
+
 
         toggle_only_show_selected: function() {
             this.only_show_selected = !this.only_show_selected;
@@ -726,7 +770,7 @@ var pan_ocpapers = {
 
     resize: function() {
         var h = $(window).height() - 60;
-        $('#pan_ocpapers_paperlist').css('height', h);
+        $('#pan_ocpapers_paperlist').css('height', h - 30);
         $('#pan_ocpapers_working_paper_oc_tree').css('max-height', h - 120);
         $('#pan_ocpapers_working_paper_collector_attr_list').css('max-height', h - 145);
     }

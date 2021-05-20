@@ -21,7 +21,6 @@
 
 #pan_ocpapers_paperlist {
     overflow-x: hidden;
-    overflow-y: auto;
     height: 300px;
     font-size: 0.9em;
     max-width: calc(100% - 15px);
@@ -31,6 +30,10 @@
     top: 0;
     background-color: #d8d8d8;
 }
+#pan_ocpapers_paperlist tbody{
+    overflow-y: auto;
+}
+
 
 #pan_ocpapers_paperlist tbody td{
     padding: 3px 3px;

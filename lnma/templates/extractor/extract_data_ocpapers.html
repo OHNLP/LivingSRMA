@@ -7,6 +7,7 @@
 
         <div id="pan_ocpapers_toolbar" class="panel-info">
             <div class="oc-attr d-flex flex-row">
+                
                 <span style="font-size: 1.2em;" class="mr-2">
                     <a href="javascript:void(0);" onclick="pan_ocpapers.show_ocs_menu();">
                         <b>
@@ -18,6 +19,19 @@
                     </a>
                 </span>
 
+                <div class="input-group input-group-sm mr-2"
+                    style="width: 200px">
+                    <input type="text" class="form-control" placeholder="PMID, short #, first author name"
+                        v-model="keywords">
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary" type="button"
+                            title="Reset search"
+                            v-on:click="reset_keywords()">
+                            <i class="fa fa-close"></i>
+                        </button>
+                    </div>
+                </div>
+
                 <div class="btn-group mr-2">
                     <button v-on:click="toggle_only_show_selected();"
                         type="button" class="btn btn-default btn-sm">
@@ -27,10 +41,10 @@
                 </div>
 
                 <div class="btn-group mr-2">
-                    <button v-on:click="update_extract();"
+                    <button v-on:click="save_extract();"
                         type="button" class="btn btn-default btn-sm">
                         <i class="fa fa-save"></i>
-                        Save all
+                        Save
                     </button>
                 </div>
 
@@ -108,7 +122,6 @@
                 <thead class="paper-table-header">
                     <tr>
                         <th class="paper-table-header-th" colspan="6">
-                            &nbsp;
                         </th>
                         <th v-for="thr1 in thr1s"
                             v-bind:colspan="thr1.cols"
@@ -127,7 +140,7 @@
                             #
                         </th>
                         <th class="paper-table-header-th" style="width: 90px;">
-                            PMID
+                            PID
                         </th>
                         <th class="paper-table-header-th" style="width: 130px;">
                             ({{ n_selected }} selected)
@@ -156,19 +169,19 @@
                     <tr class="paper-table-row" 
                         v-for="paper in papers"
                         v-bind:id="'paper-table-row-' + paper.pid"
-                        v-show="!only_show_selected || working_oc.data[paper.pid].is_selected">
+                        v-show="(is_search_match(paper)) && (!only_show_selected || working_oc.data[paper.pid].is_selected)">
                         <td class="paper-table-body-td">
                             <input type="checkbox" 
                                 v-model="working_oc.data[paper.pid].is_selected"
                                 disabled="disabled">
                         </td>
 
-                        <td class="paper-table-body-td"
+                        <td class="paper-table-body-td cursor-pointer"
                             v-on:click="on_click_paper(paper)">
                             {{ paper.seq_num }}
                         </td>
 
-                        <td class="paper-table-body-td"
+                        <td class="paper-table-body-td cursor-pointer"
                             v-on:click="on_click_paper(paper)">
                             {{ paper.pid }}
                         </td>

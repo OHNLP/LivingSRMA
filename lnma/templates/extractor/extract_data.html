@@ -137,10 +137,35 @@ var pan_ocpapers = {
         all_attrs: null,
         show_attrs: null,
         extract: null,
-        papers: []
+        papers: [],
+
+        // search
+        keywords: ''
     },
 
     vpp_methods: {
+        ///////////////////////////////////////////////////
+        // for search
+        ///////////////////////////////////////////////////
+        reset_keywords: function() {
+            this.keywords = '';
+        },
+
+        is_search_match: function(paper) {
+            if (this.keywords == '') {
+                return true;
+            }
+
+            if (paper.pid.indexOf(this.keywords)>=0 ||
+                paper.seq_num == parseInt(this.keywords) ||
+                paper.short_name.toLocaleUpperCase().indexOf(this.keywords.toLocaleUpperCase())>=0
+            ) {
+                return true;
+            }
+
+            return false;
+        },
+
         toggle_only_show_selected: function() {
             this.only_show_selected = !this.only_show_selected;
         },
@@ -164,8 +189,8 @@ var pan_ocpapers = {
         },
 
         // save all!
-        update_extract: function() {
-            pan_ocpapers.update_extract();
+        save_extract: function() {
+            pan_ocpapers.save_extract();
         },
 
         goto_analysis: function() {
@@ -645,7 +670,7 @@ var pan_ocpapers = {
         );
     },
 
-    update_extract: function() {
+    save_extract: function() {
         // there are 
         var project_id = Cookies.get('project_id');
         var oc_type = this.vpp.$data.working_oc.oc_type;
