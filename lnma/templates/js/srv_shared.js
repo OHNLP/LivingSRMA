@@ -121,6 +121,95 @@ var srv_shared = {
         return extract_tree;
     },
 
+
+    /**
+     * Create a sorted extract tree
+     *  the extract tree is a tree-shape data structure
+        [{
+            oc_type: pwma,
+            _is_shown: true/false,
+            groups: [{
+                abbr: primary,
+                _is_shown: true/false,
+                cates: [{
+                    name: cate_name,                    
+                    _is_shown: true/false,
+                    ocs: [{}, {}]
+                }, {}]
+            },
+            group2: []
+
+        }, {}
+        ]
+
+        The first level is the oc_type.
+        The second level is the group.
+        The third level is the cate.
+        In each cate, there are outcomes as list.
+     * 
+     * @param extract_tree An extract_tree
+     * @returns A sorted tree structured extracts
+     */
+    create_extract_tree_sorted: function(extract_tree) {
+        var sorted = [];
+
+        var oc_types = Object.keys(extract_tree).sort();
+
+        for (let i = 0; i < oc_types.length; i++) {
+            const oc_type = oc_types[i];
+
+            if (oc_type == 'itable') {
+                // sorted.push({
+                //     oc_type: oc_type,
+                //     oc: extract_tree[oc_type]
+                // });
+                continue;
+            }
+            
+            var groups = Object.keys(extract_tree[oc_type].groups).sort();
+            var sorted_groups = [];
+            for (let j = 0; j < groups.length; j++) {
+                const group = groups[j];
+                
+                var cates = Object.keys(extract_tree[oc_type].groups[group].cates).sort();
+                var sorted_cates = [];
+                for (let k = 0; k < cates.length; k++) {
+                    const cate = cates[k];
+                    
+                    // now, check the ocs
+                    var ocs = extract_tree[oc_type].groups[group].cates[cate].ocs;
+                    var ocs_list = Object.keys(ocs).map(function(abbr) {
+                        return ocs[abbr];
+                    });
+                    ocs_list.sort(function(a, b) {
+                        return a.meta.full_name > b.meta.full_name ? 1 : -1;
+                    });
+                    
+                    var sorted_cate = {
+                        name: cate,
+                        ocs: ocs_list
+                    };
+                    sorted_cates.push(sorted_cate);
+                }
+                
+                var sorted_group = {
+                    abbr: group,
+                    cates: sorted_cates
+                };
+                sorted_groups.push(sorted_group);
+            }
+
+            var sorted_oc_type = {
+                oc_type: oc_type,
+                groups: sorted_groups
+            };
+            sorted.push(sorted_oc_type);
+        }
+
+        return sorted;
+    },
+
+
     /**
      * Create an extract dictionary
      * 

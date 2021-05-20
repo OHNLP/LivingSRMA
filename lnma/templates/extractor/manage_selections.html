@@ -1,12 +1,12 @@
 {% extends '_layout_adminlte.html' %}
 
 {% block title %}
-Manage Selections
+Extract by paper
 {% endblock %}
 
 {% block page_name %}
 <i class="fa fa-tasks"></i>
-Manage Selections
+Extract by paper
 {% endblock %}
 
 {% block active_nav_link %}extractor-manage-selections{% endblock %}
@@ -127,7 +127,7 @@ html {
                     <td class="paper-table-body-td-author"
                         v-on:click="on_click_paper(paper)">
                         <div class="paper-table-body-td-author">
-                            {{ get_first_author(paper.authors) }} {{ get_year(paper.pub_date) }}
+                            {{ paper.short_name }}
                         </div>
                     </td>
                     <td>
@@ -153,7 +153,7 @@ html {
             class="mr-1"
             v-if="working_paper != null">
             <div class="working_title">
-                {{ get_first_author(working_paper.authors) }} {{ get_year(working_paper.pub_date) }}<br>
+                {{ working_paper.short_name }}<br>
                 is selected in <b>{{ n_selected_ocs() }}</b> outcomes
             </div>
 
@@ -194,48 +194,48 @@ html {
                 </div>
 
                 <div class="d-flex flex-column"
-                    v-for="(oc_type, oc_type_abbr) in extract_tree"
-                    v-if="oc_type_abbr != 'itable'">
+                    v-for="(oc_type, oc_type_idx) in extract_tree_sorted"
+                    v-if="oc_type.oc_type != 'itable'">
 
                     <div class="chk-oc-h1 d-flex flex-row justify-content-between cursor-pointer"
-                        v-on:click="on_click_toggle(extract_tree[oc_type_abbr])">
+                        v-on:click="on_click_toggle(extract_tree[oc_type.oc_type])">
                         <div class="ml-1">
-                            <i v-if="oc_type._is_shown" class="far fa-folder-open"></i>
+                            <i v-if="extract_tree[oc_type.oc_type]._is_shown" class="far fa-folder-open"></i>
                             <i v-else class="far fa-folder"></i>
                             &nbsp;
-                            {{ oc_type_abbr }}
+                            {{ _lbl(oc_type.oc_type) }}
                         </div>
                     </div>
 
-                    <div v-for="(group, group_abbr) in oc_type.groups"
+                    <div v-for="(group, group_idx) in oc_type.groups"
                         class="mt-1 mb-1"
-                        v-show="oc_type._is_shown">
+                        v-show="extract_tree[oc_type.oc_type]._is_shown">
 
                         <div class="chk-oc-h2 d-flex flex-row justify-content-between cursor-pointer"
-                            v-on:click="on_click_toggle(extract_tree[oc_type_abbr].groups[group_abbr])">
+                            v-on:click="on_click_toggle(extract_tree[oc_type.oc_type].groups[group.abbr])">
                             <div class="ml-1 font-weight-bold">
-                                <i v-if="group._is_shown" class="far fa-folder-open"></i>
+                                <i v-if="extract_tree[oc_type.oc_type].groups[group.abbr]._is_shown" class="far fa-folder-open"></i>
                                 <i v-else class="far fa-folder"></i>
                                 &nbsp; 
-                                Group: {{ group_abbr }}
+                                {{ _lbl(group.abbr) }}
                             </div>
                         </div>
 
-                        <div v-for="(cate, cate_name) in group.cates"
-                            v-show="group._is_shown">
+                        <div v-for="(cate, cate_idx) in group.cates"
+                            v-show="extract_tree[oc_type.oc_type].groups[group.abbr]._is_shown">
 
                             <div class="chk-oc-h3 d-flex flex-row justify-content-between cursor-pointer"
-                                v-on:click="on_click_toggle(extract_tree[oc_type_abbr].groups[group_abbr].cates[cate_name])">
+                                v-on:click="on_click_toggle(extract_tree[oc_type.oc_type].groups[group.abbr].cates[cate.name])">
                                 <div class="ml-1">
                                     <i v-if="cate._is_shown" class="far fa-folder-open"></i>
                                     <i v-else class="far fa-folder"></i>
                                     &nbsp;
-                                    - {{ cate_name }}
+                                    - {{ cate.name }}
                                 </div>
                             </div>
 
-                            <div v-for="(oc, oc_abbr) in cate.ocs"
-                                v-if="cate._is_shown && (!only_show_selected || working_paper_oc_selections[oc.abbr])"
+                            <div v-for="(oc, oc_idx) in cate.ocs"
+                                v-if="extract_tree[oc_type.oc_type].groups[group.abbr].cates[cate.name]._is_shown && (!only_show_selected || working_paper_oc_selections[oc.abbr])"
                                 v-bind:id="'chk_oc_line_' + oc.abbr"
                                 class="chk-oc d-flex flex-row">
                                 <div>
@@ -353,6 +353,7 @@ var pan_ocpapers = {
         extracts: null,
         extract_dict: null,
         extract_tree: null,
+        extract_tree_sorted: null,
 
         // working paper
         working_paper: null,
@@ -374,6 +375,11 @@ var pan_ocpapers = {
     },
 
     vpp_methods: {
+        // label converting function from srv_shared
+        _lbl: function(v) {
+            return srv_shared._lbl(v);
+        },
+
         ///////////////////////////////////////////////////
         // for search
         ///////////////////////////////////////////////////
@@ -542,6 +548,9 @@ var pan_ocpapers = {
         // update the extract dict for display
         this.vpp.$data.extract_dict = this.update_extract_dict(data);
         this.vpp.$data.extract_tree = this.update_extract_tree(data);
+        this.vpp.$data.extract_tree_sorted = srv_shared.create_extract_tree_sorted(
+            this.vpp.$data.extract_tree
+        );
 
         // update
         this.vpp.$forceUpdate();
@@ -670,6 +679,11 @@ var pan_ocpapers = {
                     this.vpp.$data
                 );
 
+                // then update the sorted tree
+                this.vpp.$data.extract_tree_sorted = srv_shared.update_extract_tree_sorted(
+                    this.vpp.$data.extract_tree
+                );
+
                 this.vpp.$forceUpdate();
                 break;
             }
@@ -707,6 +721,12 @@ var jarvis = {
     },
 
     init: function() {
+
+        // init the shared service
+        srv_shared.update_labels_by_project_settings(
+            srv_extractor.project.settings
+        );
+
         pan_ocpapers.init();
         pan_collector.init();
 
