@@ -146,6 +146,10 @@ tr.shown td.details-control {
     color: #fff;
     background-color: #b88d17;
 }
+.badge-rct {
+    color: #fff;
+    background-color: #12a119;
+}
 .badge-unscreened {
     color: #fff;
     background-color: #696b00;
@@ -489,7 +493,7 @@ Screener Overview
 
                                 <input class="form-check-input" type="checkbox" name="checkbox_lbl_rct" id="checkbox_lbl_rct">
                                 <label class="form-check-label" for="checkbox_lbl_rct">
-                                    Show <span class="badge badge-pill badge-info"><i class="fa fa-bong"></i> RCT</span> Only
+                                    Show <span class="badge badge-pill badge-info"><i class="fa fa-robot"></i> RCT</span> Only
                                 </label>
                             </div>
     
@@ -1060,7 +1064,7 @@ var tbjs_paperlist = {
     },
 
     _update_attr_labels: function(d) {
-        var label_rct = '<span class="badge badge-pill badge-info"><i class="fa fa-bong"></i> RCT</span>';
+        var label_rct = '<span class="badge badge-pill badge-info"><i class="fa fa-robot"></i> RCT</span>';
 
         var label_ckl = '<span class="badge badge-pill badge-ckl"><i class="far fa-clock"></i> Check Later</span>';
 
@@ -1078,6 +1082,12 @@ var tbjs_paperlist = {
         // the Check later label
         if (srv_screener.has_label_ckl(d)) {
             ret += label_ckl;
+        }
+
+        // the human input
+        if (d.meta.pred[0].hasOwnProperty(srv_screener.ATTR_PRED_RCT_USR_FB)) {
+            var usr_fb = srv_screener.RCT_USER_FEEDBACK[d.meta.pred[0][srv_screener.ATTR_PRED_RCT_USR_FB]];
+            ret += '<span class="badge badge-pill badge-light">'+ usr_fb + '</span>';
         }
 
         return ret;

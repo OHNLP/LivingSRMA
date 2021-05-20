@@ -79,7 +79,7 @@ var srv_screener = {
     RCT_USER_FEEDBACK: {
         '0': '<b class="text-danger">NOT RCT</b>',
         '1': '<b class="text-success"><i class="fa fa-bong"></i> RCT</b>',
-        '': '?'
+        '': '<b><i class="far fa-question-circle"></i></b>'
     },
 
     // stage states
