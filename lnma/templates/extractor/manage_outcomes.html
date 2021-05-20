@@ -197,15 +197,12 @@ html {
 <!-- /#main -->
 
 
-<ul id="pan_ocpapers_ctx_menu" style="display: none;">
-    
-</ul>
-
-
 {% endblock %}
 
 {% block script %}
 <script>
+
+{% include 'js/srv_shared.js' %}
 
 ///////////////////////////////////////////////////////////
 // bind the project information to srv_analyzer.js
@@ -219,6 +216,7 @@ srv_analyzer.project = [[ project_json_str|safe ]];
 ///////////////////////////////////////////////////////////
 {% include "js/srv_extractor.js" %}
 srv_extractor.project = [[ project_json_str|safe ]];
+
 
 var pan_outcomes = {
 
@@ -287,6 +285,7 @@ var pan_outcomes = {
                     $('.cate-extracts-' + oc_type).toggle();
                 },
 
+                
             }
         });
     },
@@ -295,7 +294,9 @@ var pan_outcomes = {
         var ret = jarvis.confirm('The deleted outcome and related extractions can NOT be restored. Are you sure to delete [' + full_name + ']?');
     
         if (ret) {
-            // 
+            // close the panel
+            pan_ocpapers.hide();
+
             var project_id = Cookies.get('project_id');
             $.post(
                 srv_extractor.url.delete_extract,
@@ -336,13 +337,17 @@ var pan_outcomes = {
         meta.group = group;
         meta.category = category;
 
-        // copy the meta.cate_attr
-        meta.cate_attrs = JSON.parse(JSON.stringify(srv_extractor.tpl.input_format[oc_type][meta.input_format]));
-
         // set the default input format
         if (srv_extractor.project.settings.outcome.default_setting.hasOwnProperty('input_format')) {
             meta.input_format = srv_extractor.project.settings.outcome.default_setting.input_format;
         }
+
+        // copy the meta.cate_attr according to the input_format
+        meta.cate_attrs = JSON.parse(
+            JSON.stringify(
+                srv_extractor.tpl.input_format[oc_type][meta.input_format]
+            )
+        );
 
         // send this extract to backend
         var data = {};
@@ -361,13 +366,17 @@ var pan_outcomes = {
                 console.log(data);
 
                 // update UI
-                pan_outcomes.add_vpp_extracts([data.extract]);
+                // pan_outcomes.add_vpp_extracts([data.extract]);
+                pan_outcomes.load();
 
                 // and open this outcome directly
                 pan_outcomes.show_extract_data(
                     data.extract.oc_type,
                     data.extract.abbr
                 )
+
+                // update the vpp
+                pan_outcomes.vpp.$forceUpdate();
             }, 'json'
         );
     },
@@ -380,84 +389,15 @@ var pan_outcomes = {
         this.vpp.$forceUpdate();
     },
 
-    // add_extracts: function(extracts) {
-    //     var oc_data = {};
-
-    //     // build the sorted cate
-    //     for (let i = 0; i < extracts.length; i++) {
-    //         const extract = extracts[i];
-    //         var oc_type = extract.oc_type;
-    //         var group = extract.meta.group;
-    //         var cate = extract.meta.category;
-
-    //         // check the group first
-    //         if (!this.vpp.$data.data[oc_type].outcomes.hasOwnProperty(cate)) {
-    //             this.vpp.$data.data[oc_type].outcomes[cate] = [];
-    //         }
-
-    //         // put this ext into cate
-    //         this.vpp.$data.data[oc_type].outcomes[cate].push(
-    //             extract.meta
-    //         );
-
-    //         // add number
-    //         this.vpp.$data.stat[oc_type].total += 1;
-    //     }
-
-    //     // update the vpp
-    //     this.vpp.$forceUpdate();
-
-    //     // update the sub-comp
-    //     this.vpp.$data.force_update = Math.random();
-    // },
-
     add_vpp_extracts: function(extracts) {
+        var new_exts = this.vpp.$data.extracts.concat(extracts);
+        this.vpp.$data.extract_tree = this.update_extract_tree(new_exts);
 
+        this.vpp.$data.force_update = Math.random();
     },
 
     update_extract_tree: function(extracts) {
-        var extract_tree = {};
-
-        for (let i = 0; i < extracts.length; i++) {
-            const ext = extracts[i];
-            
-            var oc_type = ext.oc_type;
-            var group = ext.meta.group;
-            var cate = ext.meta.category;
-
-            if (ext.oc_type == 'itable') {
-                extract_tree.itable = ext;
-
-            } else {
-                // check the type
-                if (!extract_tree.hasOwnProperty(oc_type)) {
-                    extract_tree[oc_type] = {
-                        _is_shown: true,
-                        groups: {}
-                    }
-                }
-
-                // check the group
-                if (!extract_tree[oc_type].groups.hasOwnProperty(group)) {
-                    extract_tree[oc_type].groups[group] = {
-                        _is_shown: true,
-                        cates: {}
-                    };
-                }
-
-                // check the cate
-                if (!extract_tree[oc_type].groups[group].cates.hasOwnProperty(cate)) {
-                    extract_tree[oc_type].groups[group].cates[cate] = {
-                        _is_shown: true,
-                        ocs: {}
-                    }
-                }
-                // put this outcome to the cate
-                extract_tree[oc_type].groups[group].cates[cate].ocs[ext.abbr] = ext;
-            }
-        }
-
-        return extract_tree;
+        return srv_shared.create_extract_tree(extracts);
     },
 
     show: function() {
@@ -520,6 +460,11 @@ var pan_ocpapers = {
                 }
             },
             methods: {
+                // label converting function from srv_shared
+                _lbl: function(v) {
+                    return srv_shared._lbl(v);
+                },
+
                 toggle_show_settings: function() {
                     this.show_settings = !this.show_settings;
                 },
@@ -911,7 +856,8 @@ var pan_ocpapers = {
     },
 
     hide: function() {
-        $(this.vpp_id).hide();
+        $('#config_outcome').css('right', 5000);
+        // $(this.vpp_id).hide();
     },
 
     set_size: function(size) {
@@ -965,6 +911,31 @@ Vue.component('outcome-list', {
     },
 
     computed: {
+        sorted_cate_ocs: function() {
+            var sorted = [];
+            var cates = Object.keys(this.cate_ocs).sort();
+
+            for (let i = 0; i < cates.length; i++) {
+                const cate = cates[i];
+                
+                // sort the ocs by name
+                var ocs = this.cate_ocs[cate].ocs;
+                var ocs_list = Object.keys(ocs).map(function(abbr) {
+                    return ocs[abbr];
+                });
+                ocs_list.sort(function(a, b) {
+                    return a.meta.full_name > b.meta.full_name ? 1 : -1;
+                });
+
+                // add this to sorted
+                sorted.push({
+                    name: cate,
+                    ocs: ocs_list
+                });
+            }
+
+            return sorted;
+        }
     },
 
     props: [
@@ -976,13 +947,13 @@ Vue.component('outcome-list', {
 
     template: `
 <div v-if="Object.keys(cate_ocs).length != 0" :force_update="force_update">
-<div v-for="cate, cate_name in cate_ocs" v-show="Object.keys(cate.ocs).length>0">
+<div v-for="cate, cate_idx in sorted_cate_ocs" v-show="cate.ocs.length>0">
     <div class="cate-line"
         v-on:click="toggle_cate(event)">
             <i class="far fa-folder-open"></i>
-            {{ cate_name }} 
+            {{ cate.name }} 
         <button class="btn btn-default btn-xs text-primary"
-            v-on:click="create_extract(oc_type, 'default', group, cate_name)">
+            v-on:click="create_extract(oc_type, 'default', group, cate.name)">
             <i class="fa fa-plus"></i>
             Add outcome
         </button>
@@ -1033,6 +1004,12 @@ var jarvis = {
     },
 
     init: function() {
+
+        // init the shared service
+        srv_shared.update_labels_by_project_settings(
+            srv_extractor.project.settings
+        );
+
         pan_outcomes.init();
         pan_ocpapers.init();
 

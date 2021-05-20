@@ -67,3 +67,11 @@
 .cursor-pointer {
     cursor: pointer;
 }
+
+
+/**********************************************************
+ * For jquery menu
+ *********************************************************/
+.ui-menu-icons .ui-menu-item-wrapper {
+    padding-left: 1em;
+}

@@ -16,6 +16,9 @@ Extract Data
 {% block active_nav_link %}extractor-extract-data{% endblock %}
 
 {% block style %}
+<!-- jQuery UI Theme -->
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css">
+
 <style>
     
 {% include 'css/basic.css' %}
@@ -37,9 +40,6 @@ html {
 }
 
 </style>
-
-<!-- jQuery UI Theme -->
-<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css">
 
 
 {% endblock %}
@@ -86,6 +86,7 @@ html {
 
 <script>
 
+{% include 'js/srv_shared.js' %}
 {% include 'js/srv_analyzer.js' %}
 {% include "js/srv_extractor.js" %}
 {% include "js/srv_pdfworker.js" %}
@@ -144,6 +145,11 @@ var pan_ocpapers = {
     },
 
     vpp_methods: {
+        // label converting function from srv_shared
+        _lbl: function(v) {
+            return srv_shared._lbl(v);
+        },
+        
         ///////////////////////////////////////////////////
         // for search
         ///////////////////////////////////////////////////
@@ -424,37 +430,15 @@ var pan_ocpapers = {
             console.log(data);
             pan_ocpapers.extracts = data.extracts;
 
-            // update the outcome dictionary
-            for (let i = 0; i < data.extracts.length; i++) {
-                const extract = data.extracts[i];
-                var oc_type = extract.oc_type;
-                var group = extract.meta.group;
-                var cate = extract.meta.category;
-
-                // add oc_type
-                if (!pan_ocpapers.extract_dict.hasOwnProperty(oc_type)) {
-                    pan_ocpapers.extract_dict[oc_type] = {}
-                }
-
-                // add group
-                if (!pan_ocpapers.extract_dict[oc_type].hasOwnProperty(group)) {
-                    pan_ocpapers.extract_dict[oc_type][group] = {}
-                }
-
-                // add cate
-                if (!pan_ocpapers.extract_dict[oc_type][group].hasOwnProperty(cate)) {
-                    pan_ocpapers.extract_dict[oc_type][group][cate] = [];
-                }
-
-                // put this ext into cate
-                pan_ocpapers.extract_dict[oc_type][group][cate].push(
-                    extract.meta
-                );
-
-            }
-
             // update the ocs_menu according to the extracts
-            pan_ocpapers.update_ocs_menu(data.extracts);
+            pan_ocpapers.vpp.$data.extract_tree = srv_shared.create_extract_tree(
+                data.extracts
+            );
+
+            // update the ocs menu
+            pan_ocpapers.update_ocs_menu(
+                pan_ocpapers.vpp.$data.extract_tree
+            );
         });
     },
 
@@ -618,7 +602,6 @@ var pan_ocpapers = {
         this.vpp.$forceUpdate();
     },
 
-
     show_extract_and_papers: function(abbr) {
         this.extract_abbr = abbr;
 
@@ -694,133 +677,7 @@ var pan_ocpapers = {
                 );
             }
         )
-    },
-
-    show_ocs_menu: function() {
-        var top = 40;
-        var left = 90;
-        $("#pan_ocpapers_ocs_menu").css({
-            position: 'absolute',
-            display: "block",
-            top: top,
-            left: left
-        }).addClass("show").menu();
-
-        $("#pan_ocpapers_ocs_menu").menu('refresh');
-
-        $('#pan_ocpapers_ocs_menu .ui-menu-item').on('click', function() {
-            $("#pan_ocpapers_ocs_menu").hide();
-        });
-    },
-
-    update_ocs_menu: function(extracts) {
-        // loop on the cate_attrs
-        var html = [];
-
-        // first item is the itable
-        html.push('<li class="oc-menu-item"><div onclick="pan_ocpapers.show_extract_and_papers(\'itable\');">Interactive Table</div></li>')
-
-        // then, add the pwma
-        html.push('<li class="oc-menu-item"><div>PWMA Outcomes</div><ul>');
-        
-        // then the primary analysis
-        html.push('<li class="oc-menu-item"><div>Primary Analysis</div><ul>');
-        if (pan_ocpapers.extract_dict.hasOwnProperty('pwma') &&
-            pan_ocpapers.extract_dict.pwma.hasOwnProperty('primary')) {
-            
-            // loop on cates
-            for (const cate in pan_ocpapers.extract_dict['pwma']['primary']) {
-                const exts = pan_ocpapers.extract_dict['pwma']['primary'][cate];
-                html.push(
-                    '<li class="oc-menu-item"><div>'+cate+'</div><ul>'
-                );
-                // loop on each one
-                for (let i = 0; i < exts.length; i++) {
-                    const ext = exts[i];
-                    html.push(
-                        '<li class="oc-menu-item"><div onclick="pan_ocpapers.show_extract_and_papers(\''+ext.abbr+'\');">'+ext.full_name+'</div></li>'
-                    );
-                }
-                html.push(
-                    '</ul></li>'
-                );
-            }
-        }
-        html.push('</ul></li>'); // end of the primary analysis
-
-        // then the sensitivity analysis
-        html.push('<li class="oc-menu-item"><div>Sensitivity Analysis</div>');
-        if (pan_ocpapers.extract_dict.hasOwnProperty('pwma') &&
-            pan_ocpapers.extract_dict.pwma.hasOwnProperty('sensitivity')) {
-            
-            html.push('<ul>');
-
-            // loop on cates
-            for (const cate in pan_ocpapers.extract_dict['pwma']['sensitivity']) {
-                const exts = pan_ocpapers.extract_dict['pwma']['sensitivity'][cate];
-                html.push(
-                    '<li class="oc-menu-item"><div>'+cate+'</div><ul>'
-                );
-                // loop on each one
-                for (let i = 0; i < exts.length; i++) {
-                    const ext = exts[i];
-                    html.push(
-                        '<li class="oc-menu-item"><div onclick="pan_ocpapers.show_extract_and_papers(\''+ext.abbr+'\');">'+ext.full_name+'</div></li>'
-                    );
-                }
-                html.push(
-                    '</ul></li>'
-                );
-            }
-
-            html.push('</ul>'); // end of the list
-
-        }
-        html.push('</li>'); // end of the sensitivity analysis
-
-
-        // then the subgroup
-        html.push('<li class="oc-menu-item"><div>Subgroup Analysis</div>');
-        if (pan_ocpapers.extract_dict.hasOwnProperty('subg') &&
-            pan_ocpapers.extract_dict.subg.hasOwnProperty('default')) {
-
-            html.push('<ul>');
-
-            html.push('</ul>'); // end of the list
-        }
-        html.push('</li>'); // end of the subgroup analysis
-
-
-        html.push('</ul></li>'); // end of the pwma
-
-
-        // last is the NMA
-        html.push('<li class="oc-menu-item"><div>NMA Outcomes</div>');
-        if (pan_ocpapers.extract_dict.hasOwnProperty('nma')) {
-            html.push('<ul>')
-            html.push('</ul>'); // end of the list
-        }
-        html.push('</li>'); // end of the subgroup analysis
-
-
-        // put the new html into box
-        $('#pan_ocpapers_ocs_menu').html(
-            html.join('')
-        );
-    },
-
-    __update_ocs_menu_html: function(html, name, abbr) {
-        // add a new oc
-        html.push(
-            '<li class="oc-menu-item">'+
-            '<div onclick="pan_ocpapers.show_extract_and_papers(\''+abbr+'\');">'+ 
-                name +
-            '</div></li>'
-        );
-
-        return html;
-    },
-    
+    },   
 
     show_working_paper: function() {
         var w_win_collector = $('#win_collector').width();
@@ -861,8 +718,8 @@ var pan_ocpapers = {
     }
 };
 
-
 {% include 'js/pan_ocpapers_ext_wpc.js' %}
+{% include 'js/pan_ocpapers_ext_ocmenu.js' %}
 
 
 var jarvis = {
@@ -884,6 +741,11 @@ var jarvis = {
     init: function() {
         // get the outcome abbr from url
         var oc_abbr = jarvis.getUrlParameter('abbr');
+
+        // init the shared service
+        srv_shared.update_labels_by_project_settings(
+            srv_extractor.project.settings
+        );
 
         // init the UI
         pan_ocpapers.init();

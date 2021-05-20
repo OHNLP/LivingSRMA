@@ -11,10 +11,10 @@
                     <a href="javascript:void(0);" onclick="pan_ocpapers.show_ocs_menu();">
                         <b>
                             [
-                                {{ working_oc.meta.oc_type }} | 
-                                {{ working_oc.meta.group }}
-                            ]<br>
-                            {{ working_oc.meta.full_name }}
+                                {{ _lbl(working_oc.meta.oc_type) }} <br>
+                                {{ _lbl(working_oc.meta.group) }} <br>
+                                {{ working_oc.meta.full_name }}
+                            ]
                         </b>
                     </a>
                 </span>

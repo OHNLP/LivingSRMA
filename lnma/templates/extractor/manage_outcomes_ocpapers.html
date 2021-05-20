@@ -5,7 +5,13 @@
     <div class="panel-info">
         <div class="oc-attr d-flex flex-row">
             <span style="font-size: 1.2em;" class="mr-2">
-                <b>[{{ extract.meta.full_name }}]</b> Settings
+                <b>
+                    [
+                        {{ _lbl(extract.oc_type) }} |
+                        {{ extract.meta.full_name }}
+                    ]
+                </b> 
+                Settings
             </span>
 
             <div class="btn-group mr-2" role="group" aria-label="Extract information">
