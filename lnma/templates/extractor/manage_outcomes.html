@@ -295,6 +295,7 @@ var pan_outcomes = {
         var ret = jarvis.confirm('The deleted outcome and related extractions can NOT be restored. Are you sure to delete [' + full_name + ']?');
     
         if (ret) {
+            // 
             var project_id = Cookies.get('project_id');
             $.post(
                 srv_extractor.url.delete_extract,

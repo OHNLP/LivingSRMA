@@ -7,7 +7,7 @@
             <span style="font-size: 1.2em;" class="mr-2">
                 <b>[{{ extract.meta.full_name }}]</b> Settings
             </span>
-            
+
             <div class="btn-group mr-2" role="group" aria-label="Extract information">
                 <button v-on:click="update_extract();"
                     class="btn btn-default btn-sm">
@@ -32,8 +32,8 @@
                 </button>
             </div>
 
-            <div class="btn-group mr-2" role="group" aria-label="Analyze outcome">
-                <button v-on:click="goto_analysis(extract)"
+            <div class="btn-group mr-2" role="group" aria-label="Delete outcome">
+                <button v-on:click="delete_extract(extract)"
                     type="button" class="btn btn-danger btn-sm">
                     Delete this outcome
                 </button>
