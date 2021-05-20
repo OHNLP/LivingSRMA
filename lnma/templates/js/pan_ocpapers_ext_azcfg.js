@@ -70,8 +70,9 @@ Object.assign(pan_ocpapers.vpp_methods, {
 
                 // get some infomation
                 // create a record for analyze
-                var study = this.get_first_author(paper.authors) + ' ' +
-                            this.get_year(paper.pub_date);
+                // var study = this.get_first_author(paper.authors) + ' ' +
+                            // this.get_year(paper.pub_date);
+                var study = paper.short_name;
                 var year = this.get_year(paper.pub_date);
 
                 // get this data
@@ -82,11 +83,12 @@ Object.assign(pan_ocpapers.vpp_methods, {
                     // when i == 0, the main
                     // when i > 0, then other i-1
                     var ext = null;
+                    var _study = study;
                     if (i==0) {
                         ext = d.attrs.main;
                     } else {
                         ext = d.attrs.other[i-1];
-                        study = study + ' Arm ' + (i + 1);
+                        _study = _study + ' CP' + (i + 1);
                     }
 
                     // now get data
@@ -108,12 +110,12 @@ Object.assign(pan_ocpapers.vpp_methods, {
                     }
 
                     if (Et == 0 && Ec == 0) {
-                        console.log('* skip 0t0c ' + " " + pid + " " + study);
+                        console.log('* skip 0t0c ' + " " + pid + " " + _study);
                         continue;
                     }
                     var r = {
                         // the must attributes
-                        study: study,
+                        study: _study,
                         year: year,
                         Et: Et,
                         Nt: Nt,

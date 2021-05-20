@@ -311,7 +311,7 @@ Object.assign(pan_ocpapers, {
             html.push('<li class="ui-state-disabled menu-header"><div>Other Arms</div></li>');
             
             for (let a = 0; a < n_arms - 2; a++) {
-                html.push('<li class="menu-item"><div>Arm '+(a+2)+'</div><ul>');
+                html.push('<li class="menu-item"><div>Comp '+(a+2)+'</div><ul>');
                 html = this.__update_ctx_menu_html(html, highlight_text, pid, a);
                 html.push('</ul></li>')
             }
