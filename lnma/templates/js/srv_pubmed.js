@@ -40,11 +40,14 @@ var srv_pubmed = {
             var authors_elems = doc.find('Author');
             for (var j = 0; j < authors_elems.length; j++) {
                 var elem = $(authors_elems[j]);
-                var last_name = elem.find('LastName')[0].textContent;
-                var fore_name = elem.find('ForeName')[0].textContent;
-                var initials = elem.find('Initials')[0].textContent;
-                var name = fore_name + ' ' + last_name;
-                authors.push(name);
+                try {
+                    var last_name = elem.find('LastName')[0].textContent;
+                    var fore_name = elem.find('ForeName')[0].textContent;
+                    var name = fore_name + ' ' + last_name;
+                    authors.push(name);
+                } catch (err) {
+                    
+                }
             }
 
             // get journal

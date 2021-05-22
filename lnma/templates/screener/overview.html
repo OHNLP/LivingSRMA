@@ -299,7 +299,12 @@ Screener Overview
                     v-bind:disabled="is_btn_disabled"
                     v-on:click="update_paper_detail">
                     <i class="fa fa-save"></i>
-                    Update the information for paper [ {{ new_data.pmid }} ]
+                    <span v-if="!is_btn_disabled">
+                        Update the information for paper [ {{ new_data.pmid }} ]
+                    </span>
+                    <span v-else>
+                        Updating paper [ {{ new_data.pmid }} ] <i class="fas fa-spinner fa-spin"></i>
+                    </span>
                 </button>
             </div>
         </div>
@@ -1591,8 +1596,9 @@ var tbjs_paperlist = {
             ].join('');
         } else {
             html = [
+                '<a target="_blank" href="https://clinicaltrials.gov/ct2/show/'+d.meta.rct_id+'" title="Check this clinical trial">'+d.meta.rct_id+'</a> ',
                 '<a href="javascript:void(0);" onclick="tbjs_paperlist.set_rct_id(\''+d.paper_id+'\', \''+d.meta.rct_id+'\')" title="Click to update the NCT number for this study">',
-                    d.meta.rct_id,
+                    '<i class="fa fa-edit"></i>',
                 '</a>'
             ].join('');
         }
@@ -1622,13 +1628,33 @@ var tbjs_paperlist = {
             }
         }
 
-        var html = [
-            html_study_type + ' ', 
-            '<a href="javascript:void(0);" onclick="tbjs_paperlist.set_pmid(\''+d.paper_id+'\', \''+d.pid+'\')" title="Click to update the PMID for this study">',
-                d.pid_type + ': ', 
-                d.pid,
+        // build html
+        var html = [html_study_type];
+        
+
+        // now build the id
+        if (d.is_pmid) {
+            html.push(
+                '<a target="_blank" href="https://pubmed.ncbi.nlm.nih.gov/'+d.pid+'" title="Check the detail in PubMed">' +
+                    d.pid_type + ': ' + d.pid +
+                '</a> '
+            );
+        } else {
+            html.push(
+                '<a href="javascript:void(0);" title="">' +
+                    d.pid_type + ': ' + d.pid +
+                '</a> '
+            );
+        }
+
+        // push the edit
+        html.push(
+            '<a href="javascript:void(0);" onclick="tbjs_paperlist.set_pmid(\''+d.paper_id+'\', \''+d.pid+'\')" title="Click to update the PMID for this study">' +
+                '<i class="fa fa-edit"></i>' +
             '</a>'
-        ].join('');
+        );
+
+        html = html.join('');
         
         return html;
     },
