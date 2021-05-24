@@ -85,7 +85,13 @@ html {
     background-color: #ffffff;
     padding: 5px;
 }
-
+.paper-table-row:hover {
+    background-color: #d6d6d6;
+}
+.paper-table-body-td {
+    padding-left: 3px !important;
+    border-left: 1px solid #a7a7a7;
+}
 .paper-table-body-td-author {
     width: 190px;
     white-space: nowrap;
@@ -709,9 +715,12 @@ var pan_ocpapers = {
                 cols: 0
             }
             for (let j = 0; j < cate.attrs.length; j++) {
-                const attr = cate.attrs[j];
+                var attr = cate.attrs[j];
                 
                 thr1.cols += 1;
+
+                // update the attr cate name
+                attr.cate_name = cate.name;
 
                 var thr2 = {
                     name: attr.name,

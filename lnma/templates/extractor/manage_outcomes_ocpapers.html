@@ -281,7 +281,7 @@
                                 PMID
                             </th>
                             <th class="paper-table-header-th" style="width: 40px;">
-                                T
+                                O/F
                             </th>
                             <th class="paper-table-header-th" style="width: 90px;" v-show="show_col_nct">
                                 NCT
@@ -352,7 +352,7 @@
                                 
                                 <!-- the main track -->
                                 <span class="paper-table-body-cell"
-                                    v-bind:title="extract.data[paper.pid].attrs.main[attr_sub.abbr]">
+                                    v-bind:title="attr_sub.cate_name + '|' + attr_sub.name + ': ' + extract.data[paper.pid].attrs.main[attr_sub.abbr]">
                                     {{ extract.data[paper.pid].attrs.main[attr_sub.abbr] }}&nbsp;
                                 </span>
         
@@ -361,7 +361,7 @@
         
                                 <span v-for="other, other_idx in extract.data[paper.pid].attrs.other"
                                     class="paper-table-body-cell"
-                                    v-bind:title="extract.data[paper.pid].attrs.other[other_idx][attr_sub.abbr]">
+                                    v-bind:title="attr_sub.cate_name + '|' + attr_sub.name + ': ' + extract.data[paper.pid].attrs.other[other_idx][attr_sub.abbr]">
                                     {{ extract.data[paper.pid].attrs.other[other_idx][attr_sub.abbr] }}&nbsp;
                                 </span>                        
         
