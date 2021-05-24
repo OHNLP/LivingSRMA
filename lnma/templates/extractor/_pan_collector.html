@@ -50,6 +50,18 @@
                         v-html="paper.authors">
                     </p>
                     <p>
+                        Clinical Trial ID: 
+                        <a v-if="paper.meta.rct_id != ''"
+                            target="_blank" title="Show in ClinicalTrials.gov" 
+                            :href="'https://clinicaltrials.gov/ct2/show/' + paper.meta.rct_id ">
+                            {{ paper.meta.rct_id }}
+                        </a>
+                        <a v-else 
+                            target="_blank" title="Clinical Trial ID not found"
+                            href="javascript:void(0);">
+                            -
+                        </a>
+                        | 
                         {{ paper.pid_type }}: 
                         <a v-if="paper.is_pmid"
                             target="_blank" title="Show in PubMed" 
