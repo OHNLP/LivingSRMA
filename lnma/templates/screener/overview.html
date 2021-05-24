@@ -1635,14 +1635,16 @@ var tbjs_paperlist = {
         // now build the id
         if (d.is_pmid) {
             html.push(
+                d.pid_type + ': ' + 
                 '<a target="_blank" href="https://pubmed.ncbi.nlm.nih.gov/'+d.pid+'" title="Check the detail in PubMed">' +
-                    d.pid_type + ': ' + d.pid +
+                    d.pid +
                 '</a> '
             );
         } else {
             html.push(
+                d.pid_type + ': ' + 
                 '<a href="javascript:void(0);" title="">' +
-                    d.pid_type + ': ' + d.pid +
+                    d.pid +
                 '</a> '
             );
         }
@@ -1670,7 +1672,7 @@ var tbjs_paperlist = {
                     '<label class="custom-file-label" for="tb-row-upload-'+d.paper_id+'">Choose file</label>' +
                 '</div>' +
                 '</form>' +
-                '<button class="btn btn-primary mr-2" onclick="srv_pdfworker.update_pdfs(\''+d.paper_id+'\');">Upload</button>' + 
+                '<button id="btn_upload_'+d.paper_id+'" class="btn btn-primary mr-2" onclick="srv_pdfworker.update_pdfs(\''+d.paper_id+'\');">Upload</button>' + 
                 
                 '<div id="tb-rowext-pdfs-list-'+d.paper_id+'">' +
                 this.__get_div_pdfs(d) +
@@ -1739,8 +1741,9 @@ var tbjs_paperlist = {
             ].join('');
         } else {
             html = [
+                '' + d.pub_date + ' ',
                 '<a href="javascript:void(0);" onclick="tbjs_paperlist.set_pub_date(\''+d.paper_id+'\', \''+d.pub_date+'\')" title="Click to update the publication date for this study">',
-                    d.pub_date,
+                    '<i class="fa fa-edit"></i>',
                 '</a>'
             ].join('');
         }
@@ -2421,6 +2424,11 @@ var srv_pdfworker = {
             $('#tb-rowext-pdfs-form-' + paper_id)[0]
         );
 
+        // disable the upload button and add animation
+        $('#btn_upload_' + paper_id)
+            .prop('disabled', true)
+            .html('Uploading <i class="fas fa-spinner fa-spin"></i> <span id="pdf_upload_progress"> - </span>');
+
         // send the update
         $.ajax({
             type: 'POST',
@@ -2429,8 +2437,33 @@ var srv_pdfworker = {
             contentType: false,
             cache: false,
             processData: false,
+
+            // 2021-05-23: add a callback for the uploading animation
+            xhr: function() {
+                var xhr = new window.XMLHttpRequest();
+
+                xhr.upload.addEventListener("progress", function(evt) {
+                    if (evt.lengthComputable) {
+                        var percentComplete = evt.loaded / evt.total;
+                        percentComplete = parseInt(percentComplete * 100);
+                        // console.log(percentComplete);
+
+                        // show a percentage
+                        $('#pdf_upload_progress').html(
+                            percentComplete + '%'
+                        );
+
+                        if (percentComplete === 100) {
+
+                        }
+
+                    }
+                }, false);
+
+                return xhr;
+            },
+
             success: function(data) {
-                
                 console.log(data);
 
                 var paper = data.paper;
@@ -2439,6 +2472,11 @@ var srv_pdfworker = {
                 $('#tb-rowext-pdfs-list-' + paper.paper_id).html(
                     tbjs_paperlist.__get_div_pdfs(paper)
                 );
+
+                // update the button
+                $('#btn_upload_' + paper.paper_id)
+                    .prop('disabled', false)
+                    .html('Upload');
 
                 // update the tb data list
                 tbjs_paperlist.update_data_by_paper(paper);
