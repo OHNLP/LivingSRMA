@@ -77,6 +77,9 @@ td.details-control {
 tr.shown td.details-control {
     cursor: pointer;
 }
+.col-first {
+    font-size: .9em;
+}
 .col-title {
     cursor: pointer;
 }
@@ -668,8 +671,8 @@ var tbjs_paperlist = {
         // column 1
         {
             title: '',
-            width: 25,
-            className: 'details-control dt-center',
+            width: 70,
+            className: 'col-first',
             orderable: false,
             data: 'first_column'
         },
@@ -699,7 +702,7 @@ var tbjs_paperlist = {
         {
             title: '',
             className: 'col-actions',
-            width: 190,
+            width: 140,
             orderable: false,
             data: 'basic_actions'
         },
@@ -831,28 +834,28 @@ var tbjs_paperlist = {
         });
 
         // update the open/close details event
-        $(this.table_id + ' tbody').on('click', 'td.details-control', function() {
-            var tr = $(this).closest('tr');
-            var row = tbjs_paperlist.table.row( tr );
+        // $(this.table_id + ' tbody').on('click', 'td.details-control', function() {
+        //     var tr = $(this).closest('tr');
+        //     var row = tbjs_paperlist.table.row( tr );
     
-            if ( row.child.isShown() ) {
-                // This row is already open - close it
-                row.child.hide();
-                tr.removeClass('shown');
-                $(this).html('<i class="fa fa-plus"></i>')
-            }
-            else {
-                // Open this row
-                var row_html = tbjs_paperlist._get_expand_html_by_stage(row.data());
-                row.child(row_html).show();
-                tbjs_paperlist.update_paper_detail(row.data());
-                tr.addClass('shown');
-                $(this).html('<i class="fa fa-minus"></i>')
+        //     if ( row.child.isShown() ) {
+        //         // This row is already open - close it
+        //         row.child.hide();
+        //         tr.removeClass('shown');
+        //         $(this).html('<i class="fa fa-plus"></i>')
+        //     }
+        //     else {
+        //         // Open this row
+        //         var row_html = tbjs_paperlist._get_expand_html_by_stage(row.data());
+        //         row.child(row_html).show();
+        //         tbjs_paperlist.update_paper_detail(row.data());
+        //         tr.addClass('shown');
+        //         $(this).html('<i class="fa fa-minus"></i>')
 
-                // trigger the highlight
-                tbjs_paperlist._mark_element('#tb-rowext-abstract-' + row.data().paper_id);
-            }
-        });
+        //         // trigger the highlight
+        //         tbjs_paperlist._mark_element('#tb-rowext-abstract-' + row.data().paper_id);
+        //     }
+        // });
 
         // update the click title event
         $(this.table_id + ' tbody').on('click', 'td.col-title', function() {
@@ -1064,8 +1067,21 @@ var tbjs_paperlist = {
     ///////////////////////////////////////////////////////////////////////////
     // Update the data attributes
     ///////////////////////////////////////////////////////////////////////////
+
+    // 2021-05-23: change this column to pid
     _update_attr_first_column: function(d) {
-        return '<i class="fa fa-plus"></i>';
+        // return '<i class="fa fa-plus"></i>';
+        var ret = '';
+
+        // first, add the rct_id
+        if (d.meta.hasOwnProperty('rct_id')) {
+            ret = d.meta.rct_id + '<br>';
+        }
+
+        // second, add the pmid
+        ret += d.pid;
+
+        return ret;
     },
 
     _update_attr_labels: function(d) {
@@ -1261,6 +1277,7 @@ var tbjs_paperlist = {
 
     _get_expand_html_by_stage_all_of_them: function(d) {
         var html = 
+            this.__get_tr_title(d) + 
             this.__get_tr_info(d) + 
             this.__get_tr_authors(d) +
             this.__get_tr_abstract(d);
@@ -1285,6 +1302,7 @@ var tbjs_paperlist = {
                 '</td>'+
             '</tr>'+
             this.__get_tr_tags(d) +
+            this.__get_tr_title(d) + 
             this.__get_tr_info(d) + 
             this.__get_tr_authors(d) +
             this.__get_tr_abstract(d);
@@ -1326,6 +1344,7 @@ var tbjs_paperlist = {
 
             this.__get_tr_tags(d),
             this.__get_tr_pdfs(d),
+            this.__get_tr_title(d) + 
             this.__get_tr_info(d),
             this.__get_tr_authors(d),
             this.__get_tr_abstract(d)
@@ -1352,6 +1371,7 @@ var tbjs_paperlist = {
             '</tr>'+
             this.__get_tr_tags(d) +
             this.__get_tr_pdfs(d) +
+            this.__get_tr_title(d) + 
             this.__get_tr_info(d) + 
             this.__get_tr_authors(d) +
             this.__get_tr_abstract(d);
@@ -1376,6 +1396,7 @@ var tbjs_paperlist = {
             '</tr>'+
             this.__get_tr_tags(d) +
             this.__get_tr_pdfs(d) +
+            this.__get_tr_title(d) + 
             this.__get_tr_info(d) + 
             this.__get_tr_authors(d) +
             this.__get_tr_abstract(d);
@@ -1398,6 +1419,7 @@ var tbjs_paperlist = {
                 '</td>'+
             '</tr>'+
             this.__get_tr_tags(d) +
+            this.__get_tr_title(d) + 
             this.__get_tr_info(d) + 
             this.__get_tr_authors(d) +
             this.__get_tr_abstract(d);
@@ -1420,6 +1442,7 @@ var tbjs_paperlist = {
                 '</td>'+
             '</tr>'+
             this.__get_tr_tags(d) +
+            this.__get_tr_title(d) + 
             this.__get_tr_info(d) + 
             this.__get_tr_authors(d) +
             this.__get_tr_abstract(d);
@@ -1443,6 +1466,7 @@ var tbjs_paperlist = {
                 '</td>'+
             '</tr>'+
             this.__get_tr_tags(d) +
+            this.__get_tr_title(d) + 
             this.__get_tr_info(d) + 
             this.__get_tr_authors(d) +
             this.__get_tr_abstract(d);
@@ -1461,6 +1485,7 @@ var tbjs_paperlist = {
                 '</td>'+
             '</tr>'+
             this.__get_tr_tags(d) +
+            this.__get_tr_title(d) + 
             this.__get_tr_info(d) + 
             this.__get_tr_authors(d) +
             this.__get_tr_abstract(d);
@@ -1686,6 +1711,13 @@ var tbjs_paperlist = {
         return '<tr>'+
             '<td>Authors:</td>'+
             '<td>'+d.authors+'</td>'+
+        '</tr>';
+    },
+
+    __get_tr_title: function(d) {
+        return '<tr>' + 
+            '<td>Title:</td>' +
+            '<td>' + d.title + '</td>' +
         '</tr>';
     },
 
