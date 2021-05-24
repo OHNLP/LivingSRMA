@@ -123,6 +123,8 @@ tr.shown td.details-control {
     padding-left: 3px;
     padding-right: 3px;
     border-radius: 3px;
+    padding-top: 1px;
+    padding-bottom: 5px;
 }
 .tr-tags .badge-tag {
     padding: 9px 7px;
@@ -184,6 +186,18 @@ tr.shown td.details-control {
 }
 .study-type-followup {
 
+}
+.btn-ve {
+    border-top: 1px solid #f1f1f1;
+    border-left: 1px solid #f1f1f1;
+    border-right: 1px solid #999999;
+    border-bottom: 1px solid #999999;
+}
+.btn-ve:active {
+    border-top: 1px solid #999999;
+    border-left: 1px solid #999999;
+    border-right: 1px solid #f1f1f1;
+    border-bottom: 1px solid #f1f1f1;
 }
 </style>
 {% endblock %}
@@ -576,7 +590,7 @@ Screener Overview
 {% block active_nav_link %}screener-overview{% endblock %}
 
 {% block script %}
-<script src="/static/lib/d3/d3.min.js"></script>
+<!-- <script src="/static/lib/d3/d3.min.js"></script> -->
 <script src="https://unpkg.com/dayjs@1.8.21/dayjs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js"></script>
 
@@ -589,6 +603,7 @@ Screener Overview
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/searchpanes/1.2.0/css/searchPanes.dataTables.min.css">
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.3.1/css/select.dataTables.min.css"> -->
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.4.0/clipboard.min.js" integrity="sha512-iJh0F10blr9SC3d0Ow1ZKHi9kt12NYa+ISlmCdlCdNZzFwjH1JppRTeAnypvUez01HroZhAmP4ro4AvZ/rG0UQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 <!-- my scripts -->
 <script>
@@ -866,7 +881,7 @@ var tbjs_paperlist = {
                 // This row is already open - close it
                 row.child.hide();
                 tr.removeClass('shown');
-                tr.find('td.details-control').html('<i class="fa fa-plus"></i>')
+                // tr.find('td.details-control').html('<i class="fa fa-plus"></i>');
             }
             else {
                 // Open this row
@@ -874,10 +889,16 @@ var tbjs_paperlist = {
                 row.child(row_html).show();
                 tbjs_paperlist.update_paper_detail(row.data());
                 tr.addClass('shown');
-                tr.find('td.details-control').html('<i class="fa fa-minus"></i>')
+                // tr.find('td.details-control').html('<i class="fa fa-minus"></i>')
 
                 // trigger the highlight
                 tbjs_paperlist._mark_element('#tb-rowext-abstract-' + row.data().paper_id);
+
+                // bind the copy function
+                var clip = new Clipboard('#btn_copy_title_'+row.data().paper_id);
+                clip.on("success", function(e){
+                    jarvis.toast('Copied the title [' + e.text + ']!');
+                });
             }
         });
 
@@ -1716,8 +1737,8 @@ var tbjs_paperlist = {
 
     __get_tr_title: function(d) {
         return '<tr>' + 
-            '<td>Title:</td>' +
-            '<td>' + d.title + '</td>' +
+            '<td>Title: </td>' +
+            '<td><a title="Copy the title" id="btn_copy_title_'+d.paper_id+'" class="btn btn-xs btn-ve" data-clipboard-text="'+d.title+'"><i class="far fa-copy"></i></a> ' + d.title + '</td>' +
         '</tr>';
     },
 
@@ -2675,6 +2696,10 @@ var jarvis = {
 
             tbjs_paperlist.load();
         });
+    },
+
+    toast: function(msg, type) {
+        toast(msg, type);
     },
 
     prompt: function(text, value) {
