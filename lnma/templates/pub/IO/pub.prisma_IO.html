@@ -507,10 +507,27 @@ var tb_studylist = {
 
         for (var i = 0; i < this.data.prisma_data.studylist[sn][stage].length; i++) {
             var pid = this.data.prisma_data.studylist[sn][stage][i];
-            console.log(pid);
+            // console.log(pid);
             // it should be there ...
-            var study = this.data.study_paper.paper_dict[pid];
-            studies.push(study);
+            // 2021-05-22: it may not be there
+            if (this.data.study_paper.paper_dict.hasOwnProperty(pid)) {
+                var study = this.data.study_paper.paper_dict[pid];
+                studies.push(study);
+
+            } else {
+                console.log('* missing pid', pid);
+
+                // put an empty object
+                studies.push({
+                    authors: "",
+                    ctid: '',
+                    date: '',
+                    journal: '',
+                    pid_type: 'pid',
+                    pmid: pid,
+                    title: pid
+                });
+            }
         }
         this.vpp.studies = studies;
         this.vpp.total = studies.length;
@@ -923,15 +940,18 @@ var jarvis = {
                         // clicked the search item
                         // update the PRISMA plot
                         jarvis.update_prisma(sn);
+
                     } else if (op == 'cnt') {
                         // clicked the number
                         // update the study list
                         if (sn == 'xx') {
                             // clicked the cell in the PRISMA plot
                             tb_studylist.update_study_list(jarvis.current.sn, stage);
+
                         } else {
                             // update plot
                             jarvis.update_prisma(sn);
+
                             // update list
                             tb_studylist.update_study_list(sn, stage);
                         }
