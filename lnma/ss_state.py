@@ -18,6 +18,7 @@ SS_PR_UPDATE_EXIST      = 'p40'
 SS_PR_CHECKED_SR        = 'p70'
 # SS_PR_CHECKED_MA        = 'p80'
 SS_PR_CHECKED_SRMA      = 'p90'
+SS_PR_CHECKED_BY_ADMIN  = 'p99'
 SS_PR_NA                = 'na'
 
 # for study screening result of excluded
@@ -48,6 +49,18 @@ SS_STAGE_INCLUDED_ONLY_SR = 'included_only_sr'
 SS_STAGE_INCLUDED_SR = 'included_sr'
 SS_STAGE_INCLUDED_SRMA = 'included_srma'
 SS_STAGE_DECIDED = 'decided'
+
+# RS -> Stage
+SS_RS2STAGE = {
+    SS_RS_EXCLUDED_TITLE: SS_STAGE_EXCLUDED_BY_TITLE,
+    SS_RS_EXCLUDED_ABSTRACT: SS_STAGE_EXCLUDED_BY_ABSTRACT,
+    SS_RS_INCLUDED_ONLY_SR: SS_STAGE_INCLUDED_SR,
+    SS_RS_INCLUDED_SRMA: SS_STAGE_INCLUDED_SRMA,
+}
+
+# ss reason
+SS_REASON_CHECKED_BY_ADMIN = "checked by admin"
+
 
 # for screener
 SS_STAGE_CONDITIONS = {

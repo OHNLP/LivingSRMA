@@ -785,6 +785,20 @@ def pred_rct(ti, ab):
     return j
 
 
+def get_decision_detail_dict(reason, decision):
+    '''
+    Get a decision detail dictionary
+    '''
+    # create a dict for the details
+    detail_dict = {
+        'date_decided': get_today_date_str(),
+        'reason': reason,
+        'decision': decision
+    }
+
+    return detail_dict
+
+
 def get_today_date_str():
     '''
     Get the today date string

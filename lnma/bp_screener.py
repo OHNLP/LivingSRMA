@@ -393,11 +393,15 @@ def sspr_include_papers_sr():
     papers = []
     
     # create a dict for the details
-    detail_dict = {
-        'date_decided': get_today_date_str(),
-        'reason': reason,
-        'decision': ss_state.SS_STAGE_INCLUDED_SR
-    }
+    # detail_dict = {
+    #     'date_decided': get_today_date_str(),
+    #     'reason': reason,
+    #     'decision': ss_state.SS_STAGE_INCLUDED_SR
+    # }
+
+    detail_dict = util.get_decision_detail_dict(
+        reason, ss_state.SS_STAGE_INCLUDED_SR
+    )
 
     for paper_id in paper_ids:
         p = dora.set_paper_pr_rs_with_details(
