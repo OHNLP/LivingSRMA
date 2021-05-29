@@ -100,52 +100,8 @@
 
                 </div>
 
-
-            </div>
-
-        </div>
-
-        <!-- /card for the basic information -->
-
-        <div class="card border-dark mt-2 mb-2 ml-2 mr-2">
-            
-            <div class="card-body text-dark">
-                <h5 class="card-title">Public Website Appearance Settings</h5>
-
-                <p class="card-text">The following settings will be used to decide what and how to display the information of this outcome in the public website.</p>
-
-
                 <div class="row">
-                    
-                    <div class="form-group col-md-4">
-                        <label for="input_included_in_plots">Include in PWMA Plots</label>
 
-                        <select v-model="extract.meta.included_in_plots"
-                            class="form-control" id="input_included_in_plots" 
-                            aria-describedby="input_included_in_plots_help">
-                            <option value="yes">Yes, include this outcome</option>
-                            <option value="no">No, exclude this outcome</option>
-                        </select>
-
-                        <small id="input_included_in_plots_help" class="form-text text-muted">
-                            Include this outcome in the PWMA result plots or not?
-                        </small>
-                    </div>
-
-                    <div class="form-group col-md-4">
-                        <label for="input_included_in_sof">Include in SoF Table</label>
-
-                        <select v-model="extract.meta.included_in_sof"
-                            class="form-control" id="input_included_in_sof" 
-                            aria-describedby="input_included_in_sof_help">
-                            <option value="yes">Yes, include this outcome</option>
-                            <option value="no">No, exclude this outcome</option>
-                        </select>
-
-                        <small id="input_included_in_sof_help" class="form-text text-muted">
-                            Include this outcome in the SoF table or not?
-                        </small>
-                    </div>
 
                     <div class="form-group col-md-4">
                         <label for="input_input_format">Data Type / Input Format</label>
@@ -168,11 +124,16 @@
                     </div>
 
                 </div>
-                <!-- /.row -->
 
-                <p>
-                    The following settings are used for running the analyzer for SoF and plots
-                </p>
+            </div>
+
+        </div>
+
+        <div class="card border-dark mt-2 mb-2 ml-2 mr-2" >
+            <div class="card-body text-dark">
+                <h5 class="card-title">Default Meta-Analysis Settings</h5>
+
+                <p class="card-text">The following settings will be used as the default parameters for running the analyzer for SoF and plots.</p>
 
                 <div class="row">
 
@@ -225,6 +186,54 @@
                     </div>
                     
                 </div>
+            </div>
+        </div>
+        <!-- /card for the basic information -->
+
+        <div class="card border-dark mt-2 mb-2 ml-2 mr-2">
+            
+            <div class="card-body text-dark">
+                <h5 class="card-title">Public Website Appearance Settings</h5>
+
+                <p class="card-text">The following settings will be used to decide what and how to display the information of this outcome in the public website.</p>
+
+
+                <div class="row">
+                    
+                    <div class="form-group col-md-4">
+                        <label for="input_included_in_plots">Include in PWMA Plots</label>
+
+                        <select v-model="extract.meta.included_in_plots"
+                            class="form-control" id="input_included_in_plots" 
+                            aria-describedby="input_included_in_plots_help">
+                            <option value="yes">Yes, include this outcome</option>
+                            <option value="no">No, exclude this outcome</option>
+                        </select>
+
+                        <small id="input_included_in_plots_help" class="form-text text-muted">
+                            Include this outcome in the PWMA result plots or not?
+                        </small>
+                    </div>
+
+                    <div class="form-group col-md-4">
+                        <label for="input_included_in_sof">Include in SoF Table</label>
+
+                        <select v-model="extract.meta.included_in_sof"
+                            class="form-control" id="input_included_in_sof" 
+                            aria-describedby="input_included_in_sof_help">
+                            <option value="yes">Yes, include this outcome</option>
+                            <option value="no">No, exclude this outcome</option>
+                        </select>
+
+                        <small id="input_included_in_sof_help" class="form-text text-muted">
+                            Include this outcome in the SoF table or not?
+                        </small>
+                    </div>
+
+                </div>
+                <!-- /.row -->
+
+                
 
 
             </div>
