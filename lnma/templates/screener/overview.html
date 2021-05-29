@@ -1096,11 +1096,18 @@ var tbjs_paperlist = {
 
         // first, add the rct_id
         if (d.meta.hasOwnProperty('rct_id')) {
-            ret = d.meta.rct_id + '<br>';
+            ret += '<a target="_blank" href="https://clinicaltrials.gov/ct2/show/'+d.meta.rct_id+'" title="Check this clinical trial">'+d.meta.rct_id+'</a> <br>';
         }
 
         // second, add the pmid
-        ret += d.pid;
+        if (d.is_pmid) {
+            ret += 'PMID: <a target="_blank" href="https://pubmed.ncbi.nlm.nih.gov/'+d.pid+'" title="Check the detail in PubMed">' +
+                d.pid +
+            '</a> '
+        } else {
+            ret += 'E: ';
+            ret += d.pid;
+        }
 
         return ret;
     },
