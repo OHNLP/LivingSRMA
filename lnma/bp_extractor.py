@@ -771,6 +771,11 @@ def get_itable_from_itable_data_xls(keystr):
         else:
             pmid = row['PubMed ID']
 
+        # must make sure the pmid is a string
+        pmid = '%s' % pmid
+        # the pmid may contain blank
+        pmid = pmid.strip()
+
         # check if this pmid exists
         is_main = False
         if pmid not in data:

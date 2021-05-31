@@ -1436,6 +1436,7 @@ def get_itable_attr_rs_cfg_from_db(prj):
 
         if paper is None:
             # what???
+            print('* MISSING %s when building ITABLE.json' % pid)
             continue
         
         # the `r` is for the output
