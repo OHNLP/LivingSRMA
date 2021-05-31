@@ -24,6 +24,7 @@ from lnma import dora
 from lnma import util
 from lnma import ss_state
 from lnma import settings
+from lnma import srv_paper
 
 bp = Blueprint("extractor", __name__, url_prefix="/extractor")
 template_base = 'extractor/'
@@ -151,7 +152,7 @@ def get_paper():
     project_id = request.cookies.get('project_id')
     pid = request.args.get('pid')
 
-    paper = dora.get_paper(project_id, pid)
+    paper = dora.get_paper_by_project_id_and_pid(project_id, pid)
     json_paper = paper.as_dict()
 
     ret = {
@@ -776,6 +777,15 @@ def get_itable_from_itable_data_xls(keystr):
         # the pmid may contain blank
         pmid = pmid.strip()
 
+        # get the NCT
+        nct8 = row['Trial registration #'].strip()
+
+        # get the decision
+        if 'Included in MA' in row:
+            included_in_ma = ('%s'%row['Included in MA']).strip().upper()
+        else:
+            included_in_ma = 'NO'
+
         # check if this pmid exists
         is_main = False
         if pmid not in data:
@@ -794,9 +804,56 @@ def get_itable_from_itable_data_xls(keystr):
                 }
             }
             is_main = True
+
+            # it's better to update the nct information
+            is_success, p = srv_paper.set_paper_rct_id(
+                keystr, pmid, nct8
+            )
+
+            if is_success:
+                pass
+            else:
+                print('* ERROR when setting rct_id %s for %s' % (
+                    nct8, pmid
+                ))
+
+            # next, if a study is in itable.xls,
+            # it must be included sr at least
+            p = dora.get_paper_by_keystr_and_pid(
+                keystr, pmid
+            )
+            sss = p.get_ss_stages()
+            if ss_state.SS_STAGE_INCLUDED_SR in sss:
+                # OK, this study is included in SR at least
+                pass
+            else:
+                # change stage!
+                if included_in_ma == 'YES':
+                    _, p = srv_paper.set_paper_ss_decision(
+                        keystr, pmid, 
+                        ss_state.SS_PR_CHECKED_BY_ADMIN,
+                        ss_state.SS_RS_INCLUDED_SRMA,
+                        ss_state.SS_REASON_CHECKED_BY_ADMIN,
+                        ss_state.SS_STAGE_INCLUDED_SRMA
+                    )
+                else:
+                    _, p = srv_paper.set_paper_ss_decision(
+                        keystr, pmid, 
+                        ss_state.SS_PR_CHECKED_BY_ADMIN,
+                        ss_state.SS_RS_INCLUDED_ONLY_SR,
+                        ss_state.SS_REASON_CHECKED_BY_ADMIN,
+                        ss_state.SS_STAGE_INCLUDED_ONLY_SR
+                    )
+
+                # what???
+                print('* updated %s from %s to %s' % (
+                    pmid, sss, p.get_ss_stages()
+                ))
+
         else:
             # which means this row is an multi arm
-            # add a new object in other
+            # add a new object in `other`
+            # that's all we need to do
             data[pmid]['n_arms'] += 1
             data[pmid]['attrs']['other'].append({})
 
@@ -806,7 +863,8 @@ def get_itable_from_itable_data_xls(keystr):
 
             # skip the pmid column
             # since we already use this column as the key
-            if col.upper() == 'PMID': continue
+            if col.upper() in settings.EXTRACTOR_ITABLE_IMPORT_SKIP_COLUMNS:
+                continue
 
             # get the value in this column
             val = row[col]
@@ -830,6 +888,10 @@ def get_itable_from_itable_data_xls(keystr):
                 else:
                     # just save the different values
                     data[pmid]['attrs']['other'][-1][abbr] = val
+
+        print('* added %s %s' % (
+            pmid, data[pmid]['n_arms']
+        ))
 
     return ca_dict, ca_list, i2a, data
 
@@ -867,11 +929,21 @@ def get_cate_attr_subs_from_itable_data_xls(keystr):
     cate_attr_dict = OrderedDict()
     idx2abbr = {}
 
+    # check each attr
     for idx, row in df_attrs.iterrows():
         vtype = 'text'
-        print(row)
-        # found cate!
+
+        # found cate and attr
         cate = row['cate'].strip()
+        attr = row['attr'].strip()
+
+        print("* found %s | %s" % (
+            cate, attr
+        ))
+
+        # skip some attrs
+        if attr.upper() in settings.EXTRACTOR_ITABLE_IMPORT_SKIP_COLUMNS:
+            continue
         
         # put this cate if not exists
         if cate not in cate_attr_dict:
@@ -881,7 +953,6 @@ def get_cate_attr_subs_from_itable_data_xls(keystr):
                 'attrs': {}
             }
 
-        attr = row['attr'].strip()
         # split the name into different parts
         attr_subs = attr.split('|')
         if len(attr_subs) > 1:

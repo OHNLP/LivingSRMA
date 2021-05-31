@@ -8,6 +8,63 @@ from lnma import dora
 from lnma import ss_state
 
 
+def set_paper_rct_id(keystr, pid, rct_id):
+    '''
+    Set the RCT ID for a paper
+    '''
+    if not util.is_valid_rct_id(rct_id):
+        return False, None
+
+    paper = dora.get_paper_by_keystr_and_pid(
+        keystr, pid
+    )
+
+    # hmmm ... why?
+    if paper is None:
+        return False, None
+
+    # if it's the same, no need to update
+    if paper.meta['rct_id'] == rct_id:
+        return True, paper
+
+    # update the paper
+    is_success, paper = dora.set_paper_rct_id(
+        paper.paper_id, rct_id
+    )
+
+    return is_success, paper
+
+
+def set_paper_ss_decision(keystr, pid, ss_pr, ss_rs, reason, stage):
+    '''
+    Set paper screening decision
+
+    The input parameters must be decided in advance
+    '''
+    paper = dora.get_paper_by_keystr_and_pid(
+        keystr, pid
+    )
+
+    # what??? 
+    if paper is None:
+        return False, None
+
+    # create a dict for the details
+    detail_dict = util.get_decision_detail_dict(
+        reason, stage
+    )
+
+    # update the ss for this paper
+    p = dora.set_paper_pr_rs_with_details(
+        paper.paper_id, 
+        pr=ss_pr,
+        rs=ss_rs,
+        detail_dict=detail_dict
+    )
+
+    return True, p
+
+
 def set_paper_pred(keystr, pid, model_id, result):
     '''
     Set the paper prediction

@@ -148,8 +148,21 @@ def is_same_extraction(ea, eb):
     return True
     
 
+def is_valid_rct_id(rct_id):
+    '''
+    Check if a RCT ID is valid
+
+    currently, there is not a good way to know
+    '''
+    if len(rct_id)>5:
+        return True
+
+    return False
+
+
 def is_valid_pmid(pmid):
-    '''Check if a pmid is valid PMID
+    '''
+    Check if a pmid is valid PMID
 
     Just a basic check
     '''
@@ -194,7 +207,8 @@ def _get_e_fetch_url(uid, db='pubmed', retmode='xml'):
 
 
 def e_search(term, db='pubmed'):
-    '''search for term in pubmed
+    '''
+    Search for term in pubmed
     '''
     try_times = 0
 
@@ -224,7 +238,8 @@ def e_search(term, db='pubmed'):
 
 
 def e_summary(ids, db='pubmed'):
-    '''get summary of pmid list
+    '''
+    Get summary of pmid list
     '''
     try_times = 0
 
@@ -254,7 +269,8 @@ def e_summary(ids, db='pubmed'):
 
     
 def _e_fetch(ids, db='pubmed'):
-    '''get the raw xml data from pubmed
+    '''
+    Get the raw xml data from pubmed
     '''
     try_times = 0
 

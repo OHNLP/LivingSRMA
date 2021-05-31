@@ -89,7 +89,7 @@ def get_paper():
     project_id = request.cookies.get('project_id')
     pid = request.args.get('pid')
 
-    paper = dora.get_paper(project_id, pid)
+    paper = dora.get_paper_by_project_id_and_pid(project_id, pid)
     json_paper = paper.as_dict()
 
     ret = {

@@ -689,6 +689,14 @@ SCREENER_REASON_INCLUDED_IN_SR_BY_IMPORT_PMIDS = 'User import'
 PAPER_STUDY_TYPE_ORIGINAL = 'original'
 PAPER_STUDY_TYPE_FOLLOWUP = 'followup'
 
+# the following columns will be skipped during import itable
+# which means, these columns won't be added in the meta and data
+# but they maybe used for other purpose (fixing meta data)
+EXTRACTOR_ITABLE_IMPORT_SKIP_COLUMNS = [
+    'YEAR', 'PMID', 'AUTHOR',
+    'TRIAL REGISTRATION #'
+]
+
 # AI models
 AI_MODEL_ROBOTSEARCH_RCT = 'ROBOTSEARCH_RCT'
 AI_MODEL = {

@@ -753,7 +753,7 @@ def update_paper_rct_result_by_keystr_and_seq_num(keystr, seq_num):
 def update_paper_rct_result(project_id, pid):
     '''Update the RCT detection result
     '''
-    paper = get_paper(project_id, pid)
+    paper = get_paper_by_project_id_and_pid(project_id, pid)
     paper = _update_paper_rct_result(paper)
 
     return paper
@@ -849,16 +849,22 @@ def create_paper_if_not_exist_and_predict_rct(project_id, pid,
         return is_existed, paper
 
 
-def get_paper(project_id, pid):
-    paper = Paper.query.filter(and_(
-        Paper.project_id == project_id,
-        Paper.pid == pid
-    )).first()
+# def get_paper(project_id, pid):
+#     '''
+#     Get a paper by the project_id and pid(pmid/embaseid)
+#     '''
+#     paper = Paper.query.filter(and_(
+#         Paper.project_id == project_id,
+#         Paper.pid == pid
+#     )).first()
 
-    return paper
+#     return paper
 
 
 def get_paper_by_project_id_and_pid(project_id, pid):
+    '''
+    Get a paper by the project_id and pid(pmid/embaseid)
+    '''
     paper = Paper.query.filter(and_(
         Paper.project_id == project_id,
         Paper.pid == pid
@@ -868,6 +874,9 @@ def get_paper_by_project_id_and_pid(project_id, pid):
 
 
 def get_paper_by_id(paper_id):
+    '''
+    Get a paper by its unique paper_id
+    '''
     paper = Paper.query.filter(and_(
         Paper.paper_id == paper_id
     )).first()
