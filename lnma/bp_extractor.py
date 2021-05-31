@@ -760,7 +760,9 @@ def get_itable_from_itable_data_xls(keystr):
     cols = df.columns
     n_cols = len(df.columns)
 
+    # a pmid based dictionary
     data = {}
+
     # begin loop 
     for _, row in df.iterrows():
         # find the pmid first
@@ -798,6 +800,7 @@ def get_itable_from_itable_data_xls(keystr):
             col = cols[idx]
 
             # skip the pmid column
+            # since we already use this column as the key
             if col.upper() == 'PMID': continue
 
             # get the value in this column
@@ -1009,12 +1012,12 @@ def get_itable_filters_from_xls(keystr):
 ###############################################################################
 
 
-def import_softable_pma_from_xls(keystr, group='primary'):
+def import_softable_pma_from_xls(keystr, fn, group='primary'):
     '''
     Import the softable data from XLS
     '''
     if keystr == 'IO':
-        return import_softable_pma_from_xls_for_IO(group=group)
+        return import_softable_pma_from_xls_for_IO(fn, group=group)
 
     raise Exception('Not implemented')
 
@@ -1026,43 +1029,41 @@ def import_softable_nma_from_xls(keystr):
     raise Exception('Not implemented')
 
 
-def import_softable_pma_from_xls_for_IO(group='primary'):
+def import_softable_pma_from_xls_for_IO(fn, group='primary'):
     '''
     A special tool for importing the data file for IO project
 
     The data must follow this order:
+    
+    1. itable data / study chars 
+    2. Adverse events / the category
+    3. Bronchits / AE lists
 
-    0. filters (skip)
-    1. itable data (USED)
-    2. no use
-    3. All SEs (no use)
-    4. Only Included AE (no use)
-    5. Adverse events (USED)
-    6. AE Reporting (no use)
-    7. Bronchits (USED, and all of followings)
+    The fn could be any
 
     '''
     prj = 'IO'
-    fn = 'ALL_DATA.xls'
-    full_fn = os.path.join(
-        current_app.instance_path, 
-        settings.PATH_PUBDATA, 
-        prj, fn
-    )
     # ret = get_ae_pma_data(full_fn, is_getting_sms=False)
     project = dora.get_project_by_keystr(prj)
     project_id = project.project_id
 
     # First, create a row->pmid dictionary
     # Use the second tab
+    # fn = 'ALL_DATA.xls'
+    full_fn = os.path.join(
+        current_app.instance_path, 
+        settings.PATH_PUBDATA, 
+        prj, fn
+    )
     xls = pd.ExcelFile(full_fn)
-    df = xls.parse(xls.sheet_names[1], skiprows=1)
+    print('* load xls %s' % full_fn)
+    df = xls.parse(xls.sheet_names[0], skiprows=1)
     idx2pmid = {}
     for idx, row in df.iterrows():
         idx2pmid[idx] = row['PMID']
 
     # Second, create tab->cate+tab dictionary
-    dft = xls.parse(xls.sheet_names[4])
+    dft = xls.parse(xls.sheet_names[1])
     ae_dict = {}
     ae_list = []
     for col in dft.columns:
@@ -1096,7 +1097,11 @@ def import_softable_pma_from_xls_for_IO(group='primary'):
     # each sheet is an AE/OC
     # the data tab starts from 8th
     outcomes = []
-    for sheet_name in xls.sheet_names[7:]:
+    print('* start parsing %s sheets: %s' % (
+        len(xls.sheet_names[2:]), 
+        xls.sheet_names[2:]
+    ))
+    for sheet_name in xls.sheet_names[2:]:
         print('* parsing %s' % (sheet_name))
         ae_name = sheet_name
 

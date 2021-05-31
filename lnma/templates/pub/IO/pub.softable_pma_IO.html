@@ -241,7 +241,7 @@ a {
                         <div class="oc-name" style="font-weight: bold;">
                             <select v-model="group"
                                 v-on:change="update_oclist()">
-                                <option value="primary">Treatment Related AEs</option>
+                                <option value="treatment">Treatment Related AEs</option>
                                 <option value="immune">Immune Related AEs</option>
                             </select>
                         </div>
@@ -496,7 +496,7 @@ var vw_oclist = {
         this.vpp = new Vue({
             el: this.vpp_id,
             data: {
-                group: 'primary',
+                group: 'treatment',
                 rs: this.rs,
                 select_mode: this.select_mode,
                 rs_stat: this.rs_stat
