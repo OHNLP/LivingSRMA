@@ -16,4 +16,7 @@ __all__ = [
 
     # special for pub?
     'pwma_analyzer_v2',
+
+    # python analyzer
+    'py_pwma_analyzer'
 ]

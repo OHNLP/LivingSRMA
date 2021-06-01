@@ -688,6 +688,9 @@ class Extract(db.Model):
 
 
     def as_dict(self):
+        '''
+        Return the dict format of this object
+        '''
         ret = {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
         # add how many selected
@@ -703,10 +706,24 @@ class Extract(db.Model):
         Reduce the object size
         '''
         full_dict = self.as_dict()
-        if 'data' in full_dict:
-            del full_dict['data']
+
+        for attr in ['data', 'project_id', 'extract_id']:
+            if attr in full_dict:
+                del full_dict[attr]
 
         return full_dict
+
+
+    def as_very_simple_dict(self):
+        '''
+        Return the very simple format
+        '''
+        simple_dict = self.as_simple_dict()
+
+        if 'cate_attrs' in simple_dict['meta']:
+            del simple_dict['meta']['cate_attrs']
+
+        return simple_dict
 
 
 class Piece(db.Model):

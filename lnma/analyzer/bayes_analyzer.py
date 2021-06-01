@@ -39,6 +39,9 @@ from .rpadapter import _gemtc_trans_netplt
 
 
 def analyze(rs, cfg):
+    '''
+    Analyze the given records with configs
+    '''
     # decide which backend service to use
     if cfg['input_format'] == INPUT_FORMATS_HRLU:
         # 2021-02-17: The dmetar mixed the Freq and Bayes

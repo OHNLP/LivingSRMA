@@ -403,7 +403,7 @@ var jarvis = {
     init: function() {
         // get the latest prisma
         $.get(
-            './graphdata/IO/LATEST.json',
+            "[[ url_for('pub.graphdata_latest_json', prj='IO') ]]",
             {},
             function(data) {
                 console.log(data);

@@ -288,6 +288,7 @@ a {
                                         <i class="far fa-clipboard"></i>
                                         {{ ae.oc_name }}
                                     </div>
+
                                     <div class="oc-type"
                                         v-if="ae.cnt_ga<1"
                                         title="Not enough records">
@@ -296,6 +297,8 @@ a {
                                     <div class="oc-type"
                                         v-else
                                         v-bind:title="ae.cnt_ga + ' studies'"
+                                        v-bind:oc_abbr="ae.oc_abbr"
+                                        v-bind:oc_group="ae.oc_group"
                                         v-bind:oc_cate="r.oc_cate"
                                         v-bind:oc_name="ae.oc_name"
                                         v-bind:ae_grade="'GA'"
@@ -310,6 +313,8 @@ a {
                                     <div class="oc-type"
                                         v-else
                                         v-bind:title="ae.cnt_g3h + ' studies'"
+                                        v-bind:oc_abbr="ae.oc_abbr"
+                                        v-bind:oc_group="ae.oc_group"
                                         v-bind:oc_cate="r.oc_cate"
                                         v-bind:oc_name="ae.oc_name"
                                         v-bind:ae_grade="'G3H'"
@@ -324,6 +329,8 @@ a {
                                     <div class="oc-type"
                                         v-else
                                         v-bind:title="ae.cnt_g5n + ' studies'"
+                                        v-bind:oc_abbr="ae.oc_abbr"
+                                        v-bind:oc_group="ae.oc_group"
                                         v-bind:oc_cate="r.oc_cate"
                                         v-bind:oc_name="ae.oc_name"
                                         v-bind:ae_grade="'G5N'"
@@ -419,8 +426,9 @@ a {
                             <th class="col-ta-left" colspan="7">{{ get_grade_label(grade) }}</th>
                         </tr>
 
-                        <tr v-for="r, ae_name in rs[grade]">
+                        <tr v-for="r, oc_abbr in rs[grade]">
                             <td class="col-ae-name">{{ r.name }}</td>
+
                             <td v-if="r.is_show['sm']" class="col-flipable"
                                 v-on:click="flip_cell(grade, r, 'sm')">
                                 {{ measure }} {{ _round2(r.sm) }}<br>
@@ -432,6 +440,7 @@ a {
                                 Events: <b>{{ r.Et }}</b><br>
                                 Participants: <b>{{ r.Nt }}</b>
                             </td>
+                            
                             <td>
                                 {{ get_CIR(r).toFixed(0) }} per {{ baseline }}
                             </td>
@@ -511,6 +520,8 @@ var vw_oclist = {
             },
             methods: {
                 toggle_oc: function(event) {
+                    var oc_abbr = event.target.getAttribute('oc_abbr');
+                    var oc_group = event.target.getAttribute('oc_group');
                     var oc_cate = event.target.getAttribute('oc_cate');
                     var oc_name = event.target.getAttribute('oc_name');
                     var ae_grade = event.target.getAttribute('ae_grade');
@@ -525,7 +536,7 @@ var vw_oclist = {
 
                     // call the worker to update everything related
                     // jarvis will do this task accordingly
-                    jarvis.toggle_oc(oc_cate, oc_name, ae_grade);
+                    jarvis.toggle_oc(oc_abbr, oc_group, oc_cate, oc_name, ae_grade);
                 },
 
                 get_grade_label: function(g) {
@@ -559,13 +570,6 @@ var vw_oclist = {
     },
 
     get_pid_condition: function() {
-        // if (this.pids.length == 0) {
-        //     return 'pid is not null ';
-        // } else {
-        //     var cond = this.pids.map(function(v) { return '' + v}).join(',');
-        //     return 'pid in (' + cond + ') '
-        // }
-
         var conditions = '';
         // so first condition is the pid
         if (this.pids.length == 0) {
@@ -593,14 +597,14 @@ var vw_oclist = {
             this.pids = pids;
         }
         
-        var sql = 'select oc_cate, oc_name, ' +
+        var sql = 'select oc_cate, oc_name, oc_abbr, ' +
             '  count(case when has_GA = true then pid else null end) as cnt_ga, ' +
             '  count(case when has_G3H = true then pid else null end) as cnt_g3h, ' +
             '  count(case when has_G5N = true then pid else null end) as cnt_g5n ' +
             'from aes ' + 
             'where ' +
             this.get_pid_condition() + ' ' + 
-            'group by oc_cate, oc_name ' + 
+            'group by oc_cate, oc_name, oc_abbr ' + 
             'order by oc_cate asc, oc_name asc';
         console.log(sql);
         // init the result
@@ -610,6 +614,8 @@ var vw_oclist = {
             cnt_cates: 0,
             cnt_aes: 0,
         };
+
+        // create the rs for display
         for (var i = 0; i < raw_rs.length; i++) {
             var r = raw_rs[i];
             if (rs.hasOwnProperty(r.oc_cate)) {
@@ -625,6 +631,8 @@ var vw_oclist = {
             // put this ae into cate
             rs[r.oc_cate]['aes'].push({
                 oc_name: r.oc_name,
+                oc_abbr: r.oc_abbr,
+                oc_group: this.vpp.$data.group,
                 cnt_ga: r.cnt_ga,
                 cnt_g3h: r.cnt_g3h,
                 cnt_g5n: r.cnt_g5n
@@ -751,10 +759,10 @@ var tb_sofpma = {
 
                 flip_cell: function(ae_grade, r, cell) {
                     // first, find this ae in rs
-                    if (this.rs[ae_grade].hasOwnProperty(r.name)) {
+                    if (this.rs[ae_grade].hasOwnProperty(r.abbr)) {
                         // flip this cell!
-                        this.rs[ae_grade][r.name].is_show[cell] = 
-                            !this.rs[ae_grade][r.name].is_show[cell];
+                        this.rs[ae_grade][r.abbr].is_show[cell] = 
+                            !this.rs[ae_grade][r.abbr].is_show[cell];
                     } else {
                         // how can it be ???
                     }
@@ -764,14 +772,15 @@ var tb_sofpma = {
         });
     },
 
-    toggle_oc: function(oc_cate, oc_name, ae_grade) {
+    toggle_oc: function(abbr, group, oc_cate, oc_name, ae_grade) {
         // first, find this ae in rs
-        if (this.vpp.rs[ae_grade].hasOwnProperty(oc_name)) {
+        if (this.vpp.rs[ae_grade].hasOwnProperty(abbr)) {
             // if exists, remove
-            delete this.vpp.rs[ae_grade][oc_name];
+            delete this.vpp.rs[ae_grade][abbr];
+
         } else {
             // if not, add this oc of ae_grade
-            var ae = this.data.oc_dict[oc_name][ae_grade];
+            var ae = this.data.oc_dict[abbr]['results'][ae_grade];
             if (ae.stus.length == 0) {
                 // this means no studies in this ae + grade 
                 return;
@@ -780,6 +789,9 @@ var tb_sofpma = {
         
             // build the r for display
             var r = {
+                abbr: abbr,
+                group: group,
+                oc_cate: oc_cate,
                 name: oc_name,
                 sm: ae.result[measure].random.model.sm,
                 lower: ae.result[measure].random.model.lower,
@@ -799,7 +811,7 @@ var tb_sofpma = {
             }
 
             // add this to list
-            this.vpp.rs[ae_grade][oc_name] = r;
+            this.vpp.rs[ae_grade][abbr] = r;
         }
 
         // have to force update the view
@@ -880,9 +892,9 @@ var jarvis = {
         return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
     },
 
-    toggle_oc: function(oc_cate, oc_name, ae_grade) {
-        console.log('* toggle_oc ' + oc_cate + ', ' + oc_name + ', ' + ae_grade);
-        tb_sofpma.toggle_oc(oc_cate, oc_name, ae_grade);
+    toggle_oc: function(abbr, group, oc_cate, oc_name, ae_grade) {
+        console.log('* toggle_oc [' + abbr + ']' + group + ' | ' + oc_cate + ', ' + oc_name + ', ' + ae_grade);
+        tb_sofpma.toggle_oc(abbr, group, oc_cate, oc_name, ae_grade);
     },
 
     clear_all_ae: function() {
