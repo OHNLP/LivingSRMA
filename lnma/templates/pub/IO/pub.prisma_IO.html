@@ -342,7 +342,7 @@ a {
 
 <div id="fg_prisma" class="box" style="width: 500px; min-width: 500px;">
 
-    {% include 'svg/PRISMA_IO_v2.svg' %}
+    {% include 'svg/PRISMA_IO_v2.1.svg' %}
 
 </div><!-- /#fg_prisma -->
 
@@ -365,7 +365,7 @@ a {
 
             <div class="study-title" style="cursor: pointer;"
                 v-bind:title="'[' + r.title + ']'"
-                v-on:click="show_study(r.pid)">
+                v-on:click="show_study(r.pmid)">
                 <span class="study-badge">{{ idx + 1 }}</span>
                 {{ r.title }}
             </div>
@@ -378,10 +378,11 @@ a {
                 {{ r.date }} 
                 <span class="study-journal">{{ r.journal }}</span class="">. 
                     
-                <a class="study-pmid" target="_blank" title="Open the page in ClinicalTrials.gov" 
-                    v-bind:href="url.ctgov.view_ct + r.ctid">{{ r.ctid }}</a> 
                 <a class="study-pmid" target="_blank" title="Open the page in PubMed" 
                     v-bind:href="url.pubmed.view_pmid + r.pmid">{{ r.pmid }}</a>
+
+                <a class="study-pmid" target="_blank" title="Open the page in ClinicalTrials.gov" 
+                    v-bind:href="url.ctgov.view_ct + r.ctid">{{ r.ctid }}</a> 
             </div>
 
         </div>
@@ -426,7 +427,6 @@ a {
 <!-- alasql.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/alasql/0.5.5/alasql.min.js"></script>
 
-<!-- for IE -->
 <script>
 var isIE = /*@cc_on!@*/false || !!document.documentMode;
 if (isIE) {
@@ -434,6 +434,9 @@ if (isIE) {
 }
 </script>
 <script>
+
+{% include 'js/srv_pubmed.js' %}
+
 var tb_studylist = {
     vpp: null,
     vpp_id: '#tb_studylist',
@@ -457,7 +460,9 @@ var tb_studylist = {
             },
             methods: {
                 show_study: function(pid) {
-
+                    if (pid.length == 8) {
+                        srv_pubmed.show(pid);
+                    }
                 },
 
                 prev_page: function() {
@@ -790,7 +795,7 @@ var jarvis = {
             esearch: 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed',
             esummary: 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed',
             efetch: "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed",
-            view_pmid: 'https://www.ncbi.nlm.nih.gov/pubmed/?term='
+            view_pmid: 'https://pubmed.ncbi.nlm.nih.gov/'
         },
     },
 
@@ -874,7 +879,7 @@ var jarvis = {
                 }
 
                 // update the st for the data
-                prisma_data.search['st'] = {'date': 'Latest'}
+                prisma_data.search['st'] = {'date': data.latest.last_updated}
                 prisma_data.studylist['st'] = {
                     sr: data.prisma.f1.paper_list,
                     ma: data.prisma.f2.paper_list
@@ -914,7 +919,7 @@ var jarvis = {
                 }
                 document.getElementById('fg_prisma').innerHTML = svgtxt;
 
-                jarvis.update_prisma('s7');
+                jarvis.update_prisma('st');
 
                 tb_studylist.init({
                     prisma_data: prisma_data,
@@ -922,7 +927,7 @@ var jarvis = {
                 });
 
                 // set the default view
-                tb_studylist.update_study_list('s7', 'ma');
+                tb_studylist.update_study_list('st', 'ma');
 
                 // bind the click event
                 $('svg a').on('click', function(evt) {

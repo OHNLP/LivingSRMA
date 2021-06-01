@@ -693,6 +693,7 @@ def graphdata_prisma_json(prj):
 
     if src == 'db':
         ret = get_prisma_from_db(prj)
+        latest = dora.get_project_latest_stat_by_keystr(prj)
 
         if ret is None:
             ret = {
@@ -700,6 +701,7 @@ def graphdata_prisma_json(prj):
                 'msg': 'ITABLE DATA NOT EXISTS FOR THIS PROJECT'
             }
 
+        ret['latest'] = latest
         return jsonify(ret)
 
 
