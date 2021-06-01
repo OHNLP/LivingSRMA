@@ -106,7 +106,7 @@ def ADJRCC():
     full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, 'PWMA_DATA.xlsx')
     pwma = get_pwma_data(full_fn)
 
-    return render_template('pub/pub.ADJRCC.html', pwma=pwma)
+    return render_template('pub/ADJRCC/pub.ADJRCC.html', pwma=pwma)
 
 
 ###############################################################################
