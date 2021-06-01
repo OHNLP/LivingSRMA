@@ -289,6 +289,12 @@ a {
                                         {{ ae.oc_name }}
                                     </div>
                                     <div class="oc-type"
+                                        v-if="ae.cnt_ga<1"
+                                        title="Not enough records">
+                                        -
+                                    </div>
+                                    <div class="oc-type"
+                                        v-else
                                         v-bind:title="ae.cnt_ga + ' studies'"
                                         v-bind:oc_cate="r.oc_cate"
                                         v-bind:oc_name="ae.oc_name"
@@ -296,6 +302,7 @@ a {
                                         v-on:click="toggle_oc">
                                         {{ ae.cnt_ga }}
                                     </div>
+
                                     <div class="oc-type"
                                         v-if="ae.cnt_g3h<2">
                                         -
@@ -309,6 +316,7 @@ a {
                                         v-on:click="toggle_oc">
                                         {{ ae.cnt_g3h }}
                                     </div>
+
                                     <div class="oc-type"
                                         v-if="ae.cnt_g5n<2">
                                         -
