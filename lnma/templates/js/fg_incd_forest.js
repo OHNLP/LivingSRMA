@@ -13,6 +13,7 @@ var fg_incd_forest = {
         {width: 100, align: 'end',    name: 'Relative weight', row: 2}
     ],
     row_height: 15,
+    min_dot_size: 4,
     row_txtmb: 3,
     row_frstml: 20,
     default_height: 300,
@@ -22,6 +23,7 @@ var fg_incd_forest = {
         txt_nm: 'prim-frst-txt-nm',
         txt_mt: 'prim-frst-txt-mt',
         txt_sm: 'prim-frst-txt-sm',
+        txt_clickable: 'prim-frst-txt-clickable',
         stu_g: 'prim-frst-stu-g',
         stu_bg: 'prim-frst-stu-bg',
         stu_rect: 'prim-frst-stu-rect'
@@ -38,6 +40,8 @@ var fg_incd_forest = {
         ".prim-frst-stu-model{ fill: red; stroke: black; stroke-width: 1; }",
         ".prim-frst-stu-model-refline{ stroke: black; stroke-width: 1; }",
         ".prim-frst-stu-g:hover .prim-frst-stu-bg{ fill: whitesmoke; }",
+        ".prim-frst-txt-clickable{ fill: #00397b; cursor: pointer !important; }",
+        ".prim-frst-txt-clickable:hover{ fill: blue; }",
         "</style>"
     ].join('\n'),
 
@@ -165,12 +169,25 @@ var fg_incd_forest = {
                     // this is the first item
                     elem.attr('pid', stu.pid);
 
+                    // add clickable style
+                    elem.attr('class', this.css.txt_nm + ' ' +
+                                       this.css.txt_clickable);
+
+                    // add title to this element
+                    elem.append('title')
+                        .text(txt + '. click to check the detail in PubMed');
+
                     // bind click
                     elem.on('click', function() {
                         // var d = d3.select(this);
                         // console.log('* clicked', d);
                         var e = $(this);
                         console.log('* clicked paper', e.attr('pid'));
+
+                        // open something?
+                        if (typeof(srv_pubmed)!='undefined') {
+                            srv_pubmed.show(e.attr('pid'));
+                        }
                     });
                 }
             }
@@ -277,8 +294,8 @@ var fg_incd_forest = {
             .each(function(d, i) {
                 // console.log(i, d);
                 // add the rect
-                var s = fg_incd_forest.row_height * d.w_random;
-                s = s > 2? s : 2;
+                var s = fg_prim_forest.min_dot_size + 
+                    (fg_prim_forest.row_height - fg_prim_forest.min_dot_size) * d.w_random;
                 var x = fg_incd_forest._x_scale(d.bt_ab_TE) - s/2;
                 var y = - s / 2;
                 d3.select(this)

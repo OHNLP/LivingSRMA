@@ -5,7 +5,13 @@ var srv_pubmed = {
         esearch: 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed',
         esummary: 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed',
         efetch: "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed",
-        view_pmid: 'https://www.ncbi.nlm.nih.gov/pubmed/?term='
+        view_pmid: 'https://www.ncbi.nlm.nih.gov/pubmed/?term=',
+        show: 'https://pubmed.ncbi.nlm.nih.gov/'
+    },
+
+    show: function(pmid) {
+        var url = this.url.show + pmid + '/';
+        window.open(url, "_blank");
     },
     
     efetch: function(ids, callback) {

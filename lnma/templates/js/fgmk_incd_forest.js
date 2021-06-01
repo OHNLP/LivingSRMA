@@ -17,6 +17,7 @@ return {
         {width: 100, align: 'end',    name: 'Relative weight', row: 2}
     ],
     row_height: 15,
+    min_dot_size: 4,
     row_txtmb: 3,
     row_frstml: 20,
     default_height: 300,
@@ -295,8 +296,8 @@ return {
                 return function(d, i) {
                     // console.log(i, d);
                     // add the rect
-                    var s = fig.row_height * d.w_random;
-                    s = s > 2? s : 2;
+                    var s = fig.min_dot_size + 
+                        (fig.row_height - fig.min_dot_size) * d.w_random;
                     var x = fig._x_scale(d.bt_ab_TE) - s/2;
                     var y = - s / 2;
                     d3.select(this)

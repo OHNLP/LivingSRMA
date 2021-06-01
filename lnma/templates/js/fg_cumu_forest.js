@@ -25,6 +25,7 @@ var fg_cumu_forest = {
         txt_nm: 'cumu-frst-txt-nm',
         txt_mt: 'cumu-frst-txt-mt',
         txt_sm: 'cumu-frst-txt-sm',
+        txt_clickable: 'cumu-frst-txt-clickable',
         stu_g: 'cumu-frst-stu-g',
         stu_bg: 'cumu-frst-stu-bg',
         stu_rect: 'cumu-frst-stu-rect'
@@ -41,6 +42,8 @@ var fg_cumu_forest = {
         ".cumu-frst-stu-model{ fill: red; stroke: black; stroke-width: 1; }",
         ".cumu-frst-stu-model-refline{ stroke: black; stroke-width: 1; }",
         ".cumu-frst-stu-g:hover .cumu-frst-stu-bg{ fill: whitesmoke; }",
+        ".cumu-frst-txt-clickable{ fill: #00397b; cursor: pointer !important; }",
+        ".cumu-frst-txt-clickable:hover{ fill: blue; }",
         "</style>"
     ].join('\n'),
 
@@ -194,12 +197,49 @@ var fg_cumu_forest = {
                 .attr('height', this.row_height);
             for (var j = 0; j < this.cols.length; j++) {
                 var col = this.cols[j];
-                g.append('text')
+                var txt = this.get_txt_by_col(stu, j);
+
+                // special rule for the study name
+                var _txt = txt;
+                if (j == 0) {
+                    if (txt.length > 33) {
+                        _txt = txt.substring(0, 32) + ' ...'
+                    }
+                }
+
+                var elem = g.append('text')
                     .attr('class', this.css.txt_nm)
                     .attr('x', col.x + (col.align=='start'? 0 : col.width))
                     .attr('y', this.row_height - this.row_txtmb)
                     .attr('text-anchor', col.align)
-                    .text(this.get_txt_by_col(stu, j));
+                    .text(_txt);
+
+                // bind event to the firt item
+                if (j == 0) {
+                    // this is the first item
+                    elem.attr('pid', stu.pid);
+
+                    // add clickable style
+                    elem.attr('class', this.css.txt_nm + ' ' +
+                                       this.css.txt_clickable);
+
+                    // add title to this element
+                    elem.append('title')
+                        .text(txt);
+
+                    // bind click
+                    elem.on('click', function() {
+                        // var d = d3.select(this);
+                        // console.log('* clicked', d);
+                        var e = $(this);
+                        console.log('* clicked paper', e.attr('pid'));
+
+                        // open something?
+                        if (typeof(srv_pubmed)!='undefined') {
+                            srv_pubmed.show(e.attr('pid'));
+                        }
+                    });
+                }
             }
         }
 

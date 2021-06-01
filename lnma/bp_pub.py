@@ -3234,11 +3234,9 @@ def get_sof_pma_data_IO(full_fn, is_calc_pma=True):
 
 def get_sof_pma_data_from_db_IO(is_calc_pma=True):
     '''
-    The SoF Table of PWMA DATA
+    The SoF Table of PWMA DATA for IO project
     '''
-
     # First, get all extracts of pwma
-    # For IO project, the pwma type only contains the primary
     # But for other projects, need to double check the input type
     keystr = 'IO'
     project = dora.get_project_by_keystr(keystr)
@@ -3306,7 +3304,7 @@ def get_sof_pma_data_from_db_IO(is_calc_pma=True):
         f1 = __notna(r['%s_Et'%gr]) and __notna(r['GA_Nt']) and \
              __notna(r['%s_Ec'%gr]) and __notna(r['GA_Nc'])
             
-        # the second condition is not both 
+        # the second condition is not both zero
         f2 = (__notna(r['%s_Et'%gr]) and __notzero(r['%s_Et'%gr])) or \
              (__notna(r['%s_Ec'%gr]) and __notzero(r['%s_Ec'%gr]))
 
@@ -3330,6 +3328,7 @@ def get_sof_pma_data_from_db_IO(is_calc_pma=True):
                 # which means we don't display this on the website in graph
                 continue
 
+        # get short name for the group, cate, oc
         oc_group = extract.meta['group']
         oc_cate = extract.meta['category']
         oc_name = extract.meta['full_name']
@@ -3350,57 +3349,27 @@ def get_sof_pma_data_from_db_IO(is_calc_pma=True):
                 paper = paper_dict[pid]
             else:
                 # which means this study is not included in SR
-                # or was included in SR but removed
+                # or was included in SR but has been removed?
                 continue
 
-            # OK, this studis is selected, put the extracted result
-            # first arm
+            # OK, this study is selected, put the extracted result
             # shallow copy is good enough for this case
-            r = ext_pp_data['attrs']['main'].copy()
-            
-            # make sure the data type is int
-            for col in int_cols:
-                if col in r:
-                    r[col] = __int(r[col])
-                else:
-                    r[col] = ''
-            
-            # add more attributes
-            r['has_GA']  = __notna(r['GA_Et'])
-            r['has_G34'] = __notna(r['G34_Et'])
-            r['has_G3H'] = __notna(r['G3H_Et'])
-            r['has_G5N'] = __notna(r['G5N_Et'])
-
-            # add flag for incidence analysis
-            # to conduct incidence analysis, 2 columns are required
-            # E, N
-            r['has_GA_incd']  = __notna(r['GA_Et']) and __notna(r['GA_Nt'])
-            r['has_G34_incd'] = __notna(r['G34_Et']) and __notna(r['GA_Nt'])
-            r['has_G3H_incd'] = __notna(r['G3H_Et']) and __notna(r['GA_Nt'])
-            r['has_G5N_incd'] = __notna(r['G5N_Et']) and __notna(r['GA_Nt'])
-
-            # add flag for prim+cumu analysis
-            # to conduct prim+cumu analysis, 4 columns are required
-            # Et, Nt, Ec, Nc
-            r['has_GA_prim']  = __is_pwmable(r, 'GA')
-            r['has_G34_prim'] = __is_pwmable(r, 'G34')
-            r['has_G3H_prim'] = __is_pwmable(r, 'G3H')
-            r['has_G5N_prim'] = __is_pwmable(r, 'G5N')
-
-            r['author'] = paper.get_short_name()
-            r['year'] = paper.get_year()
-            r['pid'] = paper.pid
-            r['oc_cate'] = oc_cate
-            r['oc_name'] = oc_name
-            r['oc_group'] = oc_group
-
-            rs.append(r)
-            oc_rs.append(r)
-
-            # other arms
+            # we could make a list to contain all the records
+            # the second item is the author name suffix
+            # for each paper, there must be one main record
+            # sometimes, there is also multi-arm
+            ext_pp_rs = [
+                [ext_pp_data['attrs']['main'].copy(), '']
+            ]
             for arm_idx in range(ext_pp_data['n_arms'] - 2):
-                r = ext_pp_data['attrs']['other'][arm_idx].copy()
+                ext_pp_rs.append(
+                    [ext_pp_data['attrs']['other'][arm_idx].copy(), ' Comp %s' % (arm_idx + 2)]
+                )
             
+            # then, we just need to run the calculation once
+            for item in ext_pp_rs:
+                r = item[0]
+                
                 # make sure the data type is int
                 for col in int_cols:
                     if col in r:
@@ -3409,14 +3378,22 @@ def get_sof_pma_data_from_db_IO(is_calc_pma=True):
                         r[col] = ''
                 
                 # add more attributes
-                r['has_GA']  = __notna(r['GA_Et'])
-                r['has_G34'] = __notna(r['G34_Et'])
-                r['has_G3H'] = __notna(r['G3H_Et'])
-                r['has_G5N'] = __notna(r['G5N_Et'])
+                # r['has_GA']  = __notna(r['GA_Et'])
+                # r['has_G34'] = __notna(r['G34_Et'])
+                # r['has_G3H'] = __notna(r['G3H_Et'])
+                # r['has_G5N'] = __notna(r['G5N_Et'])
+
+                # first, the has_XX is defined as whether could use this record for basic
+                # we use a strict condition, as same as the prim analysis
+                r['has_GA']  = __is_pwmable(r, 'GA')
+                r['has_G34'] = __is_pwmable(r, 'G34')
+                r['has_G3H'] = __is_pwmable(r, 'G3H')
+                r['has_G5N'] = __is_pwmable(r, 'G5N')
 
                 # add flag for incidence analysis
                 # to conduct incidence analysis, 2 columns are required
                 # E, N
+                # so the has_XX_incd is a little different from the pwmable
                 r['has_GA_incd']  = __notna(r['GA_Et']) and __notna(r['GA_Nt'])
                 r['has_G34_incd'] = __notna(r['G34_Et']) and __notna(r['GA_Nt'])
                 r['has_G3H_incd'] = __notna(r['G3H_Et']) and __notna(r['GA_Nt'])
@@ -3429,8 +3406,9 @@ def get_sof_pma_data_from_db_IO(is_calc_pma=True):
                 r['has_G34_prim'] = __is_pwmable(r, 'G34')
                 r['has_G3H_prim'] = __is_pwmable(r, 'G3H')
                 r['has_G5N_prim'] = __is_pwmable(r, 'G5N')
-                                    
-                r['author'] = paper.get_short_name() + ' Comp %s' % (arm_idx + 2)
+
+                # the author name is the combination of paper short name and suffix
+                r['author'] = paper.get_short_name() + item[1]
                 r['year'] = paper.get_year()
                 r['pid'] = paper.pid
                 r['oc_cate'] = oc_cate
@@ -3439,6 +3417,49 @@ def get_sof_pma_data_from_db_IO(is_calc_pma=True):
 
                 rs.append(r)
                 oc_rs.append(r)
+
+            # other arms
+            # for arm_idx in range(ext_pp_data['n_arms'] - 2):
+            #     r = ext_pp_data['attrs']['other'][arm_idx].copy()
+            
+            #     # make sure the data type is int
+            #     for col in int_cols:
+            #         if col in r:
+            #             r[col] = __int(r[col])
+            #         else:
+            #             r[col] = ''
+                
+            #     # add more attributes
+            #     r['has_GA']  = __notna(r['GA_Et'])
+            #     r['has_G34'] = __notna(r['G34_Et'])
+            #     r['has_G3H'] = __notna(r['G3H_Et'])
+            #     r['has_G5N'] = __notna(r['G5N_Et'])
+
+            #     # add flag for incidence analysis
+            #     # to conduct incidence analysis, 2 columns are required
+            #     # E, N
+            #     r['has_GA_incd']  = __notna(r['GA_Et']) and __notna(r['GA_Nt'])
+            #     r['has_G34_incd'] = __notna(r['G34_Et']) and __notna(r['GA_Nt'])
+            #     r['has_G3H_incd'] = __notna(r['G3H_Et']) and __notna(r['GA_Nt'])
+            #     r['has_G5N_incd'] = __notna(r['G5N_Et']) and __notna(r['GA_Nt'])
+
+            #     # add flag for prim+cumu analysis
+            #     # to conduct prim+cumu analysis, 4 columns are required
+            #     # Et, Nt, Ec, Nc
+            #     r['has_GA_prim']  = __is_pwmable(r, 'GA')
+            #     r['has_G34_prim'] = __is_pwmable(r, 'G34')
+            #     r['has_G3H_prim'] = __is_pwmable(r, 'G3H')
+            #     r['has_G5N_prim'] = __is_pwmable(r, 'G5N')
+                                    
+            #     r['author'] = paper.get_short_name() + ' Comp %s' % (arm_idx + 2)
+            #     r['year'] = paper.get_year()
+            #     r['pid'] = paper.pid
+            #     r['oc_cate'] = oc_cate
+            #     r['oc_name'] = oc_name
+            #     r['oc_group'] = oc_group
+
+            #     rs.append(r)
+            #     oc_rs.append(r)
 
         # now do the PWMA
         if not is_calc_pma: continue
@@ -3502,15 +3523,18 @@ def get_sof_pma_data_from_db_IO(is_calc_pma=True):
                 # get the pma result
                 try:
                     # use Python package to calculate the OR/RR
-                    pma_r = get_pma_by_py(ds, datatype="CAT_RAW", sm=sm, fixed_or_random='random')
-                    # pma_f = get_pma_by_py(ds, datatype="CAT_RAW", sm=sm, fixed_or_random='fixed')
+                    pma_r = get_pma_by_py(
+                        ds, datatype="CAT_RAW", 
+                        sm=sm, fixed_or_random='random'
+                    )
+                    pma_f = get_pma_by_py(
+                        ds, datatype="CAT_RAW", 
+                        sm=sm, fixed_or_random='fixed'
+                    )
  
                     # validate the result, if isNaN, just set None
-                    if np.isnan(pma_r['model']['sm']):
-                        pma_r = None
-
-                    # if np.isnan(pma_f['model']['sm']):
-                    #     pma_f = None
+                    if np.isnan(pma_r['model']['sm']): pma_r = None
+                    if np.isnan(pma_f['model']['sm']): pma_f = None
 
                     # use R package to calculate the OR/RR
                     # pma_r = get_pma_by_rplt(ds, datetype="CAT_RAW", sm=sm, fixed_or_random='random')
@@ -3524,11 +3548,11 @@ def get_sof_pma_data_from_db_IO(is_calc_pma=True):
                         ds
                     ))
                     pma_r = None
-                    # pma_f = None
+                    pma_f = None
 
                 oc_dict[oc_name][grade]['result'][sm] = {
                     'random': pma_r,
-                    # 'fixed': pma_f
+                    'fixed': pma_f
                 }
 
 
