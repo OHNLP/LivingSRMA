@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 import json
 
@@ -39,6 +40,11 @@ def create_app(test_config=None):
             indent=4, separators=(',', ': '))
 
     app.jinja_env.filters['tojson_pretty'] = tojson_pretty
+
+    # a helper function for jinja2 to show current year
+    def get_current_year():
+        return datetime.now().strftime('%Y')
+    app.jinja_env.globals.update(get_current_year=get_current_year)
 
     # ensure the instance folder exists
     try:
