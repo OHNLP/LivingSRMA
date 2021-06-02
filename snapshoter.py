@@ -25,11 +25,14 @@ def kacha(keystr, output_path):
     Take a snapshot
     '''
     # first of all, remove the old kacha?
-    shutil.rmtree(
-        os.path.join(
-            output_path, keystr
-        )
+    prj_path = os.path.join(
+        output_path, keystr
     )
+    if os.path.exists(prj_path):
+        shutil.rmtree(prj_path)
+        print('* removed existed %s pub site data' % (
+            keystr
+        ))
     
     if keystr == 'IO':
         kacha_IO(output_path)
