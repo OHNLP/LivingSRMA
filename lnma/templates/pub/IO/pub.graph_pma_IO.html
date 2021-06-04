@@ -471,7 +471,11 @@ a {
                 </div>
                 <div v-else>
                     <h5>{{ current.title }}</h5>
-                    
+                    <p v-if="current.is_analyzing"
+                        style="font-size: 1.5em; padding-left: 1em;">
+                        Running meta-analysis ... 
+                        <i class="fas fa-spinner fa-spin"></i>
+                    </p>
                 </div>
 
             </div>
@@ -1062,6 +1066,7 @@ var vw_ocplot = {
                     ae_grade: '',
                     cnt_studies: 0, 
                     has_img: false,
+                    is_analyzing: false,
                     img: {
                         cumuplt: {},
                         outplt1: {}
@@ -1143,6 +1148,7 @@ var vw_ocplot = {
     hide_plot: function() {
         // set no img 
         this.vpp.current.has_img = false;
+        this.vpp.current.is_analyzing = false;
     },
 
     show_plot: function(oc_group, oc_cate, oc_name, ae_grade, pids) {
@@ -1155,6 +1161,7 @@ var vw_ocplot = {
 
         // set no img and try to load
         this.vpp.current.has_img = false;
+        this.vpp.current.is_analyzing = true;
 
         // update the data in vpp
         this.vpp.current.oc_group = oc_group;
@@ -1237,6 +1244,7 @@ var vw_ocplot = {
 
              // finally, set has_img to true
              this.vpp.current.has_img = true;
+             this.vpp.current.is_analyzing = false;
          } else {
              // update message to show the error
          }
