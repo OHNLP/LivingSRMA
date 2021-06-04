@@ -119,13 +119,25 @@ def is_same_extraction(ea, eb):
     if ea['n_arms'] != eb['n_arms']:
         return False
 
-    # check the main arm
+    # check the main arm from ea side
     for attr in ea['attrs']['main']:
         if attr not in eb['attrs']['main']:
             # which means eb use different meta???
             return False
         
         if ea['attrs']['main'][attr] != eb['attrs']['main'][attr]:
+            return False
+
+    # 2021-06-04: two side check update
+    # we found that when updating the itable design
+    # one side check couldn't figure out the changes
+    # check the main arm from eb side
+    for attr in eb['attrs']['main']:
+        if attr not in ea['attrs']['main']:
+            # which means ea use different meta???
+            return False
+        
+        if eb['attrs']['main'][attr] != ea['attrs']['main'][attr]:
             return False
 
     # check other arms
@@ -136,12 +148,23 @@ def is_same_extraction(ea, eb):
     for arm_idx, _ in enumerate(ea['attrs']['other']):
         ea_arm = ea['attrs']['other'][arm_idx]
         eb_arm = eb['attrs']['other'][arm_idx]
+
+        # check from ea side
         for attr in ea_arm:
             if attr not in eb_arm:
                 # which means eb use different meta???
                 return False
             
             if ea_arm[attr] != eb_arm[attr]:
+                return False
+
+        # 2021-06-04: two side check
+        for attr in eb_arm:
+            if attr not in ea_arm:
+                # which means eb use different meta???
+                return False
+            
+            if eb_arm[attr] != ea_arm[attr]:
                 return False
             
     # wow, they are the same
