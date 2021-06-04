@@ -69,7 +69,7 @@ PWMA Primary + Cumulative Analysis API Demo
                     <label for="apikey" class="col-sm-3 col-form-label">apikey
                     </label>
                     <div class="col-sm-9">
-                        <input type="text" class="form-control" id="apikey" value="">
+                        <input type="text" class="form-control" id="apikey" value="[[ config['settings'].API_SYSTEM_APIKEYS[0]|show_if_local ]]">
                         <small id="apikeyHelp" class="form-text text-muted">
                             For the security of this service, API Key is required for authentication.
                         </small>

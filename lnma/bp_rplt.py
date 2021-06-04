@@ -14,8 +14,10 @@ from werkzeug.utils import secure_filename
 
 from lnma.settings import *
 
+from lnma import settings
 from lnma import dora
-from lnma.analyzer import rplt_analyzer
+# from lnma.analyzer import rplt_analyzer
+from lnma.analyzer import rpy2_pwma_analyzer as rplt_analyzer
 
 PATH_PUBDATA = 'pubdata'
 
@@ -32,13 +34,13 @@ def apikey_required(f):
             return f(*args, **kwargs)
 
         # check the API Keys here
-        apikey_set = set([
-            '7323590e-577b-4f46-b19f-3ec401829bd6',
-            '9bebaa87-983d-42e4-ad70-4430c99aa886',
-            'a8c0c749-7263-4072-a313-99ccc76569d3'
-        ])
+        # apikey_set = set([
+        #     '7323590e-577b-4f46-b19f-3ec401829bd6',
+        #     '9bebaa87-983d-42e4-ad70-4430c99aa886',
+        #     'a8c0c749-7263-4072-a313-99ccc76569d3'
+        # ])
         apikey = request.form.get('apikey', '').strip()
-        if apikey not in apikey_set:
+        if apikey not in settings.API_SYSTEM_APIKEYS:
             ret = {
                 'success': False,
                 'msg': 'Unauthorized request'
@@ -218,6 +220,8 @@ def pwma_prcm():
         'is_hakn': hk,
         'input_format': 'CAT_RAW',
         'sort_by': 'year',
+        'pooling_method': 'MH',
+        'tau_estimation_method': 'DL',
         'assumed_baseline': 100
     }
 

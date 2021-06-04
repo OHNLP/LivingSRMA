@@ -11,7 +11,9 @@ from flask_compress import Compress
 db = SQLAlchemy()
 
 def create_app(test_config=None):
-    """Create and configure an instance of the Flask application."""
+    """
+    Create and configure an instance of the Flask application.
+    """
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_pyfile('config.py')
 
@@ -31,6 +33,13 @@ def create_app(test_config=None):
     from lnma import settings
     app.config['settings'] = settings
 
+    # set the dev flag
+    if settings.HOST_ENV_DEV_FLAG_NAME in os.environ and \
+       os.environ[settings.HOST_ENV_DEV_FLAG_NAME] == settings.HOST_ENV_DEV_FLAG_VALUE:
+        app.config['is_local'] = True
+    else:
+        app.config['is_local'] = False
+
     if test_config is not None:
         app.config.update(test_config)
 
@@ -40,6 +49,16 @@ def create_app(test_config=None):
             indent=4, separators=(',', ': '))
 
     app.jinja_env.filters['tojson_pretty'] = tojson_pretty
+
+    # a helper function for jinja2 to show something only for localhost
+    def show_if_local(value):
+        if settings.HOST_ENV_DEV_FLAG_NAME in os.environ:
+            if os.environ[settings.HOST_ENV_DEV_FLAG_NAME] == settings.HOST_ENV_DEV_FLAG_VALUE:
+                return value
+
+        return ''
+
+    app.jinja_env.filters['show_if_local'] = show_if_local
 
     # a helper function for jinja2 to show current year
     def get_current_year():

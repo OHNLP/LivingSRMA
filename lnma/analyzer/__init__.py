@@ -19,4 +19,7 @@ __all__ = [
 
     # python analyzer
     'py_pwma_analyzer'
+
+    # rpy2 analyzer
+    'rpy2_pwma_analyzer'
 ]
