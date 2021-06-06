@@ -177,6 +177,7 @@ html {
                     <div>
                         <input type="checkbox" 
                             id="chk_oc_itable" class="chk-oc-input"
+                            v-on:change="on_change_selection('itable')"
                             v-model="working_paper_oc_selections['itable']">
                     </div>
                     <div class="d-flex flex-row justify-content-between flex-fill">
@@ -242,7 +243,8 @@ html {
                                     <input type="checkbox" 
                                         class="chk-oc-input"
                                         v-model="working_paper_oc_selections[oc.abbr]"
-                                        v-bind:id="'chk_oc_input_' + oc.abbr">
+                                        v-bind:id="'chk_oc_input_' + oc.abbr"
+                                        v-on:change="on_change_selection(oc.abbr)">
                                 </div>
                                 <div class="d-flex flex-row justify-content-between flex-fill">
                                     <div>
@@ -503,6 +505,28 @@ var pan_ocpapers = {
 
         on_click_toggle: function(it) {
             it._is_shown = !it._is_shown;
+        },
+
+        on_change_selection: function(oc_abbr) {
+            console.log(
+                '*', oc_abbr, 'to',
+                this.working_paper_oc_selections[oc_abbr]
+            );
+
+            var project_id = Cookies.get('project_id');
+            srv_extractor.update_paper_one_selection(
+                project_id,
+                this.working_paper.pid,
+                oc_abbr,
+                this.working_paper_oc_selections[oc_abbr],
+                function(data) {
+                    console.log('* update_paper_one_selection', data);
+                    jarvis.toast('Updated ' + data.data.pid + ' to ' + data.data.is_selected);
+
+                    // just update this paper in the extraction?
+                    pan_ocpapers.update_vpp_papers(data.paper);
+                }
+            );
         },
 
         save_working_paper_selections: function() {

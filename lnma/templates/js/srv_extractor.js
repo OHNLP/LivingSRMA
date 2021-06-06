@@ -24,6 +24,7 @@ var srv_extractor = {
         get_extract_and_papers: "[[ url_for('extractor.get_extract_and_papers') ]]",
 
         get_included_papers_and_selections: "[[ url_for('extractor.get_included_papers_and_selections') ]]",
+        update_paper_one_selection: "[[ url_for('extractor.update_paper_one_selection') ]]",
         update_paper_selections: "[[ url_for('extractor.update_paper_selections') ]]",
 
         extract_data: "[[ url_for('extractor.extract_data') ]]"
@@ -175,7 +176,28 @@ var srv_extractor = {
             cache: false,
             success: callback,
             error: function(jqXHR, textStatus, errorThrown) {
-                jarvis.toast('Something wrong when getting included papers', 'alert');
+                jarvis.toast('Something wrong when setting paper selections', 'alert');
+                console.error(textStatus, errorThrown);
+            }
+        });
+    },
+
+    update_paper_one_selection: function(project_id, pid, abbr, is_selected, callback) {
+        $.ajax({
+            type: 'POST',
+            dataType: "json",
+            url: this.url.update_paper_one_selection,
+            data: {
+                rnd: Math.random(),
+                project_id: project_id,
+                pid: pid,
+                abbr: abbr,
+                is_selected: is_selected
+            },
+            cache: false,
+            success: callback,
+            error: function(jqXHR, textStatus, errorThrown) {
+                jarvis.toast('Something wrong when setting selection', 'alert');
                 console.error(textStatus, errorThrown);
             }
         });

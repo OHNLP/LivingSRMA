@@ -1856,6 +1856,89 @@ def update_extract_meta_and_data(project_id, oc_type, abbr, meta, data):
     return extract
     
 
+def update_paper_selection(project_id, pid, abbr, is_selected):
+    '''
+    Update the paper outcome selection in one extract
+    '''
+    # first, get this selection
+    extract = Extract.query.filter(and_(
+        Extract.project_id == project_id,
+        Extract.abbr == abbr
+    )).first()
+
+    # TODO if it's NONE???
+
+    if pid in extract.data:
+        db_is_selected = extract.data[pid]['is_selected']
+        # print('* %s in %s (%s vs %s)' % (
+        #     pid, oc_abbr, is_selected, db_is_selected
+        # ))
+        if is_selected == db_is_selected:
+            # OK, no need to change the value
+            pass
+        else:
+            # user changed the option, ok, update
+            extract.data[pid]['is_selected'] = is_selected
+
+            # add to session
+            flag_modified(extract, "data")
+            db.session.add(extract)
+            db.session.commit()
+            
+            print('* found %s in %s is_selected updated to %s' % (
+                pid, extract.meta['full_name'], is_selected
+            ))
+
+    else:
+        if is_selected:
+            # well, have to add this pid to this outcome
+            # make an empty extraction
+            # {
+            #     'is_selected': is_selected,
+            #     'is_checked': False,
+            #     'n_arms': 2,
+            #     'attrs': {
+            #         'main': {},
+            #         'other': []
+            #     }
+            # }
+            extract.data[pid] = util.mk_empty_extract_paper_data(is_selected)
+            extract.data[pid]['attrs']['main'] = util.fill_extract_data_arm(
+                extract.data[pid]['attrs']['main'],
+                extract.meta['cate_attrs']
+            )
+            flag_modified(extract, "data")
+            db.session.add(extract)
+            db.session.commit()
+
+            print('* created %s in %s is_selected updated to %s' % (
+                pid, extract.abbr, is_selected
+            ))
+        else:
+            # since it is not selected, just ignore is fine
+            pass
+
+    return extract
+
+
+def get_paper_selections(project_id, pid):
+    '''
+    Get the selections of a paper
+    '''
+    extracts = get_extracts_by_project_id(project_id)
+
+    # check each extract
+    abbrs = []
+    for extract in extracts:
+        if pid in extract.data:
+            if extract.data[pid]['is_selected']:
+                abbrs.append(extract.abbr)
+            else:
+                pass
+    
+    return abbrs
+
+
 def update_paper_selections(project_id, pid, abbrs):
     '''
     Update the paper outcome selection in a project

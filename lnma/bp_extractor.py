@@ -234,6 +234,49 @@ def get_included_papers_and_selections():
     return jsonify(ret)
 
 
+@bp.route('/update_paper_one_selection', methods=['POST'])
+@login_required
+def update_paper_one_selection():
+    '''
+    Update just one selection for a paper
+    '''
+    project_id = request.form.get('project_id')
+    pid = request.form.get('pid')
+    abbr = request.form.get('abbr')
+    is_selected = request.form.get('is_selected')
+    is_selected = True if is_selected.lower() == 'true' else False
+
+    print('* %s in extract[%s]: %s(%s)' % (
+        pid, abbr, is_selected, type(is_selected)
+    ))
+
+    extract = dora.update_paper_selection(
+        project_id, pid, abbr, is_selected
+    )
+
+    paper = dora.get_paper_by_project_id_and_pid(
+        project_id, pid
+    )
+
+    outcome_selections = dora.get_paper_selections(
+        project_id, pid
+    )
+
+    paper.meta['outcome_selections'] = outcome_selections
+    ret = {
+        'success': True,
+        'msg': '',
+        'paper': paper.as_very_simple_dict(),
+        'data': {
+            'pid': pid,
+            'abbr': abbr,
+            'is_selected': is_selected
+        }
+    }
+
+    return jsonify(ret)
+
+
 @bp.route('/update_paper_selections', methods=['POST'])
 @login_required
 def update_paper_selections():
