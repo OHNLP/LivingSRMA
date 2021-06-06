@@ -521,7 +521,7 @@ var pan_ocpapers = {
                 this.working_paper_oc_selections[oc_abbr],
                 function(data) {
                     console.log('* update_paper_one_selection', data);
-                    jarvis.toast('Updated ' + data.data.pid + ' to ' + data.data.is_selected);
+                    jarvis.toast(data.msg);
 
                     // just update this paper in the extraction?
                     pan_ocpapers.update_vpp_papers(data.paper);

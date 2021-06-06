@@ -681,6 +681,13 @@ class Extract(db.Model):
 
         return n
 
+    
+    def get_short_title(self):
+        '''
+        Get a short title for this extract
+        '''
+        return self.meta['full_name']
+
 
     def __repr__(self):
         return '<Extract {0} {1}: {2}>'.format(

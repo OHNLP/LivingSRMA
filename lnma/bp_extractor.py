@@ -262,10 +262,16 @@ def update_paper_one_selection():
         project_id, pid
     )
 
+    msg = 'Updated %s %s %s' % (
+        paper.get_short_name(),
+        'selected in' if is_selected else 'removed from',
+        extract.get_short_title()
+    )
+
     paper.meta['outcome_selections'] = outcome_selections
     ret = {
         'success': True,
-        'msg': '',
+        'msg': msg,
         'paper': paper.as_very_simple_dict(),
         'data': {
             'pid': pid,
