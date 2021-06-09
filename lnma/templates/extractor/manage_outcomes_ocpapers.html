@@ -77,7 +77,7 @@
                             class="form-control" id="input_analysis_group">
                             <!-- <option value="primary">Primary Analysis</option> -->
                             <!-- <option value="sensitivity">Sensitivity Analysis</option> -->
-                            <option v-for="group in project.settings.outcome.analysis_groups"
+                            <option v-for="group in project.settings.outcome[extract.oc_type].analysis_groups"
                                 v-bind:value="group.abbr">
                                 {{ group.name }}
                             </option>

@@ -17,14 +17,20 @@ var srv_shared = {
      * @param {Object} settings The settings object of a project
      */
     update_labels_by_project_settings: function(settings) {
-        if (settings.hasOwnProperty('outcome') &&
-            settings.outcome.hasOwnProperty('analysis_groups')) {
-            for (let i = 0; i < settings.outcome.analysis_groups.length; i++) {
-                const d = settings.outcome.analysis_groups[i];
-                // put this group name to dictionary
-                this.label_dict[d.abbr] = d.name;
+        if (settings.hasOwnProperty('outcomes_enabled')) {
+            for (let i = 0; i < settings.outcomes_enabled.length; i++) {
+                const oc_type = settings.outcomes_enabled[i];
+                if (settings.hasOwnProperty('outcome') &&
+                    settings.outcome.hasOwnProperty(oc_type)) {
+                    for (let i = 0; i < settings.outcome[oc_type].analysis_groups.length; i++) {
+                        const d = settings.outcome[oc_type].analysis_groups[i];
+                        // put this group name to dictionary
+                        this.label_dict[d.abbr] = d.name;
+                    }
+                }
             }
         }
+        
     },
 
     /**
