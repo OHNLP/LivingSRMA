@@ -547,8 +547,6 @@ var pan_ocpapers = {
 
 var jarvis = {
 
-    INPUT_FORMAT_NAMES: [[ config['settings']['INPUT_FORMAT_NAMES'] | tojson_pretty | safe ]],
-
     getUrlParameter: function(name) {
         name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
         var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');

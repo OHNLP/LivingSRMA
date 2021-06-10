@@ -175,7 +175,7 @@ html {
         </div>
 
         <outcome-list 
-            v-if="extract_tree!=null && extract_tree.hasOwnProperty(oc_type)"
+            v-if="extract_tree!=null && extract_tree.hasOwnProperty(oc_type) && extract_tree[oc_type].groups.hasOwnProperty(group.abbr)"
             v-bind:force_update="force_update"
             v-bind:oc_type="oc_type"
             v-bind:cate_ocs="extract_tree[oc_type].groups[group.abbr].cates"
@@ -350,8 +350,8 @@ var pan_outcomes = {
         meta.category = category;
 
         // set the default input format
-        if (srv_extractor.project.settings.outcome.default_setting.hasOwnProperty('input_format')) {
-            meta.input_format = srv_extractor.project.settings.outcome.default_setting.input_format;
+        if (srv_extractor.project.settings.outcome[oc_type].default_setting.hasOwnProperty('input_format')) {
+            meta.input_format = srv_extractor.project.settings.outcome[oc_type].default_setting.input_format;
         }
 
         // copy the meta.cate_attr according to the input_format
@@ -974,7 +974,7 @@ Vue.component('outcome-list', {
         </button>
     </div>
 
-    <div class="cate-extracts cate-extracts-pwma">
+    <div v-bind:class="'cate-extracts cate-extracts-' + oc_type">
         <div v-for="oc in cate.ocs" 
             v-bind:id="'cate-extract-line-' + oc.abbr"
             class="cate-extract-line d-flex flex-row">

@@ -51,15 +51,21 @@ STANDARD_DATA_COLS = {
 }
 
 INPUT_FORMAT_NAMES = {
-    "PRIM_CAT_PRE": "Categorical Precalculated Data",
-    "PRIM_CAT_RAW": "Categorical Raw Data",
-    "PRIM_CATIRR_RAW": "Categorical Raw (Incidence Rate Ratios) Data",
-    "PRIM_CONTD_PRE": "Continuous Precalculated Data",
-    "PRIM_CONTD_RAW": "Continuous Raw Data",
-    "PRIM_CAT_RAW_G5": "Categorical Raw Data of Adv Grades (for IO project use only)",
-
-    "NMA_PRE_SMLU": "Precalculated Data",
-    "NMA_RAW_ET": "Raw Data"
+    "pwma": {
+        "PRIM_CAT_PRE": "Categorical Precalculated Data",
+        "PRIM_CAT_RAW": "Categorical Raw Data",
+        "PRIM_CATIRR_RAW": "Categorical Raw (Incidence Rate Ratios) Data",
+        "PRIM_CONTD_PRE": "Continuous Precalculated Data",
+        "PRIM_CONTD_RAW": "Continuous Raw Data",
+        "PRIM_CAT_RAW_G5": "Categorical Raw Data of Adv Grades (for IO project use only)",
+    },
+    "subg": {
+        
+    },
+    "nma": {
+        "NMA_PRE_SMLU": "Precalculated Data",
+        "NMA_RAW_ET": "Raw Data"
+    }
 }
 
 SOFTABLE_NMA_COLS = {
@@ -135,7 +141,7 @@ OC_TYPE_TPL = {
             "included_in_sof": 'no',
             "included_in_em": 'yes',
             "input_format": 'NMA_PRE_SMLU',
-            
+
             "measure_of_effect": 'HR',
             "analysis_method": 'freq',
             "fixed_or_random": 'random',
