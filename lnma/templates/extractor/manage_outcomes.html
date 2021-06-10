@@ -145,18 +145,19 @@ html {
 <div id="main">
 
 <div id="pan_outcomes" class="panel-container">
-    <!-- for pwma -->
+    <div v-for="oc_type in project.settings.outcomes_enabled">
+        
     <h5>
-        PWMA Outcomes
+        {{ oc_type.toLocaleUpperCase() }} Outcomes
 
         <button class="btn btn-default btn-xs"
-            v-on:click="close_all_cates('pwma', event)">
+            v-on:click="close_all_cates(oc_type, event)">
             <i class="fa fa-close"></i>
             Fold
         </button>
     </h5>
 
-    <div v-for="group in project.settings.outcome['pwma'].analysis_groups"
+    <div v-for="group in project.settings.outcome[oc_type].analysis_groups"
         class="panel-box">
         <div class="d-flex flex-row">
             <div class="mr-1">
@@ -165,7 +166,7 @@ html {
 
             <div>
                 <button class="btn btn-default btn-xs text-primary"
-                    v-on:click="create_extract('pwma', 'default', group.abbr, 'default')">
+                    v-on:click="create_extract(oc_type, 'default', group.abbr, 'default')">
                     <i class="fa fa-plus"></i>
                     Add outcome to default category
                 </button>
@@ -174,17 +175,18 @@ html {
         </div>
 
         <outcome-list 
-            v-if="extract_tree!=null && extract_tree.hasOwnProperty('pwma')"
+            v-if="extract_tree!=null && extract_tree.hasOwnProperty(oc_type)"
             v-bind:force_update="force_update"
-            v-bind:oc_type="'pwma'"
-            v-bind:cate_ocs="extract_tree.pwma.groups[group.abbr].cates"
+            v-bind:oc_type="oc_type"
+            v-bind:cate_ocs="extract_tree[oc_type].groups[group.abbr].cates"
             v-bind:group="group.abbr">
         </outcome-list>
 
         <hr>
     </div>
+    </div>
 
-    
+
 </div>
 <!-- /#pan_outcomes -->
 
@@ -335,7 +337,11 @@ var pan_outcomes = {
         var abbr = srv_extractor.mk_oc_abbr();
 
         // create an meta
-        var meta = JSON.parse(JSON.stringify(srv_extractor.tpl.oc_type[oc_type][tpl]));
+        var meta = JSON.parse(
+            JSON.stringify(
+                srv_extractor.tpl.oc_type[oc_type][tpl]
+            )
+        );
         meta.full_name = text;
         meta.abbr = abbr;
 

@@ -57,6 +57,9 @@ INPUT_FORMAT_NAMES = {
     "PRIM_CONTD_PRE": "Continuous Precalculated Data",
     "PRIM_CONTD_RAW": "Continuous Raw Data",
     "PRIM_CAT_RAW_G5": "Categorical Raw Data of Adv Grades (for IO project use only)",
+
+    "NMA_PRE_SMLU": "Precalculated Data",
+    "NMA_RAW_ET": "Raw Data"
 }
 
 SOFTABLE_NMA_COLS = {
@@ -143,7 +146,7 @@ OC_TYPE_TPL = {
 
 INPUT_FORMAT_TPL = {
     "nma": {
-        'raw': [{
+        'NMA_RAW_ET': [{
             'abbr': 'nma_raw_regimen',
             'name': 'Regimen',
             'attrs': [{
@@ -180,7 +183,7 @@ INPUT_FORMAT_TPL = {
                 'subs': None
             }]
         }],
-        'pre': [{
+        'NMA_PRE_SMLU': [{
             'abbr': 'nma_pre_regimen',
             'name': 'Regimen',
             'attrs': [{
@@ -197,7 +200,7 @@ INPUT_FORMAT_TPL = {
             'name': 'Result',
             'attrs': [{
                 'abbr': 'sm',
-                'name': 'SM',
+                'name': 'Measure',
                 'subs': None
             }, {
                 'abbr': 'lowerci',
