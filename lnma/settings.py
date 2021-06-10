@@ -78,8 +78,8 @@ OC_TYPE_TPL = {
             "category": 'default',
             "group": 'primary',
             "full_name": 'pwma outcome full name',
-            "included_in_plots": 'yes',
-            "included_in_sof": 'yes',
+            "included_in_plots": 'no',
+            "included_in_sof": 'no',
             "input_format": 'PRIM_CAT_RAW',
             "measure_of_effect": 'RR',
             "fixed_or_random": 'random',
@@ -92,6 +92,56 @@ OC_TYPE_TPL = {
             "sensitivity_analysis": "no",
             "cumulative_meta_analysis": "no",
             "cumulative_meta_analysis_sortby": "year",
+            "attrs": None,
+            "cate_attrs": None
+        }
+    },
+    "subg": {
+        "default": {
+            "abbr": '',
+            "subgroups": ['A', 'B'],
+            "oc_type": 'subg',
+            "category": 'default',
+            "group": 'subgroup',
+            "full_name": 'pwma Outcome full name',
+            "included_in_plots": 'no',
+            "included_in_sof": 'no',
+            "input_format": 'SUBG_CAT_RAW',
+            "measure_of_effect": 'RR',
+            "fixed_or_random": 'random',
+            "which_is_better": 'lower',
+
+            "pooling_method": "Inverse",
+            "tau_estimation_method": "DL",
+            "hakn_adjustment": "no",
+            "smd_estimation_method": "Hedges",
+            "prediction_interval": "no",
+            "sensitivity_analysis": "no",
+            "cumulative_meta_analysis": "no",
+            "cumulative_meta_analysis_sortby": "year",
+
+            "attrs": None,
+            "cate_attrs": None
+        }
+    },
+    "nma": {
+        "default": {
+            "abbr": '',
+            "oc_type": 'nma',
+            "category": 'default',
+            "group": 'primary',
+            "full_name": 'NMA Outcome full name',
+            "included_in_plots": 'no',
+            "included_in_sof": 'no',
+            "included_in_em": 'yes',
+            "input_format": 'NMA_PRE_SMLU',
+            
+            "measure_of_effect": 'HR',
+            "analysis_method": 'freq',
+            "fixed_or_random": 'random',
+            "which_is_better": 'lower',
+            "reference_treatment": '',
+
             "attrs": None,
             "cate_attrs": None
         }
