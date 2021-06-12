@@ -21,20 +21,25 @@ var pan_maresults = {
             methods: this.vpp_methods,
 
             updated: function() {
+
                 // draw the pwma prim
-                if (this.has_pwma_cumu_forest) {
+                console.log('* check has_pwma_prim_forest=' + this.has_pwma_prim_forest);
+                if (this.has_pwma_prim_forest) {
                     fg_pwma_prim_forest.draw(
                         fg_pwma_prim_forest.data,
                         fg_pwma_prim_forest.cfg
                     );
+                    console.log('* drawn fg_pwma_prim_forest');
                 }
 
                 // draw the pwma cumu
+                console.log('* check has_pwma_cumu_forest=' + this.has_pwma_cumu_forest);
                 if (this.has_pwma_cumu_forest) {
                     fg_pwma_cumu_forest.draw(
                         fg_pwma_cumu_forest.data, 
                         fg_pwma_cumu_forest.cfg
                     );
+                    console.log('* drawn fg_pwma_cumu_forest');
                 }
 
                 // draw the pwma incd
@@ -44,6 +49,7 @@ var pan_maresults = {
                         fg_incd_incd_forest.data, 
                         fg_incd_incd_forest.cfg
                     );
+                    console.log('* drawn fg_incd_incd_forest');
                 }
 
                 // draw the incd cumu
@@ -52,7 +58,10 @@ var pan_maresults = {
                         fg_incd_cumu_forest.data, 
                         fg_incd_cumu_forest.cfg
                     );
+                    console.log('* drawn fg_incd_cumu_forest');
                 }
+
+                console.log('* pan_maresults updated!');
             }
         });
     },
@@ -92,6 +101,8 @@ var pan_maresults = {
             fg_pwma_cumu_forest.cfg = cfg;
             this.vpp.$data.has_pwma_cumu_forest = true;
         }
+
+        this.vpp.$forceUpdate();
     },
 
     show_pwma_incd_plots: function(data) {
@@ -119,6 +130,8 @@ var pan_maresults = {
             fg_incd_cumu_forest.cfg = cfg;
             this.vpp.$data.has_incd_cumu_forest = true;
         }
+
+        this.vpp.$forceUpdate();
     },
 
     resize: function() {

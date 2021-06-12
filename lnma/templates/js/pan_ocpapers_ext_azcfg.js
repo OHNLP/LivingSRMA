@@ -109,19 +109,19 @@ Object.assign(pan_ocpapers.vpp_methods, {
                     //     continue;
                     // }
                     if (this.isna(Et)) {
-                        console.log('* skip NA ' + grade + ' Et='+Et+' ' + pid + ' ' + _study);
+                        // console.log('* skip NA ' + grade + ' Et='+Et+' ' + pid + ' ' + _study);
                         continue;
                     }
                     if (this.isna(Ec)) {
-                        console.log('* skip NA ' + grade + ' Ec='+Ec+' ' + pid + ' ' + _study);
+                        // console.log('* skip NA ' + grade + ' Ec='+Ec+' ' + pid + ' ' + _study);
                         continue;
                     }
                     if (this.isna(Nt)) {
-                        console.log('* skip NA ' + grade + ' Nt='+Nt+' ' + pid + ' ' + _study);
+                        // console.log('* skip NA ' + grade + ' Nt='+Nt+' ' + pid + ' ' + _study);
                         continue;
                     }
                     if (this.isna(Nc)) {
-                        console.log('* skip NA ' + grade + ' Nc='+Nc+' ' + pid + ' ' + _study);
+                        // console.log('* skip NA ' + grade + ' Nc='+Nc+' ' + pid + ' ' + _study);
                         continue;
                     }
 

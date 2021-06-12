@@ -63,8 +63,9 @@ def _round(v, d):
     _round the number
     '''
     try:
-        return _round(v, d)
-    except:
+        return round(v, d)
+    except Exception as err:
+        print(err)
         return None
 
 
