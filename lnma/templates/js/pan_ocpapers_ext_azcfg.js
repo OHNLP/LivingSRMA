@@ -100,17 +100,33 @@ Object.assign(pan_ocpapers.vpp_methods, {
                     var control = this.get_str(ext.control);
 
                     // Now need to check the value
-                    if (this.isna(Nt) || 
-                        this.isna(Nc) || 
-                        this.isna(Et) ||
-                        this.isna(Ec)) {
+                    // if (this.isna(Nt) || 
+                    //     this.isna(Nc) || 
+                    //     this.isna(Et) ||
+                    //     this.isna(Ec)) {
                         
-                        // console.log('* skip NULL ' + " " + pid + " " + study);
+                    //     // console.log('* skip NULL ' + " " + pid + " " + study);
+                    //     continue;
+                    // }
+                    if (this.isna(Et)) {
+                        console.log('* skip NA ' + grade + ' Et='+Et+' ' + pid + ' ' + _study);
+                        continue;
+                    }
+                    if (this.isna(Ec)) {
+                        console.log('* skip NA ' + grade + ' Ec='+Ec+' ' + pid + ' ' + _study);
+                        continue;
+                    }
+                    if (this.isna(Nt)) {
+                        console.log('* skip NA ' + grade + ' Nt='+Nt+' ' + pid + ' ' + _study);
+                        continue;
+                    }
+                    if (this.isna(Nc)) {
+                        console.log('* skip NA ' + grade + ' Nc='+Nc+' ' + pid + ' ' + _study);
                         continue;
                     }
 
                     if (Et == 0 && Ec == 0) {
-                        console.log('* skip 0t0c ' + " " + pid + " " + _study);
+                        console.log('* skip 0t0c ' + pid + " " + _study);
                         continue;
                     }
                     var r = {

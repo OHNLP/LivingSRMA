@@ -160,9 +160,9 @@ var pan_ocpapers = {
                 return true;
             } else if (isNaN(v)) {
                 return true;
-            } else if (v == '') {
+            } else if (v === '') {
                 return true;
-            } else if ((''+v).toLocaleUpperCase() == 'NA') {
+            } else if ((''+v).toLocaleUpperCase() === 'NA') {
                 return true;
             } else if (v == '-') {
                 return true;

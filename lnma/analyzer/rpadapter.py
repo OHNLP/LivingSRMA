@@ -20,7 +20,13 @@ def backtransf(x, sm):
         "HR", "OR", "RR", "IRR", "ROM", "DOR",
         # and log effect
         "PLN", "IRLN", "MLN"]:
-        ret = np.e ** x
+        try:
+            # sometimes, the x is not a number
+            # for example, when both Et and Ec are 0
+            # the x is 'NA'
+            ret = np.e ** x
+        except:
+            ret = None
 
     elif sm == 'PLOGIT':
         ret = expit(x)
@@ -51,6 +57,15 @@ def backtransf(x, sm):
 
     return ret
 
+
+def _round(v, d):
+    '''
+    _round the number
+    '''
+    try:
+        return _round(v, d)
+    except:
+        return None
 
 
 ###############################################################
@@ -472,12 +487,12 @@ def _dmetar_trans_rksucra(j, params):
     #     for r in j['sucrarank']:
     #         rs.append({
     #             'treat': r['_row'],
-    #             'value': np.round(float(r['SUCRA']*100), 2)
+    #             'value': np._round(float(r['SUCRA']*100), 2)
     #         })
     # elif j['version']['jsonlite'] == [[1, 6, 1]]:
     #     for i in range(len(j['sucraplot']['treats'])):
     #         treat = j['sucraplot']['treats'][i]
-    #         value = np.round(j['sucrarank']['SUCRA'][i]*100, 2)
+    #         value = np._round(j['sucrarank']['SUCRA'][i]*100, 2)
     #         rs.append({
     #             'treat': treat,
     #             'value': value
@@ -745,9 +760,9 @@ def _meta_trans_metabin(j, params):
                 'upper': data['upper.random'][0],
 
                 # backtransf the TE and other values
-                'bt_TE': round(backtransf(data['TE.random'][0], sm), 4),
-                'bt_lower': round(backtransf(data['lower.random'][0], sm), 4),
-                'bt_upper': round(backtransf(data['upper.random'][0], sm), 4),
+                'bt_TE': _round(backtransf(data['TE.random'][0], sm), 4),
+                'bt_lower': _round(backtransf(data['lower.random'][0], sm), 4),
+                'bt_upper': _round(backtransf(data['upper.random'][0], sm), 4),
                 'w': 1
             },
             'fixed': {
@@ -762,9 +777,9 @@ def _meta_trans_metabin(j, params):
                 'upper': data['upper.fixed'][0],
 
                 # backtransf the TE and other values
-                'bt_TE': round(backtransf(data['TE.fixed'][0], sm), 4),
-                'bt_lower': round(backtransf(data['lower.fixed'][0], sm), 4),
-                'bt_upper': round(backtransf(data['upper.fixed'][0], sm), 4),
+                'bt_TE': _round(backtransf(data['TE.fixed'][0], sm), 4),
+                'bt_lower': _round(backtransf(data['lower.fixed'][0], sm), 4),
+                'bt_upper': _round(backtransf(data['upper.fixed'][0], sm), 4),
                 'w': 1
             }
         },
@@ -789,12 +804,12 @@ def _meta_trans_metabin(j, params):
             'lower': data['lower'][i],
             'upper': data['upper'][i],
 
-            'bt_TE': round(backtransf(data['TE'][i], sm), 4),
-            'bt_lower': round(backtransf(data['lower'][i], sm), 4),
-            'bt_upper': round(backtransf(data['upper'][i], sm), 4),
+            'bt_TE': _round(backtransf(data['TE'][i], sm), 4),
+            'bt_lower': _round(backtransf(data['lower'][i], sm), 4),
+            'bt_upper': _round(backtransf(data['upper'][i], sm), 4),
 
-            'w_random': round(data['w.random'][i] / np.sum(data['w.random']), 4),
-            'w_fixed': round(data['w.fixed'][i] / np.sum(data['w.fixed']), 4)
+            'w_random': _round(data['w.random'][i] / np.sum(data['w.random']), 4),
+            'w_fixed': _round(data['w.fixed'][i] / np.sum(data['w.fixed']), 4)
         })
 
     return ret
@@ -827,13 +842,13 @@ def _meta_trans_metacum(j, params):
                 'seTE': data['seTE'][-1],
                 'lower': data['lower'][-1],
                 'upper': data['upper'][-1],
-                'bt_TE': round(backtransf(data['TE'][-1], sm), 4),
-                'bt_lower': round(backtransf(data['lower'][-1], sm), 4),
-                'bt_upper': round(backtransf(data['upper'][-1], sm), 4),
+                'bt_TE': _round(backtransf(data['TE'][-1], sm), 4),
+                'bt_lower': _round(backtransf(data['lower'][-1], sm), 4),
+                'bt_upper': _round(backtransf(data['upper'][-1], sm), 4),
                 
-                'bt_ab_TE': round(backtransf(data['TE'][-1], sm) * ab, 2),
-                'bt_ab_lower': round(backtransf(data['lower'][-1], sm) * ab, 2),
-                'bt_ab_upper': round(backtransf(data['upper'][-1], sm) * ab, 2),
+                'bt_ab_TE': _round(backtransf(data['TE'][-1], sm) * ab, 2),
+                'bt_ab_lower': _round(backtransf(data['lower'][-1], sm) * ab, 2),
+                'bt_ab_upper': _round(backtransf(data['upper'][-1], sm) * ab, 2),
             },
             'fixed': {
                 'name': 'Fixed effects model',
@@ -841,13 +856,13 @@ def _meta_trans_metacum(j, params):
                 'seTE': data['seTE'][-1],
                 'lower': data['lower'][-1],
                 'upper': data['upper'][-1],
-                'bt_TE': round(backtransf(data['TE'][-1], sm), 4),
-                'bt_lower': round(backtransf(data['lower'][-1], sm), 4),
-                'bt_upper': round(backtransf(data['upper'][-1], sm), 4),
+                'bt_TE': _round(backtransf(data['TE'][-1], sm), 4),
+                'bt_lower': _round(backtransf(data['lower'][-1], sm), 4),
+                'bt_upper': _round(backtransf(data['upper'][-1], sm), 4),
                 
-                'bt_ab_TE': round(backtransf(data['TE'][-1], sm) * ab, 2),
-                'bt_ab_lower': round(backtransf(data['lower'][-1], sm) * ab, 2),
-                'bt_ab_upper': round(backtransf(data['upper'][-1], sm) * ab, 2),
+                'bt_ab_TE': _round(backtransf(data['TE'][-1], sm) * ab, 2),
+                'bt_ab_lower': _round(backtransf(data['lower'][-1], sm) * ab, 2),
+                'bt_ab_upper': _round(backtransf(data['upper'][-1], sm) * ab, 2),
             }
         },
         'stus': []
@@ -861,13 +876,13 @@ def _meta_trans_metacum(j, params):
             'seTE': data['seTE'][i],
             'lower': data['lower'][i],
             'upper': data['upper'][i],
-            'bt_TE': round(backtransf(data['TE'][i], sm), 4),
-            'bt_lower': round(backtransf(data['lower'][i], sm), 4),
-            'bt_upper': round(backtransf(data['upper'][i], sm), 4),
+            'bt_TE': _round(backtransf(data['TE'][i], sm), 4),
+            'bt_lower': _round(backtransf(data['lower'][i], sm), 4),
+            'bt_upper': _round(backtransf(data['upper'][i], sm), 4),
             
-            'bt_ab_TE': round(backtransf(data['TE'][i], sm) * ab, 2),
-            'bt_ab_lower': round(backtransf(data['lower'][i], sm) * ab, 2),
-            'bt_ab_upper': round(backtransf(data['upper'][i], sm) * ab, 2),
+            'bt_ab_TE': _round(backtransf(data['TE'][i], sm) * ab, 2),
+            'bt_ab_lower': _round(backtransf(data['lower'][i], sm) * ab, 2),
+            'bt_ab_upper': _round(backtransf(data['upper'][i], sm) * ab, 2),
         })
 
     return ret
@@ -886,9 +901,9 @@ def _meta_trans_metagen(j, params):
                 'name': 'Random effects model',
                 'TE': data['TE.random'][0],
                 'seTE': data['seTE.random'][0],
-                'sm': round(np.e ** data['TE.random'][0], 3),
-                'lower': round(np.e ** data['lower.random'][0], 3),
-                'upper': round(np.e ** data['upper.random'][0], 3)
+                'sm': _round(np.e ** data['TE.random'][0], 3),
+                'lower': _round(np.e ** data['lower.random'][0], 3),
+                'upper': _round(np.e ** data['upper.random'][0], 3)
             }
         },
         'heterogeneity': {
@@ -905,11 +920,11 @@ def _meta_trans_metagen(j, params):
             'name': stu,
             'TE': data['TE'][i],
             'seTE': data['seTE'][i],
-            'sm': round(np.e ** data['TE'][i], 3),
-            'lower': round(np.e ** data['lower'][i], 3),
-            'upper': round(np.e ** data['upper'][i], 3),
-            'w.random': round(data['w.random'][i] / np.sum(data['w.random']), 4),
-            'w.fixed': round(data['w.fixed'][i] / np.sum(data['w.fixed']), 4)
+            'sm': _round(np.e ** data['TE'][i], 3),
+            'lower': _round(np.e ** data['lower'][i], 3),
+            'upper': _round(np.e ** data['upper'][i], 3),
+            'w.random': _round(data['w.random'][i] / np.sum(data['w.random']), 4),
+            'w.fixed': _round(data['w.fixed'][i] / np.sum(data['w.fixed']), 4)
         })
 
     return ret
@@ -941,12 +956,12 @@ def _meta_trans_metaprop(j, params):
                 'seTE': data['seTE.random'][0],
                 'lower': data['lower.random'][0],
                 'upper': data['upper.random'][0],
-                'bt_TE': round(backtransf(data['TE.random'][0], sm), 4),
-                'bt_lower': round(backtransf(data['lower.random'][0], sm), 4),
-                'bt_upper': round(backtransf(data['upper.random'][0], sm), 4),
-                'bt_ab_TE': round(backtransf(data['TE.random'][0], sm) * ab, 2),
-                'bt_ab_lower': round(backtransf(data['lower.random'][0], sm) * ab, 2),
-                'bt_ab_upper': round(backtransf(data['upper.random'][0], sm) * ab, 2),
+                'bt_TE': _round(backtransf(data['TE.random'][0], sm), 4),
+                'bt_lower': _round(backtransf(data['lower.random'][0], sm), 4),
+                'bt_upper': _round(backtransf(data['upper.random'][0], sm), 4),
+                'bt_ab_TE': _round(backtransf(data['TE.random'][0], sm) * ab, 2),
+                'bt_ab_lower': _round(backtransf(data['lower.random'][0], sm) * ab, 2),
+                'bt_ab_upper': _round(backtransf(data['upper.random'][0], sm) * ab, 2),
                 'w': 1 
             },
             'fixed': {
@@ -957,12 +972,12 @@ def _meta_trans_metaprop(j, params):
                 'seTE': data['seTE.fixed'][0],
                 'lower': data['lower.fixed'][0],
                 'upper': data['upper.fixed'][0],
-                'bt_TE': round(backtransf(data['TE.fixed'][0], sm), 4),
-                'bt_lower': round(backtransf(data['lower.fixed'][0], sm), 4),
-                'bt_upper': round(backtransf(data['upper.fixed'][0], sm), 4),
-                'bt_ab_TE': round(backtransf(data['TE.fixed'][0], sm) * ab, 2),
-                'bt_ab_lower': round(backtransf(data['lower.fixed'][0], sm) * ab, 2),
-                'bt_ab_upper': round(backtransf(data['upper.fixed'][0], sm) * ab, 2),
+                'bt_TE': _round(backtransf(data['TE.fixed'][0], sm), 4),
+                'bt_lower': _round(backtransf(data['lower.fixed'][0], sm), 4),
+                'bt_upper': _round(backtransf(data['upper.fixed'][0], sm), 4),
+                'bt_ab_TE': _round(backtransf(data['TE.fixed'][0], sm) * ab, 2),
+                'bt_ab_lower': _round(backtransf(data['lower.fixed'][0], sm) * ab, 2),
+                'bt_ab_upper': _round(backtransf(data['upper.fixed'][0], sm) * ab, 2),
                 'w': 1
             }
         },
@@ -985,17 +1000,17 @@ def _meta_trans_metaprop(j, params):
             'seTE': data['seTE'][i],
             'lower': data['lower'][i],
             'upper': data['upper'][i],
-            'bt_TE': round(backtransf(data['TE'][i], sm), 4),
-            'bt_ab_TE': round(backtransf(data['TE'][i], sm) * ab, 2),
+            'bt_TE': _round(backtransf(data['TE'][i], sm), 4),
+            'bt_ab_TE': _round(backtransf(data['TE'][i], sm) * ab, 2),
 
             # the lower and upper in incidence analysis is already the backtransf parsed
-            'bt_lower': round(data['lower'][i], 4),
-            'bt_upper': round(data['upper'][i], 4),
-            'bt_ab_lower': round(data['lower'][i] * ab, 2),
-            'bt_ab_upper': round(data['upper'][i] * ab, 2),
+            'bt_lower': _round(data['lower'][i], 4),
+            'bt_upper': _round(data['upper'][i], 4),
+            'bt_ab_lower': _round(data['lower'][i] * ab, 2),
+            'bt_ab_upper': _round(data['upper'][i] * ab, 2),
 
-            'w_random': round(data['w.random'][i] / np.sum(data['w.random']), 4),
-            'w_fixed': round(data['w.fixed'][i] / np.sum(data['w.fixed']), 4)
+            'w_random': _round(data['w.random'][i] / np.sum(data['w.random']), 4),
+            'w_fixed': _round(data['w.fixed'][i] / np.sum(data['w.fixed']), 4)
         })
     
     return ret

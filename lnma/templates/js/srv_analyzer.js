@@ -214,7 +214,7 @@ var srv_analyzer = {
         },
 
         cumulative_meta_analysis: {
-            selected: 'yes',
+            selected: 'no',
             is_used: true,
             is_disabled: false,
             options: [
