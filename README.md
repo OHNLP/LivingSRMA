@@ -213,19 +213,33 @@ $ chmod 755 Miniconda3-latest-Linux-x86_64.sh
 $ ./Miniconda3-latest-Linux-x86_64.sh
 ```
 
+It's better to create a virtual env to avoid any version conflict issue.
+The following operations related to Python are all in this venv.
+
+```bash
+conda create --name py37lnma python=3.7
+conda activate py37lnma
+```
+
 May need to install mysql lib first:
 
 ```bash
-$ sudo apt-get install libmysqlclient-dev
+sudo apt-get install libmysqlclient-dev
 ```
 
+
 ```bash
-(py37lnma) $ pip install mysqlclient
+pip install mysqlclient
 ```
 
 ## Other Packages
 
-Not yet.
+Then, we could install other packages.
+Go to LNMA project root folder and install.
+
+```bash
+pip install -r requirements.txt
+```
 
 
 # Folder Structure
@@ -280,7 +294,7 @@ mkdir /dev/shm/lnma
 First, create a venv for RCT identifier:
 
 ```bash
-conda create rctpy36 python=3.6
+conda create --name rctpy36 python=3.6
 conda activate rctpy36
 ```
 
