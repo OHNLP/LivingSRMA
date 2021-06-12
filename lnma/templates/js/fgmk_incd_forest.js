@@ -222,21 +222,39 @@ return {
         t_heter.append('tspan').text('Heterogeneity: ');
         t_heter.append('tspan').text('I').attr('class', this.css.txt_mt);
         t_heter.append('tspan').text('2').attr('class', this.css.txt_mt + ' ' + this.css.txt_sm).attr('baseline-shift', 'super');
-        var txt_i2 = (this.data.heterogeneity.i2 * 100).toFixed(0) + '%';
-        t_heter.append('tspan').text('=' + txt_i2);
+        t_heter.append('tspan').text('=');
+        try {
+            var txt_i2 = (this.data.heterogeneity.i2 * 100).toFixed(0) + '%';
+            t_heter.append('tspan').text(txt_i2);
+        } catch (err) {
+            console.log(err);
+            t_heter.append('tspan').text('NA');
+        }
         t_heter.append('tspan').text(', ');
 
         // add tau2
         t_heter.append('tspan').text('τ');
         t_heter.append('tspan').text('2').attr('class', this.css.txt_mt + ' ' + this.css.txt_sm).attr('baseline-shift', 'super');
-        var txt_tau2 = (this.data.heterogeneity.tau2).toFixed(4) 
-        t_heter.append('tspan').text('=' + txt_tau2);
+        t_heter.append('tspan').text('=');
+        try {
+            var txt_tau2 = (this.data.heterogeneity.tau2).toFixed(4) 
+            t_heter.append('tspan').text(txt_tau2);
+        } catch (err) {
+            console.log(err);
+            t_heter.append('tspan').text('NA');
+        }
         t_heter.append('tspan').text(', ');
 
         // add p
         t_heter.append('tspan').text('p').attr('class', this.css.txt_mt);
-        var txt_p = (this.data.heterogeneity.p).toFixed(2) 
-        t_heter.append('tspan').text('=' + txt_p);
+        t_heter.append('tspan').text('=');
+        try {
+            var txt_p = (this.data.heterogeneity.p).toFixed(2) 
+            t_heter.append('tspan').text(txt_p);
+        } catch (err) {
+            console.log(err);
+            t_heter.append('tspan').text('NA');
+        }
     },
 
     _draw_forest: function() {

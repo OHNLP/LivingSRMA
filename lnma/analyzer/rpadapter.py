@@ -823,6 +823,10 @@ def _meta_trans_metacum(j, params):
     '''
     data = j['cumuma']
 
+    if data == {}:
+        # which means there is no result for cumuma
+        return None
+
     # this function could be used by both prim and incidence analysis
     if 'primma' in j:
         data_prim = j['primma']
@@ -881,9 +885,9 @@ def _meta_trans_metacum(j, params):
             'bt_lower': _round(backtransf(data['lower'][i], sm), 4),
             'bt_upper': _round(backtransf(data['upper'][i], sm), 4),
             
-            'bt_ab_TE': _round(backtransf(data['TE'][i], sm) * ab, 2),
-            'bt_ab_lower': _round(backtransf(data['lower'][i], sm) * ab, 2),
-            'bt_ab_upper': _round(backtransf(data['upper'][i], sm) * ab, 2),
+            # 'bt_ab_TE': _round(backtransf(data['TE'][i], sm) * ab, 2),
+            # 'bt_ab_lower': _round(backtransf(data['lower'][i], sm) * ab, 2),
+            # 'bt_ab_upper': _round(backtransf(data['upper'][i], sm) * ab, 2),
         })
 
     return ret

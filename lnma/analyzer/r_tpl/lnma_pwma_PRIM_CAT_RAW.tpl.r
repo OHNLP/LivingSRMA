@@ -154,7 +154,10 @@ dev.off()
 # we will use the function metacum
 # x will be an object of class meta
 # sortvar can be indicated by an object of class meta or by an object of original data set
-results.cum <- metacum(resultsraw, sortvar = PRI_CAT_RAWDATA${{ cumulative_meta_analysis_sortby }})
+results.cum <- metacum(
+    resultsraw, 
+    sortvar = PRI_CAT_RAWDATA${{ cumulative_meta_analysis_sortby }}
+)
 
 fig_width <- 10
 fig_height <- fig_width * (0.25 + resultsraw$k * 0.04)

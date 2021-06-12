@@ -303,7 +303,7 @@ a {
                                     </div>
 
                                     <div class="oc-type"
-                                        v-if="ae.cnt_ga<2"
+                                        v-if="ae.cnt_ga<1"
                                         title="Not enough records">
                                         -
                                     </div>
@@ -318,7 +318,7 @@ a {
                                     </div>
 
                                     <div class="oc-type"
-                                        v-if="ae.cnt_g3h<2"
+                                        v-if="ae.cnt_g3h<1"
                                         title="Not enough records">
                                         -
                                     </div>
@@ -333,7 +333,7 @@ a {
                                     </div>
 
                                     <div class="oc-type"
-                                        v-if="ae.cnt_g5n<2"
+                                        v-if="ae.cnt_g5n<1"
                                         title="Not enough records">
                                         -
                                     </div>
@@ -449,15 +449,15 @@ a {
 
                     <div class="oc-plot-tab-page"
                         v-bind:class="{'oc-plot-tab-page-selected': current.is_prim_plot}">
-                        <div id="fg_prim_forest" style="width: 100%; height: 100%;">
-                            <svg id="fg_prim_forest_svg"></svg>
+                        <div id="fg_pwma_prim_forest" style="width: 100%; height: 100%;">
+                            <svg id="fg_pwma_prim_forest_svg"></svg>
                         </div>
                     </div>
 
                     <div class="oc-plot-tab-page"
                         v-bind:class="{'oc-plot-tab-page-selected': current.is_incd_plot}">
-                        <div id="fg_incd_forest" style="width: 100%; height: 100%;">
-                            <svg id="fg_incd_forest_svg"></svg>
+                        <div id="fg_incd_incd_forest" style="width: 100%; height: 100%;">
+                            <svg id="fg_incd_incd_forest_svg"></svg>
                         </div>
                     </div>
 
@@ -508,9 +508,22 @@ if (isIE) {
 {% include 'js/srv_pubmed.js' %}
 {% include 'js/srv_rpltapi.js' %}
 
-{% include 'js/fg_prim_forest.js' %}
-{% include 'js/fg_incd_forest.js' %}
+
 {% include 'js/fg_cumu_forest.js' %}
+
+///////////////////////////////////////////////////////////
+// The plots for PWMA
+///////////////////////////////////////////////////////////
+{% include 'js/fgmk_incd_forest.js' %}
+{% include 'js/fgmk_prim_forest.js' %}
+// Alias for the pwma plots
+var fg_pwma_prim_forest = fgmk_prim_forest.make_fig(
+    'fg_pwma_prim_forest'
+);
+// alias for the incidence plots
+var fg_incd_incd_forest = fgmk_incd_forest.make_fig(
+    'fg_incd_incd_forest'
+);
 
 var vw_studyfilter = {
     vpp: null,
@@ -1245,6 +1258,8 @@ var vw_ocplot = {
              // finally, set has_img to true
              this.vpp.current.has_img = true;
              this.vpp.current.is_analyzing = false;
+
+             // then the `updated` in vpp will be called
          } else {
              // update message to show the error
          }
@@ -1261,15 +1276,22 @@ var vw_ocplot = {
         }
 
         if (this.data.analysis_method == 'pwma_prcm') {
-            fg_prim_forest.draw(vw_ocplot.data.data.primma, cfg);
-            fg_cumu_forest.draw(vw_ocplot.data.data.cumuma, cfg);
+            fg_pwma_prim_forest.draw(vw_ocplot.data.data.primma, cfg);
+
+            if (vw_ocplot.data.data.cumuma === null) {
+                // usually it means only 1 record
+                // no cumuma
+                console.log('* cumuma is null');
+            } else {
+                fg_cumu_forest.draw(vw_ocplot.data.data.cumuma, cfg);
+            }
         } else {
             cfg.sm = {
                 name: 'Event Rate',
                 sm: 'Incidence (%)'
             };
             cfg.mode = 'pwma_incd';
-            fg_incd_forest.draw(vw_ocplot.data.data.incdma, cfg);
+            fg_incd_incd_forest.draw(vw_ocplot.data.data.incdma, cfg);
             fg_cumu_forest.draw(vw_ocplot.data.data.cumuma, cfg);
         }
 
@@ -1351,8 +1373,6 @@ var jarvis = {
             // init the list and plots with outcome data
             vw_oclist.init(data2);
             vw_ocplot.init(data2);
-
-            // init the fg_prim_forest module
 
             // ok, remove the 
             jarvis.ssmsg('Almost initialized.');

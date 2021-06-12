@@ -237,11 +237,11 @@ return {
         try {
             var txt_i2 = (this.data.heterogeneity.i2 * 100).toFixed(0) + '%';
             t_heter.append('tspan').text(txt_i2);
-            t_heter.append('tspan').text(', ');
         } catch (err) {
             console.log(err);
             t_heter.append('tspan').text('NA');
         }
+        t_heter.append('tspan').text(', ');
 
         // add tau2
         t_heter.append('tspan').text('τ');
@@ -250,11 +250,11 @@ return {
         try {
             var txt_tau2 = (this.data.heterogeneity.tau2).toFixed(4) 
             t_heter.append('tspan').text(txt_tau2);
-            t_heter.append('tspan').text(', ');
         } catch (err) {
             console.log(err);
             t_heter.append('tspan').text('NA');
         }
+        t_heter.append('tspan').text(', ');
 
         // add p
         t_heter.append('tspan').text('p').attr('class', this.css.txt_mt);

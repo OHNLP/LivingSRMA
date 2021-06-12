@@ -16,8 +16,8 @@ from lnma.settings import *
 
 from lnma import settings
 from lnma import dora
-# from lnma.analyzer import rplt_analyzer
-from lnma.analyzer import rpy2_pwma_analyzer as rplt_analyzer
+from lnma.analyzer import rplt_analyzer
+# from lnma.analyzer import rpy2_pwma_analyzer as rplt_analyzer
 
 PATH_PUBDATA = 'pubdata'
 

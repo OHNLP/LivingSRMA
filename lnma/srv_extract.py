@@ -230,8 +230,17 @@ def get_sof_pma_data_from_db_IO(is_calc_pma=True):
                 author = r['author']
 
                 # a data fix for PythonMeta
-                if Et == 0: Et = 0.4
-                if Ec == 0: Ec = 0.4
+
+                if Et == 0 and Ec == 0:
+                    print('* skip Et Ec both 0')
+                    continue
+
+                if Et == 0: 
+                    Et = 0.4
+                    Nt += Et
+                if Ec == 0: 
+                    Ec = 0.4
+                    Nc += Ec
 
                 # convert data to PythonMeta Format
                 ds.append([

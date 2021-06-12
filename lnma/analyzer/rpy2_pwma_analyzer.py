@@ -89,6 +89,7 @@ def analyze_pwma_prcm(rs, cfg):
         'primma': j_prim,
         'cumuma': j_cumu,
     }
+    pprint(j)
 
     # build the return
     ret = {
