@@ -65,7 +65,7 @@ def analyze_pwma_prcm(rs, cfg):
         studlab=df.study,
         comb_random=True,
         sm=cfg['measure_of_effect'],
-        hakn=True if cfg['is_hakn'] == 'YES' else False,
+        hakn=True if cfg['is_hakn'] == 'TRUE' else False,
         method=cfg['pooling_method'],
         method_tau=cfg['tau_estimation_method']
     )
@@ -117,7 +117,7 @@ def analyze_pwma_incd(rs, cfg):
         studlab=df.study,
         comb_random=True,
         sm=cfg['measure_of_effect'],
-        hakn=True if cfg['is_hakn'] == 'YES' else False,
+        hakn=True if cfg['is_hakn'] == 'TRUE' else False,
         method=cfg['pooling_method'],
         method_tau=cfg['tau_estimation_method']
     )

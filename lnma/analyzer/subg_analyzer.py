@@ -32,8 +32,8 @@ def analyze(rs, cfg):
         # for R script
         'is_fixed': 'TRUE' if cfg['fixed_or_random'] == 'fixed' else 'FALSE',
         'is_random': 'TRUE' if cfg['fixed_or_random'] == 'random' else 'FALSE',
-        'is_hakn': 'TRUE' if cfg['hakn_adjustment'] == 'yes' else 'FALSE',
-        'is_prediction': 'TRUE' if cfg['prediction_interval'] == 'yes' else 'FALSE',
+        'is_hakn': cfg['hakn_adjustment'],
+        'is_prediction': cfg['prediction_interval'],
         'smlab_text':  DIS_TEXT['MOE'][cfg['measure_of_effect']],
 
         # for output

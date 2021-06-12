@@ -60,7 +60,7 @@ INPUT_FORMAT_NAMES = {
         "PRIM_CAT_RAW_G5": "Categorical Raw Data of Adv Grades (for IO project use only)",
     },
     "subg": {
-        
+
     },
     "nma": {
         "NMA_PRE_SMLU": "Precalculated Data",
@@ -92,9 +92,9 @@ OC_TYPE_TPL = {
             "which_is_better": 'lower',
             "pooling_method": "Inverse",
             "tau_estimation_method": "DL",
-            "hakn_adjustment": "no",
+            "hakn_adjustment": "FALSE",
             "smd_estimation_method": "Hedges",
-            "prediction_interval": "no",
+            "prediction_interval": "FALSE",
             "sensitivity_analysis": "no",
             "cumulative_meta_analysis": "no",
             "cumulative_meta_analysis_sortby": "year",
@@ -119,9 +119,9 @@ OC_TYPE_TPL = {
 
             "pooling_method": "Inverse",
             "tau_estimation_method": "DL",
-            "hakn_adjustment": "no",
+            "hakn_adjustment": "FALSE",
             "smd_estimation_method": "Hedges",
-            "prediction_interval": "no",
+            "prediction_interval": "FALSE",
             "sensitivity_analysis": "no",
             "cumulative_meta_analysis": "no",
             "cumulative_meta_analysis_sortby": "year",
