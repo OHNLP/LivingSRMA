@@ -165,11 +165,11 @@ https://askubuntu.com/questions/1246031/gpg-invalid-key-resource-url-following-d
 Then add CRAN repository, the last line may be not required if no errors.
 
 ```bash
-$ sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
-$ sudo add-apt-repository 'deb https://cloud.r-project.org/bin/linux/ubuntu bionic-cran35/'
-$ sudo apt update
-$ sudo apt install r-base
-$ sudo apt install r-base --fix-missing
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
+sudo add-apt-repository 'deb https://cloud.r-project.org/bin/linux/ubuntu bionic-cran35/'
+sudo apt update
+sudo apt install r-base
+sudo apt install r-base --fix-missing
 ```
 
 Then install packages for LNMA (for whole system). The `dmetar` package is required to calculate the SUCRA, but this can also be done by Python. Please make sure the packages mentioned above have been installed in advance, otherwise installation of R packages will fail.
@@ -180,15 +180,15 @@ To make sure all of them are installed correctly, please install one by one.
 ```bash
 $ sudo R
 
-> install.packages('meta')
-> install.packages('netmeta')
-> install.packages('jsonlite')
-> install.packages("rjags")
-> install.packages("gemtc")
-> install.packages('tableHTML')
-> install.packages('Rglpk')
-> install.packages("devtools")
-> devtools::install_github("MathiasHarrer/dmetar")
+install.packages('meta')
+install.packages('netmeta')
+install.packages('jsonlite')
+install.packages("rjags")
+install.packages("gemtc")
+install.packages('tableHTML')
+install.packages('Rglpk')
+install.packages("devtools")
+devtools::install_github("MathiasHarrer/dmetar")
 
 ```
 
@@ -198,9 +198,11 @@ The BUGSnet packages requires more packages, install the following:
 
 ```bash
 $ sudo R
-> install.packages('igraph')
-> install.packages(c("remotes", "knitr"))
-> remotes::install_github("audrey-b/BUGSnet@v1.0.3", upgrade = TRUE, build_vignettes = TRUE)
+
+install.packages('igraph')
+install.packages(c("remotes", "knitr"))
+install.packages('rmarkdown')
+remotes::install_github("audrey-b/BUGSnet@v1.0.3", upgrade = TRUE, build_vignettes = TRUE)
 ```
 
 ## Python Packages
