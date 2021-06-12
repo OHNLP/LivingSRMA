@@ -197,11 +197,13 @@ devtools::install_github("MathiasHarrer/dmetar")
 The BUGSnet packages requires more packages, install the following:
 
 ```bash
+$ sudo apt install pandoc pandoc-citeproc
 $ sudo R
 
 install.packages('igraph')
 install.packages(c("remotes", "knitr"))
 install.packages('rmarkdown')
+install.packages('markdown')
 remotes::install_github("audrey-b/BUGSnet@v1.0.3", upgrade = TRUE, build_vignettes = TRUE)
 ```
 
