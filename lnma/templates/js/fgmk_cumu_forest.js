@@ -136,7 +136,7 @@ return {
         // if data is null, skip
         // because this no data
         if (data === null) {
-            $(this.plot_id).html('Not enough records for cumulative plot');
+            $(this.plot_id).html('<text y="10">There are not enough records for the cumulative plot</text>');
             return;
         }
 
