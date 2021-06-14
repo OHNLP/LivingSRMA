@@ -214,9 +214,9 @@ var fg_cumu_forest = {
                     .attr('text-anchor', col.align)
                     .text(_txt);
 
-                // bind event to the firt item
+                // bind event to the first col
                 if (j == 0) {
-                    // this is the first item
+                    // this is the first col
                     elem.attr('pid', stu.pid);
 
                     // add clickable style
@@ -374,12 +374,17 @@ var fg_cumu_forest = {
     },
 
     get_txt_by_col: function(obj, idx) {
-        switch(idx) {
-            case 0: return obj.name;
-            // case 1 is the figure, so no text
-            case 1: return '';
-            case 2: return obj[this.attr_TE].toFixed(2);
-            case 3: return '['+obj[this.attr_lower].toFixed(2)+'; '+obj[this.attr_upper].toFixed(2)+']';
+        try {
+            switch(idx) {
+                case 0: return obj.name;
+                // case 1 is the figure, so no text
+                case 1: return '';
+                case 2: return obj[this.attr_TE].toFixed(2);
+                case 3: return '['+obj[this.attr_lower].toFixed(2)+'; '+obj[this.attr_upper].toFixed(2)+']';
+            }
+        } catch (err) {
+            console.log(err);
+            return '';
         }
         return '';
     },

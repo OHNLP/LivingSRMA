@@ -16,8 +16,8 @@ from lnma.settings import *
 
 from lnma import settings
 from lnma import dora
-from lnma.analyzer import rplt_analyzer
-# from lnma.analyzer import rpy2_pwma_analyzer as rplt_analyzer
+# from lnma.analyzer import rplt_analyzer
+from lnma.analyzer import rpy2_pwma_analyzer as rplt_analyzer
 
 PATH_PUBDATA = 'pubdata'
 
@@ -130,7 +130,7 @@ def pwma_incd():
     }
 
     try:
-        result = rplt_analyzer.analyze(rs, cfg)
+        result = rplt_analyzer.analyze_pwma_incd(rs, cfg)
         # TODO the return should be checked here
         # but most of time, the figure will be generated.
         if result['success']:
@@ -146,6 +146,12 @@ def pwma_incd():
             for i, r in enumerate(rs):
                 for k in r:
                     ret['data']['incdma']['stus'][i][k] = r[k]
+                
+            # the cumulative may NOT be in the results if there is only one record
+            if 'cumuma' in ret['data'] and ret['data']['cumuma'] is not None:
+                for i, r in enumerate(rs):
+                    for k in r:
+                        ret['data']['cumuma']['stus'][i][k] = r[k]
         else:
             ret['msg'] = result['msg']
 
@@ -218,6 +224,7 @@ def pwma_prcm():
         'analyzer_model': 'PWMA_PRCM',
         'measure_of_effect': sm,
         'is_hakn': hk,
+        'fixed_or_random': 'random',
         'input_format': 'CAT_RAW',
         'sort_by': 'year',
         'pooling_method': 'MH',
@@ -233,7 +240,7 @@ def pwma_prcm():
     }
 
     try:
-        result = rplt_analyzer.analyze(rs, cfg)
+        result = rplt_analyzer.analyze_pwma_prcm(rs, cfg, has_cumu=True)
         # TODO the return should be checked here
         # but most of time, the figure will be generated.
         if result['success']:
@@ -245,12 +252,20 @@ def pwma_prcm():
                 ret['data'] = result['data']
 
             # merge the rs value
+            # in this proecess, add the pid and other information to results
             for i, r in enumerate(rs):
                 for k in r:
                     ret['data']['primma']['stus'][i][k] = r[k]
-                    
+
+            # the cumulative may NOT be in the results if there is only one record
+            if 'cumuma' in ret['data'] and ret['data']['cumuma'] is not None:
+                for i, r in enumerate(rs):
+                    for k in r:
+                        ret['data']['cumuma']['stus'][i][k] = r[k]
+                        
         else:
             ret['msg'] = result['msg']
+
     except Exception as err:
         print('Handling run-time error:', err)
 

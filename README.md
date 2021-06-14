@@ -231,6 +231,7 @@ May need to install mysql lib first:
 sudo apt-get install libmysqlclient-dev
 ```
 
+And then install the mysqlclient in Python
 
 ```bash
 pip install mysqlclient

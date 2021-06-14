@@ -961,6 +961,34 @@ def allowed_file(filename):
 ###########################################################
 # Shared data functions
 ###########################################################
+def notna(v):
+    '''
+    Check whether a value `v` is NA or not
+    '''
+    return not (v is None or v == '' or v== 'null')
+
+
+def notzero(v):
+    '''
+    Check whether a value `v` is 0
+    '''
+    return v!=0
+
+
+def is_pwmable(Et, Nt, Ec, Nc):
+    '''
+    Check whether a study is able to do PWMA
+    '''
+    # the first condition is all numbers are not null
+    f1 = notna(Et) and notna(Nt) and \
+         notna(Ec) and notna(Nc)
+        
+    # the second condition is not both zero
+    f2 = (notna(Et) and notzero(Et)) or \
+         (notna(Ec) and notzero(Ec))
+
+    # final combine two
+    return f1 and f2
 
 
 ###############################################################################

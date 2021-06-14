@@ -29,6 +29,7 @@ return {
         txt_nm: 'prim-frst-txt-nm',
         txt_mt: 'prim-frst-txt-mt',
         txt_sm: 'prim-frst-txt-sm',
+        txt_clickable: 'prim-frst-txt-clickable',
         stu_g: 'prim-frst-stu-g',
         stu_bg: 'prim-frst-stu-bg',
         stu_rect: 'prim-frst-stu-rect'
@@ -45,6 +46,8 @@ return {
         ".prim-frst-stu-model{ fill: red; stroke: black; stroke-width: 1; }",
         ".prim-frst-stu-model-refline{ stroke: black; stroke-width: 1; }",
         ".prim-frst-stu-g:hover .prim-frst-stu-bg{ fill: whitesmoke; }",
+        ".prim-frst-txt-clickable{ fill: #00397b; cursor: pointer !important; }",
+        ".prim-frst-txt-clickable:hover{ fill: blue; }",
         "</style>"
     ].join('\n'),
 
@@ -182,12 +185,24 @@ return {
                     // this is the first item
                     elem.attr('pid', stu.pid);
 
+                    // add clickable style
+                    elem.attr('class', this.css.txt_nm + ' ' +
+                                       this.css.txt_clickable);
+
+                    // add title to this element
+                    elem.append('title')
+                        .text(txt + '. click to check the detail in PubMed');
+
                     // bind click
                     elem.on('click', function() {
                         // var d = d3.select(this);
                         // console.log('* clicked', d);
                         var e = $(this);
                         console.log('* clicked paper', e.attr('pid'));
+                        // open something?
+                        if (typeof(srv_pubmed)!='undefined') {
+                            srv_pubmed.show(e.attr('pid'));
+                        }
                     });
                 }
             }
@@ -219,6 +234,19 @@ return {
         }
     },
 
+    _isna: function(v) {
+        if (v === null) {
+            return true;
+        }
+        if (v === '') {
+            return true;
+        }
+        if (v === 'NA' || v === 'na' || v === 'Na' || v === 'nA') {
+            return true;
+        }
+        return false;
+    },
+
     _draw_heter: function() {
         // show the heterogeneity
         var g_heter = this.svg.append('g')
@@ -235,8 +263,12 @@ return {
         t_heter.append('tspan').text('2').attr('class', this.css.txt_mt + ' ' + this.css.txt_sm).attr('baseline-shift', 'super');
         t_heter.append('tspan').text('=');
         try {
-            var txt_i2 = (this.data.heterogeneity.i2 * 100).toFixed(0) + '%';
-            t_heter.append('tspan').text(txt_i2);
+            if (this._isna(this.data.heterogeneity.i2)) {
+                t_heter.append('tspan').text('NA');
+            } else {
+                var txt_i2 = (this.data.heterogeneity.i2 * 100).toFixed(0) + '%';
+                t_heter.append('tspan').text(txt_i2);
+            }
         } catch (err) {
             console.log(err);
             t_heter.append('tspan').text('NA');
@@ -248,8 +280,12 @@ return {
         t_heter.append('tspan').text('2').attr('class', this.css.txt_mt + ' ' + this.css.txt_sm).attr('baseline-shift', 'super');
         t_heter.append('tspan').text('=');
         try {
-            var txt_tau2 = (this.data.heterogeneity.tau2).toFixed(4) 
-            t_heter.append('tspan').text(txt_tau2);
+            if (this._isna(this.data.heterogeneity.tau2)) {
+                t_heter.append('tspan').text('NA');
+            } else {
+                var txt_tau2 = (this.data.heterogeneity.tau2).toFixed(4) 
+                t_heter.append('tspan').text(txt_tau2);
+            }
         } catch (err) {
             console.log(err);
             t_heter.append('tspan').text('NA');
@@ -260,8 +296,12 @@ return {
         t_heter.append('tspan').text('p').attr('class', this.css.txt_mt);
         t_heter.append('tspan').text('=');
         try {
-            var txt_p = (this.data.heterogeneity.p).toFixed(2) 
-            t_heter.append('tspan').text(txt_p);
+            if (this._isna(this.data.heterogeneity.p)) {
+                t_heter.append('tspan').text('NA');
+            } else {
+                var txt_p = (this.data.heterogeneity.p).toFixed(2) 
+                t_heter.append('tspan').text(txt_p);
+            }
         } catch (err) {
             console.log(err);
             t_heter.append('tspan').text('NA');

@@ -208,6 +208,19 @@ return {
         }
     },
 
+    _isna: function(v) {
+        if (v === null) {
+            return true;
+        }
+        if (v === '') {
+            return true;
+        }
+        if (v === 'NA' || v === 'na' || v === 'Na' || v === 'nA') {
+            return true;
+        }
+        return false;
+    },
+
     _draw_heter: function() {
         // show the heterogeneity
         var g_heter = this.svg.append('g')
@@ -224,8 +237,12 @@ return {
         t_heter.append('tspan').text('2').attr('class', this.css.txt_mt + ' ' + this.css.txt_sm).attr('baseline-shift', 'super');
         t_heter.append('tspan').text('=');
         try {
-            var txt_i2 = (this.data.heterogeneity.i2 * 100).toFixed(0) + '%';
-            t_heter.append('tspan').text(txt_i2);
+            if (this._isna(this.data.heterogeneity.i2)) {
+                t_heter.append('tspan').text('NA');
+            } else {
+                var txt_i2 = (this.data.heterogeneity.i2 * 100).toFixed(0) + '%';
+                t_heter.append('tspan').text(txt_i2);
+            }
         } catch (err) {
             console.log(err);
             t_heter.append('tspan').text('NA');
@@ -237,8 +254,12 @@ return {
         t_heter.append('tspan').text('2').attr('class', this.css.txt_mt + ' ' + this.css.txt_sm).attr('baseline-shift', 'super');
         t_heter.append('tspan').text('=');
         try {
-            var txt_tau2 = (this.data.heterogeneity.tau2).toFixed(4) 
-            t_heter.append('tspan').text(txt_tau2);
+            if (this._isna(this.data.heterogeneity.tau2)) {
+                t_heter.append('tspan').text('NA');
+            } else {
+                var txt_tau2 = (this.data.heterogeneity.tau2).toFixed(4) 
+                t_heter.append('tspan').text(txt_tau2);
+            }
         } catch (err) {
             console.log(err);
             t_heter.append('tspan').text('NA');
@@ -249,8 +270,12 @@ return {
         t_heter.append('tspan').text('p').attr('class', this.css.txt_mt);
         t_heter.append('tspan').text('=');
         try {
-            var txt_p = (this.data.heterogeneity.p).toFixed(2) 
-            t_heter.append('tspan').text(txt_p);
+            if (this._isna(this.data.heterogeneity.p)) {
+                t_heter.append('tspan').text('NA');
+            } else {
+                var txt_p = (this.data.heterogeneity.p).toFixed(2) 
+                t_heter.append('tspan').text(txt_p);
+            }
         } catch (err) {
             console.log(err);
             t_heter.append('tspan').text('NA');

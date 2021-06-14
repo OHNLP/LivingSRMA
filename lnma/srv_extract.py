@@ -8,7 +8,8 @@ from lnma import settings
 from lnma import util
 from lnma import dora
 from lnma import ss_state
-from lnma.analyzer import py_pwma_analyzer
+# from lnma.analyzer import py_pwma_analyzer as pwma_analyzer
+from lnma.analyzer import rpy2_pwma_analyzer as pwma_analyzer
 
 
 def get_sof_pma_data_from_db_IO(is_calc_pma=True):
@@ -79,7 +80,7 @@ def get_sof_pma_data_from_db_IO(is_calc_pma=True):
 
     # Second, build the oc_dict
     rs = []
-    for extract in extracts:
+    for extract in tqdm(extracts):
 
         # check if this extract is excluded from graph / sof
         if is_calc_pma:
@@ -229,18 +230,16 @@ def get_sof_pma_data_from_db_IO(is_calc_pma=True):
                 Nc = r['GA_Nc']
                 author = r['author']
 
-                # a data fix for PythonMeta
-
-                if Et == 0 and Ec == 0:
-                    print('* skip Et Ec both 0')
+                if not util.is_pwmable(Et, Nt, Ec, Nc):
+                    # this record is not good for pwma
                     continue
 
-                if Et == 0: 
-                    Et = 0.4
-                    Nt += Et
-                if Ec == 0: 
-                    Ec = 0.4
-                    Nc += Ec
+                # if Et == 0: 
+                #     Et = 0.4
+                #     Nt += Et
+                # if Ec == 0: 
+                #     Ec = 0.4
+                #     Nc += Ec
 
                 # convert data to PythonMeta Format
                 ds.append([
@@ -253,37 +252,43 @@ def get_sof_pma_data_from_db_IO(is_calc_pma=True):
 
             # for each sm, get the PMA result
             for sm in sms:
-                # get the pma result
-                try:
-                    # use Python package to calculate the OR/RR
-                    pma_r = py_pwma_analyzer.get_pma(
-                        ds, datatype="CAT_RAW", 
-                        sm=sm, fixed_or_random='random'
-                    )
-                    # validate the result, if isNaN, just set None
-                    if np.isnan(pma_r['model']['sm']): pma_r = None
-
-                    # pma_f = py_pwma_analyzer.get_pma(
-                    #     ds, datatype="CAT_RAW", 
-                    #     sm=sm, fixed_or_random='fixed'
-                    # )
-                    # if np.isnan(pma_f['model']['sm']): pma_f = None
-                    # no enough space, just set to None
-                    pma_f = None
-
-                    # use R package to calculate the OR/RR
-                    # pma_r = get_pma_by_rplt(ds, datetype="CAT_RAW", sm=sm, fixed_or_random='random')
-                    # pma_f = get_pma_by_rplt(ds, datetype="CAT_RAW", sm=sm, fixed_or_random='fixed')
-                    
-                except:
-                    print('* %s: [%s] [%s] [%s]' % (
-                        'ISSUE Data cause error'.ljust(25, ' '),
-                        oc_name.rjust(35, ' '), 
-                        grade.rjust(3, ' '),
-                        ds
-                    ))
+                if len(ds) == 0:
+                    # this is no records, no need to continue
                     pma_r = None
                     pma_f = None
+                
+                else:
+                    # get the pma result
+                    try:
+                        # use Python package to calculate the OR/RR
+                        pma_r = pwma_analyzer.get_pma(
+                            ds, datatype="CAT_RAW", 
+                            sm=sm, fixed_or_random='random'
+                        )
+                        # validate the result, if isNaN, just set None
+                        if np.isnan(pma_r['model']['sm']): pma_r = None
+
+                        # pma_f = pwma_analyzer.get_pma(
+                        #     ds, datatype="CAT_RAW", 
+                        #     sm=sm, fixed_or_random='fixed'
+                        # )
+                        # if np.isnan(pma_f['model']['sm']): pma_f = None
+                        # no enough space, just set to None
+                        pma_f = None
+
+                        # use R package to calculate the OR/RR
+                        # pma_r = get_pma_by_rplt(ds, datetype="CAT_RAW", sm=sm, fixed_or_random='random')
+                        # pma_f = get_pma_by_rplt(ds, datetype="CAT_RAW", sm=sm, fixed_or_random='fixed')
+                        
+                    except Exception as err:
+                        print('* %s: [%s] [%s] [%s]' % (
+                            'ISSUE Data cause error'.ljust(25, ' '),
+                            oc_name.rjust(35, ' '), 
+                            grade.rjust(3, ' '),
+                            ds
+                        ), err)
+                        pma_r = None
+                        pma_f = None
 
                 oc_dict[oc_abbr]['results'][grade]['result'][sm] = {
                     'random': pma_r,

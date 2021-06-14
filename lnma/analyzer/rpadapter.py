@@ -850,7 +850,8 @@ def _meta_trans_metacum(j, params):
                 'bt_TE': _round(backtransf(data['TE'][-1], sm), 4),
                 'bt_lower': _round(backtransf(data['lower'][-1], sm), 4),
                 'bt_upper': _round(backtransf(data['upper'][-1], sm), 4),
-                
+
+                # this is for incdma cumu use
                 'bt_ab_TE': _round(backtransf(data['TE'][-1], sm) * ab, 2),
                 'bt_ab_lower': _round(backtransf(data['lower'][-1], sm) * ab, 2),
                 'bt_ab_upper': _round(backtransf(data['upper'][-1], sm) * ab, 2),
@@ -865,6 +866,7 @@ def _meta_trans_metacum(j, params):
                 'bt_lower': _round(backtransf(data['lower'][-1], sm), 4),
                 'bt_upper': _round(backtransf(data['upper'][-1], sm), 4),
                 
+                # this is for incdma cumu use
                 'bt_ab_TE': _round(backtransf(data['TE'][-1], sm) * ab, 2),
                 'bt_ab_lower': _round(backtransf(data['lower'][-1], sm) * ab, 2),
                 'bt_ab_upper': _round(backtransf(data['upper'][-1], sm) * ab, 2),
@@ -885,9 +887,10 @@ def _meta_trans_metacum(j, params):
             'bt_lower': _round(backtransf(data['lower'][i], sm), 4),
             'bt_upper': _round(backtransf(data['upper'][i], sm), 4),
             
-            # 'bt_ab_TE': _round(backtransf(data['TE'][i], sm) * ab, 2),
-            # 'bt_ab_lower': _round(backtransf(data['lower'][i], sm) * ab, 2),
-            # 'bt_ab_upper': _round(backtransf(data['upper'][i], sm) * ab, 2),
+            # this is for incdma cumu use
+            'bt_ab_TE': _round(backtransf(data['TE'][i], sm) * ab, 2),
+            'bt_ab_lower': _round(backtransf(data['lower'][i], sm) * ab, 2),
+            'bt_ab_upper': _round(backtransf(data['upper'][i], sm) * ab, 2),
         })
 
     return ret

@@ -508,14 +508,13 @@ if (isIE) {
 {% include 'js/srv_pubmed.js' %}
 {% include 'js/srv_rpltapi.js' %}
 
-
-{% include 'js/fg_cumu_forest.js' %}
-
 ///////////////////////////////////////////////////////////
 // The plots for PWMA
 ///////////////////////////////////////////////////////////
 {% include 'js/fgmk_incd_forest.js' %}
 {% include 'js/fgmk_prim_forest.js' %}
+{% include 'js/fgmk_cumu_forest.js' %}
+
 // Alias for the pwma plots
 var fg_pwma_prim_forest = fgmk_prim_forest.make_fig(
     'fg_pwma_prim_forest'
@@ -523,6 +522,10 @@ var fg_pwma_prim_forest = fgmk_prim_forest.make_fig(
 // alias for the incidence plots
 var fg_incd_incd_forest = fgmk_incd_forest.make_fig(
     'fg_incd_incd_forest'
+);
+// alias for the cumulative plots
+var fg_cumu_forest = fgmk_cumu_forest.make_fig(
+    'fg_cumu_forest'
 );
 
 var vw_studyfilter = {
@@ -1277,14 +1280,7 @@ var vw_ocplot = {
 
         if (this.data.analysis_method == 'pwma_prcm') {
             fg_pwma_prim_forest.draw(vw_ocplot.data.data.primma, cfg);
-
-            if (vw_ocplot.data.data.cumuma === null) {
-                // usually it means only 1 record
-                // no cumuma
-                console.log('* cumuma is null');
-            } else {
-                fg_cumu_forest.draw(vw_ocplot.data.data.cumuma, cfg);
-            }
+            fg_cumu_forest.draw(vw_ocplot.data.data.cumuma, cfg);
         } else {
             cfg.sm = {
                 name: 'Event Rate',

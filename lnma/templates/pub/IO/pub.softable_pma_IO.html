@@ -206,7 +206,7 @@ a {
         <i class="fa fa-table"></i>
         Summary of Findings: Pairwise Meta-Analysis
     </h1>
-    <div id="ss-msg">Loading data and initializing ...</div>
+    <div id="ss-msg">Loading data and initializing ... <i class="fas fa-spinner fa-pulse"></i></div>
 </div>
 
 <div id="wrapper">
@@ -307,7 +307,7 @@ a {
                                     </div>
 
                                     <div class="oc-type"
-                                        v-if="ae.cnt_g3h<2">
+                                        v-if="ae.cnt_g3h<1">
                                         -
                                     </div>
                                     <div class="oc-type"
@@ -323,7 +323,7 @@ a {
                                     </div>
 
                                     <div class="oc-type"
-                                        v-if="ae.cnt_g5n<2">
+                                        v-if="ae.cnt_g5n<1">
                                         -
                                     </div>
                                     <div class="oc-type"
@@ -431,14 +431,14 @@ a {
 
                             <td v-if="r.is_show['sm']" class="col-flipable"
                                 v-on:click="flip_cell(grade, r, 'sm')">
-                                {{ measure }} {{ _round2(r.sm) }}<br>
-                                ({{ _round2(r.lower) }} to {{ _round2(r.upper) }})
+                                {{ measure }} {{ _round2(r.ae.result[measure].random.model.sm) }}<br>
+                                ({{ _round2(r.ae.result[measure].random.model.lower) }} to {{ _round2(r.ae.result[measure].random.model.upper) }})
                             </td>
                             <td v-else class="col-ta-left col-flipable"
                                 v-on:click="flip_cell(grade, r, 'sm')">
-                                <b>{{ r.n_stu }}</b> Studies<br>
-                                Events: <b>{{ r.Et }}</b><br>
-                                Participants: <b>{{ r.Nt }}</b>
+                                <b>{{ r.ae.stus.length }}</b> Studies<br>
+                                Events: <b>{{ r.ae.Et }}</b><br>
+                                Participants: <b>{{ r.ae.Nt }}</b>
                             </td>
                             
                             <td>
@@ -683,30 +683,39 @@ var tb_sofpma = {
             methods: {
                 get_ACR: function(r) {
                     if (this.use_internal_baseline) {
-                        return r.Ec / r.Nc * this.baseline;
+                        return r.ae.Ec / r.ae.Nc * this.baseline;
                     } else {
                         return external_risk_calculated;
                     }
+                },
+
+                get_obj: function(r, obj, fixed_or_random) {
+                    // get the obj of this record
+                    // obj could be
+                    // sm, lower, upper
+                    if (typeof(obj)=='undefined') {
+                        obj = 'sm';
+                    }
+                    if (typeof(fixed_or_random)=='undefined') {
+                        fixed_or_random = 'random';
+                    }
+                    return r.ae.result[this.measure][fixed_or_random].model[obj];
                 },
 
                 get_CIR: function(r, obj) {
                     // get the obj of this CIR
                     // obj could be
                     // sm, lower, upper
-                    if (typeof(obj)=='undefined') {
-                        obj = 'sm';
-                    }
-
                     // calculate the CIR based on measure
                     if (this.measure == 'OR') {
-                        var a = this.get_ACR(r) / this.baseline * r[obj];
+                        var a = this.get_ACR(r) / this.baseline * this.get_obj(r, obj);
                         var b = 1 - this.get_ACR(r) / this.baseline;
                         var c = a + b;
                         var d = a / c;
                         var e = d * this.baseline;
                         return e;
                     } else if (this.measure == 'RR') {
-                        var a = this.get_ACR(r) * r[obj];
+                        var a = this.get_ACR(r) * this.get_obj(r, obj);
                         return a;
                     }
                 },
@@ -715,18 +724,15 @@ var tb_sofpma = {
                     // get the obj of this CIR
                     // obj could be
                     // sm, lower, upper
-                    if (typeof(obj)=='undefined') {
-                        obj = 'sm';
-                    }
                     if (this.measure == 'OR') {
-                        var a = (1 - r[obj]) * this.get_ACR(r) / this.baseline;
+                        var a = (1 - this.get_obj(r, obj)) * this.get_ACR(r) / this.baseline;
                         var b = 1 - this.get_ACR(r) / this.baseline;
                         var c = a + b;
                         var d = a / c;
                         var e = d * this.baseline;
                         return e;
                     } else if (this.measure == 'RR') {
-                        var a = this.get_ACR(r) * (1 - r[obj]);
+                        var a = this.get_ACR(r) * (1 - this.get_obj(r, obj));
                         return a;
                     }
                 },
@@ -785,22 +791,16 @@ var tb_sofpma = {
                 // this means no studies in this ae + grade 
                 return;
             }
-            var measure = this.vpp.measure;
-        
+            
             // build the r for display
             var r = {
+                // basic info for display
                 abbr: abbr,
                 group: group,
                 oc_cate: oc_cate,
                 name: oc_name,
-                sm: ae.result[measure].random.model.sm,
-                lower: ae.result[measure].random.model.lower,
-                upper: ae.result[measure].random.model.upper,
-                Et: ae.Et,
-                Nt: ae.Nt,
-                Ec: ae.Ec,
-                Nc: ae.Nc,
-                n_stu: ae.stus.length,
+                // bind the original AE
+                ae: ae,
                 // for display setting
                 is_show: {
                     // show sm / study info
