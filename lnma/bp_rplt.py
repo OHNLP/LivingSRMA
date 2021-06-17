@@ -128,6 +128,7 @@ def pwma_incd():
         'sm': sm,
         'hk': hk
     }
+    ret['params'].update(cfg)
 
     try:
         result = rplt_analyzer.analyze_pwma_incd(rs, cfg)
@@ -238,6 +239,7 @@ def pwma_prcm():
         'sm': sm,
         'hk': hk
     }
+    ret['params'].update(cfg)
 
     try:
         result = rplt_analyzer.analyze_pwma_prcm(rs, cfg, has_cumu=True)

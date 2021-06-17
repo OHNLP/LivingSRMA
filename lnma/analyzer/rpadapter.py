@@ -764,6 +764,11 @@ def _meta_trans_metabin(j, params):
                 'bt_TE': _round(backtransf(data['TE.random'][0], sm), 4),
                 'bt_lower': _round(backtransf(data['lower.random'][0], sm), 4),
                 'bt_upper': _round(backtransf(data['upper.random'][0], sm), 4),
+
+                # the prediction
+                'bt_pred_lower': _round(backtransf(data['lower.predict'][0], sm), 4),
+                'bt_pred_upper': _round(backtransf(data['upper.predict'][0], sm), 4),
+
                 'w': 1
             },
             'fixed': {
@@ -781,6 +786,10 @@ def _meta_trans_metabin(j, params):
                 'bt_TE': _round(backtransf(data['TE.fixed'][0], sm), 4),
                 'bt_lower': _round(backtransf(data['lower.fixed'][0], sm), 4),
                 'bt_upper': _round(backtransf(data['upper.fixed'][0], sm), 4),
+
+                # the prediction
+                'bt_pred_lower': _round(backtransf(data['lower.predict'][0], sm), 4),
+                'bt_pred_upper': _round(backtransf(data['upper.predict'][0], sm), 4),
                 'w': 1
             }
         },

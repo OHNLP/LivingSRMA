@@ -13,6 +13,7 @@ return {
         {width: 50,  align: 'end',    name: 'Total', row: 2},
         {width: 50,  align: 'end',    name: 'Events', row: 2},
         {width: 50,  align: 'end',    name: 'Total', row: 2},
+
         {width: 50,  align: 'end',    name: '$SM$', row: 2},
         {width: 100, align: 'end',    name: '95% CI', row: 2},
         {width: 200, align: 'middle', name: '$SM_NAME$ (95% CI)', row: 2},
@@ -23,6 +24,12 @@ return {
     row_txtmb: 3,
     row_frstml: 20,
     default_height: 300,
+    
+    is_draw_prediction_interval: false,
+    loc: {
+        prediction_interval: 5,
+        heterogeneity: 5,
+    },
 
     css: {
         txt_bd: 'prim-frst-txt-bd',
@@ -97,12 +104,25 @@ return {
         // 8 is the number of lines of header and footers
         this.height = this.row_height * (this.data.stus.length + 8);
         this.svg.attr('height', this.height);
+        
+        // if we draw the predict interval, add one more line
+        if (this.cfg.params.prediction_interval == 'TRUE') {
+            this.is_draw_prediction_interval = true;
+            this.height += this.row_height;
+        } else {
+            this.is_draw_prediction_interval = false;
+        }
 
         // show header
         this._draw_header();
         
         // show studies
         this._draw_study_vals();
+
+        // show the prediction interval
+        if (this.is_draw_prediction_interval) {
+            this._draw_predition_interval();
+        }
         
         // show the model text
         this._draw_heter();
@@ -210,7 +230,7 @@ return {
 
         // the model result
         for (var i = 0; i < 1; i++) {
-            var stu = this.data.model.random;
+            var stu = this.data.model[this.cfg.params.fixed_or_random];
             var g = this.svg.append('g')
                 .attr('class', this.css.stu_g)
                 .attr('transform', 'translate(0, ' + (this.row_height * (4 + this.data.stus.length)) + ')');
@@ -247,10 +267,41 @@ return {
         return false;
     },
 
+    _draw_predition_interval: function() {
+        var loc = this.data.stus.length + this.loc.prediction_interval;
+        var g_predintv = this.svg.append('g')
+            .attr('transform', 'translate(0, ' + (this.row_height * loc) + ')');
+        var t_predintv = g_predintv.append('text')
+            .attr('class', this.css.txt_nm)
+            .attr('x', 0)
+            .attr('y', this.row_height - this.row_txtmb)
+            .attr('text-anchor', 'start');
+        // add the subtext
+        t_predintv.append('tspan').text('Prediction Interval:');
+
+        // get the text
+        var _txt = '[' + 
+            this.data.model[this.cfg.params.fixed_or_random].bt_pred_lower.toFixed(2) + 
+            '; ' +
+            this.data.model[this.cfg.params.fixed_or_random].bt_pred_upper.toFixed(2) + 
+        ']';
+        // draw the lower and upper
+        var col = this.cols[6];
+        var elem = g.append('text')
+            .attr('class', this.css.txt_nm)
+            .attr('x', col.x + (col.align=='start'? 0 : col.width))
+            .attr('y', this.row_height - this.row_txtmb)
+            .attr('text-anchor', col.align)
+            .text(_txt);
+    },
+
     _draw_heter: function() {
         // show the heterogeneity
+        var loc = this.data.stus.length + this.loc.heterogeneity;
+        if (this.is_draw_prediction_interval) { loc += 1; }
+
         var g_heter = this.svg.append('g')
-            .attr('transform', 'translate(0, ' + (this.row_height * (5 + this.data.stus.length)) + ')');
+            .attr('transform', 'translate(0, ' + (this.row_height * loc) + ')');
         var t_heter = g_heter.append('text')
             .attr('class', this.css.txt_nm)
             .attr('x', 0)
@@ -366,7 +417,7 @@ return {
                     // console.log(i, d);
                     // add the rect
                     var s = fig.min_dot_size + 
-                        (fig.row_height - fig.min_dot_size) * d.w_random;
+                        (fig.row_height - fig.min_dot_size) * d['w_'+fig.cfg.params.fixed_or_random];
                 
                     var x = fig._x_scale(d.bt_TE) - s/2;
                     var y = - s / 2;
@@ -392,7 +443,7 @@ return {
             })(this));
 
         // draw the model ref line
-        var xr1 = this._x_scale(this.data.model.random.bt_TE);
+        var xr1 = this._x_scale(this.data.model[this.cfg.params.fixed_or_random].bt_TE);
         var xr2 = xr1;
         var yr1 = this.y_scale(-0.5);
         var yr2 = this.y_scale(this.data.stus.length + 2.5)
@@ -407,9 +458,9 @@ return {
             .attr('y2', yr2);
 
         // draw the model diamond
-        var x0 = this._x_scale(this.data.model.random.bt_lower);
-        var xc = this._x_scale(this.data.model.random.bt_TE);
-        var x1 = this._x_scale(this.data.model.random.bt_upper);
+        var x0 = this._x_scale(this.data.model[this.cfg.params.fixed_or_random].bt_lower);
+        var xc = this._x_scale(this.data.model[this.cfg.params.fixed_or_random].bt_TE);
+        var x1 = this._x_scale(this.data.model[this.cfg.params.fixed_or_random].bt_upper);
         var y0 = this.row_txtmb;
         var yc = this.row_height / 2;
         var y1 = this.row_height - this.row_txtmb;
@@ -444,7 +495,7 @@ return {
                     // this is the model
                     return '100%';
                 } else {
-                    return (obj['w_random'] * 100).toFixed(1) + '%';
+                    return (obj['w_' + this.cfg.params.fixed_or_random] * 100).toFixed(1) + '%';
                 }
         }
         return '';

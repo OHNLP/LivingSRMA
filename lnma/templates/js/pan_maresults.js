@@ -85,8 +85,9 @@ var pan_maresults = {
                 name: data.params.measure_of_effect,
                 sm: data.params.measure_of_effect,
             },
-            mode: 'pwma_prcm'
-        }
+            mode: 'pwma_prcm',
+            params: data.params
+        };
 
         // prepare the the primary result data
         fg_pwma_prim_forest.data = data.data.primma;

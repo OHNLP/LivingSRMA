@@ -56,6 +56,7 @@ resultsraw <- metabin(Et,
                       sm = "{{ measure_of_effect }}", 
                       method = "{{ pooling_method }}", 
                       method.tau = "{{ tau_estimation_method }}", 
+                      prediction = {{ is_prediction }}, 
                       hakn = {{ is_hakn }})
 
 # generating the forest plot

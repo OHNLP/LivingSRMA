@@ -1275,8 +1275,9 @@ var vw_ocplot = {
         
         var cfg = {
             sm: vw_ocplot.sms[vw_ocplot.data.params.sm],
-            mode: 'pwma_prcm'
-        }
+            mode: 'pwma_prcm',
+            params: this.data.params
+        };
 
         if (this.data.analysis_method == 'pwma_prcm') {
             fg_pwma_prim_forest.draw(vw_ocplot.data.data.primma, cfg);
