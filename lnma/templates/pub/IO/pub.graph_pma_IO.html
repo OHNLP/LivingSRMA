@@ -1332,6 +1332,11 @@ var jarvis = {
 
         prj = 'IO';
 
+        var src = jarvis.getUrlParameter('src');
+        if (src == null || src == '') {
+            src = 'db';
+        }
+
         // set the vw_oclist to radio button model
         vw_oclist.select_mode = 'radio';
 
@@ -1339,11 +1344,11 @@ var jarvis = {
         $.when(
             $.get(
                 '/pub/graphdata/' + prj + '/ITABLE.json',
-                {rnd: Math.random(), src: 'db'}
+                {rnd: Math.random(), src: src}
             ),
             $.get(
                 '/pub/graphdata/'+prj+'/GRAPH_PMA.json',
-                {ver: Math.random(), src: 'db'},
+                {ver: Math.random(), src: src},
             )
         ).done(function(r1, r2) {
             var data1 = r1[0];

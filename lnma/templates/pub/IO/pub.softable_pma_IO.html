@@ -855,14 +855,20 @@ var jarvis = {
         var prj = jarvis.getUrlParameter('prj');
         prj = 'IO';
 
+        // get the src
+        var src = jarvis.getUrlParameter('src');
+        if (src == null || src == '') {
+            src = 'db';
+        }
+
         $.when(
             $.get(
                 '/pub/graphdata/' + prj + '/ITABLE.json',
-                {rnd: Math.random(), src: 'db'}
+                {rnd: Math.random(), src: src}
             ),
             $.get(
                 '/pub/graphdata/'+prj+'/SOFTABLE_PMA.json',
-                {rnd: Math.random(), src: 'db'},
+                {rnd: Math.random(), src: src},
             )
         ).done(function(r1, r2) {
             var data1 = r1[0];

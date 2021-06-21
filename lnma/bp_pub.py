@@ -468,6 +468,10 @@ def graphdata_itable_json(prj):
     # get the itable from database directly
     src = request.args.get('src')
 
+    if src == 'cache':
+        ret = json.load(open(full_output_fn))
+        return jsonify(ret)
+
     if src == 'db':
         ret = get_itable_attr_rs_cfg_from_db(prj)
 
@@ -476,6 +480,9 @@ def graphdata_itable_json(prj):
                 'success': False,
                 'msg': 'ITABLE DATA NOT EXISTS FOR THIS PROJECT'
             }
+
+        # catch the result
+        json.dump(ret, open(full_output_fn, 'w'), default=util.json_encoder)
 
         return jsonify(ret)
 
@@ -594,8 +601,11 @@ def graphdata_softable_pma_json(prj):
     '''
     fn_json = 'SOFTABLE_PMA.json'
     full_fn_json = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn_json)
-
     src = request.args.get('src')
+
+    if src == 'cache':
+        ret = json.load(open(full_fn_json))
+        return jsonify(ret)
 
     if src == 'db':
         ret = None
@@ -608,6 +618,9 @@ def graphdata_softable_pma_json(prj):
                 'success': False,
                 'msg': 'ITABLE DATA NOT EXISTS FOR THIS PROJECT'
             }
+
+        # catch the result
+        json.dump(ret, open(full_fn_json, 'w'), default=util.json_encoder)
 
         return jsonify(ret)
 

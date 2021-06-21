@@ -1058,6 +1058,16 @@ def escape_illegal_xml_characters(x):
     return re.sub(u'[\x00-\x08\x0b\x0c\x0e-\x1F\uD800-\uDFFF\uFFFE\uFFFF]', '', x)
 
 
+def json_encoder(o):
+    '''
+    Encode the object `o` in for JSON
+    '''
+    if isinstance(o, datetime.datetime):
+        return o.__str__()
+
+    return str(o)
+    
+
 if __name__ == "__main__":
     fn = '/home/hehuan/Downloads/endnote_test.xml'
     fn = '/home/hehuan/Downloads/endnote_test_large.xml'

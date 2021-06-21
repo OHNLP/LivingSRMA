@@ -234,6 +234,82 @@ var srv_shared = {
         // update the vpp data
         return extract_dict;
     },
+    
+    /**
+     * Get the rounded number
+     * @param {float} v 
+     * @returns float rounded number
+     */
+    _round2: function(v) {
+        return (Math.round(v * 100) / 100).toFixed(2);
+    },
 
+    /**
+     * Get the certainty of evidence color
+     * @param {string} which_is_better lower / higher
+     * @param {float} te Treatment effect
+     * @param {float} lw lower CI
+     * @param {float} up upper CI
+     * @param {string} cie 
+     * @returns {string} the color class
+     */
+    get_ce_color: function(which_is_better, te, lw, up, cie) {
+        // use the two digits rounded value instead of the real value
+        var sm = parseFloat(this._round2(te));
+        var lower = parseFloat(this._round2(lw));
+        var upper = parseFloat(this._round2(up));
 
+        var delta_sm = Math.abs(1 - sm);
+        var is_ci_cross_one = lower <= 1 && upper >= 1;
+        var ci_diff = upper - lower;
+
+        var _d2c = function(wib, sm, cie) {
+            if (sm == 1) { return 'cie-nner-' + cie; }
+            if (wib == 'lower') {
+                if (sm < 1) { return 'cie-bene-' + cie; }
+                else { return 'cie-harm-' + cie; }
+            } else {
+                if (sm > 1) { return 'cie-bene-' + cie; }
+                else { return 'cie-harm-' + cie; }
+            }
+        }
+
+        /**
+         * 2021-03-28: update the rule for color
+            1. if sm = 1 -> grey
+            2. if sm not = 1 then:
+                a. if CI not cross -> red / green depends on direction of sm
+                b. if CI cross 1 then:
+                    i. if the difference between upper and lower < 0.3, then
+                        1. if the 1- sm =<0.1 -> grey
+                        2. if the 1- sm >0.1 -> depends on direction of sm
+                    ii. if the difference between upper and lower >= 0.3, then
+                        1. depends upon direction of sm
+            */
+
+        // Rule 1
+        if (sm == 1) {
+            return 'cie-nner-' + cie;
+        }
+
+        // small is green, big is red
+        if (is_ci_cross_one) {
+            // Rule 2b
+            if (ci_diff < 0.3) {
+                // Rule 2bi
+                if (delta_sm <= 0.1) {
+                    return 'cie-nner-' + cie; 
+                } else {
+                    return _d2c(which_is_better, sm, cie);
+                }
+            } else {
+                // Rule 2bii
+                return _d2c(which_is_better, sm, cie);
+            }
+        } else {
+            // Rule 2a
+            return _d2c(which_is_better, sm, cie);
+        }
+
+    },
 };
