@@ -170,6 +170,12 @@ dev.off()
 # Merge all the results.
 all_ret <- list(
     results = results,
+    primma = results,
+
+    {% if cumulative_meta_analysis == 'yes' %}
+    cumuma = results.cum,
+    {% endif %}
+
     version = list(
         jsonlite = packageVersion('jsonlite'),
         meta = packageVersion('meta')

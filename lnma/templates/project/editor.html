@@ -6,6 +6,15 @@ Project Editor
 
 {% block style %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.61.0/codemirror.min.css" />
+
+<style>
+
+.CodeMirror {
+    border: 1px solid #eee;
+    
+}
+</style>
+
 {% endblock %}
 
 {% block page_name %}
@@ -372,9 +381,13 @@ Project Editor
 
                 <div class="tab-pane fade" id="advanced_mode_panel" role="tabpanel" aria-labelledby="tag_info_tab">
 
-                    <p class="lead">The Advanced Modeadvanced_mode_panel</p>
+                    <p class="lead">The Advanced Mode</p>
                     <p>
                         <b>DO NOT</b> edit anything below if you are not sure what would be affected.
+                        <button onclick="jarvis.resize_cm_editor();">
+                            <i class="fa fa-expand"></i>
+                            Re-size
+                        </button>
                     </p>
                     <form method="POST" action="[[ url_for('project.api_set_settings') ]]"
                         onsubmit="return jarvis.on_submit_advanced_mode()">
@@ -383,8 +396,7 @@ Project Editor
                                 <div class="form-group">
                                     <textarea class="form-control"  
                                         id="form_textarea_settings" 
-                                        name="form_textarea_settings" 
-                                        rows="15">[[ form_textarea_settings ]]</textarea>
+                                        name="form_textarea_settings">[[ form_textarea_settings ]]</textarea>
                                 </div>
                             </div>
                         </div>
@@ -447,7 +459,8 @@ var jarvis = {
         var myTextArea = document.getElementById('form_textarea_settings');
         myCodeMirror = CodeMirror.fromTextArea(myTextArea, {
             lineWrapping: true,
-            mode: 'application/json'
+            mode: 'application/json',
+            viewportMargin: 50
         });
 
         // switch tab
@@ -457,6 +470,13 @@ var jarvis = {
             $('#' + hash + '_tab').tab('show');
         } 
 
+    },
+
+    resize_cm_editor: function() {
+        var w = $(window).width();
+        var h = $(window).height();
+
+        $('.CodeMirror').css('height', h - 250);
     },
 
     on_submit_advanced_mode: function() {

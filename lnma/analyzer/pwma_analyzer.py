@@ -112,12 +112,12 @@ def analyze(rs, cfg):
         'params': params,
         'success': True,
         'data': {
-            'primma': _meta_trans_metabin(jrst, params)
+            'primma': None #_meta_trans_metabin(jrst, params)
         }
     }
 
     # add cumulative MA results if applied
     if params['cumulative_meta_analysis'] == 'yes':
-        ret['data']['cumuma'] = _meta_trans_metacum(jrst, params)
+        ret['data']['cumuma'] = None # _meta_trans_metacum(jrst, params)
 
     return ret
