@@ -1,5 +1,6 @@
 import os
 import json
+import math
 import random
 from re import template
 import string
@@ -807,6 +808,9 @@ def get_itable_from_itable_data_xls(keystr):
     first_sheet_name = xls.sheet_names[0]
     df = xls.parse(first_sheet_name, skiprows=1)
 
+    # 2021-06-27: weird bug, read so many NaN columns
+    df = df.dropna(axis=1, how='all')
+
     cols = df.columns
     n_cols = len(df.columns)
 
@@ -848,7 +852,7 @@ def get_itable_from_itable_data_xls(keystr):
                 'is_checked': True,
                 'n_arms': 2,
                 'attrs': {
-                    'main': {},
+                    'main': {0:{}}, # follow the pattern shared by subg
                     'other': []
                 }
             }
@@ -904,7 +908,7 @@ def get_itable_from_itable_data_xls(keystr):
             # add a new object in `other`
             # that's all we need to do
             data[pmid]['n_arms'] += 1
-            data[pmid]['attrs']['other'].append({})
+            data[pmid]['attrs']['other'].append({0:{}}) # subg 0 (in fact no subg)
 
         # check each column
         for idx in range(n_cols):
@@ -928,15 +932,15 @@ def get_itable_from_itable_data_xls(keystr):
             abbr = i2a[idx]
 
             if is_main:
-                data[pmid]['attrs']['main'][abbr] = val
+                data[pmid]['attrs']['main'][0][abbr] = val
             else:
                 # check if this value is same in the main track
-                if val == data[pmid]['attrs']['main'][abbr]: 
+                if val == data[pmid]['attrs']['main'][0][abbr]: 
                     # for the same value, also set ...
-                    data[pmid]['attrs']['other'][-1][abbr] = val
+                    data[pmid]['attrs']['other'][-1][0][abbr] = val
                 else:
                     # just save the different values
-                    data[pmid]['attrs']['other'][-1][abbr] = val
+                    data[pmid]['attrs']['other'][-1][0][abbr] = val
 
         print('* added %s %s' % (
             pmid, data[pmid]['n_arms']
@@ -968,6 +972,9 @@ def get_cate_attr_subs_from_itable_data_xls(keystr):
     first_sheet_name = xls.sheet_names[0]
     df = xls.parse(first_sheet_name, header=None, nrows=2)
 
+    # 2021-06-27: weird bug, read so many NaN columns
+    df = df.dropna(axis=1, how='all')
+
     # df = pd.read_excel(full_fn)
 
     # convert to other shape
@@ -982,13 +989,20 @@ def get_cate_attr_subs_from_itable_data_xls(keystr):
     for idx, row in df_attrs.iterrows():
         vtype = 'text'
 
+        if type(row['cate']) != str:
+            if math.isnan(row['cate']) \
+                or math.isnan(row['attr']):
+                print('* skip nan cate or attr idx %s' % idx)
+                continue
+
+
+        print("* found %s | %s" % (
+            row['cate'], row['attr']
+        ))
+
         # found cate and attr
         cate = row['cate'].strip()
         attr = row['attr'].strip()
-
-        print("* found %s | %s" % (
-            cate, attr
-        ))
 
         # skip some attrs
         if attr.upper() in settings.EXTRACTOR_ITABLE_IMPORT_SKIP_COLUMNS:
