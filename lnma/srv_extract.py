@@ -307,3 +307,9 @@ def get_sof_pma_data_from_db_IO(is_calc_pma=True):
 
     return ret
 
+
+def upgrade_extract_data_model():
+    '''
+    Upgrade the data model for all extracts
+    '''
+    pass
