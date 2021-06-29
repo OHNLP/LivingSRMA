@@ -1856,6 +1856,22 @@ def update_extract_meta_and_data(project_id, oc_type, abbr, meta, data):
     return extract
     
 
+def update_extract(extract):
+    '''
+    Update the given extract
+    '''
+    extract.date_updated = datetime.datetime.now()
+
+    flag_modified(extract, "meta")
+    flag_modified(extract, "data")
+
+    # commit this
+    db.session.add(extract)
+    db.session.commit()
+
+    return extract
+
+
 def update_paper_selection(project_id, pid, abbr, is_selected):
     '''
     Update the paper outcome selection in one extract

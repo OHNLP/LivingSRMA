@@ -560,10 +560,16 @@ class Extract(db.Model):
     For the `pwma` type, the `meta` includes:
     {
         abbr: '',
+        cq_abbr: 'IMM',       # for clinical question
         oc_type: 'pwma',
-        category: 'default',
         group: 'Primary',
+        category: 'default',
         full_name: 'pwma Outcome full name',
+
+        # for subg
+        "is_subg_analysis": 'no',
+        "sub_groups": ['A', 'B'],
+        
         included_in_plots: 'yes',
         included_in_sof: 'yes',
         input_format: 'PRIM_CAT_RAW',
@@ -586,10 +592,20 @@ class Extract(db.Model):
             n_arms: 2 / 3 / 4 / 5,
             attrs: {
                 main: {
-                    attr_sub_abbr: value
+                    0: {  # the 0 is the default group
+                        attr_sub_abbr: value
+                    },
+                    1: {  # the 1 and others are other sub groups
+
+                    }
                 },
                 other: [{
-                    attr_sub_abbr: value
+                    0: {
+                        attr_sub_abbr: value
+                    },
+                    1: {
+                        
+                    }
                 }, ...]
             }
         }
