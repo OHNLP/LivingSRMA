@@ -852,7 +852,7 @@ def get_itable_from_itable_data_xls(keystr):
                 'is_checked': True,
                 'n_arms': 2,
                 'attrs': {
-                    'main': {0:{}}, # follow the pattern shared by subg
+                    'main': {'g0': {}}, # follow the pattern shared by subg
                     'other': []
                 }
             }
@@ -908,7 +908,7 @@ def get_itable_from_itable_data_xls(keystr):
             # add a new object in `other`
             # that's all we need to do
             data[pmid]['n_arms'] += 1
-            data[pmid]['attrs']['other'].append({0:{}}) # subg 0 (in fact no subg)
+            data[pmid]['attrs']['other'].append({'g0':{}}) # subg 0 (in fact no subg)
 
         # check each column
         for idx in range(n_cols):
@@ -932,15 +932,15 @@ def get_itable_from_itable_data_xls(keystr):
             abbr = i2a[idx]
 
             if is_main:
-                data[pmid]['attrs']['main'][0][abbr] = val
+                data[pmid]['attrs']['main']['g0'][abbr] = val
             else:
                 # check if this value is same in the main track
-                if val == data[pmid]['attrs']['main'][0][abbr]: 
+                if val == data[pmid]['attrs']['main']['g0'][abbr]: 
                     # for the same value, also set ...
-                    data[pmid]['attrs']['other'][-1][0][abbr] = val
+                    data[pmid]['attrs']['other'][-1]['g0'][abbr] = val
                 else:
                     # just save the different values
-                    data[pmid]['attrs']['other'][-1][0][abbr] = val
+                    data[pmid]['attrs']['other'][-1]['g0'][abbr] = val
 
         print('* added %s %s' % (
             pmid, data[pmid]['n_arms']

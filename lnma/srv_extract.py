@@ -333,7 +333,7 @@ def upgrade_extract_data_model(keystr):
         # now, let's check the data
         for pid in extract.data:
             # check the main arm
-            if 0 in extract.data[pid]['attrs']['main']:
+            if 'g0' in extract.data[pid]['attrs']['main']:
                 # this pid is updated
                 continue
 
@@ -342,7 +342,7 @@ def upgrade_extract_data_model(keystr):
 
             # update the content
             extract.data[pid]['attrs']['main'] = {
-                0: m
+                'g0': m
             }
 
             # check other arms
@@ -357,7 +357,7 @@ def upgrade_extract_data_model(keystr):
 
                 # put the other arm into new_other
                 new_other.append({
-                    0: d
+                    'g0': d
                 })
             # update the other arm
             extract.data[pid]['attrs']['other'] = new_other

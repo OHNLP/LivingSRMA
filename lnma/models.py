@@ -592,19 +592,19 @@ class Extract(db.Model):
             n_arms: 2 / 3 / 4 / 5,
             attrs: {
                 main: {
-                    0: {  # the 0 is the default group
+                    g0: {  # the 0 is the default group
                         attr_sub_abbr: value
                     },
-                    1: {  # the 1 and others are other sub groups
+                    g1: {  # the 1 and others are other sub groups
 
                     }
                 },
                 other: [{
-                    0: {
+                    g0: {
                         attr_sub_abbr: value
                     },
-                    1: {
-                        
+                    g1: {
+
                     }
                 }, ...]
             }
