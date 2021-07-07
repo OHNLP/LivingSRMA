@@ -631,7 +631,7 @@ def parse_endnote_exported_xml(full_fn):
             # the abstract
             elif node.tag == 'abstract':
                 paper['abstract'] = ''.join(node.itertext())
-                print('* found abstract: %s' % paper['abstract'])
+                # print('* found abstract: %s' % paper['abstract'])
                 
             elif node.tag == 'pub-dates':
                 paper['pub_date'].append( ' '.join(node.itertext()) )

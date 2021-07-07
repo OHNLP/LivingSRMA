@@ -23,6 +23,7 @@ def import_endnote_xml(full_fn, keystr):
         print('* Not found input file [%s]' % full_fn)
         return False, None
 
+    print('* parsing the input xml file ...')
     papers = util.parse_endnote_exported_xml(full_fn)
     if papers is None:
         print('* Not supported file format [%s]' % full_fn)
@@ -34,6 +35,9 @@ def import_endnote_xml(full_fn, keystr):
         'existed': 0,
         'created': 0,
     }
+    print('* importing the %s studies' % (
+        len(papers)
+    ))
     for p in tqdm(papers):
         is_exist, paper = dora.create_paper_if_not_exist_and_predict_rct(
             project.project_id, 
