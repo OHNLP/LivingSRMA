@@ -27,6 +27,7 @@ from lnma import util
 from lnma import dora
 
 from lnma import srv_extract
+from lnma import srv_project
 
 import PythonMeta as PMA
 
@@ -706,7 +707,7 @@ def graphdata_prisma_json(prj):
 
     if src == 'db':
         ret = get_prisma_from_db(prj)
-        latest = dora.get_project_latest_stat_by_keystr(prj)
+        latest = srv_project.get_project_latest_stat_by_keystr(prj)
 
         if ret is None:
             ret = {

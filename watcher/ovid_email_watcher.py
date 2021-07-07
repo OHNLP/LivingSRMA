@@ -322,6 +322,7 @@ def _update_papers_in_project(prj_update):
         len(prj_update['cnt']['created']),
     ))
     logger.info('*' * 30)
+    
 
     return prj_update
 

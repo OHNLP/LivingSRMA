@@ -101,7 +101,8 @@ def get_project_by_keystr(keystr):
 
 
 def list_all_projects():
-    '''Get all projects for test
+    '''
+    Get all projects for test
     '''
     projects = Project.query.all()
     return projects
@@ -1071,6 +1072,9 @@ def get_papers_by_stage(project_id, stage):
 
 
 def set_paper_pr_rs(paper_id, pr=None, rs=None):
+    '''
+    Set the pr_rs for a paper
+    '''
     paper = Paper.query.filter_by(
         paper_id=paper_id
     ).first()
@@ -1228,50 +1232,6 @@ def remove_pdfs_from_paper(paper_id, pdf_metas):
     db.session.commit()
     
     return paper
-
-
-def get_project_latest_stat_by_keystr(keystr):
-    '''
-    Get the latest statistics for a project by the keystr
-    '''
-    project = get_project_by_keystr(keystr)
-
-    if project is None:
-        return None
-
-    result = get_project_latest_stat(project.project_id)
-
-    return result
-
-
-def get_project_latest_stat(project_id):
-    '''
-    Get the latest statistics for a project
-    '''
-    sql = """
-    select max(date_created) as last_created,
-        max(date_updated) as last_updated
-    from papers
-    where project_id = '{project_id}'
-    """.format(project_id = project_id)
-
-    r = db.session.execute(sql).fetchone()
-
-    print(r)
-
-    if r is not None:
-        result = {
-            'last_created': r['last_created'].strftime('%Y-%m-%d'),
-            'last_updated': r['last_updated'].strftime('%Y-%m-%d')
-        }
-    else:
-        # Hmmm ... I don't think this would happen
-        # 
-        # 2021-05-12
-        # Sorry, it happens
-        result = None
-
-    return result
 
 
 def get_screener_stat_by_stage(project_id, stage):

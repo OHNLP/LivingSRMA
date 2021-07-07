@@ -3,7 +3,7 @@ import time
 
 from tqdm import tqdm 
 
-from lnma import settings
+from lnma import settings, srv_project
 from lnma import util
 from lnma import dora
 from lnma import ss_state
@@ -65,5 +65,8 @@ def import_endnote_xml(full_fn, keystr):
         cnt['created'],
         cnt['exitsed'],
     ))
+
+    # update the timestamp
+    _ = srv_project.update_project_last_update_by_keystr(keystr)
 
     return True, papers
