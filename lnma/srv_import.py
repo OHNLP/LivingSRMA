@@ -63,7 +63,7 @@ def import_endnote_xml(full_fn, keystr):
     print('* imported %s(c%s+e%s) papers' % (
         cnt['total'],
         cnt['created'],
-        cnt['exitsed'],
+        cnt['existed'],
     ))
 
     # update the timestamp
