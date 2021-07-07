@@ -1013,7 +1013,8 @@ def check_paper_pid_type(pid_type):
 
 
 def check_paper_pid(pid):
-    '''check the paper pid for valid input
+    '''
+    check the paper pid for valid input
     '''
     if pid is None:
         return ''
@@ -1026,7 +1027,8 @@ def check_paper_pid(pid):
 
 
 def check_paper_pub_date(pub_date):
-    '''check the paper pub date for valid input
+    '''
+    check the paper pub date for valid input
     '''
     if pub_date is None:
         return ''
@@ -1039,7 +1041,8 @@ def check_paper_pub_date(pub_date):
 
 
 def check_paper_journal(journal):
-    '''check the paper journal for valid input
+    '''
+    check the paper journal for valid input
     '''
     if journal is None:
         return ''

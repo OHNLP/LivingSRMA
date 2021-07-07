@@ -13,6 +13,7 @@ from lnma import dora
 from lnma import ss_state
 
 from lnma import bp_extractor
+from lnma import srv_import
 
 # app for using LNMA functions and tables
 app = create_app()
@@ -57,6 +58,37 @@ class Project:
         dora.delete_all_extracts_by_keystr(keystr)
 
         print('* deleted all extracts!')
+
+
+    @command
+    @argument("keystr", type=str, description="The keystr for a project")
+    @argument("fn", type=str, description="The file name of the data file")
+    @argument("data_format", type=str, description="The format, endnote_xml or ovid_xml")
+    @argument("are_you_sure", type=str, description="yes for final confirmation")
+    def import_studies(self, keystr:str, fn:str, data_format:str, are_you_sure:str):
+        '''
+        Import the studies from given file
+        '''
+        if are_you_sure != 'yes':
+            print('* import cancelled')
+            return 
+
+        if data_format == 'endnote_xml':
+            is_success, papers = srv_import.import_endnote_xml(fn, keystr)
+
+        elif data_format == 'ovid_xml':
+            pass
+
+        elif data_format == 'pmid_csv':
+            pass
+
+        else:
+            print('* unknown data_format %s, import cancelled' % data_format)
+            return 
+
+        print('* imported %s papers!' % (
+            len(papers)
+        ))
 
 
     @command
