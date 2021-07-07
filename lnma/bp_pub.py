@@ -762,7 +762,7 @@ def graphdata_latest_json(prj):
 
     which is used for displaying some latest information
     '''
-    result = dora.get_project_latest_stat_by_keystr(prj)
+    result = srv_project.get_project_latest_stat_by_keystr(prj)
 
     return jsonify(result)
 
