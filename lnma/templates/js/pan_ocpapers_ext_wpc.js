@@ -111,7 +111,9 @@ Object.assign(pan_ocpapers.vpp_methods, {
     },
 
     set_working_arm_attr_value: function(abbr, value) {
-        this.get_working_arm_attrs()[abbr] = value;
+        for (let i = 0; i < this.working_oc.meta.sub_groups.length; i++) {        
+            this.get_working_arm_attrs()['g'+i][abbr] = value;
+        }
     },
 
     clear_input: function() {

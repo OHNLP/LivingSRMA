@@ -328,7 +328,9 @@ def upgrade_extract_data_model(keystr):
         # for the subg
         if 'is_subg_analysis' not in extract.meta:
             extract.meta['is_subg_analysis'] = 'no'
-            extract.meta['sub_groups'] = ['A', 'B']
+
+        if extract.meta['is_subg_analysis'] == 'no':
+            extract.meta['sub_groups'] = ['A']
 
         # now, let's check the data
         for pid in extract.data:
