@@ -360,10 +360,12 @@
                                 class="paper-table-body-td paper-value">
                                 
                                 <!-- the main track -->
-                                <span class="paper-table-body-cell"
-                                    v-bind:title="attr_sub.cate_name + '|' + attr_sub.name + ': ' + extract.data[paper.pid].attrs.main[attr_sub.abbr]">
-                                    {{ extract.data[paper.pid].attrs.main[attr_sub.abbr] }}&nbsp;
-                                </span>
+                                <div v-for="g, g_idx in extract.meta.sub_groups">
+                                    <span class="paper-table-body-cell"
+                                        v-bind:title="attr_sub.cate_name + '|' + attr_sub.name + ': ' + extract.data[paper.pid].attrs.main['g'+g_idx][attr_sub.abbr]">
+                                        {{ extract.data[paper.pid].attrs.main['g'+g_idx][attr_sub.abbr] }}&nbsp;
+                                    </span>
+                                </div>
         
                                 <!-- the other tracks if n_arms > 2 -->
                                 <hr class="n-arms-hr" v-if="extract.data[paper.pid].n_arms > 2">

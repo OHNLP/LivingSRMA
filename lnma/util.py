@@ -82,17 +82,21 @@ def mk_empty_extract_paper_data(is_selected=False):
     }
 
 
-def fill_extract_data_arm(arm, cate_attrs):
+def fill_extract_data_arm(arm, cate_attrs, g_idx=0):
     '''
     Fill the extract data arm with empty values
     The arm could be main (arm 1) or other arm
     '''
+    # sub group
+    sg = 'g%s' % g_idx
     for cate in cate_attrs:
         for attr in cate['attrs']:
             attr_abbr = attr['abbr']
             if attr['subs'] is None:
-                if attr_abbr not in arm:
-                    arm[attr_abbr] = ''
+                if sg not in arm:
+                    arm[sg] = {}
+                if attr_abbr not in arm[sg]:
+                    arm[sg][attr_abbr] = ''
                 else:
                     # which means this attr exsits
                     pass
@@ -100,8 +104,10 @@ def fill_extract_data_arm(arm, cate_attrs):
                 # have multiple subs
                 for sub in attr['subs']:
                     sub_abbr = sub['abbr']
+                    if sg not in arm:
+                        arm[sg] = {}
                     if sub_abbr not in arm:
-                        arm[sub_abbr] = ''
+                        arm[sg][sub_abbr] = ''
 
     return arm
 

@@ -1,3 +1,4 @@
+import enum
 import json
 from xml.sax.saxutils import escape
 
@@ -657,20 +658,12 @@ class Extract(db.Model):
             }
 
             # fill the main track with empty values
-            self.data[pid]['attrs']['main'] = util.fill_extract_data_arm(
-                self.data[pid]['attrs']['main'],
-                self.meta['cate_attrs']
-            )
-            # for cate in extract.meta['cate_attrs']:
-            #     for attr in cate['attrs']:
-            #         attr_abbr = attr['abbr']
-            #         if attr['subs'] is None:
-            #             extract.data[pid]['attrs']['main'][attr_abbr] = ''
-            #         else:
-            #             # have multiple subs
-            #             for sub in attr['subs']:
-            #                 sub_abbr = sub['abbr']
-            #                 extract.data[pid]['attrs']['main'][sub_abbr] = ''
+            for g_idx, g in enumerate(self.meta['sub_groups']):
+                self.data[pid]['attrs']['main'] = util.fill_extract_data_arm(
+                    self.data[pid]['attrs']['main'],
+                    self.meta['cate_attrs'],
+                    g_idx
+                )
 
         # reverse search, unselect those are not in papers
         for pid in self.data:
