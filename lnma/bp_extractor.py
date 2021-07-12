@@ -391,8 +391,10 @@ def update_extract():
     project_id = request.form.get('project_id')
     oc_type = request.form.get('oc_type')
     abbr = request.form.get('abbr')
+
     # the meta of the extract settings
     meta = json.loads(request.form.get('meta'))
+    
     # the data of the extracted infos
     data = json.loads(request.form.get('data'))
     

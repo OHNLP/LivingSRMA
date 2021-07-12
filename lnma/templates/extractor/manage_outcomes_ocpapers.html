@@ -60,23 +60,31 @@
 
 
                 <div class="row">
-                    <div class="form-group col-md-4">
-                        <label for="input_full_name">Outcome Full Name</label>
-                        <input v-model="extract.meta.full_name"
-                            class="form-control" 
-                            id="input_full_name" aria-describedby="input_full_name_help">
-                        <small id="input_full_name_help" class="form-text text-muted">
-                            The full name of this outcome, such as <i>Overall Survival</i>, <i>Cough</i>.
-                        </small>
-                    </div>
 
-                    <div class="form-group col-md-4">
+                    <div v-if="extract.meta.group != 'subgroup'" 
+                        class="form-group col-md-4">
                         <label for="input_analysis_group">Analysis Group</label>
 
                         <select v-model="extract.meta.group"
                             class="form-control" id="input_analysis_group">
-                            <!-- <option value="primary">Primary Analysis</option> -->
-                            <!-- <option value="sensitivity">Sensitivity Analysis</option> -->
+                            <option v-for="group in project.settings.outcome[extract.oc_type].analysis_groups"
+                                v-bind:value="group.abbr">
+                                {{ group.name }}
+                            </option>
+                        </select>
+
+                        <small id="input_analysis_group_help" class="form-text text-muted">
+                            The group for this outcome, <i>Primary Analysis</i>, <i>Sensitivity Analysis,</i> or other?
+                        </small>
+                    </div>
+
+                    <div v-else
+                        class="form-group col-md-4">
+                        <label for="input_analysis_group">Analysis Group</label>
+
+                        <select v-model="extract.meta.group" disabled
+                            class="form-control" id="input_analysis_group">
+                            
                             <option v-for="group in project.settings.outcome[extract.oc_type].analysis_groups"
                                 v-bind:value="group.abbr">
                                 {{ group.name }}
@@ -96,6 +104,45 @@
                         <small id="input_category_help" class="form-text text-muted">
                             The category of this outcome.
                         </small>
+                    </div>
+
+                    <div class="form-group col-md-4">
+                        <label for="input_full_name">Outcome Full Name</label>
+                        <input v-model="extract.meta.full_name"
+                            class="form-control" 
+                            id="input_full_name" aria-describedby="input_full_name_help">
+                        <small id="input_full_name_help" class="form-text text-muted">
+                            The full name of this outcome, such as <i>Overall Survival</i>, <i>Cough</i>.
+                        </small>
+                    </div>
+
+                    <div v-if="extract.meta.group == 'subgroup'"
+                        class="form-group col-md-8">
+                        <label for="input_subgroups">
+                            Subgroups
+                            <button class="btn btn-sm btn-primary"
+                                title="Add a new sub group"
+                                v-on:click="on_click_add_sub_group">
+                                <i class="fa fa-plus"></i>
+                            </button>
+                        </label>
+                        <small id="input_category_help" class="form-text text-muted">
+                            The category of this outcome.
+                        </small>
+                        <div class="row">
+
+                            <div v-for="subg, subg_idx in extract.meta.sub_groups"
+                                class="col-md-3">
+                                <input type="text" 
+                                    class="form-control" 
+                                    v-model="extract.meta.sub_groups[subg_idx]">
+                                <button v-if="subg_idx != 0" 
+                                    v-on:click="on_click_remove_sub_group(subg_idx)"
+                                    class="btn btn-sm">
+                                    <i class="fa fa-minus"></i>
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
                 </div>
@@ -386,23 +433,31 @@
                             <td v-for="attr_sub in all_attrs" 
                                 class="paper-table-body-td paper-value">
                                 
-                                <!-- the main track -->
+                                <!-- the main arm -->
                                 <div v-for="g, g_idx in extract.meta.sub_groups">
+                                    <span v-if="extract.meta.is_subg_analysis">
+                                        {{ g_idx }}
+                                    </span>
                                     <span class="paper-table-body-cell"
-                                        v-bind:title="attr_sub.cate_name + '|' + attr_sub.name + ': ' + extract.data[paper.pid].attrs.main['g'+g_idx][attr_sub.abbr]">
-                                        {{ extract.data[paper.pid].attrs.main['g'+g_idx][attr_sub.abbr] }}&nbsp;
+                                        v-bind:title="attr_sub.cate_name + '|' + attr_sub.name + ': ' + get_extracted_data(paper.pid, null, g_idx, attr_sub.abbr)">
+                                        {{ get_extracted_data(paper.pid, null, g_idx, attr_sub.abbr) }}&nbsp;
                                     </span>
                                 </div>
         
                                 <!-- the other tracks if n_arms > 2 -->
                                 <hr class="n-arms-hr" v-if="extract.data[paper.pid].n_arms > 2">
+                                
+                                <div v-if="extract.data[paper.pid].n_arms > 2 && extract.data[paper.pid].attrs.other.length > 0">
+                                    <div v-for="g, g_idx in extract.meta.sub_groups">
+                                        <span v-for="other, other_idx in extract.data[paper.pid].attrs.other"
+                                        class="paper-table-body-cell"
+                                        v-bind:title="attr_sub.cate_name + '|' + attr_sub.name + ': ' + get_extracted_data(paper.pid, other_idx, g_idx, attr_sub.abbr)">
+                                        {{ get_extracted_data(paper.pid, other_idx, g_idx, attr_sub.abbr) }}&nbsp;
+                                    </span>
         
-                                <span v-for="other, other_idx in extract.data[paper.pid].attrs.other"
-                                    class="paper-table-body-cell"
-                                    v-bind:title="attr_sub.cate_name + '|' + attr_sub.name + ': ' + extract.data[paper.pid].attrs.other[other_idx][attr_sub.abbr]">
-                                    {{ extract.data[paper.pid].attrs.other[other_idx][attr_sub.abbr] }}&nbsp;
-                                </span>                        
-        
+                                    </div>
+                                </div>
+                                
                             </td>
                         </tr>
                     </tbody>

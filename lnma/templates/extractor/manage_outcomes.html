@@ -349,6 +349,11 @@ var pan_outcomes = {
         meta.group = group;
         meta.category = category;
 
+        // for sub group
+        if (meta.group == 'subgroup') {
+            meta.is_subg_analysis = true;
+        }
+
         // set the default input format
         if (srv_extractor.project.settings.outcome[oc_type].default_setting.hasOwnProperty('input_format')) {
             meta.input_format = srv_extractor.project.settings.outcome[oc_type].default_setting.input_format;
@@ -680,6 +685,59 @@ var pan_ocpapers = {
                     // let val = event.srcElement.checked;                    
                     // this.only_show_selected = val;
                     this.$forceUpdate();
+                },
+
+                on_click_add_sub_group: function() {
+                    this.extract.meta.sub_groups.push('');
+                },
+
+                on_click_remove_sub_group: function(subg_idx) {
+                    this.extract.meta.sub_groups.splice(subg_idx, 1);
+                },
+
+                /**
+                 * Get the extracted data by the given info
+                 * 
+                 * which paper?
+                 * main arm or other arm?, null is main, number is other seq
+                 * which sub group?
+                 * which attr or attr_sub?
+                 */
+                get_extracted_data: function(pid, main_or_other, group_idx, attr_sub_abbr) {
+                    if (!this.extract.data.hasOwnProperty(pid)) {
+                        // no such paper???
+                        return '';
+                    }
+                    if (main_or_other == null) {
+                        // check the main arm
+                        if (!this.extract.data[pid].attrs.main.hasOwnProperty('g' + group_idx)) {
+                            // no such group in the main arm?
+                            return '';
+
+                        } else {
+                            if (!this.extract.data[pid].attrs.main['g'+group_idx].hasOwnProperty(attr_sub_abbr)) {
+                                // no such attr in this main arm?
+                                return ''
+                            } else {
+                                return this.extract.data[pid].attrs.main['g'+group_idx][attr_sub_abbr];
+                            }
+                        }
+                    } else {
+                        // check the other arm
+                        if (!this.extract.data[pid].attrs.other[main_or_other].hasOwnProperty('g' + group_idx)) {
+                            // no such group in the other arm?
+                            return '';
+
+                        } else {
+                            if (!this.extract.data[pid].attrs.other[main_or_other]['g'+group_idx].hasOwnProperty(attr_sub_abbr)) {
+                                // no such attr in this other arm?
+                                return ''
+                            } else {
+                                return this.extract.data[pid].attrs.other[main_or_other]['g'+group_idx][attr_sub_abbr];
+                            }
+                        }
+                    }
+
                 }
             }
         });

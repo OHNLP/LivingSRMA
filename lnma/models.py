@@ -628,7 +628,8 @@ class Extract(db.Model):
     def update_data_by_papers(self, papers):
         '''
         Extend the current extract with more papers
-        according to the given papers
+        according to the given papers.
+        And also update existing papers according the extract meta
         '''
         # merge the return obj
         # make a ref in the extract for frontend display
@@ -642,6 +643,23 @@ class Extract(db.Model):
             # check if this pid exists in extract
             if pid in self.data:
                 # nothing to do if has added
+                # 2021-07-12: fix the sub group update
+                # for those already existsed, the subgroup may updated
+                for g_idx, g in enumerate(self.meta['sub_groups']):
+                    # check the main
+                    self.data[pid]['attrs']['main'] = util.fill_extract_data_arm(
+                        self.data[pid]['attrs']['main'],
+                        self.meta['cate_attrs'],
+                        g_idx
+                    )
+                    # check the other arms
+                    for idx in range(len(self.data[pid]['attrs']['other'])):
+                        self.data[pid]['attrs']['other'][idx] = util.fill_extract_data_arm(
+                            self.data[pid]['attrs']['other'][idx],
+                            self.meta['cate_attrs'],
+                            g_idx
+                        )
+                # after update the meta, we could skip this paper
                 continue
 
             # if not exist, add this paper
