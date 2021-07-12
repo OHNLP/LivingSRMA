@@ -106,7 +106,8 @@
                     <div class="form-group col-md-4">
                         <label for="input_input_format">Data Type / Input Format</label>
 
-                        <select v-model="extract.meta.input_format"
+                        <select v-if="extract.meta.oc_type == 'pwma'"
+                            v-model="extract.meta.input_format"
                             v-on:change="on_change_input_format($event)"
                             class="form-control" id="input_input_format" 
                             aria-describedby="input_input_format_help">
@@ -116,6 +117,14 @@
                             <option value="PRIM_CONTD_PRE">Continuous Precalculated Data</option>
                             <option value="PRIM_CONTD_RAW">Continuous Raw Data</option>
                             <option value="PRIM_CAT_RAW_G5">Categorical Raw Data of Grades (for IO project use only)</option>
+                        </select>
+                        <select v-if="extract.meta.oc_type == 'nma'"
+                            v-model="extract.meta.input_format"
+                            v-on:change="on_change_input_format($event)"
+                            class="form-control" id="input_input_format" 
+                            aria-describedby="input_input_format_help">
+                            <option value="NMA_RAW_ET">Raw Data (event, total)</option>
+                            <option value="NMA_PRE_SMLU">Precalculated Data (SM, lower, upper)</option>
                         </select>
 
                         <small id="input_input_format_help" class="form-text text-muted">
@@ -184,6 +193,24 @@
                             Which is better when comparing the measure of effects.
                         </small>
                     </div>
+
+
+                    <!-- for NMA -->
+                    <div v-if="extract.meta.oc_type == 'nma'"
+                        class="form-group col-md-4">
+                        <label for="input_analysis_method">NMA Analysis Method</label>
+
+                        <select v-model="extract.meta.analysis_method"
+                            class="form-control" id="input_analysis_method" 
+                            aria-describedby="input_analysis_method_help">
+                            <option value="freq">Frequentist Network Meta-Analysis</option>
+                            <option value="bayes">Bayesian Network Meta-Analysis</option>
+                        </select>
+
+                        <small id="input_analysis_method_help" class="form-text text-muted">
+                            How to perform the network meta-analysis
+                        </small>
+                    </div>
                     
                 </div>
             </div>
@@ -201,7 +228,7 @@
                 <div class="row">
                     
                     <div class="form-group col-md-4">
-                        <label for="input_included_in_plots">Include in PWMA Plots</label>
+                        <label for="input_included_in_plots">Include in Plots</label>
 
                         <select v-model="extract.meta.included_in_plots"
                             class="form-control" id="input_included_in_plots" 
@@ -211,7 +238,7 @@
                         </select>
 
                         <small id="input_included_in_plots_help" class="form-text text-muted">
-                            Include this outcome in the PWMA result plots or not?
+                            Include this outcome in the result plots or not?
                         </small>
                     </div>
 

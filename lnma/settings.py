@@ -82,7 +82,7 @@ OC_TYPE_TPL = {
             "abbr": '',
 
             # The five level
-            "cq_abbr": '',
+            "cq_abbr": 'default',
             "oc_type": 'pwma',
             "group": 'primary',
             "category": 'default',
@@ -90,7 +90,7 @@ OC_TYPE_TPL = {
 
             # for subg
             "is_subg_analysis": 'no',
-            "sub_groups": ['A', 'B'],
+            "sub_groups": ['A'],
 
             # for the display
             "included_in_plots": 'no',
@@ -101,6 +101,7 @@ OC_TYPE_TPL = {
             "measure_of_effect": 'RR',
             "fixed_or_random": 'random',
             "which_is_better": 'lower',
+            
             "pooling_method": "Inverse",
             "tau_estimation_method": "DL",
             "hakn_adjustment": "FALSE",
@@ -115,40 +116,12 @@ OC_TYPE_TPL = {
             "cate_attrs": None
         }
     },
-    # "subg": {
-    #     "default": {
-    #         "abbr": '',
-    #         "subgroups": ['A', 'B'],
-    #         "oc_type": 'subg',
-    #         "category": 'default',
-    #         "group": 'subgroup',
-    #         "full_name": 'pwma Outcome full name',
-    #         "included_in_plots": 'no',
-    #         "included_in_sof": 'no',
-    #         "input_format": 'SUBG_CAT_RAW',
-    #         "measure_of_effect": 'RR',
-    #         "fixed_or_random": 'random',
-    #         "which_is_better": 'lower',
-
-    #         "pooling_method": "Inverse",
-    #         "tau_estimation_method": "DL",
-    #         "hakn_adjustment": "FALSE",
-    #         "smd_estimation_method": "Hedges",
-    #         "prediction_interval": "FALSE",
-    #         "sensitivity_analysis": "no",
-    #         "cumulative_meta_analysis": "no",
-    #         "cumulative_meta_analysis_sortby": "year",
-
-    #         "attrs": None,
-    #         "cate_attrs": None
-    #     }
-    # },
     "nma": {
         "default": {
             "abbr": '',
 
             # The five level
-            "cq_abbr": '',
+            "cq_abbr": 'default',
             "oc_type": 'nma',
             "group": 'primary',
             "category": 'default',
@@ -156,7 +129,7 @@ OC_TYPE_TPL = {
 
             # for subg
             "is_subg_analysis": 'no',
-            "sub_groups": ['A', 'B'],
+            "sub_groups": ['A'],
 
             # for the display
             "included_in_plots": 'no',
@@ -327,130 +300,6 @@ INPUT_FORMAT_TPL = {
             }]
         }]
     },
-
-    # "subg": {
-    #     "SUBG_CATIRR_RAW": [{
-    #         'abbr': 'SUBG_CATIRR_RAW_default', 
-    #         'name': 'Default attributes', 
-    #         'attrs': [{
-    #             'abbr': 'Et', 
-    #             'name': 'Et',
-    #             'subs': None,
-    #         }, {
-    #             'abbr': 'Tt',
-    #             'name': 'Tt', 
-    #             'subs': None,
-    #         }, {
-    #             'abbr': 'Ec', 
-    #             'name': 'Ec',
-    #             'subs': None,
-    #         }, {
-    #             'abbr': 'Tc',
-    #             'name': 'Tc', 
-    #             'subs': None,
-    #         }]
-    #     }],
-
-    #     "SUBG_CAT_RAW": [{
-    #         'abbr': 'SUBG_CAT_RAW_treat',
-    #         'name': 'Treatment Arm',
-    #         'attrs': [{
-    #             'abbr': 'Et',
-    #             'name': 'Event',
-    #             'subs': None
-    #         }, {
-    #             'abbr': 'Nt',
-    #             'name': 'Total',
-    #             'subs': None
-    #         }, {
-    #             'abbr': 'treatment',
-    #             'name': 'Treatment',
-    #             'subs': None
-    #         }]
-    #     }, {
-    #         'abbr': 'SUBG_CAT_RAW_control',
-    #         'name': 'Control Arm',
-    #         'attrs': [{
-    #             'abbr': 'Ec',
-    #             'name': 'Event',
-    #             'subs': None
-    #         }, {
-    #             'abbr': 'Nc',
-    #             'name': 'Total',
-    #             'subs': None
-    #         }, {
-    #             'abbr': 'control',
-    #             'name': 'Control',
-    #             'subs': None
-    #         }]
-    #     }],
-
-    #     "SUBG_CAT_PRE": [{
-    #         'abbr': 'SUBG_CAT_PRE_default', 
-    #         'name': 'Result', 
-    #         'attrs': [{
-    #             'abbr': 'TE', 
-    #             'name': 'TE',
-    #             'subs': None,
-    #         }, {
-    #             'abbr': 'lowerci', 
-    #             'name': 'Lower CI', 
-    #             'subs': None,
-    #         }, {
-    #             'abbr': 'upperci', 
-    #             'name': 'Upper CI', 
-    #             'subs': None,
-    #         }]
-    #     }],
-
-    #     "SUBG_CONTD_RAW": [{
-    #         'abbr': 'SUBG_CONTD_RAW_treat', 
-    #         'name': 'Treatment Arm', 
-    #         'attrs': [{
-    #             'abbr': 'Nt', 
-    #             'name': 'Nt',
-    #             'subs': None,
-    #         }, {
-    #             'abbr': 'Mt', 
-    #             'name': 'Mt', 
-    #             'subs': None,
-    #         }, {
-    #             'abbr': 'SDt', 
-    #             'name': 'SDt', 
-    #             'subs': None,
-    #         }]
-    #     }, {
-    #         'abbr': 'SUBG_CONTD_RAW_control', 
-    #         'name': 'Control Arm', 
-    #         'attrs': [{
-    #             'abbr': 'Nc', 
-    #             'name': 'Nc',
-    #             'subs': None,
-    #         }, {
-    #             'abbr': 'Mc', 
-    #             'name': 'Mc', 
-    #             'subs': None,
-    #         }, {
-    #             'abbr': 'SDc', 
-    #             'name': 'SDc', 
-    #             'subs': None,
-    #         }]
-    #     }],
-
-    #     "SUBG_CONTD_PRE": [{
-    #         'abbr': 'SUBG_CONTD_PRE_default', 
-    #         'name': 'Result', 
-    #         'attrs': [{
-    #             'abbr': 'TE', 
-    #             'name': 'TE',
-    #             'subs': None,
-    #         }, {
-    #             'abbr': 'SE',
-    #             'name': 'SE', 
-    #             'subs': None,
-    #         }]
-    #     }],
-    # },
 
     "pwma": {
         "PRIM_CAT_RAW": [{
