@@ -484,20 +484,21 @@ var pan_ocpapers = {
                 },
 
                 get_input_size: function(str) {
-                    // convert null to empty
-                    if (str == null) {
-                        str = '';
-                    }
-                    // convert number to string
-                    str = '' + str;
-                    var s = str.length;
-                    if (s<5) {
-                        return 5;
-                    } else if (s > 14) {
-                        return 14;
-                    } else {
-                        return s;
-                    }
+                    // // convert null to empty
+                    // if (str == null) {
+                    //     str = '';
+                    // }
+                    // // convert number to string
+                    // str = '' + str;
+                    // var s = str.length;
+                    // if (s<5) {
+                    //     return 5;
+                    // } else if (s > 14) {
+                    //     return 14;
+                    // } else {
+                    //     return s;
+                    // }
+                    return srv_extractor.get_input_size(str);
                 },
 
                 // get year

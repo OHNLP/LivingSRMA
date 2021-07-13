@@ -205,20 +205,21 @@ var pan_ocpapers = {
         },
         
         get_input_size: function(str) {
-            // convert null to empty
-            if (typeof(str) == 'undefined' || str == null) {
-                str = '';
-            }
-            // convert number to string
-            str = '' + str;
-            var s = str.length;
-            if (s<pan_ocpapers.MIN_INPUT_AUTO_SIZE) {
-                return pan_ocpapers.MIN_INPUT_AUTO_SIZE;
-            } else if (s > pan_ocpapers.MAX_INPUT_AUTO_SIZE) {
-                return pan_ocpapers.MAX_INPUT_AUTO_SIZE;
-            } else {
-                return s;
-            }
+            // // convert null to empty
+            // if (typeof(str) == 'undefined' || str == null) {
+            //     str = '';
+            // }
+            // // convert number to string
+            // str = '' + str;
+            // var s = str.length;
+            // if (s<pan_ocpapers.MIN_INPUT_AUTO_SIZE) {
+            //     return pan_ocpapers.MIN_INPUT_AUTO_SIZE;
+            // } else if (s > pan_ocpapers.MAX_INPUT_AUTO_SIZE) {
+            //     return pan_ocpapers.MAX_INPUT_AUTO_SIZE;
+            // } else {
+            //     return s;
+            // }
+            return srv_extractor.get_input_size(str);
         },
 
         // update the value

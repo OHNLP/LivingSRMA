@@ -126,28 +126,41 @@ def is_same_extraction(ea, eb):
         return False
 
     # check the main arm from ea side
-    for attr in ea['attrs']['main']:
-        if attr not in eb['attrs']['main']:
-            # which means eb use different meta???
+    # 2021-07-12: add subgroup in the comparison
+    # the following comparison is also updated
+    for g in ea['attrs']['main']:
+        if g not in eb['attrs']['main']:
+            # which means this subgroup not in eb
             return False
+        for attr in ea['attrs']['main'][g]:
+            if attr not in eb['attrs']['main'][g]:
+                # which means eb use different meta???
+                return False
         
-        if ea['attrs']['main'][attr] != eb['attrs']['main'][attr]:
-            return False
+            if ea['attrs']['main'][g][attr] != eb['attrs']['main'][g][attr]:
+                # which means the value is different
+                return False
 
     # 2021-06-04: two side check update
     # we found that when updating the itable design
     # one side check couldn't figure out the changes
     # check the main arm from eb side
-    for attr in eb['attrs']['main']:
-        if attr not in ea['attrs']['main']:
-            # which means ea use different meta???
+    for g in eb['attrs']['main']:
+        if g not in ea['attrs']['main']:
+            # which means this subg group not in ea
             return False
-        
-        if eb['attrs']['main'][attr] != ea['attrs']['main'][attr]:
-            return False
+        for attr in eb['attrs']['main'][g]:
+            if attr not in ea['attrs']['main'][g]:
+                # which means ea use different meta???
+                return False
+            
+            if eb['attrs']['main'][g][attr] != ea['attrs']['main'][g][attr]:
+                # which means ea have different 
+                return False
 
     # check other arms
     if len(ea['attrs']['other']) != len(eb['attrs']['other']):
+        # which means the number of arms is different
         return False
 
     # check each arm in other
@@ -156,22 +169,32 @@ def is_same_extraction(ea, eb):
         eb_arm = eb['attrs']['other'][arm_idx]
 
         # check from ea side
-        for attr in ea_arm:
-            if attr not in eb_arm:
-                # which means eb use different meta???
+        for g in ea_arm:
+            if g not in eb_arm:
+                # which means this sub group g not in eb_arm
                 return False
-            
-            if ea_arm[attr] != eb_arm[attr]:
-                return False
+            for attr in ea_arm[g]:
+                if attr not in eb_arm[g]:
+                    # which means eb use different meta???
+                    return False
+                
+                if ea_arm[g][attr] != eb_arm[g][attr]:
+                    # which means ea has different value
+                    return False
 
         # 2021-06-04: two side check
-        for attr in eb_arm:
-            if attr not in ea_arm:
-                # which means eb use different meta???
+        for g in eb_arm:
+            if g not in ea_arm:
+                # which means this sub group g not in ea_arm
                 return False
-            
-            if eb_arm[attr] != ea_arm[attr]:
-                return False
+            for attr in eb_arm[g]:
+                if attr not in ea_arm[g]:
+                    # which means eb use different meta???
+                    return False
+                
+                if eb_arm[g][attr] != ea_arm[g][attr]:
+                    # which means eb has different value
+                    return False
             
     # wow, they are the same
     return True

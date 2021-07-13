@@ -45,6 +45,17 @@
             </button>
         </div>
 
+        <div v-if="working_oc.meta.is_subg_analysis == 'yes'"
+            class="ml-1 d-flex">
+            <button v-for="g, g_idx in working_oc.meta.sub_groups"
+                v-bind:id="'working_paper_subg_tab_' + (g_idx)"
+                v-bind:class="{'btn-info': working_paper_subg == g_idx}"
+                v-on:click="switch_working_subg(g_idx)"
+                class="w-subg-tab btn btn-xs">
+                {{ g }}
+            </button>
+        </div>
+
         <div id="pan_ocpapers_working_paper_collector_attr_list">
             <div class="w-cate-item mb-1"
                 v-for="cate in working_oc.meta.cate_attrs">
@@ -61,12 +72,14 @@
                             {{ attr.name }}
                         </div>
 
-                        <div class="w-attr-item-value"
+                        <div class="w-attr-item-value d-flex flex-row"
                             v-if="attr.subs == null">
-                            <div v-for="g, g_idx in working_oc.meta.sub_groups">
+                            <div v-for="g, g_idx in working_oc.meta.sub_groups"
+                                v-bind:class="{'w-subg-item-value':working_paper_subg == g_idx}">
                                 <input class="paper-extract-input-auto input-auto-complete" type="text" 
                                     v-bind:abbr="attr.abbr"
-                                    v-bind:size="get_input_size(get_working_arm_attrs()['g'+g_idx][attr.abbr])"
+                                    v-bind:size="get_input_size(get_working_arm_extracted_value(g_idx, attr.abbr))"
+                                    v-on:click="switch_working_subg(g_idx)"
                                     v-model="get_working_arm_attrs()['g'+g_idx][attr.abbr]"> 
                                 <span class="w-remove-content"
                                     v-on:click="get_working_arm_attrs()['g'+g_idx][attr.abbr] = ''">
@@ -89,7 +102,7 @@
                                     <input class="paper-extract-input-auto input-auto-complete"     
                                         type="text" 
                                         v-bind:abbr="sub.abbr"
-                                        v-bind:size="get_input_size(get_working_arm_attrs()['g'+g_idx][sub.abbr])"
+                                        v-bind:size="get_input_size(get_working_arm_extracted_value(g_idx, attr.abbr))"
                                         v-model="get_working_arm_attrs()['g'+g_idx][sub.abbr]"> 
                                     <span class="w-remove-content"
                                         v-on:click="get_working_arm_attrs()['g'+g_idx][sub.abbr] = ''">

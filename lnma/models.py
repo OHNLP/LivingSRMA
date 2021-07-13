@@ -625,6 +625,16 @@ class Extract(db.Model):
     date_created = db.Column(db.DateTime, index=False)
     date_updated = db.Column(db.DateTime, index=False)
 
+
+    def update_data(self):
+        '''
+        Double check the current extract with its meta data
+        '''
+        pids = set([])
+
+        # for pid in self.data:
+
+
     def update_data_by_papers(self, papers):
         '''
         Extend the current extract with more papers

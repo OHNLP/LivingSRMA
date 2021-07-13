@@ -335,6 +335,13 @@ Data Extractor
 {% include 'js/lisr_analyzer.js' %}
 {% include 'js/fg_pwma_imglist.js' %}
 
+///////////////////////////////////////////////////////////
+// bind the project information to srv_extractor.js
+///////////////////////////////////////////////////////////
+
+{% include "js/srv_extractor.js" %}
+srv_extractor.project = [[ project_json_str|safe ]];
+
 
 var pan_itable_previewer = {
     vpp_id: '#pan_itbuilder_previewer',
@@ -643,20 +650,21 @@ var pan_ocpapers = {
                 },
 
                 get_input_size: function(str) {
-                    // convert null to empty
-                    if (str == null) {
-                        str = '';
-                    }
-                    // convert number to string
-                    str = '' + str;
-                    var s = str.length;
-                    if (s<5) {
-                        return 5;
-                    } else if (s > 14) {
-                        return 14;
-                    } else {
-                        return s;
-                    }
+                    // // convert null to empty
+                    // if (str == null) {
+                    //     str = '';
+                    // }
+                    // // convert number to string
+                    // str = '' + str;
+                    // var s = str.length;
+                    // if (s<5) {
+                    //     return 5;
+                    // } else if (s > 14) {
+                    //     return 14;
+                    // } else {
+                    //     return s;
+                    // }
+                    return srv_extractor.get_input_size(str);
                 },
 
                 // get year

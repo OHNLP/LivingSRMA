@@ -101,7 +101,7 @@ OC_TYPE_TPL = {
             "measure_of_effect": 'RR',
             "fixed_or_random": 'random',
             "which_is_better": 'lower',
-            
+
             "pooling_method": "Inverse",
             "tau_estimation_method": "DL",
             "hakn_adjustment": "FALSE",
@@ -154,11 +154,20 @@ OC_TYPE_TPL = {
     "itable": {
         "default": {
             'abbr': 'itable',
+
+            # the five level
+            'cq_abbr': 'default',
             'oc_type': 'itable',
-            'category': 'default',
             'group': 'itable',
+            'category': 'default',
             'full_name': 'Interactive Table',
             'input_format': 'custom',
+
+            # for subg, but won't be used
+            "is_subg_analysis": 'no',
+            "sub_groups": ['A'],
+
+            # the filters for default itable
             'filters': [{
                 'display_name': 'Included in MA',
                 'type': 'radio',
@@ -171,6 +180,8 @@ OC_TYPE_TPL = {
                     'default': True
                 }]
             }],
+
+            # the cate attrs
             'cate_attrs': [
             {
                 'abbr': 'ITABLECAT000',
@@ -632,6 +643,10 @@ EXTRACTOR_ITABLE_IMPORT_SKIP_COLUMNS = [
     'YEAR', 'PMID', 'AUTHOR',
     'TRIAL REGISTRATION #'
 ]
+
+# the min and max input box size
+EXTRACTOR_INPUT_BOX_MIN_SIZE = 4
+EXTRACTOR_INPUT_BOX_MAX_SIZE = 8
 
 # AI models
 AI_MODEL_ROBOTSEARCH_RCT = 'ROBOTSEARCH_RCT'

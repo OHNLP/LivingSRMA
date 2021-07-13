@@ -175,6 +175,10 @@ div.w-attr-item:nth-child(odd) {background: whitesmoke; }
     background-color: lightcoral;
     color: white;
 }
+.w-subg-item-value {
+    background-color: #cdeff5;
+    padding: 1px 2px 2px 2px;
+}
 
 .paper-extract-input-auto {
     font-family: 'Courier New', Courier, monospace;

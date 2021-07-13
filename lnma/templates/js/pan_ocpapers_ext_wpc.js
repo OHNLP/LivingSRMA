@@ -24,6 +24,10 @@ Object.assign(pan_ocpapers.vpp_data, {
     // null means main arm
     // numbers mean other arm
     working_paper_arm: null,
+
+    // working group idx
+    // by default, this is 0 for all extract except subg analysis
+    working_paper_subg: 0
 });
 
 // Extend the vpp methods
@@ -100,6 +104,12 @@ Object.assign(pan_ocpapers.vpp_methods, {
         $('#working_paper_arm_tab_' + arm_idx).addClass('btn-primary');
     },
 
+    switch_working_subg: function(subg_idx) {
+        if (this.working_oc.meta)
+        console.log('* switch subg to ' + subg_idx);
+        this.working_paper_subg = subg_idx;
+    },
+
     get_working_arm_attrs: function() {
         if (this.working_paper_arm == null) {
             return this.working_oc.data[this.working_paper.pid].attrs.main;
@@ -114,6 +124,49 @@ Object.assign(pan_ocpapers.vpp_methods, {
         for (let i = 0; i < this.working_oc.meta.sub_groups.length; i++) {        
             this.get_working_arm_attrs()['g'+i][abbr] = value;
         }
+    },
+
+    /**
+     * Get the extracted data by the given info
+     * 
+     * which sub group?
+     * which attr or attr_sub?
+     */
+     get_working_arm_extracted_value: function(group_idx, attr_sub_abbr) {
+        if (!this.working_oc.data.hasOwnProperty(this.working_paper.pid)) {
+            // no such paper???
+            return '';
+        }
+        if (this.working_paper_arm == null) {
+            // check the main arm
+            if (!this.working_oc.data[this.working_paper.pid].attrs.main.hasOwnProperty('g' + group_idx)) {
+                // no such group in the main arm?
+                return '';
+
+            } else {
+                if (!this.working_oc.data[this.working_paper.pid].attrs.main['g'+group_idx].hasOwnProperty(attr_sub_abbr)) {
+                    // no such attr in this main arm?
+                    return ''
+                } else {
+                    return this.working_oc.data[this.working_paper.pid].attrs.main['g'+group_idx][attr_sub_abbr];
+                }
+            }
+        } else {
+            // check the other arm
+            if (!this.working_oc.data[this.working_paper.pid].attrs.other[this.working_paper_arm].hasOwnProperty('g' + group_idx)) {
+                // no such group in the other arm?
+                return '';
+
+            } else {
+                if (!this.working_oc.data[this.working_paper.pid].attrs.other[this.working_paper_arm]['g'+group_idx].hasOwnProperty(attr_sub_abbr)) {
+                    // no such attr in this other arm?
+                    return ''
+                } else {
+                    return this.working_oc.data[this.working_paper.pid].attrs.other[this.working_paper_arm]['g'+group_idx][attr_sub_abbr];
+                }
+            }
+        }
+
     },
 
     clear_input: function() {
@@ -156,7 +209,8 @@ Object.assign(pan_ocpapers, {
             ];
 
             // second, for each fill, get the values
-            afs[i].from_value = itable.data[pid].attrs.main[afs[i].from_abbr];
+            // 2021-07-12: add default sub group g0 to itable
+            afs[i].from_value = itable.data[pid].attrs.main['g0'][afs[i].from_abbr];
 
             // now, put this value to the paper of this working oc
             this.vpp.set_working_arm_attr_value(
@@ -279,10 +333,10 @@ Object.assign(pan_ocpapers, {
         // update the value for the specific paper
         if (seq == null) {
             // it means this is the main track
-            this.vpp.$data.working_oc.data[pid].attrs.main[attr_abbr] = highlight_text;
+            this.vpp.$data.working_oc.data[pid].attrs.main['g'+this.vpp.$data.working_paper_subg][attr_abbr] = highlight_text;
         } else {
             // this means the value is for other arms
-            this.vpp.$data.working_oc.data[pid].attrs.other[seq][attr_abbr] = highlight_text;
+            this.vpp.$data.working_oc.data[pid].attrs.other[seq]['g'+this.vpp.$data.working_paper_subg][attr_abbr] = highlight_text;
         }
         // update UI
         this.vpp.$forceUpdate();

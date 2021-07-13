@@ -435,9 +435,7 @@
                                 
                                 <!-- the main arm -->
                                 <div v-for="g, g_idx in extract.meta.sub_groups">
-                                    <span v-if="extract.meta.is_subg_analysis">
-                                        {{ g_idx }}
-                                    </span>
+                                    
                                     <span class="paper-table-body-cell"
                                         v-bind:title="attr_sub.cate_name + '|' + attr_sub.name + ': ' + get_extracted_data(paper.pid, null, g_idx, attr_sub.abbr)">
                                         {{ get_extracted_data(paper.pid, null, g_idx, attr_sub.abbr) }}&nbsp;

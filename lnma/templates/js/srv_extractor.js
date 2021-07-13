@@ -30,6 +30,24 @@ var srv_extractor = {
         extract_data: "[[ url_for('extractor.extract_data') ]]"
     },
 
+    // the project is binded when running extracting
+    project: null,
+
+    // the default templates for 
+    tpl: {
+        oc_type: [[ config['settings']['OC_TYPE_TPL']|tojson ]],
+        input_format: [[ config['settings']['INPUT_FORMAT_TPL']|tojson ]],
+        filter: [[ config['settings']['FILTER_TPL']|tojson ]]
+    },
+
+    // the settings
+    setting: {
+        input_size: {
+            min: [[ config['settings']['EXTRACTOR_INPUT_BOX_MIN_SIZE'] ]],
+            max: [[ config['settings']['EXTRACTOR_INPUT_BOX_MAX_SIZE'] ]]
+        }
+    },
+
     goto_extract_data: function(abbr) {
         location.href = this.url.extract_data + '?abbr=' + abbr;
     },
@@ -223,13 +241,25 @@ var srv_extractor = {
         });
     },
 
-    // the project is binded when running extracting
-    project: null,
+    ///////////////////////////////////////////////////////////////////////////
+    // Utils for extractor
+    ///////////////////////////////////////////////////////////////////////////
 
-    tpl: {
-        oc_type: [[ config['settings']['OC_TYPE_TPL']|tojson ]],
-        input_format: [[ config['settings']['INPUT_FORMAT_TPL']|tojson ]],
-        filter: [[ config['settings']['FILTER_TPL']|tojson ]],
+    get_input_size: function(str) {
+        // convert null to empty
+        if (typeof(str) == 'undefined' || str == null) {
+            str = '';
+        }
+        // convert number to string
+        str = '' + str;
+        var s = str.length;
+        if (s < this.setting.input_size.min) {
+            return this.setting.input_size.min;
+        } else if (s > this.setting.input_size.max) {
+            return this.setting.input_size.max;
+        } else {
+            return s;
+        }
     },
 
     /**
@@ -281,13 +311,15 @@ var srv_extractor = {
         };
         
         // fill the main track of the oc extraction.
-        d.attrs.main = this.mk_oc_data_attr(oc);
+        d.attrs.main['g0'] = this.mk_oc_data_attr(oc);
 
         return d;
     },
 
     /**
      * Make the empty attrs
+     * 
+     * For the given outcome structure on the subg
      */
     mk_oc_data_attr: function(oc) {
         var d = {};
