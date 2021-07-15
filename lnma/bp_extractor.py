@@ -34,14 +34,19 @@ template_base = 'extractor/'
 @login_required
 def v1():
     project_id = request.cookies.get('project_id')
+    cq_abbr = request.cookies.get('cq_abbr')
 
     if project_id is None:
         return redirect(url_for('project.mylist'))
+
+    if cq_abbr is None:
+        cq_abbr = 'default'
 
     project = dora.get_project(project_id)
 
     return render_template(
         'extractor/v1.html',
+        cq_abbr=cq_abbr,
         project=project,
         project_json_str=json.dumps(project.as_dict())
     )
@@ -51,14 +56,19 @@ def v1():
 @login_required
 def manage_outcomes():
     project_id = request.cookies.get('project_id')
+    cq_abbr = request.cookies.get('cq_abbr')
 
     if project_id is None:
         return redirect(url_for('project.mylist'))
+
+    if cq_abbr is None:
+        cq_abbr = 'default'
 
     project = dora.get_project(project_id)
 
     return render_template(
         template_base + 'manage_outcomes.html',
+        cq_abbr=cq_abbr,
         project=project,
         project_json_str=json.dumps(project.as_dict())
     )
@@ -72,10 +82,16 @@ def manage_selections():
     if project_id is None:
         return redirect(url_for('project.mylist'))
 
+    # decide which cq to use
+    cq_abbr = request.cookies.get('cq_abbr')
+    if cq_abbr is None:
+        cq_abbr = 'default'
+
     project = dora.get_project(project_id)
 
     return render_template(
         template_base + 'manage_selections.html',
+        cq_abbr=cq_abbr,
         project=project,
         project_json_str=json.dumps(project.as_dict())
     )
@@ -92,10 +108,16 @@ def manage_itable():
     if project_id is None:
         return redirect(url_for('project.mylist'))
 
+    # decide which cq to use
+    cq_abbr = request.cookies.get('cq_abbr')
+    if cq_abbr is None:
+        cq_abbr = 'default'
+
     project = dora.get_project(project_id)
 
     return render_template(
         template_base + 'manage_itable.html',
+        cq_abbr=cq_abbr,
         project=project,
         project_json_str=json.dumps(project.as_dict())
     )
@@ -112,12 +134,18 @@ def extract_data():
     if project_id is None:
         return redirect(url_for('project.mylist'))
 
+    # decide which cq to use
+    cq_abbr = request.cookies.get('cq_abbr')
+    if cq_abbr is None:
+        cq_abbr = 'default'
+
     oc_abbr = request.args.get('abbr')
     project = dora.get_project(project_id)
 
     return render_template(
         template_base + 'extract_data.html', 
         oc_abbr=oc_abbr,
+        cq_abbr=cq_abbr,
         project=project,
         project_json_str=json.dumps(project.as_dict())
     )
@@ -394,7 +422,7 @@ def update_extract():
 
     # the meta of the extract settings
     meta = json.loads(request.form.get('meta'))
-    
+
     # the data of the extracted infos
     data = json.loads(request.form.get('data'))
     
@@ -630,6 +658,11 @@ def get_extracts():
     '''
     project_id = request.args.get('project_id')
     with_data = request.args.get('with_data')
+    
+    # decide which cq to use
+    cq_abbr = request.cookies.get('cq_abbr')
+    if cq_abbr is None:
+        cq_abbr = 'default'
 
     if with_data == 'yes':
         with_data = True

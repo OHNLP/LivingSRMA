@@ -14,6 +14,7 @@
                         [
                             {{ _lbl(working_oc.oc_type) }} | 
                             {{ _lbl(working_oc.meta.group) }} | 
+                            {{ working_oc.meta.category }} | 
                             {{ working_oc.meta.full_name }}
                         ]
                         </b>
@@ -128,8 +129,9 @@
             <table class="paper-table">
                 <thead class="paper-table-header">
                     <tr>
-                        <th class="paper-table-header-th" colspan="6">
-                        </th>
+                        <th v-if="working_oc.meta.is_subg_analysis" class="paper-table-header-th" colspan="7"></th>
+                        <th v-else class="paper-table-header-th" colspan="6"></th>
+
                         <th v-for="thr1 in thr1s"
                             v-bind:colspan="thr1.cols"
                             v-show="show_attrs[thr1.abbr]"
@@ -157,6 +159,11 @@
                         </th>
                         <th class="paper-table-header-th" style="width: 50px;">
                             Arms
+                        </th>
+
+                        <!-- for subg analysis -->
+                        <th v-if="working_oc.meta.is_subg_analysis == 'yes'">
+                           Sub Group 
                         </th>
                         
                         <!-- the attributes need to collect -->
@@ -214,6 +221,13 @@
                                 <option value="4">4</option>
                                 <option value="5">5</option>
                             </select>
+                        </td>
+
+                        <!-- for subg analysis -->
+                        <td v-if="working_oc.meta.is_subg_analysis == 'yes'">
+                            <div v-for="g, g_idx in working_oc.meta.sub_groups">
+                                {{ g }}
+                            </div>
                         </td>
                         
                         <!-- the attributes of pwma -->

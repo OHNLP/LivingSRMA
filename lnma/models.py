@@ -188,6 +188,31 @@ class Project(db.Model):
         return txt
 
 
+    def get_cqs(self):
+        '''
+        Get clinical questions
+        '''
+        if 'clinical_questions' not in self.settings:
+            return []
+
+        else:
+            return self.settings['clinical_questions']
+
+
+    def get_cq_name(self, cq_abbr):
+        '''
+        Get the clinical question name by given abbr
+        '''
+        if 'clinical_questions' not in self.settings:
+            return ''
+
+        for cq in self.settings['clinical_questions']:
+            if cq['abbr'] == cq_abbr:
+                return cq['name']
+
+        return ''
+
+
     def __repr__(self):
         return '<Project {0}: {1}>'.format(self.project_id, self.title)
 
