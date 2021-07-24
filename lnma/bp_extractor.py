@@ -397,6 +397,9 @@ def get_extract_and_papers():
     stage = ss_state.SS_STAGE_INCLUDED_SR
     papers = dora.get_papers_by_stage(project_id, stage)
     
+    # update the meta
+    extract.update_meta()
+    
     # update the extract with papers
     extract.update_data_by_papers(papers)
 

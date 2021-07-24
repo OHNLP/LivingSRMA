@@ -9,7 +9,9 @@ from werkzeug.security import check_password_hash
 
 from sqlalchemy.dialects.mysql import LONGTEXT
 
-from lnma import ss_state, util
+from lnma import ss_state
+from lnma import util
+from lnma import settings
 
 # for the relationship between project and user
 rel_project_users = db.Table(
@@ -649,6 +651,20 @@ class Extract(db.Model):
     data = db.Column(db.JSON, index=False)
     date_created = db.Column(db.DateTime, index=False)
     date_updated = db.Column(db.DateTime, index=False)
+
+
+    def update_meta(self):
+        '''
+        Update / validate the meta according to default template by oc_type
+
+        Fix the missing attributes in desing
+        '''
+        meta_template = settings.OC_TYPE_TPL[self.oc_type]['default']
+
+        for attr_name in meta_template:
+            if attr_name not in self.meta:
+                self.meta[attr_name] = meta_template[attr_name]
+                print(f'* fixed missing attr[{attr_name}] in meta')
 
 
     def update_data(self):

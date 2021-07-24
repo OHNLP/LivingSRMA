@@ -88,6 +88,9 @@ OC_TYPE_TPL = {
             "category": 'default',
             "full_name": 'pwma outcome full name',
 
+            # for two arms
+            "treatments": ["A", "B"],
+
             # for subg
             "is_subg_analysis": 'no',
             "sub_groups": ['A'],
@@ -126,6 +129,9 @@ OC_TYPE_TPL = {
             "group": 'primary',
             "category": 'default',
             "full_name": 'NMA Outcome full name',
+
+            # for two arms by default
+            "treatments": ["A", "B"],
 
             # for subg
             "is_subg_analysis": 'no',

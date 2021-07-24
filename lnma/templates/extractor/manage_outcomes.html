@@ -101,7 +101,7 @@ html {
 }
 
 .btn-xs {
-    padding: .15rem .5rem;
+    padding: .05rem .5rem;
     font-size: .8rem;
     line-height: 1.2;
     border-radius: .2rem;
@@ -725,6 +725,14 @@ var pan_ocpapers = {
 
                 on_click_remove_sub_group: function(subg_idx) {
                     this.extract.meta.sub_groups.splice(subg_idx, 1);
+                },
+
+                on_click_add_treatment_arm: function() {
+                    this.extract.meta.treatments.push('');
+                },
+
+                on_click_remove_treatment_arm: function(treat_idx) {
+                    this.extract.meta.treatments.splice(treat_idx, 1);
                 },
 
                 /**
