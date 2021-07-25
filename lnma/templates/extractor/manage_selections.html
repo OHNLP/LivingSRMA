@@ -558,8 +558,10 @@ var pan_ocpapers = {
 
     load: function() {
         var project_id = Cookies.get('project_id');
+        var cq_abbr = Cookies.get('cq_abbr');
         srv_extractor.get_included_papers_and_selections(
             project_id,
+            cq_abbr,
             function(data) {
                 console.log(data)
                 pan_ocpapers.on_load(data);
@@ -605,8 +607,13 @@ var pan_ocpapers = {
 
         // second, send those to backend for update
         var project_id = Cookies.get('project_id');
+        var cq_abbr = Cookies.get('cq_abbr');
+
         srv_extractor.update_paper_selections(
-            project_id, pid, ocs_selected, 
+            project_id, 
+            cq_abbr,
+            pid, 
+            ocs_selected, 
             function(data) {
                 // the data contain a paer
                 console.log(data);

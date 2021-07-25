@@ -228,14 +228,15 @@ var srv_extractor = {
         );
     },
 
-    get_included_papers_and_selections: function(project_id, callback) {
+    get_included_papers_and_selections: function(project_id, cq_abbr, callback) {
         $.ajax({
             type: 'GET',
             dataType: "json",
             url: this.url.get_included_papers_and_selections,
             data: {
+                project_id: project_id,
+                cq_abbr: cq_abbr,
                 rnd: Math.random(),
-                project_id: project_id
             },
             cache: false,
             success: callback,
@@ -286,7 +287,7 @@ var srv_extractor = {
         });
     },
 
-    update_paper_selections: function(project_id, pid, abbrs, callback) {
+    update_paper_selections: function(project_id, cq_abbr, pid, abbrs, callback) {
         $.ajax({
             type: 'POST',
             dataType: "json",
@@ -294,6 +295,7 @@ var srv_extractor = {
             data: {
                 rnd: Math.random(),
                 project_id: project_id,
+                cq_abbr: cq_abbr,
                 pid: pid,
                 abbrs: abbrs
             },

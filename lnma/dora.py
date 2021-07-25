@@ -1916,13 +1916,14 @@ def get_paper_selections(project_id, pid):
     return abbrs
 
 
-def update_paper_selections(project_id, pid, abbrs):
+def update_paper_selections(project_id, cq_abbr, pid, abbrs):
     '''
     Update the paper outcome selection in a project
     '''
-    # first, get all extracts
+    # first, get all extracts of the specific cq
     extracts = Extract.query.filter(
-        Extract.project_id == project_id
+        Extract.project_id == project_id,
+        Extract.meta['cq_abbr'] == cq_abbr
     ).all()
 
     # get the paper

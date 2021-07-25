@@ -216,6 +216,10 @@ def get_included_papers_and_selections():
     project_id = request.args.get('project_id')
     project_id = request.cookies.get('project_id')
 
+    cq_abbr = request.args.get('cq_abbr')
+    if cq_abbr is None:
+        cq_abbr = 'default'
+
     # get all papers
     papers = dora.get_papers_by_stage(
         project_id, 
@@ -232,7 +236,10 @@ def get_included_papers_and_selections():
     
     # get all extracts
     # itable, pwma, subg, nma
-    extracts = dora.get_extracts_by_project_id(project_id)
+    extracts = dora.get_extracts_by_project_id_and_cq(
+        project_id,
+        cq_abbr
+    )
 
     # check each extract
     for extract in extracts:
@@ -316,12 +323,13 @@ def update_paper_one_selection():
 @login_required
 def update_paper_selections():
     project_id = request.form.get('project_id')
+    cq_abbr = request.form.get('cq_abbr')
     abbrs = request.form.getlist('abbrs[]')
     pid = request.form.get('pid')
 
     # update the extract with given info
     paper, outcome_selections = dora.update_paper_selections(
-        project_id, pid, abbrs
+        project_id, cq_abbr, pid, abbrs
     )
 
     # bind the outcome selections to meta
