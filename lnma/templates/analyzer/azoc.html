@@ -547,7 +547,7 @@ var pan_ocpapers = {
 
 var jarvis = {
 
-    getUrlParameter: function(name) {
+    get_url_paramter: function(name) {
         name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
         var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
         var results = regex.exec(location.search);
@@ -563,7 +563,7 @@ var jarvis = {
 
     init: function() {
         // get the outcome abbr from url
-        var oc_abbr = jarvis.getUrlParameter('abbr');
+        var oc_abbr = jarvis.get_url_paramter('abbr');
 
         // init the shared service
         srv_shared.update_labels_by_project_settings(

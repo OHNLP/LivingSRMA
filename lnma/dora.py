@@ -1,6 +1,7 @@
 from operator import contains
 import uuid
 import datetime
+from sqlalchemy.sql.expression import extract
 
 from werkzeug.security import generate_password_hash
 
@@ -1992,6 +1993,18 @@ def update_paper_selections(project_id, pid, abbrs):
     return paper, abbrs
 
 
+def get_extracts_by_project_id_and_cq(project_id, cq_abbr):
+    '''
+    Get all of the extracts by given project and cq
+    '''
+    extracts = Extract.query.filter(
+        Extract.project_id == project_id,
+        Extract.meta['cq_abbr'] == cq_abbr
+    ).all()
+
+    return extracts
+
+
 def get_extracts_by_project_id(project_id):
     '''
     Get all of the extract detail of a project
@@ -2036,6 +2049,49 @@ def get_extracts_by_keystr_and_oc_type(keystr:str, oc_type:str):
     ).all()
 
     return extracts
+
+
+def get_itable_by_project_id_and_cq(project_id, cq_abbr):
+    '''
+    Get the itable of a specific cq in a project
+    '''
+    extract = Extract.query.filter(
+        Extract.project_id == project_id,
+        Extract.oc_type == 'itable',
+        Extract.meta['cq_abbr'] == cq_abbr
+    ).first()
+
+    return extract
+
+
+def get_extract_by_project_id_and_cq_and_abbr(project_id, cq_abbr, abbr):
+    '''
+    Get an extract
+    '''
+    extract = get_extract_by_project_id_and_abbr(project_id, abbr)
+
+    if extract is None:
+        return None
+
+    if extract.meta['cq_abbr'] != cq_abbr:
+        return None
+
+    return extract
+
+
+def get_extract_by_keystr_and_abbr(keystr, cq_abbr, abbr):
+    '''
+    Get an extract by keystr, cq, and abbr
+    '''
+    extract = get_extract_by_keystr_and_abbr(keystr, abbr)
+
+    if extract is None:
+        return None
+
+    if extract.meta['cq_abbr'] != cq_abbr:
+        return None
+
+    return extract
 
 
 def get_extract_by_project_id_and_abbr(project_id, abbr):

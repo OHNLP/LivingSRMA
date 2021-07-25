@@ -321,7 +321,7 @@ def upgrade_extract_data_model(keystr):
     updated_exts = []
     for extract in tqdm(extracts):
         # first, check the new attr `cq_abbr`
-        if 'cq_attr' not in extract.meta:
+        if 'cq_abbr' not in extract.meta:
             # now, let's add something
             extract.meta['cq_abbr'] = 'default'
         
@@ -331,6 +331,9 @@ def upgrade_extract_data_model(keystr):
 
         if extract.meta['is_subg_analysis'] == 'no':
             extract.meta['sub_groups'] = ['A']
+
+        if 'treatments' not in extract.meta:
+            extract.meta['treatments'] = ['A', 'B']
 
         # now, let's check the data
         for pid in extract.data:

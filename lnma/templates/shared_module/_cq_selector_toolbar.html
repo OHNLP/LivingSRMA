@@ -1,0 +1,54 @@
+{# 
+    Please use this module withi Jinja2 environment.
+
+    And make sure put the following variables
+
+    * project: the Project object
+    * cq_abbr: the cq abbr for current extraction
+
+    Otherwise, the page couldn't be rendered correctly.
+#}
+<ul class="navbar-nav ml-auto">
+      
+    <!-- Notifications Dropdown Menu -->
+    <li class="nav-item dropdown">
+      <a class="nav-link" data-toggle="dropdown" href="#">
+        <i class="fas fa-notes-medical"></i>
+        <span class="mr-2">
+            [[ project.get_cq_name(cq_abbr) ]]
+        </span>
+      </a>
+
+      <div class="dropdown-menu dropdown-menu-left">
+
+        <span class="dropdown-item dropdown-header">
+            <b class="badge badge-info">[[ project.get_cqs()|length ]]</b>
+            Clinical Questions
+        </span>
+
+        <div class="dropdown-divider"></div>
+        {% for cq in project.get_cqs() %}
+        <a href="javascript:void(0);" 
+            class="dropdown-item"
+            onclick="lnma_set_cq('[[ cq['abbr'] ]]')">
+            <i class="fas fa-notes-medical mr-2"></i> 
+            [[ cq['name'] ]]
+        </a>
+        {% endfor %}
+
+      </div>
+    </li>
+    
+</ul>
+
+<script>
+function lnma_set_cq(cq_abbr) {
+    Cookies.set('cq_abbr', cq_abbr);
+
+    // then reload current page
+    // location.reload();
+
+    // just reload current base url
+    location.href = window.location.origin + window.location.pathname;
+}
+</script>

@@ -5,34 +5,7 @@ Manage Outcomes
 {% endblock %}
 
 {% block section_cq %}
-<ul class="navbar-nav ml-auto">
-      
-    <!-- Notifications Dropdown Menu -->
-    <li class="nav-item dropdown">
-      <a class="nav-link" data-toggle="dropdown" href="#">
-        <i class="fas fa-notes-medical"></i>
-        <span class="mr-2">
-            [[ project.get_cq_name(cq_abbr) ]]
-        </span>
-      </a>
-
-      <div class="dropdown-menu dropdown-menu-left">
-        <span class="dropdown-item dropdown-header">
-            <b class="badge badge-info">[[ project.get_cqs()|length ]]</b>
-            Clinical Questions
-        </span>
-        <div class="dropdown-divider"></div>
-        {% for cq in project.get_cqs() %}
-        <a href="javascript:void(0);" class="dropdown-item">
-            <i class="fas fa-notes-medical mr-2"></i> 
-            [[ cq['name'] ]]
-        </a>
-        {% endfor %}
-
-      </div>
-    </li>
-    
-</ul>
+{% include 'shared_module/_cq_selector_toolbar.html' %}
 {% endblock %}
 
 {% block page_name %}
@@ -209,6 +182,7 @@ html {
             v-if="extract_tree!=null && extract_tree.hasOwnProperty(oc_type) && extract_tree[oc_type].groups.hasOwnProperty(group.abbr)"
             v-bind:force_update="force_update"
             v-bind:oc_type="oc_type"
+            v-bind:working_abbr="working_abbr"
             v-bind:cate_ocs="extract_tree[oc_type].groups[group.abbr].cates"
             v-bind:group="group.abbr">
         </outcome-list>
@@ -275,6 +249,8 @@ var pan_outcomes = {
             itable: { total: 0 },
         },
 
+        working_abbr: null,
+
         // bind the project information to the outcome panel
         project: [[ project_json_str|safe ]],
 
@@ -284,14 +260,15 @@ var pan_outcomes = {
 
     load: function() {
         var project_id = Cookies.get('project_id');
+        var cq_abbr = Cookies.get('cq_abbr');
 
-        $.get(
-            srv_extractor.url.get_extracts,
-            {project_id:project_id},
+        srv_extractor.get_extracts(
+            project_id, 
+            cq_abbr,
             function(data) {
                 console.log(data);
                 pan_outcomes.show_all_extracts(data.extracts);
-            }, 'json'
+            }
         );
     },
 
@@ -311,7 +288,8 @@ var pan_outcomes = {
                 },
 
                 show_extract_data: function(oc_type, abbr) {
-                    pan_outcomes.show_extract_data(oc_type, abbr);
+                    this.working_abbr = abbr;
+                    pan_outcomes.show_extract_data(abbr);
                 },
 
                 delete_extract: function(oc_type, abbr, full_name) {
@@ -348,13 +326,16 @@ var pan_outcomes = {
         }
     },
 
-    show_extract_data: function(oc_type, abbr) {
-        console.log('* show extract [' + oc_type + '] [' + abbr + ']');
+    show_extract_data: function(abbr) {
+        console.log('* show extract [' + abbr + ']');
 
         // set loc
         $('#config_outcome').css("right", 0);
 
-        pan_ocpapers.show_extract_and_papers(oc_type, abbr);
+        // set working_abbr
+        this.vpp.$data.working_abbr = abbr;
+
+        pan_ocpapers.show_extract_and_papers(abbr);
     },
     
     create_extract: function(oc_type, tpl, group, category) {
@@ -400,16 +381,15 @@ var pan_outcomes = {
         // send this extract to backend
         var data = {};
         var project_id = Cookies.get('project_id');
+        var cq_abbr = Cookies.get('cq_abbr');
+        meta.cq_abbr = cq_abbr;
 
-        $.post(
-            srv_extractor.url.create_extract,
-            {
-                project_id: project_id,
-                oc_type: oc_type,
-                abbr: abbr,
-                meta: JSON.stringify(meta),
-                data: JSON.stringify(data)
-            }, 
+        srv_extractor.create_extract(
+            project_id,
+            oc_type,
+            abbr,
+            meta,
+            data,
             function(data) {
                 console.log(data);
 
@@ -419,13 +399,12 @@ var pan_outcomes = {
 
                 // and open this outcome directly
                 pan_outcomes.show_extract_data(
-                    data.extract.oc_type,
                     data.extract.abbr
                 )
 
                 // update the vpp
                 pan_outcomes.vpp.$forceUpdate();
-            }, 'json'
+            }
         );
     },
 
@@ -876,15 +855,14 @@ var pan_ocpapers = {
         return ret;
     },
 
-    show_extract_and_papers: function(oc_type, abbr) {
+    show_extract_and_papers: function(abbr) {
         var project_id = Cookies.get('project_id');
-        $.get(
-            srv_extractor.url.get_extract_and_papers,
-            {project_id:project_id, abbr:abbr, rnd:Math.random()},
+        srv_extractor.get_extract_and_papers(
+            project_id,
+            abbr,
             function(data) {
                 pan_ocpapers.update(data);
-
-            }, 'json'
+            }
         );
     },
 
@@ -983,7 +961,7 @@ var pan_ocpapers = {
 Vue.component('outcome-list', {
     data: function () {
         return {
-            update: 0
+            update: 0,
         }
     },
     methods: {
@@ -993,11 +971,11 @@ Vue.component('outcome-list', {
 
         show_extract_data: function(oc_type, abbr) {
             // highlight this line
-            $('.cate-extract-line').removeClass('cate-extract-line-clicked');
-            $('#cate-extract-line-' + abbr).addClass('cate-extract-line-clicked');
+            // $('.cate-extract-line').removeClass('cate-extract-line-clicked');
+            // $('#cate-extract-line-' + abbr).addClass('cate-extract-line-clicked');
 
             // show it
-            pan_outcomes.show_extract_data(oc_type, abbr);
+            pan_outcomes.show_extract_data(abbr);
         },
 
         delete_extract: function(oc_type, abbr, full_name) {
@@ -1055,7 +1033,8 @@ Vue.component('outcome-list', {
         'oc_type',
         'cate_ocs',
         'group',
-        'force_update'
+        'force_update',
+        'working_abbr'
     ],
 
     template: `
@@ -1075,7 +1054,8 @@ Vue.component('outcome-list', {
     <div v-bind:class="'cate-extracts cate-extracts-' + oc_type">
         <div v-for="oc in cate.ocs" 
             v-bind:id="'cate-extract-line-' + oc.abbr"
-            class="cate-extract-line d-flex flex-row">
+            class="cate-extract-line d-flex flex-row"
+            v-bind:class="{'cate-extract-line-clicked':working_abbr==oc.abbr}">
                 
             <div class="cate-extract-name"
                 v-on:click="show_extract_data(oc_type, oc.abbr)">
@@ -1132,6 +1112,15 @@ var jarvis = {
         // the load the init outcomes
         pan_outcomes.load();
 
+        // get the abbr if has
+        var oc_abbr = jarvis.get_url_paramter('abbr');
+
+        if (oc_abbr == '') {
+
+        } else {
+            pan_outcomes.show_extract_data(oc_abbr);
+        }
+
         // bind resize event
         this.bind_resize_event();
     },
@@ -1174,6 +1163,8 @@ var jarvis = {
         });
     }
 };
+
+{% include 'js/jarvis_ext_utils.js' %}
 
 $(document).ready(function() {
     jarvis.init();

@@ -115,7 +115,7 @@ if (isIE) {
 
 var jarvis = {
 
-    getUrlParameter: function(name) {
+    get_url_paramter: function(name) {
         name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
         var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
         var results = regex.exec(location.search);
@@ -148,8 +148,8 @@ var jarvis = {
         }
 
         // get filename
-        var prj = jarvis.getUrlParameter('prj');
-        var default_treatment = jarvis.getUrlParameter('tr');
+        var prj = jarvis.get_url_paramter('prj');
+        var default_treatment = jarvis.get_url_paramter('tr');
         this.default_treatment = default_treatment;
 
         jarvis.ssmsg('Loading data ...');

@@ -4,6 +4,10 @@
 Manage Interactive Table
 {% endblock %}
 
+{% block section_cq %}
+{% include 'shared_module/_cq_selector_toolbar.html' %}
+{% endblock %}
+
 {% block page_name %}
 <i class="fa fa-list"></i>
 Manage Interactive Table
@@ -891,7 +895,7 @@ var pan_itbuilder = {
 
     extract_itable: function() {
         location.href = 
-            srv_extractor.url.extract_data + "?abbr=itable";
+            srv_extractor.url.extract_data + "?abbr=" + this.vpp.$data.itable.abbr;
     },
 
     /**
@@ -910,67 +914,75 @@ var pan_itbuilder = {
      */
     get_itable: function() {
         var project_id = Cookies.get('project_id');
-        var abbr = 'itable';
-        $.get(
-            srv_extractor.url.get_extract,
-            {project_id:project_id, abbr:abbr, rnd:Math.random()},
+        var cq_abbr = Cookies.get('cq_abbr');
+
+        srv_extractor.get_itable(
+            project_id,
+            cq_abbr,
             function(data) {
                 if (data.success) {
                     pan_itbuilder.update(data.extract);
                 } else {
                     // at present, there is not itable extract for this project
                     // create an itable extract
-                    pan_itbuilder.init_itable('itable');
+                    pan_itbuilder.init_itable();
                 }
-            }, 'json'
+            }
         );
     },
 
     /**
      * Create an itable
-     * the abbr should be 'itable'
-     * but this could be expanded in the future
+     * the oc_type should be 'itable'
+     * but the abbr is also generated randomly
      */
-    init_itable: function(abbr) {
+    init_itable: function() {
         var project_id = Cookies.get('project_id');
+        var cq_abbr = Cookies.get('cq_abbr');
         var oc_type = 'itable';
         var tpl = 'default';
-        var meta = JSON.parse(JSON.stringify(srv_extractor.tpl.oc_type[oc_type][tpl]));
+        var abbr = srv_extractor.mk_oc_abbr();
+
+        // create a meta for itable
+        var meta = JSON.parse(JSON.stringify(
+            srv_extractor.tpl.oc_type[oc_type][tpl]
+        ));
+        // set the cq to current cq
+        meta.cq_abbr = cq_abbr;
+        // set the abbr in meta
+        meta.abbr = abbr;
+
+        // init empty data
         var data = {}
 
-        $.post(
-            srv_extractor.url.create_extract,
-            {
-                project_id: project_id,
-                oc_type: oc_type,
-                abbr: abbr,
-                meta: JSON.stringify(meta),
-                data: JSON.stringify(data)
-            }, 
+        srv_extractor.create_extract(
+            project_id,
+            oc_type,
+            abbr,
+            meta,
+            data,
             function(data) {
                 // show what we get!
                 console.log(data);
                 // update UI
                 pan_itbuilder.update(data.extract);
-            }, 'json'
+            }
         );
     },
 
     save_itable: function() {
         var project_id = Cookies.get('project_id');
+        var cq_abbr = Cookies.get('cq_abbr');
         var oc_type = 'itable';
-        var abbr = 'itable';
+        var abbr = this.vpp.$data.itable.abbr;
         var meta = this.vpp.$data.itable.meta;
 
-        // // send back to server
-        $.post(
-            srv_extractor.url.update_extract_meta,
-            {
-                project_id:project_id, 
-                oc_type:oc_type, 
-                abbr:abbr,
-                meta:JSON.stringify(meta)
-            },
+        // send back to server
+        srv_extractor.update_extract_meta(
+            project_id,
+            oc_type,
+            abbr,
+            meta,
             function(data) {
                 // show
                 toast('Saved the interactive table');

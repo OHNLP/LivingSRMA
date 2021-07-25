@@ -852,11 +852,11 @@ var jarvis = {
         }
 
         // OK, 
-        var prj = jarvis.getUrlParameter('prj');
+        var prj = jarvis.get_url_paramter('prj');
         prj = 'IO';
 
         // get the src
-        var src = jarvis.getUrlParameter('src');
+        var src = jarvis.get_url_paramter('src');
         if (src == null || src == '') {
             src = 'db';
         }
@@ -891,7 +891,7 @@ var jarvis = {
         
     },
 
-    getUrlParameter: function(name) {
+    get_url_paramter: function(name) {
         name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
         var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
         var results = regex.exec(location.search);

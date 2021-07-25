@@ -8,7 +8,6 @@
                 <b>
                     [
                         {{ _lbl(extract.oc_type) }} |
-                        {{ extract.meta.category  }} |
                         {{ extract.meta.full_name }}
                     ]
                 </b> 
@@ -44,6 +43,10 @@
                     type="button" class="btn btn-danger btn-sm">
                     Delete this outcome
                 </button>
+            </div>
+
+            <div style="color: white;">
+                {{ extract.abbr }}
             </div>
 
         </div>

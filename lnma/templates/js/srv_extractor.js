@@ -19,6 +19,7 @@ var srv_extractor = {
 
         get_paper: "[[ url_for('extractor.get_paper') ]]",
         get_pdata_in_extract: "[[ url_for('extractor.get_pdata_in_extract') ]]",
+        get_itable: "[[ url_for('extractor.get_itable') ]]",
         get_extract: "[[ url_for('extractor.get_extract') ]]",
         get_extracts: "[[ url_for('extractor.get_extracts') ]]",
         get_extract_and_papers: "[[ url_for('extractor.get_extract_and_papers') ]]",
@@ -27,7 +28,9 @@ var srv_extractor = {
         update_paper_one_selection: "[[ url_for('extractor.update_paper_one_selection') ]]",
         update_paper_selections: "[[ url_for('extractor.update_paper_selections') ]]",
 
-        extract_data: "[[ url_for('extractor.extract_data') ]]"
+        extract_data: "[[ url_for('extractor.extract_data') ]]",
+
+        manage_outcomes: "[[ url_for('extractor.manage_outcomes') ]]",
     },
 
     // the project is binded when running extracting
@@ -52,6 +55,27 @@ var srv_extractor = {
         location.href = this.url.extract_data + '?abbr=' + abbr;
     },
 
+    create_extract: function(project_id, oc_type, abbr, meta, data, callback) {
+        $.ajax({
+            type: 'POST',
+            dataType: 'json',
+            url: this.url.create_extract,
+            data: {
+                project_id: project_id, 
+                oc_type: oc_type, 
+                abbr:abbr,
+                meta:JSON.stringify(meta), 
+                data:JSON.stringify(data)
+            },
+            cache: false,
+            success: callback,
+            error: function(jqXHR, textStatus, errorThrown) {
+                jarvis.toast('Something wrong when creating the extraction.', 'alert');
+                console.error(textStatus, errorThrown);
+            }
+        });
+    },
+
     update_extract: function(
         project_id,
         oc_type,
@@ -70,6 +94,32 @@ var srv_extractor = {
                 abbr:abbr,
                 meta:JSON.stringify(meta), 
                 data:JSON.stringify(data)
+            },
+            cache: false,
+            success: callback,
+            error: function(jqXHR, textStatus, errorThrown) {
+                jarvis.toast('Something wrong when saving the extraction.', 'alert');
+                console.error(textStatus, errorThrown);
+            }
+        });
+    },
+
+    update_extract_meta: function(
+        project_id,
+        oc_type,
+        abbr,
+        meta,
+        callback
+    ) {
+        $.ajax({
+            type: 'POST',
+            dataType: 'json',
+            url: this.url.update_extract_meta,
+            data: {
+                project_id:project_id, 
+                oc_type:oc_type, 
+                abbr:abbr,
+                meta:JSON.stringify(meta)
             },
             cache: false,
             success: callback,
@@ -138,11 +188,25 @@ var srv_extractor = {
         );
     },
 
-    get_extract: function(project_id, abbr, callback) {
+    get_itable: function(project_id, cq_abbr, callback) {
+        $.get(
+            this.url.get_itable,
+            {
+                project_id: project_id,
+                cq_abbr: cq_abbr,
+                rnd: Math.random()
+            },
+            callback,
+            'json'
+        );
+    },
+
+    get_extract: function(project_id, cq_abbr, abbr, callback) {
         $.get(
             this.url.get_extract,
             {
                 project_id: project_id,
+                cq_abbr: cq_abbr,
                 abbr: abbr,
                 rnd: Math.random()
             },
@@ -151,11 +215,12 @@ var srv_extractor = {
         );
     },
 
-    get_extracts: function(project_id, callback) {
+    get_extracts: function(project_id, cq_abbr, callback) {
         $.get(
             this.url.get_extracts,
             {
                 project_id: project_id,
+                cq_abbr: cq_abbr,
                 rnd: Math.random()
             },
             callback,

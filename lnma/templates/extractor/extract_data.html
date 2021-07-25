@@ -5,35 +5,7 @@ Extract by outcome
 {% endblock %}
 
 {% block section_cq %}
-
-<ul class="navbar-nav ml-auto">
-      
-    <!-- Notifications Dropdown Menu -->
-    <li class="nav-item dropdown">
-      <a class="nav-link" data-toggle="dropdown" href="#">
-        <i class="fas fa-notes-medical"></i>
-        <span class="mr-2">
-            [[ project.get_cq_name(cq_abbr) ]]
-        </span>
-      </a>
-
-      <div class="dropdown-menu dropdown-menu-left">
-        <span class="dropdown-item dropdown-header">
-            <b class="badge badge-info">[[ project.get_cqs()|length ]]</b>
-            Clinical Questions
-        </span>
-        <div class="dropdown-divider"></div>
-        {% for cq in project.get_cqs() %}
-        <a href="javascript:void(0);" class="dropdown-item">
-            <i class="fas fa-notes-medical mr-2"></i> 
-            [[ cq['name'] ]]
-        </a>
-        {% endfor %}
-
-      </div>
-    </li>
-    
-</ul>
+{% include 'shared_module/_cq_selector_toolbar.html' %}
 {% endblock %}
 
 {% block page_name %}
@@ -229,6 +201,11 @@ var pan_ocpapers = {
         // save all!
         save_extract: function() {
             pan_ocpapers.save_extract();
+        },
+
+        edit_extract_meta: function() {
+            location.href = srv_extractor.url.manage_outcomes + 
+                '?abbr=' + this.working_oc.abbr;
         },
 
         goto_analysis: function() {
@@ -457,22 +434,28 @@ var pan_ocpapers = {
 
     load_all_outcomes: function() {
         var project_id = Cookies.get('project_id');
+        var cq_abbr = Cookies.get('cq_abbr');
 
-        srv_extractor.get_extracts(project_id, function(data) {
-            // update the outcome selection menu
-            console.log(data);
-            pan_ocpapers.extracts = data.extracts;
+        srv_extractor.get_extracts(
+            project_id, 
+            cq_abbr,
+            
+            function(data) {
+                // update the outcome selection menu
+                console.log(data);
+                pan_ocpapers.extracts = data.extracts;
 
-            // update the ocs_menu according to the extracts
-            pan_ocpapers.vpp.$data.extract_tree = srv_shared.create_extract_tree(
-                data.extracts
-            );
+                // update the ocs_menu according to the extracts
+                pan_ocpapers.vpp.$data.extract_tree = srv_shared.create_extract_tree(
+                    data.extracts
+                );
 
-            // update the ocs menu
-            pan_ocpapers.update_ocs_menu(
-                pan_ocpapers.vpp.$data.extract_tree
-            );
-        });
+                // update the ocs menu
+                pan_ocpapers.update_ocs_menu(
+                    pan_ocpapers.vpp.$data.extract_tree
+                );
+            }
+        );
     },
 
     update: function(data) {
@@ -756,14 +739,6 @@ var pan_ocpapers = {
 
 
 var jarvis = {
-
-    getUrlParameter: function(name) {
-        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
-        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
-        var results = regex.exec(location.search);
-        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
-    },
-
     goto_screener: function(project_id, title) {
         Cookies.set('project_id', project_id);
         Cookies.set('project_title', title);
@@ -773,7 +748,7 @@ var jarvis = {
 
     init: function() {
         // get the outcome abbr from url
-        var oc_abbr = jarvis.getUrlParameter('abbr');
+        var oc_abbr = jarvis.get_url_paramter('abbr');
 
         // init the shared service
         srv_shared.update_labels_by_project_settings(
@@ -858,6 +833,8 @@ var jarvis = {
         });
     }
 };
+
+{% include 'js/jarvis_ext_utils.js' %}
 
 $(document).ready(function() {
     jarvis.init();

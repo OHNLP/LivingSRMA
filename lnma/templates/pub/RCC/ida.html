@@ -249,7 +249,7 @@ var jarvis = {
             return;
         }
 
-        var prj = jarvis.getUrlParameter('prj');
+        var prj = jarvis.get_url_paramter('prj');
 
         // init the vue app
         vw_idgpanel.init();
@@ -259,7 +259,7 @@ var jarvis = {
         setTimeout('jarvis.ssclose();', 400);
     },
 
-    getUrlParameter: function(name) {
+    get_url_paramter: function(name) {
         name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
         var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
         var results = regex.exec(location.search);

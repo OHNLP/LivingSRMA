@@ -747,8 +747,8 @@ var jarvis = {
             jarvis.ssmsg('The functions used in this website require advanced web technologies, which are <b>NOT</b> supported by Internet Explorer<br>Try using Google Chrome, Apple Safari, Mozilla Firefox or other modern browsers.')
             return;
         }
-        var prj = jarvis.getUrlParameter('prj');
-        var src = jarvis.getUrlParameter('src');
+        var prj = jarvis.get_url_paramter('prj');
+        var src = jarvis.get_url_paramter('src');
 
         if (src == '') {
             src = 'xls'
@@ -857,7 +857,7 @@ var jarvis = {
             
     },
 
-    getUrlParameter: function(name) {
+    get_url_paramter: function(name) {
         name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
         var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
         var results = regex.exec(location.search);
