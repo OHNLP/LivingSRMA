@@ -641,7 +641,7 @@ var jarvis = {
         },
     },
 
-    getUrlParameter: function(name) {
+    get_url_paramter: function(name) {
         name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
         var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
         var results = regex.exec(location.search);
@@ -654,7 +654,7 @@ var jarvis = {
             autoOpen: false
         });
 
-        var prj = jarvis.getUrlParameter('prj');
+        var prj = jarvis.get_url_paramter('prj');
 
         $.get(
             '/pub/graphdata/' + prj + '/PRISMA.json',

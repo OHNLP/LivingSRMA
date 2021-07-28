@@ -93,6 +93,9 @@ var srv_shared = {
             var cate = ext.meta.category;
 
             if (ext.oc_type == 'itable') {
+                // the side effect is that if there are multiple exts(itables),
+                // the last one (randomly) will overwrite all others.
+                // BUT!!! there should be only one itable for each cq in project
                 extract_tree.itable = ext;
 
             } else {

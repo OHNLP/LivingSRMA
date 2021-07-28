@@ -57,7 +57,7 @@ Project Editor
 {% block script %}
 <script>
 var jarvis = {
-    getUrlParameter: function(name) {
+    get_url_paramter: function(name) {
         name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
         var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
         var results = regex.exec(location.search);
@@ -66,14 +66,14 @@ var jarvis = {
 
     init: function() {
         // get filename
-        var prj = jarvis.getUrlParameter('prj');
+        var prj = jarvis.get_url_paramter('prj');
         /**
          * slides is a string defined as follows:
          * filename.png$a sentence for legend|filename.png$xxx
          */
-        var pt = jarvis.getUrlParameter('pt');
+        var pt = jarvis.get_url_paramter('pt');
 
-        var slides = jarvis.getUrlParameter('slides');
+        var slides = jarvis.get_url_paramter('slides');
         var slides = slides.split('|');
 
         // build the page

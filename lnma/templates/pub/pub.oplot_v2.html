@@ -482,7 +482,7 @@ var jarvis = {
         }
 
         // OK, 
-        var prj = jarvis.getUrlParameter('prj');
+        var prj = jarvis.get_url_paramter('prj');
         if (prj == null) {
             jarvis.ssmsg('Project information error.')
             return;
@@ -523,7 +523,7 @@ var jarvis = {
         
     },
 
-    getUrlParameter: function(name) {
+    get_url_paramter: function(name) {
         name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
         var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
         var results = regex.exec(location.search);

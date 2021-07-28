@@ -521,7 +521,7 @@ if (isIE) {
 {% include "js/fig_saver.js" %}
 
 var jarvis = {
-    getUrlParameter: function(name) {
+    get_url_paramter: function(name) {
         name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
         var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
         var results = regex.exec(location.search);
@@ -591,8 +591,8 @@ var jarvis = {
         fg_scrplt.init();
 
         // get filename
-        var prj = jarvis.getUrlParameter('prj');
-        var fn = jarvis.getUrlParameter('fn');
+        var prj = jarvis.get_url_paramter('prj');
+        var fn = jarvis.get_url_paramter('fn');
         jarvis.ssmsg('Loading data ...');
 
         $.get(

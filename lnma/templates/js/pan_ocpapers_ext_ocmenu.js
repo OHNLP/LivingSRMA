@@ -59,7 +59,7 @@ Object.assign(pan_ocpapers, {
         if (is_shown_itable) {
             html.push(
                 '<li class="oc-menu-item">'+
-                '<div onclick="pan_ocpapers.show_extract_and_papers(\'itable\');">'+
+                '<div onclick="pan_ocpapers.show_extract_and_papers(\''+extract_tree.itable.abbr+'\');">'+
                 'Interactive Table'+
                 '</div></li>'
             );

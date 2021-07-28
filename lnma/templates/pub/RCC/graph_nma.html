@@ -445,7 +445,7 @@ var fm_ref_treat_selector = {
 
 var jarvis = {
 
-    getUrlParameter: function(name) {
+    get_url_paramter: function(name) {
         name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
         var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
         var results = regex.exec(location.search);
@@ -535,10 +535,10 @@ var jarvis = {
         }
 
         // get filename
-        var prj = jarvis.getUrlParameter('prj');
-        var oc = jarvis.getUrlParameter('oc');
-        var treat = jarvis.getUrlParameter('tr');
-        var is_lower_better = jarvis.getUrlParameter('lb');
+        var prj = jarvis.get_url_paramter('prj');
+        var oc = jarvis.get_url_paramter('oc');
+        var treat = jarvis.get_url_paramter('tr');
+        var is_lower_better = jarvis.get_url_paramter('lb');
 
         this.default_oc_name = oc;
         this.default_treat = treat;

@@ -397,6 +397,9 @@ def get_extract_and_papers():
     stage = ss_state.SS_STAGE_INCLUDED_SR
     papers = dora.get_papers_by_stage(project_id, stage)
     
+    # update the meta
+    extract.update_meta()
+
     # update the extract with papers
     extract.update_data_by_papers(papers)
 
@@ -622,6 +625,37 @@ def get_pdata_in_extract():
     return jsonify(ret)
 
 
+@bp.route('/get_itable')
+@login_required
+def get_itable():
+    '''
+    Get one extract by the project_id and the abbr
+    '''
+    project_id = request.args.get('project_id')
+    cq_abbr = request.args.get('cq_abbr')
+    
+    # get the exisiting extracts
+    extract = dora.get_itable_by_project_id_and_cq(
+        project_id, 
+        cq_abbr
+    )
+
+    if extract is None:
+        # this is a new extract
+        ret = {
+            'success': False,
+            'msg': 'not exist itable for cq %s' % cq_abbr
+        }
+        return jsonify(ret)
+
+    ret = {
+        'success': True,
+        'msg': '',
+        'extract': extract.as_dict()
+    }
+    return jsonify(ret)
+
+
 @bp.route('/get_extract')
 @login_required
 def get_extract():
@@ -629,10 +663,15 @@ def get_extract():
     Get one extract by the project_id and the abbr
     '''
     project_id = request.args.get('project_id')
+    cq_abbr = request.args.get('cq_abbr')
     abbr = request.args.get('abbr')
     
     # get the exisiting extracts
-    extract = dora.get_extract_by_project_id_and_abbr(project_id, abbr)
+    extract = dora.get_extract_by_project_id_and_cq_and_abbr(
+        project_id, 
+        cq_abbr, 
+        abbr
+    )
 
     if extract is None:
         # this is a new extract
@@ -657,10 +696,20 @@ def get_extracts():
     Get all of the extracts by the project_id
     '''
     project_id = request.args.get('project_id')
+
+    if project_id is None:
+        ret = {
+            'success': False,
+            'msg': 'project_id is required'
+        }
+        return jsonify(ret)
+
     with_data = request.args.get('with_data')
     
     # decide which cq to use
-    cq_abbr = request.cookies.get('cq_abbr')
+    # cq_abbr = request.cookies.get('cq_abbr')
+    cq_abbr = request.args.get('cq_abbr')
+
     if cq_abbr is None:
         cq_abbr = 'default'
 
@@ -670,7 +719,13 @@ def get_extracts():
         with_data = False
     
     # get the exisiting extracts
-    extracts = dora.get_extracts_by_project_id(project_id)
+    extracts = dora.get_extracts_by_project_id_and_cq(
+        project_id,
+        cq_abbr
+    )
+
+    for i in range(len(extracts)):
+        extracts[i].update_meta()
 
     # build the return obj
     if with_data:

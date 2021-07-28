@@ -554,7 +554,7 @@ var jarvis = {
         }
 
         // OK, get the project name
-        var prj = jarvis.getUrlParameter('prj');
+        var prj = jarvis.get_url_paramter('prj');
         if (prj == null) {
             jarvis.ssmsg('Project information error.')
             return;
@@ -564,7 +564,7 @@ var jarvis = {
         // the msrs should be a comma seperated string:
         // e.g., OR,RR
         // HR,OR
-        var msrs = jarvis.getUrlParameter('msrs');
+        var msrs = jarvis.get_url_paramter('msrs');
         if (msrs == null || msrs == '') {
             msrs = 'OR,RR';
         }
@@ -597,7 +597,7 @@ var jarvis = {
         
     },
 
-    getUrlParameter: function(name) {
+    get_url_paramter: function(name) {
         name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
         var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
         var results = regex.exec(location.search);

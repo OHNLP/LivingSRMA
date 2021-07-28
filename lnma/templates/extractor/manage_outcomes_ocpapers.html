@@ -8,7 +8,6 @@
                 <b>
                     [
                         {{ _lbl(extract.oc_type) }} |
-                        {{ extract.meta.category  }} |
                         {{ extract.meta.full_name }}
                     ]
                 </b> 
@@ -44,6 +43,10 @@
                     type="button" class="btn btn-danger btn-sm">
                     Delete this outcome
                 </button>
+            </div>
+
+            <div style="color: white;">
+                {{ extract.abbr }}
             </div>
 
         </div>
@@ -127,7 +130,7 @@
                                 <i class="fa fa-plus"></i>
                             </button>
                         </label>
-                        <small id="input_category_help" class="form-text text-muted">
+                        <small id="input_subgroups_help" class="form-text text-muted">
                             The category of this outcome.
                         </small>
                         <div class="row">
@@ -149,7 +152,6 @@
                 </div>
 
                 <div class="row">
-
 
                     <div class="form-group col-md-4">
                         <label for="input_input_format">Data Type / Input Format</label>
@@ -177,6 +179,63 @@
 
                         <small id="input_input_format_help" class="form-text text-muted">
                             The format of the input data to the analyzer.
+                        </small>
+                    </div>
+
+                    <div v-if="extract.meta.oc_type == 'pwma'"
+                        class="form-group col-md-4">
+                        <label for="input_treatment_arm">Treatment Arm</label>
+                        <input v-model="extract.meta.treatments[0]"
+                            class="form-control" 
+                            id="input_treatment_arm" aria-describedby="input_treatment_arm_help">
+                        <small id="input_treatment_arm_help" class="form-text text-muted">
+                            The treatment arm name.
+                        </small>
+                    </div>
+                    
+                    <div v-if="extract.meta.oc_type == 'pwma'"
+                        class="form-group col-md-4">
+                        <label for="input_treatment_arm">Control Arm</label>
+                        <input v-model="extract.meta.treatments[1]"
+                            class="form-control" 
+                            id="input_treatment_arm" aria-describedby="input_treatment_arm_help">
+                        <small id="input_treatment_arm_help" class="form-text text-muted">
+                            The control arm name.
+                        </small>
+                    </div>
+
+                </div>
+
+                <div class="row">
+                    <div v-if="extract.meta.oc_type == 'nma'"
+                        class="form-group col-md-12">
+                        <label for="input_treatments">
+                            Treatments
+                            <button class="btn btn-xs btn-primary"
+                                title="Add a new treatment arm"
+                                v-on:click="on_click_add_treatment_arm">
+                                <i class="fa fa-plus"></i>
+                            </button>
+                        </label>
+
+                        <div class="row">
+
+                            <div v-for="treatment, treat_idx in extract.meta.treatments"
+                                class="col-sm-2">
+                                <input type="text" 
+                                    class="form-control" 
+                                    v-model="extract.meta.treatments[treat_idx]">
+                                <button v-if="treat_idx > 1" 
+                                    v-on:click="on_click_remove_treatment_arm(treat_idx)"
+                                    class="btn btn-sm">
+                                    <i class="fa fa-minus"></i>
+                                </button>
+                            </div>
+
+                        </div>
+
+                        <small id="input_treatments_help" class="form-text text-muted">
+                            The treatments in this outcome.
                         </small>
                     </div>
 

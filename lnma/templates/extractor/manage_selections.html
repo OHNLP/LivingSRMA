@@ -5,34 +5,7 @@ Extract by paper
 {% endblock %}
 
 {% block section_cq %}
-<ul class="navbar-nav ml-auto">
-      
-    <!-- Notifications Dropdown Menu -->
-    <li class="nav-item dropdown">
-      <a class="nav-link" data-toggle="dropdown" href="#">
-        <i class="fas fa-notes-medical"></i>
-        <span class="mr-2">
-            [[ project.get_cq_name(cq_abbr) ]]
-        </span>
-      </a>
-
-      <div class="dropdown-menu dropdown-menu-left">
-        <span class="dropdown-item dropdown-header">
-            <b class="badge badge-info">[[ project.get_cqs()|length ]]</b>
-            Clinical Questions
-        </span>
-        <div class="dropdown-divider"></div>
-        {% for cq in project.get_cqs() %}
-        <a href="javascript:void(0);" class="dropdown-item">
-            <i class="fas fa-notes-medical mr-2"></i> 
-            [[ cq['name'] ]]
-        </a>
-        {% endfor %}
-
-      </div>
-    </li>
-    
-</ul>
+{% include 'shared_module/_cq_selector_toolbar.html' %}
 {% endblock %}
 
 {% block page_name %}

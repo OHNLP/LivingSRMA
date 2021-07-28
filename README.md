@@ -630,6 +630,12 @@ please follow the instruction.
 
 # Update log
 
+## 2021-07-16
+
+A weired issue on my dev machine:
+
+Just run export LD_PRELOAD=/lib/x86_64-linux-gnu/libstdc++.so.6 before start dev server.
+
 ## 2020-10-07
 
 Fixed a lot of things. Add a reverse parser for the dev site on development server for checking detailed log data.
