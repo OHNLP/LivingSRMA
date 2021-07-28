@@ -27,7 +27,9 @@ var srv_extractor = {
         update_paper_one_selection: "[[ url_for('extractor.update_paper_one_selection') ]]",
         update_paper_selections: "[[ url_for('extractor.update_paper_selections') ]]",
 
-        extract_data: "[[ url_for('extractor.extract_data') ]]"
+        extract_data: "[[ url_for('extractor.extract_data') ]]",
+
+        sort_rct_seq: "[[ url_for('extractor.sort_rct_seq') ]]"
     },
 
     // the project is binded when running extracting
@@ -46,6 +48,19 @@ var srv_extractor = {
             min: [[ config['settings']['EXTRACTOR_INPUT_BOX_MIN_SIZE'] ]],
             max: [[ config['settings']['EXTRACTOR_INPUT_BOX_MAX_SIZE'] ]]
         }
+    },
+
+    sort_rct_seq: function(callback) {
+        $.ajax({
+            url: this.api_url.sort_rct_seq,
+            type: 'get',
+            dataType: 'json',
+            data: { rnd: Math.random() },
+            success: callback,
+            error: function(data) {
+                toast('System error when updating the studies, please try later.', 'error');
+            }
+        })
     },
 
     goto_extract_data: function(abbr) {

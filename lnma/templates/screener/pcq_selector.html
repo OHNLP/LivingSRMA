@@ -1,0 +1,85 @@
+{% extends '_layout_adminlte.html' %}
+
+{% block title %}
+Manage Study-Question
+{% endblock %}
+
+{% block style %}
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css">
+
+<style>
+#main {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+    margin: 0 0 0 10px;
+    overflow: hidden;
+}
+</style>
+{% endblock %}
+
+{% block page_name %}
+<i class="fa fa-braille"></i>
+Manage Study-Question
+{% endblock %}
+
+{% block content %}
+
+<div id="main">
+
+<div id="pan_ocpapers">
+    
+</div>
+
+</div>
+
+{% endblock %}
+
+{% block active_nav_link %}screener-pcq-selector{% endblock %}
+
+{% block script %}
+<script src="https://unpkg.com/dayjs@1.8.21/dayjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.4.0/clipboard.min.js" integrity="sha512-iJh0F10blr9SC3d0Ow1ZKHi9kt12NYa+ISlmCdlCdNZzFwjH1JppRTeAnypvUez01HroZhAmP4ro4AvZ/rG0UQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<!-- my scripts -->
+<script>
+
+{% include 'js/srv_screener.js' %}
+
+
+
+var jarvis = {
+
+    project: [[ project_json_str|safe ]],
+
+    init: function () {
+
+        // bind resize event
+        this.bind_resize_event();
+    },
+
+    toast: function(msg, type) {
+        toast(msg, type);
+    },
+
+    prompt: function(text, value) {
+        return window.prompt(text, value);
+    },
+
+    confirm: function(text) {
+        return window.confirm(text);
+    },
+
+    bind_resize_event: function() {
+        $(window).on('resize', function(){
+            // pan_outcomes.resize();
+        });
+    }
+};
+
+$(document).ready(function () {
+    jarvis.init();
+})
+</script>
+{% endblock %}

@@ -281,12 +281,39 @@ label {
           </li> -->
 
           <li class="nav-item">
-            <a id="nav-link-screener-overview" href="[[ url_for('screener.overview') ]]" class="nav-link">
+
+            <a id="nav-link-screener" href="#" class="nav-link">
               <i class="nav-icon fas fa-filter"></i>
               <p>
-                Study Screener
+                Data Screener
+                <i class="fas fa-angle-left right"></i>
               </p>
             </a>
+
+            <ul class="nav nav-treeview">
+
+              <li class="nav-item">
+                <a id="nav-link-screener-overview" 
+                  href="[[ url_for('screener.overview') ]]" 
+                  class="nav-link">
+                  &nbsp;&nbsp;
+                  <i class="fa fa-table nav-icon"></i>
+                  <p>All Study Screener</p>
+                </a>
+              </li>
+
+              <li class="nav-item">
+                <a id="nav-link-screener-pcq-selector" 
+                  href="[[ url_for('screener.pcq_selector') ]]" 
+                  class="nav-link">
+                  &nbsp;&nbsp;
+                  <i class="fa fa-braille nav-icon"></i>
+                  <p>Manage Study-CQ</p>
+                </a>
+              </li>
+
+            </ul>
+
           </li>
           
           <li class="nav-item">

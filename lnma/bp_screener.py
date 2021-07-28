@@ -47,6 +47,27 @@ def overview():
     )
 
 
+@bp.route('/pcq_selector')
+@login_required
+def pcq_selector():
+    project_id = request.cookies.get('project_id')
+
+    if project_id is None:
+        return redirect(url_for('project.mylist'))
+
+    project = dora.get_project(project_id)
+
+    return render_template(
+        'screener/pcq_selector.html',
+        project=project,
+        project_json_str=json.dumps(project.as_dict())
+    )
+
+
+###############################################################################
+# AJAX API functions for screener
+###############################################################################
+
 @bp.route('/get_paper_by_id')
 @login_required
 def get_paper_by_id():
