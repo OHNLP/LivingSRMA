@@ -30,6 +30,7 @@ var srv_extractor = {
 
         extract_data: "[[ url_for('extractor.extract_data') ]]",
 
+        sort_rct_seq: "[[ url_for('extractor.sort_rct_seq') ]]",
         manage_outcomes: "[[ url_for('extractor.manage_outcomes') ]]",
     },
 
@@ -49,6 +50,19 @@ var srv_extractor = {
             min: [[ config['settings']['EXTRACTOR_INPUT_BOX_MIN_SIZE'] ]],
             max: [[ config['settings']['EXTRACTOR_INPUT_BOX_MAX_SIZE'] ]]
         }
+    },
+
+    sort_rct_seq: function(callback) {
+        $.ajax({
+            url: this.api_url.sort_rct_seq,
+            type: 'get',
+            dataType: 'json',
+            data: { rnd: Math.random() },
+            success: callback,
+            error: function(data) {
+                toast('System error when updating the studies, please try later.', 'error');
+            }
+        })
     },
 
     goto_extract_data: function(abbr) {

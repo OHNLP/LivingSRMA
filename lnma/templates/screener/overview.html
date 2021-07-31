@@ -617,7 +617,10 @@ Screener Overview
 <script>
 
 {% include 'js/srv_pubmed.js' %}
+
 {% include 'js/srv_screener.js' %}
+
+{% include 'js/srv_extractor.js' %}
 
 // update the project information
 srv_screener.project = [[ project_json_str|safe ]];
@@ -2683,26 +2686,6 @@ var srv_collector = {
         form.submit();
     }
 };
-
-
-var srv_extractor = {
-    api_url: {
-        sort_rct_seq: "[[ url_for('extractor.sort_rct_seq') ]]"
-    },
-
-    sort_rct_seq: function(callback) {
-        $.ajax({
-            url: this.api_url.sort_rct_seq,
-            type: 'get',
-            dataType: 'json',
-            data: { rnd: Math.random() },
-            success: callback,
-            error: function(data) {
-                toast('System error when updating the studies, please try later.', 'error');
-            }
-        })
-    }
-}
 
 
 var jarvis = {
