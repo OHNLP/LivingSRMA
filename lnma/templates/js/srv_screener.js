@@ -63,6 +63,7 @@ var srv_screener = {
     STAGE_EXCLUDED_BY_FULLTEXT: 'excluded_by_fulltext',
     STAGE_INCLUDED_SR: 'included_sr',
     STAGE_INCLUDED_SRMA: 'included_srma',
+    STAGE_FULLTEXT_REVIEW: 'passed_title_not_fulltext',
     
     // Not used stages
     // STAGE_INCLUDED_ONLY_SR: 'included_only_sr',
