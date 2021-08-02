@@ -255,7 +255,7 @@ class Paper(db.Model):
         date_decided: "2021-03-27",
         decision: "included_sr",
         reason: "Through Abstract",
-        cq_selection: {
+        ss_cq: {
             default: 'no'
         }
     }
@@ -317,6 +317,21 @@ class Paper(db.Model):
         return stages
 
 
+    def is_ss_included_in_project(self):
+        '''
+        Check whether this paper is included in project
+        '''
+        if self.ss_rs in [
+            ss_state.SS_RS_INCLUDED_ONLY_SR,
+            ss_state.SS_RS_INCLUDED_ONLY_MA,
+            ss_state.SS_RS_INCLUDED_SRMA
+        ]:
+            return True
+
+        else:
+            return False
+
+
     def get_rct_id(self):
         '''
         Get the RCT ID (NCT) or other number
@@ -358,6 +373,29 @@ class Paper(db.Model):
         Get the year from this record
         '''
         return util.get_year(self.pub_date)
+
+    
+    def update_ss_cq_by_cqs(self, cqs):
+        '''
+        Update the ss_cq in the ss_ex
+
+        This attiribute is used only for those included studies.
+        '''
+        if self.is_ss_included_in_project():
+            # ok, let's check the cq
+            if 'ss_cq' in self.ss_ex:
+                pass
+            else:
+                self.ss_ex['ss_cq'] = {}
+            
+            # check each cq
+            for cq in cqs:
+                if cq['abbr'] in self.ss_ex['ss_cq']:
+                    pass
+                else:
+                    self.ss_ex['ss_cq'][cq['abbr']] = settings.SCREENER_DEFAULT_DECISION_FOR_CQ_INCLUSION
+
+        # ok, that's all
 
     
     def is_pmid(self):

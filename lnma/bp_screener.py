@@ -12,7 +12,7 @@ from flask import url_for
 from flask_login import login_required
 from flask_login import current_user
 
-from lnma import dora
+from lnma import dora, srv_paper
 from lnma.models import *
 from lnma import ss_state
 from lnma.util import get_today_date_str
@@ -72,11 +72,22 @@ def pcq_selector():
 @login_required
 def get_paper_by_id():
     paper_id = request.args.get('paper_id')
-    paper = dora.get_paper_by_id(paper_id)
+    project_id = request.cookies.get('project_id')
 
+    if project_id is None:
+        return redirect(url_for('project.mylist'))
+
+    paper = dora.get_paper_by_id(paper_id)
+    project = dora.get_project(project_id)
+
+    # check this paper
     if paper is None:
         json_paper = None
     else:
+        if paper.is_ss_included_in_project():
+            paper.update_ss_cq_by_cqs(
+                project.settings['clinical_questions']
+            )
         json_paper = paper.as_dict()
 
     ret = {
@@ -423,6 +434,8 @@ def sspr_include_papers_sr():
     detail_dict = util.get_decision_detail_dict(
         reason, ss_state.SS_STAGE_INCLUDED_SR
     )
+    # for those included in sr, also included in each sub cq
+    detail_dict['ss_cq'] = srv_paper.make_ss_cq_dict()
 
     for paper_id in paper_ids:
         p = dora.set_paper_pr_rs_with_details(

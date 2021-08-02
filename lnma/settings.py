@@ -638,6 +638,9 @@ PAPER_JOURNAL_MAX_LENGTH = 128
 # screening reasons
 SCREENER_REASON_INCLUDED_IN_SR_BY_IMPORT_PMIDS = 'User import'
 
+# default screening decision for each cq when study is included in project
+SCREENER_DEFAULT_DECISION_FOR_CQ_INCLUSION = 'yes'
+
 # Study type?
 PAPER_STUDY_TYPE_ORIGINAL = 'original'
 PAPER_STUDY_TYPE_FOLLOWUP = 'followup'

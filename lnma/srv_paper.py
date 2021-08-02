@@ -8,6 +8,17 @@ from lnma import dora
 from lnma import ss_state
 
 
+def make_ss_cq_dict(project):
+    '''
+    Make an initial ss_cq based on a project
+    '''
+    d = {}
+    for cq in project.settings['clinical_questions']:
+        d[cq['abbr']] = settings.SCREENER_DEFAULT_DECISION_FOR_CQ_INCLUSION
+
+    return d
+
+
 def set_paper_rct_id(keystr, pid, rct_id):
     '''
     Set the RCT ID for a paper

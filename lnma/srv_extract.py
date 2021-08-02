@@ -8,7 +8,6 @@ from lnma import settings
 from lnma import util
 from lnma import dora
 from lnma import ss_state
-# from lnma.analyzer import py_pwma_analyzer as pwma_analyzer
 from lnma.analyzer import rpy2_pwma_analyzer as pwma_analyzer
 
 
@@ -307,68 +306,3 @@ def get_sof_pma_data_from_db_IO(is_calc_pma=True):
 
     return ret
 
-
-def upgrade_extract_data_model(keystr):
-    '''
-    Upgrade the data model for all extracts in a project
-    '''
-    import copy
-
-    extracts = dora.get_extracts_by_keystr(keystr)
-
-    # now, check each extract
-
-    updated_exts = []
-    for extract in tqdm(extracts):
-        # first, check the new attr `cq_abbr`
-        if 'cq_abbr' not in extract.meta:
-            # now, let's add something
-            extract.meta['cq_abbr'] = 'default'
-        
-        # for the subg
-        if 'is_subg_analysis' not in extract.meta:
-            extract.meta['is_subg_analysis'] = 'no'
-
-        if extract.meta['is_subg_analysis'] == 'no':
-            extract.meta['sub_groups'] = ['A']
-
-        if 'treatments' not in extract.meta:
-            extract.meta['treatments'] = ['A', 'B']
-
-        # now, let's check the data
-        for pid in extract.data:
-            # check the main arm
-            if 'g0' in extract.data[pid]['attrs']['main']:
-                # this pid is updated
-                continue
-
-            # copy the main
-            m = copy.deepcopy(extract.data[pid]['attrs']['main'])
-
-            # update the content
-            extract.data[pid]['attrs']['main'] = {
-                'g0': m
-            }
-
-            # check other arms
-            if len(extract.data[pid]['attrs']['other']) == 0:
-                # no need to convert empty other arms
-                continue
-
-            new_other = []
-            for other_idx in range(len(extract.data[pid]['attrs']['other'])):
-                # copy the data in this arm
-                d = copy.deepcopy(extract.data[pid]['attrs']['other'][other_idx])
-
-                # put the other arm into new_other
-                new_other.append({
-                    'g0': d
-                })
-            # update the other arm
-            extract.data[pid]['attrs']['other'] = new_other
-
-        # no matter what we do, update this extract here
-        updated_ext = dora.update_extract(extract)
-        updated_exts.append(updated_ext)
-
-    return updated_exts
