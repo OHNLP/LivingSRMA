@@ -246,6 +246,19 @@ class Paper(db.Model):
         study_type: "followup"
         tags: ['tag',]
     }
+
+    The `ss_ex` could also contain a lot:
+    {
+        label: {
+            CKL: { name: 'CKL' }
+        },
+        date_decided: "2021-03-27",
+        decision: "included_sr",
+        reason: "Through Abstract",
+        cq_selection: {
+            default: 'no'
+        }
+    }
     """
     __tablename__ = 'papers'
     __table_args__ = {'extend_existing': True}
