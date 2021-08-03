@@ -192,3 +192,7 @@ def upgrade_extract_data_model_for_subg_and_cq(keystr):
         updated_exts.append(updated_ext)
 
     return updated_exts
+
+
+if __name__ == '__main__':
+    pass
