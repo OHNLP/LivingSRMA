@@ -8,6 +8,10 @@ Manage Study-Question
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css">
 
 <style>
+html {
+    overflow-x: hidden;
+    overflow-y: hidden;
+}
 #main {
     display: flex;
     flex-direction: row;
@@ -15,6 +19,45 @@ Manage Study-Question
     height: 100%;
     margin: 0 0 0 10px;
     overflow: hidden;
+}
+.col-cq-name {
+    max-width: 150px;
+    text-align: center;
+}
+.col-ss-cq {
+    text-align: center;
+}
+
+.table-ss-cq tr:hover {
+    background-color: #efefef;
+}
+.table-ss-cq tbody {
+    overflow-y: auto;
+}
+#pan_ocpapers_paperlist {
+    overflow-x: hidden;
+    height: 300px;
+    font-size: 0.9em;
+    max-width: calc(100% - 15px);
+}
+#pan_ocpapers_paperlist thead th{
+    position: sticky;
+    top: 0;
+    background-color: #d8d8d8;
+    padding: 0px 3px;
+    vertical-align: bottom;
+}
+#pan_ocpapers_paperlist tbody{
+    overflow-y: auto;
+}
+#pan_ocpapers_paperlist tbody td{
+    padding: 0px 3px;
+    border-right: 1px dotted #cfcfcf;
+    border-bottom: 1px dotted #cfcfcf;
+    vertical-align: middle;
+}
+#pan_ocpapers_paperlist tbody td input.check{
+    zoom: 1.5;
 }
 </style>
 {% endblock %}
@@ -29,7 +72,81 @@ Manage Study-Question
 <div id="main">
 
 <div id="pan_ocpapers">
-        
+<div v-if="papers != null && papers.length != 0"
+    class="d-flex flex-column">
+    <div class="mb-1 d-flex flex-row">
+        <div class="mr-2">
+            <span style="font-size: 1.2em;">
+                {{ papers.length }} studies (included in this project)
+            </span>
+        </div>
+
+        <div class="input-group input-group-sm mr-2"
+            style="width: 250px">
+            <input type="text" class="form-control" placeholder="PMID, short #, first author name"
+                v-model="keywords">
+            <div class="input-group-append">
+                <button class="btn btn-outline-secondary" type="button"
+                    title="Reset search"
+                    v-on:click="reset_keywords()">
+                    <i class="fa fa-close"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="pan_ocpapers_paperlist" class="mt-1">
+        <table class="table-ss-cq" style="max-width: 100%;">
+            <thead>
+                <tr>
+                    <th width="60px">#</th>
+                    <th width="120px">PID</th>
+                    <th>Study</th>
+                    <th v-for="cq in project.settings.clinical_questions"
+                        class="col-cq-name">
+                        {{ cq.name }}
+                        <br>
+                        <span style="font-size: 1.2em;">
+                            {{ count_n_papers_by_cq(cq.abbr) }} selected
+                        </span>
+                    </th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr v-for="paper, paper_idx in papers"
+                    v-if="is_search_match(paper)"
+                    v-bind:id="'paper-table-row-' + paper.pid"
+                    class="paper-table-row">
+                    <td v-on:click="on_click_paper(paper)">
+                        {{ paper.seq_num }}
+                    </td>
+                    <td v-on:click="on_click_paper(paper)">
+                        {{ paper.pid }}
+                    </td>
+                    <td class="paper-table-body-td-author"
+                        v-on:click="on_click_paper(paper)">
+                        <div class="paper-table-body-td-author">
+                            {{ paper.short_name }}
+                        </div>
+                    </td>
+
+                    <td v-for="cq in project.settings.clinical_questions"
+                        class="col-ss-cq">
+                        <input type="checkbox" 
+                            class="check"
+                            v-bind:id="'chk_p_' + paper.paper_id"
+                            v-bind:checked="paper.ss_ex.ss_cq[cq.abbr]=='yes'"
+                            @change="on_change_ss_cq(paper_idx, cq, event)">
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    
+    </div>
+
+
+</div>
 </div>
 
 </div>
@@ -47,13 +164,117 @@ Manage Study-Question
 
 {% include 'js/srv_screener.js' %}
 
-var pan_ocpapers = {};
+var pan_ocpapers = {
+    vpp_id: "#pan_ocpapers",
+    vpp: null,
+    vpp_data: {
+        keywords: '',
+        project: [[ project_json_str|safe ]],
+
+        papers: null
+    },
+    
+    vpp_methods: {
+        reset_keywords: function() {
+            this.keywords = '';
+        },
+
+        count_n_papers_by_cq: function(cq_abbr) {
+            var cnt = 0;
+            for (let i = 0; i < this.papers.length; i++) {
+                if (this.papers[i].ss_ex.ss_cq[cq_abbr]=='yes') {
+                    cnt += 1;
+                }
+            }
+            return cnt;
+        },
+        
+        is_search_match: function(paper) {
+            if (this.keywords == '') {
+                return true;
+            }
+
+            if (paper.pid.indexOf(this.keywords)>=0 ||
+                paper.seq_num == parseInt(this.keywords) ||
+                paper.short_name.toLocaleUpperCase().indexOf(this.keywords.toLocaleUpperCase())>=0
+            ) {
+                return true;
+            }
+
+            return false;
+        },
+
+        on_change_ss_cq: function(paper_idx, cq, event) {
+            var s = event.target.checked;
+            var paper = this.papers[paper_idx];
+            console.log('* set ' + paper.pid + " on " + cq.abbr + ' = ' + s);
+
+            // get the values for submission
+            var paper_id = paper.paper_id;
+            var cq_abbr = cq.abbr;
+            var ss_cq = s? 'yes' : 'no';
+
+            // update local first
+            this.papers[paper_idx].ss_ex.ss_cq[cq.abbr] = ss_cq;
+
+            srv_screener.set_ss_cq(paper_id, cq_abbr, ss_cq, function(data) {
+                var paper = data.paper;
+
+                if (data.success) {
+                    // show this good news!
+                    jarvis.toast('Updated the question selection for paper ' + paper.pid);
+                } else {
+                    jarvis.toast('Failed when setting clinical question for this study, try again later or contact administrator', 'warning');
+                }
+            });
+        }
+    },
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: this.vpp_data,
+            methods: this.vpp_methods,
+            updated: function() {
+                pan_ocpapers.resize();
+            }
+        });
+
+        this.resize();
+    },
+
+    load: function() {
+        var project_id = Cookies.get('project_id');
+        var stage = srv_screener.STAGE_INCLUDED_SR;
+        srv_screener.get_papers_by_stage(
+            project_id,
+            stage,
+            function(data) {
+                console.log(data);
+                jarvis.toast('Loaded papers');
+
+                // bind papers
+                pan_ocpapers.vpp.$data.papers = data.papers;
+            }
+        )
+    },
+
+    resize: function() {
+        var h = $(window).height() - 90;
+        $('#pan_ocpapers_paperlist').height(h);
+    }
+};
 
 var jarvis = {
 
     project: [[ project_json_str|safe ]],
 
     init: function () {
+        // init the UI
+        pan_ocpapers.init();
+
+        // the load the papers
+        pan_ocpapers.load();
 
         // bind resize event
         this.bind_resize_event();
@@ -73,7 +294,7 @@ var jarvis = {
 
     bind_resize_event: function() {
         $(window).on('resize', function(){
-            // pan_outcomes.resize();
+            pan_ocpapers.resize();
         });
     }
 };

@@ -33,8 +33,6 @@
 #pan_ocpapers_paperlist tbody{
     overflow-y: auto;
 }
-
-
 #pan_ocpapers_paperlist tbody td{
     padding: 3px 3px;
 }

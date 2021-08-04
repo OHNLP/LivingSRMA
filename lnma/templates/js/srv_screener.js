@@ -157,6 +157,17 @@ var srv_screener = {
         );
     },
 
+    get_papers_by_stage: function(project_id, stage, callback) {
+        var url = this.api_url.get_papers_by_stage;
+
+        $.get(
+            url,
+            {project_id: project_id, stage: stage},
+            callback, 
+            'json'
+        );
+    },
+
     ///////////////////////////////////////////////////////////////////////////
     // the functions related to screening
     ///////////////////////////////////////////////////////////////////////////
@@ -274,13 +285,13 @@ var srv_screener = {
         var project_id = Cookies.get('project_id');
         
         var url = this.api_url.set_ss_cq;
+        console.log('* submit', paper_id, 'cq_abbr', cq_abbr, 'ss_cq', ss_cq);
         $.post(
             url,
             {
                 paper_id: paper_id, 
                 cq_abbr: cq_abbr, 
-                ss_cq: ss_cq, 
-                project_id: project_id
+                ss_cq: ss_cq
             },
             callback,
             'json'
