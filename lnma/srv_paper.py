@@ -1,4 +1,5 @@
 import time
+from sqlalchemy.orm.attributes import flag_modified
 
 from tqdm import tqdm 
 
@@ -6,6 +7,7 @@ from lnma import settings
 from lnma import util
 from lnma import dora
 from lnma import ss_state
+from lnma import db
 
 
 def make_ss_cq_dict(project):
@@ -17,6 +19,27 @@ def make_ss_cq_dict(project):
         d[cq['abbr']] = settings.SCREENER_DEFAULT_DECISION_FOR_CQ_INCLUSION
 
     return d
+
+
+def set_paper_ss_cq(paper_id, cq_abbr, ss_cq):
+    '''
+    Set the ss_cq for a paper
+    '''
+    paper = dora.get_paper_by_id(paper_id)
+
+    if paper is None:
+        return False, None
+
+    if 'ss_cq' not in paper.ss_ex:
+        paper.ss_ex['ss_cq'] = {}
+
+    paper.ss_ex['ss_cq'][cq_abbr] = ss_cq
+
+    flag_modified(paper, 'ss_ex')
+    db.session.add(paper)
+    db.session.commit()
+
+    return True, paper
 
 
 def set_paper_rct_id(keystr, pid, rct_id):

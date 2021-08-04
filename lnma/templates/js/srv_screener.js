@@ -29,6 +29,9 @@ var srv_screener = {
         // for PMID
         set_pub_date: '[[ url_for("screener.set_pub_date") ]]',
 
+        // for ss_cq selection
+        set_ss_cq: '[[ url_for("screener.set_ss_cq") ]]',
+
         // for tag
         add_tag: '[[ url_for("screener.add_tag") ]]',
         toggle_tag: '[[ url_for("screener.toggle_tag") ]]'
@@ -261,6 +264,24 @@ var srv_screener = {
         $.post(
             url,
             {paper_ids: paper_ids, project_id: project_id},
+            callback,
+            'json'
+        );
+    },
+
+    set_ss_cq: function(paper_id, cq_abbr, ss_cq, callback) {
+        // send request to backend
+        var project_id = Cookies.get('project_id');
+        
+        var url = this.api_url.set_ss_cq;
+        $.post(
+            url,
+            {
+                paper_id: paper_id, 
+                cq_abbr: cq_abbr, 
+                ss_cq: ss_cq, 
+                project_id: project_id
+            },
             callback,
             'json'
         );

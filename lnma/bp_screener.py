@@ -197,6 +197,22 @@ def set_pub_date():
     return jsonify(ret)
 
 
+@bp.route('/set_ss_cq', methods=['GET', 'POST'])
+@login_required
+def set_ss_cq():
+    paper_id = request.form.get('paper_id')
+    cq_abbr = request.form.get('cq_abbr')
+    ss_cq = request.form.get('ss_cq')
+
+    is_success, paper = srv_paper.set_paper_ss_cq(paper_id, cq_abbr, ss_cq)
+
+    ret = {
+        'success': is_success,
+        'paper': paper.as_very_simple_dict() if is_success else None
+    }
+    return jsonify(ret)
+
+
 @bp.route('/add_tag', methods=['GET', 'POST'])
 @login_required
 def add_tag():

@@ -3,6 +3,9 @@ import datetime
 
 from tqdm import tqdm 
 
+from sqlalchemy import and_, or_, not_
+from sqlalchemy.orm.attributes import flag_modified
+
 from lnma import settings
 from lnma import util
 from lnma import dora
@@ -68,5 +71,40 @@ def update_project_last_update_by_keystr(keystr):
 
     db.session.add(project)
     db.session.commit()
+
+    return project
+
+
+def update_project_papers_ss_cq_by_keystr(keystr):
+    '''
+    Update the ss_cq for all papers in this project
+
+    Set the paper data model `ss_ex` to support cq-based data.
+    ALL ss_rs==f1,f2,f3 papers are affected.
+    '''
+    project = dora.get_project_by_keystr(keystr)
+    papers = dora.get_papers_by_keystr(keystr)
+
+    print('* found %d papers in current database' % len(papers))
+
+    cnt = {
+        'total': 0
+    }
+
+    for paper in tqdm(papers):
+        if paper.is_ss_included_in_project():
+            paper.update_ss_cq_by_cqs(
+                project.settings['clinical_questions']
+            )
+
+            flag_modified(paper, "ss_ex")
+            cnt['total'] += 1
+
+            db.session.add(paper)
+            db.session.commit()
+
+    print('* found and upgraded %s studies for the ss_cq' % (
+        cnt['total']
+    ))
 
     return project

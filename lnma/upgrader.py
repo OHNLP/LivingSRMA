@@ -1,11 +1,16 @@
 from tqdm import tqdm 
 
-from lnma import settings
+from sqlalchemy import and_, or_, not_
+from sqlalchemy.orm.attributes import flag_modified
+
+from lnma import settings, srv_project
 from lnma import util
 from lnma import dora
 from lnma import ss_state
 from lnma import models
 
+from lnma import db
+from lnma import create_app
 
 def upgrade_project_settings(keystr):
     '''
@@ -113,18 +118,9 @@ def upgrade_paper_ss_ex_for_cq(keystr):
 
     ALL ss_rs==f1,f2,f3 papers are affected.
     '''
-    project = dora.get_project_by_keystr(keystr)
-    papers = dora.get_papers_by_keystr(keystr)
+    srv_project.update_project_papers_ss_cq_by_keystr(keystr)
 
-    print('* found %d papers in current database' % len(papers))
-
-    cnt = {
-
-    }
-
-    for paper in tqdm(papers):
-        if paper.is_ss_included_in_project():
-            pass
+    print('* done upgrading papers')
 
 
 def upgrade_extract_data_model_for_subg_and_cq(keystr):
@@ -195,4 +191,9 @@ def upgrade_extract_data_model_for_subg_and_cq(keystr):
 
 
 if __name__ == '__main__':
-    pass
+    app = create_app()
+    db.init_app(app)
+    app.app_context().push()
+
+    # 
+    print('* done upgrader')

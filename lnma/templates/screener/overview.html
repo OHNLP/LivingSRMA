@@ -1806,17 +1806,20 @@ var tbjs_paperlist = {
     },
 
     __get_tr_cqs: function(d) {
+        console.log(d);
         var html = [
-            '<tr>',
-            '<td>Included in CQs</td>',
-            '<td class="d-flex flex-row">',
+            '<tr id="tb-tr-cqs-'+d.paper_id+'">',
+            '<td>C.Questions:</td>',
+            '<td class="d-flex flex-row flex-wrap">',
         ];
 
         for (let i = 0; i < srv_screener.project.settings.clinical_questions.length; i++) {
             const cq = srv_screener.project.settings.clinical_questions[i];
             html.push(
                 '<div class="col-md-2 cq-name">',
-                    '<input type="checkbox" class="mr-1" id="chk_p_'+d.paper_id+'_cq_'+i+'">',
+                    d.ss_ex.ss_cq[cq.abbr] == 'yes'?
+                    '<input type="checkbox" class="mr-1" id="chk_p_'+d.paper_id+'_cq_'+i+'" checked onchange="tbjs_paperlist.set_ss_cq(\''+d.paper_id+'\', \''+cq.abbr+'\', event)">':
+                    '<input type="checkbox" class="mr-1" id="chk_p_'+d.paper_id+'_cq_'+i+'" onchange="tbjs_paperlist.set_ss_cq(\''+d.paper_id+'\', \''+cq.abbr+'\', event)">',
                     '<span title="'+cq.name+'" for="chk_p_'+d.paper_id+'_cq_'+i+'">',
                         cq.name,
                     '</span>',
@@ -2192,6 +2195,29 @@ var tbjs_paperlist = {
 
             } else {
                 toast("Existed PMID [" + data.paper.pid + '] for another study [' + data.paper.seq_num + ']', 'error');
+            }
+        });
+    },
+
+    set_ss_cq: function(paper_id, cq_abbr, event) {
+        var ss_cq = event.target.checked? 'yes':'no';
+        // mark include in server
+        srv_screener.set_ss_cq(paper_id, cq_abbr, ss_cq, function(data) {
+            var paper = data.paper;
+
+            if (data.success) {
+                // update the tag list UI
+                $('#tb-tr-cqs-' + paper.paper_id).replaceWith(
+                    tbjs_paperlist.__get_tr_cqs(paper)
+                );
+
+                // update the tb data list
+                tbjs_paperlist.update_data_by_paper(paper);
+
+                // show this good news!
+                jarvis.toast('Updated the question selection for paper ' + paper.pid);
+            } else {
+                jarvis.toast('Failed when setting clinical question for this study, try again later or contact administrator', 'warning');
             }
         });
     },

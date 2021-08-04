@@ -10,7 +10,7 @@ from flask import url_for
 from flask_login import login_required
 from flask_login import current_user
 
-from lnma import dora
+from lnma import dora, srv_project
 
 bp = Blueprint("project", __name__, url_prefix="/project")
 
@@ -370,6 +370,13 @@ def api_set_settings():
     is_success, project = dora.set_project_settings(
         project_id, settings
     )
+
+    # then, due to this large update
+    # we also need to check and update other things related to setting
+    # 1. update the ss_cq based the cq
+    srv_project.update_project_papers_ss_cq_by_keystr(project.keystr)
+
+    # 2. I'm not sure yet.
 
     flash('Saved new settings')
     return redirect(url_for('project.editor', _anchor="advanced_mode"))
