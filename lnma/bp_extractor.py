@@ -26,6 +26,7 @@ from lnma import util
 from lnma import ss_state
 from lnma import settings
 from lnma import srv_paper
+from lnma import srv_extract
 
 bp = Blueprint("extractor", __name__, url_prefix="/extractor")
 template_base = 'extractor/'
@@ -628,6 +629,58 @@ def get_pdata_in_extract():
     }
 
     # just keep the pid in extract
+    ret['extract']['data'] = {
+        pid: ret['extract']['data'][pid]
+    }
+
+    return jsonify(ret)
+
+
+@bp.route('/get_pdata_in_itable')
+@login_required
+def get_pdata_in_itable():
+    '''
+    Get one paper in an itable by the project_id and the cq_abbr and the pid
+    '''
+    project_id = request.args.get('project_id')
+    cq_abbr = request.args.get('cq_abbr')
+    pid = request.args.get('pid')
+    
+    # get the exisiting extracts
+    extract = srv_extract.get_itable_by_project_id_and_cq_abbr(
+        project_id, cq_abbr
+    )
+
+    if extract is None:
+        # this is a new extract
+        ret = {
+            'success': False,
+            'abbr': None,
+            'cq_abbr': cq_abbr,
+            'pid': pid,
+            'msg': 'not exist itable in cq %s' % cq_abbr
+        }
+        return jsonify(ret)
+
+    if pid not in extract.data:
+        # this is a missing?
+        ret = {
+            'success': False,
+            'abbr': extract.abbr,
+            'cq_abbr': cq_abbr,
+            'pid': pid,
+            'msg': 'no paper data in itable in cq %s' % cq_abbr
+        }
+        return jsonify(ret)
+
+    ret = {
+        'success': True,
+        'msg': '',
+        'extract': extract.as_dict(),
+    }
+
+    # just keep only ONE pid in extract
+    # we don't need to send all results to user
     ret['extract']['data'] = {
         pid: ret['extract']['data'][pid]
     }

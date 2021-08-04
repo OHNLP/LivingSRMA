@@ -10,7 +10,14 @@ from lnma import dora
 from lnma import ss_state
 from lnma import db
 
-from lnma.models import Paper
+from lnma.models import *
+
+
+def get_paper_data_in_itable():
+    '''
+    '''
+    pass
+
 
 def get_included_papers_by_cq(project_id, cq_abbr):
     '''

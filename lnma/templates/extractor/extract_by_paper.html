@@ -179,8 +179,8 @@ html {
                     <div>
                         <input type="checkbox" 
                             id="chk_oc_itable" class="chk-oc-input"
-                            v-on:change="on_change_selection('itable')"
-                            v-model="working_paper_oc_selections['itable']">
+                            v-on:change="on_change_selection(extract_tree.itable.abbr)"
+                            v-model="working_paper_oc_selections[extract_tree.itable.abbr]">
                     </div>
                     <div class="d-flex flex-row justify-content-between flex-fill">
                         <div>
@@ -188,7 +188,7 @@ html {
                         </div>
                         <div>
                             <button 
-                                v-on:click="on_click_oc(extract_dict['itable'])"
+                                v-on:click="on_click_oc(extract_tree.itable)"
                                 class="btn btn-default btn-xs">
                                 <i class="fa fa-edit"></i>
                             </button>

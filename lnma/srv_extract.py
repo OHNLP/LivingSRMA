@@ -4,11 +4,28 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm 
 
+from sqlalchemy import and_, or_, not_
+from sqlalchemy.orm.attributes import flag_modified
+
 from lnma import settings
 from lnma import util
 from lnma import dora
 from lnma import ss_state
 from lnma.analyzer import rpy2_pwma_analyzer as pwma_analyzer
+from lnma.models import *
+
+
+def get_itable_by_project_id_and_cq_abbr(project_id, cq_abbr):
+    '''
+    Get the specific CQ itable in a project
+    '''
+    extract = Extract.query.filter(and_(
+        Extract.project_id == project_id,
+        Extract.meta['cq_abbr'] == cq_abbr,
+        Extract.oc_type == 'itable'
+    )).first()
+
+    return extract
 
 
 def get_sof_pma_data_from_db_IO(is_calc_pma=True):
