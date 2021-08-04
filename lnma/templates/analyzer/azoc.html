@@ -111,13 +111,11 @@ var fg_incd_cumu_forest = fgmk_cumu_forest.make_fig(
 {% include "js/srv_extractor.js" %}
 srv_extractor.project = [[ project_json_str|safe ]];
 
-
 ///////////////////////////////////////////////////////////
 // bind the project information to srv_analyzer.js
 ///////////////////////////////////////////////////////////
 {% include 'js/srv_analyzer.js' %}
 srv_analyzer.project = [[ project_json_str|safe ]];
-
 
 ///////////////////////////////////////////////////////////
 // pan_ocpapers for checking the paper data for this outcome
@@ -299,7 +297,7 @@ var pan_ocpapers = {
         },
 
         on_click_extract: function(abbr) {
-            srv_extractor.goto_extract_data(abbr);
+            srv_extractor.goto_extract_by_outcome(abbr);
         }
     },
 
@@ -485,8 +483,11 @@ var pan_ocpapers = {
 
         // get the data 
         var project_id = Cookies.get('project_id');
-        srv_analyzer.get_extract_and_papers(
+        var cq_abbr = Cookies.get('cq_abbr');
+
+        srv_extractor.get_extract_and_papers(
             project_id,
+            cq_abbr,
             abbr,
             function(data) {
                 pan_ocpapers.update(data);

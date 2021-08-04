@@ -74,29 +74,6 @@ def manage_outcomes():
     )
 
 
-@bp.route('/manage_selections')
-@login_required
-def manage_selections():
-    project_id = request.cookies.get('project_id')
-
-    if project_id is None:
-        return redirect(url_for('project.mylist'))
-
-    # decide which cq to use
-    cq_abbr = request.cookies.get('cq_abbr')
-    if cq_abbr is None:
-        cq_abbr = 'default'
-
-    project = dora.get_project(project_id)
-
-    return render_template(
-        template_base + 'manage_selections.html',
-        cq_abbr=cq_abbr,
-        project=project,
-        project_json_str=json.dumps(project.as_dict())
-    )
-
-
 @bp.route('/manage_itable')
 @login_required
 def manage_itable():
@@ -123,9 +100,32 @@ def manage_itable():
     )
 
 
-@bp.route('/extract_data')
+@bp.route('/extract_by_paper')
 @login_required
-def extract_data():
+def extract_by_paper():
+    project_id = request.cookies.get('project_id')
+
+    if project_id is None:
+        return redirect(url_for('project.mylist'))
+
+    # decide which cq to use
+    cq_abbr = request.cookies.get('cq_abbr')
+    if cq_abbr is None:
+        cq_abbr = 'default'
+
+    project = dora.get_project(project_id)
+
+    return render_template(
+        template_base + 'extract_by_paper.html',
+        cq_abbr=cq_abbr,
+        project=project,
+        project_json_str=json.dumps(project.as_dict())
+    )
+
+
+@bp.route('/extract_by_outcome')
+@login_required
+def extract_by_outcome():
     '''
     Extract data
     '''
@@ -143,7 +143,7 @@ def extract_data():
     project = dora.get_project(project_id)
 
     return render_template(
-        template_base + 'extract_data.html', 
+        template_base + 'extract_by_outcome.html', 
         oc_abbr=oc_abbr,
         cq_abbr=cq_abbr,
         project=project,
@@ -214,16 +214,15 @@ def get_included_papers_and_selections():
     Get the included papers and the decisions of selection for outcomes
     '''
     project_id = request.args.get('project_id')
-    project_id = request.cookies.get('project_id')
-
     cq_abbr = request.args.get('cq_abbr')
+
     if cq_abbr is None:
         cq_abbr = 'default'
 
     # get all papers
-    papers = dora.get_papers_by_stage(
+    papers = srv_paper.get_included_papers_by_cq(
         project_id, 
-        ss_state.SS_STAGE_INCLUDED_SR
+        cq_abbr
     )
 
     # extend the paper meta with a new attribute
@@ -388,6 +387,7 @@ def create_extract():
 @login_required
 def get_extract_and_papers():
     project_id = request.args.get('project_id')
+    cq_abbr = request.args.get('cq_abbr')
     abbr = request.args.get('abbr')
     
     # get the exisiting extracts
@@ -402,8 +402,10 @@ def get_extract_and_papers():
         return jsonify(ret)
 
     # get papers
-    stage = ss_state.SS_STAGE_INCLUDED_SR
-    papers = dora.get_papers_by_stage(project_id, stage)
+    papers = srv_paper.get_included_papers_by_cq(
+        project_id, 
+        cq_abbr
+    )
     
     # update the meta
     extract.update_meta()

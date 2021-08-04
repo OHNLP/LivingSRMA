@@ -161,40 +161,6 @@ def get_extracts():
     return jsonify(ret)
 
 
-@bp.route('/get_extract_and_papers')
-@login_required
-def get_extract_and_papers():
-    project_id = request.args.get('project_id')
-    abbr = request.args.get('abbr')
-    
-    # get the exisiting extracts
-    extract = dora.get_extract_by_project_id_and_abbr(project_id, abbr)
-
-    if extract is None:
-        # this is a new extract
-        ret = {
-            'success': False,
-            'msg': 'not exist extract %s' % abbr
-        }
-        return jsonify(ret)
-
-    # get papers
-    stage = ss_state.SS_STAGE_INCLUDED_SR
-    papers = dora.get_papers_by_stage(project_id, stage)
-        
-    # update the extract with papers
-    extract.update_data_by_papers(papers)
-
-    # make the return object
-    ret = {
-        'success': True,
-        'msg': '',
-        'extract': extract.as_dict(),
-        'papers': [ p.as_simple_dict() for p in papers ]
-    }
-    return jsonify(ret)
-
-
 ###############################################################################
 # Static file analyzers
 ###############################################################################

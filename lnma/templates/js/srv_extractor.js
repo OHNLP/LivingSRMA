@@ -28,7 +28,8 @@ var srv_extractor = {
         update_paper_one_selection: "[[ url_for('extractor.update_paper_one_selection') ]]",
         update_paper_selections: "[[ url_for('extractor.update_paper_selections') ]]",
 
-        extract_data: "[[ url_for('extractor.extract_data') ]]",
+        extract_by_paper: "[[ url_for('extractor.extract_by_paper') ]]",
+        extract_by_outcome: "[[ url_for('extractor.extract_by_outcome') ]]",
 
         sort_rct_seq: "[[ url_for('extractor.sort_rct_seq') ]]",
         manage_outcomes: "[[ url_for('extractor.manage_outcomes') ]]",
@@ -65,8 +66,8 @@ var srv_extractor = {
         })
     },
 
-    goto_extract_data: function(abbr) {
-        location.href = this.url.extract_data + '?abbr=' + abbr;
+    goto_extract_by_outcome: function(abbr) {
+        location.href = this.url.extract_by_outcome + '?abbr=' + abbr;
     },
 
     create_extract: function(project_id, oc_type, abbr, meta, data, callback) {
@@ -261,13 +262,14 @@ var srv_extractor = {
         });
     },
 
-    get_extract_and_papers: function(project_id, abbr, callback) {
+    get_extract_and_papers: function(project_id, cq_abbr, abbr, callback) {
         $.ajax({
             type: 'GET',
             dataType: "json",
             url: this.url.get_extract_and_papers,
             data: {
                 project_id: project_id,
+                cq_abbr: cq_abbr,
                 abbr: abbr,
                 rnd: Math.random()
             },

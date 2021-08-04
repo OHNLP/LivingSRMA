@@ -1,4 +1,5 @@
 import time
+from sqlalchemy import and_, or_, not_
 from sqlalchemy.orm.attributes import flag_modified
 
 from tqdm import tqdm 
@@ -8,6 +9,24 @@ from lnma import util
 from lnma import dora
 from lnma import ss_state
 from lnma import db
+
+from lnma.models import Paper
+
+def get_included_papers_by_cq(project_id, cq_abbr):
+    '''
+    Get all papers that meet the requrements
+    '''
+    papers = Paper.query.filter(and_(
+        Paper.project_id == project_id,
+        Paper.ss_rs.in_([
+            ss_state.SS_RS_INCLUDED_ONLY_SR,
+            ss_state.SS_RS_INCLUDED_SRMA
+        ]),
+        Paper.is_deleted == settings.PAPER_IS_DELETED_NO,
+        Paper.ss_ex['ss_cq'][cq_abbr] == settings.PAPER_SS_EX_SS_CQ_YES
+    )).order_by(Paper.date_updated.desc()).all()
+
+    return papers
 
 
 def make_ss_cq_dict(project):

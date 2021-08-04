@@ -518,9 +518,8 @@ var pan_ocpapers = {
                     pan_ocpapers.toggle_trial_studies(paper);
                 },
 
-                goto_extract_data: function(extract) {
-                    location.href = srv_extractor.url.extract_data + 
-                        '?abbr=' + extract.abbr;
+                goto_extract_by_outcome: function(extract) {
+                    srv_extractor.goto_extract_by_outcome(extract.abbr);
                 },
 
                 goto_analysis: function(extract) {
@@ -857,8 +856,10 @@ var pan_ocpapers = {
 
     show_extract_and_papers: function(abbr) {
         var project_id = Cookies.get('project_id');
+        var cq_abbr = Cookies.get('cq_abbr');
         srv_extractor.get_extract_and_papers(
             project_id,
+            cq_abbr,
             abbr,
             function(data) {
                 pan_ocpapers.update(data);

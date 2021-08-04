@@ -8,6 +8,10 @@ Manage Study-Question
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css">
 
 <style>
+/* shared rules */
+{% include 'css/pan_paperviewer.css' %}
+
+/* local rules */
 html {
     overflow-x: hidden;
     overflow-y: hidden;
@@ -106,8 +110,12 @@ Manage Study-Question
                         class="col-cq-name">
                         {{ cq.name }}
                         <br>
+                        <span class="badge badge-secondary">
+                            <i>{{ cq.abbr }}</i>
+                        </span>
+                        <br>
                         <span style="font-size: 1.2em;">
-                            {{ count_n_papers_by_cq(cq.abbr) }} selected
+                            {{ count_n_papers_by_cq(cq.abbr) }} included
                         </span>
                     </th>
                 </tr>
@@ -151,6 +159,9 @@ Manage Study-Question
 
 </div>
 
+<div id="pan_paperviewer">
+
+</div>
 {% endblock %}
 
 {% block active_nav_link %}screener-pcq-selector{% endblock %}
@@ -162,7 +173,11 @@ Manage Study-Question
 <!-- my scripts -->
 <script>
 
+///////////////////////////////////////////////////////////
+// bind the project information to srv_screener.js
+///////////////////////////////////////////////////////////
 {% include 'js/srv_screener.js' %}
+srv_screener.project = [[ project_json_str|safe ]];
 
 var pan_ocpapers = {
     vpp_id: "#pan_ocpapers",

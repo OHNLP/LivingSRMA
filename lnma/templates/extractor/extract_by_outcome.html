@@ -53,7 +53,7 @@ html {
 <div id="main">
 
 
-{% include 'extractor/extract_data_ocpapers.html' %}
+{% include 'extractor/extract_by_outcome_ocpapers.html' %}
 
 
 <ul id="pan_ocpapers_ctx_menu" style="display: none;">
@@ -622,13 +622,16 @@ var pan_ocpapers = {
         this.extract_abbr = abbr;
 
         // update the url if not equal
-        var url = srv_extractor.url.extract_data + "?abbr=" + abbr;
+        var url = srv_extractor.url.extract_by_outcome + "?abbr=" + abbr;
         window.history.pushState("", "", url);
 
         // get the data 
         var project_id = Cookies.get('project_id');
+        var cq_abbr = Cookies.get('cq_abbr');
+        
         srv_extractor.get_extract_and_papers(
             project_id,
+            cq_abbr,
             abbr,
             function(data) {
                 pan_ocpapers.update(data);

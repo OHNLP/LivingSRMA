@@ -713,13 +713,15 @@ var pan_ocpapers = {
 
     show_extract_and_papers: function(oc_type, abbr) {
         var project_id = Cookies.get('project_id');
-        $.get(
-            srv_extractor.url.get_extract_and_papers,
-            {project_id:project_id, abbr:abbr, rnd:Math.random()},
+        var cq_abbr = Cookies.get('cq_abbr');
+
+        srv_extractor.get_extract_and_papers(
+            project_id,
+            cq_abbr,
+            abbr,
             function(data) {
                 pan_ocpapers.update(data);
-
-            }, 'json'
+            }
         );
     },
 
@@ -895,7 +897,7 @@ var pan_itbuilder = {
 
     extract_itable: function() {
         location.href = 
-            srv_extractor.url.extract_data + "?abbr=" + this.vpp.$data.itable.abbr;
+            srv_extractor.url.extract_by_outcome + "?abbr=" + this.vpp.$data.itable.abbr;
     },
 
     /**
