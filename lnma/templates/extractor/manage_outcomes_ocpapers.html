@@ -386,7 +386,7 @@
         <div class="card-body text-dark">
             <h5 class="card-title">
                 References Settings
-            
+                
                <span class="text-sm ml-3">
                     <input type="checkbox"
                         v-model="only_show_selected"
@@ -395,7 +395,7 @@
                </span>
             </h5>
 
-            <p class="card-text mb-2">Select the papers included in this outcome for the public website.</p>
+            <p class="card-text mb-2">Select the papers to be included in this outcome for the public website from <b>{{ papers.length }}</b> papers.</p>
 
             <div class="panel-paperlist" v-if="extract != null">
 

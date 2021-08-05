@@ -750,6 +750,9 @@ var jarvis = {
     },
 
     init: function() {
+        // set cq_abbr if not 
+        this.set_default_cq();
+        
         // get the outcome abbr from url
         var oc_abbr = jarvis.get_url_paramter('abbr');
 

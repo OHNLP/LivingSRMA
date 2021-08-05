@@ -1293,6 +1293,9 @@ var jarvis = {
     },
 
     init: function() {
+        // set cq_abbr if not 
+        this.set_default_cq();
+
         pan_itbuilder.init();
         pan_ocpapers.init();
         pan_itable_previewer.init();
@@ -1342,6 +1345,7 @@ var jarvis = {
     }
 
 };
+{% include 'js/jarvis_ext_utils.js' %}
 
 
 $(document).ready(function() {

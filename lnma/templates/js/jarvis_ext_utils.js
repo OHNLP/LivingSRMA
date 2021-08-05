@@ -17,4 +17,13 @@ Object.assign(jarvis, {
         var results = regex.exec(location.search);
         return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
     },
+
+    set_default_cq: function() {
+        // set cq_abbr if not 
+        if (typeof(Cookies.get('cq_abbr')) == 'undefined') {
+            Cookies.set('cq_abbr', 'default');
+        } else {
+            console.log('* found cq_abbr=' + Cookies.get('cq_abbr') + ' in Cookies');
+        }
+    }
 });

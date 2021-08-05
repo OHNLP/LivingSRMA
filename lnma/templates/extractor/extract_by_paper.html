@@ -755,6 +755,8 @@ var jarvis = {
     },
 
     init: function() {
+        // set cq_abbr if not 
+        this.set_default_cq();
 
         // init the shared service
         srv_shared.update_labels_by_project_settings(
@@ -820,6 +822,7 @@ var jarvis = {
         });
     }
 };
+{% include 'js/jarvis_ext_utils.js' %}
 
 $(document).ready(function() {
     jarvis.init();

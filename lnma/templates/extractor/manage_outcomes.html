@@ -857,6 +857,8 @@ var pan_ocpapers = {
     show_extract_and_papers: function(abbr) {
         var project_id = Cookies.get('project_id');
         var cq_abbr = Cookies.get('cq_abbr');
+
+        console.log('* show_extract_and_papers', project_id, ' cq_abbr', cq_abbr, 'abbr', abbr);
         srv_extractor.get_extract_and_papers(
             project_id,
             cq_abbr,
@@ -1098,6 +1100,8 @@ var jarvis = {
     },
 
     init: function() {
+        // set cq_abbr if not 
+        this.set_default_cq();
 
         // init the shared service
         srv_shared.update_labels_by_project_settings(

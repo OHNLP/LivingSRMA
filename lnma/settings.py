@@ -207,7 +207,7 @@ OC_TYPE_TPL = {
                     'subs': None
                 }, {
                     'abbr': 'ITABLEECATSYSSUB002',
-                    'name': 'Included in MA',
+                    'name': 'Comments',
                     'subs': None
                 }]
             }
