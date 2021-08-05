@@ -450,8 +450,10 @@ def sspr_include_papers_sr():
     detail_dict = util.get_decision_detail_dict(
         reason, ss_state.SS_STAGE_INCLUDED_SR
     )
+
+    project = dora.get_project(project_id)
     # for those included in sr, also included in each sub cq
-    detail_dict['ss_cq'] = srv_paper.make_ss_cq_dict()
+    detail_dict['ss_cq'] = srv_paper.make_ss_cq_dict(project)
 
     for paper_id in paper_ids:
         p = dora.set_paper_pr_rs_with_details(
