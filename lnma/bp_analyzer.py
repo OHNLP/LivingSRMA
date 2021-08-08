@@ -55,10 +55,15 @@ def azoc():
     abbr = request.args.get('abbr')
     project = dora.get_project(project_id)
 
+    cq_abbr = request.cookies.get('cq_abbr')
+    if cq_abbr is None:
+        cq_abbr = 'default'
+
     if abbr == '':
         # which means it's a navigation
         return render_template(
             'analyzer/azoc.html',
+            cq_abbr=cq_abbr,
             project=project,
             project_json_str=json.dumps(project.as_dict())
         )
@@ -74,91 +79,10 @@ def azoc():
 
     return render_template(
         'analyzer/azoc.html',
+        cq_abbr=cq_abbr,
         project=project,
         project_json_str=json.dumps(project.as_dict())
     )
-
-###############################################################################
-# APIs for analyzing extract
-###############################################################################
-
-@bp.route('/get_paper')
-@login_required
-def get_paper():
-    project_id = request.args.get('project_id')
-    project_id = request.cookies.get('project_id')
-    pid = request.args.get('pid')
-
-    paper = dora.get_paper_by_project_id_and_pid(project_id, pid)
-    json_paper = paper.as_dict()
-
-    ret = {
-        'success': True,
-        'paper': json_paper
-    }
-    return jsonify(ret)
-
-
-@bp.route('/get_extract')
-@login_required
-def get_extract():
-    '''
-    Get one extract by the project_id and the abbr
-    '''
-    project_id = request.args.get('project_id')
-    abbr = request.args.get('abbr')
-    
-    # get the exisiting extracts
-    extract = dora.get_extract_by_project_id_and_abbr(project_id, abbr)
-
-    if extract is None:
-        # this is a new extract
-        ret = {
-            'success': False,
-            'msg': 'not exist extract %s' % abbr
-        }
-        return jsonify(ret)
-
-    ret = {
-        'success': True,
-        'msg': '',
-        'extract': extract.as_dict()
-    }
-    return jsonify(ret)
-
-
-@bp.route('/get_extracts')
-@login_required
-def get_extracts():
-    '''
-    Get all of the extracts by the project_id
-    '''
-    project_id = request.args.get('project_id')
-    with_data = request.args.get('with_data')
-
-    if with_data == 'yes':
-        with_data = True
-    else:
-        with_data = False
-    
-    # get the exisiting extracts
-    extracts = dora.get_extracts_by_project_id(project_id)
-
-    # build the return obj
-    if with_data:
-        ret = {
-            'success': True,
-            'msg': '',
-            'extracts': [ extr.as_dict() for extr in extracts ]
-        }
-    else:
-        ret = {
-            'success': True,
-            'msg': '',
-            'extracts': [ extr.as_simple_dict() for extr in extracts ]
-        }
-        
-    return jsonify(ret)
 
 
 ###############################################################################

@@ -4,10 +4,6 @@ var srv_analyzer = {
     url: {
         azoc: "[[ url_for('analyzer.azoc') ]]",
         analyze: "[[ url_for('analyzer.analyze') ]]",
-
-        get_paper: "[[ url_for('analyzer.get_paper') ]]",
-        get_extract: "[[ url_for('analyzer.get_extract') ]]",
-        get_extracts: "[[ url_for('analyzer.get_extracts') ]]",
     },
 
     // the project information
@@ -580,52 +576,5 @@ var srv_analyzer = {
                 console.error(textStatus, errorThrown);
             }
         });
-    },
-
-    /**
-     * Get a paper
-     * @param {string} pid 
-     * @param {function} callback the callback for ajax
-     */
-    get_paper: function(pid, callback) {
-        $.ajax({
-            type: 'GET',
-            dataType: "json",
-            url: this.url.get_paper,
-            data: {
-                pid: pid,
-                rnd: Math.random(),
-            },
-            cache: false,
-            success: callback,
-            error: function(jqXHR, textStatus, errorThrown) {
-                jarvis.toast('Something wrong when getting included papers', 'alert');
-                console.error(textStatus, errorThrown);
-            }
-        });
-    },
-
-    get_extracts: function(project_id, callback) {
-        $.get(
-            this.url.get_extracts,
-            {
-                project_id: project_id,
-                rnd: Math.random()
-            },
-            callback,
-            'json'
-        );
-    },
-
-    get_extracts: function(project_id, callback) {
-        $.get(
-            this.url.get_extracts,
-            {
-                project_id: project_id,
-                rnd: Math.random()
-            },
-            callback,
-            'json'
-        );
     },
 };

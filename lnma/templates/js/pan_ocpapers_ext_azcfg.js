@@ -85,9 +85,9 @@ Object.assign(pan_ocpapers.vpp_methods, {
                     var ext = null;
                     var _study = study;
                     if (i==0) {
-                        ext = d.attrs.main;
+                        ext = d.attrs.main['g0'];
                     } else {
-                        ext = d.attrs.other[i-1];
+                        ext = d.attrs.other[i-1]['g0'];
                         _study = _study + ' CP' + (i + 1);
                     }
 

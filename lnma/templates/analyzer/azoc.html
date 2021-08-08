@@ -4,6 +4,10 @@
 Data Analyzer
 {% endblock %}
 
+{% block section_cq %}
+{% include 'shared_module/_cq_selector_toolbar.html' %}
+{% endblock %}
+
 {% block page_name %}
 <i class="fas fa-project-diagram"></i>
 Data Analyzer 
@@ -337,8 +341,9 @@ var pan_ocpapers = {
 
     load_all_outcomes: function() {
         var project_id = Cookies.get('project_id');
+        var cq_abbr = Cookies.get('cq_abbr');
 
-        srv_analyzer.get_extracts(project_id, function(data) {
+        srv_extractor.get_extracts(project_id, cq_abbr, function(data) {
             // update the outcome selection menu
             console.log(data);
             pan_ocpapers.extracts = data.extracts;
@@ -392,7 +397,7 @@ var pan_ocpapers = {
         this.update_paper_dict();
 
         // shortcut
-        this.update_all_and_show_attrs_for_outcome();
+        // this.update_all_and_show_attrs_for_outcome();
 
         // update some configs?
         this.vpp.cfgs.input_format.selected = data.extract.meta.input_format;
@@ -650,6 +655,8 @@ var jarvis = {
         });
     }
 };
+
+{% include 'js/jarvis_ext_utils.js' %}
 
 $(document).ready(function() {
     jarvis.init();
