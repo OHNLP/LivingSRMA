@@ -1355,7 +1355,7 @@ var tbjs_paperlist = {
         var html = [
             '<tr>', 
                 '<td>Actions:</td>',
-                '<td class="d-flex flex-row">',
+                '<td class="d-flex flex-row flex-wrap">',
                 '<div>',
                     '<button class="btn btn-primary btn-sm" onclick="tbjs_paperlist.include_in_sr(\''+d.paper_id+'\', \'Through Full Text Review\')">Include in Project</button>',
                 '</div>',
@@ -1806,6 +1806,11 @@ var tbjs_paperlist = {
     },
 
     __get_tr_cqs: function(d) {
+        if (srv_screener.project.settings.clinical_questions.length == 1) {
+            // for those only has one cq, no need to change this 
+            return '';
+        }
+
         console.log(d);
         var html = [
             '<tr id="tb-tr-cqs-'+d.paper_id+'">',

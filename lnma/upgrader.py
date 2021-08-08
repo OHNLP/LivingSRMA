@@ -40,11 +40,14 @@ def upgrade_project_settings(keystr):
             "from": "TRIAL CHARACTERISTICS|Control regimen",
             "to": "Control Arm|Control"
         }]
+        print('* added default auto_fill to [%s]' % (keystr))
         flag_upgraded = True
 
     # the clinical_questions is for screening and extraction
     if 'clinical_questions' in project.settings:
-        print("* found clinical_questions in [%s]" % keystr)
+        print('* found clinical_questions in [%s]' % keystr)
+        for cq in project.settings['clinical_questions']:
+            print('*   cq %s: %s' % (cq['abbr'], cq['name']))
 
     else:
         # Ok, let's just put a default cq
@@ -52,6 +55,7 @@ def upgrade_project_settings(keystr):
             "abbr": "default",
             "name": project.title
         }]
+        print('* added default clinical question to [%s]' % (keystr))
         flag_upgraded = True
 
     # the `outcome` attr is for data extraction
@@ -95,6 +99,7 @@ def upgrade_project_settings(keystr):
                 }
             }
         }
+        print('* added default outcome to [%s]' % (keystr))
         flag_upgraded = True
 
     # the outcomes_enabled is for screening and extraction
@@ -107,7 +112,18 @@ def upgrade_project_settings(keystr):
             'pwma', 
             'nma'
         ]
+        print("* found outcomes_enabled in [%s]" % keystr)
         flag_upgraded = True
+
+    if flag_upgraded:
+        # let's upgrade the project 
+        flag_modified(project, 'settings')
+        db.session.add(project)
+        db.session.commit()
+        print('* commited changes to database to [%s]' % (keystr))
+
+    else:
+        print('* skipped commit due to no changes to [%s]' % (keystr))
     
     print('* done upgrading with [%s]' % keystr)
 

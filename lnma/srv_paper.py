@@ -41,8 +41,13 @@ def make_ss_cq_dict(project):
     Make an initial ss_cq based on a project
     '''
     d = {}
+    if len(project.settings['clinical_questions']) == 1:
+        decision = settings.PAPER_SS_EX_SS_CQ_YES
+    else:
+        decision = settings.PAPER_SS_EX_SS_CQ_NO
+
     for cq in project.settings['clinical_questions']:
-        d[cq['abbr']] = settings.SCREENER_DEFAULT_DECISION_FOR_CQ_INCLUSION
+        d[cq['abbr']] = decision
 
     return d
 
