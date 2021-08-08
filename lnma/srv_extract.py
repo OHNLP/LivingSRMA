@@ -15,6 +15,24 @@ from lnma.analyzer import rpy2_pwma_analyzer as pwma_analyzer
 from lnma.models import *
 
 
+def get_itable_by_keystr_and_cq_abbr(keystr, cq_abbr):
+    '''
+    Get the specific CQ itable in a project
+    '''
+    project = dora.get_project_by_keystr(keystr)
+
+    if project is None:
+        return None
+
+    extract = Extract.query.filter(and_(
+        Extract.project_id == project.project_id,
+        Extract.meta['cq_abbr'] == cq_abbr,
+        Extract.oc_type == 'itable'
+    )).first()
+
+    return extract
+
+
 def get_itable_by_project_id_and_cq_abbr(project_id, cq_abbr):
     '''
     Get the specific CQ itable in a project

@@ -2078,7 +2078,7 @@ def get_extract_by_project_id_and_cq_and_abbr(project_id, cq_abbr, abbr):
     return extract
 
 
-def get_extract_by_keystr_and_abbr(keystr, cq_abbr, abbr):
+def get_extract_by_keystr_and_cq_and_abbr(keystr, cq_abbr, abbr):
     '''
     Get an extract by keystr, cq, and abbr
     '''
