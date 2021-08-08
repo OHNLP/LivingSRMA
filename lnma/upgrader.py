@@ -134,7 +134,10 @@ def upgrade_paper_ss_ex_for_cq(keystr):
 
     ALL ss_rs==f1,f2,f3 papers are affected.
     '''
-    srv_project.update_project_papers_ss_cq_by_keystr(keystr)
+    srv_project.update_project_papers_ss_cq_by_keystr(
+        keystr,
+        settings.PAPER_SS_EX_SS_CQ_YES
+    )
 
     print('* done upgrading papers')
 
@@ -203,7 +206,7 @@ def upgrade_extract_data_model_for_subg_and_cq(keystr):
         updated_ext = dora.update_extract(extract)
         updated_exts.append(updated_ext)
 
-    return updated_exts
+    print('* done upgrading extracts')
 
 
 if __name__ == '__main__':

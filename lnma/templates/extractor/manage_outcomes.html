@@ -141,6 +141,10 @@ html {
 .badge-w-2em {
     width: 2em;
 }
+.input-outcome-filter {
+    width: 120px;
+    font-size: 14px;
+}
 </style>
 {% endblock %}
 
@@ -158,6 +162,14 @@ html {
             v-on:click="close_all_cates(oc_type, event)">
             <i class="fa fa-close"></i>
             Fold
+        </button>
+
+        <input type="text" class="input-outcome-filter" placeholder="Outcome name"
+            v-model="outcome_keyword">
+        <button class="btn btn-default btn-xs text-primary"
+            title="Clear input box"
+            v-on:click="outcome_keyword = ''">
+            <i class="fa fa-times"></i>
         </button>
     </h5>
 
@@ -183,6 +195,7 @@ html {
             v-bind:force_update="force_update"
             v-bind:oc_type="oc_type"
             v-bind:working_abbr="working_abbr"
+            v-bind:keyword="outcome_keyword"
             v-bind:cate_ocs="extract_tree[oc_type].groups[group.abbr].cates"
             v-bind:group="group.abbr">
         </outcome-list>
@@ -241,6 +254,9 @@ var pan_outcomes = {
         extracts: [],
         extract_tree: null,
 
+        // for filtering the outcome list
+        outcome_keyword: '',
+
         // others
         stat: {
             pwma: { total: 0 },
@@ -256,6 +272,27 @@ var pan_outcomes = {
 
         // for update sub-comp
         force_update: false
+    },
+
+    vpp_methods: {
+        create_extract: function(oc_type, tpl, group, category) {
+            pan_outcomes.create_extract(oc_type, tpl, group, category);
+        },
+
+        show_extract_data: function(oc_type, abbr) {
+            this.working_abbr = abbr;
+            pan_outcomes.show_extract_data(abbr);
+        },
+
+        delete_extract: function(oc_type, abbr, full_name) {
+            pan_outcomes.delete_extract(
+                oc_type, abbr, full_name
+            );
+        },
+
+        close_all_cates: function(oc_type, event) {
+            $('.cate-extracts-' + oc_type).toggle();
+        }
     },
 
     load: function() {
@@ -281,29 +318,7 @@ var pan_outcomes = {
         this.vpp = new Vue({
             el: this.vpp_id,
             data: this.vpp_data,
-
-            methods: {
-                create_extract: function(oc_type, tpl, group, category) {
-                    pan_outcomes.create_extract(oc_type, tpl, group, category);
-                },
-
-                show_extract_data: function(oc_type, abbr) {
-                    this.working_abbr = abbr;
-                    pan_outcomes.show_extract_data(abbr);
-                },
-
-                delete_extract: function(oc_type, abbr, full_name) {
-                    pan_outcomes.delete_extract(
-                        oc_type, abbr, full_name
-                    );
-                },
-
-                close_all_cates: function(oc_type, event) {
-                    $('.cate-extracts-' + oc_type).toggle();
-                },
-
-                
-            }
+            methods: this.vpp_methods
         });
     },
 
@@ -985,11 +1000,11 @@ Vue.component('outcome-list', {
             pan_outcomes.delete_extract(oc_type, abbr, full_name);
         },
 
-
         toggle_cate: function(event) {
             var elem = $(event.target);
             elem.next().toggle();
         },
+
         n_selected: function(extract) {
             var n = 0;
             for (const pmid in extract.data) {
@@ -1001,6 +1016,18 @@ Vue.component('outcome-list', {
             }
             return n;
             
+        },
+
+        is_match_keyword: function(oc) {
+            if (this.keyword == '') {
+                return true;
+            }
+
+            if (oc.meta.full_name.toLocaleLowerCase().indexOf(this.keyword)>=0) {
+                return true;
+            }
+
+            return false;
         }
     },
 
@@ -1035,6 +1062,7 @@ Vue.component('outcome-list', {
     props: [
         'oc_type',
         'cate_ocs',
+        'keyword',
         'group',
         'force_update',
         'working_abbr'
@@ -1057,6 +1085,7 @@ Vue.component('outcome-list', {
     <div v-bind:class="'cate-extracts cate-extracts-' + oc_type">
         <div v-for="oc in cate.ocs" 
             v-bind:id="'cate-extract-line-' + oc.abbr"
+            v-if="is_match_keyword(oc)"
             class="cate-extract-line d-flex flex-row"
             v-bind:class="{'cate-extract-line-clicked':working_abbr==oc.abbr}">
                 

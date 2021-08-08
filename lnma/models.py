@@ -375,7 +375,7 @@ class Paper(db.Model):
         return util.get_year(self.pub_date)
 
     
-    def update_ss_cq_by_cqs(self, cqs):
+    def update_ss_cq_by_cqs(self, cqs, decision=settings.SCREENER_DEFAULT_DECISION_FOR_CQ_INCLUSION):
         '''
         Update the ss_cq in the ss_ex
 
@@ -389,13 +389,17 @@ class Paper(db.Model):
                 self.ss_ex['ss_cq'] = {}
             
             # check each cq
+            if len(cqs) == 1:
+                # if there is only one cq, just set to yes
+                decision = settings.PAPER_SS_EX_SS_CQ_YES
+
             for cq in cqs:
                 if cq['abbr'] in self.ss_ex['ss_cq']:
                     # great! we already have this cq set
                     pass
                 else:
                     # nice! just add this lovely new cq
-                    self.ss_ex['ss_cq'][cq['abbr']] = settings.SCREENER_DEFAULT_DECISION_FOR_CQ_INCLUSION
+                    self.ss_ex['ss_cq'][cq['abbr']] = decision
         else:
             # ok, this study is not included in SR
             # so ... no need to add this ss_cq

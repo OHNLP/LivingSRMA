@@ -10,7 +10,7 @@ from flask import url_for
 from flask_login import login_required
 from flask_login import current_user
 
-from lnma import dora, srv_project
+from lnma import dora, settings, srv_project
 
 bp = Blueprint("project", __name__, url_prefix="/project")
 
@@ -360,7 +360,7 @@ def api_set_settings():
 
     # convert to JSON
     try:
-        settings = json.loads(raw_txt)
+        new_prj_settings = json.loads(raw_txt)
 
     except Exception as err:
         flash('ERROR! Invalid JSON format settings')
@@ -368,13 +368,17 @@ def api_set_settings():
 
     # update
     is_success, project = dora.set_project_settings(
-        project_id, settings
+        project_id, new_prj_settings
     )
 
     # then, due to this large update
     # we also need to check and update other things related to setting
     # 1. update the ss_cq based the cq
-    srv_project.update_project_papers_ss_cq_by_keystr(project.keystr)
+    # this is based on the decision of 
+    srv_project.update_project_papers_ss_cq_by_keystr(
+        project.keystr,
+        settings.PAPER_SS_EX_SS_CQ_NO
+    )
 
     # 2. I'm not sure yet.
 

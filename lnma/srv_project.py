@@ -75,7 +75,7 @@ def update_project_last_update_by_keystr(keystr):
     return project
 
 
-def update_project_papers_ss_cq_by_keystr(keystr):
+def update_project_papers_ss_cq_by_keystr(keystr, decision):
     '''
     Update the ss_cq for all papers in this project
 
@@ -94,7 +94,8 @@ def update_project_papers_ss_cq_by_keystr(keystr):
     for paper in tqdm(papers):
         if paper.is_ss_included_in_project():
             paper.update_ss_cq_by_cqs(
-                project.settings['clinical_questions']
+                project.settings['clinical_questions'],
+                decision
             )
 
             flag_modified(paper, "ss_ex")
