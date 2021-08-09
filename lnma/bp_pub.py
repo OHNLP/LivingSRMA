@@ -33,7 +33,6 @@ from lnma import srv_pub_prisma
 
 import PythonMeta as PMA
 
-settings.PUBLIC_PATH_PUBDATA = 'pubdata'
 DEFAULT_EXTERNAL_VAL = 0
 
 bp = Blueprint("pub", __name__, url_prefix="/pub")
@@ -141,7 +140,7 @@ def RCC():
         prj, 
         'PWMA_DATA.xlsx'
     )
-    
+
     df = pd.read_excel(full_fn)
     pwma = OrderedDict()
     for idx, row in df.iterrows():

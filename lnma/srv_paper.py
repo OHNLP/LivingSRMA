@@ -219,11 +219,197 @@ def update_all_srma_paper_pub_date(keystr):
     return True
     
 
-if __name__ == '__main__':
-    # for debug purpose
-    from lnma import db, create_app
-    app = create_app()
-    db.init_app(app)
-    app.app_context().push()
+def get_prisma_bef(project_id):
+    '''
+    Get the statistics for the PRISMA
+    Including:
 
-    update_all_srma_paper_pub_date('IO')
+    - b: batch number
+    - e: excluded
+    - f: final number
+
+    '''
+    # get the basic stats
+    stat = dora.get_screener_stat_by_project_id(project_id)
+
+    # get the NCT number states
+    papers = dora.get_papers(project_id)
+    b1_study_list = []
+    b4_study_list = []
+    b5_study_list = []
+    e1_study_list = []
+    e2_study_list = []
+    e3_study_list = []
+    f1_study_list = []
+    f2_study_list = []
+    
+    f1_paper_list = []
+    f2_paper_list = []
+
+    for paper in papers:
+        rct_id = ''
+        if 'rct_id' in paper.meta:
+            rct_id = paper.meta['rct_id']
+        
+        # use the pid as rct id if it is missing
+        if rct_id == '':
+            rct_id = paper.pid
+
+        stages = paper.get_ss_stages()
+        # print(paper.ss_rs, stages)
+
+        if ss_state.SS_STAGE_INCLUDED_SR in stages:
+            f1_study_list.append(rct_id)
+            f1_paper_list.append(paper.pid)
+
+        if ss_state.SS_STAGE_INCLUDED_SRMA in stages:
+            f2_study_list.append(rct_id)
+            f2_paper_list.append(paper.pid)
+
+    prisma = {
+        'b1': {
+            "n_ctids": len(b1_study_list),
+            "n_pmids": stat[ss_state.SS_STAGE_ALL_OF_THEM],
+        },
+        'b2': {
+            "n_ctids": 0,
+            "n_pmids": 0,
+        },
+        'b3': {
+            "n_ctids": 0,
+            "n_pmids": 0,
+        },
+        'b4': {
+            "n_ctids": len(b4_study_list),
+            "n_pmids": stat[ss_state.SS_STAGE_DECIDED]
+                - stat[ss_state.SS_STAGE_EXCLUDED_BY_FULLTEXT],
+        },
+        'b5': {
+            "n_ctids": len(b5_study_list),
+            "n_pmids": stat[ss_state.SS_STAGE_INCLUDED_SR]
+                + stat[ss_state.SS_STAGE_EXCLUDED_BY_ABSTRACT]
+        },
+
+        'e1': {
+            "n_ctids": len(e1_study_list),
+            "n_pmids": stat[ss_state.SS_STAGE_EXCLUDED_BY_TITLE],
+        },
+        'e2': {
+            "n_ctids": len(e2_study_list),
+            "n_pmids": stat[ss_state.SS_STAGE_EXCLUDED_BY_ABSTRACT],
+        },
+        'e3': {
+            "n_ctids": len(e3_study_list),
+            "n_pmids": stat[ss_state.SS_STAGE_EXCLUDED_BY_FULLTEXT],
+        },
+
+        'f1': {
+            "n_ctids": len(f1_study_list),
+            "n_pmids": stat[ss_state.SS_STAGE_INCLUDED_SR],
+            "study_list": f1_study_list,
+            "paper_list": f1_paper_list
+        },
+        'f2': {
+            "n_ctids": len(f2_study_list),
+            "n_pmids": stat[ss_state.SS_STAGE_INCLUDED_SRMA],
+            "study_list": f2_study_list,
+            "paper_list": f2_paper_list
+        }
+    }
+
+    return prisma, stat
+
+
+def get_prisma_abeuf(project_id):
+    '''
+    Get the statistics of the project for the PRISMA
+    Including:
+
+    - a auto update
+    - b batch number
+    - e excluded
+    - u updated
+    - f final
+
+    '''
+    stages = [
+        { "stage": "b1", "text": "Records retrieved from database search" },
+        { "stage": "b2", "text": "Records identified through other sources" },
+        { "stage": "b3", "text": "Records after removing dupicates" },
+        { "stage": "b4", "text": "Records initialized screened" },
+        { "stage": "b5", "text": "Full-text articles assessed for eligibility" },
+        { "stage": "b6", "text": "Studies included in systematic review" },
+        { "stage": "b7", "text": "Studies included in meta-analysis" },
+        { "stage": "e1", "text": "Excluded by title and abstract review" },
+        { "stage": "e2", "text": "Excluded by full text review" },
+        { "stage": "e3", "text": "Studies not included in meta-analysis" },
+        { "stage": "a1", "text": "Records identified through automated search" },
+        { "stage": "a1_na_na", "text": "Unscreened records" },
+        { "stage": "a1_p2_na", "text": "Records need to check full text" },
+        { "stage": "a2", "text": "New studies included in systematic review" },
+        { "stage": "a3", "text": "New studies included in meta-analysis" },
+        { "stage": "u1", "text": "Updated studies in SR" },
+        { "stage": "u2", "text": "Updated studies in MA" },
+        { "stage": "f1", "text": "Final number in qualitative synthesis (systematic review)" },
+        { "stage": "f2", "text": "Final number in quantitative synthesis (meta-analysis)" }
+    ]
+    sql = """
+    select project_id,
+        count(*) as cnt,
+        count(case when ss_st = 'b10' then paper_id else null end) as b1,
+        count(case when ss_st = 'b12' then paper_id else null end) as b2,
+        count(case when ss_st in ('b10', 'b12') and ss_rs != 'e1' then paper_id else null end) as b3,
+        count(case when ss_st in ('b10', 'b12') and ss_rs != 'e1' then paper_id else null end) as b4,
+        count(case when ss_st in ('b10', 'b12') and ss_rs != 'e1' and ss_rs != 'e2' then paper_id else null end) as b5,
+        count(case when ss_st in ('b10', 'b12') and ss_rs in ('f1', 'f3') then paper_id else null end) as b6,
+        count(case when ss_st in ('b10', 'b12') and ss_rs = 'f3' then paper_id else null end) as b7,
+        
+        count(case when ss_rs = 'e2' then paper_id else null end) as e1,
+        count(case when ss_rs = 'e3' then paper_id else null end) as e2,
+        count(case when ss_rs = 'f1' then paper_id else null end) as e3,
+
+        count(case when ss_st in ('a10', 'a11', 'a12') then paper_id else null end) as a1,
+        count(case when ss_st in ('a10', 'a11', 'a12') and ss_pr = 'na' and ss_rs = 'na' then paper_id else null end) as a1_na_na,
+        count(case when ss_st in ('a10', 'a11', 'a12') and ss_pr = 'p20' and ss_rs = 'na' then paper_id else null end) as a1_p2_na,
+        count(case when ss_st in ('a10', 'a11', 'a12') and ss_rs in ('f1', 'f3') then paper_id else null end) as a2,
+        count(case when ss_st in ('a10', 'a11', 'a12') and ss_rs = 'f3' then paper_id else null end) as a3,
+        
+        count(case when ss_st in ('a10', 'a11', 'a12') and ss_pr = 'p40' and ss_rs in ('f1', 'f3') then paper_id else null end) as u1,
+        count(case when ss_st in ('a10', 'a11', 'a12') and ss_pr = 'p40' and ss_rs = 'f3' then paper_id else null end) as u2,
+        
+        count(case when ss_rs in ('f1', 'f3') then paper_id else null end) as f1,
+        count(case when ss_rs = 'f3' then paper_id else null end) as f2
+
+    from papers
+    where project_id = '{project_id}'
+        and is_deleted = 'no'
+    group by project_id
+    """.format(project_id=project_id)
+    r = db.session.execute(sql).fetchone()
+
+    if r is None:
+        prisma = {
+            'stages': stages
+        }
+        for k in stages:
+            prisma[k['stage']] = 0
+        return prisma
+
+    # put the values in prisma dict
+    prisma = {
+        'stages': stages
+    }
+    for k in r.keys():
+        prisma[k] = r[k]
+
+    return prisma
+    
+
+# if __name__ == '__main__':
+#     # for debug purpose
+#     from lnma import db, create_app
+#     app = create_app()
+#     db.init_app(app)
+#     app.app_context().push()
+
+#     update_all_srma_paper_pub_date('IO')

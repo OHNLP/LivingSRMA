@@ -5,6 +5,7 @@ from flask import current_app
 
 from lnma import dora
 from lnma import srv_extract
+from lnma import srv_paper
 from lnma import util
 from lnma import ss_state
 from lnma import settings
@@ -12,7 +13,7 @@ from lnma import settings
 '''
 Services of PRISMA for publication site
 '''
-def get_prisma_from_db(prj):
+def get_prisma_from_db(prj, cq_abbr="default"):
     '''
     Get PRISMA JSON data from database
     '''
@@ -24,7 +25,7 @@ def get_prisma_from_db(prj):
     past_prisma = {}
 
     # get the living prisma from database
-    prisma, stat = dora.get_prisma_bef(project_id)
+    prisma, stat = srv_paper.get_prisma_bef(project_id)
 
     # get the paper information from database
     # the paper dict is PMID based
@@ -88,7 +89,7 @@ def get_prisma_from_xls(prj):
     Get PRISMA JSON data from Excel file
     '''
     import numpy as np
-    
+
     fn = 'PRISMA_DATA.xlsx'
     full_fn = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, fn)
 
