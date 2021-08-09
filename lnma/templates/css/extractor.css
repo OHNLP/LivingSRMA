@@ -121,6 +121,9 @@
     cursor: -webkit-grab;
 }
 
+#pan_ocpapers_working_paper_selector {
+    max-width: 280px;
+}
 /**********************************************************
  * For the pan_ocpapers_working_paper_collector
 *********************************************************/
