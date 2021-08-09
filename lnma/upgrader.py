@@ -150,10 +150,13 @@ def upgrade_extract_data_model_for_subg_and_cq(keystr):
     import copy
 
     extracts = dora.get_extracts_by_keystr(keystr)
+    print('* found %s extracts in [%s]' % (
+        len(extracts), keystr
+    ))
 
     # now, check each extract
-
     updated_exts = []
+    
     for extract in tqdm(extracts):
         # first, check the new attr `cq_abbr`
         if 'cq_abbr' not in extract.meta:
@@ -206,6 +209,9 @@ def upgrade_extract_data_model_for_subg_and_cq(keystr):
         updated_ext = dora.update_extract(extract)
         updated_exts.append(updated_ext)
 
+    print('* updated %s extracts' % (
+        len(updated_exts)
+    ))
     print('* done upgrading extracts')
 
 
