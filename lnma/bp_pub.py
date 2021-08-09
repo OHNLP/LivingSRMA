@@ -29,10 +29,11 @@ from lnma import dora
 from lnma import srv_extract
 from lnma import srv_project
 from lnma import srv_pub_itable
+from lnma import srv_pub_prisma
 
 import PythonMeta as PMA
 
-PATH_PUBDATA = 'pubdata'
+settings.PUBLIC_PATH_PUBDATA = 'pubdata'
 DEFAULT_EXTERNAL_VAL = 0
 
 bp = Blueprint("pub", __name__, url_prefix="/pub")
@@ -105,7 +106,12 @@ def ADJRCC():
     prj = 'ADJRCC'
 
     # load the pwma data
-    full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, 'PWMA_DATA.xlsx')
+    full_fn = os.path.join(
+        current_app.instance_path, 
+        settings.PUBLIC_PATH_PUBDATA, 
+        prj, 
+        'PWMA_DATA.xlsx'
+    )
     pwma = get_pwma_data(full_fn)
 
     return render_template('pub/ADJRCC/pub.ADJRCC.html', pwma=pwma)
@@ -120,11 +126,22 @@ def ADJRCC():
 def RCC():
     prj = 'RCC'
     # load the graph data
-    full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, 'NMA_LIST.json')
+    full_fn = os.path.join(
+        current_app.instance_path, 
+        settings.PUBLIC_PATH_PUBDATA, 
+        prj, 
+        'NMA_LIST.json'
+    )
     nma = json.load(open(full_fn))
     
     # load the dma data
-    full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, 'PWMA_DATA.xlsx')
+    full_fn = os.path.join(
+        current_app.instance_path, 
+        settings.PUBLIC_PATH_PUBDATA, 
+        prj, 
+        'PWMA_DATA.xlsx'
+    )
+    
     df = pd.read_excel(full_fn)
     pwma = OrderedDict()
     for idx, row in df.iterrows():
@@ -150,7 +167,7 @@ def RCC():
         pwma[pwma_type][option_text]['slides'].append(filename + '$' + legend_text)
 
     # load the evmap data
-    full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, 'EVMAP.json')
+    full_fn = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, 'EVMAP.json')
     evmap = json.load(open(full_fn))
 
     return render_template('pub/RCC/pub.RCC.html', nma=nma, pwma=pwma, evmap=evmap)
@@ -160,11 +177,11 @@ def RCC():
 def mRCC():
     prj = 'RCC'
     # load the graph data
-    full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, 'NMA_LIST.json')
+    full_fn = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, 'NMA_LIST.json')
     nma = json.load(open(full_fn))
     
     # load the dma data
-    full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, 'PWMA_DATA.xlsx')
+    full_fn = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, 'PWMA_DATA.xlsx')
     df = pd.read_excel(full_fn)
     pwma = OrderedDict()
     for idx, row in df.iterrows():
@@ -190,7 +207,7 @@ def mRCC():
         pwma[pwma_type][option_text]['slides'].append(filename + '$' + legend_text)
 
     # load the evmap data
-    full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, 'EVMAP.json')
+    full_fn = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, 'EVMAP.json')
     evmap = json.load(open(full_fn))
 
     return render_template('pub/RCC/pub.mRCC.html', nma=nma, pwma=pwma, evmap=evmap)
@@ -217,11 +234,11 @@ def ida_RCC():
 def CAT():
     prj = 'CAT'
     # load the graph data
-    full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, 'NMA_LIST.json')
+    full_fn = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, 'NMA_LIST.json')
     nma = json.load(open(full_fn))
 
     # load the dma data
-    full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, 'DMA_DATA.xlsx')
+    full_fn = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, 'DMA_DATA.xlsx')
     df = pd.read_excel(full_fn)
     dma = OrderedDict()
     for idx, row in df.iterrows():
@@ -254,11 +271,11 @@ def CAT_v1():
     '''
     prj = 'CAT'
     # load the graph data
-    full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, 'NMA_LIST.json')
+    full_fn = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, 'NMA_LIST.json')
     nma = json.load(open(full_fn))
 
     # load the dma data
-    full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, 'DMA_DATA.xlsx')
+    full_fn = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, 'DMA_DATA.xlsx')
     df = pd.read_excel(full_fn)
     dma = OrderedDict()
     for idx, row in df.iterrows():
@@ -394,7 +411,7 @@ def evmap_tr_v2():
 def graphdata(prj, fn):
     '''General data files
     '''
-    full_path = os.path.join(current_app.instance_path, PATH_PUBDATA, prj)
+    full_path = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj)
     return send_from_directory(full_path, fn)
 
 
@@ -402,7 +419,7 @@ def graphdata(prj, fn):
 def graphdata_img(prj, fn):
     '''get image files of specific project
     '''
-    full_path = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, 'img')
+    full_path = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, 'img')
     return send_from_directory(full_path, fn)
 
 
@@ -412,7 +429,7 @@ def graphdata_da_cmp(prj, cmp, fn):
     Get decision aid image files of specific project
     '''
     full_path = os.path.join(
-        current_app.instance_path, PATH_PUBDATA, prj, 
+        current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, 
         'decision_aid',
         cmp
     )
@@ -422,24 +439,24 @@ def graphdata_da_cmp(prj, cmp, fn):
 @bp.route('/graphdata/<prj>/ITABLE_CFG.json')
 def graphdata_itable_cfg_json(prj):
     full_fn_itable_cfg_json = os.path.join(
-        current_app.instance_path, PATH_PUBDATA, prj, 'ITABLE_CFG.json')
+        current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, 'ITABLE_CFG.json')
 
     # just send the ITABLE_CFG.json if exists
     # if os.path.exists(full_fn_itable_cfg_json):
     #     return send_from_directory(
-    #         os.path.join(current_app.instance_path, PATH_PUBDATA, prj),
+    #         os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj),
     #         'ITABLE_CFG.json'
     #     )
 
     # just load the existing filters
     fn = 'ITABLE_FILTERS.json'
-    full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
+    full_fn = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, fn)
     if os.path.exists(full_fn):
         filters = json.load(open(full_fn))['filters']
     else:
         # get the filters from the excel file
         fn = 'ITABLE_FILTERS.xlsx'
-        full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
+        full_fn = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, fn)
         filters = get_filters_from_itable(full_fn)
 
     ret = {
@@ -462,10 +479,10 @@ def graphdata_itable_json(prj):
     Special rule for the ITABLE.json which does not exist
     '''
     fn = 'ITABLE_ATTR_DATA.xlsx'
-    full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
+    full_fn = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, fn)
 
     output_fn = 'ITABLE.json'
-    full_output_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, output_fn)
+    full_output_fn = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, output_fn)
 
     # get the itable from database directly
     src = request.args.get('src')
@@ -530,7 +547,7 @@ def graphdata_oplots(prj):
 
     '''
     fn = 'ALL_DATA.xlsx'
-    full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
+    full_fn = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, fn)
     ret = get_ae_pma_data(full_fn, is_getting_sms=False)
 
     return jsonify(ret)
@@ -544,8 +561,18 @@ def graphdata_graph_pma_json(prj):
     This JSON is designed for the PWMA results.
     It is the first pure DB-based export, no XLS file required.
     '''
-    if prj == 'IO':
-        ret = srv_extract.get_sof_pma_data_from_db_IO(is_calc_pma=False)
+    src = request.args.get('src')
+    if src is None or src == '':
+        # set the default to get things from db
+        src = 'db'
+
+    cq_abbr = request.args.get('cq')
+    if cq_abbr is None or cq_abbr == '':
+        cq_abbr = 'default'
+
+    ret = srv_extract.get_sof_pma_data_from_db(
+        prj, cq_abbr, is_calc_pma=False
+    )
 
     return jsonify(ret)
 
@@ -560,25 +587,25 @@ def graphdata_graph_json(prj):
     '''
 
     fn = 'SOFTABLE_NMA_DATA.xlsx'
-    full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
+    full_fn = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, fn)
 
     # hold all the outcomes
     fn_json = 'GRAPH.json'
-    full_fn_json = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn_json)
+    full_fn_json = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, fn_json)
 
     # hold one outcome
     fn_oc_json = 'GRAPH_%s.json'
-    full_oc_fn_json = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn_oc_json)
+    full_oc_fn_json = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, fn_oc_json)
 
     # hold the outcome list 
     fn_nma_list_json = 'NMA_LIST.json'
-    full_nma_list_json = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn_nma_list_json)
+    full_nma_list_json = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, fn_nma_list_json)
 
     # use cache to haste the loading
     use_cache = request.args.get('use_cache')
     if use_cache == 'yes':
         return send_from_directory(
-            os.path.join(current_app.instance_path, PATH_PUBDATA, prj),
+            os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj),
             fn_json
         )
     
@@ -607,18 +634,25 @@ def graphdata_softable_pma_json(prj):
     From third tab all the events
     '''
     fn_json = 'SOFTABLE_PMA.json'
-    full_fn_json = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn_json)
+    full_fn_json = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, fn_json)
     src = request.args.get('src')
+    if src is None or src == '':
+        # set the default to get things from db
+        src = 'db'
+
+    # get the cq_abbr
+    cq_abbr = request.args.get('cq')
+    if cq_abbr is None or cq_abbr == '':
+        cq_abbr = 'default'
 
     if src == 'cache':
         ret = json.load(open(full_fn_json))
         return jsonify(ret)
 
     if src == 'db':
-        ret = None
-
-        if prj == 'IO':
-            ret = srv_extract.get_sof_pma_data_from_db_IO()
+        ret = srv_extract.get_sof_pma_data_from_db(
+            prj, cq_abbr, is_calc_pma=True
+        )
 
         if ret is None:
             ret = {
@@ -639,16 +673,16 @@ def graphdata_softable_pma_json(prj):
     if v is None or v == '' or v == '1':
         if prj == 'IO':
             fn = 'ALL_DATA.xlsx'
-            full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
+            full_fn = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, fn)
             ret = get_sof_pma_data_IO(full_fn, is_calc_pma=True)
         else:
             fn = 'SOFTABLE_PMA_DATA.xlsx'
-            full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
+            full_fn = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, fn)
             ret = get_ae_pma_data_simple(full_fn)
 
     elif v == '2':
         fn = 'SOFTABLE_PMA_DATA.xlsx'
-        full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
+        full_fn = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, fn)
         ret = get_sof_pma_data(full_fn)
 
     # cache the data
@@ -666,21 +700,26 @@ def graphdata_softable_nma_json(prj):
     From third tab all the events
     '''
     fn = 'SOFTABLE_NMA_DATA.xlsx'
-    full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
+    full_fn = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, fn)
 
     fn_json = 'SOFTABLE_NMA.json'
-    full_fn_json = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn_json)
+    full_fn_json = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, fn_json)
 
     # get parameters
     use_cache = request.args.get('use_cache')
     v = request.args.get('v')
 
+    # get the cq_abbr
+    cq_abbr = request.args.get('cq')
+    if cq_abbr is None or cq_abbr == '':
+        cq_abbr = 'default'
+
     if use_cache == 'yes':
         return send_from_directory(
-            os.path.join(current_app.instance_path, PATH_PUBDATA, prj),
+            os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj),
             fn_json
         )
-    full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
+    full_fn = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, fn)
 
     backend = 'freq'
     if prj == 'RCC':
@@ -710,9 +749,13 @@ def graphdata_prisma_json(prj):
     '''
     # get the itable from database directly
     src = request.args.get('src')
+    
+    cq_abbr = request.args.get('cq')
+    if cq_abbr is None or cq_abbr == '':
+        cq_abbr = 'default'
 
     if src == 'db':
-        ret = get_prisma_from_db(prj)
+        ret = srv_pub_prisma.get_prisma_from_db(prj)
         latest = srv_project.get_project_latest_stat_by_keystr(prj)
 
         if ret is None:
@@ -725,7 +768,7 @@ def graphdata_prisma_json(prj):
         return jsonify(ret)
 
 
-    ret = get_prisma_from_xls(prj)
+    ret = srv_pub_prisma.get_prisma_from_xls(prj)
 
     return jsonify(ret)
 
@@ -739,16 +782,16 @@ def graphdata_evmap_json(prj):
 
     fn = 'EVMAP_DATA.xlsx'
     fn = 'SOFTABLE_NMA_DATA.xlsx'
-    full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
+    full_fn = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, fn)
 
     # hold all the outcomes
     fn_json = 'EVMAP.json'
-    full_fn_json = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn_json)
+    full_fn_json = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, fn_json)
 
     use_cache = request.args.get('use_cache')
     if use_cache == 'yes':
         return send_from_directory(
-            os.path.join(current_app.instance_path, PATH_PUBDATA, prj),
+            os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj),
             fn_json
         )
 
@@ -776,235 +819,6 @@ def graphdata_latest_json(prj):
 ###########################################################
 # Other utils
 ###########################################################
-
-def get_prisma_from_db(prj):
-    '''
-    Get PRISMA JSON data from database
-    '''
-    project = dora.get_project_by_keystr(prj)
-    project_id = project.project_id
-
-    # get the fixed number from project settings
-    # this depends on whether this project 
-    past_prisma = {}
-
-    # get the living prisma from database
-    prisma, stat = dora.get_prisma_bef(project_id)
-
-    # get the paper information from database
-    # the paper dict is PMID based
-    paper_dict = {}
-
-    # the study dict is NCT based
-    study_dict = {}
-
-    # fill the pmid
-    papers = dora.get_papers_by_stage(
-        project.project_id,
-        ss_state.SS_STAGE_INCLUDED_SR
-    )
-    for paper in papers:
-        rct_id = paper.get_rct_id()
-
-        # add this paper to the paper dict
-        paper_dict[paper.pid] = {
-            "authors": paper.authors,
-            "ctid": rct_id,
-            "date": paper.pub_date,
-            "journal": paper.journal,
-            "pmid": paper.pid,
-            "pid_type": paper.pid_type,
-            "title": paper.title,
-        }
-
-        # add this RCT to the study dict
-        if rct_id not in study_dict:
-            study_dict[rct_id] = {
-                "authors": paper.authors,
-                "ctid": rct_id,
-                "date": paper.pub_date,
-                "journal": paper.journal,
-                "pmid": paper.pid,
-                "title": paper.title,
-
-                # the followings are for RCT
-                "study_id": rct_id,
-                "latest_pmid": '',
-                "pmids": [],
-            }
-        
-        # then add this paper to the study list
-        study_dict[rct_id]['latest_pmid'] = paper.pid
-        study_dict[rct_id]['pmids'].append(paper.pid)
-
-    # finally, we present this object
-    ret = {
-        "prisma": prisma,
-        "stat": stat,
-        "paper_dict": paper_dict,
-        "study_dict": study_dict,
-    }
-
-    return ret
-
-
-def get_prisma_from_xls(prj):
-    '''
-    Get PRISMA JSON data from Excel file
-    '''
-    fn = 'PRISMA_DATA.xlsx'
-    full_fn = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn)
-
-    # hold all the outcomes
-    fn_json = 'PRISMA.json'
-    full_fn_json = os.path.join(current_app.instance_path, PATH_PUBDATA, prj, fn_json)
-    
-    # there are two tables for this 
-    tab_name_prisma = 'PRISMA'
-    tab_name_studies = 'studies'
-
-    # load the xls
-    xls = pd.ExcelFile(full_fn)
-
-    # read the prisma, we need to read this tab two times
-    dft = xls.parse(tab_name_prisma, nrows=4)
-
-    # first, get the basic info
-    prisma = {}
-    stage_list = dft.columns.tolist()
-    for col in dft.columns:
-        # col should be b1, b2, b3 ... f1, f2
-        stage = col.strip()
-        text = dft.loc[0, col]
-        n_pmids = dft.loc[1, col]
-        if np.isnan(n_pmids):
-            n_pmids = None
-        detail = dft.loc[2, col]
-        if type(detail) != str:
-            detail = None
-        
-        # create the basic 
-        prisma[stage] = {
-            'stage': stage,
-            'n_pmids': n_pmids,
-            'n_ctids': 0,
-            'text': text,
-            'detail': detail,
-            'study_list': [],
-            'paper_list': []
-        }
-
-    # the study dict is NCT based
-    study_dict = {}
-    # the paper dict is PMID based
-    paper_dict = {}
-    # then, get the nct and pmids, skip the text, number and detail rows
-    dft = xls.parse(tab_name_prisma, skiprows=[1,2,3])
-    for col in dft.columns:
-        stage = col
-        study_ids = dft[col][~dft[col].isna()].tolist()
-            
-        # update the studies
-        for study_id in study_ids:
-            # the pmid is a number, but we need it as a string
-            study_id = str(study_id)
-            # tmp is ctid,PMID format, e.g., NCT12345678,321908734
-            tmp = study_id.split(',')
-
-            if len(tmp) == 1:
-                # only pmid ???
-                ctid = tmp[0]
-                pmid = tmp[0]
-            elif len(tmp) == 2:
-                ctid = tmp[0].strip()
-                pmid = tmp[1].strip()
-            else:
-                continue
-
-            try:
-                # some pid are saved as a float number????
-                # like 27918762.0???
-                pmid = '%s' % int(float(pmid))
-            except:
-                pass
-                
-            # append this ctid to this stage
-            if ctid not in prisma[stage]['study_list']:
-                prisma[stage]['study_list'].append(ctid)
-
-            # create a new in the study_dict for this nct
-            if ctid not in study_dict:
-                study_dict[ctid] = {
-                    'ctid': ctid, 'latest_pmid': None, 'pmids': [],
-                }
-
-            # append this pmid to this stage
-            if pmid not in prisma[stage]['paper_list']:
-                prisma[stage]['paper_list'].append(pmid)
-            
-            # update the pmid information of this clinical trial
-            study_dict[ctid]['latest_pmid'] = pmid
-            study_dict[ctid]['pmids'].append(pmid)
-            
-            # create a new item in paper_dict for this pmid
-            if pmid not in paper_dict:
-                paper_dict[pmid] = {
-                    'ctid': ctid, 'pmid': pmid
-                }
-            else:
-                # what???
-                pass
-        
-        if prisma[stage]['n_pmids'] is None:
-            prisma[stage]['n_pmids'] = len(prisma[stage]['paper_list'])
-
-        # update the number of ncts
-        prisma[stage]['n_ctids'] = len(prisma[stage]['study_list'])
-
-
-    # second, read more studies from second tab
-    try:
-        # the second tab is optional
-        cols = ['study_id', 'title', 'date', 'journal', 'authors']
-        dft = xls.parse(tab_name_studies, usecols='A:E', names=cols)
-        for idx, row in dft.iterrows():
-            study_id = ('%s'%row['study_id']).strip()
-            is_ctid = False
-            if study_id.startswith('NCT'):
-                is_ctid = True
-            else:
-                # sometimes the value is weird ...
-                try:
-                    study_id = '%s' % int(float(study_id))
-                except:
-                    pass
-
-            # update the study info
-            if is_ctid:
-                if study_id in study_dict:
-                    for col in cols:
-                        study_dict[study_id][col] = str(row[col])
-                else:
-                    pass
-            else:
-                if study_id in paper_dict:
-                    for col in cols:
-                        paper_dict[study_id][col] = str(row[col])
-                else:
-                    pass
-    except Exception as err:
-        # nothing, just ignore this error
-        print(err)
-
-    # reat the studies
-    ret = {
-        "prisma": prisma,
-        "study_dict": study_dict,
-        "paper_dict": paper_dict
-    }
-
-    return ret
-
 
 def get_evmap_data(full_fn):
     # return get_evmap_data_v1(full_fn)

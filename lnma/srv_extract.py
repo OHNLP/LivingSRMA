@@ -1,6 +1,7 @@
 import time
 
 import numpy as np
+from numpy.lib.function_base import extract
 import pandas as pd
 from tqdm import tqdm 
 
@@ -13,6 +14,9 @@ from lnma import dora
 from lnma import ss_state
 from lnma.analyzer import rpy2_pwma_analyzer as pwma_analyzer
 from lnma.models import *
+
+from lnma import srv_paper
+from lnma import db
 
 
 def get_itable_by_keystr_and_cq_abbr(keystr, cq_abbr):
@@ -46,7 +50,15 @@ def get_itable_by_project_id_and_cq_abbr(project_id, cq_abbr):
     return extract
 
 
-def get_sof_pma_data_from_db_IO(is_calc_pma=True):
+def get_sof_pma_data_from_db(keystr, cq_abbr, is_calc_pma=True):
+    '''
+    Get the SoF table data for PWMA
+    '''
+    if keystr == 'IO': return get_sof_pma_data_from_db_IO(cq_abbr, is_calc_pma)
+    pass
+
+
+def get_sof_pma_data_from_db_IO(cq_abbr="default", is_calc_pma=True):
     '''
     The SoF Table of PWMA DATA for IO project
     '''
@@ -54,11 +66,17 @@ def get_sof_pma_data_from_db_IO(is_calc_pma=True):
     # But for other projects, need to double check the input type
     keystr = 'IO'
     project = dora.get_project_by_keystr(keystr)
-    extracts = dora.get_extracts_by_keystr_and_oc_type(keystr, 'pwma')
-    papers = dora.get_papers_by_stage(
-        project.project_id, 
-        ss_state.SS_STAGE_INCLUDED_SR
+    # papers = dora.get_papers_by_stage(
+    #     project.project_id, 
+    #     ss_state.SS_STAGE_INCLUDED_SR,
+    #     cq_abbr
+    # )
+    papers = srv_paper.get_included_papers_by_cq(
+        project.project_id, cq_abbr
     )
+    print('* found %s papers included in %s-%s' % (
+        len(papers), 'IO', cq_abbr
+    ))
     
     # make a dictionary for lookup
     paper_dict = {}
@@ -66,6 +84,15 @@ def get_sof_pma_data_from_db_IO(is_calc_pma=True):
         paper_dict[paper.pid] = paper
 
     # Then, we need to build the oc_list for the navigation
+    extracts = dora.get_extracts_by_keystr_and_cq_and_oc_type(
+        keystr, 
+        cq_abbr, 
+        'pwma'
+    )
+    print('* found %s extracts defined in %s-%s' % (
+        len(extracts), 'IO', cq_abbr
+    ))
+
     oc_dict = {}
     for extract in extracts:
         abbr = extract.abbr
@@ -160,11 +187,11 @@ def get_sof_pma_data_from_db_IO(is_calc_pma=True):
             # for each paper, there must be one main record
             # sometimes, there is also multi-arm
             ext_pp_rs = [
-                [ext_pp_data['attrs']['main'].copy(), '']
+                [ext_pp_data['attrs']['main']['g0'].copy(), '']
             ]
             for arm_idx in range(ext_pp_data['n_arms'] - 2):
                 ext_pp_rs.append(
-                    [ext_pp_data['attrs']['other'][arm_idx].copy(), ' Comp %s' % (arm_idx + 2)]
+                    [ext_pp_data['attrs']['other'][arm_idx]['g0'].copy(), ' Comp %s' % (arm_idx + 2)]
                 )
             
             # then, we just need to run the calculation once
@@ -341,3 +368,31 @@ def get_sof_pma_data_from_db_IO(is_calc_pma=True):
 
     return ret
 
+
+###########################################################
+# Utils for management
+###########################################################
+
+def reset_extracts_includes(keystr, cq_abbr, include_in, yes_or_no):
+    '''
+    Reset all extracts' include in 
+    '''
+    extracts = dora.get_extracts_by_keystr_and_cq(keystr, cq_abbr)
+
+    for ext in tqdm(extracts):
+        if include_in == 'plots':
+            ext.meta['included_in_plots'] = yes_or_no            
+            flag_modified(ext, 'meta')
+            db.session.add(ext)
+            db.session.commit()
+
+        elif include_in == 'sof':
+            ext.meta['included_in_sof'] = yes_or_no
+            flag_modified(ext, 'meta')
+            db.session.add(ext)
+            db.session.commit()
+
+        else:
+            pass
+
+    print('* done reset')

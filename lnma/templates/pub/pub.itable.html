@@ -749,9 +749,14 @@ var jarvis = {
         }
         var prj = jarvis.get_url_paramter('prj');
         var src = jarvis.get_url_paramter('src');
+        var cq = jarvis.get_url_paramter('cq');
 
         if (src == '') {
-            src = 'xls'
+            src = 'xls';
+        }
+
+        if (cq == '') {
+            cq = 'default';
         }
 
         jarvis.src = src;
@@ -759,7 +764,7 @@ var jarvis = {
         if (jarvis.src == 'db') {
             $.get(
                 '/pub/graphdata/'+prj+'/ITABLE.json',
-                {ver: Math.random(), src: jarvis.src},
+                {ver: Math.random(), src: jarvis.src, cq: cq},
                 function(data) {
                     console.log(data);
 

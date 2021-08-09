@@ -1340,15 +1340,19 @@ var jarvis = {
         // set the vw_oclist to radio button model
         vw_oclist.select_mode = 'radio';
 
+        var cq = jarvis.get_url_paramter('cq');
+        if (cq == '') {
+            cq = 'default';
+        }
 
         $.when(
             $.get(
                 '/pub/graphdata/' + prj + '/ITABLE.json',
-                {rnd: Math.random(), src: src}
+                {rnd: Math.random(), src: src, cq: cq}
             ),
             $.get(
                 '/pub/graphdata/'+prj+'/GRAPH_PMA.json',
-                {ver: Math.random(), src: src},
+                {ver: Math.random(), src: src, cq: cq},
             )
         ).done(function(r1, r2) {
             var data1 = r1[0];

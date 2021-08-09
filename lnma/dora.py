@@ -2031,8 +2031,7 @@ def get_extracts_by_keystr(keystr:str):
 
     return extracts
 
-
-def get_extracts_by_keystr_and_oc_type(keystr:str, oc_type:str):
+def get_extracts_by_keystr_and_cq(keystr:str, cq_abbr:str):
     '''
     Get all of the extract detail of a project
     '''
@@ -2044,7 +2043,26 @@ def get_extracts_by_keystr_and_oc_type(keystr:str, oc_type:str):
 
     extracts = Extract.query.filter(
         Extract.project_id == project.project_id,
-        Extract.oc_type == oc_type
+        Extract.meta['cq_abbr'] == cq_abbr
+    ).all()
+
+    return extracts
+
+
+def get_extracts_by_keystr_and_cq_and_oc_type(keystr:str, cq_abbr:str, oc_type:str):
+    '''
+    Get all of the extract detail of a project
+    '''
+    project = get_project_by_keystr(keystr)
+
+    if project is None:
+        # what???
+        return None
+
+    extracts = Extract.query.filter(
+        Extract.project_id == project.project_id,
+        Extract.oc_type == oc_type,
+        Extract.meta['cq_abbr'] == cq_abbr
     ).all()
 
     return extracts

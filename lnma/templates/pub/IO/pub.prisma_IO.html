@@ -840,12 +840,18 @@ var jarvis = {
         });
 
         var prj = jarvis.get_url_paramter('prj');
+        var cq = jarvis.get_url_paramter('cq');
+
+        if (cq == '') {
+            cq = 'default';
+        }
 
         $.get(
             '/pub/graphdata/IO/PRISMA.json',
             { 
                 rnd: Math.random(),
-                src: 'db'
+                src: 'db',
+                cq: cq
             },
             function(data) {
                 console.log(data);
