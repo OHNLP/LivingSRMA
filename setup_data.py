@@ -47,7 +47,7 @@ rs = [
 ]
 
 for r in rs:
-    p = dora.create_project(
+    p, msg = dora.create_project(
         r[0], r[1], r[2], r[3]
     )
 

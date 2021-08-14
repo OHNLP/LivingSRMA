@@ -34,7 +34,7 @@ def create_project(owner_uid, title, keystr=None, abstract="", p_settings=None):
     _p = get_project_by_keystr(keystr)
     if _p is not None:
         # existed???
-        return None
+        return None, 'existed project'
 
     date_created = datetime.datetime.now()
     date_updated = datetime.datetime.now()
@@ -65,7 +65,7 @@ def create_project(owner_uid, title, keystr=None, abstract="", p_settings=None):
     db.session.add(project)
     db.session.commit()
 
-    return project
+    return project, 'ok'
 
 
 def get_project(project_id):

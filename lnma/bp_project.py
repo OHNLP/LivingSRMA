@@ -28,17 +28,20 @@ def create():
 
     query = request.form.get('query')
 
-    project = dora.create_project(
+    project, msg = dora.create_project(
         owner_uid = current_user.uid,
         title = request.form.get('title'),
         keystr = request.form.get('keystr'),
         abstract = request.form.get('abstract'),
         p_settings=None
     )
+    if project is None:
+        flash('Failed. This project Identifier already exists, please use other Identifier and try again', 'error')
+        return redirect(url_for('project.create'))
+    else:
+        flash('Project is created!')
+        return redirect(url_for('project.mylist'))
 
-    flash('Project is created!')
-
-    return redirect(url_for('project.mylist'))
 
 
 @bp.route('/mylist', methods=['GET', 'POST'])

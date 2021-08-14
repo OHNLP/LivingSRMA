@@ -516,7 +516,7 @@ function toast(msg, type) {
   <!-- Categories: success (green), info (blue), warning (yellow), danger (red) -->
   {% if messages %}
     {% for category, message in messages %}
-      toast("[[ message ]]");
+      toast("[[ message ]]", "[[ category ]]");
     {% endfor %}
   {% endif %}
 {% endwith %}
