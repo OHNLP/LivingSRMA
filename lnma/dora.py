@@ -19,8 +19,9 @@ from lnma import settings
 
 REL_PROJECT_USER_CREATOR = 'creator'
 
-def create_project(owner_uid, title, keystr=None, abstract="", settings=None):
-    """Create a project based on given parameter
+def create_project(owner_uid, title, keystr=None, abstract="", p_settings=None):
+    """
+    Create a project based on given parameter
     """
     # create a project
     project_id = str(uuid.uuid1())
@@ -40,29 +41,13 @@ def create_project(owner_uid, title, keystr=None, abstract="", settings=None):
     is_deleted = settings.PAPER_IS_DELETED_NO
 
     # settings is very very very important!
-    if settings is None:
-        settings = {
-            'collect_template': {},
-            'query': '',
-            'criterias': {
-                "inclusion": "",            # string, the inclusion criteria
-                "exclusion": "",            # string, the exclusion criteria
-            },
-            "exclusion_reasons": [          # a list of strings for the reasons
-                "Conference Abstract"
-            ],
-            "highlight_keywords": {         # the keywords for highlight title or abs
-                "inclusion": [              # the inclusion keywords
-                    'phase 3'
-                ],             
-                "exclusion": [              # the exclusion keywords
-                    'meta-analysis'
-                ]              
-            },
-            "tags": [                       # a list of strings for the tags
-                "Other MA"
-            ],
-        }
+    # 2021-08-13: the `settings` is the module name ...
+    import copy
+    if p_settings is None:
+        p_settings = copy.deepcopy(settings.PROJECT_DEFAULT_SETTINGS)
+
+    # update the cq name
+    p_settings["clinical_questions"][0]['name'] = title
 
     project = Project(
         project_id = project_id,
@@ -72,7 +57,7 @@ def create_project(owner_uid, title, keystr=None, abstract="", settings=None):
         abstract = abstract,
         date_created = date_created,
         date_updated = date_updated,
-        settings = settings,
+        settings = p_settings,
         is_deleted = is_deleted
     )
     owner = User.query.get(owner_uid)

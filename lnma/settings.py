@@ -627,6 +627,93 @@ PUBWEB_DATAFILES = {
     'prisma_data':        'PRISMA_DATA.xlsx'
 }
 
+PROJECT_DEFAULT_SETTINGS = {
+    # for the extraction
+    'auto_fill': [
+    {
+        "from": "TRIAL CHARACTERISTICS|Treatment regimen",
+        "to": "Treatment Arm|Treatment"
+    },
+    {
+        "from": "TRIAL CHARACTERISTICS|Control regimen",
+        "to": "Control Arm|Control"
+    }],
+    'collect_template': {},
+    'query': '',
+    'criterias': {
+        "inclusion": "",            # string, the inclusion criteria
+        "exclusion": "",            # string, the exclusion criteria
+    },
+    "exclusion_reasons": [          # a list of strings for the reasons
+        "Conference Abstract"
+    ],
+    "highlight_keywords": {         # the keywords for highlight title or abs
+        "inclusion": [              # the inclusion keywords
+            'phase 3'
+        ],             
+        "exclusion": [              # the exclusion keywords
+            'meta-analysis'
+        ]              
+    },
+    "tags": [                       # a list of strings for the tags
+        "Other MA"
+    ],
+    "pdf_keywords": {
+        "main": [
+            "phase",
+            "arms",
+            "follow-up"
+        ]
+    },
+    # defines the clinical question used in this project
+    "clinical_questions": [
+        {
+            "abbr": "default",
+            "name": ""  # the name should be same as project name
+        }
+    ],
+    "outcome": {
+        "nma": {
+            "analysis_groups": [
+                {
+                    "abbr": "primary",
+                    "name": "Primary Analysis"
+                },
+                {
+                    "abbr": "sensitivity",
+                    "name": "Sensitivity Analysis"
+                }
+            ],
+            "default_setting": {
+                "input_format": "NMA_PRE_SMLU"
+            }
+        },
+        "pwma": {
+            "analysis_groups": [
+                {
+                    "abbr": "primary",
+                    "name": "Primary Analysis"
+                },
+                {
+                    "abbr": "sensitivity",
+                    "name": "Sensitivity Analysis"
+                },
+                {
+                    "abbr": "subgroup",
+                    "name": "Subgroup Analysis"
+                }
+            ],
+            "default_setting": {
+                "input_format": "PRIM_CAT_RAW"
+            }
+        }
+    },
+    "outcomes_enabled": [
+        'pwma', 
+        'nma'
+    ]
+}
+
 # the maximum length
 PID_TYPE_MAX_LENGTH = 32
 PID_TYPE_NONE_TYPE = 'UNKNOWN'
