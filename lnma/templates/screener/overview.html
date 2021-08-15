@@ -989,6 +989,9 @@ var tbjs_paperlist = {
             // update the local database
             tbjs_paperlist.papers[data.paper.pid] = data.paper;
 
+            // update the authors
+            $('#tb-rowext-authors-' + data.paper.paper_id).html(data.paper.authors);
+
             // update the abstract
             $('#tb-rowext-abstract-' + data.paper.paper_id).html(data.paper.abstract);
 
@@ -1333,7 +1336,7 @@ var tbjs_paperlist = {
                 '<td>Actions:</td>'+
                 '<td>'+
                 '<button class="btn btn-secondary btn-sm" onclick="tbjs_paperlist.set_needchkft(\''+d.paper_id+'\')">Proceed to Full-Text Review</button> '+
-                '<button class="btn btn-primary btn-sm" onclick="tbjs_paperlist.include_in_sr(\''+d.paper_id+'\', \'Through Abstract\')">Include in SR</button> '+
+                '<button class="btn btn-primary btn-sm" onclick="tbjs_paperlist.include_in_sr(\''+d.paper_id+'\', \'Through Abstract\')">Include in Project</button> '+
                 
                 '<button class="btn btn-danger btn-sm" onclick="tbjs_paperlist.exclude_by_ab(\''+d.paper_id+'\')">Exclude by Abstract</button> '+
                 ' | ' +
@@ -1745,13 +1748,13 @@ var tbjs_paperlist = {
             '<td>Files: </td>' +
             '<td id="tb-rowext-pdfs-'+d.paper_id+'" class="d-flex flex-row">' +
                 '<form id="tb-rowext-pdfs-form-'+d.paper_id+'" method="post" enctype="multipart/form-data">' +
-                '<div class="custom-file mr-2" style="width: 200px;">' + 
+                '<div class="mr-2">' + 
                     '<input type="hidden" name="paper_id" value="'+d.paper_id+'">' + 
-                    '<input type="file" name="files[]" multiple accept=".pdf" class="custom-file-input" id="tb-row-upload-'+d.paper_id+'">' +
+                    '<input type="file" name="files[]" multiple accept=".pdf" class="" id="tb-row-upload-'+d.paper_id+'">' +
                     '<label class="custom-file-label" for="tb-row-upload-'+d.paper_id+'">Choose file</label>' +
                 '</div>' +
                 '</form>' +
-                '<button id="btn_upload_'+d.paper_id+'" class="btn btn-primary mr-2" onclick="srv_pdfworker.update_pdfs(\''+d.paper_id+'\');">Upload</button>' + 
+                '<button id="btn_upload_'+d.paper_id+'" class="btn btn-sm btn-primary mr-2" onclick="srv_pdfworker.update_pdfs(\''+d.paper_id+'\');">Upload</button>' + 
                 
                 '<div id="tb-rowext-pdfs-list-'+d.paper_id+'">' +
                 this.__get_div_pdfs(d) +
@@ -1764,7 +1767,7 @@ var tbjs_paperlist = {
     __get_tr_authors: function(d) {
         return '<tr>'+
             '<td>Authors:</td>'+
-            '<td>'+d.authors+'</td>'+
+            '<td id="tb-rowext-authors-'+d.paper_id+'"> ... </td>'+
         '</tr>';
     },
 
@@ -1788,7 +1791,6 @@ var tbjs_paperlist = {
         return '<tr>'+
             '<td>Abstract:</td>'+
             '<td id="tb-rowext-abstract-'+d.paper_id+'" class="pb-4">...</td>'+
-            // '<td id="tb-rowext-abstract-'+d.paper_id+'">'+d.abstract+'</td>'+
         '</tr>';
     },
 
@@ -1884,7 +1886,7 @@ var tbjs_paperlist = {
             const pdf_meta = d.meta.pdfs[i];
             html_tags.push(
                 '<div class="btn-group mr-2">' +
-                '    <button type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' +
+                '    <button type="button" class="btn btn-sm btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' +
                 '        <i class="far fa-file-pdf"></i> ' + pdf_meta.display_name +
                 '    </button>' +
                 '    <div class="dropdown-menu dropdown-menu-right">' +

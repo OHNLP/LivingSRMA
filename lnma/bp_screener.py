@@ -118,7 +118,17 @@ def get_papers_by_stage():
     project_id = request.args.get('project_id')
     stage = request.args.get('stage')
     papers = dora.get_papers_by_stage(project_id, stage)
-    json_papers = [ p.as_very_simple_dict() for p in papers ]
+    json_papers = [  ]
+    for p in papers:
+        d = p.as_very_simple_dict()
+
+        # remove some unused information in first look
+        del d['date_updated']
+        del d['year']
+        if 'pred_dict' in d['meta']: del d['meta']['pred_dict']
+        if 'all_rct_ids' in d['meta']: del d['meta']['all_rct_ids']
+
+        json_papers.append(d)
 
     ret = {
         'success': True,
@@ -512,7 +522,10 @@ def sspr_set_label_ckl():
     papers = []
 
     for paper_id in paper_ids:
-        p = set_label_check_later(paper_id)
+        p = srv_paper.set_paper_ss_label(
+            paper_id, ss_state.SS_LABEL_CKL,
+            current_user
+        )
         papers.append(p.as_simple_dict())
 
     ret = {
@@ -532,7 +545,7 @@ def sspr_unset_label_ckl():
     papers = []
 
     for paper_id in paper_ids:
-        p = unset_label_check_later(paper_id)
+        p = srv_paper.unset_label_check_later(paper_id)
         papers.append(p.as_simple_dict())
 
     ret = {
@@ -567,18 +580,20 @@ def sspr_set_rct_feedback():
 # Internal functions for screener
 ###############################################################################
 
-def set_label_check_later(paper_id):
-    '''Set the "check later" label for study
-    '''
-    paper = dora.set_paper_ss_label(paper_id, ss_state.SS_LABEL_CKL)
-    return paper
+# def set_label_check_later(paper_id):
+#     '''
+#     Set the "check later" label for study
+#     '''
+#     paper = dora.set_paper_ss_label(paper_id, ss_state.SS_LABEL_CKL)
+#     return paper
 
 
-def unset_label_check_later(paper_id):
-    '''Unset the "check later" label for study
-    '''
-    paper = dora.unset_paper_ss_label(paper_id, ss_state.SS_LABEL_CKL)
-    return paper
+# def unset_label_check_later(paper_id):
+#     '''
+#     Unset the "check later" label for study
+#     '''
+#     paper = dora.unset_paper_ss_label(paper_id, ss_state.SS_LABEL_CKL)
+#     return paper
 
 
 def create_pr_rs_details(reason, decision):

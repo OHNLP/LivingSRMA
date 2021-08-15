@@ -34,18 +34,23 @@ class User(db.Model):
     role = db.Column(db.String(16), index=False)
     is_deleted = db.Column(db.String(8), index=False)
 
+
     # for Flask-login
     def is_authenticated(self):
         return True
 
+
     def is_active(self):
         return self.is_deleted == 'no'
+
 
     def is_anonymous(self):
         return False
 
+
     def get_id(self):
         return self.uid
+
 
     # for data API
     def as_dict(self):
@@ -56,8 +61,14 @@ class User(db.Model):
             'role': self.role
         }
 
+
+    def get_abbr(self):
+        return self.first_name[0].upper() + self.last_name[0].upper()
+
+
     def set_password(self, raw_pass):
         self.password = generate_password_hash(raw_pass)
+
 
     def __repr__(self):
         return '<User {}>'.format(self.uid)
@@ -407,6 +418,23 @@ class Paper(db.Model):
 
         # ok, that's all
 
+    def get_simple_pid_type(self):
+        '''
+        Get the simple pid type
+        '''
+        pid_type = self.pid_type.upper()
+
+        if 'OVID' in pid_type or \
+            'MEDLINE' in pid_type:
+            return 'MEDLINE'
+        if 'PMID' in pid_type or \
+            'PUBMED' in pid_type:
+            return 'PUBMED'
+        if 'EMBASE' in pid_type:
+            return 'EBASE'
+
+        return pid_type
+
     
     def is_pmid(self):
         '''
@@ -478,6 +506,12 @@ class Paper(db.Model):
         '''
         simple_dict = self.as_simple_dict()
         simple_dict['abstract'] = ''
+        simple_dict['authors'] = ''
+        simple_dict['date_created'] = self.date_created.strftime('%Y-%m-%d')
+        simple_dict['pid_type'] = self.get_simple_pid_type()
+        
+        del simple_dict['is_deleted']
+        del simple_dict['project_id']
 
         return simple_dict
 
@@ -489,8 +523,6 @@ class Paper(db.Model):
         d = self.as_simple_dict()
         del d['paper_id']
         del d['pid_type']
-        del d['project_id']
-        del d['is_deleted']
         del d['date_updated']
 
         return d
