@@ -509,6 +509,10 @@ class Paper(db.Model):
         simple_dict['authors'] = ''
         simple_dict['date_created'] = self.date_created.strftime('%Y-%m-%d')
         simple_dict['pid_type'] = self.get_simple_pid_type()
+
+        # delete those for import information
+        if 'xml' in simple_dict['meta']: del simple_dict['meta']['xml']
+        if 'raw_type' in simple_dict['meta']: del simple_dict['meta']['raw_type']
         
         del simple_dict['is_deleted']
         del simple_dict['project_id']
