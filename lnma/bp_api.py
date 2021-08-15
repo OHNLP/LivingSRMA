@@ -114,7 +114,7 @@ def get_papers():
 
     try:
         papers = dora.get_papers_by_keystr(keystr)
-        data = [ p.as_extreme_simple_dict() for p in papers ]
+        data = [ p.as_quite_simple_dict() for p in papers ]
         ret['success'] = True
         ret['data'] = data
 

@@ -520,7 +520,7 @@ class Paper(db.Model):
         return simple_dict
 
     
-    def as_extreme_simple_dict(self):
+    def as_quite_simple_dict(self):
         '''
         Return the very very simple data of this paper
         '''
@@ -528,6 +528,10 @@ class Paper(db.Model):
         del d['paper_id']
         del d['pid_type']
         del d['date_updated']
+
+        # delete those for import information
+        if 'xml' in d['meta']: del d['meta']['xml']
+        if 'raw_type' in d['meta']: del d['meta']['raw_type']
 
         return d
 
