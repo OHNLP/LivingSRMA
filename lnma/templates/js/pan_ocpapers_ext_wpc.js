@@ -356,8 +356,9 @@ Object.assign(pan_ocpapers, {
         // loop on the cate_attrs
         var html = [
             '<li class="menu-info"><div>',
-                '<i class="fa fa-close"></i> ',
-                'Highlighted <b id="pan_ocpapers_ctx_menu_txt">'+highlight_text+'</b> is:',
+                '<div style="display:inline-block;"> <i class="fa fa-close"></i> ',
+                'Highlighted </div>',
+                '<div id="pan_ocpapers_ctx_menu_txt" title="'+highlight_text+'">'+highlight_text+'</div>',
             '</div></li>'
         ];
 

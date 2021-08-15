@@ -218,6 +218,15 @@ div.w-attr-item:nth-child(odd) {background: whitesmoke; }
 }
 #pan_ocpapers_ctx_menu_txt {
     color: black;
+    max-width: 200px;
+    font-weight: bold;
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 12px;
+    margin-left: 5px;
+    text-decoration: underline;
 }
 #pan_ocpapers_ctx_menu .menu-header {
     font-size: .8em;
