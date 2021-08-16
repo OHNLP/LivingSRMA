@@ -188,6 +188,8 @@ div.w-attr-item:nth-child(odd) {background: whitesmoke; }
     height: 20px;
     line-height: 20px;
     border: 1px solid #cccccc;
+    
+    width: calc(100% - 20px);
 }
 
 .ui-autocomplete {

@@ -106,18 +106,25 @@ Object.assign(pan_ocpapers.vpp_methods, {
 
     switch_working_subg: function(subg_idx) {
         if (this.working_oc.meta)
-        console.log('* switch subg to ' + subg_idx);
+        // console.log('* switch subg to ' + subg_idx);
         this.working_paper_subg = subg_idx;
     },
 
     get_working_arm_attrs: function() {
+        // console.log('* get_working_arm_attrs: ' + this.working_paper_arm);
         if (this.working_paper_arm == null) {
             return this.working_oc.data[this.working_paper.pid].attrs.main;
         } else {
-            return this.working_oc.data[this.working_paper.pid].attrs.other[
-                this.working_paper_arm
-            ];
+            return this.working_oc.data[this.working_paper.pid].attrs.other[this.working_paper_arm];
         }
+    },
+
+    set_working_arm_group_attr_value: function(g_idx, abbr, value) {
+        var old_val = this.get_working_arm_attrs()['g'+g_idx][abbr];
+        this.get_working_arm_attrs()['g'+g_idx][abbr] = value;
+        console.log('* set value ' + old_val + ' -> ' + this.get_working_arm_attrs()['g'+g_idx][abbr]);
+        
+        this.$forceUpdate();
     },
 
     set_working_arm_attr_value: function(abbr, value) {
