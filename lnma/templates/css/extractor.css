@@ -251,7 +251,10 @@ div.w-attr-item:nth-child(odd) {background: whitesmoke; }
     width: 280px; 
     max-width: 320px;
 }
-
+.ui-menu {
+    overflow-x: hidden;
+    overflow-y: scroll;
+}
 /**********************************************************
  * For the pan_collector
 *********************************************************/

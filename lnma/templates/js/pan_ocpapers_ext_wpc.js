@@ -457,6 +457,11 @@ Object.assign(pan_ocpapers, {
         // fix the top and left 
         var box_width = $('#pan_ocpapers_ctx_menu').width();
         var box_height = $('#pan_ocpapers_ctx_menu').height();
+
+        // 2021-08-16: fix the very large box height
+        if (box_height > win_height) {
+            box_height = win_height - 150;
+        }
         // console.log('* box w:', box_width, 'h:', box_height);
 
         if (left + box_width > win_width) {
@@ -472,7 +477,8 @@ Object.assign(pan_ocpapers, {
             position: 'absolute',
             display: "block",
             top: top,
-            left: left
+            left: left,
+            height: box_height + 'px'
         });
 
         // bind other event
