@@ -84,7 +84,7 @@
                                         v-on:click="switch_working_subg(g_idx)"
                                         v-model="working_oc.data[working_paper.pid].attrs.main['g'+g_idx][attr.abbr]"> 
                                     <span class="w-remove-content"
-                                        v-on:click="set_working_arm_group_attr_value(g_idx, attr.abbr, '')">
+                                        v-on:click="set_working_paper_arm_by_group_attr_value(g_idx, attr.abbr, '')">
                                         <i class="fa fa-close"></i>
                                     </span>
                                 </span>
@@ -95,7 +95,7 @@
                                         v-on:click="switch_working_subg(g_idx)"
                                         v-model="working_oc.data[working_paper.pid].attrs.other[working_paper_arm]['g'+g_idx][attr.abbr]"> 
                                     <span class="w-remove-content"
-                                        v-on:click="set_working_arm_group_attr_value(g_idx, attr.abbr, '')">
+                                        v-on:click="set_working_paper_arm_by_group_attr_value(g_idx, attr.abbr, '')">
                                         <i class="fa fa-close"></i>
                                     </span>
                                 </span> -->
@@ -105,7 +105,7 @@
                                     v-on:click="switch_working_subg(g_idx)"
                                     v-model="get_working_arm_attrs()['g'+g_idx][attr.abbr]"> 
                                 <span class="w-remove-content"
-                                    v-on:click="set_working_arm_group_attr_value(g_idx, attr.abbr, '')">
+                                    v-on:click="set_working_paper_arm_by_group_attr_value(g_idx, attr.abbr, '')">
                                     <i class="fa fa-close"></i>
                                 </span>
                             </div>

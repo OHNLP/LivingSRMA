@@ -255,7 +255,7 @@ div.w-attr-item:nth-child(odd) {background: whitesmoke; }
 }
 .ui-menu {
     overflow-x: hidden;
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 /**********************************************************
  * For the pan_collector

@@ -119,7 +119,7 @@ Object.assign(pan_ocpapers.vpp_methods, {
         }
     },
 
-    set_working_arm_group_attr_value: function(g_idx, abbr, value) {
+    set_working_paper_arm_by_group_attr_value: function(g_idx, abbr, value) {
         var old_val = this.get_working_arm_attrs()['g'+g_idx][abbr];
         this.get_working_arm_attrs()['g'+g_idx][abbr] = value;
         console.log('* set value ' + old_val + ' -> ' + this.get_working_arm_attrs()['g'+g_idx][abbr]);
@@ -127,7 +127,13 @@ Object.assign(pan_ocpapers.vpp_methods, {
         this.$forceUpdate();
     },
 
-    set_working_arm_attr_value: function(abbr, value) {
+    set_working_paper_arm_group_by_attr_value: function(abbr, value) {
+        var old_val = this.get_working_arm_attrs()['g'+this.working_paper_subg][abbr];
+        this.get_working_arm_attrs()['g'+this.working_paper_subg][abbr] = value;
+        console.log('* set wk_pp_arm_group value ' + old_val + ' -> ' + value);
+    },
+
+    set_working_paper_arm_allgroups_by_attr_value: function(abbr, value) {
         for (let i = 0; i < this.working_oc.meta.sub_groups.length; i++) {        
             this.get_working_arm_attrs()['g'+i][abbr] = value;
         }
@@ -220,7 +226,7 @@ Object.assign(pan_ocpapers, {
             afs[i].from_value = itable.data[pid].attrs.main['g0'][afs[i].from_abbr];
 
             // now, put this value to the paper of this working oc
-            this.vpp.set_working_arm_attr_value(
+            this.vpp.set_working_paper_arm_allgroups_by_attr_value(
                 afs[i].to_abbr,
                 afs[i].from_value
             );
@@ -339,19 +345,24 @@ Object.assign(pan_ocpapers, {
      * 
      * seq: null means `main`, 0 to x means item index in `other`
      */
-     set_highlight_text_to_attr: function(highlight_text, pid, attr_abbr, seq) {
-        console.log('* set_highlight_text_to_attr: ' + highlight_text + ', ' + pid + ', ' + attr_abbr + ', ' + seq);
+     set_highlight_text_to_attr: function(highlight_text, attr_abbr) {
+        console.log('* set_highlight_text_to_attr: ' + highlight_text + 'to ' + attr_abbr);
 
         // update the value for the specific paper
-        if (seq == null) {
-            // it means this is the main track
-            this.vpp.$data.working_oc.data[pid].attrs.main['g'+this.vpp.$data.working_paper_subg][attr_abbr] = highlight_text;
-        } else {
-            // this means the value is for other arms
-            this.vpp.$data.working_oc.data[pid].attrs.other[seq]['g'+this.vpp.$data.working_paper_subg][attr_abbr] = highlight_text;
-        }
+        // if (seq == null) {
+        //     // it means this is the main track
+        //     this.vpp.$data.working_oc.data[pid].attrs.main['g'+this.vpp.$data.working_paper_subg][attr_abbr] = highlight_text;
+        // } else {
+        //     // this means the value is for other arms
+        //     this.vpp.$data.working_oc.data[pid].attrs.other[seq]['g'+this.vpp.$data.working_paper_subg][attr_abbr] = highlight_text;
+        // }
+
+        // 2021-08-15: just add to the working arm
+        // this.get_working_arm_attrs()['g' + this.working_paper_subg][attr_abbr] = highlight_text;
+        this.vpp.set_working_paper_arm_group_by_attr_value(attr_abbr, highlight_text);
+
         // update UI
-        this.vpp.$forceUpdate();
+        // this.vpp.$forceUpdate();
     },
 
     update_ctx_menu: function(highlight_text, pid) {
@@ -362,11 +373,11 @@ Object.assign(pan_ocpapers, {
 
         // loop on the cate_attrs
         var html = [
-            '<li class="menu-info"><div>',
+            '<li class="menu-info">',
                 '<div style="display:inline-block;"> <i class="fa fa-close"></i> ',
                 'Highlighted </div>',
                 '<div id="pan_ocpapers_ctx_menu_txt" title="'+highlight_text+'">'+highlight_text+'</div>',
-            '</div></li>'
+            '</li>'
         ];
 
         // this is for the main extracting
@@ -410,7 +421,7 @@ Object.assign(pan_ocpapers, {
                     if (is_show) {
                         html.push(
                         '<li class="menu-item">' +
-                            '<div onclick="pan_ocpapers.set_highlight_text_to_attr(\''+highlight_text+'\', \''+pid+'\', \''+attr.abbr+'\', '+seq+')">' +
+                            '<div onclick="pan_ocpapers.set_highlight_text_to_attr(\''+highlight_text+'\', \''+attr.abbr+'\')">' +
                             attr.name +
                             '</div>' +
                         '</li>'
@@ -423,7 +434,7 @@ Object.assign(pan_ocpapers, {
                         if (this.vpp.is_show_attr(sub.abbr)) {
                             html.push(
                             '<li class="menu-item">' +
-                                '<div onclick="pan_ocpapers.set_highlight_text_to_attr(\''+highlight_text+'\', \''+pid+'\', \''+sub.abbr+'\', '+seq+')">' +
+                                '<div onclick="pan_ocpapers.set_highlight_text_to_attr(\''+highlight_text+'\', \''+sub.abbr+'\')">' +
                                 attr.name + ' - ' + sub.name +
                                 '</div>' +
                             '</li>'
@@ -450,7 +461,7 @@ Object.assign(pan_ocpapers, {
 
         var win_width = $(document.body).width();
         var win_height = $(document.body).height();
-        // console.log('* win w:', win_width, 'h:', win_height);
+        console.log('* win w:', win_width, 'h:', win_height);
 
         // generate the menu first
         $("#pan_ocpapers_ctx_menu").css({
@@ -461,32 +472,37 @@ Object.assign(pan_ocpapers, {
         }).addClass("show").menu();
         $("#pan_ocpapers_ctx_menu").menu('refresh');
 
+        // 2021-08-17: set to auto to get the actual height
+        $("#pan_ocpapers_ctx_menu").css('height', 'auto');
+
         // fix the top and left 
         var box_width = $('#pan_ocpapers_ctx_menu').width();
         var box_height = $('#pan_ocpapers_ctx_menu').height();
+        console.log('* ctx_menu w:', box_width, 'h:', box_height);
 
+        // create a new style for the menu
+        var style = {
+            position: 'absolute',
+            display: "block",
+        };
         // 2021-08-16: fix the very large box height
         if (box_height > win_height) {
             box_height = win_height - 150;
+            style.height = box_height;
         }
-        // console.log('* box w:', box_width, 'h:', box_height);
-
+        // fix the left and top to avoid showing outside of window
         if (left + box_width > win_width) {
             left = win_width - box_width;
         }
         if (top + box_height > win_height) {
             top = win_height - box_height;
         }
+        style.left = left;
+        style.top = top;
         console.log('* adjusted show ctx menu at top:', top, 'left:', left);
 
         // display the menu
-        $("#pan_ocpapers_ctx_menu").css({
-            position: 'absolute',
-            display: "block",
-            top: top,
-            left: left,
-            height: box_height + 'px'
-        });
+        $("#pan_ocpapers_ctx_menu").css(style);
 
         // bind other event
         $('#pan_ocpapers_ctx_menu .ui-menu-item').on('click', function() {
