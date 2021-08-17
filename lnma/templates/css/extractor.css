@@ -226,8 +226,8 @@ div.w-attr-item:nth-child(odd) {background: whitesmoke; }
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    line-height: 12px;
-    margin-left: 5px;
+    /* line-height: 12px;
+    margin-left: 5px; */
     text-decoration: underline;
 }
 #pan_ocpapers_ctx_menu .menu-header {
