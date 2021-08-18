@@ -158,7 +158,11 @@ tr.shown td.details-control {
 }
 .badge-rct {
     color: #fff;
-    background-color: #12a119;
+    background-color: #17a2b8;
+}
+.badge-rfc {
+    color: #fff;
+    background-color: #019927;
 }
 .badge-unscreened {
     color: #fff;
@@ -176,6 +180,12 @@ tr.shown td.details-control {
 }
 .offscreen {
     left: -8888px !important;
+}
+.text-rct-yes {
+    color: #17a2b8;
+}
+.text-rct-no {
+    color: #ff0000;
 }
 .fs-s, .text-sm {
     font-size: 10px;
@@ -203,6 +213,15 @@ tr.shown td.details-control {
     border-left: 1px solid #999999;
     border-right: 1px solid #f1f1f1;
     border-bottom: 1px solid #f1f1f1;
+}
+.list-group-item-sub {
+    padding: 0.2rem 1.25rem !important;
+}
+.list-cq-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 120px;
 }
 </style>
 {% endblock %}
@@ -401,7 +420,11 @@ Screener Overview
                     <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" 
                         v-on:click="show_stage('decided')">
                         Decided
-                        <span class="badge badge-secondary badge-pill">{{ stat.decided }}</span>
+                        <span>
+                            <span class="badge badge-secondary badge-pill">{{ stat.decided }}</span>
+                            <span class="badge badge-rfc">{{ stat.decided_rfc }}</span>
+                        </span>
+                        
                     </button>
                 </div>
 
@@ -425,21 +448,29 @@ Screener Overview
                     Included References
                 </h5>
                 <div class="list-group">
-                    <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" v-on:click="show_stage('included_sr')">
-                        Included in Project
+                    <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" 
+                        v-on:click="show_stage('included_sr')">
+                        Included
                         <span>
                             <span class="badge badge-primary badge-pill">{{ stat.included_sr }}</span>
                             <span class="badge badge-secondary badge-ckl">{{ stat.included_sr_ckl }}</span>
+                            <span class="badge badge-rfc">{{ stat.included_sr_rfc }}</span>
                         </span>
                     </button>
 
-                    <!-- <button class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" v-on:click="show_stage('included_srma')">
-                        Included in SR &amp; MA
-                        <span>
-                            <span class="badge badge-primary badge-pill">{{ stat.included_srma }}</span>
-                            <span class="badge badge-secondary badge-ckl">{{ stat.included_srma_ckl }}</span>
-                        </span>
-                    </button> -->
+                    {% for cq in project.get_cqs() %}
+                    <button class="list-group-item list-group-item-sub list-group-item-action d-flex justify-content-between align-items-center"
+                        title="[[ cq['name'] ]]">
+                        <div class="list-cq-name">
+                            - [[ cq['name'] ]]
+                        </div>
+                        <div>
+                            <span class="badge badge-primary badge-pill">{{ stat.included_sr }}</span>
+                            <span class="badge badge-secondary badge-ckl">{{ stat.included_sr_ckl }}</span>
+                            <span class="badge badge-rfc">{{ stat.included_sr_rfc }}</span>
+                        </div>
+                    </button>
+                    {% endfor %}
                 </div>
 
                 <h5 class="mt-3">
@@ -1578,16 +1609,34 @@ var tbjs_paperlist = {
         return html;
     },
 
-    __get_select_fulltext_exclusion_reasons: function(d) {
+    __get_select_fulltext_exclusion_reasons: function(d, default_value, cq_abbr, onchange) {
+        if (typeof(default_value) == 'undefined') {
+            default_value = '';
+        }
+        if (typeof(cq) == 'undefined') {
+            cq = '';
+        }
+        if (typeof(onchange) == 'undefined') {
+            onchange = '';
+        }
         var reasons = [];
         for (let i = 0; i < srv_screener.project.settings.exclusion_reasons.length; i++) {
             const er = srv_screener.project.settings.exclusion_reasons[i];
-            let opt_r = '<option value="'+er+'">'+er+'</option>';
+            let opt_r = '';
+            if (default_value == '') {
+                opt_r = '<option value="'+er+'">'+er+'</option>';
+            } else {
+                if (default_value == er) {
+                    opt_r = '<option value="'+er+'" selected>'+er+'</option>';
+                } else {
+                    opt_r = '<option value="'+er+'">'+er+'</option>';
+                }
+            }
             reasons.push(opt_r);
         }
         reasons = reasons.join('\n');
         var html = [
-            '<select class="custom-select exclusion-reason custom-select-sm mr-2" id="tb-row-exclude-reason-'+d.paper_id+'">',
+            '<select class="custom-select exclusion-reason custom-select-sm mr-2" id="tb-row-exclude-reason-'+d.paper_id+'" cq="'+cq_abbr+'" onchange="'+onchange+'">',
                 reasons,
             '</select>'
         ].join('');
@@ -1822,16 +1871,33 @@ var tbjs_paperlist = {
 
         for (let i = 0; i < srv_screener.project.settings.clinical_questions.length; i++) {
             const cq = srv_screener.project.settings.clinical_questions[i];
-            html.push(
-                '<div class="col-md-2 cq-name">',
-                    d.ss_ex.ss_cq[cq.abbr] == 'yes'?
-                    '<input type="checkbox" class="mr-1" id="chk_p_'+d.paper_id+'_cq_'+i+'" checked onchange="tbjs_paperlist.set_ss_cq(\''+d.paper_id+'\', \''+cq.abbr+'\', event)">':
-                    '<input type="checkbox" class="mr-1" id="chk_p_'+d.paper_id+'_cq_'+i+'" onchange="tbjs_paperlist.set_ss_cq(\''+d.paper_id+'\', \''+cq.abbr+'\', event)">',
-                    '<span title="'+cq.name+'" for="chk_p_'+d.paper_id+'_cq_'+i+'">',
-                        cq.name,
-                    '</span>',
-                '</div>'
-            );
+
+            if (d.ss_ex.ss_cq[cq.abbr].d == 'yes') {
+
+                html.push(
+                    '<div class="col-md-2 cq-name">',
+                        
+                        '<input type="checkbox" class="mr-1" id="chk_p_'+d.paper_id+'_cq_'+i+'" checked onchange="tbjs_paperlist.set_ss_cq(\''+d.paper_id+'\', \''+cq.abbr+'\', event)">',
+                        '<span title="'+cq.name+'" for="chk_p_'+d.paper_id+'_cq_'+i+'">',
+                            cq.name,
+                        '</span>',
+                    '</div>'
+                );
+
+            } else {
+                // define a onchange event
+                var onchange = 'tbjs_paperlist.set_ss_cq_exclude_reason(\''+d.paper_id+'\', \''+cq.abbr+'\', event)';
+                html.push(
+                    '<div class="col-md-2 cq-name">',
+                        '<input type="checkbox" class="mr-1" id="chk_p_'+d.paper_id+'_cq_'+i+'" onchange="tbjs_paperlist.set_ss_cq(\''+d.paper_id+'\', \''+cq.abbr+'\', event)">',
+                        '<span title="'+cq.name+'" for="chk_p_'+d.paper_id+'_cq_'+i+'">',
+                            cq.name,
+                        '</span>',
+                        '<br>',
+                        this.__get_select_fulltext_exclusion_reasons(d, d.ss_ex.ss_cq[cq.abbr].r, cq.abbr, onchange),
+                    '</div>'
+                );
+            }
         }
         html.push('</td></tr>');
 
@@ -2222,9 +2288,33 @@ var tbjs_paperlist = {
                 tbjs_paperlist.update_data_by_paper(paper);
 
                 // show this good news!
-                jarvis.toast('Updated the question selection for paper ' + paper.pid);
+                jarvis.toast('Updated the question selection for paper ' + paper.seq_num + ' | ' + paper.short_name);
             } else {
                 jarvis.toast('Failed when setting clinical question for this study, try again later or contact administrator', 'warning');
+            }
+        });
+    },
+
+    set_ss_cq_exclude_reason: function(paper_id, cq_abbr, event) {
+        // console.log(event);
+        var reason = event.target.value;
+        srv_screener.set_ss_cq_exclude_reason(paper_id, cq_abbr, 'no', reason,
+        function(data) {
+            var paper = data.paper;
+
+            if (data.success) {
+                // update the tag list UI
+                $('#tb-tr-cqs-' + paper.paper_id).replaceWith(
+                    tbjs_paperlist.__get_tr_cqs(paper)
+                );
+
+                // update the tb data list
+                tbjs_paperlist.update_data_by_paper(paper);
+
+                // show this good news!
+                jarvis.toast('Updated the exclusion reason for paper ' + paper.seq_num + ' | ' + paper.short_name);
+            } else {
+                jarvis.toast('Failed when setting exclusion reason for this study, try again later or contact administrator', 'warning');
             }
         });
     },

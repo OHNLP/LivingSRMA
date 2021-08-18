@@ -31,6 +31,7 @@ var srv_screener = {
 
         // for ss_cq selection
         set_ss_cq: '[[ url_for("screener.set_ss_cq") ]]',
+        set_ss_cq_exclude_reason: '[[ url_for("screener.set_ss_cq_exclude_reason") ]]',
 
         // for tag
         add_tag: '[[ url_for("screener.add_tag") ]]',
@@ -81,9 +82,12 @@ var srv_screener = {
     // attribute name for the user feedback
     ATTR_PRED_RCT_USR_FB: 'usr_fb',
     RCT_USER_FEEDBACK: {
-        '0': '<b class="text-danger">NOT RCT</b>',
-        '1': '<b class="text-success"><i class="fa fa-bong"></i> RCT</b>',
+        '0': '<b class="text-rct-no">NOT RCT</b>',
+        '1': '<b class="text-rct-yes"><i class="fa fa-bong"></i> RCT</b>',
         '': '<b><i class="far fa-question-circle"></i></b>'
+    },
+    RFC_LABELS: {
+
     },
 
     // stage states
@@ -292,6 +296,26 @@ var srv_screener = {
                 paper_id: paper_id, 
                 cq_abbr: cq_abbr, 
                 ss_cq: ss_cq
+            },
+            callback,
+            'json'
+        );
+    },
+
+    set_ss_cq_exclude_reason: function(paper_id, cq_abbr, ss_cq, reason, callback) {
+        // send request to backend
+        var project_id = Cookies.get('project_id');
+        
+        var url = this.api_url.set_ss_cq_exclude_reason;
+        console.log('* submit ex cq reason', 
+            paper_id, 'cq_abbr', cq_abbr, 'ss_cq', ss_cq, reason);
+        $.post(
+            url,
+            {
+                paper_id: paper_id, 
+                cq_abbr: cq_abbr, 
+                ss_cq: ss_cq,
+                reason: reason
             },
             callback,
             'json'

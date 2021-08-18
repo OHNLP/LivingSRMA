@@ -1251,6 +1251,15 @@ def get_screener_stat_by_stage(project_id, stage):
     return result
 
 
+def get_screener_cq_stat_by_project_id(project_id):
+    '''
+    Get the CQ-level statistics
+    '''
+    sql = """select project_id, 
+    """
+    
+
+
 def get_screener_stat_by_project_id(project_id):
     '''Get the statistics of the project for the screener
     '''
@@ -1279,12 +1288,14 @@ def get_screener_stat_by_project_id(project_id):
 
         count(case when ss_rs in ('f1', 'f3') then paper_id else null end) as included_sr,
         count(case when ss_rs in ('f1', 'f3') and json_contains_path(ss_ex->'$.label', 'one', '$.CKL') then paper_id else null end) as included_sr_ckl,
+        count(case when ss_rs in ('f1', 'f3') and json_contains_path(ss_ex->'$.label', 'one', '$.RFC') then paper_id else null end) as included_sr_rfc,
 
         count(case when ss_rs = 'f3' then paper_id else null end) as included_srma,
         count(case when ss_rs = 'f3' and json_contains_path(ss_ex->'$.label', 'one', '$.CKL') then paper_id else null end) as included_srma_ckl,
 
         count(case when ss_rs != 'na' then paper_id else null end) as decided,
-        count(case when ss_rs != 'na' and json_contains_path(ss_ex->'$.label', 'one', '$.CKL') then paper_id else null end) as decided_ckl
+        count(case when ss_rs != 'na' and json_contains_path(ss_ex->'$.label', 'one', '$.CKL') then paper_id else null end) as decided_ckl,
+        count(case when ss_rs != 'na' and json_contains_path(ss_ex->'$.label', 'one', '$.RFC') then paper_id else null end) as decided_rfc
     
     from papers
     where project_id = '{project_id}'
@@ -1318,19 +1329,20 @@ def get_screener_stat_by_project_id(project_id):
 
         'included_sr',
         'included_sr_ckl',
+        'included_sr_rfc',
 
         'included_srma',
         'included_srma_ckl',
 
         'decided',
-        'decided_ckl'
+        'decided_ckl',
+        'decided_rfc'
     ]
     result = {}
     for attr in attrs:
         try:
             result[attr] = r[attr]
-        except Exception as err:
-            
+        except:
             result[attr] = 0
 
     return result

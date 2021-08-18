@@ -142,6 +142,9 @@ def get_papers_by_stage():
 def get_stat():
     project_id = request.args.get('project_id')
     rst = dora.get_screener_stat_by_project_id(project_id)
+
+    # 2021-08-17: extend the rst with cq-level result
+
     ret = {
         'success': True,
         'stat': rst
@@ -215,6 +218,26 @@ def set_ss_cq():
     ss_cq = request.form.get('ss_cq')
 
     is_success, paper = srv_paper.set_paper_ss_cq(paper_id, cq_abbr, ss_cq)
+
+    ret = {
+        'success': is_success,
+        'paper': paper.as_very_simple_dict() if is_success else None
+    }
+    return jsonify(ret)
+
+
+@bp.route('/set_ss_cq_exclude_reason', methods=['GET', 'POST'])
+@login_required
+def set_ss_cq_exclude_reason():
+    paper_id = request.form.get('paper_id')
+    cq_abbr = request.form.get('cq_abbr')
+    ss_cq = request.form.get('ss_cq')
+    exclude_reason = request.form.get('reason')
+
+    is_success, paper = srv_paper.set_paper_ss_cq(
+        paper_id, cq_abbr, settings.PAPER_SS_EX_SS_CQ_NO,
+        exclude_reason
+    )
 
     ret = {
         'success': is_success,

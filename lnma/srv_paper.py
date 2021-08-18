@@ -103,9 +103,15 @@ def make_ss_cq_dict(project):
     '''
     d = {}
     if len(project.settings['clinical_questions']) == 1:
-        decision = settings.PAPER_SS_EX_SS_CQ_YES
+        decision = {
+            'd': settings.PAPER_SS_EX_SS_CQ_YES,
+            'r': ''
+        }
     else:
-        decision = settings.PAPER_SS_EX_SS_CQ_NO
+        decision = {
+            'd': settings.PAPER_SS_EX_SS_CQ_NO,
+            'r': ''
+        }
 
     for cq in project.settings['clinical_questions']:
         d[cq['abbr']] = decision
@@ -113,7 +119,7 @@ def make_ss_cq_dict(project):
     return d
 
 
-def set_paper_ss_cq(paper_id, cq_abbr, ss_cq):
+def set_paper_ss_cq(paper_id, cq_abbr, ss_cq, ss_cq_ex_reason=''):
     '''
     Set the ss_cq for a paper
     '''
@@ -125,7 +131,16 @@ def set_paper_ss_cq(paper_id, cq_abbr, ss_cq):
     if 'ss_cq' not in paper.ss_ex:
         paper.ss_ex['ss_cq'] = {}
 
-    paper.ss_ex['ss_cq'][cq_abbr] = ss_cq
+    if ss_cq == settings.PAPER_SS_EX_SS_CQ_YES:
+        paper.ss_ex['ss_cq'][cq_abbr] = {
+            'd': settings.PAPER_SS_EX_SS_CQ_YES,
+            'r': ss_cq_ex_reason
+        }
+    else:
+        paper.ss_ex['ss_cq'][cq_abbr] = {
+            'd': settings.PAPER_SS_EX_SS_CQ_NO,
+            'r': ss_cq_ex_reason
+        }
 
     flag_modified(paper, 'ss_ex')
     db.session.add(paper)

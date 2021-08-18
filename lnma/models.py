@@ -402,15 +402,29 @@ class Paper(db.Model):
             # check each cq
             if len(cqs) == 1:
                 # if there is only one cq, just set to yes
-                decision = settings.PAPER_SS_EX_SS_CQ_YES
+                decision = {
+                    'd': settings.PAPER_SS_EX_SS_CQ_YES,
+                    'r': ''
+                }
 
             for cq in cqs:
                 if cq['abbr'] in self.ss_ex['ss_cq']:
-                    # great! we already have this cq set
-                    pass
+                    # update the format
+                    if (type(self.ss_ex['ss_cq'][cq['abbr']]) == str):
+                        # oh, it's not the format we need now
+                        self.ss_ex['ss_cq'][cq['abbr']] = {
+                            'd': self.ss_ex['ss_cq'][cq['abbr']],
+                            'r': ''
+                        }
+                    else:
+                        # great! we already have this cq set in dict format
+                        pass
                 else:
                     # nice! just add this lovely new cq
-                    self.ss_ex['ss_cq'][cq['abbr']] = decision
+                    self.ss_ex['ss_cq'][cq['abbr']] = {
+                        'd': decision,
+                        'r': ''
+                    }
         else:
             # ok, this study is not included in SR
             # so ... no need to add this ss_cq
