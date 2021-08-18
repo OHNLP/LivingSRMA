@@ -144,7 +144,7 @@ Manage Study-Question
                         <input type="checkbox" 
                             class="check"
                             v-bind:id="'chk_p_' + paper.paper_id"
-                            v-bind:checked="paper.ss_ex.ss_cq[cq.abbr]=='yes'"
+                            v-bind:checked="paper.ss_ex.ss_cq[cq.abbr].d=='yes'"
                             @change="on_change_ss_cq(paper_idx, cq, event)">
                     </td>
                 </tr>
@@ -197,7 +197,7 @@ var pan_ocpapers = {
         count_n_papers_by_cq: function(cq_abbr) {
             var cnt = 0;
             for (let i = 0; i < this.papers.length; i++) {
-                if (this.papers[i].ss_ex.ss_cq[cq_abbr]=='yes') {
+                if (this.papers[i].ss_ex.ss_cq[cq_abbr].d=='yes') {
                     cnt += 1;
                 }
             }
@@ -230,7 +230,7 @@ var pan_ocpapers = {
             var ss_cq = s? 'yes' : 'no';
 
             // update local first
-            this.papers[paper_idx].ss_ex.ss_cq[cq.abbr] = ss_cq;
+            this.papers[paper_idx].ss_ex.ss_cq[cq.abbr].d = ss_cq;
 
             srv_screener.set_ss_cq(paper_id, cq_abbr, ss_cq, function(data) {
                 var paper = data.paper;

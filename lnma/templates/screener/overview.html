@@ -84,7 +84,7 @@ tr.shown td.details-control {
     cursor: pointer;
 }
 .col-seq {
-    text-indent: .5em;
+    text-indent: 0em;
 }
 .col-actions {
     line-height: 1em;
@@ -453,24 +453,27 @@ Screener Overview
                         Included
                         <span>
                             <span class="badge badge-primary badge-pill">{{ stat.included_sr }}</span>
-                            <span class="badge badge-secondary badge-ckl">{{ stat.included_sr_ckl }}</span>
                             <span class="badge badge-rfc">{{ stat.included_sr_rfc }}</span>
+                            <span class="badge badge-secondary badge-ckl">{{ stat.included_sr_ckl }}</span>
                         </span>
                     </button>
 
-                    {% for cq in project.get_cqs() %}
-                    <button class="list-group-item list-group-item-sub list-group-item-action d-flex justify-content-between align-items-center"
-                        title="[[ cq['name'] ]]">
+                    <button v-for="cq in project.settings.clinical_questions"
+                        class="list-group-item list-group-item-sub list-group-item-action d-flex justify-content-between align-items-center"
+                        v-bind:title="cq['name']">
                         <div class="list-cq-name">
-                            - [[ cq['name'] ]]
+                            - {{ cq.name }}
                         </div>
                         <div>
-                            <span class="badge badge-primary badge-pill">{{ stat.included_sr }}</span>
-                            <span class="badge badge-secondary badge-ckl">{{ stat.included_sr_ckl }}</span>
-                            <span class="badge badge-rfc">{{ stat.included_sr_rfc }}</span>
+                            <span class="badge badge-primary badge-pill">
+                                {{ stat.cq['cnt_included_in_cq_' + cq.abbr] }}
+                            </span>
+                            <!-- <span class="badge badge-rfc">
+                                {{ stat.cq['cnt_included_in_cq_' + cq.abbr] }}
+                            </span> -->
                         </div>
                     </button>
-                    {% endfor %}
+
                 </div>
 
                 <h5 class="mt-3">
@@ -486,6 +489,7 @@ Screener Overview
                         By Title
                         <span>
                             <span class="badge badge-secondary badge-pill">{{ stat.excluded_by_title }}</span>
+                            <span class="badge badge-secondary badge-rfc">{{ stat.excluded_by_title_rfc }}</span>
                             <span class="badge badge-secondary badge-ckl">{{ stat.excluded_by_title_ckl }}</span>
                         </span>
                     </button>
@@ -493,6 +497,7 @@ Screener Overview
                         By Abstract
                         <span>
                             <span class="badge badge-secondary badge-pill">{{ stat.excluded_by_abstract }}</span>
+                            <span class="badge badge-secondary badge-rfc">{{ stat.excluded_by_abstract_rfc }}</span>
                             <span class="badge badge-secondary badge-ckl">{{ stat.excluded_by_abstract_ckl }}</span>
                         </span>
                     </button>
@@ -500,6 +505,7 @@ Screener Overview
                         By Full Text
                         <span>
                             <span class="badge badge-secondary badge-pill">{{ stat.excluded_by_fulltext }}</span>
+                            <span class="badge badge-secondary badge-rfc">{{ stat.excluded_by_fulltext_rfc }}</span>
                             <span class="badge badge-secondary badge-ckl">{{ stat.excluded_by_fulltext_ckl }}</span>
                         </span>
                     </button>
@@ -562,6 +568,16 @@ Screener Overview
                                 <input class="form-check-input" type="checkbox" name="checkbox_lbl_ckl" id="checkbox_lbl_ckl">
                                 <label class="form-check-label" for="checkbox_lbl_ckl">
                                     Show <span class="badge badge-pill badge-ckl"><i class="far fa-clock"></i> Check Later</span> Only
+                                </label>
+                            </div>
+    
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" 
+                                    type="checkbox" 
+                                    name="checkbox_lbl_rfc" 
+                                    id="checkbox_lbl_rfc">
+                                <label class="form-check-label" for="checkbox_lbl_rfc">
+                                    Show No Agreement Only
                                 </label>
                             </div>
                         </div>
@@ -650,8 +666,10 @@ Screener Overview
 {% include 'js/srv_pubmed.js' %}
 
 {% include 'js/srv_screener.js' %}
+srv_screener.project = [[ project_json_str|safe ]];
 
 {% include 'js/srv_extractor.js' %}
+srv_extractor.project = [[ project_json_str|safe ]];
 
 // update the project information
 srv_screener.project = [[ project_json_str|safe ]];
@@ -675,7 +693,7 @@ var ui_category_stat = {
             el: this.vpp_id,
             data: {
                 stat: data,
-
+                project: [[ project_json_str |safe ]]
             },
             methods: {
                 show_stage: function(stage) {
@@ -723,7 +741,7 @@ var tbjs_paperlist = {
             title: '#',
             className: 'col-seq',
             orderable: true,
-            data: 'seq_num'
+            data: 'seq_num_confirmed'
         },
 
         // column 1
@@ -799,7 +817,8 @@ var tbjs_paperlist = {
             data: 'paper_rct_id',
             visible: false,
             searchable: true
-        }
+        },
+
     ],
 
     sample: [
@@ -829,6 +848,22 @@ var tbjs_paperlist = {
         $.fn.dataTable.ext.search.push(
             function( settings, data, dataIndex ) {
                 var chk = $('input#checkbox_lbl_ckl').prop('checked');
+
+                if (chk) {
+                    if (data[3].indexOf('Check')>=0) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        );
+
+        // the search filter for no-agreement
+        $.fn.dataTable.ext.search.push(
+            function( settings, data, dataIndex ) {
+                var chk = $('input#checkbox_lbl_rfc').prop('checked');
 
                 if (chk) {
                     if (data[3].indexOf('Check')>=0) {
@@ -1090,6 +1125,9 @@ var tbjs_paperlist = {
     },
 
     update_datum_attrs: function(d) {
+        // add the confirmed 
+        d['seq_num_confirmed'] = this._update_attr_seq_num_confirmed(d);
+
         // add the pred_is_rct column
         d['first_column'] = this._update_attr_first_column(d);
 
@@ -1136,6 +1174,36 @@ var tbjs_paperlist = {
     // Update the data attributes
     ///////////////////////////////////////////////////////////////////////////
 
+    // 2021-08-17: change the seq num style
+    _update_attr_seq_num_confirmed: function(d) {
+        var ret = d.seq_num;
+
+        if (this.stage == 'unscreened') {
+
+        } else if (this.stage == 'passed_title_not_fulltext') {
+
+        } else {
+            if (d.ss_ex.hasOwnProperty('label')) {
+                if (d.ss_ex.label.hasOwnProperty('RFC')) {
+                    ret += '<br><span class="badge badge-rfc"><i class="fa fa-check"></i></span>';
+                } else {
+                    ret += '<br><span class="badge"><i class="far fa-question-circle"></i></span>';
+                }
+            }
+        }
+
+        // var ret = '';
+        // if (d.ss_ex.hasOwnProperty('label')) {
+        //     if (d.ss_ex.label.hasOwnProperty('RFC')) {
+        //         ret = '<br><span class="badge badge-rfc">'+d.seq_num+'</span>';
+        //     } else {
+        //         ret = '<br><span class="badge">'+d.seq_num+'</span>';
+        //     }
+        // }
+
+        return ret
+    },
+
     // 2021-05-23: change this column to pid
     _update_attr_first_column: function(d) {
         // return '<i class="fa fa-plus"></i>';
@@ -1167,7 +1235,7 @@ var tbjs_paperlist = {
         // create the return string
         var ret = '';
         
-        // the RCT label
+        // the predicted RCT label
         if (d.meta.hasOwnProperty('pred')) {
             // if is RCT
             if (d.meta.pred[0].is_rct) {
@@ -1180,7 +1248,7 @@ var tbjs_paperlist = {
             ret += label_ckl;
         }
 
-        // the human input
+        // the human input RCT result
         if (d.meta.pred[0].hasOwnProperty(srv_screener.ATTR_PRED_RCT_USR_FB)) {
             var usr_fb = srv_screener.RCT_USER_FEEDBACK[d.meta.pred[0][srv_screener.ATTR_PRED_RCT_USR_FB]];
             ret += '<span class="badge badge-pill badge-light">'+ usr_fb + '</span>';
@@ -1339,8 +1407,6 @@ var tbjs_paperlist = {
     _get_expand_html_by_stage: function(d) {
         var stage = this.stage;
         var func_name = '_get_expand_html_by_stage_' + stage;
-        var func = this[func_name];
-
         // the html is always a table
         // content of this table is decided by the stage
         // and for each stage, the main differences are the buttons
@@ -1350,32 +1416,24 @@ var tbjs_paperlist = {
         return html;
     },
 
+    __get_tr_actions_by_stage: function(d) {
+        var stage = this.stage;
+        var func_name = '__get_tr_actions_by_stage_' + stage;
+        return this[func_name](d);
+    },
+
     _get_expand_html_by_stage_all_of_them: function(d) {
         var html = 
             this.__get_tr_title(d) + 
             this.__get_tr_info(d) + 
             this.__get_tr_authors(d) +
             this.__get_tr_abstract(d);
-
         return html;
     },
     
     _get_expand_html_by_stage_unscreened: function(d) {
-        var _html_btn_ckl = this.__get_btn_check_later(d);
         var html = 
-            '<tr>'+
-                '<td>Actions:</td>'+
-                '<td>'+
-                '<button class="btn btn-secondary btn-sm" onclick="tbjs_paperlist.set_needchkft(\''+d.paper_id+'\')">Proceed to Full-Text Review</button> '+
-                '<button class="btn btn-primary btn-sm" onclick="tbjs_paperlist.include_in_sr(\''+d.paper_id+'\', \'Through Abstract\')">Include in Project</button> '+
-                
-                '<button class="btn btn-danger btn-sm" onclick="tbjs_paperlist.exclude_by_ab(\''+d.paper_id+'\')">Exclude by Abstract</button> '+
-                ' | ' +
-                _html_btn_ckl +
-                ' | ' +
-                this.__get_div_rct_yes_no(d) + 
-                '</td>'+
-            '</tr>'+
+            this.__get_tr_actions_by_stage_unscreened(d) +
             this.__get_tr_tags(d) +
             this.__get_tr_title(d) + 
             this.__get_tr_info(d) + 
@@ -1384,66 +1442,75 @@ var tbjs_paperlist = {
 
         return html;
     },
+
+    __get_tr_actions_by_stage_unscreened: function(d) {
+        var _html_btn_ckl = this.__get_btn_check_later(d);
+        var html = '<tr id="tb-tr-actions-'+d.paper_id+'">'+
+            '<td>Actions:</td>'+
+            '<td>'+
+            '<button class="btn btn-secondary btn-sm" onclick="tbjs_paperlist.set_needchkft(\''+d.paper_id+'\')">Proceed to Full-Text Review</button> '+
+            '<button class="btn btn-primary btn-sm" onclick="tbjs_paperlist.include_in_sr(\''+d.paper_id+'\', \'Through Abstract\')">Include in Project</button> '+
+            
+            '<button class="btn btn-danger btn-sm" onclick="tbjs_paperlist.exclude_by_ab(\''+d.paper_id+'\')">Exclude by Abstract</button> '+
+            ' | ' +
+            _html_btn_ckl +
+            ' | ' +
+            this.__get_div_rct_yes_no(d) + 
+            '</td>'+
+        '</tr>';
+        return html
+    },
     
     _get_expand_html_by_stage_passed_title_not_fulltext: function(d) {
         var html = [
-            '<tr>', 
-                '<td>Actions:</td>',
-                '<td class="d-flex flex-row flex-wrap">',
-                '<div>',
-                    '<button class="btn btn-primary btn-sm" onclick="tbjs_paperlist.include_in_sr(\''+d.paper_id+'\', \'Through Full Text Review\')">Include in Project</button>',
-                '</div>',
-
-                '<div class="ml-2">',
-                    this.__get_select_fulltext_exclusion_reasons(d),
-                    '<button class="btn btn-danger btn-sm" type="button" onclick="tbjs_paperlist.exclude_by_ft(\''+d.paper_id+'\')">',
-                        'Exclude by Full-Text Review',
-                    '</button>',
-                '</div>',
-
-                '<div class="ml-2">',
-                    '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_unscreened(\''+d.paper_id+'\')">Send Back to Unscreened</button>',
-                '</div>',
-
-                '<div class="ml-2">',
-                    this.__get_btn_check_later(d),
-                '</div>',
-
-                '<div class="ml-2">',
-                    '<span class="mr-2">|</span>',
-                    this.__get_div_rct_yes_no(d),
-                '</div>',
-
-                '</td>',
-            '</tr>',
-
+            this.__get_tr_actions_by_stage_passed_title_not_fulltext(d),
             this.__get_tr_tags(d),
             this.__get_tr_pdfs(d),
-            this.__get_tr_title(d) + 
+            this.__get_tr_title(d),
             this.__get_tr_info(d),
             this.__get_tr_authors(d),
             this.__get_tr_abstract(d)
-
         ].join('');
         return html;
     },
 
+    __get_tr_actions_by_stage_passed_title_not_fulltext: function(d) {
+        var html = ['<tr id="tb-tr-actions-'+d.paper_id+'">',
+            '<td>Actions:</td>',
+            '<td class="d-flex flex-row flex-wrap">',
+            '<div>',
+                '<button class="btn btn-primary btn-sm" onclick="tbjs_paperlist.include_in_sr(\''+d.paper_id+'\', \'Through Full Text Review\')">Include in Project</button>',
+            '</div>',
+
+            '<div class="ml-2">',
+                this.__get_select_fulltext_exclusion_reasons(d),
+                '<button class="btn btn-danger btn-sm" type="button" onclick="tbjs_paperlist.exclude_by_ft(\''+d.paper_id+'\')">',
+                    'Exclude by Full-Text Review',
+                '</button>',
+            '</div>',
+
+            '<div class="ml-2">',
+                '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_unscreened(\''+d.paper_id+'\')">Send Back to Unscreened</button>',
+            '</div>',
+
+            '<div class="ml-2">',
+                this.__get_btn_check_later(d),
+            '</div>',
+
+            '<div class="ml-2">',
+                '<span class="mr-2">|</span>',
+                this.__get_div_rct_yes_no(d),
+            '</div>',
+
+            '</td>',
+        '</tr>'];
+        return html.join('');
+    },
+
     _get_expand_html_by_stage_included_sr: function(d) {
-        var _html_btn_ckl = this.__get_btn_check_later(d);
 
         var html = 
-            '<tr>'+
-                '<td>Actions:</td>'+
-                '<td>'+
-                // '<button class="btn btn-primary btn-sm" onclick="tbjs_paperlist.include_in_srma(\''+d.paper_id+'\')">Include in MA</button> '+
-                '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_needchkft(\''+d.paper_id+'\')">Send Back to Full-Text Review</button> '+
-                '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_unscreened(\''+d.paper_id+'\')">Send Back to Unscreened</button> '+
-                ' | ' +
-                _html_btn_ckl + 
-                ' | ' +
-                this.__get_div_rct_yes_no(d) + 
-                '</td>'+
-            '</tr>'+
+            this.__get_tr_actions_by_stage_included_sr(d)+
             this.__get_tr_cqs(d) +
             this.__get_tr_tags(d) +
             this.__get_tr_pdfs(d) +
@@ -1455,21 +1522,27 @@ var tbjs_paperlist = {
         return html;
     },
 
+    __get_tr_actions_by_stage_included_sr: function(d) {
+        var html = '<tr id="tb-tr-actions-'+d.paper_id+'">'+
+            '<td>Actions:</td>'+
+            '<td>'+
+            // '<button class="btn btn-primary btn-sm" onclick="tbjs_paperlist.include_in_srma(\''+d.paper_id+'\')">Include in MA</button> '+
+            '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_needchkft(\''+d.paper_id+'\')">Send Back to Full-Text Review</button> '+
+            '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_unscreened(\''+d.paper_id+'\')">Send Back to Unscreened</button> '+
+            ' | ' +
+            this.__get_btn_check_later(d) + 
+            ' | ' +
+            this.__get_div_rct_yes_no(d) + 
+            ' | ' +
+            this.__get_div_rfc_yes_no(d) +
+            '</td>'+
+        '</tr>';
+        return html;
+    },
+
     _get_expand_html_by_stage_included_srma: function(d) {
-        var _html_btn_ckl = this.__get_btn_check_later(d);
         var html = 
-            '<tr>'+
-                '<td>Actions:</td>'+
-                '<td>'+
-                '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.include_in_sr(\''+d.paper_id+'\', \'Back from MA\')">Send Back to SR</button> '+
-                '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_needchkft(\''+d.paper_id+'\')">Send Back to Full-Text Review</button> '+
-                '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_unscreened(\''+d.paper_id+'\')">Send Back to Unscreened</button> '+
-                ' | ' +
-                _html_btn_ckl + 
-                ' | ' +
-                this.__get_div_rct_yes_no(d) + 
-                '</td>'+
-            '</tr>'+
+            this.__get_tr_actions_by_stage_included_srma(d)+
             this.__get_tr_tags(d) +
             this.__get_tr_pdfs(d) +
             this.__get_tr_title(d) + 
@@ -1479,12 +1552,42 @@ var tbjs_paperlist = {
 
         return html;
     },
+    
+    __get_tr_actions_by_stage_included_srma: function(d) {
+        var _html_btn_ckl = this.__get_btn_check_later(d);
+        var html = 
+            '<tr id="tb-tr-actions-'+d.paper_id+'">'+
+                '<td>Actions:</td>'+
+                '<td>'+
+                '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.include_in_sr(\''+d.paper_id+'\', \'Back from MA\')">Send Back to SR</button> '+
+                '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_needchkft(\''+d.paper_id+'\')">Send Back to Full-Text Review</button> '+
+                '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_unscreened(\''+d.paper_id+'\')">Send Back to Unscreened</button> '+
+                ' | ' +
+                _html_btn_ckl + 
+                ' | ' +
+                this.__get_div_rct_yes_no(d) + 
+                ' | ' +
+                this.__get_div_rfc_yes_no(d) +
+                '</td>'+
+            '</tr>';
+        return html;
+    },
 
     _get_expand_html_by_stage_excluded_by_title: function(d) {
+        var html = this.__get_tr_actions_by_stage_excluded_by_title(d) +
+            this.__get_tr_tags(d) +
+            this.__get_tr_title(d) + 
+            this.__get_tr_info(d) + 
+            this.__get_tr_authors(d) +
+            this.__get_tr_abstract(d);
+        return html;
+    },
+
+    __get_tr_actions_by_stage_excluded_by_title: function(d) {
         var _html_btn_ckl = this.__get_btn_check_later(d);
 
         var html = 
-            '<tr>'+
+            '<tr id="tb-tr-actions-'+d.paper_id+'">'+
                 '<td>Actions:</td>'+
                 '<td>'+
                 '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_unscreened(\''+d.paper_id+'\')">Send Back to Unscreened</button> '+
@@ -1492,8 +1595,15 @@ var tbjs_paperlist = {
                 _html_btn_ckl + 
                 ' | ' +
                 this.__get_div_rct_yes_no(d) + 
+                ' | ' +
+                this.__get_div_rfc_yes_no(d) +
                 '</td>'+
-            '</tr>'+
+            '</tr>';
+        return html;
+    },
+
+    _get_expand_html_by_stage_excluded_by_abstract: function(d) {
+        var html = this.__get_tr_actions_by_stage_excluded_by_abstract(d) +
             this.__get_tr_tags(d) +
             this.__get_tr_title(d) + 
             this.__get_tr_info(d) + 
@@ -1503,11 +1613,11 @@ var tbjs_paperlist = {
         return html;
     },
 
-    _get_expand_html_by_stage_excluded_by_abstract: function(d) {
+    __get_tr_actions_by_stage_excluded_by_abstract: function(d) {
         var _html_btn_ckl = this.__get_btn_check_later(d);
 
         var html = 
-            '<tr>'+
+            '<tr id="tb-tr-actions-'+d.paper_id+'">'+
                 '<td>Actions:</td>'+
                 '<td>'+
                 '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_unscreened(\''+d.paper_id+'\')">Send Back to Unscreened</button> '+
@@ -1515,22 +1625,30 @@ var tbjs_paperlist = {
                 _html_btn_ckl + 
                 ' | ' +
                 this.__get_div_rct_yes_no(d) + 
+                ' | ' +
+                this.__get_div_rfc_yes_no(d) +
                 '</td>'+
-            '</tr>'+
-            this.__get_tr_tags(d) +
-            this.__get_tr_title(d) + 
-            this.__get_tr_info(d) + 
-            this.__get_tr_authors(d) +
-            this.__get_tr_abstract(d);
+            '</tr>';
 
         return html;
     },
 
     _get_expand_html_by_stage_excluded_by_fulltext: function(d) {
+        var html = this.__get_tr_actions_by_stage_excluded_by_fulltext(d) +
+            this.__get_tr_tags(d) +
+            this.__get_tr_title(d) + 
+            this.__get_tr_info(d) + 
+            this.__get_tr_authors(d) +
+            this.__get_tr_abstract(d);
+
+        return html;
+    },
+
+    __get_tr_actions_by_stage_excluded_by_fulltext: function(d) {
         var _html_btn_ckl = this.__get_btn_check_later(d);
 
         var html = 
-            '<tr>'+
+            '<tr id="tb-tr-actions-'+d.paper_id+'">'+
                 '<td>Actions:</td>'+
                 '<td>'+
                 '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_needchkft(\''+d.paper_id+'\')">Send Back to Full-Text Review</button> '+
@@ -1539,8 +1657,15 @@ var tbjs_paperlist = {
                 _html_btn_ckl + 
                 ' | ' +
                 this.__get_div_rct_yes_no(d) + 
+                ' | ' +
+                this.__get_div_rfc_yes_no(d) +
                 '</td>'+
-            '</tr>'+
+            '</tr>';
+        return html;
+    },
+
+    _get_expand_html_by_stage_decided: function(d) {
+        var html = this.__get_tr_actions_by_stage_decided(d) +
             this.__get_tr_tags(d) +
             this.__get_tr_title(d) + 
             this.__get_tr_info(d) + 
@@ -1550,22 +1675,18 @@ var tbjs_paperlist = {
         return html;
     },
 
-    _get_expand_html_by_stage_decided: function(d) {
+    __get_tr_actions_by_stage_decided: function(d) {
         var html = 
-            '<tr>'+
+            '<tr id="tb-tr-actions-'+d.paper_id+'">'+
                 '<td>Actions:</td>'+
                 '<td>'+
                 '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_unscreened(\''+d.paper_id+'\')">Send Back to Unscreened</button> '+
                 ' | ' +
                 this.__get_div_rct_yes_no(d) + 
+                ' | ' +
+                this.__get_div_rfc_yes_no(d) +
                 '</td>'+
-            '</tr>'+
-            this.__get_tr_tags(d) +
-            this.__get_tr_title(d) + 
-            this.__get_tr_info(d) + 
-            this.__get_tr_authors(d) +
-            this.__get_tr_abstract(d);
-
+            '</tr>';
         return html;
     },
 
@@ -1719,6 +1840,44 @@ var tbjs_paperlist = {
         return html;
     },
 
+    __get_div_rfc_yes_no: function(d, cq_abbr) {
+        if (typeof(cq_abbr)=='undefined') {
+            cq_abbr = '';
+        }
+        var html = []
+        
+        if (d.ss_ex.hasOwnProperty('label')) {
+            if (d.ss_ex.label.hasOwnProperty('RFC')) {
+                // alredy have!
+                html = [
+                    '<button class="ml-2 btn btn-sm btn-default" onclick="tbjs_paperlist.set_label_rfc(\''+d.paper_id+'\', \'no\', \''+cq_abbr+'\')">',
+                        '<i class="fa fa-times"></i> ',
+                        'Withdraw Agreement',
+                    '</button>'
+                ];
+            } else {
+                // no RFC yet
+                html = [
+                    '<button class="ml-2 btn btn-sm btn-default" onclick="tbjs_paperlist.set_label_rfc(\''+d.paper_id+'\', \'yes\', \''+cq_abbr+'\')">',
+                        '<i class="fa fa-check"></i> ',
+                        'Agree',
+                    '</button>'
+                ];
+            }
+        } else {
+            // no rfc yet
+            html = [
+                '<button class="ml-2 btn btn-sm btn-default" onclick="tbjs_paperlist.set_label_rfc(\''+d.paper_id+'\', \'yes\', \''+cq_abbr+'\')">',
+                    '<i class="fa fa-check"></i> ',
+                    'Agree',
+                '</button>'
+            ];
+        }
+        
+
+        return html.join('');
+    },
+
     __get_span_rct_id: function(d) {
         var html = [];
         if (d.meta.rct_id == '') {
@@ -1800,7 +1959,7 @@ var tbjs_paperlist = {
                 '<div class="mr-2">' + 
                     '<input type="hidden" name="paper_id" value="'+d.paper_id+'">' + 
                     '<input type="file" name="files[]" multiple accept=".pdf" class="" id="tb-row-upload-'+d.paper_id+'">' +
-                    '<label class="custom-file-label" for="tb-row-upload-'+d.paper_id+'">Choose file</label>' +
+                    // '<label class="custom-file-label" for="tb-row-upload-'+d.paper_id+'">Choose file</label>' +
                 '</div>' +
                 '</form>' +
                 '<button id="btn_upload_'+d.paper_id+'" class="btn btn-sm btn-primary mr-2" onclick="srv_pdfworker.update_pdfs(\''+d.paper_id+'\');">Upload</button>' + 
@@ -2272,11 +2431,35 @@ var tbjs_paperlist = {
         });
     },
 
+    set_rfc: function(paper_id, rfc, cq_abbr) {
+        srv_screener.set_label_rfc(
+            paper_id, rfc, cq_abbr, function(data) {
+                var paper = data.paper;
+                
+                if (data.success) {
+                    // update the tag list UI
+                    $('#tb-tr-cqs-' + paper.paper_id).replaceWith(
+                        tbjs_paperlist.__get_tr_cqs(paper)
+                    );
+
+                    // update the tb data list
+                    tbjs_paperlist.update_data_by_paper(paper);
+
+                    // show this good news!
+                    jarvis.toast('Updated the question selection for paper ' + paper.seq_num + ' | ' + paper.short_name);
+                } else {
+                    jarvis.toast('Failed when setting clinical question for this study, try again later or contact administrator', 'warning');
+                }
+            }
+        );
+    },
+
     set_ss_cq: function(paper_id, cq_abbr, event) {
         var ss_cq = event.target.checked? 'yes':'no';
         // mark include in server
         srv_screener.set_ss_cq(paper_id, cq_abbr, ss_cq, function(data) {
             var paper = data.paper;
+            ui_category_stat.update();
 
             if (data.success) {
                 // update the tag list UI
@@ -2296,6 +2479,7 @@ var tbjs_paperlist = {
     },
 
     set_ss_cq_exclude_reason: function(paper_id, cq_abbr, event) {
+        return;
         // console.log(event);
         var reason = event.target.value;
         srv_screener.set_ss_cq_exclude_reason(paper_id, cq_abbr, 'no', reason,
@@ -2339,6 +2523,30 @@ var tbjs_paperlist = {
 
         // remove from the list
         this.remove_paper_from_tbjs(paper_id);
+    },
+
+    set_label_rfc: function(paper_id, rfc, cq_abbr) {
+        // mark include in server
+        srv_screener.set_label_rfc(paper_id, rfc, cq_abbr, function(data) {
+            var paper = data.paper;
+            if (data.success) {
+                // update the tb data list
+                tbjs_paperlist.update_data_by_paper(paper);
+
+                // update the action tr
+                $('#tb-tr-actions-' + paper.paper_id).replaceWith(
+                    tbjs_paperlist.__get_tr_actions_by_stage(paper)
+                );
+
+                // update the count number
+                ui_category_stat.update();
+
+                // show this good news!
+                jarvis.toast('Updated the agreement for paper ' + paper.seq_num + ' | ' + paper.short_name);
+            } else {
+                jarvis.toast('Failed when setting agreement for this study, try again later or contact administrator', 'warning');
+            }
+        });
     },
 
     set_label_check_later: function(paper_id) {

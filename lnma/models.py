@@ -386,7 +386,8 @@ class Paper(db.Model):
         return util.get_year(self.pub_date)
 
     
-    def update_ss_cq_by_cqs(self, cqs, decision=settings.SCREENER_DEFAULT_DECISION_FOR_CQ_INCLUSION):
+    def update_ss_cq_by_cqs(self, cqs, 
+        decision=settings.SCREENER_DEFAULT_DECISION_FOR_CQ_INCLUSION):
         '''
         Update the ss_cq in the ss_ex
 
@@ -404,7 +405,8 @@ class Paper(db.Model):
                 # if there is only one cq, just set to yes
                 decision = {
                     'd': settings.PAPER_SS_EX_SS_CQ_YES,
-                    'r': ''
+                    'r': '',
+                    'c': 'yes'
                 }
 
             for cq in cqs:
@@ -414,16 +416,21 @@ class Paper(db.Model):
                         # oh, it's not the format we need now
                         self.ss_ex['ss_cq'][cq['abbr']] = {
                             'd': self.ss_ex['ss_cq'][cq['abbr']],
-                            'r': ''
+                            'r': '',
+                            'c': 'no'
                         }
                     else:
                         # great! we already have this cq set in dict format
-                        pass
+                        if 'c' in self.ss_ex['ss_cq'][cq['abbr']]:
+                            pass
+                        else:
+                            self.ss_ex['ss_cq'][cq['abbr']]['c'] = 'no'
                 else:
                     # nice! just add this lovely new cq
                     self.ss_ex['ss_cq'][cq['abbr']] = {
                         'd': decision,
-                        'r': ''
+                        'r': '',
+                        'c': 'no'
                     }
         else:
             # ok, this study is not included in SR

@@ -1251,13 +1251,45 @@ def get_screener_stat_by_stage(project_id, stage):
     return result
 
 
-def get_screener_cq_stat_by_project_id(project_id):
+def get_screener_cq_stat_by_project(project):
     '''
     Get the CQ-level statistics
     '''
-    sql = """select project_id, 
-    """
-    
+    sql = """select project_id,"""
+    attrs = ['all_of_them']
+
+    for cq in project.settings['clinical_questions']:
+        sql += """
+        count(case when ss_rs in ('f1', 'f3') 
+            and JSON_EXTRACT(ss_ex->'$.ss_cq', '$.{cq_abbr}.d') = 'yes'
+            then paper_id else null end
+        ) as cnt_included_in_cq_{cq_abbr},
+        """.format(cq_abbr = cq['abbr'])
+
+        attrs.append('cnt_included_in_cq_%s' % cq['abbr'])
+
+    sql += """
+    count(*) as all_of_them
+    from papers
+    where project_id = '{project_id}'
+        and is_deleted = 'no'
+    group by project_id
+    """.format(project_id=project.project_id)
+
+    # print(sql)
+
+    r = db.session.execute(sql).fetchone()
+
+    # put the values in result data
+    result = {}
+    for attr in attrs:
+        try:
+            result[attr] = r[attr]
+        except:
+            result[attr] = 0
+
+    return result
+
 
 
 def get_screener_stat_by_project_id(project_id):
@@ -1274,15 +1306,15 @@ def get_screener_stat_by_project_id(project_id):
         
         count(case when ss_rs = 'e2' then paper_id else null end) as excluded_by_title,
         count(case when ss_rs = 'e2' and json_contains_path(ss_ex->'$.label', 'one', '$.CKL') then paper_id else null end) as excluded_by_title_ckl,
+        count(case when ss_rs = 'e2' and json_contains_path(ss_ex->'$.label', 'one', '$.RFC') then paper_id else null end) as excluded_by_title_rfc,
 
         count(case when ss_rs = 'e22' then paper_id else null end) as excluded_by_abstract,
         count(case when ss_rs = 'e22' and json_contains_path(ss_ex->'$.label', 'one', '$.CKL') then paper_id else null end) as excluded_by_abstract_ckl,
-
-        count(case when ss_rs in ('e2', 'e22') then paper_id else null end) as excluded_by_title_abstract,
-        count(case when ss_rs = 'e21' then paper_id else null end) as excluded_by_rct_classifier,
+        count(case when ss_rs = 'e22' and json_contains_path(ss_ex->'$.label', 'one', '$.RFC') then paper_id else null end) as excluded_by_abstract_rfc,
 
         count(case when ss_rs = 'e3' then paper_id else null end) as excluded_by_fulltext,
         count(case when ss_rs = 'e3' and json_contains_path(ss_ex->'$.label', 'one', '$.CKL') then paper_id else null end) as excluded_by_fulltext_ckl,
+        count(case when ss_rs = 'e3' and json_contains_path(ss_ex->'$.label', 'one', '$.RFC') then paper_id else null end) as excluded_by_fulltext_rfc,
 
         count(case when ss_rs = 'f1' then paper_id else null end) as included_only_sr,
 
@@ -1292,6 +1324,9 @@ def get_screener_stat_by_project_id(project_id):
 
         count(case when ss_rs = 'f3' then paper_id else null end) as included_srma,
         count(case when ss_rs = 'f3' and json_contains_path(ss_ex->'$.label', 'one', '$.CKL') then paper_id else null end) as included_srma_ckl,
+
+        count(case when ss_rs in ('e2', 'e22') then paper_id else null end) as excluded_by_title_abstract,
+        count(case when ss_rs = 'e21' then paper_id else null end) as excluded_by_rct_classifier,
 
         count(case when ss_rs != 'na' then paper_id else null end) as decided,
         count(case when ss_rs != 'na' and json_contains_path(ss_ex->'$.label', 'one', '$.CKL') then paper_id else null end) as decided_ckl,
@@ -1306,7 +1341,6 @@ def get_screener_stat_by_project_id(project_id):
 
     # put the values in result data
     attrs = [
-        'all_of_them',
         'unscreened',
         'unscreened_ckl',
 
@@ -1315,17 +1349,15 @@ def get_screener_stat_by_project_id(project_id):
 
         'excluded_by_title',
         'excluded_by_title_ckl',
+        'excluded_by_title_rfc',
 
         'excluded_by_abstract',
         'excluded_by_abstract_ckl',
-
-        'excluded_by_title_abstract',
-        'excluded_by_rct_classifier',
+        'excluded_by_abstract_rfc',
 
         'excluded_by_fulltext',
         'excluded_by_fulltext_ckl',
-
-        'included_only_sr',
+        'excluded_by_fulltext_rfc',
 
         'included_sr',
         'included_sr_ckl',
@@ -1336,7 +1368,13 @@ def get_screener_stat_by_project_id(project_id):
 
         'decided',
         'decided_ckl',
-        'decided_rfc'
+        'decided_rfc',
+
+        # others
+        'all_of_them',
+        'included_only_sr',
+        'excluded_by_title_abstract',
+        'excluded_by_rct_classifier',
     ]
     result = {}
     for attr in attrs:

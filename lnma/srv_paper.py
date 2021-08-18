@@ -91,7 +91,7 @@ def get_included_papers_by_cq(project_id, cq_abbr):
             ss_state.SS_RS_INCLUDED_SRMA
         ]),
         Paper.is_deleted == settings.PAPER_IS_DELETED_NO,
-        Paper.ss_ex['ss_cq'][cq_abbr] == settings.PAPER_SS_EX_SS_CQ_YES
+        Paper.ss_ex['ss_cq'][cq_abbr]['d'] == settings.PAPER_SS_EX_SS_CQ_YES
     )).order_by(Paper.date_updated.desc()).all()
 
     return papers
@@ -103,20 +103,59 @@ def make_ss_cq_dict(project):
     '''
     d = {}
     if len(project.settings['clinical_questions']) == 1:
-        decision = {
-            'd': settings.PAPER_SS_EX_SS_CQ_YES,
-            'r': ''
-        }
+        decision = make_ss_cq_decision(
+            settings.PAPER_SS_EX_SS_CQ_YES,
+            '',
+            'no'
+        )
     else:
-        decision = {
-            'd': settings.PAPER_SS_EX_SS_CQ_NO,
-            'r': ''
-        }
+        decision = make_ss_cq_decision(
+            settings.PAPER_SS_EX_SS_CQ_NO,
+            '',
+            'no'
+        )
 
     for cq in project.settings['clinical_questions']:
         d[cq['abbr']] = decision
 
     return d
+
+
+def make_ss_cq_decision(d, r, c):
+    '''
+    Decision, Reason, Confirmed
+    '''
+    return {
+        'd': d,
+        'r': r,
+        'c': c
+    }
+
+
+def set_paper_label_rfc(paper_id, rfc, cq_abbr=''):
+    '''
+    Set the RFC label for 
+    '''
+
+    if cq_abbr is None or cq_abbr == '':
+        # which means just set project level
+        if rfc == 'yes':
+            paper = set_paper_ss_label(paper_id, 'RFC')
+        else:
+            paper = unset_paper_ss_label(paper_id, 'RFC')
+
+        return True, paper
+
+    else:
+        paper = dora.get_paper_by_id(paper_id)
+        
+        paper.ss_ex['ss_cq'][cq_abbr]['c'] = rfc
+
+        flag_modified(paper, 'ss_ex')
+        db.session.add(paper)
+        db.session.commit()
+
+        return True, paper
 
 
 def set_paper_ss_cq(paper_id, cq_abbr, ss_cq, ss_cq_ex_reason=''):
@@ -131,16 +170,23 @@ def set_paper_ss_cq(paper_id, cq_abbr, ss_cq, ss_cq_ex_reason=''):
     if 'ss_cq' not in paper.ss_ex:
         paper.ss_ex['ss_cq'] = {}
 
-    if ss_cq == settings.PAPER_SS_EX_SS_CQ_YES:
-        paper.ss_ex['ss_cq'][cq_abbr] = {
-            'd': settings.PAPER_SS_EX_SS_CQ_YES,
-            'r': ss_cq_ex_reason
-        }
+    if cq_abbr in paper.ss_ex['ss_cq']:
+        c = paper.ss_ex['ss_cq'][cq_abbr]['c']
     else:
-        paper.ss_ex['ss_cq'][cq_abbr] = {
-            'd': settings.PAPER_SS_EX_SS_CQ_NO,
-            'r': ss_cq_ex_reason
-        }
+        c = 'no'
+
+    if ss_cq == settings.PAPER_SS_EX_SS_CQ_YES:
+        paper.ss_ex['ss_cq'][cq_abbr] = make_ss_cq_decision(
+            settings.PAPER_SS_EX_SS_CQ_YES,
+            ss_cq_ex_reason,
+            c
+        )
+    else:
+        paper.ss_ex['ss_cq'][cq_abbr] = make_ss_cq_decision(
+            settings.PAPER_SS_EX_SS_CQ_NO,
+            ss_cq_ex_reason,
+            c
+        )
 
     flag_modified(paper, 'ss_ex')
     db.session.add(paper)

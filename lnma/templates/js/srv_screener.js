@@ -19,6 +19,7 @@ var srv_screener = {
         set_label_ckl: '[[ url_for("screener.sspr_set_label_ckl") ]]',
         unset_label_ckl: '[[ url_for("screener.sspr_unset_label_ckl") ]]',
         set_rct_feedback: '[[ url_for("screener.sspr_set_rct_feedback") ]]',
+        set_label_rfc: '[[ url_for("screener.sspr_set_label_rfc") ]]', 
 
         // for NCT8
         set_rct_id: '[[ url_for("screener.set_rct_id") ]]',
@@ -387,6 +388,23 @@ var srv_screener = {
         $.post(
             url,
             {paper_ids: paper_ids, project_id: project_id},
+            callback,
+            'json'
+        );
+    },
+    
+    set_label_rfc: function(paper_id, rfc, cq_abbr, callback) {
+        // send request
+        var project_id = Cookies.get('project_id');
+        var url = this.api_url.set_label_rfc;
+        $.post(
+            url,
+            {
+                paper_id: paper_id, 
+                rfc: rfc,
+                cq_abbr: cq_abbr,
+                project_id: project_id
+            },
             callback,
             'json'
         );

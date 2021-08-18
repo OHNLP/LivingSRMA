@@ -144,6 +144,10 @@ def get_stat():
     rst = dora.get_screener_stat_by_project_id(project_id)
 
     # 2021-08-17: extend the rst with cq-level result
+    project = dora.get_project(project_id)
+    cq_rst = dora.get_screener_cq_stat_by_project(project)
+
+    rst['cq'] = cq_rst
 
     ret = {
         'success': True,
@@ -209,6 +213,7 @@ def set_pub_date():
     
     return jsonify(ret)
 
+    
 
 @bp.route('/set_ss_cq', methods=['GET', 'POST'])
 @login_required
@@ -531,6 +536,23 @@ def sspr_include_papers_srma():
     ret = {
         'success': True,
         'papers': papers
+    }
+    return jsonify(ret)
+
+
+@bp.route('/sspr/set_label_rfc', methods=['GET', 'POST'])
+@login_required
+def sspr_set_label_rfc():
+    project_id = request.form.get('project_id')
+    paper_id = request.form.get('paper_id')
+    cq_abbr = request.form.get('cq_abbr')
+    rfc = request.form.get('rfc')
+
+    is_success, paper = srv_paper.set_paper_label_rfc(paper_id, rfc, cq_abbr)
+
+    ret = {
+        'success': is_success,
+        'paper': paper.as_simple_dict() if is_success else None
     }
     return jsonify(ret)
 
