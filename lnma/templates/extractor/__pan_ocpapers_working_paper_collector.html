@@ -66,6 +66,7 @@
                 <div class="w-cate-attrs">
                     <div class="w-attr-item"
                         v-for="attr in cate.attrs"
+                        v-bind:id="'wpc-input-'+attr.abbr"
                         v-show="is_show_attr(attr.abbr)">
                         <div class="w-attr-item-name"
                             v-bind:title="attr.name">
@@ -117,6 +118,7 @@
 
                             <div class="w-sub-item-value"
                                 v-for="sub, sub_idx in attr.subs">
+
 
                                 <div class="w-sub-item-name">
                                     - {{ sub.name }}

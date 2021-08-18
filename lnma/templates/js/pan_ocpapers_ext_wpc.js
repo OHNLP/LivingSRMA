@@ -346,7 +346,7 @@ Object.assign(pan_ocpapers, {
      * seq: null means `main`, 0 to x means item index in `other`
      */
      set_highlight_text_to_attr: function(highlight_text, attr_abbr) {
-        console.log('* set_highlight_text_to_attr: ' + highlight_text + 'to ' + attr_abbr);
+        console.log('* set_highlight_text_to_attr: ' + highlight_text + ' to ' + attr_abbr);
 
         // update the value for the specific paper
         // if (seq == null) {
@@ -362,7 +362,22 @@ Object.assign(pan_ocpapers, {
         this.vpp.set_working_paper_arm_group_by_attr_value(attr_abbr, highlight_text);
 
         // update UI
-        // this.vpp.$forceUpdate();
+        this.vpp.$forceUpdate();
+
+        // 2021-08-18: scroll to that element for display
+        // $('#wpc-input-' + attr_abbr)[0].scrollIntoView();
+        $('#wpc-input-' + attr_abbr)
+        .css('background-color', 'bisque')
+        .effect(
+            'shake',
+            {
+                direction: 'left',
+                distance: 5,
+                times: 3
+            }
+        ).animate({
+            backgroundColor: 'white',
+        });
     },
 
     update_ctx_menu: function(highlight_text, pid) {
