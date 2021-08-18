@@ -223,6 +223,9 @@ tr.shown td.details-control {
     text-overflow: ellipsis;
     width: 120px;
 }
+.cursor-pointer {
+    cursor: pointer;
+}
 </style>
 {% endblock %}
 
@@ -1185,9 +1188,9 @@ var tbjs_paperlist = {
         } else {
             if (d.ss_ex.hasOwnProperty('label')) {
                 if (d.ss_ex.label.hasOwnProperty('RFC')) {
-                    ret += '<br><span class="badge badge-rfc"><i class="fa fa-check"></i></span>';
+                    ret += '<br><span class="badge badge-rfc" title="Agreed decision. Click to withdraw agreement" onclick="tbjs_paperlist.set_label_rfc(\''+d.paper_id+'\', \'no\', \'\')"><i class="fa fa-check"></i></span>';
                 } else {
-                    ret += '<br><span class="badge"><i class="far fa-question-circle"></i></span>';
+                    ret += '<br><span class="badge cursor-pointer" title="Click to agree this decision" onclick="tbjs_paperlist.set_label_rfc(\''+d.paper_id+'\', \'yes\', \'\')"><i class="far fa-question-circle"></i></span>';
                 }
             }
         }
