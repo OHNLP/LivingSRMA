@@ -360,6 +360,7 @@ var pan_ocpapers = {
 
         // working paper
         working_paper: null,
+        working_paper_init: false,
         working_paper_oc_selections: null,
 
         // working arm
@@ -451,9 +452,20 @@ var pan_ocpapers = {
             return n;
         },
 
+        set_wp_draggable: function() {
+            $('#pan_ocpapers_working_paper').css('left', '10%');
+            $("#pan_ocpapers_working_paper").draggable({ 
+                handle: "div.working_title",
+                containment: "#pan_ocpapers", 
+                scroll: false,
+                axis: 'x'
+            });
+        },
+
         on_click_paper: function(paper) {
             // set the working pmid ?
-            this.working_paper = paper;                    
+            this.working_paper = paper;
+            this.working_paper_init = true;
 
             // highlight this line
             $('.paper-table-row').removeClass('paper-table-row-clicked');
@@ -469,13 +481,6 @@ var pan_ocpapers = {
             pan_collector.show_paper(
                 paper.pid
             );
-
-            // make it draggable
-            // $( "#pan_ocpapers_working_paper" ).draggable({ 
-            //     handle: "div.working_title",
-            //     containment: "#pan_ocpapers", 
-            //     scroll: false
-            // });
         },
 
         on_click_oc: function(oc) {
@@ -551,6 +556,13 @@ var pan_ocpapers = {
 
                 // update the autocomplete
                 pan_ocpapers.update_autocomplete();
+
+                // update the dragable
+                if (this.working_paper != null && 
+                    this.working_paper_init) {
+                    this.set_wp_draggable();
+                    this.working_paper_init = false;
+                }
             }
         });
     },
