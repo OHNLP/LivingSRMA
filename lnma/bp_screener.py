@@ -78,7 +78,7 @@ def get_paper_by_id():
     if project_id is None:
         return redirect(url_for('project.mylist'))
 
-    time.sleep(1)
+    # time.sleep(1)
 
     paper = dora.get_paper_by_id(paper_id)
     project = dora.get_project(project_id)
