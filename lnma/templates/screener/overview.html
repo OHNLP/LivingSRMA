@@ -622,16 +622,36 @@ Screener Overview
 
                             <div class="form-check form-check-inline">
 
-                                <input class="form-check-input" type="checkbox" name="checkbox_lbl_rct" id="checkbox_lbl_rct">
-                                <label class="form-check-label" for="checkbox_lbl_rct">
-                                    Show <span class="badge badge-pill badge-info"><i class="fa fa-robot"></i> RCT</span> Only
+                                <input class="form-check-input" 
+                                    type="checkbox" 
+                                    name="checkbox_lbl_rct" 
+                                    id="checkbox_lbl_rct"
+                                    v-model="show_rct_label"
+                                    v-on:change="on_change_rct_label">
+                                <label class="form-check-label"
+                                    for="checkbox_lbl_rct">
+                                    Show 
+                                    <span class="badge badge-pill badge-info">
+                                        <i class="fa fa-robot"></i> RCT
+                                    </span>
+                                    Only
                                 </label>
                             </div>
     
                             <div class="form-check form-check-inline">
-                                <input class="form-check-input" type="checkbox" name="checkbox_lbl_ckl" id="checkbox_lbl_ckl">
-                                <label class="form-check-label" for="checkbox_lbl_ckl">
-                                    Show <span class="badge badge-pill badge-ckl"><i class="far fa-clock"></i> Check Later</span> Only
+                                <input class="form-check-input" 
+                                    type="checkbox" 
+                                    name="checkbox_lbl_ckl" 
+                                    id="checkbox_lbl_ckl"
+                                    v-model="show_ckl_label"
+                                    v-on:change="on_change_ckl_label">
+                                <label class="form-check-label"
+                                    for="checkbox_lbl_ckl">
+                                    Show 
+                                    <span class="badge badge-pill badge-ckl">
+                                        <i class="far fa-clock"></i> Check Later
+                                    </span> 
+                                    Only
                                 </label>
                             </div>
     
@@ -643,7 +663,8 @@ Screener Overview
                                 Sort by: 
                             </label>
 
-                            <button class="btn btn-default btn-sm" onclick="tbjs_paperlist.sort_by_decision_reason();">
+                            <button class="btn btn-default btn-sm"
+                                onclick="tbjs_paperlist.sort_by_decision_reason();">
                                 <i class="fa fa-sort-alpha-down"></i>
                                 Decision Reason
                             </button>
@@ -667,9 +688,15 @@ Screener Overview
 
                             {% for i, tag in enumerate(project['settings']['tags']) %}
                             <div class="form-check form-check-inline mr-2 tag-filter-item">
-                                <input class="form-check-input tag-filter" type="checkbox" name="checkbox_tag_[[i]]" id="checkbox_tag_[[i]]" value="[[ tag ]]">
-                                <label class="form-check-label" for="checkbox_tag_[[i]]">
-                                    [[ tag ]]
+                                <input class="form-check-input tag-filter" 
+                                    type="checkbox" 
+                                    name="checkbox_tag_[[i]]" 
+                                    id="checkbox_tag_[[i]]" 
+                                    value="[[ tag ]]"
+                                    onchange="tbjs_paperlist_topbar.vpp.on_change_tag_filter()">
+                                <label class="form-check-label"
+                                    for="checkbox_tag_[[i]]">
+                                [[ tag ]]
                                 </label>
                             </div>
                             {% endfor %}
@@ -677,7 +704,7 @@ Screener Overview
                     </div>
 
                 </div>
-                <!-- /div#tbjs_paperlist_filters -->
+                <!-- /div#tbjs_paperlist_topbar -->
 
 
                 <table id="tbjs_paperlist" class="display compact hover" style="width: 100%;">
@@ -808,7 +835,12 @@ var tbjs_paperlist_topbar = {
     vpp_data: {
         criterias: srv_screener.project.settings.criterias,
         is_pan_iecriteria_hide: true,
-        topbar_title: null
+        topbar_title: null,
+
+        stage: null,
+
+        show_rct_label: '',
+        show_ckl_label: '',
     },
 
     vpp_methods: {
@@ -818,6 +850,37 @@ var tbjs_paperlist_topbar = {
 
         set_title: function(title, cq_name, cq_type) {
             this.topbar_title = title;
+        },
+
+        on_change_rct_label: function(event) {
+            console.log('* rct label:', event.target.checked);
+            tbjs_paperlist.toggle_label_rct();
+
+
+            // // the filter event for RCT
+            // $('#checkbox_lbl_rct').change(function() {
+            //     tbjs_paperlist.toggle_label_rct();
+            // });
+
+            // // the filter event for check later
+            // $('#checkbox_lbl_ckl').change(function() {
+            //     tbjs_paperlist.toggle_label_ckl();
+            // });
+
+            // // the filter event for tags
+            // $('.tag-filter').change(function() {
+            //     tbjs_paperlist.toggle_tag_filter();
+            // });
+        },
+
+        on_change_ckl_label: function(event) {
+            console.log('* ckl label:', event.target.checked);
+            tbjs_paperlist.toggle_label_ckl();
+        },
+
+        on_change_tag_filter: function(event) {
+            // console.log('* tag filters:', event.target.checked);
+            tbjs_paperlist.toggle_tag_filter();
         }
     },
 
@@ -1119,21 +1182,6 @@ var tbjs_paperlist = {
                 }
             );
         });
-
-        // the filter event for RCT
-        $('#checkbox_lbl_rct').change(function() {
-            tbjs_paperlist.toggle_label_rct();
-        });
-
-        // the filter event for check later
-        $('#checkbox_lbl_ckl').change(function() {
-            tbjs_paperlist.toggle_label_ckl();
-        });
-
-        // the filter event for tags
-        $('.tag-filter').change(function() {
-            tbjs_paperlist.toggle_tag_filter();
-        })
     },
 
     _mark_element: function(elem) {
@@ -1194,6 +1242,9 @@ var tbjs_paperlist = {
     load_by_stage: function(stage, cq_abbr, cq_dval) {
         // set stage
         this.stage = stage;
+
+        // update toolbar tbjs_paperlist_topbar
+        tbjs_paperlist_topbar.vpp.$data.stage = stage;
 
         // update header title
         tbjs_paperlist_topbar.vpp.set_title(
@@ -1939,6 +1990,7 @@ var tbjs_paperlist = {
 
     __get_btn_check_later: function(d) {
         var html = '<button class="btn btn-default btn-sm" onclick="tbjs_paperlist.set_label_check_later(\''+d.paper_id+'\')"><i class="far fa-clock"></i> Check Later</button>';
+        
         if (srv_screener.has_label_ckl(d)) {
             html = '<button class="btn btn-default btn-sm" onclick="tbjs_paperlist.unset_label_check_later(\''+d.paper_id+'\')"><i class="far fa-clock"></i> Has Checked</button>';
         }
