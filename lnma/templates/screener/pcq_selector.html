@@ -259,11 +259,11 @@ var pan_ocpapers = {
     },
 
     load: function() {
-        var project_id = Cookies.get('project_id');
         var stage = srv_screener.STAGE_INCLUDED_SR;
         srv_screener.get_papers_by_stage(
-            project_id,
             stage,
+            '',
+            '',
             function(data) {
                 console.log(data);
                 jarvis.toast('Loaded papers');
