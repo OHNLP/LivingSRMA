@@ -132,6 +132,32 @@ def make_ss_cq_decision(d, r, c):
     }
 
 
+def set_paper_label_dis(paper_id, dis, cq_abbr=''):
+    '''
+    Set the DIS label for paper
+    '''
+
+    if cq_abbr is None or cq_abbr == '':
+        # which means just set project level
+        if dis == 'yes':
+            paper = set_paper_ss_label(paper_id, 'DIS')
+        else:
+            paper = unset_paper_ss_label(paper_id, 'DIS')
+
+        return True, paper
+
+    else:
+        paper = dora.get_paper_by_id(paper_id)
+        
+        paper.ss_ex['ss_cq'][cq_abbr]['c'] = dis
+
+        flag_modified(paper, 'ss_ex')
+        db.session.add(paper)
+        db.session.commit()
+
+        return True, paper
+
+
 def set_paper_label_rfc(paper_id, rfc, cq_abbr=''):
     '''
     Set the RFC label for 

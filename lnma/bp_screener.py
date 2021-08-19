@@ -570,6 +570,23 @@ def sspr_set_label_rfc():
     return jsonify(ret)
 
 
+@bp.route('/sspr/set_label_dis', methods=['GET', 'POST'])
+@login_required
+def sspr_set_label_dis():
+    project_id = request.form.get('project_id')
+    paper_id = request.form.get('paper_id')
+    cq_abbr = request.form.get('cq_abbr')
+    dis = request.form.get('dis')
+
+    is_success, paper = srv_paper.set_paper_label_dis(paper_id, dis, cq_abbr)
+
+    ret = {
+        'success': is_success,
+        'paper': paper.as_simple_dict() if is_success else None
+    }
+    return jsonify(ret)
+
+
 @bp.route('/sspr/set_label_ckl', methods=['GET', 'POST'])
 @login_required
 def sspr_set_label_ckl():

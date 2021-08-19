@@ -164,6 +164,10 @@ tr.shown td.details-control {
     color: #fff;
     background-color: #019927;
 }
+.badge-dis {
+    color: #fff;
+    background-color: #8f3333;
+}
 .badge-unscreened {
     color: #fff;
     background-color: #696b00;
@@ -1300,6 +1304,8 @@ var tbjs_paperlist = {
             if (d.ss_ex.hasOwnProperty('label')) {
                 if (d.ss_ex.label.hasOwnProperty('RFC')) {
                     ret += '<br><span class="badge badge-rfc" title="Agreed decision. Click to withdraw agreement" onclick="tbjs_paperlist.set_label_rfc(\''+d.paper_id+'\', \'no\', \'\')"><i class="fa fa-check"></i></span>';
+                } else if (d.ss_ex.label.hasOwnProperty('DIS')) {
+                    ret += '<br><span class="badge badge-dis" title="Disagreed decision. Click to withdraw disagreement" onclick="tbjs_paperlist.set_label_dis(\''+d.paper_id+'\', \'no\', \'\')"><i class="fa fa-times"></i></span>';
                 } else {
                     ret += '<br><span class="badge cursor-pointer" title="Click to agree this decision" onclick="tbjs_paperlist.set_label_rfc(\''+d.paper_id+'\', \'yes\', \'\')"><i class="far fa-question-circle"></i></span>';
                 }
@@ -1969,12 +1975,25 @@ var tbjs_paperlist = {
                         'Withdraw Agreement',
                     '</button>'
                 ];
+            } else if (d.ss_ex.label.hasOwnProperty('DIS')) {
+                // alredy have!
+                html = [
+                    '<button class="ml-2 btn btn-sm btn-default" onclick="tbjs_paperlist.set_label_dis(\''+d.paper_id+'\', \'no\', \''+cq_abbr+'\')">',
+                        '<i class="fa fa-times"></i> ',
+                        'Withdraw Disagreement',
+                    '</button>'
+                ];
             } else {
                 // no RFC yet
                 html = [
                     '<button class="ml-2 btn btn-sm btn-default" onclick="tbjs_paperlist.set_label_rfc(\''+d.paper_id+'\', \'yes\', \''+cq_abbr+'\')">',
                         '<i class="fa fa-check"></i> ',
                         'Agree',
+                    '</button>',
+
+                    '<button class="ml-2 btn btn-sm btn-default" onclick="tbjs_paperlist.set_label_dis(\''+d.paper_id+'\', \'yes\', \''+cq_abbr+'\')">',
+                        '<i class="fa fa-times"></i> ',
+                        'Disagree',
                     '</button>'
                 ];
             }
@@ -2642,6 +2661,30 @@ var tbjs_paperlist = {
     set_label_rfc: function(paper_id, rfc, cq_abbr) {
         // mark include in server
         srv_screener.set_label_rfc(paper_id, rfc, cq_abbr, function(data) {
+            var paper = data.paper;
+            if (data.success) {
+                // update the tb data list
+                tbjs_paperlist.update_data_by_paper(paper);
+
+                // update the action tr
+                $('#tb-tr-actions-' + paper.paper_id).replaceWith(
+                    tbjs_paperlist.__get_tr_actions_by_stage(paper)
+                );
+
+                // update the count number
+                ui_category_stat.update();
+
+                // show this good news!
+                jarvis.toast('Updated the agreement for paper ' + paper.seq_num + ' | ' + paper.short_name);
+            } else {
+                jarvis.toast('Failed when setting agreement for this study, try again later or contact administrator', 'warning');
+            }
+        });
+    },
+
+    set_label_dis: function(paper_id, dis, cq_abbr) {
+        // mark include in server
+        srv_screener.set_label_dis(paper_id, dis, cq_abbr, function(data) {
             var paper = data.paper;
             if (data.success) {
                 // update the tb data list
