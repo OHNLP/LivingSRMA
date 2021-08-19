@@ -140,37 +140,67 @@ var srv_screener = {
 
     get_paper_by_id: function(paper_id, callback) {
         var project_id = Cookies.get('project_id');
-        var url = this.api_url.get_paper_by_id;
 
-        $.get(
-            url,
-            {project_id: project_id, paper_id: paper_id},
-            callback, 
-            'json'
-        );
+        $.ajax({
+            type: 'GET',
+            dataType: "json",
+            url: this.api_url.get_paper_by_id,
+            data: {
+                project_id: project_id,
+                paper_id: paper_id,
+                rnd: Math.random(),
+            },
+            cache: false,
+            success: callback,
+            error: function(jqXHR, textStatus, errorThrown) {
+                jarvis.toast('Something wrong when getting paper data. Refresh page and try later.', 'alert');
+                console.error(textStatus, errorThrown);
+            }
+        });
     },
 
     get_papers: function(stage, callback) {
         var project_id = Cookies.get('project_id');
-        var url = this.api_url.get_papers_by_stage;
 
-        $.get(
-            url,
-            {project_id: project_id, stage: stage},
-            callback, 
-            'json'
-        );
+        $.ajax({
+            type: 'GET',
+            dataType: "json",
+            url: this.api_url.get_papers_by_stage,
+            data: {
+                project_id: project_id,
+                stage: stage,
+                rnd: Math.random(),
+            },
+            cache: false,
+            success: callback,
+            error: function(jqXHR, textStatus, errorThrown) {
+                jarvis.toast('Something wrong when getting paper data. Refresh page and try later.', 'alert');
+                console.error(textStatus, errorThrown);
+            }
+        });
     },
 
-    get_papers_by_stage: function(project_id, stage, callback) {
-        var url = this.api_url.get_papers_by_stage;
+    get_papers_by_stage: function(stage, cq_abbr, cq_dval, callback) {
+        var project_id = Cookies.get('project_id');
 
-        $.get(
-            url,
-            {project_id: project_id, stage: stage},
-            callback, 
-            'json'
-        );
+        $.ajax({
+            type: 'GET',
+            dataType: "json",
+            url: this.api_url.get_papers_by_stage,
+            data: {
+                project_id: project_id,
+                stage: stage,
+                cq_abbr: cq_abbr,
+                cq_dval: cq_dval,
+                rnd: Math.random(),
+            },
+            cache: false,
+            success: callback,
+            error: function(jqXHR, textStatus, errorThrown) {
+                jarvis.toast('Something wrong when getting paper data. Refresh page and try later.', 'alert');
+                console.error(textStatus, errorThrown);
+            }
+        });
     },
 
     ///////////////////////////////////////////////////////////////////////////

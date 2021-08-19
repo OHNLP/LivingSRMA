@@ -1,3 +1,4 @@
+import time
 import json
 
 from flask import request
@@ -77,6 +78,8 @@ def get_paper_by_id():
     if project_id is None:
         return redirect(url_for('project.mylist'))
 
+    time.sleep(1)
+
     paper = dora.get_paper_by_id(paper_id)
     project = dora.get_project(project_id)
 
@@ -117,11 +120,21 @@ def get_papers():
 def get_papers_by_stage():
     project_id = request.args.get('project_id')
     stage = request.args.get('stage')
+    cq_abbr = request.args.get('cq_abbr')
+    cq_dval = request.args.get('cq_dval') # for yes / no
+    print('* stage:%s, cq_abbr:%s, cq_dval:%s' % (
+        stage, cq_abbr, cq_dval
+    ))
+
     papers = dora.get_papers_by_stage(project_id, stage)
     json_papers = [  ]
     for p in papers:
-        d = p.as_very_simple_dict()
 
+        if stage == ss_state.SS_STAGE_INCLUDED_SR and cq_abbr!='':
+            if p.ss_ex['ss_cq'][cq_abbr]['d'] != cq_dval:
+                continue
+
+        d = p.as_very_simple_dict()
         # remove some unused information in first look
         del d['date_updated']
         del d['year']
