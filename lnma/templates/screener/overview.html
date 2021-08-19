@@ -1990,7 +1990,7 @@ var tbjs_paperlist = {
 
     __get_btn_check_later: function(d) {
         var html = '<button class="btn btn-default btn-sm" onclick="tbjs_paperlist.set_label_check_later(\''+d.paper_id+'\')"><i class="far fa-clock"></i> Check Later</button>';
-        
+
         if (srv_screener.has_label_ckl(d)) {
             html = '<button class="btn btn-default btn-sm" onclick="tbjs_paperlist.unset_label_check_later(\''+d.paper_id+'\')"><i class="far fa-clock"></i> Has Checked</button>';
         }
@@ -2761,23 +2761,74 @@ var tbjs_paperlist = {
     set_label_check_later: function(paper_id) {
         // mark include in server
         srv_screener.set_label_check_later(paper_id, function(data) {
-            // update the count number
-            ui_category_stat.update();
+            if (data.success) {
+                // update the count number
+                ui_category_stat.update();
+
+                // update the list
+                var papers = data.papers;
+
+                for (let i = 0; i < papers.length; i++) {
+                    const paper = papers[i];
+                    
+                    // update the tag list UI
+                    $('#tb-tr-actions-' + paper.paper_id).replaceWith(
+                        tbjs_paperlist.__get_tr_actions_by_stage(paper)
+                        );
+                        
+                    // update the tb data list
+                    tbjs_paperlist.update_data_by_paper(paper);
+                    
+                    // show this good news!
+                    jarvis.toast('Set paper check later. ' + paper.seq_num + ' | ' + paper.short_name);
+                }
+            } else {
+                jarvis.toast('Failed when setting clinical question for this study, try again later or contact administrator', 'warning');
+            }
+
         });
 
         // remove from the list
-        this.remove_paper_from_tbjs(paper_id);
+        // this.remove_paper_from_tbjs(paper_id);
     },
 
     unset_label_check_later: function(paper_id) {
         // mark include in server
+        // srv_screener.unset_label_check_later(paper_id, function(data) {
+        //     // update the count number
+        //     ui_category_stat.update();
+        // });
+        // mark un ckl in server
         srv_screener.unset_label_check_later(paper_id, function(data) {
-            // update the count number
-            ui_category_stat.update();
+            if (data.success) {
+                // update the count number
+                ui_category_stat.update();
+
+                // update the list
+                var papers = data.papers;
+
+                for (let i = 0; i < papers.length; i++) {
+                    const paper = papers[i];
+                    
+                    // update the tag list UI
+                    $('#tb-tr-actions-' + paper.paper_id).replaceWith(
+                        tbjs_paperlist.__get_tr_actions_by_stage(paper)
+                        );
+                        
+                    // update the tb data list
+                    tbjs_paperlist.update_data_by_paper(paper);
+                    
+                    // show this good news!
+                    jarvis.toast('Removed paper check later. ' + paper.seq_num + ' | ' + paper.short_name);
+                }
+            } else {
+                jarvis.toast('Failed when setting clinical question for this study, try again later or contact administrator', 'warning');
+            }
+
         });
 
         // remove from the list
-        this.remove_paper_from_tbjs(paper_id);
+        // this.remove_paper_from_tbjs(paper_id);
     },
 
     toggle_label_rct: function() {

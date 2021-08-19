@@ -85,4 +85,6 @@ SS_STAGE_TO_PR_AND_RS = {
 # label check later
 SS_LABEL_CKL = 'CKL'
 # label reviwer-confirmed decision
-SS_LABEL_RCD = 'RCD'
+SS_LABEL_RFC = 'RFC'
+# label reviwer disagree
+SS_LABEL_DIS = 'DIS'

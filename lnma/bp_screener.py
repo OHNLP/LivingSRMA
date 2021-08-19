@@ -620,7 +620,10 @@ def sspr_unset_label_ckl():
     papers = []
 
     for paper_id in paper_ids:
-        p = srv_paper.unset_label_check_later(paper_id)
+        p = srv_paper.unset_paper_ss_label(
+            paper_id, 
+            ss_state.SS_LABEL_CKL
+        )
         papers.append(p.as_simple_dict())
 
     ret = {

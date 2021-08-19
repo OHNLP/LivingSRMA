@@ -1107,55 +1107,6 @@ def set_paper_pr_rs_with_details(paper_id, pr=None, rs=None, detail_dict=None):
     return paper
 
 
-def set_paper_ss_label(paper_id, label):
-    '''Set the ss label for paper
-    '''
-    paper = Paper.query.filter_by(
-        paper_id=paper_id
-    ).first()
-
-    if 'label' not in paper.ss_ex:
-        paper.ss_ex['label'] = {}
-
-    # set the label
-    paper.ss_ex['label'][label] = {
-        'name': label
-    }
-    flag_modified(paper, "ss_ex")
-
-    # automatic update the date_updated
-    paper.date_updated = datetime.datetime.now()
-
-    db.session.add(paper)
-    db.session.commit()
-    return paper
-
-
-def unset_paper_ss_label(paper_id, label):
-    '''Unset the ss label for paper
-    '''
-    paper = Paper.query.filter_by(
-        paper_id=paper_id
-    ).first()
-
-    # first, check the "label" category exists
-    if 'label' not in paper.ss_ex:
-        paper.ss_ex['label'] = {}
-
-    # set the label itself
-    if label in paper.ss_ex['label']:
-        del paper.ss_ex['label'][label]
-    
-    flag_modified(paper, "ss_ex")
-
-    # automatic update the date_updated
-    paper.date_updated = datetime.datetime.now()
-
-    db.session.add(paper)
-    db.session.commit()
-    return paper
-
-
 def set_rct_user_feedback(paper_id, usr_fb):
     '''Set the user feedback for RCT result
     '''
