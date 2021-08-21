@@ -12,6 +12,7 @@ from sqlalchemy.dialects.mysql import LONGTEXT
 from lnma import ss_state
 from lnma import util
 from lnma import settings
+from lnma import srv_paper
 
 # for the relationship between project and user
 rel_project_users = db.Table(
@@ -406,22 +407,24 @@ class Paper(db.Model):
             # check each cq
             if len(cqs) == 1:
                 # if there is only one cq, just set to yes
-                decision = {
-                    'd': settings.PAPER_SS_EX_SS_CQ_YES,
-                    'r': '',
-                    'c': 'yes'
-                }
+                decision = srv_paper.make_ss_cq_decision(
+                    settings.PAPER_SS_EX_SS_CQ_YES,
+                    '',
+                    'yes'
+                )
 
             for cq in cqs:
                 if cq['abbr'] in self.ss_ex['ss_cq']:
                     # update the format
                     if (type(self.ss_ex['ss_cq'][cq['abbr']]) == str):
                         # oh, it's not the format we need now
-                        self.ss_ex['ss_cq'][cq['abbr']] = {
-                            'd': self.ss_ex['ss_cq'][cq['abbr']],
-                            'r': '',
-                            'c': 'no'
-                        }
+                        # str format yes/no is the old format for cq
+                        # we need a dict format to put more information
+                        self.ss_ex['ss_cq'][cq['abbr']] = srv_paper.make_ss_cq_decision(
+                            self.ss_ex['ss_cq'][cq['abbr']],
+                            '',
+                            'no'
+                        )
                     else:
                         # great! we already have this cq set in dict format
                         if 'c' in self.ss_ex['ss_cq'][cq['abbr']]:
@@ -430,11 +433,11 @@ class Paper(db.Model):
                             self.ss_ex['ss_cq'][cq['abbr']]['c'] = 'no'
                 else:
                     # nice! just add this lovely new cq
-                    self.ss_ex['ss_cq'][cq['abbr']] = {
-                        'd': decision,
-                        'r': '',
-                        'c': 'no'
-                    }
+                    self.ss_ex['ss_cq'][cq['abbr']] = srv_paper.make_ss_cq_decision(
+                        decision,
+                        '',
+                        'no'
+                    )
         else:
             # ok, this study is not included in SR
             # so ... no need to add this ss_cq

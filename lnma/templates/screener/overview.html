@@ -415,13 +415,13 @@ Screener Overview
                     All References
                 </h5>
                 <div class="list-group">
-                    <!-- <button class="list-group-item-button d-flex justify-content-between align-items-center" v-on:click="show_stage('all_of_them')">
+                    <!-- <button class="list-group-item-button d-flex justify-content-between align-items-center" v-on:click="load_by_stage('all_of_them')">
                         All
                         <span class="badge badge-secondary badge-pill">{{ stat.all_of_them }}</span>
                     </button> -->
                     <button class="list-group-item-button d-flex justify-content-between align-items-center" 
                         v-bind:class="{'list-group-item-selected': active_stage == 'unscreened'}"
-                        v-on:click="show_stage('unscreened')">
+                        v-on:click="load_by_stage('unscreened')">
                         Unscreened
                         <span>
                             <span class="badge badge-unscreened badge-pill">{{ stat.unscreened }}</span>
@@ -430,7 +430,7 @@ Screener Overview
                     </button>
                     <button class="list-group-item-button d-flex justify-content-between align-items-center" 
                         v-bind:class="{'list-group-item-selected': active_stage == 'decided'}"
-                        v-on:click="show_stage('decided')">
+                        v-on:click="load_by_stage('decided')">
                         Decided
                         <span>
                             <span class="badge badge-secondary badge-pill">{{ stat.decided }}</span>
@@ -447,7 +447,7 @@ Screener Overview
                 <div class="list-group">
                     <button class="list-group-item-button d-flex justify-content-between align-items-center" 
                         v-bind:class="{'list-group-item-selected': active_stage == 'passed_title_not_fulltext'}"
-                        v-on:click="show_stage('passed_title_not_fulltext')">
+                        v-on:click="load_by_stage('passed_title_not_fulltext')">
                         Full Text Review
                         <span>
                             <span class="badge badge-secondary badge-pill">{{ stat.passed_title_not_fulltext }}</span>
@@ -463,7 +463,7 @@ Screener Overview
                 <div class="list-group">
                     <button class="list-group-item-button d-flex justify-content-between align-items-center" 
                         v-bind:class="{'list-group-item-selected': active_stage == 'included_sr'}"
-                        v-on:click="show_stage('included_sr')">
+                        v-on:click="load_by_stage('included_sr')">
                         Included
                         <span>
                             <span class="badge badge-primary badge-pill">{{ stat.included_sr }}</span>
@@ -485,7 +485,7 @@ Screener Overview
 
                             <div class="list-group-item-cq-count cursor-pointer"
                                 v-bind:class="{'list-group-item-selected': active_stage == 'included_sr' && active_cq_abbr == cq.abbr && active_cq_dval == 'yes'}"
-                                v-on:click="show_stage('included_sr', cq.abbr, 'yes');"
+                                v-on:click="load_by_stage('included_sr', cq.abbr, 'yes');"
                                 style="width: 60px; ">
                                 <span class="badge badge-primary badge-pill">
                                     {{ stat.cq['cnt_included_in_cq_' + cq.abbr] }}
@@ -494,7 +494,7 @@ Screener Overview
 
                             <div class="list-group-item-cq-count cursor-pointer"
                                 v-bind:class="{'list-group-item-selected': active_stage == 'included_sr' && active_cq_abbr == cq.abbr && active_cq_dval == 'no'}"
-                                v-on:click="show_stage('included_sr', cq.abbr, 'no');"
+                                v-on:click="load_by_stage('included_sr', cq.abbr, 'no');"
                                 style="width: 60px">
                                 <span class="badge badge-default">
                                     {{ stat.included_sr - stat.cq['cnt_included_in_cq_' + cq.abbr] }}
@@ -510,13 +510,13 @@ Screener Overview
                     Excluded References
                 </h5>
                 <div class="list-group">
-                    <!-- <button class="list-group-item-button d-flex justify-content-between align-items-center" v-on:click="show_stage('excluded_by_rct_classifier')">
+                    <!-- <button class="list-group-item-button d-flex justify-content-between align-items-center" v-on:click="load_by_stage('excluded_by_rct_classifier')">
                         By RCT Classifier
                         <span class="badge badge-secondary badge-pill">{{ stat.excluded_by_rct_classifier }}</span>
                     </button> -->
                     <button class="list-group-item-button d-flex justify-content-between align-items-center" 
                         v-bind:class="{'list-group-item-selected': active_stage == 'excluded_by_title'}"
-                        v-on:click="show_stage('excluded_by_title')">
+                        v-on:click="load_by_stage('excluded_by_title')">
                         By Title
                         <span>
                             <span class="badge badge-secondary badge-pill">{{ stat.excluded_by_title }}</span>
@@ -527,7 +527,7 @@ Screener Overview
 
                     <button class="list-group-item-button d-flex justify-content-between align-items-center" 
                         v-bind:class="{'list-group-item-selected': active_stage == 'excluded_by_abstract'}"
-                        v-on:click="show_stage('excluded_by_abstract')">
+                        v-on:click="load_by_stage('excluded_by_abstract')">
                         By Abstract
                         <span>
                             <span class="badge badge-secondary badge-pill">{{ stat.excluded_by_abstract }}</span>
@@ -538,7 +538,7 @@ Screener Overview
 
                     <button class="list-group-item-button d-flex justify-content-between align-items-center" 
                         v-bind:class="{'list-group-item-selected': active_stage == 'excluded_by_fulltext'}"
-                        v-on:click="show_stage('excluded_by_fulltext')">
+                        v-on:click="load_by_stage('excluded_by_fulltext')">
                         By Full Text
                         <span>
                             <span class="badge badge-secondary badge-pill">{{ stat.excluded_by_fulltext }}</span>
@@ -795,7 +795,7 @@ var ui_category_stat = {
                 ]
             },
             methods: {
-                show_stage: function(stage, cq_abbr, cq_dval) {
+                load_by_stage: function(stage, cq_abbr, cq_dval) {
                     if (typeof(cq_abbr) == 'undefined') {
                         cq_abbr = null;
                     }
@@ -910,6 +910,12 @@ var tbjs_paperlist = {
 
     // by default, show unscreened stage
     stage: srv_screener.STAGE_UNSCREENED,
+
+    // by default, show null
+    cq_abbr: null,
+
+    // by default, show dval null
+    cq_dval: null,
 
     // for highlight NCT number
     regex_RCT_ID: /NCT\d{8}/gmi,
@@ -1242,6 +1248,10 @@ var tbjs_paperlist = {
     load_by_stage: function(stage, cq_abbr, cq_dval) {
         // set stage
         this.stage = stage;
+        // set cq_abbr
+        this.cq_abbr = cq_abbr;
+        // set stage
+        this.cq_dval = cq_dval;
 
         // update toolbar tbjs_paperlist_topbar
         tbjs_paperlist_topbar.vpp.$data.stage = stage;
@@ -1696,21 +1706,32 @@ var tbjs_paperlist = {
     },
 
     __get_tr_actions_by_stage_included_sr: function(d) {
-        var html = '<tr id="tb-tr-actions-'+d.paper_id+'">'+
-            '<td>Actions:</td>'+
-            '<td>'+
+        var html = [
+        '<tr id="tb-tr-actions-'+d.paper_id+'">',
+            '<td>Actions:</td>',
+            '<td>',
+        ];
             // '<button class="btn btn-primary btn-sm" onclick="tbjs_paperlist.include_in_srma(\''+d.paper_id+'\')">Include in MA</button> '+
-            '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_needchkft(\''+d.paper_id+'\')">Send Back to Full-Text Review</button> '+
-            '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_unscreened(\''+d.paper_id+'\')">Send Back to Unscreened</button> '+
-            ' | ' +
-            this.__get_btn_check_later(d) + 
-            ' | ' +
-            this.__get_div_rct_yes_no(d) + 
-            ' | ' +
-            this.__get_div_rfc_yes_no(d) +
-            '</td>'+
-        '</tr>';
-        return html;
+
+        if (tbjs_paperlist.cq_abbr == null) {
+            // only show the buttons when not in cq level
+            html = html.concat([
+                '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_needchkft(\''+d.paper_id+'\')">Send Back to Full-Text Review</button> ',
+                '<button class="btn btn-warning btn-sm" onclick="tbjs_paperlist.set_unscreened(\''+d.paper_id+'\')">Send Back to Unscreened</button> ',
+                ' | ' ,
+            ]);
+        }
+            
+        html = html.concat([
+            this.__get_btn_check_later(d) ,
+            ' | ' ,
+            this.__get_div_rct_yes_no(d) ,
+            ' | ' ,
+            this.__get_div_rfc_yes_no(d) ,
+            '</td>',
+        '</tr>'
+        ]);
+        return html.join('');
     },
 
     _get_expand_html_by_stage_included_srma: function(d) {

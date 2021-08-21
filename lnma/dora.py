@@ -84,6 +84,13 @@ def get_project_by_keystr(keystr):
     return project
 
 
+def get_all_projects():
+    '''
+    Get all projects
+    '''
+    return list_all_projects()
+
+    
 def list_all_projects():
     '''
     Get all projects for test

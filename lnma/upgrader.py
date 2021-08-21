@@ -136,7 +136,9 @@ def upgrade_paper_ss_ex_label_for_user(keystr):
     project = dora.get_project_by_keystr(keystr)
     papers = dora.get_papers_by_keystr(keystr)
 
-    print('* found %d papers in current database' % len(papers))
+    print('* found %d papers for [%s] in current database' % (
+        len(papers), keystr
+    )
 
     cnt = {
         'total': 0
