@@ -128,6 +128,47 @@ def upgrade_project_settings(keystr):
     print('* done upgrading with [%s]' % keystr)
 
 
+
+def upgrade_paper_ss_ex_label_for_user(keystr):
+    '''
+    Upgrade the paper's label
+    '''
+    project = dora.get_project_by_keystr(keystr)
+    papers = dora.get_papers_by_keystr(keystr)
+
+    print('* found %d papers in current database' % len(papers))
+
+    cnt = {
+        'total': 0
+    }
+
+    for paper in tqdm(papers):
+        if 'label' in paper.ss_ex:
+            has_update = False
+            for label in paper.ss_ex['label']:
+                if 'user' in paper.ss_ex['label'][label]:
+                    continue
+                else:
+                    paper.ss_ex['label'][label]['user'] = {
+                        'uid': settings.SYSTEM_ADMIN_UID,
+                        'abbr': settings.SYSTEM_ADMIN_NAME
+                    }
+                    has_update = True
+
+            if has_update:
+                flag_modified(paper, "ss_ex")
+                cnt['total'] += 1
+
+                db.session.add(paper)
+                db.session.commit()
+
+    print('* found and upgraded %s studies for the ss_cq' % (
+        cnt['total']
+    ))
+
+    print('* done upgrading papers')
+    
+
 def upgrade_paper_ss_ex_for_cq(keystr):
     '''
     Upgrade the paper data model `ss_ex` to support cq-based data.

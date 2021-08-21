@@ -6,6 +6,8 @@ from sqlalchemy.orm.attributes import flag_modified
 
 from tqdm import tqdm
 
+from flask_login import current_user
+
 from lnma import settings
 from lnma import util
 from lnma import dora
@@ -36,6 +38,11 @@ def set_paper_ss_label(paper_id, label, user=None):
         paper.ss_ex['label'][label]['user'] = {
             'uid': user.uid,
             'abbr': user.get_abbr()
+        }
+    else:
+        paper.ss_ex['label'][label]['user'] = {
+            'uid': current_user.uid,
+            'abbr': current_user.get_abbr()
         }
 
     flag_modified(paper, "ss_ex")

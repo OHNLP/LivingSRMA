@@ -63,7 +63,10 @@ class User(db.Model):
 
 
     def get_abbr(self):
-        return self.first_name[0].upper() + self.last_name[0].upper()
+        return "%s. %s" % (
+            self.first_name[0].upper(), 
+            self.last_name.upper()
+        )
 
 
     def set_password(self, raw_pass):

@@ -768,3 +768,7 @@ HOST_ENV_DEV_FLAG_VALUE = 'localhost'
 
 # for public sites
 PUBLIC_PATH_PUBDATA = 'pubdata'
+
+# system admin account
+SYSTEM_ADMIN_UID = 'sysadmin@lisr.org'
+SYSTEM_ADMIN_NAME = 'SYSADMIN'
