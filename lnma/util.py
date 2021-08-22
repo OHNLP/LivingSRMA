@@ -1100,6 +1100,41 @@ def json_encoder(o):
     return str(o)
     
 
+def make_ss_cq_dict(project):
+    '''
+    Make an initial ss_cq based on a project
+    '''
+    d = {}
+    if len(project.settings['clinical_questions']) == 1:
+        decision = make_ss_cq_decision(
+            settings.PAPER_SS_EX_SS_CQ_YES,
+            '',
+            'no'
+        )
+    else:
+        decision = make_ss_cq_decision(
+            settings.PAPER_SS_EX_SS_CQ_NO,
+            '',
+            'no'
+        )
+
+    for cq in project.settings['clinical_questions']:
+        d[cq['abbr']] = decision
+
+    return d
+
+
+def make_ss_cq_decision(d, r, c):
+    '''
+    Decision, Reason, Confirmed
+    '''
+    return {
+        'd': d,
+        'r': r,
+        'c': c
+    }
+    
+
 if __name__ == "__main__":
     fn = '/home/hehuan/Downloads/endnote_test.xml'
     fn = '/home/hehuan/Downloads/endnote_test_large.xml'

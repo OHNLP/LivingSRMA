@@ -9,7 +9,13 @@ from sqlalchemy import and_, or_, not_
 from sqlalchemy.orm.attributes import flag_modified
 
 from lnma import ss_state
-from .models import *
+from .models import Project
+from .models import User
+from .models import Paper
+from .models import Piece
+from .models import DataSource
+from .models import Extract
+from .models import Note
 
 from . import db
 
@@ -90,7 +96,7 @@ def get_all_projects():
     '''
     return list_all_projects()
 
-    
+
 def list_all_projects():
     '''
     Get all projects for test

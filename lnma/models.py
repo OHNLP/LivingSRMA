@@ -12,7 +12,6 @@ from sqlalchemy.dialects.mysql import LONGTEXT
 from lnma import ss_state
 from lnma import util
 from lnma import settings
-from lnma import srv_paper
 
 # for the relationship between project and user
 rel_project_users = db.Table(
@@ -407,7 +406,7 @@ class Paper(db.Model):
             # check each cq
             if len(cqs) == 1:
                 # if there is only one cq, just set to yes
-                decision = srv_paper.make_ss_cq_decision(
+                decision = util.make_ss_cq_decision(
                     settings.PAPER_SS_EX_SS_CQ_YES,
                     '',
                     'yes'
@@ -420,7 +419,7 @@ class Paper(db.Model):
                         # oh, it's not the format we need now
                         # str format yes/no is the old format for cq
                         # we need a dict format to put more information
-                        self.ss_ex['ss_cq'][cq['abbr']] = srv_paper.make_ss_cq_decision(
+                        self.ss_ex['ss_cq'][cq['abbr']] = util.make_ss_cq_decision(
                             self.ss_ex['ss_cq'][cq['abbr']],
                             '',
                             'no'
@@ -433,7 +432,7 @@ class Paper(db.Model):
                             self.ss_ex['ss_cq'][cq['abbr']]['c'] = 'no'
                 else:
                     # nice! just add this lovely new cq
-                    self.ss_ex['ss_cq'][cq['abbr']] = srv_paper.make_ss_cq_decision(
+                    self.ss_ex['ss_cq'][cq['abbr']] = util.make_ss_cq_decision(
                         decision,
                         '',
                         'no'

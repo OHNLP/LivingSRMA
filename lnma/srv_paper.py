@@ -104,41 +104,6 @@ def get_included_papers_by_cq(project_id, cq_abbr):
     return papers
 
 
-def make_ss_cq_dict(project):
-    '''
-    Make an initial ss_cq based on a project
-    '''
-    d = {}
-    if len(project.settings['clinical_questions']) == 1:
-        decision = make_ss_cq_decision(
-            settings.PAPER_SS_EX_SS_CQ_YES,
-            '',
-            'no'
-        )
-    else:
-        decision = make_ss_cq_decision(
-            settings.PAPER_SS_EX_SS_CQ_NO,
-            '',
-            'no'
-        )
-
-    for cq in project.settings['clinical_questions']:
-        d[cq['abbr']] = decision
-
-    return d
-
-
-def make_ss_cq_decision(d, r, c):
-    '''
-    Decision, Reason, Confirmed
-    '''
-    return {
-        'd': d,
-        'r': r,
-        'c': c
-    }
-
-
 def set_paper_label_dis(paper_id, dis, cq_abbr=''):
     '''
     Set the DIS label for paper
@@ -209,13 +174,13 @@ def set_paper_ss_cq(paper_id, cq_abbr, ss_cq, ss_cq_ex_reason=''):
         c = 'no'
 
     if ss_cq == settings.PAPER_SS_EX_SS_CQ_YES:
-        paper.ss_ex['ss_cq'][cq_abbr] = make_ss_cq_decision(
+        paper.ss_ex['ss_cq'][cq_abbr] = util.make_ss_cq_decision(
             settings.PAPER_SS_EX_SS_CQ_YES,
             ss_cq_ex_reason,
             c
         )
     else:
-        paper.ss_ex['ss_cq'][cq_abbr] = make_ss_cq_decision(
+        paper.ss_ex['ss_cq'][cq_abbr] = util.make_ss_cq_decision(
             settings.PAPER_SS_EX_SS_CQ_NO,
             ss_cq_ex_reason,
             c
