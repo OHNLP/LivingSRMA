@@ -87,7 +87,7 @@ def update_project_papers_ss_cq_by_keystr(keystr, decision):
 
     print('* found %d papers for [%s] in current database' % (
         len(papers), keystr
-    )
+    ))
 
     cnt = {
         'total': 0
