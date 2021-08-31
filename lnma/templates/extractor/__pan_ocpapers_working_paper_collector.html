@@ -101,6 +101,7 @@
                                     </span>
                                 </span> -->
                                 <input class="paper-extract-input paper-extract-input-auto input-auto-complete" type="text" 
+                                    v-bind:oc_abbr="working_oc.abbr"
                                     v-bind:g_idx="g_idx"
                                     v-bind:abbr="attr.abbr"
                                     v-on:click="switch_working_subg(g_idx)"
@@ -130,6 +131,7 @@
                                     <div class="w-sub-item-value">
                                         <input class="paper-extract-input paper-extract-input-auto input-auto-complete"     
                                             type="text" 
+                                            v-bind:oc_abbr="working_oc.abbr"
                                             v-bind:g_idx="g_idx"
                                             v-bind:abbr="sub.abbr"
                                             v-model="get_working_arm_attrs()['g'+g_idx][sub.abbr]"> 

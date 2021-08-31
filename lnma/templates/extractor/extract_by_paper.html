@@ -371,6 +371,12 @@ var pan_ocpapers = {
         // working oc
         working_oc: null,
 
+        // working autocomplete flag
+        // we need to update this flag only when:
+        // 1. switch to a different oc/itable
+        // 2. switch to a different arm
+        is_wp_ac_inited: true,
+
         // the attrs for extraction
         all_attrs: [],
 
@@ -505,6 +511,9 @@ var pan_ocpapers = {
                 // ?
             }
 
+            // set the autocomplete to init
+            this.is_wp_ac_inited = false;
+
             // highlight the oc in list
             $('.chk-oc').removeClass('chk-oc-extracting');
             $('#chk_oc_line_' + oc.abbr).addClass('chk-oc-extracting');
@@ -555,7 +564,12 @@ var pan_ocpapers = {
                 pan_ocpapers.resize();
 
                 // update the autocomplete
-                pan_ocpapers.update_autocomplete();
+                if (this.is_wp_ac_inited) {
+                    // only call this update autocomplete once when required
+                } else {
+                    pan_ocpapers.update_autocomplete();
+                    this.is_wp_ac_inited = true;
+                }
 
                 // update the dragable
                 if (this.working_paper != null && 

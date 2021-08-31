@@ -244,9 +244,17 @@ Object.assign(pan_ocpapers, {
      * Update the auto-complete
      */
     update_autocomplete: function() {
+        console.time('* update autocomplete');
         $('.input-auto-complete').each(function(idx, elem) {
+            // 2021-08-31: fix the freezing when 
+            // console.log('* has inited?', $(elem).hasClass('ui-autocomplete-input'));
+            if ($(elem).hasClass('ui-autocomplete-input')) {
+                return;
+            }
             var abbr = $(elem).attr('abbr');
             var g_idx = $(elem).attr('g_idx');
+            
+            // get the values
             var values = pan_ocpapers._get_values_by_abbr(abbr, g_idx);
 
             if (values.length == 0) {
@@ -281,11 +289,18 @@ Object.assign(pan_ocpapers, {
                     // console.log("changed!", e, ui);
                 }
 
-            }).on('focus', function(event) {
-                $(this).autocomplete('search');
             });
+
+            $(elem).on('focus', function(event) {
+                console.log('* focus on', event.target);
+                console.time('* search hints');
+                $(this).autocomplete('search');
+                console.timeEnd('* search hints');
+            })
         });
-        console.log('* updated autocomplete');
+        console.timeEnd('* update autocomplete');
+
+        // console.log('* updated autocomplete');
     },
 
     _get_values_by_abbr: function(abbr, g_idx) {
