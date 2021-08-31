@@ -100,7 +100,7 @@
                                         <i class="fa fa-close"></i>
                                     </span>
                                 </span> -->
-                                <input class="paper-extract-input-auto input-auto-complete" type="text" 
+                                <input class="paper-extract-input paper-extract-input-auto input-auto-complete" type="text" 
                                     v-bind:g_idx="g_idx"
                                     v-bind:abbr="attr.abbr"
                                     v-on:click="switch_working_subg(g_idx)"
@@ -128,7 +128,7 @@
                                 v-bind:class="{'w-subg-item-value':working_paper_subg == g_idx, 'w-100': working_paper_subg==0}">
                                     <!-- v-bind:size="get_input_size(get_working_arm_extracted_value(g_idx, attr.abbr))" -->
                                     <div class="w-sub-item-value">
-                                        <input class="paper-extract-input-auto input-auto-complete"     
+                                        <input class="paper-extract-input paper-extract-input-auto input-auto-complete"     
                                             type="text" 
                                             v-bind:g_idx="g_idx"
                                             v-bind:abbr="sub.abbr"

@@ -191,6 +191,9 @@ div.w-attr-item:nth-child(odd) {background: whitesmoke; }
     
     width: calc(100% - 20px);
 }
+input[type=text].paper-extract-input:focus {
+    border: 2px solid #000000;
+}
 
 .ui-autocomplete {
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
