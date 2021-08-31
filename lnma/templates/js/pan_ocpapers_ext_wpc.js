@@ -348,6 +348,9 @@ Object.assign(pan_ocpapers, {
      set_highlight_text_to_attr: function(highlight_text, attr_abbr) {
         console.log('* set_highlight_text_to_attr: ' + highlight_text + ' to ' + attr_abbr);
 
+        // trim the text
+        highlight_text = highlight_text.trim();
+
         // update the value for the specific paper
         // if (seq == null) {
         //     // it means this is the main track
