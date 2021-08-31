@@ -253,11 +253,8 @@ Object.assign(pan_ocpapers, {
     update_autocomplete: function() {
         console.time('* update autocomplete');
         $('.input-auto-complete').each(function(idx, elem) {
-            // 2021-08-31: fix the freezing when 
-            // console.log('* has inited?', $(elem).hasClass('ui-autocomplete-input'));
-            if ($(elem).hasClass('ui-autocomplete-input')) {
-                return;
-            }
+            var has_ac = $(elem).hasClass('ui-autocomplete-input');
+
             var abbr = $(elem).attr('abbr');
             var g_idx = $(elem).attr('g_idx');
             
@@ -297,13 +294,23 @@ Object.assign(pan_ocpapers, {
                 }
 
             });
+            // console.log('* updated ac for ' + abbr + ' with values', values);
+
+            // 2021-08-31: fix the freezing when 
+            // console.log('* has inited?', $(elem).hasClass('ui-autocomplete-input'));
+            // once the $(elem).autocomplete() finished, 
+            // the $(elem).hasClass('ui-autocomplete-input')) is always true
+            // so we need to chech the label before running autocomplete
+            if (has_ac) {
+                return;
+            }
 
             $(elem).on('focus', function(event) {
                 console.log('* focus on', event.target);
                 console.time('* search hints');
                 $(this).autocomplete('search');
                 console.timeEnd('* search hints');
-            })
+            });
         });
         console.timeEnd('* update autocomplete');
 
