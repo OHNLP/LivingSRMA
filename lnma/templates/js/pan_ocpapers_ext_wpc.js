@@ -27,7 +27,14 @@ Object.assign(pan_ocpapers.vpp_data, {
 
     // working group idx
     // by default, this is 0 for all extract except subg analysis
-    working_paper_subg: 0
+    working_paper_subg: 0,
+
+
+    // working autocomplete flag
+    // we need to update this flag only when:
+    // 1. switch to a different oc/itable
+    // 2. switch to a different arm
+    is_wp_ac_inited: true,
 });
 
 // Extend the vpp methods
