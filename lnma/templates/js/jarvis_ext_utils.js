@@ -25,5 +25,23 @@ Object.assign(jarvis, {
         } else {
             console.log('* found cq_abbr=' + Cookies.get('cq_abbr') + ' in Cookies');
         }
+    },
+
+    get_link_doi: function(doi, cls) {
+        if (typeof(cls) == 'undefined') {
+            cls = '';
+        }
+        return '<a target="_blank" class="'+cls+'" href="https://doi.org/'+doi+'" title="Check the detail through DOI '+doi+'">' + doi + '</a>';
+    },
+
+    get_link_pmid: function(pmid, cls) {
+        if (typeof(cls) == 'undefined') {
+            cls = '';
+        }
+        return '<a target="_blank" href="https://pubmed.ncbi.nlm.nih.gov/'+pmid+'" title="Check the detail in PubMed '+pmid+'">' + pmid + '</a>';
+    },
+
+    get_link_nct: function(nct) {
+        return '<a target="_blank" href="https://clinicaltrials.gov/ct2/show/'+nct+'" title="Check this clinical trial '+nct+'">'+nct+'</a>';
     }
 });

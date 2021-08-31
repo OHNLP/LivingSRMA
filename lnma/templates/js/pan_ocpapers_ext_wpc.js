@@ -403,16 +403,17 @@ Object.assign(pan_ocpapers, {
 
         var n_arms = this.vpp.$data.working_oc.data[pid].n_arms;
 
+        // 2021-08-30: since we use working_arm to decide, no need to have this
         // this is for the other extracting (i.e., multiple arms)
-        if (n_arms > 2) {
-            html.push('<li class="ui-state-disabled menu-header"><div>Other Arms</div></li>');
+        // if (n_arms > 2) {
+        //     html.push('<li class="ui-state-disabled menu-header"><div>Other Arms</div></li>');
             
-            for (let a = 0; a < n_arms - 2; a++) {
-                html.push('<li class="menu-item"><div>Comp '+(a+2)+'</div><ul>');
-                html = this.__update_ctx_menu_html(html, highlight_text, pid, a);
-                html.push('</ul></li>')
-            }
-        }
+        //     for (let a = 0; a < n_arms - 2; a++) {
+        //         html.push('<li class="menu-item"><div>Comp '+(a+2)+'</div><ul>');
+        //         html = this.__update_ctx_menu_html(html, highlight_text, pid, a);
+        //         html.push('</ul></li>')
+        //     }
+        // }
 
         // put the new html into box
         $('#pan_ocpapers_ctx_menu').html(

@@ -24,6 +24,9 @@ Study Importer | By Endnote XML
 .paper-result-existed {
     background-color: rgb(194, 150, 6);
 }
+.paper-result-error {
+    background-color: rgb(194, 6, 6);
+}
 </style>
 {% endblock %}
 
@@ -64,11 +67,12 @@ Study Importer | By Endnote XML
                     
                     <div class="form-group">
                         <label for="default_stage">The decision for the uploaded studies</label>
-                        <select class="form-control" id="default_stage" name="default_stage">
+                        <select class="form-control" 
+                            id="default_stage" name="default_stage"
+                            v-model="select_default_stage">
                             <option value="[[ ss.SS_STAGE_UNSCREENED ]]">Unscreened</option>
                             <option value="[[ ss.SS_STATE_PASSED_TITLE_NOT_FULLTEXT ]]">Full-text Review</option>
                             <option value="[[ ss.SS_STAGE_INCLUDED_SR ]]">Included in SR</option>
-                            <option value="[[ ss.SS_STAGE_INCLUDED_SRMA ]]">Included in SR and MA</option>
                             <option value="[[ ss.SS_STAGE_EXCLUDED_BY_TITLE ]]">Excluded by Title</option>
                             <option value="[[ ss.SS_STAGE_EXCLUDED_BY_ABSTRACT ]]">Excluded by Abstract</option>
                             <option value="[[ ss.SS_STAGE_EXCLUDED_BY_FULLTEXT ]]">Excluded by Full Text</option>
@@ -77,18 +81,37 @@ Study Importer | By Endnote XML
 
                 </form>
                 
-                <div>                    
-                    <button class="btn btn-primary"
-                        v-bind:disabled="btn_import.disabled"
-                        v-on:click="start_import">
-                        <i class="fa fa-upload"></i>
-                        Import this XML file
+                <div>
+                    <button class="btn btn-primary mb-2"
+                        v-bind:disabled="is_uploading || is_importing"
+                        v-on:click="upload_xml">
+                        <span v-if="is_uploading">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            Uploading the selected XML file ...
+                        </span>
+                        <span v-else>
+                            <i class="fa fa-upload"></i>
+                            Upload this XML file
+                        </span>
+                    </button>
+
+                    <button class="btn btn-success"
+                        v-bind:disabled="is_importing || papers == null || papers.length == 0"
+                        v-on:click="import_studies">
+                        <span v-if="is_importing">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            Importing the studies
+                        </span>
+                        <span v-else>
+                            <i class="fa fa-upload"></i>
+                            Import the studies found in XML file
+                        </span>
                     </button>
                 </div>
 
             </div>
 
-            <div class="col-md-9" v-if="papers != null">
+            <div class="col-md-9" v-if="papers != null && cnt != null">
                 <div>
                     <h5>
                         <i class="fa fa-file"></i>
@@ -96,7 +119,11 @@ Study Importer | By Endnote XML
                     </h5>
                     <p>
                         <b>{{ papers.length }}</b> studies are found in the uploaded file.<br>
+                        <b>{{ cnt.has_pid }}</b> have an ID (PMID / EMBASE ID / PMC),
+                        <b>{{ cnt.no_pid_has_doi }}</b> use the DOI instead, 
+                        <b>{{ cnt.no_id }}</b> don't have any ID (System assigned an ID based on title). <br>
                         <b>{{ count.processed }}</b> / {{ papers.length }} studies are processed. <b>{{ count.existed }}</b> studies are already existed, and <b>{{ count.created }}</b> studies are created.
+                        <b>{{ count.error }}</b> errors.
                     </p>
                 </div>
                 <div class="d-flex flex-wrap">
@@ -106,28 +133,6 @@ Study Importer | By Endnote XML
                     
                     </div>
                 </div>
-                <!-- <table class="table">
-
-                    <tr>
-                        <th>#</th>
-                        <th width="80px">Status</th>
-                        <th>Paper Info</th>
-                    </tr>
-
-                    <tr v-for="r, i in papers">
-                        <td><span class="badge badge-default">{{ i + 1 }}</span></td>
-                        <td>
-                            <span v-if="r.success" class="badge badge-primary">
-                                {{ r.result }}
-                            </span>
-                            <span v-else class="badge badge-warning">
-                                {{ r.result }}
-                            </span>
-                        </td>
-                        <td>{{ r.title }}</td>
-                    </tr>
-
-                </table> -->
 
                 
             </div>
@@ -142,51 +147,7 @@ Study Importer | By Endnote XML
 {% block script %}
 <script>
 
-var srv_importer = {
-    stage: {
-        // view stage
-        all_of_them: { title: 'All References' },
-        decided: { title: 'Decided References' },
-
-        // main stages
-        unscreened: { title: 'Unscreened References' },
-        passed_title_not_fulltext: { title: 'Full-text review' },
-        excluded_by_title: { title: 'Excluded after checking title' },
-        excluded_by_abstract: { title: 'Excluded after checking abstract' },
-        excluded_by_fulltext: { title: 'Excluded after checking fulltext' },
-        included_sr: { title: 'Included in SR' },
-        included_srma: { title: 'Included in Both SR and MA' },
-        
-        // extended stages
-        included_only_sr: { title: 'Included only in SR' },
-        excluded_by_title_abstract: { title: 'Excluded after checking title and abstract' },
-        excluded_by_rct_classifier: { title: 'Excluded by RCT classifier' },
-    },
-
-    url: {
-        upload_endnote_xml: "[[ url_for('importer.upload_endnote_xml') ]]",
-        save_papers: "[[ url_for('importer.save_papers') ]]",
-    },
-
-    save_papers: function(papers, stage, callback) {
-        var project_id = Cookies.get('project_id');
-        if (project_id == undefined) {
-            alert('Set working project first.');
-            return;
-        }
-
-        $.post(
-            this.url.save_papers,
-            {
-                project_id:project_id, 
-                papers: JSON.stringify(papers), 
-                stage:stage
-            },
-            callback, 
-            'json'
-        );
-    }
-}
+{% include 'js/srv_importer.js' %}
 
 var vw_uploader_endnote_xml = {
     vpp: null,
@@ -200,27 +161,33 @@ var vw_uploader_endnote_xml = {
             data: {
                 results: null,
                 papers: null,
+                cnt: null,
                 count: {
                     processed: 0,
                     existed: 0,
-                    created: 0
+                    created: 0,
+                    error: 0
                 },
-                btn_import: {
-                    disabled: false
-                },
-                select_default_stage: {
-                    disabled: false
-                }
+
+                is_uploading: false,
+
+                is_importing: false,
+
+                select_default_stage: 'unscreened'
             },
             methods: {
-                start_import: function() {
-                    vw_uploader_endnote_xml.start_import();
+                upload_xml: function() {
+                    vw_uploader_endnote_xml.upload_xml();
+                },
+
+                import_studies: function() {
+                    vw_uploader_endnote_xml.import_papers();
                 }
             }
         });
     },
 
-    start_import: function() {
+    upload_xml: function() {
         // final confirm
         // var default_stage = $('#default_stage').val();
         // var msg = "The studies found in your uploaded XML file would be imported as [" + srv_importer.stage[default_stage].title + "], are you sure?";
@@ -245,31 +212,29 @@ var vw_uploader_endnote_xml = {
         }
 
         // update UI
-        this.vpp.btn_import.disabled = true;
+        this.vpp.$data.is_uploading = true;
+
+        // create the form for submit
         var form_data = new FormData($('#upload_file')[0]);
         form_data.append('project_id', project_id);
 
-        // send request
-        $.ajax({
-            type: 'POST',
-            url: srv_importer.url.upload_endnote_xml,
-            data: form_data,
-            contentType: false,
-            cache: false,
-            processData: false,
-            success: function(data) {
+        srv_importer.upload_endnote_xml(
+            form_data,
+            function(data) {
                 console.log(data);
                 vw_uploader_endnote_xml.show_papers(data);
-            },
-            error: function(jqXHR, textStatus, errorThrown) {
-                console.error(textStatus, errorThrown);
             }
-        });
+        );
     },
 
     show_papers: function(data) {
+        // bind local data
+        this.data = data;
+        
         // update the UI
-        this.vpp.btn_import.disabled = true;
+        this.vpp.$data.is_uploading = false;
+
+        this.vpp.$data.cnt = data.cnt;
 
         // update the paper list
         if (this.vpp.papers == null) {
@@ -290,10 +255,10 @@ var vw_uploader_endnote_xml = {
         }
 
         // then process!
-        this.processing_papers();
+        // this.import_papers();
     },
 
-    processing_papers: function(data) {
+    import_papers: function(data) {
         // first handle the return data
         if (typeof(data) == 'undefined') {
             // it's the first time run!
@@ -314,8 +279,11 @@ var vw_uploader_endnote_xml = {
         
         if (this.idx_processing == this.papers.length) {
             // it means all the papers have been processed!
+            this.vpp.$data.is_importing = false;
             return;
         }
+
+        this.vpp.$data.is_importing = true;
         
         // create a small batch for saving
         var papers_for_processing = [];
@@ -331,12 +299,15 @@ var vw_uploader_endnote_xml = {
         }
 
         if (papers_for_processing.length>0) {
-            var stage = $('#default_stage').val();
+            var stage = vw_uploader_endnote_xml.vpp.$data.select_default_stage;
             srv_importer.save_papers(
                 papers_for_processing, 
                 stage,
                 function(data) {
-                    vw_uploader_endnote_xml.processing_papers(data);
+                    vw_uploader_endnote_xml.import_papers(data);
+                },
+                function(jqXHR, textStatus, errorThrown) {
+                    toast('A paper is not saved due to data issue')
                 }
             )
         } else {
@@ -354,6 +325,7 @@ var jarvis = {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 };
+
 $(document).ready(function() {
     jarvis.init();
 })

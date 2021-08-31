@@ -19,6 +19,7 @@ from .models import Note
 
 from . import db
 
+from lnma import util
 from lnma.util import get_year, pred_rct
 from lnma.util import get_nct_number
 from lnma import settings
@@ -630,7 +631,7 @@ def toggle_paper_tag(paper_id, tag):
     return True, paper
 
 
-def is_existed_paper(project_id, pid):
+def is_existed_paper(project_id, pid, title=None):
     '''Check if a pid exists
 
     By default check the pmid
@@ -641,7 +642,20 @@ def is_existed_paper(project_id, pid):
     )).first()
 
     if paper is None:
+        if title is not None:
+            # try to use the title
+            paper = Paper.query.filter(and_(
+                Paper.project_id == project_id,
+                Paper.title == title
+            )).first()
+
+            if paper is not None:
+                return True, paper
+
+        # which means not matter title is None or not,
+        # this paper doesn't exist
         return False, None
+
     else:
         return True, paper
 
@@ -816,7 +830,7 @@ def create_paper_if_not_exist(project_id, pid,
     ss_st=None, ss_pr=None, ss_rs=None, ss_ex=None, seq_num=None):
     '''A wrapper function for create_paper and is_existed_paper
     '''
-    is_existed, paper = is_existed_paper(project_id, pid)
+    is_existed, paper = is_existed_paper(project_id, pid, title)
     if is_existed:
         return is_existed, paper
     else:

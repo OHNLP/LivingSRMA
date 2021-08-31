@@ -80,6 +80,13 @@ tr.shown td.details-control {
 .col-first {
     font-size: .9em;
 }
+.first-col-text {
+    display: inline-block;
+    max-width: 120px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 .col-title {
     cursor: pointer;
 }
@@ -1390,22 +1397,28 @@ var tbjs_paperlist = {
     // 2021-05-23: change this column to pid
     _update_attr_first_column: function(d) {
         // return '<i class="fa fa-plus"></i>';
-        var ret = '';
+        var ret = '<div class="first-col-text">';
 
         // first, add the rct_id
         if (d.meta.hasOwnProperty('rct_id')) {
-            ret += '<a target="_blank" href="https://clinicaltrials.gov/ct2/show/'+d.meta.rct_id+'" title="Check this clinical trial">'+d.meta.rct_id+'</a> <br>';
+            ret += jarvis.get_link_nct(d.meta.rct_id) + '<br>';
         }
 
         // second, add the pmid
-        if (d.is_pmid) {
-            ret += 'PMID: <a target="_blank" href="https://pubmed.ncbi.nlm.nih.gov/'+d.pid+'" title="Check the detail in PubMed">' +
-                d.pid +
-            '</a> '
+        if (d.pid_type == 'MD5') {
+            if (d.meta.hasOwnProperty('doi') && d.meta.doi != '') {
+                ret += 'N/DOI: ' + jarvis.get_link_doi(d.meta.doi);
+            } else {
+                ret += 'NO ID';
+                
+            }
+        } else if (d.is_pmid) {
+            ret += 'PMID: ' + jarvis.get_link_pmid(d.pid);
         } else {
-            ret += 'E: ';
+            ret += '';
             ret += d.pid;
         }
+        ret += "</div>"
 
         return ret;
     },
@@ -2134,27 +2147,32 @@ var tbjs_paperlist = {
         // build html
         var html = [html_study_type];
         
-
         // now build the id
-        if (d.is_pmid) {
+        if (d.pid_type == 'MD5') {
+            if (d.meta.hasOwnProperty('doi') && d.meta.doi != '') {
+                html.push(
+                    'N/DOI' + ': ' + 
+                    jarvis.get_link_doi(d.meta.doi)
+                );
+            } else {
+                html.push(
+                    'NOID'
+                );
+            }
+        } else if (d.is_pmid) {
             html.push(
                 d.pid_type + ': ' + 
-                '<a target="_blank" href="https://pubmed.ncbi.nlm.nih.gov/'+d.pid+'" title="Check the detail in PubMed">' +
-                    d.pid +
-                '</a> '
+                jarvis.get_link_pmid(d.pid)
             );
         } else {
             html.push(
-                d.pid_type + ': ' + 
-                '<a href="javascript:void(0);" title="">' +
-                    d.pid +
-                '</a> '
+                d.pid_type + ': ' + d.pid
             );
         }
 
         // push the edit
         html.push(
-            '<a href="javascript:void(0);" onclick="tbjs_paperlist.set_pmid(\''+d.paper_id+'\', \''+d.pid+'\')" title="Click to update the PMID for this study">' +
+            '<a href="javascript:void(0);" class="ml-2" onclick="tbjs_paperlist.set_pmid(\''+d.paper_id+'\', \''+d.pid+'\')" title="Click to update the ID for this study">' +
                 '<i class="fa fa-edit"></i>' +
             '</a>'
         );
@@ -2284,7 +2302,7 @@ var tbjs_paperlist = {
             this.__get_span_pmid(d) + ' | ' +
             '<span>' + d.journal + '</span> | ' + 
             this.__get_span_pub_date(d) + ' | ' +
-            '<a href="javascript:void(0);" class="text-sm" onclick="tbjs_paperlist.sync_data_from_pubmed(\''+d.paper_id+'\', \''+d.pid+'\')"><i class="fa fa-sync"></i> Sync</a>';
+            this.__get_span_sync(d);
     },
 
     /**
@@ -2306,6 +2324,15 @@ var tbjs_paperlist = {
         }
 
         return html;
+    },
+
+    __get_span_sync: function(d) {
+        if (d.is_pmid) {
+            return '<a href="javascript:void(0);" class="text-sm" onclick="tbjs_paperlist.sync_data_from_pubmed(\''+d.paper_id+'\', \''+d.pid+'\')"><i class="fa fa-sync"></i> Sync</a>';
+
+        } else {
+            return '';
+        }
     },
 
     /**
@@ -2612,7 +2639,7 @@ var tbjs_paperlist = {
     },
 
     set_pmid: function(paper_id, pmid) {
-        var txt = jarvis.prompt('Please input the new PubMed ID(e.g., 12345678)', pmid);
+        var txt = jarvis.prompt('Please input the new PubMed ID (e.g., 12345678)', pmid);
 
         if (txt == null) {
             return;

@@ -24,7 +24,7 @@ def import_endnote_xml(full_fn, keystr):
         return False, None
 
     print('* parsing the input xml file ...')
-    papers = util.parse_endnote_exported_xml(full_fn)
+    papers, _ = util.parse_endnote_exported_xml(full_fn)
     if papers is None:
         print('* Not supported file format [%s]' % full_fn)
         return False, None

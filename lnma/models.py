@@ -473,6 +473,7 @@ class Paper(db.Model):
         if 'OVID' in pid_type or \
             'MEDLINE' in pid_type or \
             'PMID' in pid_type or \
+            'NLM' in pid_type or \
             'PUBMED' in pid_type:
 
             if util.is_valid_pmid(self.pid):

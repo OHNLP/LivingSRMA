@@ -4,6 +4,7 @@ import re
 import json
 import time
 import random
+import hashlib
 import datetime
 import requests
 
@@ -65,6 +66,23 @@ def mk_number_str(length=6):
     Make a random str of numbers
     '''
     return ''.join(random.choice('0123456789') for i in range(length))
+
+
+def mk_fake_pid():
+    '''
+    Make a fake pid for saving those studies without id
+    '''
+    return 'F%s' % mk_number_str(16)
+
+
+def mk_md5_by_title(title):
+    '''
+    Using hash to make a new pid
+    '''
+    _title = title.lower()
+    md5 = hashlib.md5()
+    md5.update(_title.encode('utf8'))
+    return md5.hexdigest()
 
 
 def mk_empty_extract_paper_data(is_selected=False):
@@ -218,7 +236,7 @@ def is_valid_pmid(pmid):
 
     Just a basic check
     '''
-    valid_pmids = re.findall('\d{8}', pmid, re.MULTILINE)
+    valid_pmids = re.findall('\d{6,8}', pmid, re.MULTILINE)
 
     if valid_pmids == []:
         return False
@@ -619,10 +637,16 @@ def parse_endnote_exported_xml(full_fn):
         return None
 
     papers = []
+    cnt = {
+        'has_pid': 0,
+        'no_pid_has_doi': 0,
+        'no_id': 0
+    }
     for record in tqdm(root.find('records').findall('record')):
         paper = {
             'pid': '',
-            'pid_type': '',
+            'pid_type': [],
+            'doi': '',
             'title': '',
             'authors': [],
             'abstract': '',
@@ -641,11 +665,16 @@ def parse_endnote_exported_xml(full_fn):
             if node.tag == 'accession-num':
                 paper['pid'] = ''.join(node.itertext())
             elif node.tag == 'remote-database-name':
-                paper['pid_type'] = ''.join(node.itertext())
+                paper['pid_type'].append(''.join(node.itertext()))
+            elif node.tag == 'remote-database-provider':
+                paper['pid_type'].append(''.join(node.itertext()))
+            
             elif node.tag == 'title':
                 paper['title'] = ''.join(node.itertext())
             elif node.tag == 'author':
                 paper['authors'].append(''.join(node.itertext()))
+            elif node.tag == 'electronic-resource-num':
+                paper['doi'] = ''.join(node.itertext())
 
             # the journal information
             elif node.tag == 'full-title':
@@ -676,20 +705,37 @@ def parse_endnote_exported_xml(full_fn):
                 paper['other'][node.tag] += list(node.itertext())
 
         # update the authors
-        paper['authors'] = '; '.join(paper['authors'])
+        paper['authors'] = check_paper_authors('; '.join(paper['authors']))
         paper['pub_date'] = check_paper_pub_date(' '.join(paper['pub_date']))
         paper['journal'] = check_paper_journal('; '.join(paper['journal']))
-        paper['pid_type'] = check_paper_pid_type(paper['pid_type'])
+        paper['pid_type'] = check_paper_pid_type(', '.join(paper['pid_type']))
 
         # if the pid is empty, just ignore this study
         paper['pid'] = check_paper_pid(paper['pid'])
+        paper['doi'] = check_paper_doi(paper['doi'])
         
         if paper['pid'] == '':
-            pass
+            paper['pid'] = mk_md5_by_title(
+                paper['title']
+            )
+            paper['pid_type'] = 'MD5'
+            
+            if paper['doi'] == '':
+                cnt['no_id'] += 1
+            else:
+                cnt['no_pid_has_doi'] += 1
+                
         else:
-            papers.append(paper)
+            cnt['has_pid'] += 1
+        
+        papers.append(paper)
 
-    return papers
+    print('* found %s has pid, %s paper using doi, %s no id' % (
+        cnt['has_pid'], cnt['no_pid_has_doi'],
+        cnt['no_id'],
+    ))
+
+    return papers, cnt
 
 
 def parse_ovid_exported_text_content(txt):
@@ -1025,10 +1071,13 @@ def is_pwmable(Et, Nt, Ec, Nc):
 ###############################################################################
 
 def check_paper_pid_type(pid_type):
-    '''make a short pid type for input
+    '''
+    make a short pid type for input
 
     The PID type sometimes is too long for saving, make a shorter version
     from the original text
+
+    Sometimes the pid_type is None, which means no avaiable data is provided
     '''
     if pid_type is None:
         return settings.PID_TYPE_NONE_TYPE
@@ -1055,6 +1104,21 @@ def check_paper_pid(pid):
         return pid[0:settings.PAPER_PID_MAX_LENGTH]
 
 
+def check_paper_doi(doi):
+    '''
+    Check the doi content
+    '''
+    if doi is None:
+        return ''
+
+    doi = doi.strip()
+
+    if len(doi) == 0:
+        return ''
+    else:
+        return doi[0:settings.PAPER_PID_MAX_LENGTH]
+    
+
 def check_paper_pub_date(pub_date):
     '''
     check the paper pub date for valid input
@@ -1067,6 +1131,20 @@ def check_paper_pub_date(pub_date):
         return ''
     else:
         return pub_date[0:settings.PAPER_PUB_DATE_MAX_LENGTH]
+    
+
+def check_paper_authors(authors):
+    '''
+    check the paper authors for valid input
+    '''
+    if authors is None:
+        return ''
+
+    authors = authors.strip()
+    if len(authors) == 0:
+        return ''
+    else:
+        return authors[0:settings.PAPER_AUTHORS_MAX_LENGTH]
 
 
 def check_paper_journal(journal):
@@ -1133,13 +1211,13 @@ def make_ss_cq_decision(d, r, c):
         'r': r,
         'c': c
     }
-    
+
 
 if __name__ == "__main__":
     fn = '/home/hehuan/Downloads/endnote_test.xml'
     fn = '/home/hehuan/Downloads/endnote_test_large.xml'
     fn = '/home/hehuan/Downloads/endnote_test_RCC.xml'
-    papers = parse_endnote_exported_xml(fn)
+    papers, _ = parse_endnote_exported_xml(fn)
     # pprint(papers)
     json.dump(papers, open('%s.json' % fn, 'w'), indent=2)
     print('* done!')

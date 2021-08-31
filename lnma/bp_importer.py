@@ -497,7 +497,7 @@ def upload_endnote_xml():
     project_id = request.form.get('project_id')
 
     # get the study list from the uploaded file
-    papers = util.parse_endnote_exported_xml(full_fn)
+    papers, cnt = util.parse_endnote_exported_xml(full_fn)
 
     if papers is None:
         # which means something wrong with the file
@@ -505,7 +505,8 @@ def upload_endnote_xml():
 
     ret = {
         "success": True,
-        "papers": papers
+        "papers": papers,
+        "cnt": cnt
     }
 
     return jsonify(ret)
@@ -547,23 +548,39 @@ def save_papers():
                 meta['xml'] = p['xml']
         else:
             meta['raw_type'] = None
+
+        # add the DOI when uploading a new study
+        if 'doi' in p:
+            meta['doi'] = p['doi']
+        else:
+            meta['doi'] = ''
+
         # create
-        is_exist, paper = dora.create_paper_if_not_exist_and_predict_rct(
-            project_id, 
-            p['pid'], 
-            p['pid_type'],
-            p['title'],
-            p['abstract'],
-            util.check_paper_pub_date(p['pub_date']),
-            p['authors'],
-            util.check_paper_journal(p['journal']),
-            meta,
-            ss_state.SS_ST_IMPORT_ENDNOTE_XML,
-            ss_pr,
-            ss_rs,
-            ss_ex,
-            None,
-        )
+        try:
+            is_exist, paper = dora.create_paper_if_not_exist_and_predict_rct(
+                project_id, 
+                p['pid'], 
+                p['pid_type'],
+                p['title'],
+                p['abstract'],
+                util.check_paper_pub_date(p['pub_date']),
+                util.check_paper_authors(p['authors']),
+                util.check_paper_journal(p['journal']),
+                meta,
+                ss_state.SS_ST_IMPORT_ENDNOTE_XML,
+                ss_pr,
+                ss_rs,
+                ss_ex,
+                None,
+            )
+        except Exception as err:
+            # give some feedback to frontend
+            ret['papers'].append({
+                'result': 'error',
+                'success': False,
+                'seq': p['seq']
+            })
+            continue
         
         # create a return obj
         _p = {
@@ -618,7 +635,7 @@ def upload_endnote_xml_and_save_papers():
     project_id = request.form.get('project_id')
 
     # get the study list from the uploaded file
-    papers = util.parse_endnote_exported_xml(full_fn)
+    papers, _ = util.parse_endnote_exported_xml(full_fn)
     if papers is None:
         # which means something wrong with the file
         return jsonify({'success': False, 'msg': 'Not supported file format'})
