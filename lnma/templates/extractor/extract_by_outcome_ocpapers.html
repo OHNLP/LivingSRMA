@@ -189,7 +189,7 @@
                 <tbody class="paper-list">
                     <tr class="paper-table-row" 
                         v-for="paper in papers"
-                        v-bind:id="'paper-table-row-' + paper.pid"
+                        v-bind:id="'paper-table-row-' + paper.paper_id"
                         v-show="(is_search_match(paper)) && (!only_show_selected || working_oc.data[paper.pid].is_selected)">
                         <td class="paper-table-body-td">
                             <input type="checkbox" 
@@ -217,7 +217,7 @@
 
                         <td class="paper-table-body-td">
                             <input type="checkbox" 
-                                v-bind:id="'paper-row-checked'+paper.pid"
+                                v-bind:id="'paper-row-checked'+paper.paper_id"
                                 v-model="working_oc.data[paper.pid].is_checked">
                         </td>
                         <td class="paper-table-body-td">
