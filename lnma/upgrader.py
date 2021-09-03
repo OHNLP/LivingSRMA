@@ -138,7 +138,7 @@ def upgrade_paper_ss_ex_label_for_user(keystr):
 
     print('* found %d papers for [%s] in current database' % (
         len(papers), keystr
-    )
+    ))
 
     cnt = {
         'total': 0
