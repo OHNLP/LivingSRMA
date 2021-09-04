@@ -259,6 +259,9 @@ tr.shown td.details-control {
 .cursor-pointer {
     cursor: pointer;
 }
+.form-radio-inline {
+    display: inline-block;
+}
 </style>
 {% endblock %}
 
@@ -621,7 +624,7 @@ Screener Overview
 
                     <div class="form-row">
                         
-                        <div class="form-group col mb-0">
+                        <div class="form-group col-8 mb-0">
                             <label class="mr-2">
                                 <i class="fa fa-filter"></i>
                                 Filters: 
@@ -661,10 +664,73 @@ Screener Overview
                                     Only
                                 </label>
                             </div>
+
+                            <div class="border-left pl-1 ml-2" 
+                                style="display: inline-block;">
+
+                                <div class="form-radio-inline mr-2">
+                                    <label for="">
+                                        Agreement: 
+                                    </label>
+                                </div>
+
+                                <div class="form-radio-inline mr-2">
+                                    <input type="radio" 
+                                        id="radio_rfc_all"
+                                        value="all" 
+                                        v-model="show_rfc_label"
+                                        v-on:change="on_change_rfc_filter"
+                                        name="radio_rfc" >
+                                    <label class="form-check-label"     
+                                        for="radio_rfc_all">
+                                        ALL
+                                    </label>
+                                </div>
+
+                                <div class="form-radio-inline mr-1">
+                                    <input type="radio" 
+                                        id="radio_rfc_agree" 
+                                        value="agree" 
+                                        v-model="show_rfc_label"
+                                        v-on:change="on_change_rfc_filter"
+                                        name="radio_rfc" >
+                                    <label class="form-check-label"     
+                                        for="radio_rfc_agree">
+                                        <i class="fa fa-check"></i>
+                                        Agreed
+                                    </label>
+                                </div>
+                                <div class="form-radio-inline mr-1">
+                                    <input type="radio" 
+                                        id="radio_rfc_disagree" 
+                                        value="disagree" 
+                                        v-on:change="on_change_rfc_filter"
+                                        v-model="show_rfc_label"
+                                        name="radio_rfc">
+                                    <label class="form-check-label" 
+                                        for="radio_rfc_disagree">
+                                        <i class="fa fa-times"></i>
+                                        Disagreed
+                                    </label>
+                                </div>
+                                <div class="form-radio-inline">
+                                    <input type="radio" 
+                                        id="radio_rfc_unconfirmed" 
+                                        value="unconfirmed" 
+                                        v-on:change="on_change_rfc_filter"
+                                        v-model="show_rfc_label"
+                                        name="radio_rfc">
+                                    <label class="form-check-label" 
+                                        for="radio_rfc_unconfirmed">
+                                        <i class="far fa-question-circle"></i>
+                                        Unconfirmed
+                                    </label>
+                                </div>
+                            </div>
     
                         </div>
 
-                        <div class="form-group col form-inline mb-0">
+                        <div class="form-group col-4 form-inline mb-0">
                             <label class="mr-2">
                                 <i class="fa fa-sort-amount-down"></i>
                                 Sort by: 
@@ -848,6 +914,8 @@ var tbjs_paperlist_topbar = {
 
         show_rct_label: '',
         show_ckl_label: '',
+
+        show_rfc_label: 'all',
     },
 
     vpp_methods: {
@@ -888,6 +956,11 @@ var tbjs_paperlist_topbar = {
         on_change_tag_filter: function(event) {
             // console.log('* tag filters:', event.target.checked);
             tbjs_paperlist.toggle_tag_filter();
+        },
+
+        on_change_rfc_filter: function(event) {
+            console.log('* change rfc filter:', event.target.value);
+            tbjs_paperlist.toggle_label_rfc();
         }
     },
 
@@ -1011,6 +1084,15 @@ var tbjs_paperlist = {
             searchable: true
         },
 
+        // hidden columns for searching
+        // hidden column 10
+        {
+            title: '',
+            data: 'rfc_agreement',
+            visible: false,
+            searchable: true
+        },
+
     ],
 
     sample: [
@@ -1052,13 +1134,16 @@ var tbjs_paperlist = {
             }
         );
 
-        // the search filter for no-agreement
+        // the search filter for agreement
         $.fn.dataTable.ext.search.push(
             function( settings, data, dataIndex ) {
-                var chk = $('input#checkbox_lbl_rfc').prop('checked');
+                // var chk = $('input#checkbox_lbl_rfc').prop('checked');
+                var chk = tbjs_paperlist_topbar.vpp.$data.show_rfc_label;
 
-                if (chk) {
-                    if (data[3].indexOf('Check')>=0) {
+                if (chk == 'all') {
+                    return true;
+                } else {
+                    if (data[10] == chk) {
                         return true;
                     } else {
                         return false;
@@ -1341,6 +1426,10 @@ var tbjs_paperlist = {
         // add the rct_id column for search
         d['paper_rct_id'] = this._update_attr_paper_rct_id(d);
 
+        // add the rfc column for search
+        d['rfc_agreement'] = this._update_attr_rfc_agreement(d);
+
+
         return d;
     },
 
@@ -1528,6 +1617,26 @@ var tbjs_paperlist = {
         if (d.meta.hasOwnProperty('rct_id')) {
             ret = d.meta.rct_id;
         }
+        return ret;
+    },
+
+    _update_attr_rfc_agreement: function(d) {
+        var ret = '';
+
+        if (d.ss_ex.hasOwnProperty('label')) {
+            if (d.ss_ex.label.hasOwnProperty('RFC')) {
+                ret = 'agree';
+
+            } else if (d.ss_ex.label.hasOwnProperty('DIS')) {
+                ret = 'disagree';
+
+            } else {
+                ret = 'unconfirmed';
+            }
+        } else {
+            ret = 'unconfirmed';
+        }
+
         return ret;
     },
 
@@ -2891,6 +3000,10 @@ var tbjs_paperlist = {
     },
 
     toggle_label_ckl: function() {
+        this.table.draw();
+    },
+
+    toggle_label_rfc: function() {
         this.table.draw();
     },
 
