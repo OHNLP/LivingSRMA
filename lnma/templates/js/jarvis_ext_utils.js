@@ -6,6 +6,9 @@
 // Extend the jarvis with basic utils
 Object.assign(jarvis, {
 
+    // debug mode, by default is false
+    debug: false,
+
     /**
      * Get the URL paramter value
      * @param {string} name URL paramter name

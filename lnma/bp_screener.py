@@ -13,7 +13,7 @@ from flask import url_for
 from flask_login import login_required
 from flask_login import current_user
 
-from lnma import dora, srv_paper
+from lnma import dora, srv_paper, srv_pub_prisma
 from lnma.models import *
 from lnma import ss_state
 from lnma.util import get_today_date_str
@@ -174,6 +174,19 @@ def get_stat():
 def get_prisma():
     project_id = request.args.get('project_id')
     prisma = dora.get_prisma(project_id)
+    ret = {
+        'success': True,
+        'prisma': prisma
+    }
+    return jsonify(ret)
+
+
+@bp.route('/get_prisma_by_cq_abbr')
+@login_required
+def get_prisma_by_cq_abbr():
+    project_id = request.args.get('project_id')
+    cq_abbr = request.args.get('cq_abbr')
+    prisma = srv_pub_prisma.get_prisma_by_cq(project_id, cq_abbr)
     ret = {
         'success': True,
         'prisma': prisma

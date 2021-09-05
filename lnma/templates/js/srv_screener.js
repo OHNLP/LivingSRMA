@@ -37,7 +37,9 @@ var srv_screener = {
 
         // for tag
         add_tag: '[[ url_for("screener.add_tag") ]]',
-        toggle_tag: '[[ url_for("screener.toggle_tag") ]]'
+        toggle_tag: '[[ url_for("screener.toggle_tag") ]]',
+
+        get_prisma_by_cq_abbr: '[[ url_for("screener.get_prisma_by_cq_abbr") ]]'
     },
 
     project: {},
@@ -107,6 +109,27 @@ var srv_screener = {
 
             na:  { name: 'Not decided', color: 'white' }
         }
+    },
+
+    get_prisma_by_cq_abbr: function(cq_abbr, callback) {
+        var project_id = Cookies.get('project_id');
+
+        $.ajax({
+            type: 'GET',
+            dataType: "json",
+            url: this.api_url.get_prisma_by_cq_abbr,
+            data: {
+                project_id: project_id,
+                cq_abbr: cq_abbr,
+                rnd: Math.random(),
+            },
+            cache: false,
+            success: callback,
+            error: function(jqXHR, textStatus, errorThrown) {
+                jarvis.toast('Something wrong when getting paper data. Refresh page and try later.', 'alert');
+                console.error(textStatus, errorThrown);
+            }
+        });
     },
 
     get_stage: function(paper) {

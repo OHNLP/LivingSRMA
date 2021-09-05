@@ -1034,6 +1034,7 @@ var tbjs_paperlist = {
         // column 2
         { 
             title: 'Date', 
+            className: 'col-date',
             width: 80,
             data: 'date_created_norm' 
         },
@@ -1041,6 +1042,7 @@ var tbjs_paperlist = {
         // column 3
         { 
             title: 'Labels', 
+            className: 'col-labels',
             width: 50,
             data: 'labels' 
         },
@@ -1276,6 +1278,15 @@ var tbjs_paperlist = {
                 });
             }
         });
+
+        // for debug
+        if (jarvis.debug) {
+            $(this.table_id + ' tbody').on('click', 'td.col-date', function() {
+                var tr = $(this).closest('tr');
+                var row = tbjs_paperlist.table.row( tr );
+                console.log(row.data());
+            });
+        }
 
         // add highlight event to the title
         this.table.on('draw', function () {
@@ -1600,6 +1611,10 @@ var tbjs_paperlist = {
     _update_attr_date_created_norm: function(d) {
         var ret = '';
         ret = dayjs(d.date_created).format('YYYY-MM-DD');
+        
+        // if (jarvis.debug) {
+        //     ret = '<a href="javascript:void(0);" onclick="">'+ret+'</a>';
+        // }
         return ret;
     },
 
@@ -3504,8 +3519,14 @@ var jarvis = {
     },
 
     project: [[ project_json_str|safe ]],
+    debug: false,
 
     init: function () {
+        var enable_debug_info = this.get_url_paramter('di');
+        if (enable_debug_info == 'yes') {
+            this.debug = true;
+        }
+
         tbjs_paperlist.init();
 
         // load stats
