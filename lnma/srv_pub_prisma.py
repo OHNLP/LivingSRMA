@@ -491,7 +491,7 @@ def get_stat_aef(project_id):
 
         { "stage": "e2",  "text": "Excluded by title" },
         { "stage": "e22", "text": "Excluded by abstract review" },
-        { "stage": "e3",  "text": "Studies not included in meta-analysis" },
+        { "stage": "e3",  "text": "Excluded by full-text review" },
 
         { "stage": "f1", "text": "Final number in qualitative synthesis (systematic review)" },
         { "stage": "f3", "text": "Final number in quantitative synthesis (meta-analysis)" }
