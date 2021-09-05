@@ -17,7 +17,7 @@ def get_prisma_by_cq(project_id, cq_abbr="default", do_include_papers=False):
     '''
     Get the PRISMA numbers from database
     '''
-    # project = dora.get_project_by_keystr(keystr)
+    project = dora.get_project(project_id)
     # project_id = project.project_id
 
     # get the living prisma from database
@@ -49,6 +49,8 @@ def get_prisma_by_cq(project_id, cq_abbr="default", do_include_papers=False):
         project_id,
         ss_state.SS_STAGE_INCLUDED_SR
     )
+    # using this to check whether a study is used in MA
+    f1_pids = []
     for paper in papers:
         rct_id = paper.get_rct_id()
 
@@ -56,6 +58,7 @@ def get_prisma_by_cq(project_id, cq_abbr="default", do_include_papers=False):
         if paper.ss_ex['ss_cq'][cq_abbr]['d'] == 'yes':
             # nothing 
             stat['f1']['pids'].append(paper.pid)
+            f1_pids.append(paper.pid)
         else:
             # this study is not included in this cq
             stat['f1']['count'] -= 1
@@ -106,6 +109,26 @@ def get_prisma_by_cq(project_id, cq_abbr="default", do_include_papers=False):
             study_dict[rct_id]['pids'].append(paper.pid)
 
     # update the f3 decisions
+    ocs = dora.get_extracts_by_keystr_and_cq(
+        project.keystr,
+        cq_abbr
+    )
+    # check each outcome
+    for oc in ocs:
+        # check papaer extracted in this outcome
+        for pid in oc.data:
+            p = oc.data[pid]
+
+            if p['is_selected']:
+                if pid in stat['f3']['pids']:
+                    # this pid has been counted
+                    pass
+                else:
+                    stat['f3']['count'] += 1
+                    stat['f3']['pids'].append(pid)
+            else:
+                # this paper is extracted but not selected yet.
+                pass
 
     # finally, we present this object
     ret = {
@@ -470,7 +493,8 @@ def get_stat_aef(project_id):
         { "stage": "e22", "text": "Excluded by abstract review" },
         { "stage": "e3",  "text": "Studies not included in meta-analysis" },
 
-        { "stage": "f1", "text": "Final number in qualitative synthesis (systematic review)" }
+        { "stage": "f1", "text": "Final number in qualitative synthesis (systematic review)" },
+        { "stage": "f3", "text": "Final number in quantitative synthesis (meta-analysis)" }
     ]
     sql = """
     select project_id,
@@ -485,7 +509,9 @@ def get_stat_aef(project_id):
         count(case when ss_rs = 'e22' then paper_id else null end) as e22,
         count(case when ss_rs = 'e3' then paper_id else null end) as e3,
         
-        count(case when ss_rs in ('f1', 'f3') then paper_id else null end) as f1
+        count(case when ss_rs in ('f1', 'f3') then paper_id else null end) as f1,
+        0 as f3
+        
 
     from papers
     where project_id = '{project_id}'
