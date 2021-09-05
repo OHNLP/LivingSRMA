@@ -262,6 +262,18 @@ tr.shown td.details-control {
 .form-radio-inline {
     display: inline-block;
 }
+.main-decision {
+    border: 1px solid transparent;
+    cursor: pointer;
+    margin: 1px;
+    display: inline-block;
+}
+.main-decision:hover {
+    border-bottom: 1px solid #999999;
+}
+.main-decision:active {
+    border-bottom: 1px solid #333333;
+}
 </style>
 {% endblock %}
 
@@ -666,7 +678,8 @@ Screener Overview
                             </div>
 
                             <div class="border-left pl-1 ml-2" 
-                                style="display: inline-block;">
+                                style="display: inline-block;"
+                                v-show="stage != 'unscreened' && stage != 'passed_title_not_fulltext'">
 
                                 <div class="form-radio-inline mr-2">
                                     <label for="">
@@ -1138,6 +1151,13 @@ var tbjs_paperlist = {
         $.fn.dataTable.ext.search.push(
             function( settings, data, dataIndex ) {
                 // var chk = $('input#checkbox_lbl_rfc').prop('checked');
+                var stage = tbjs_paperlist_topbar.vpp.$data.stage;
+                if (stage == 'unscreened' ||
+                    stage == 'passed_title_not_fulltext') {
+                    // for these two stages, just show the record
+                    return true;
+                }
+
                 var chk = tbjs_paperlist_topbar.vpp.$data.show_rfc_label;
 
                 if (chk == 'all') {
@@ -1535,8 +1555,13 @@ var tbjs_paperlist = {
 
         // the human input RCT result
         if (d.meta.pred[0].hasOwnProperty(srv_screener.ATTR_PRED_RCT_USR_FB)) {
-            var usr_fb = srv_screener.RCT_USER_FEEDBACK[d.meta.pred[0][srv_screener.ATTR_PRED_RCT_USR_FB]];
-            ret += '<span class="badge badge-pill badge-light">'+ usr_fb + '</span>';
+            if (d.meta.pred[0][srv_screener.ATTR_PRED_RCT_USR_FB] == '') {
+
+            } else {
+                var usr_fb = srv_screener.RCT_USER_FEEDBACK[d.meta.pred[0][srv_screener.ATTR_PRED_RCT_USR_FB]];
+
+                ret += '<span class="badge badge-pill badge-light">'+ usr_fb + '</span>';
+            }
         }
 
         return ret;
@@ -1695,7 +1720,33 @@ var tbjs_paperlist = {
         html +=  '<small>' + d.ss_ex.date_decided + '</small><br>';
 
         // the main decision
-        html += '<span style="color: ' + srv_screener.ss.rs[d.ss_rs].color + ';">' + srv_screener.ss.rs[d.ss_rs].name + '</span>';
+        var span_title = '';
+        var span_onclick = '';
+        var span_suffix = '';
+        if (d.ss_ex.hasOwnProperty('label')) {
+            if (d.ss_ex.label.hasOwnProperty('RFC')) {
+                span_title = 'Agreed decision. Click to withdraw agreement';
+                span_onclick = 'tbjs_paperlist.set_label_rfc(\''+d.paper_id+'\', \'no\', \'\')';
+                span_suffix = '<i class="fa fa-check"></i>';
+
+            } else if (d.ss_ex.label.hasOwnProperty('DIS')) {
+                span_title = 'Disagreed decision. Click to withdraw disagreement';
+                span_onclick = 'tbjs_paperlist.set_label_rfc(\''+d.paper_id+'\', \'no\', \'\')';
+                span_suffix = '<i class="fa fa-times"></i>';
+
+            } else {
+                span_title = 'Click to agree this decision';
+                span_onclick = 'tbjs_paperlist.set_label_rfc(\''+d.paper_id+'\', \'yes\', \'\')';
+                span_suffix = '<i class="far fa-question-circle"></i>';
+
+            }
+        } else {
+            span_title = 'Click to agree this decision';
+            span_onclick = 'tbjs_paperlist.set_label_rfc(\''+d.paper_id+'\', \'yes\', \'\')';
+            span_suffix = '<i class="far fa-question-circle"></i>';
+
+        }
+        html += '<span class="main-decision" style="color: ' + srv_screener.ss.rs[d.ss_rs].color + ';" title="'+span_title+'" onclick="'+span_onclick+'">' + srv_screener.ss.rs[d.ss_rs].name + ' ' + span_suffix +  '</span>';
 
         // the reason
         if (d.ss_ex.reason != '') {

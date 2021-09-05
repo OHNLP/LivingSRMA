@@ -502,14 +502,31 @@ for (var i = 0; i < __active_nav_links.length; i++) {
     $('#nav-link-' + active_nav_link).addClass('active');    
 }
 
-function toast(msg, type) {
+function toast(msg, type, title, timeout) {
     if (typeof(type) == 'undefined') {
       type = 'info';
     }
+    if (typeof(type) == 'undefined') {
+      type = 'info';
+    }
+    if (typeof(title) == 'undefined') {
+      title = '';
+    }
+    if (typeof(timeout) == 'undefined') {
+      timeout = 2000;
+    }
+    
     if (!toastr.hasOwnProperty(type)) {
       type = 'info';
     }
-    toastr[type](msg);
+
+    var options = {
+      "showDuration": "300",
+      "hideDuration": "300",
+      "timeOut": "" + timeout,
+      "extendedTimeOut": "300",
+    }
+    toastr[type](msg, title, options);
 }
 
 {% with messages = get_flashed_messages(with_categories=true) %}
