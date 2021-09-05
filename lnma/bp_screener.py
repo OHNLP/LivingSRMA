@@ -189,6 +189,8 @@ def get_prisma_by_cq_abbr():
     prisma = srv_pub_prisma.get_prisma_by_cq(project_id, cq_abbr)
     ret = {
         'success': True,
+        'project_id': project_id,
+        'cq_abbr': cq_abbr,
         'prisma': prisma
     }
     return jsonify(ret)

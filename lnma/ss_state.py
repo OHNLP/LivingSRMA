@@ -61,6 +61,8 @@ SS_RS2STAGE = {
 # ss reason
 SS_REASON_CHECKED_BY_ADMIN = "checked by admin"
 
+# ss reason for unknown
+SS_REASON_OTHER = 'Other'
 
 # for screener
 SS_STAGE_CONDITIONS = {

@@ -30,22 +30,57 @@ def get_prisma_by_cq(project_id, cq_abbr="default", do_include_papers=False):
     # the study dict is NCT based
     study_dict = {}
 
-    # fill the pmid
-    if do_include_papers:
-        papers = dora.get_papers_by_stage(
-            project_id,
-            ss_state.SS_STAGE_INCLUDED_SR
-        )
-        for paper in papers:
-            rct_id = paper.get_rct_id()
+    # update the e3 reasons
+    papers = dora.get_papers_by_stage(
+        project_id, 
+        ss_state.SS_STAGE_EXCLUDED_BY_FULLTEXT
+    )
+    stat['e3_by_reason'] = {}
+    for paper in papers:
+        reason = paper.ss_ex['reason']
+        if reason not in stat['e3_by_reason']:
+            stat['e3_by_reason'][reason] = {
+                'count': 0
+            }
+        stat['e3_by_reason'][reason]['count'] += 1
 
-            # add this paper to the paper dict
+    # update the f1 decisions
+    papers = dora.get_papers_by_stage(
+        project_id,
+        ss_state.SS_STAGE_INCLUDED_SR
+    )
+    for paper in papers:
+        rct_id = paper.get_rct_id()
+
+        # decide the cq level decision
+        if paper.ss_ex['ss_cq'][cq_abbr]['d'] == 'yes':
+            # nothing 
+            stat['f1']['pids'].append(paper.pid)
+        else:
+            # this study is not included in this cq
+            stat['f1']['count'] -= 1
+            stat['e3']['count'] += 1
+
+            # update the reason
+            reason = paper.ss_ex['ss_cq'][cq_abbr]['r']
+            if reason in stat['e3_by_reason']:
+                stat['e3_by_reason'][reason]['count'] += 1
+            else:
+                # this reason is NOT in existing reasons
+                if ss_state.SS_REASON_OTHER not in stat['e3_by_reason']:
+                    stat['e3_by_reason'][ss_state.SS_REASON_OTHER] = {
+                        'count': 0
+                    }
+                stat['e3_by_reason'][ss_state.SS_REASON_OTHER]['count'] += 1
+
+        # add this paper to the paper dict
+        if do_include_papers:
             paper_dict[paper.pid] = {
                 "authors": paper.authors,
                 "ctid": rct_id,
                 "date": paper.pub_date,
                 "journal": paper.journal,
-                "pmid": paper.pid,
+                "pid": paper.pid,
                 "pid_type": paper.pid_type,
                 "title": paper.title,
             }
@@ -57,20 +92,20 @@ def get_prisma_by_cq(project_id, cq_abbr="default", do_include_papers=False):
                     "ctid": rct_id,
                     "date": paper.pub_date,
                     "journal": paper.journal,
-                    "pmid": paper.pid,
+                    "pid": paper.pid,
                     "title": paper.title,
 
                     # the followings are for RCT
                     "study_id": rct_id,
-                    "latest_pmid": '',
-                    "pmids": [],
+                    "latest_pid": '',
+                    "pids": [],
                 }
-            
+        
             # then add this paper to the study list
-            study_dict[rct_id]['latest_pmid'] = paper.pid
-            study_dict[rct_id]['pmids'].append(paper.pid)
-    else:
-        papers = []
+            study_dict[rct_id]['latest_pid'] = paper.pid
+            study_dict[rct_id]['pids'].append(paper.pid)
+
+    # update the f3 decisions
 
     # finally, we present this object
     ret = {
@@ -465,7 +500,8 @@ def get_stat_aef(project_id):
         }
         for k in stages:
             stat[k['stage']] = {
-                'count': 0
+                'count': 0,
+                'pids': []
             }
 
         return stat
@@ -480,11 +516,16 @@ def get_stat_aef(project_id):
     #     }
     for k in stages:
         stat[k['stage']] = {
-            'count': r[k['stage']]
+            'count': r[k['stage']],
+            'pids': []
         }
 
     return stat
     
+
+#####################################################################
+# Deprecated functions
+#####################################################################
 
 def get_prisma_abeuf(project_id):
     '''
