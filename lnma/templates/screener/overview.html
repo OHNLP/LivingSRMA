@@ -47,6 +47,17 @@ iframe {
     z-index: 9999;
     border: 3px solid #efefef;
 }
+#pan_prisma {
+    position: fixed;
+    top: 10px;
+    left: 100px;
+    width: 1100px;
+    min-height: 450px;
+    padding: 42px 5px 5px 5px;
+    background-color: rgba(249, 249, 250, 1);;
+    z-index: 9999;
+    border: 3px solid #efefef;
+}
 #pan_datasync {
     position: fixed;
     top: 10px;
@@ -259,6 +270,9 @@ tr.shown td.details-control {
 .cursor-pointer {
     cursor: pointer;
 }
+.hoverable:hover {
+    background-color: #79e9fa;
+}
 .form-radio-inline {
     display: inline-block;
 }
@@ -273,6 +287,10 @@ tr.shown td.details-control {
 }
 .main-decision:active {
     border-bottom: 1px solid #333333;
+}
+#pan_prisma_box {
+    width: 100%;
+    height: 400px;
 }
 </style>
 {% endblock %}
@@ -301,6 +319,43 @@ Screener Overview
     <iframe id="ifr_pdfviewer" src="/pdfworker/view_pdf" 
         width="100%" scrolling="yes"
         frameborder="0"></iframe>
+</div>
+
+
+<div id="pan_prisma" class="shadow-sm" :class="{offscreen:is_hide}">
+    <div style="position: absolute; left: 5px; top: 5px;" class="d-flex flex-row">
+        <div class="mt-1 mr-5 ml-1">
+            <a href="javascript:void(0);"
+                v-on:click="toggle();">
+                <i class="fa fa-close"></i>
+            </a>
+        </div>
+
+        <div id="pan_prisma_btns" class="d-flex flex-row">
+            <button>
+                save
+            </button>
+        </div>
+    </div>
+    <div class="d-flex flex-row" style="padding-left: 5px;">
+        <div class="d-flex flex-column border-right mr-1 pr-3">
+            <div v-for="cq in project.settings.clinical_questions"
+                v-bind:class="{'list-group-item-selected': cq_abbr == cq.abbr}"
+                v-on:click="change_cq(cq.abbr)"
+                style="width: 200px"
+                class="list-cq-name cursor-pointer hoverable mb-1">
+                {{ cq.name }}
+            </div>
+        </div>
+
+        <div class="w-100">
+            <div id="pan_prisma_box">
+                <div id="pan_prisma_box_chart" class="w-100 h-100">
+                
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 
@@ -576,19 +631,27 @@ Screener Overview
                     <i class="fa fa-cog"></i>
                     Screener Tools
                 </h5>
-                <div class="btn-group mb-1" role="group" aria-label="Basic example">
+                <div class="btn-group mb-1" role="group" >
                     <button id="btn_update_original_followup" class="btn btn-default"
                         onclick="jarvis.sort_rct_seq();">
-                        <i class="fa fa-project-diagram"></i>
+                        <i class="fa fa-folder"></i>
                         Update Original/Followup
                     </button>
                 </div>
 
-                <div class="btn-group" role="group" aria-label="Basic example">
+                <div class="btn-group mb-1" role="group" >
                     <button class="btn btn-default"
                         onclick="tbjs_paperlist.show_export_panel();">
                         <i class="fa fa-file-export"></i>
                         Export Reference List
+                    </button>
+                </div>
+
+                <div class="btn-group" role="group" >
+                    <button class="btn btn-default"
+                        onclick="pan_prisma.vpp.toggle();">
+                        <i class="fa fa-project-diagram"></i>
+                        Show PRISMA
                     </button>
                 </div>
             </div>
@@ -826,12 +889,18 @@ Screener Overview
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/searchpanes/1.2.0/css/searchPanes.dataTables.min.css">
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.3.1/css/select.dataTables.min.css"> -->
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.4.0/clipboard.min.js" integrity="sha512-iJh0F10blr9SC3d0Ow1ZKHi9kt12NYa+ISlmCdlCdNZzFwjH1JppRTeAnypvUez01HroZhAmP4ro4AvZ/rG0UQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<!-- clipboard.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.4.0/clipboard.min.js"></script>
+
+<!-- echarts for the prisma -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.2.0/echarts.min.js"></script>
 
 <!-- my scripts -->
 <script>
 
 {% include 'js/srv_pubmed.js' %}
+
+{% include 'js/fgmk_prisma_sankey.js' %}
 
 {% include 'js/srv_screener.js' %}
 srv_screener.project = [[ project_json_str|safe ]];
@@ -3210,6 +3279,58 @@ var pan_iecriteria = {
 };
 
 
+var pan_prisma = {
+    vpp_id: '#pan_prisma',
+    vpp: null,
+    fig: null,
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                is_hide: true,
+                project: srv_screener.project,
+                cq_abbr: null,
+                prisma: null
+            },
+            methods: {
+                toggle: function() {
+                    this.is_hide = !this.is_hide;
+                },
+
+                change_cq: function(cq_abbr) {
+                    this.cq_abbr = cq_abbr;
+
+                    // send request to get the data
+                    srv_screener.get_prisma_by_cq_abbr(
+                        cq_abbr,
+                        function(data) {
+                            console.log("* got prisma data", data);
+                            pan_prisma.vpp.$data.prisma = data.prisma;
+
+                            // update the figure
+                            if (pan_prisma.fig != null) {
+                                pan_prisma.fig.chart.clear();
+                                pan_prisma.fig = null;
+                            }
+                            // $('#pan_prisma_box_chart').html('');
+
+                            pan_prisma.fig = fgmk_prisma_sankey.make_fig(
+                                'pan_prisma_box',
+                                data.prisma
+                            );
+                        }
+                    );
+                }
+            },
+            mounted: function() {
+
+            }
+        });
+    }
+}
+
+
 var pan_pdfviewer = {
     vpp_id: '#pan_pdfviewer',
     vpp: null,
@@ -3554,6 +3675,9 @@ var jarvis = {
 
         // load the sync panel
         pan_datasync.init();
+
+        // load the prisma panel
+        pan_prisma.init();
 
         // bind resize event
         this.bind_resize_event();

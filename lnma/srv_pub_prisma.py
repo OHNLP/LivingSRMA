@@ -40,9 +40,9 @@ def get_prisma_by_cq(project_id, cq_abbr="default", do_include_papers=False):
         reason = paper.ss_ex['reason']
         if reason not in stat['e3_by_reason']:
             stat['e3_by_reason'][reason] = {
-                'count': 0
+                'n': 0
             }
-        stat['e3_by_reason'][reason]['count'] += 1
+        stat['e3_by_reason'][reason]['n'] += 1
 
     # update the f1 decisions
     papers = dora.get_papers_by_stage(
@@ -61,20 +61,20 @@ def get_prisma_by_cq(project_id, cq_abbr="default", do_include_papers=False):
             f1_pids.append(paper.pid)
         else:
             # this study is not included in this cq
-            stat['f1']['count'] -= 1
-            stat['e3']['count'] += 1
+            stat['f1']['n'] -= 1
+            stat['e3']['n'] += 1
 
             # update the reason
             reason = paper.ss_ex['ss_cq'][cq_abbr]['r']
             if reason in stat['e3_by_reason']:
-                stat['e3_by_reason'][reason]['count'] += 1
+                stat['e3_by_reason'][reason]['n'] += 1
             else:
                 # this reason is NOT in existing reasons
                 if ss_state.SS_REASON_OTHER not in stat['e3_by_reason']:
                     stat['e3_by_reason'][ss_state.SS_REASON_OTHER] = {
-                        'count': 0
+                        'n': 0
                     }
-                stat['e3_by_reason'][ss_state.SS_REASON_OTHER]['count'] += 1
+                stat['e3_by_reason'][ss_state.SS_REASON_OTHER]['n'] += 1
 
         # add this paper to the paper dict
         if do_include_papers:
@@ -124,12 +124,65 @@ def get_prisma_by_cq(project_id, cq_abbr="default", do_include_papers=False):
                     # this pid has been counted
                     pass
                 else:
-                    stat['f3']['count'] += 1
+                    stat['f3']['n'] += 1
                     stat['f3']['pids'].append(pid)
             else:
                 # this paper is extracted but not selected yet.
                 pass
 
+    #######################################################
+    # add other stages
+    #######################################################
+    # the s0
+    stat['s0'] = {
+        'n': stat['a1']['n'],
+        'text': 'Search',
+        'pids': []
+    }
+    # use the given s0 as the number
+    if 'prisma' in project.settings and 's0' in project.settings['prisma']:
+        stat['s0']['n'] = project.settings['prisma']['s0']['n']
+
+    stat['e1'] = {
+        'n': stat['s0']['n'] - stat['a1']['n'],
+        'text': 'Excluded by duplicates',
+        'pids': []
+    }
+    stat['all'] = {
+        'n': stat['a1']['n'] + 
+             stat['a2']['n'],
+        'text': 'Records for screening',
+        'pids': []
+    }
+    stat['uns'] = {
+        'n': stat['ax_na_na']['n'],
+        'text': 'Unscreened',
+        'pids': []
+    }
+    stat['fte'] = {
+        'n': stat['a1']['n'] + 
+                 stat['a2']['n'] -
+                 stat['e2']['n'] - 
+                 stat['e22']['n'] - 
+                 stat['uns']['n'],
+        'text': 'Eligible for full-text review',
+        'pids': []
+    }
+    stat['unr'] = {
+        'n': stat['ax_p2_na']['n'],
+        'text': 'Reviewing full text',
+        'pids': []
+    }
+    stat['f3n'] = {
+        'n': stat['f1']['n'] -
+                 stat['f3']['n'],
+        'text': 'Not in MA',
+        'pids': []
+    }
+
+    # remove the stages
+    del stat['stages']
+    
     # finally, we present this object
     ret = {
         "stat": stat,
@@ -526,7 +579,8 @@ def get_stat_aef(project_id):
         }
         for k in stages:
             stat[k['stage']] = {
-                'count': 0,
+                'n': 0,
+                'text': k['text'],
                 'pids': []
             }
 
@@ -536,13 +590,10 @@ def get_stat_aef(project_id):
     stat = {
         'stages': stages
     }
-    # for k in r.keys():
-    #     stat[k] = {
-    #         'count': r[k]
-    #     }
     for k in stages:
         stat[k['stage']] = {
-            'count': r[k['stage']],
+            'n': r[k['stage']],
+            'text': k['text'],
             'pids': []
         }
 
