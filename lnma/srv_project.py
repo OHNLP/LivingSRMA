@@ -10,6 +10,7 @@ from lnma import settings
 from lnma import util
 from lnma import dora
 from lnma import ss_state
+from lnma.models import *
 
 from . import db
 
@@ -26,6 +27,29 @@ def get_project_latest_stat_by_keystr(keystr):
     result = get_project_latest_stat(project.project_id)
 
     return result
+
+
+def delete_all_papers_by_keystr(keystr):
+    '''
+    Delete all papers in a project
+    '''
+    project = dora.get_project_by_keystr(keystr)
+
+    if project is None:
+        # what???
+        return None
+
+    project_id = project.project_id
+
+    # first, delete those paper under this project
+    Paper.query.filter_by(
+        project_id=project_id
+    ).delete()
+
+    # commit
+    db.session.commit()
+
+    return True
 
 
 def get_project_latest_stat(project_id):
@@ -111,3 +135,26 @@ def update_project_papers_ss_cq_by_keystr(keystr, decision):
     ))
 
     return project
+
+
+def delete_all_extracts_by_keystr(keystr):
+    '''
+    Delete all extract by a given project keystr
+    '''
+    project = dora.get_project_by_keystr(keystr)
+
+    if project is None:
+        # what???
+        return None
+
+    project_id = project.project_id
+
+    # first, delete those extracts under this project
+    Extract.query.filter_by(
+        project_id=project_id
+    ).delete()
+
+    # commit
+    db.session.commit()
+
+    return True

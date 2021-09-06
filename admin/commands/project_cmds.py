@@ -7,7 +7,7 @@ from nubia import command, argument, context
 from prettytable import PrettyTable
 
 # app settings
-from lnma import db, create_app, srv_paper
+from lnma import db, create_app, srv_paper, srv_project
 from lnma.models import *
 from lnma import dora
 from lnma import ss_state
@@ -47,15 +47,31 @@ class Project:
     @command
     @argument("keystr", type=str, description="The keystr for a project")
     @argument("are_you_sure", type=str, description="yes for final confirmation")
-    def delete_all_extracts(self, keystr:str, are_you_sure:str):
+    def delete_all_papers(self, keystr:str, are_you_sure:str):
         '''
-        Delete all extracts for a project
+        Delete all papers in a project
         '''
         if are_you_sure != 'yes':
             print('* deletion cancelled')
             return 
 
-        dora.delete_all_extracts_by_keystr(keystr)
+        srv_project.delete_all_papers_by_keystr(keystr)
+
+        print('* deleted all papers!')
+
+
+    @command
+    @argument("keystr", type=str, description="The keystr for a project")
+    @argument("are_you_sure", type=str, description="yes for final confirmation")
+    def delete_all_extracts(self, keystr:str, are_you_sure:str):
+        '''
+        Delete all extracts in a project
+        '''
+        if are_you_sure != 'yes':
+            print('* deletion cancelled')
+            return 
+
+        srv_project.delete_all_extracts_by_keystr(keystr)
 
         print('* deleted all extracts!')
 

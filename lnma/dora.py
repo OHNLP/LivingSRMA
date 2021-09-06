@@ -1968,29 +1968,6 @@ def get_extract_by_keystr_and_abbr(keystr, abbr):
     return extract
 
 
-def delete_all_extracts_by_keystr(keystr):
-    '''
-    Delete all extract by a given project keystr
-    '''
-    project = get_project_by_keystr(keystr)
-
-    if project is None:
-        # what???
-        return None
-
-    project_id = project.project_id
-
-    # first, delete those extracts under this project
-    Extract.query.filter_by(
-        project_id=project_id
-    ).delete()
-
-    # commit
-    db.session.commit()
-
-    return True
-
-
 ###############################################################################
 # Piece Related Functions
 ###############################################################################
