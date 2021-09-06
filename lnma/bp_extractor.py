@@ -183,12 +183,19 @@ def get_paper():
     pid = request.args.get('pid')
 
     paper = dora.get_paper_by_project_id_and_pid(project_id, pid)
-    json_paper = paper.as_dict()
 
-    ret = {
-        'success': True,
-        'paper': json_paper
-    }
+    if paper is None:
+        ret = {
+            'success': False,
+            'paper': None
+        }
+    else:
+        json_paper = paper.as_dict()
+
+        ret = {
+            'success': True,
+            'paper': json_paper
+        }
     return jsonify(ret)
 
 

@@ -190,7 +190,11 @@ var pan_collector = {
         srv_extractor.get_paper(
             pid, 
             function(data) {
-                pan_collector.update(data.paper);
+                if (data.success) {
+                    pan_collector.update(data.paper);
+                } else {
+                    toast('Error when getting paper, try later.', 'error');
+                }
             }
         );
     },
