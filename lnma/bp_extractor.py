@@ -6,6 +6,8 @@ from re import template
 import string
 from collections import OrderedDict
 
+from pprint import pprint
+
 import pandas as pd
 
 from flask import request
@@ -905,15 +907,23 @@ def import_itable_from_xls(keystr):
     
     project_id = project.project_id
     oc_type = 'itable'
-    abbr = 'itable'
+
+    # in fact, due to the update the cq, this is also needed to be updated
+    cq_abbr = 'default'
 
     # get the exisiting extracts
-    extract = dora.get_extract_by_project_id_and_abbr(
-        project.project_id, abbr
+    # extract = dora.get_extract_by_project_id_and_abbr(
+    #     project.project_id, abbr
+    # )
+    extract = dora.get_itable_by_project_id_and_cq(
+        project_id, 
+        cq_abbr
     )
+    abbr = extract.abbr
 
     # if not exist, create a new one which is empty
     if extract is None:
+        abbr = util.mk_abbr()
         extract = dora.create_extract(
             project_id, oc_type, abbr, 
             settings.OC_TYPE_TPL['itable']['default'], 
@@ -932,6 +942,7 @@ def import_itable_from_xls(keystr):
     meta['filters'] = filters
 
     # update the extract
+    # pprint(filters)
     itable = dora.update_extract_meta_and_data(
         project_id, oc_type, abbr, meta, data
     )
@@ -1266,7 +1277,10 @@ def get_itable_filters_from_xls(keystr):
         display_name = col
         tmp = dft[col].tolist()
         # the first line of dft is the column name / attribute name
-        ft_attr = tmp[0]
+        ft_attr = '%s' % tmp[0]
+
+        if ft_attr == 'nan': continue
+
         # the second line of dft is the filter type: radio or select
         ft_type = ("%s" % tmp[1]).strip().lower()
         # get those rows not NaN, which means containing option
@@ -1409,7 +1423,7 @@ def import_softable_pma_from_xls_for_IO(fn, group='primary'):
         ae_meta = json.loads(json.dumps(settings.OC_TYPE_TPL['pwma']['default']))
         
         # update the abbr
-        ae_meta['abbr'] = util.mk_oc_abbr()
+        ae_meta['abbr'] = util.oc_abbr()
 
         # update the cate
         ae_meta['category'] = ae_dict[ae_name]
