@@ -357,7 +357,9 @@ var srv_screener = {
         );
     },
 
-    set_ss_cq_exclude_reason: function(paper_id, cq_abbr, ss_cq, reason, callback) {
+    set_ss_cq_exclude_reason: function(
+        paper_id, cq_abbr, ss_cq, reason, callback
+    ) {
         // send request to backend
         var project_id = Cookies.get('project_id');
         

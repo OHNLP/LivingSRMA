@@ -901,10 +901,7 @@ def import_itable_from_xls(keystr):
     #     project = dora.get_project(project_id)
 
     if project is None:
-        return jsonify({
-            'success': False,
-            'msg': 'NO SUCH PROJECT %s' % keystr
-        })
+        return None
     
     project_id = project.project_id
     oc_type = 'itable'
@@ -973,6 +970,7 @@ def get_itable_from_itable_data_xls(keystr):
 
     cols = df.columns
     n_cols = len(df.columns)
+    cols_lower = [ _.lower() for _ in cols ]
 
     # a pmid based dictionary
     data = {}
@@ -991,7 +989,10 @@ def get_itable_from_itable_data_xls(keystr):
         pmid = pmid.strip()
 
         # get the NCT
-        nct8 = row['Trial registration #'].strip()
+        if 'Trial registration #' in row:
+            nct8 = row['Trial registration #'].strip()
+        else:
+            nct8 = ''
 
         # get the decision
         if 'Included in MA' in row:

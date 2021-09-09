@@ -140,9 +140,14 @@ class Project:
 
         itable = bp_extractor.import_itable_from_xls(keystr)
 
-        print('* imported %s studies in itable!' % (
-            len(itable.data)
-        ))
+        if itable is None:
+            print('* something wrong when importing %s' % (
+                keystr
+            ))
+        else:
+            print('* imported %s studies in itable!' % (
+                len(itable.data)
+            ))
     
 
     @command

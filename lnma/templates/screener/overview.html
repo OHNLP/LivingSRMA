@@ -645,13 +645,13 @@ Screener Overview
                     </button>
                 </div>
 
-                <!-- <div class="btn-group" role="group" >
+                <div class="btn-group" role="group" >
                     <button class="btn btn-default"
                         onclick="pan_prisma.vpp.toggle();">
                         <i class="fa fa-project-diagram"></i>
                         Show PRISMA
                     </button>
-                </div> -->
+                </div>
             </div>
             <!-- / left pane -->
 
@@ -2525,8 +2525,8 @@ var tbjs_paperlist = {
                         '<span title="'+cq.name+'" for="chk_p_'+d.paper_id+'_cq_'+i+'">',
                             cq.name,
                         '</span>',
-                        // '<br>',
-                        // this.__get_select_fulltext_exclusion_reasons(d, d.ss_ex.ss_cq[cq.abbr].r, cq.abbr, onchange),
+                        '<br>',
+                        this.__get_select_fulltext_exclusion_reasons(d, d.ss_ex.ss_cq[cq.abbr].r, cq.abbr, onchange),
                     '</div>'
                 );
             }
@@ -2961,28 +2961,31 @@ var tbjs_paperlist = {
     },
 
     set_ss_cq_exclude_reason: function(paper_id, cq_abbr, event) {
-        return;
+        // return;
         // console.log(event);
         var reason = event.target.value;
-        srv_screener.set_ss_cq_exclude_reason(paper_id, cq_abbr, 'no', reason,
-        function(data) {
-            var paper = data.paper;
 
-            if (data.success) {
-                // update the tag list UI
-                $('#tb-tr-cqs-' + paper.paper_id).replaceWith(
-                    tbjs_paperlist.__get_tr_cqs(paper)
-                );
+        srv_screener.set_ss_cq_exclude_reason(
+            paper_id, cq_abbr, 'no', reason,
+            function(data) {
+                var paper = data.paper;
 
-                // update the tb data list
-                tbjs_paperlist.update_data_by_paper(paper);
+                if (data.success) {
+                    // update the tag list UI
+                    $('#tb-tr-cqs-' + paper.paper_id).replaceWith(
+                        tbjs_paperlist.__get_tr_cqs(paper)
+                    );
 
-                // show this good news!
-                jarvis.toast('Updated the exclusion reason for paper ' + paper.seq_num + ' | ' + paper.short_name);
-            } else {
-                jarvis.toast('Failed when setting exclusion reason for this study, try again later or contact administrator', 'warning');
+                    // update the tb data list
+                    tbjs_paperlist.update_data_by_paper(paper);
+
+                    // show this good news!
+                    jarvis.toast('Updated the exclusion reason for paper ' + paper.seq_num + ' | ' + paper.short_name);
+                } else {
+                    jarvis.toast('Failed when setting exclusion reason for this study, try again later or contact administrator', 'warning');
+                }
             }
-        });
+        );
     },
     
     set_unscreened: function(paper_id) {
