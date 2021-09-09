@@ -1268,7 +1268,7 @@ def get_itable_filters_from_xls(keystr):
         # the first line of dft is the column name / attribute name
         ft_attr = tmp[0]
         # the second line of dft is the filter type: radio or select
-        ft_type = tmp[1].strip().lower()
+        ft_type = ("%s" % tmp[1]).strip().lower()
         # get those rows not NaN, which means containing option
         ft_opts = dft[col][~dft[col].isna()].tolist()[3:]
         # get the default label
