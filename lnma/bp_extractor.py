@@ -1272,7 +1272,7 @@ def get_itable_filters_from_xls(keystr):
         # get those rows not NaN, which means containing option
         ft_opts = dft[col][~dft[col].isna()].tolist()[3:]
         # get the default label
-        ft_def_opt_label = tmp[2].strip()
+        ft_def_opt_label = ("%s" % tmp[2]).strip()
 
         # set the default option
         ft_item = {
