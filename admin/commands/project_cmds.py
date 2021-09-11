@@ -28,6 +28,42 @@ class Project:
     """
 
     @command
+    @argument("keystr", type=str, description="The keystr for a project")
+    @argument("new_keystr", type=str, description="The title for a project")
+    def set_keystr(self, keystr:str, new_keystr:str):
+        '''
+        Set new keystr for a project
+        '''
+        if new_keystr.strip() == '':
+            print('* new_keystr can not be empty')
+            return 
+
+        srv_project.set_project_keystr_by_keystr(keystr, new_keystr)
+
+        print('* Set the new_keystr to %s -> %s' % (
+            keystr, new_keystr
+        ))
+
+
+    @command
+    @argument("keystr", type=str, description="The keystr for a project")
+    @argument("title", type=str, description="The title for a project")
+    def set_title(self, keystr:str, title:str):
+        '''
+        Set title for a project
+        '''
+        if title.strip() == '':
+            print('* Title can not be empty')
+            return 
+
+        srv_project.set_project_title_by_keystr(keystr, title)
+
+        print('* Set the title to %s: %s' % (
+            keystr, title
+        ))
+    
+
+    @command
     def list(self):
         '''
         List the projects in the system

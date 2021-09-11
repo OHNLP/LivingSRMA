@@ -294,7 +294,8 @@ def delete_project_and_papers(project_id):
 
 
 def is_existed_project(project_id):
-    '''Check if a project exists
+    '''
+    Check if a project exists
     '''
     project = Project.query.filter(Project.project_id==project_id).first()
 

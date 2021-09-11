@@ -158,3 +158,57 @@ def delete_all_extracts_by_keystr(keystr):
     db.session.commit()
 
     return True
+
+
+def set_project_title_by_keystr(keystr, title):
+    '''
+    Set the title for a given project
+    '''
+    project = dora.get_project_by_keystr(keystr)
+    return set_project_title(
+        project.project_id,
+        title
+    )
+
+
+def set_project_title(project_id, title):
+    '''
+    Set the title for a given project
+    '''
+    project = dora.get_project(project_id)
+    if project is None:
+        return False, None
+
+    project.title = title
+
+    db.session.add(project)
+    db.session.commit()
+
+    return True, project
+
+
+def set_project_keystr(project_id, keystr):
+    '''
+    Set the keystr
+    '''
+    project = dora.get_project(project_id)
+    if project is None:
+        return False, None
+
+    project.keystr = keystr
+
+    db.session.add(project)
+    db.session.commit()
+
+    return True, project
+
+
+def set_project_keystr_by_keystr(keystr, new_keystr):
+    '''
+    Set the new_keystr for a given project
+    '''
+    project = dora.get_project_by_keystr(keystr)
+    return set_project_keystr(
+        project.project_id,
+        new_keystr
+    )
