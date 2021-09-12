@@ -665,7 +665,8 @@ def create_paper(project_id, pid,
     pid_type='pmid', title=None, abstract=None,
     pub_date=None, authors=None, journal=None, meta=None,
     ss_st=None, ss_pr=None, ss_rs=None, ss_ex=None, seq_num=None):
-    """Create a paper object, 
+    """
+    Create a paper object, 
 
     By default, the pmid. 
     Please make sure the input pmid is NOT exist
@@ -701,7 +702,7 @@ def create_paper(project_id, pid,
 
     # ss_ex is an extend attribute for each record
     ss_ex = {
-        'label': {}
+        'label': {},
     } if ss_ex is None else ss_ex
 
     date_created = datetime.datetime.now()
@@ -758,7 +759,7 @@ def update_paper_rct_result_by_keystr_and_seq_num(keystr, seq_num):
     Update the RCT detection result
     '''
     paper = get_paper_by_keystr_and_seq(keystr, seq_num)
-    paper = _update_paper_rct_result(paper)
+    paper = update_paper_rct_result(paper)
 
     return paper
 
@@ -767,13 +768,14 @@ def update_paper_rct_result(project_id, pid):
     '''Update the RCT detection result
     '''
     paper = get_paper_by_project_id_and_pid(project_id, pid)
-    paper = _update_paper_rct_result(paper)
+    paper = update_paper_rct_result(paper)
 
     return paper
 
 
-def _update_paper_rct_result(paper):
-    '''The internal function of updating RCT result
+def update_paper_rct_result(paper):
+    '''
+    The function of updating RCT result
     '''
     # TODO catch exception
     pred = pred_rct(paper.title, paper.abstract)
@@ -858,7 +860,7 @@ def create_paper_if_not_exist_and_predict_rct(project_id, pid,
         return is_existed, paper
     else:
         # update the RCT for this paper by the internal function
-        paper = _update_paper_rct_result(paper)
+        paper = update_paper_rct_result(paper)
         return is_existed, paper
 
 

@@ -237,7 +237,7 @@ class Paper(db.Model):
     """
     Data model for papers
 
-    The `meta` could contain a lot things:
+    The `meta` could contain a lot of things:
     {
         all_rct_ids: Array(1)
         paper: Object
@@ -658,6 +658,17 @@ class Paper(db.Model):
         )
 
         return xml
+
+
+    def from_pubmed_record(self, pubmed_record):
+        '''
+        Update this item from a pubmed record
+        '''
+        self.title = pubmed_record['title']
+        self.abstract = pubmed_record['abstract']
+        self.pub_date = pubmed_record['sortpubdate']
+        self.authors = ', '.join([ a['name'] for a in pubmed_record['authors'] ])
+        self.journal = pubmed_record['source']
 
 
     def __repr__(self):
