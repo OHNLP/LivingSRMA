@@ -1,6 +1,7 @@
 import os
 import json
 import math
+import copy
 import random
 from re import template
 import string
@@ -855,7 +856,8 @@ def import_itable():
     3. filters
     '''
     prj = request.args.get('prj')
-    itable = import_itable_from_xls(prj)
+    cq = request.args.get('cq')
+    itable = import_itable_from_xls(prj, cq)
 
     # build the return obj
     ret = {
@@ -872,7 +874,8 @@ def import_softable_pma():
     Create the meta for itable
     '''
     prj = request.args.get('prj')
-    extracts = import_softable_pma_from_xls(prj)
+    cq = request.args.get('cq')
+    extracts = import_softable_pma_from_xls(prj, cq)
 
     ret = {
         'success': True,
@@ -886,7 +889,11 @@ def import_softable_pma():
 # Utils for the itable import
 ###############################################################################
 
-def import_itable_from_xls(keystr):
+def import_itable_from_xls(
+    keystr, 
+    cq_abbr, 
+    fn_itable = 'ITABLE_ATTR_DATA.xlsx', 
+    fn_filter = 'ITABLE_FILTERS.xlsx'):
     '''
     Import itable all data from xls file
 
@@ -909,7 +916,7 @@ def import_itable_from_xls(keystr):
     oc_type = 'itable'
 
     # in fact, due to the update the cq, this is also needed to be updated
-    cq_abbr = 'default'
+    # cq_abbr = 'default'
 
     # get the exisiting extracts
     # extract = dora.get_extract_by_project_id_and_abbr(
@@ -924,21 +931,23 @@ def import_itable_from_xls(keystr):
     # if not exist, create a new one which is empty
     if extract is None:
         abbr = util.mk_abbr()
+        meta = copy.deepcopy(settings.OC_TYPE_TPL['itable']['default'])
+        meta['cq_abbr'] = cq_abbr
         extract = dora.create_extract(
             project_id, oc_type, abbr, 
-            settings.OC_TYPE_TPL['itable']['default'], 
+            settings.OC_TYPE_TPL['itable']['default'],
             {}
         )
 
     # get the itable data
-    cad, cate_attrs, i2a, data = get_itable_from_itable_data_xls(project.keystr)
+    cad, cate_attrs, i2a, data = get_itable_from_itable_data_xls(project.keystr, fn_itable)
 
     # update the meta
     meta = extract.meta
     meta['cate_attrs'] = cate_attrs
 
     # get the filters
-    filters = get_itable_filters_from_xls(project.keystr)
+    filters = get_itable_filters_from_xls(project.keystr, fn_filter)
     meta['filters'] = filters
 
     # update the extract
@@ -950,17 +959,17 @@ def import_itable_from_xls(keystr):
     return itable
 
 
-def get_itable_from_itable_data_xls(keystr):
+def get_itable_from_itable_data_xls(keystr, fn = 'ITABLE_ATTR_DATA.xlsx'):
     '''
     Get the itable extract from ITABLE_ATTR_DATA.xlsx
     '''
 
     # get the ca list first
-    ca_dict, ca_list, i2a = get_cate_attr_subs_from_itable_data_xls(keystr)
+    ca_dict, ca_list, i2a = get_cate_attr_subs_from_itable_data_xls(keystr, fn)
 
     import pandas as pd
 
-    fn = 'ITABLE_ATTR_DATA.xlsx'
+    
     full_fn = os.path.join(
         current_app.instance_path, 
         settings.PATH_PUBDATA, 
@@ -1038,7 +1047,7 @@ def get_itable_from_itable_data_xls(keystr):
             if is_success:
                 pass
             else:
-                print('* ERROR when setting rct_id %s for %s' % (
+                print('* warning when setting rct_id [%s] to %s, skipped' % (
                     nct8, pmid
                 ))
 
@@ -1121,13 +1130,12 @@ def get_itable_from_itable_data_xls(keystr):
     return ca_dict, ca_list, i2a, data
 
 
-def get_cate_attr_subs_from_itable_data_xls(keystr):
+def get_cate_attr_subs_from_itable_data_xls(keystr, fn = 'ITABLE_ATTR_DATA.xlsx'):
     '''
     Get the cate, attr, and subs from
     '''
     import pandas as pd
 
-    fn = 'ITABLE_ATTR_DATA.xlsx'
     full_fn = os.path.join(
         current_app.instance_path, 
         settings.PATH_PUBDATA, 
@@ -1249,13 +1257,12 @@ def get_cate_attr_subs_from_itable_data_xls(keystr):
     return cate_attr_dict, cate_attr_list, idx2abbr
 
 
-def get_itable_filters_from_xls(keystr):
+def get_itable_filters_from_xls(keystr, fn = 'ITABLE_FILTERS.xlsx'):
     '''
     Get the filters from ITABLE_FILTER.xlsx
     '''
     import pandas as pd
 
-    fn = 'ITABLE_FILTERS.xlsx'
     full_fn = os.path.join(
         current_app.instance_path, 
         settings.PATH_PUBDATA, 
@@ -1326,7 +1333,7 @@ def get_itable_filters_from_xls(keystr):
 ###############################################################################
 
 
-def import_softable_pma_from_xls(keystr, fn, group='primary'):
+def import_softable_pma_from_xls(keystr, cq_abbr, fn, group='primary'):
     '''
     Import the softable data from XLS
     '''
@@ -1336,7 +1343,7 @@ def import_softable_pma_from_xls(keystr, fn, group='primary'):
     raise Exception('Not implemented')
 
 
-def import_softable_nma_from_xls(keystr):
+def import_softable_nma_from_xls(keystr, cq_abbr):
     '''
     Import the softable data from XLS
     '''

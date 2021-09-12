@@ -145,10 +145,11 @@ class Project:
 
     @command
     @argument("keystr", type=str, description="The keystr for a project")
+    @argument("cq_abbr", type=str, description="The cq_abbr for a clinical question")
     @argument("fn", type=str, description="The file name of the data file")
     @argument("group", type=str, description="The default analysis group for a project")
     @argument("are_you_sure", type=str, description="yes for final confirmation")
-    def import_softable_pma(self, keystr:str, fn:str, group:str, are_you_sure:str):
+    def import_softable_pma(self, keystr:str, cq_abbr:str, fn:str, group:str, are_you_sure:str):
         '''
         Import the SOFTABLE PWMA data from Excel file
         '''
@@ -156,17 +157,21 @@ class Project:
             print('* import cancelled')
             return 
 
-        extracts = bp_extractor.import_softable_pma_from_xls(keystr, fn, group)
+        # extracts = bp_extractor.import_softable_pma_from_xls(keystr, cq_abbr, fn, group)
 
-        print('* imported %s extracts!' % (
-            len(extracts)
-        ))
+        # print('* imported %s extracts!' % (
+        #     len(extracts)
+        # ))
+        print('* not fully implemented yet')
 
 
     @command
     @argument("keystr", type=str, description="The keystr for a project")
+    @argument("cq_abbr", type=str, description="The cq_abbr for a clinical question")
+    @argument("fn_itable", type=str, description="The file name of the data file")
+    @argument("fn_filter", type=str, description="The file name of the data file")
     @argument("are_you_sure", type=str, description="yes for final confirmation")
-    def import_itable(self, keystr:str, are_you_sure:str):
+    def import_itable(self, keystr:str, cq_abbr:str, fn_itable:str, fn_filter:str, are_you_sure:str):
         '''
         Replace or create the itable data from Excel file
         '''
@@ -174,7 +179,11 @@ class Project:
             print('* import cancelled')
             return 
 
-        itable = bp_extractor.import_itable_from_xls(keystr)
+        itable = bp_extractor.import_itable_from_xls(
+            keystr, cq_abbr, 
+            fn_itable,
+            fn_filter
+        )
 
         if itable is None:
             print('* something wrong when importing %s' % (

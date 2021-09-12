@@ -21,7 +21,7 @@ import pandas as pd
 
 from werkzeug.utils import secure_filename
 
-from lnma import dora, settings
+from lnma import dora, settings, srv_import
 from lnma import util
 from lnma import ss_state
 
@@ -133,6 +133,38 @@ def by_user_input():
 
 
 #     return jsonify(ret)
+
+
+@bp.route('/import_one_pmid', methods=['POST'])
+@login_required
+def import_one_pmid():
+
+    # save the uploads
+    project_id = request.form.get('project_id')
+    pmid = request.form.get('pmid')
+    nct = request.form.get('nct')
+
+    project = dora.get_project(project_id)
+
+    if project is None: 
+        return jsonify({
+            'success': False,
+            'is_existed': None,
+            'msg': 'project not found'
+        })
+
+    is_success, paper = srv_import.import_by_pmid(
+        project.keystr, 
+        pmid,
+        nct
+    )
+
+    return jsonify({
+        'success': is_success,
+        'is_existed': False,
+        'paper': paper.as_very_simple_dict()
+    })
+
 
 
 @bp.route('/import_pmids', methods=['GET', 'POST'])

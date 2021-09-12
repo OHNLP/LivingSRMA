@@ -21,6 +21,7 @@ var srv_importer = {
 
     url: {
         upload_endnote_xml: "[[ url_for('importer.upload_endnote_xml') ]]",
+        import_one_pmid: "[[ url_for('importer.import_one_pmid') ]]",
         save_papers: "[[ url_for('importer.save_papers') ]]",
     },
 
@@ -75,6 +76,30 @@ var srv_importer = {
             contentType: false,
             cache: false,
             processData: false,
+            success: callback,
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.error(textStatus, errorThrown);
+            }
+        });
+    },
+
+    import_one_pmid: function(pmid, nct, callback) {
+        var project_id = Cookies.get('project_id');
+        if (project_id == undefined) {
+            alert('Set working project first.');
+            return;
+        }
+        // send request
+        $.ajax({
+            type: 'POST',
+            url: this.url.import_one_pmid,
+            dataType: "json",
+            data: {
+                pmid: pmid,
+                nct: nct,
+                project_id: project_id
+            },
+            cache: false,
             success: callback,
             error: function(jqXHR, textStatus, errorThrown) {
                 console.error(textStatus, errorThrown);

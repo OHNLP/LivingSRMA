@@ -35,9 +35,9 @@ Study Importer
                         <div class="form-group col-md-6">
                             <label for="exampleFormControlInput1">PubMed ID / Paper Identifier</label>
                             <input v-model="paper.pid" name="pid"
-                                class="form-control" id="exampleFormControlInput1" placeholder="PubMed ID / EMBASE ID / Other ID">
+                                class="form-control" id="exampleFormControlInput1" placeholder="PubMed ID">
                             <small id="passwordHelpBlock1" class="form-text text-muted">
-                                If there is no identifier yet, just leave empty. System will generate a temporal ID for this study if it is blank.
+                                Please provide a PMID.
                             </small>
                         </div>
 
@@ -50,58 +50,6 @@ Study Importer
                             </small>
                         </div>
                         
-                    </div>
-
-                    <div class="form-group">
-                        <label for="exampleFormControlInput2">Title</label>
-                        <input v-model="paper.title" name="title"
-                            class="form-control" id="exampleFormControlInput2" placeholder="">
-                    </div>
-
-                    <div class="form-row">
-
-                        <div class="form-group col-md-5">
-                            <label for="exampleFormControlInput3">Authors</label>
-                            <input v-model="paper.authors" name="authors"
-                                class="form-control" id="exampleFormControlInput3" placeholder="">
-
-                            <small id="passwordHelpBlock_authors" class="form-text text-muted">
-                                If multiple names, seperate names by comma or semicolon.
-                            </small>
-                        </div>
-
-                        <div class="form-group col-md-4">
-                            <label for="exampleFormControlInput4">Journal</label>
-                            <input v-model="paper.journal" name="journal"
-                                class="form-control" id="exampleFormControlInput4" placeholder="">
-
-                            <small id="passwordHelpBlock_journal" class="form-text text-muted">
-                                The journal information.
-                            </small>
-                        </div>
-
-                        <div class="form-group col-md-3">
-                            <label for="exampleFormControlInput5">Year / Date</label>
-                            <input v-model="paper.pub_date" name="pub_date"
-                                class="form-control" id="exampleFormControlInput5" placeholder="">
-
-                            <small id="passwordHelpBlock_date" class="form-text text-muted">
-                                Year or the publication date of this study.
-                            </small>
-                        </div>
-
-                    </div>
-
-                    <div class="form-group">
-                        <label for="exampleFormControlTextarea1">Abstract</label>
-                        <textarea v-model="paper.abstract" name="abstract" 
-                            class="form-control" id="exampleFormControlTextarea1" rows="5"></textarea>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="form_pdf_files">PDF Files</label>
-                        <input type="file" name="files[]" multiple accept=".pdf"    
-                            class="form-control-file" id="form_pdf_files">
                     </div>
 
                 </form>
@@ -126,6 +74,8 @@ Study Importer
 {% block script %}
 <script>
 
+{% include 'js/srv_importer.js' %}
+
 
 var vw_uploader_userinput = {
     vpp: null,
@@ -139,11 +89,6 @@ var vw_uploader_userinput = {
                 result: null,
                 paper: {
                     pid: '',
-                    title: '',
-                    abstract: '',
-                    pub_date: '',
-                    authors: '',
-                    journal: '',
                     nct: '',
                 },
                 btn_import: {
@@ -168,25 +113,13 @@ var vw_uploader_userinput = {
         this.vpp.btn_import.disabled = true;
 
         // create form for upload
-
-        var form_data = new FormData($('#upload_userinput')[0]);
-        form_data.append('project_id', project_id);
-
-        // send request
-        $.ajax({
-            type: 'POST',
-            url: this.api_url,
-            data: form_data,
-            contentType: false,
-            cache: false,
-            processData: false,
-            success: function(data) {
+        srv_importer.import_one_pmid(
+            this.vpp.$data.paper.pid,
+            this.vpp.$data.paper.nct,
+            function(data) {
                 vw_uploader_userinput.show_result(data);
-            },
-            error: function(jqXHR, textStatus, errorThrown) {
-                console.error(textStatus, errorThrown);
             }
-        });
+        );
     },
 
     show_result: function(data) {
