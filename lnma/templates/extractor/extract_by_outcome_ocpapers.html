@@ -211,7 +211,7 @@
                             v-on:click="on_click_paper(paper)">
                             <div class="paper-table-body-td-author"
                                 v-bind:title="get_first_author(paper.authors)">
-                                {{ get_first_author(paper.authors) }} {{ get_year(paper.pub_date) }}
+                                {{ paper.short_name }}
                             </div>
                         </td>
 
