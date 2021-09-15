@@ -44,7 +44,13 @@ def index():
                 'stat': rst
             }
         else:
-            pass
+            project_info_dict[project_id] = {
+                'stat': {
+                    'all_of_them': 0,
+                    'unscreened': 0,
+                    'unscreened_ckl': 0
+                }
+            }
 
     return render_template(
         'portal/index.html', 
