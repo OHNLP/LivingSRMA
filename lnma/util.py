@@ -128,7 +128,8 @@ def fill_extract_data_arm(arm, cate_attrs, g_idx=0):
                     sub_abbr = sub['abbr']
                     if sg not in arm:
                         arm[sg] = {}
-                    if sub_abbr not in arm:
+                    # 2021-09-15: fix the sub value missing
+                    if sub_abbr not in arm[sg]:
                         arm[sg][sub_abbr] = ''
 
     return arm

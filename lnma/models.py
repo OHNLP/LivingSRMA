@@ -852,6 +852,10 @@ class Extract(db.Model):
                 # after update the meta, we could skip this paper
                 continue
 
+            print('* NOT FOUND pid[%s] in this extract[%s]' % (
+                pid,
+                self.abbr
+            ))
             # if not exist, add this paper
             self.data[pid] = {
                 'is_selected': False,

@@ -246,9 +246,8 @@
                             <div v-for="g, g_idx in working_oc.meta.sub_groups">
 
                                 <span class="cell-input">
-                                    <input class="paper-extract-input-auto" type="text" 
+                                    <input class="paper-extract-input-auto-100" type="text" 
                                         v-bind:abbr="attr_sub.abbr"
-                                        v-bind:size="get_input_size(working_oc.data[paper.pid].attrs.main['g'+g_idx][attr_sub.abbr])"
                                         v-model="working_oc.data[paper.pid].attrs.main['g'+g_idx][attr_sub.abbr]">    
                                 </span>
                             </div>
@@ -261,8 +260,7 @@
                                 <span v-for="other, other_idx in working_oc.data[paper.pid].attrs.other"
                                     class="cell-input">
                                     <br v-if="other_idx > 0">
-                                    <input class="paper-extract-input-auto" type="text" 
-                                        v-bind:size="get_input_size(working_oc.data[paper.pid].attrs.other[other_idx]['g'+g_idx][attr_sub.abbr])"
+                                    <input class="paper-extract-input-auto-100" type="text" 
                                         v-model="working_oc.data[paper.pid].attrs.other[other_idx]['g'+g_idx][attr_sub.abbr]">  
                                 </span>
                             </div>

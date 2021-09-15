@@ -1122,6 +1122,8 @@ def get_itable_from_itable_data_xls(keystr, fn = 'ITABLE_ATTR_DATA.xlsx'):
                 else:
                     # just save the different values
                     data[pmid]['attrs']['other'][-1]['g0'][abbr] = val
+            
+            # print('* added col[%s] as abbr[%s] val[%s]' % (col, abbr, val))
 
         print('* added %s %s' % (
             pmid, data[pmid]['n_arms']
