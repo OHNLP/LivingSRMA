@@ -35,12 +35,16 @@ def index():
 
     # get the stats for each project
     project_info_dict = {}
+    stat = dora.get_portal_stat()
     for project in projects:
         project_id = project.project_id
-        rst = dora.get_screener_stat_only_unscreened_by_project_id(project_id)
-        project_info_dict[project_id] = {
-            'stat': rst
-        }
+        if project_id in stat:
+            rst = stat[project_id]
+            project_info_dict[project_id] = {
+                'stat': rst
+            }
+        else:
+            pass
 
     return render_template(
         'portal/index.html', 
