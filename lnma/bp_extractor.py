@@ -1003,10 +1003,17 @@ def get_itable_from_itable_data_xls(keystr, fn = 'ITABLE_ATTR_DATA.xlsx'):
         else:
             pmid = row['PubMed ID']
 
-        # must make sure the pmid is a string
-        pmid = '%s' % pmid
-        # the pmid may contain blank
-        pmid = pmid.strip()
+        # try to make sure it's NOT something like 12345678.0
+        try:
+            pmid = int(pmid)
+            # must make sure the pmid is a string
+            pmid = '%s' % pmid
+            # the pmid may contain blank
+            pmid = pmid.strip()
+            pmid = '%s' % int(pmid)
+        except:
+            print('* error when parsing pmid[%s]' % ( pmid ))
+            continue
 
         # get the NCT
         if 'Trial registration #' in row:
@@ -1056,33 +1063,40 @@ def get_itable_from_itable_data_xls(keystr, fn = 'ITABLE_ATTR_DATA.xlsx'):
             p = dora.get_paper_by_keystr_and_pid(
                 keystr, pmid
             )
-            sss = p.get_ss_stages()
-            if ss_state.SS_STAGE_INCLUDED_SR in sss:
-                # OK, this study is included in SR at least
-                pass
-            else:
-                # change stage!
-                if included_in_ma == 'YES':
-                    _, p = srv_paper.set_paper_ss_decision(
-                        keystr, pmid, 
-                        ss_state.SS_PR_CHECKED_BY_ADMIN,
-                        ss_state.SS_RS_INCLUDED_SRMA,
-                        ss_state.SS_REASON_CHECKED_BY_ADMIN,
-                        ss_state.SS_STAGE_INCLUDED_SRMA
-                    )
-                else:
-                    _, p = srv_paper.set_paper_ss_decision(
-                        keystr, pmid, 
-                        ss_state.SS_PR_CHECKED_BY_ADMIN,
-                        ss_state.SS_RS_INCLUDED_ONLY_SR,
-                        ss_state.SS_REASON_CHECKED_BY_ADMIN,
-                        ss_state.SS_STAGE_INCLUDED_ONLY_SR
-                    )
 
-                # what???
-                print('* updated %s from %s to %s' % (
-                    pmid, sss, p.get_ss_stages()
+            if p is None:
+                print('* NOT found pid[%s]' % (
+                    pmid
                 ))
+
+            else:
+                sss = p.get_ss_stages()
+                if ss_state.SS_STAGE_INCLUDED_SR in sss:
+                    # OK, this study is included in SR at least
+                    pass
+                else:
+                    # change stage!
+                    if included_in_ma == 'YES':
+                        _, p = srv_paper.set_paper_ss_decision(
+                            keystr, pmid, 
+                            ss_state.SS_PR_CHECKED_BY_ADMIN,
+                            ss_state.SS_RS_INCLUDED_SRMA,
+                            ss_state.SS_REASON_CHECKED_BY_ADMIN,
+                            ss_state.SS_STAGE_INCLUDED_SRMA
+                        )
+                    else:
+                        _, p = srv_paper.set_paper_ss_decision(
+                            keystr, pmid, 
+                            ss_state.SS_PR_CHECKED_BY_ADMIN,
+                            ss_state.SS_RS_INCLUDED_ONLY_SR,
+                            ss_state.SS_REASON_CHECKED_BY_ADMIN,
+                            ss_state.SS_STAGE_INCLUDED_ONLY_SR
+                        )
+
+                    # what???
+                    print('* updated %s from %s to %s' % (
+                        pmid, sss, p.get_ss_stages()
+                    ))
 
         else:
             # which means this row is an multi arm
