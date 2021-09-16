@@ -369,6 +369,22 @@ INPUT_FORMAT_TPL = {
                 'name': 'Upper CI', 
                 'subs': None,
             }]
+        }, {
+            'abbr': 'PRIM_CAT_PRE_detail', 
+            'name': 'Detail', 
+            'attrs': [{
+                'abbr': 'survival_in_control', 
+                'name': 'Survival in Control',
+                'subs': None,
+            }, {
+                'abbr': 'detail_Ec', 
+                'name': 'Ec', 
+                'subs': None,
+            }, {
+                'abbr': 'detail_Et',
+                'name': 'Et', 
+                'subs': None,
+            }]
         }],
 
         "PRIM_CONTD_RAW": [{
