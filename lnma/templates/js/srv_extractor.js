@@ -56,7 +56,7 @@ var srv_extractor = {
 
     sort_rct_seq: function(callback) {
         $.ajax({
-            url: this.api_url.sort_rct_seq,
+            url: this.url.sort_rct_seq,
             type: 'get',
             dataType: 'json',
             data: { rnd: Math.random() },
