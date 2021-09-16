@@ -81,6 +81,48 @@ def analyze(rs, cfg):
         return analyze_pwma_prcm(rs, cfg)
 
 
+def analyze_pwma_cat_pre(rs, cfg):
+    '''
+    Analyze the primary of Categorical pre-calculated
+    '''
+    # create a dataframe first
+    df = pd.DataFrame(rs)
+
+    # get the primary
+    r_prim = meta.metagen(
+        df.TE, df.SE,
+        studlab=df.study,
+        comb_random=cfg['fixed_or_random']=='random',
+        sm=cfg['measure_of_effect'],
+        hakn=True if cfg['is_hakn'] == 'TRUE' else False,
+        method=cfg['pooling_method'],
+        method_tau=cfg['tau_estimation_method']
+    )
+
+    # convert to R json object
+    r_j_prim = jsonlite.toJSON(r_prim, force=True)
+
+    # convert to Python JSON object
+    j_prim = json.loads(r_j_prim[0])
+
+    # for compability
+    j = {
+        'primma': j_prim,
+    }
+
+    # build the return
+    ret = {
+        'submission_id': 'rpy2',
+        'params': cfg,
+        'success': True,
+        'data': {
+            'primma': _meta_trans_metabin(j, cfg)
+        }
+    }
+
+    return ret
+
+
 def analyze_pwma_prcm(rs, cfg, has_cumu=True):
     '''
     Analyze the primary and cumulative

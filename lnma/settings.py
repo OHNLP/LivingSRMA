@@ -377,11 +377,11 @@ INPUT_FORMAT_TPL = {
                 'name': 'Survival in Control',
                 'subs': None,
             }, {
-                'abbr': 'detail_Ec', 
+                'abbr': 'Ec', 
                 'name': 'Ec', 
                 'subs': None,
             }, {
-                'abbr': 'detail_Et',
+                'abbr': 'Et',
                 'name': 'Et', 
                 'subs': None,
             }]

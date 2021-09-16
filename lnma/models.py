@@ -1,3 +1,4 @@
+import copy
 import enum
 import json
 from xml.sax.saxutils import escape
@@ -726,25 +727,45 @@ class Extract(db.Model):
 
     For the `pwma` type, the `meta` includes:
     {
-        abbr: '',
-        cq_abbr: 'IMM',       # for clinical question
-        oc_type: 'pwma',
-        group: 'Primary',
-        category: 'default',
-        full_name: 'pwma Outcome full name',
+        "abbr": '',
+
+        # The five level
+        "cq_abbr": 'default',
+        "oc_type": 'pwma',
+        "group": 'primary',
+        "category": 'default',
+        "full_name": 'pwma outcome full name',
+
+        # for two arms
+        "treatments": ["A", "B"],
 
         # for subg
         "is_subg_analysis": 'no',
-        "sub_groups": ['A', 'B'],
-        
-        included_in_plots: 'yes',
-        included_in_sof: 'yes',
-        input_format: 'PRIM_CAT_RAW',
-        measure_of_effect: 'RR',
-        fixed_or_random: 'fixed',
-        which_is_better: 'lower',
-        attrs: null,
-        cate_attrs: null
+        "sub_groups": ['A'],
+
+        # for the display
+        "included_in_plots": 'no',
+        "included_in_sof": 'no',
+
+        # for the MA
+        "input_format": 'PRIM_CAT_RAW',
+        "measure_of_effect": 'RR',
+        "fixed_or_random": 'random',
+        "which_is_better": 'lower',
+
+        "pooling_method": "Inverse",
+        "tau_estimation_method": "DL",
+        "hakn_adjustment": "FALSE",
+        "smd_estimation_method": "Hedges",
+        "prediction_interval": "FALSE",
+        "sensitivity_analysis": "no",
+        "cumulative_meta_analysis": "no",
+        "cumulative_meta_analysis_sortby": "year",
+
+        # for the extraction
+        "attrs": None,
+        "cate_attrs": None
+
     }
 
     Some attributes are designed for the public site only.
@@ -910,11 +931,6 @@ class Extract(db.Model):
         return self.meta['full_name']
 
 
-    def __repr__(self):
-        return '<Extract {0} {1}: {2}>'.format(
-            self.oc_type, self.abbr, self.extract_id)
-
-
     def as_dict(self):
         '''
         Return the dict format of this object
@@ -952,6 +968,100 @@ class Extract(db.Model):
             del simple_dict['meta']['cate_attrs']
 
         return simple_dict
+
+    
+    #######################################################
+    # For analyzer purpose
+    #######################################################
+
+    def get_raw_rs_cfg(self, paper_dict, is_skip_unselected=True):
+        '''
+        Get the raw result set (rs) and configuration (cfg)
+        from this extract.
+
+        Due the incomplete data in the extract, 
+        the `study` and `year` information for each record 
+        is not available. 
+
+        So for the analyzer, it
+        '''
+        if self.oc_type == 'itable':
+            # itable is not prepared for this purpose
+            return None
+
+        if self.oc_type == 'pwma':
+            rs = self._get_rs_pwma(paper_dict, is_skip_unselected)
+            cfg = self._get_cfg_pwma()
+            return {
+                'rs': rs,
+                'cfg': cfg
+            }
+
+
+    def _get_cfg_pwma(self):
+        '''
+        Get the PWMA cfg for analyzer
+        '''
+        cfg = copy.deepcopy(self.meta)
+
+        del cfg['attrs']
+        del cfg['cate_attrs']
+
+        return cfg
+
+    
+    def _get_rs_pwma(self, paper_dict, is_skip_unselected=True):
+        '''
+        Get the PWMA rs and cfg for analyzer
+
+        The `paper_dict` is a pid-based dictionary of Paper objects
+        '''
+        # the value will for each record
+        r_treatment = self.meta['treatments'][0]
+        r_control = self.meta['treatments'][1]
+
+        rs = []
+        for pid in self.data:
+            ext = self.data[pid]
+
+            if pid in paper_dict:
+                study = paper_dict[pid].get_short_name()
+                year = paper_dict[pid].get_year()
+            else:
+                study = '%s' % pid
+                year = 'NA'
+
+            if not ext['is_selected'] and is_skip_unselected:
+                continue
+            
+            # copy values of main arm to rs
+            r = copy.deepcopy(ext['attrs']['main']['g0'])
+
+            # add other information?
+            r['pid'] = pid
+            r['study'] = study
+            r['year'] = year
+            r['treatment'] = r_treatment
+            r['control'] = r_control
+            rs.append(r)
+
+            # copy other arms if exists
+            if ext['n_arms'] > 2:
+                for arm in ext['attrs']['other']:
+                    r = copy.deepcopy(arm['g0'])
+                    r['pid'] = pid
+                    r['study'] = study
+                    r['year'] = year
+                    r['treatment'] = r_treatment
+                    r['control'] = r_control
+                    rs.append(r)
+        
+        return rs
+
+
+    def __repr__(self):
+        return '<Extract {0} {1}: {2}>'.format(
+            self.oc_type, self.abbr, self.extract_id)
 
 
 class Piece(db.Model):
