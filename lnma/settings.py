@@ -330,10 +330,6 @@ INPUT_FORMAT_TPL = {
                 'abbr': 'Nt',
                 'name': 'Total',
                 'subs': None
-            }, {
-                'abbr': 'treatment',
-                'name': 'Treatment',
-                'subs': None
             }]
         }, {
             'abbr': 'PRIM_CAT_RAW_control',
@@ -345,10 +341,6 @@ INPUT_FORMAT_TPL = {
             }, {
                 'abbr': 'Nc',
                 'name': 'Total',
-                'subs': None
-            }, {
-                'abbr': 'control',
-                'name': 'Control',
                 'subs': None
             }]
         }],
