@@ -59,6 +59,30 @@ def subindex(prj):
     return render_template('pub/pub.subindex.html', prj_data=prj_data)
 
 
+@bp.route('/prjcqhp.html')
+def prjcqhp():
+    '''
+    The homepage for a cq in a project
+    '''
+    # first, check this prj and cq exist or not
+    keystr = request.args.get('k')
+    cq_abbr = request.args.get('c')
+
+    project = dora.get_project_by_keystr(keystr)
+
+    if project is None:
+        return 'No such project %s' % keystr
+
+    path_to_homepage = 'pub/%s/%s/index.html' % (
+        keystr, cq_abbr
+    )
+    # last, check this path exists or not
+    # if not os.path.exists(os.path.join()):
+
+
+    return render_template(path_to_homepage)
+
+
 ###############################################################################
 # For IO project
 # Every thing is special designed
