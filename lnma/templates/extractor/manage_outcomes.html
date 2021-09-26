@@ -9,8 +9,32 @@ Manage Outcomes
 {% endblock %}
 
 {% block page_name %}
-<i class="fa fa-list"></i>
-Manage Outcomes
+
+<!-- Example single danger button -->
+<div class="btn-group">
+<li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" 
+        data-toggle="dropdown" href="javascript:void(0);" 
+        role="button" 
+        aria-haspopup="true" 
+        aria-expanded="false">
+        <i class="fa fa-list"></i>
+        Manage Outcomes
+    </a>
+    <div class="dropdown-menu">
+        <a class="dropdown-item" 
+            href="javascript:void(0);"
+            onclick="pan_outcomes.toggle_import_extract_panel();">
+            <i class="fa fa-file-import"></i>
+            Import an outcome
+        </a>
+
+        <!-- <a class="dropdown-item" href="#">Another action</a>
+        <a class="dropdown-item" href="#">Something else here</a>
+        <div class="dropdown-divider"></div>
+        <a class="dropdown-item" href="#">Separated link</a> -->
+    </div>
+</li>
 {% endblock %}
 
 {% block active_nav_link %}extractor-manage-outcomes{% endblock %}
@@ -153,6 +177,38 @@ html {
 <div id="main">
 
 <div id="pan_outcomes" class="panel-container">
+
+    <div id="pan_outcomes_import_extract" class="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">
+                  <i class="fa fa-file-import"></i>
+                  Import an outcome
+              </h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    Select the exported JSON format outcome file
+                </p>
+                <input type="file" name="" id="pan_outcomes_import_extract_input">
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary">
+                  <i class="fa fa-file-import"></i>
+                  Import
+              </button>
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                  Close
+                </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
     <div v-for="oc_type in project.settings.outcomes_enabled">
         
     <h5>
@@ -226,6 +282,9 @@ html {
 {% endblock %}
 
 {% block script %}
+
+<!-- filesaver -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js"></script>
 <script>
 
 {% include 'js/srv_shared.js' %}
@@ -320,6 +379,8 @@ var pan_outcomes = {
             data: this.vpp_data,
             methods: this.vpp_methods
         });
+
+        this.bind_import_extract_input();
     },
 
     delete_extract: function(oc_type, abbr, full_name) {
@@ -351,6 +412,36 @@ var pan_outcomes = {
         this.vpp.$data.working_abbr = abbr;
 
         pan_ocpapers.show_extract_and_papers(abbr);
+    },
+
+    toggle_import_extract_panel: function() {
+        $('#pan_outcomes_import_extract').modal();
+    },
+
+    bind_import_extract_input: function() {
+        let input = document.getElementById("pan_outcomes_import_extract_input");
+
+        input.addEventListener("change", function(event) {
+            
+            if (input.files.length > 0) {
+                // File reader to read the file 
+                var reader = new FileReader(); 
+                
+                // This event listener will happen when the reader has read the file
+                reader.addEventListener('load', function() {
+                    // Parse the result into an object 
+                    var result = JSON.parse(reader.result); 
+                    console.log(result);
+                });
+                
+                // Read the uploaded file
+                reader.readAsText(input.files[0]); 
+            }
+        });
+    },
+
+    import_extract: function(oc) {
+
     },
     
     create_extract: function(oc_type, tpl, group, category) {
@@ -548,6 +639,28 @@ var pan_ocpapers = {
                         extract.abbr,
                         extract.meta.full_name,
                     );
+                },
+
+                export_extract: function(extract) {
+                    console.log('* export this oc:', extract);
+                    // copy this extract
+                    var j = JSON.parse(JSON.stringify(extract));
+
+                    // remove the used items
+                    delete j['project_id'];
+                    delete j['extract_id'];
+
+                    // convert to string
+                    j = JSON.stringify(j);
+
+                    // save
+                    var blob = new Blob([j], {type: "text/json;charset=utf-8"});
+                    var fn = extract.abbr + '-' + 
+                        extract.oc_type + '-' +
+                        extract.meta.group + '-' +
+                        extract.meta.category + '-' +
+                        extract.meta.full_name + '.json';
+                    saveAs(blob, fn);
                 },
 
                 // save all!
