@@ -1,3 +1,4 @@
+import logging
 import os
 import json
 import uuid
@@ -100,24 +101,31 @@ def IOTOX():
     return render_template('pub/pub.IOTOX.html')
 
 
+@bp.route('/IO/default/index.html')
+def pub_IO_default_index():
+    '''
+    The index page for IO default project
+    '''
+    return render_template('pub/IO/default/index.html')
+
+
 @bp.route('/prisma_IO.html')
 def prisma_IO():
     '''
     A special PRISMA for IOTOX project
     The looking is different from others
     '''
-    return render_template('pub/IO/pub.prisma_IO.html')
+    return render_template('pub/IO/prisma_IO.html')
 
-# the ITable for IO is the same version as others
 
 @bp.route('/graph_pma_IO.html')
 def graph_pma_IO():
-    return render_template('pub/IO/pub.graph_pma_IO.html')
+    return render_template('pub/IO/graph_pma_IO.html')
 
 
 @bp.route('/softable_pma_IO.html')
 def softable_pma_IO():
-    return render_template('pub/IO/pub.softable_pma_IO.html')
+    return render_template('pub/IO/softable_pma_IO.html')
 
 
 ###############################################################################
@@ -496,16 +504,11 @@ def graphdata_itable_cfg_json(prj):
     return jsonify(ret)
 
 
-@bp.route('/graphdata/<prj>/ITABLE.json')
-def graphdata_itable_json(prj):
+@bp.route('/graphdata/<keystr>/ITABLE.json')
+def graphdata_itable_json(keystr):
     '''
     Special rule for the ITABLE.json which does not exist
     '''
-    fn = 'ITABLE_ATTR_DATA.xlsx'
-    full_fn = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, fn)
-
-    output_fn = 'ITABLE.json'
-    full_output_fn = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, output_fn)
 
     # get the itable from database directly
     src = request.args.get('src')
@@ -515,12 +518,25 @@ def graphdata_itable_json(prj):
     if cq_abbr is None or cq_abbr == '':
         cq_abbr = 'default'
 
+    # get the cache path
+    output_fn = 'ITABLE.json'
+    full_output_fn = os.path.join(
+        current_app.instance_path, 
+        settings.PUBLIC_PATH_PUBDATA, 
+        keystr, 
+        cq_abbr,
+        output_fn
+    )
+
+    # make the cache
+    mk_graphdata_path(keystr, cq_abbr)
+
     if src == 'cache':
         ret = json.load(open(full_output_fn))
         return jsonify(ret)
 
     if src == 'db':
-        ret = srv_pub_itable.get_itable_attr_rs_cfg_from_db(prj)
+        ret = srv_pub_itable.get_itable_attr_rs_cfg_from_db(keystr)
 
         if ret is None:
             ret = {
@@ -534,6 +550,14 @@ def graphdata_itable_json(prj):
         return jsonify(ret)
 
     # OK, get the itable data from XLS
+    fn = 'ITABLE_ATTR_DATA.xlsx'
+    full_fn = os.path.join(
+        current_app.instance_path, 
+        settings.PUBLIC_PATH_PUBDATA, 
+        keystr, 
+        fn
+    )
+
     # get the cols from the xls
     attr_pack = srv_pub_itable.get_attr_pack_from_itable(full_fn)
     attrs = list(attr_pack['attr_dict'].values())
@@ -554,30 +578,8 @@ def graphdata_itable_json(prj):
     return jsonify(ret)
 
 
-@bp.route('/graphdata/<prj>/OPLOTS.json')
-def graphdata_oplots(prj):
-    '''
-    Deprecated
-    Special rule for the OPLOTS.json which does not exist
-    
-    The input file is OPLOTS.xls with multiple sheets
-
-    S.1: Adverse events
-    S.2: ?
-    S.3: All SEs
-    S.4: AE_NAME_1 
-    S.n: AE_NAME_2
-
-    '''
-    fn = 'ALL_DATA.xlsx'
-    full_fn = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, fn)
-    ret = get_ae_pma_data(full_fn, is_getting_sms=False)
-
-    return jsonify(ret)
-
-
-@bp.route('/graphdata/<prj>/GRAPH_PMA.json')
-def graphdata_graph_pma_json(prj):
+@bp.route('/graphdata/<keystr>/GRAPH_PMA.json')
+def graphdata_graph_pma_json(keystr):
     '''
     Special rule for the GRAPH_PMA.json which does not exist
 
@@ -593,9 +595,34 @@ def graphdata_graph_pma_json(prj):
     if cq_abbr is None or cq_abbr == '':
         cq_abbr = 'default'
 
-    ret = srv_extract.get_sof_pma_data_from_db(
-        prj, cq_abbr, is_calc_pma=False
+    calc = request.args.get('calc')
+    if calc is None or calc == '':
+        calc = 'no'
+
+    # get the cache path
+    output_fn = 'GRAPH_PMA.json'
+    full_output_fn = os.path.join(
+        current_app.instance_path, 
+        settings.PUBLIC_PATH_PUBDATA, 
+        keystr, 
+        cq_abbr,
+        output_fn
     )
+
+    # make the cache
+    mk_graphdata_path(keystr, cq_abbr)
+
+    if src == 'cache':
+        ret = json.load(open(full_output_fn))
+        return jsonify(ret)
+
+    # get the result for database
+    ret = srv_extract.get_sof_pma_data_from_db(
+        keystr, cq_abbr, is_calc_pma= calc is 'yes'
+    )
+
+    # catch the result
+    json.dump(ret, open(full_output_fn, 'w'), default=util.json_encoder)
 
     return jsonify(ret)
 
@@ -647,8 +674,8 @@ def graphdata_graph_json(prj):
     return jsonify(ret)
 
 
-@bp.route('/graphdata/<prj>/SOFTABLE_PMA.json')
-def graphdata_softable_pma_json(prj):
+@bp.route('/graphdata/<keystr>/SOFTABLE_PMA.json')
+def graphdata_softable_pma_json(keystr):
     '''
     Special rule for the SoF Table PMA which does not exist
     In this function, all the data are stored in ALL_DATA.xlsx
@@ -656,8 +683,6 @@ def graphdata_softable_pma_json(prj):
     The second tab is Adverse events
     From third tab all the events
     '''
-    fn_json = 'SOFTABLE_PMA.json'
-    full_fn_json = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, fn_json)
     src = request.args.get('src')
     if src is None or src == '':
         # set the default to get things from db
@@ -668,19 +693,34 @@ def graphdata_softable_pma_json(prj):
     if cq_abbr is None or cq_abbr == '':
         cq_abbr = 'default'
 
+    fn_json = 'SOFTABLE_PMA.json'
+    full_fn_json = os.path.join(
+        current_app.instance_path, 
+        settings.PUBLIC_PATH_PUBDATA, 
+        keystr, 
+        cq_abbr,
+        fn_json
+    )
+
+    # make the cache
+    mk_graphdata_path(keystr, cq_abbr)
+    
     if src == 'cache':
+        print('* using cache for %s.%s %s' % (
+            keystr, cq_abbr, fn_json
+        ))
         ret = json.load(open(full_fn_json))
         return jsonify(ret)
 
     if src == 'db':
         ret = srv_extract.get_sof_pma_data_from_db(
-            prj, cq_abbr, is_calc_pma=True
+            keystr, cq_abbr, is_calc_pma=True
         )
 
         if ret is None:
             ret = {
                 'success': False,
-                'msg': 'ITABLE DATA NOT EXISTS FOR THIS PROJECT'
+                'msg': 'SOFTABLE_PMA DATA NOT EXISTS FOR THIS PROJECT'
             }
 
         # catch the result
@@ -694,7 +734,7 @@ def graphdata_softable_pma_json(prj):
     ret = {}
 
     if v is None or v == '' or v == '1':
-        if prj == 'IO':
+        if keystr == 'IO':
             fn = 'ALL_DATA.xlsx'
             full_fn = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, fn)
             ret = get_sof_pma_data_IO(full_fn, is_calc_pma=True)
@@ -763,8 +803,8 @@ def graphdata_softable_nma_json(prj):
     return jsonify(ret)
 
 
-@bp.route('/graphdata/<prj>/PRISMA.json')
-def graphdata_prisma_json(prj):
+@bp.route('/graphdata/<keystr>/PRISMA.json')
+def graphdata_prisma_json(keystr):
     '''
     Special rule for the PRISMA.json
 
@@ -772,14 +812,34 @@ def graphdata_prisma_json(prj):
     '''
     # get the itable from database directly
     src = request.args.get('src')
-    
+    if src is None or src == '':
+        # set the default to get things from db
+        src = 'db'
+
+    # get the cq_abbr
     cq_abbr = request.args.get('cq')
     if cq_abbr is None or cq_abbr == '':
         cq_abbr = 'default'
 
+    fn_json = 'PRISMA.json'
+    full_fn_json = os.path.join(
+        current_app.instance_path, 
+        settings.PUBLIC_PATH_PUBDATA, 
+        keystr, 
+        cq_abbr,
+        fn_json
+    )
+
+    # make the cache
+    mk_graphdata_path(keystr, cq_abbr)
+    
+    if src == 'cache':
+        ret = json.load(open(full_fn_json))
+        return jsonify(ret)
+
     if src == 'db':
-        ret = srv_pub_prisma.get_prisma_from_db(prj)
-        latest = srv_project.get_project_latest_stat_by_keystr(prj)
+        ret = srv_pub_prisma.get_prisma_from_db(keystr)
+        latest = srv_project.get_project_latest_stat_by_keystr(keystr)
 
         if ret is None:
             ret = {
@@ -788,10 +848,15 @@ def graphdata_prisma_json(prj):
             }
 
         ret['latest'] = latest
+
+        # catch the result
+        json.dump(ret, open(full_fn_json, 'w'), default=util.json_encoder)
+
         return jsonify(ret)
 
 
-    ret = srv_pub_prisma.get_prisma_from_xls(prj)
+    # read from xls?
+    ret = srv_pub_prisma.get_prisma_from_xls(keystr)
 
     return jsonify(ret)
 
@@ -837,6 +902,28 @@ def graphdata_latest_json(prj):
     result = srv_project.get_project_latest_stat_by_keystr(prj)
 
     return jsonify(result)
+
+
+@bp.route('/graphdata/<prj>/OPLOTS.json')
+def graphdata_oplots(prj):
+    '''
+    Deprecated
+    Special rule for the OPLOTS.json which does not exist
+    
+    The input file is OPLOTS.xls with multiple sheets
+
+    S.1: Adverse events
+    S.2: ?
+    S.3: All SEs
+    S.4: AE_NAME_1 
+    S.n: AE_NAME_2
+
+    '''
+    fn = 'ALL_DATA.xlsx'
+    full_fn = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, fn)
+    ret = get_ae_pma_data(full_fn, is_getting_sms=False)
+
+    return jsonify(ret)
 
 
 ###########################################################
@@ -3214,3 +3301,22 @@ def get_pwma_data(full_fn):
         pwma[pwma_type][option_text]['slides'].append(filename + '$' + legend_text)
 
     return pwma
+
+
+def mk_graphdata_path(keystr, cq_abbr):
+    '''
+    Make the path for saving graphdata
+    '''
+    full_path = os.path.join(
+        current_app.instance_path, 
+        settings.PUBLIC_PATH_PUBDATA, 
+        keystr, 
+        cq_abbr,
+    )
+    if os.path.exists(full_path):
+        pass
+    else:
+        os.makedirs(full_path, exist_ok=True)
+        print('* created folder %s' % full_path)
+
+    return True

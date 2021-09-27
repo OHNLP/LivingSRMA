@@ -2,9 +2,20 @@
 import json
 from pprint import pprint
 import pandas as pd
+import warnings
 
 import rpy2.robjects as ro
 from rpy2.robjects.packages import importr
+
+# remove the warnings for rpy2
+from rpy2.rinterface import RRuntimeWarning
+warnings.filterwarnings("ignore", category=RRuntimeWarning)
+
+# remove the warnings for rpy2 version > 3
+from rpy2.rinterface_lib.callbacks import logger as rpy2_logger
+import logging
+rpy2_logger.setLevel(logging.ERROR)
+
 from rpy2.robjects import pandas2ri
 pandas2ri.activate()
 
