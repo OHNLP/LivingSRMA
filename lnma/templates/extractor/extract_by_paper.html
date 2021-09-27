@@ -91,7 +91,9 @@ html {
 
         <div class="input-group input-group-sm mr-2"
             style="width: 250px">
-            <input type="text" class="form-control" placeholder="PMID, short #, first author name"
+            <input type="text" 
+                class="form-control" 
+                placeholder="PMID, short #, first author name"
                 v-model="keywords">
             
             <button class="btn btn-sm btn-outline-secondary" type="button"
@@ -162,13 +164,24 @@ html {
                 <button class="btn btn-sm btn-default mr-1"
                     v-on:click="save_working_paper_selections">
                     <i class="fa fa-save"></i>
-                    Save Selections
+                    Save 
                 </button>
-                <button class="btn btn-sm btn-default"
+                <button class="btn btn-sm btn-default mr-1"
                     title="Toggle display selected only"
                     v-on:click="toggle_only_show_selected">
                     <i class="fa" v-bind:class="{'fa-toggle-on': only_show_selected, 'fa-toggle-off': !only_show_selected}"></i>
                     Toggle
+                </button>
+
+                <input type="text" 
+                    style="width: 80px;"
+                    placeholder="Outcome name"
+                    v-model="working_paper_oc_fileter">
+                <button class="btn btn-xs btn-outline-secondary" 
+                    type="button"
+                    title="Reset"
+                    v-on:click="working_paper_oc_fileter=''">
+                    <i class="fa fa-close"></i>
                 </button>
             </div>
 

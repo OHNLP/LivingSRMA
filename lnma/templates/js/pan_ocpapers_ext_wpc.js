@@ -35,6 +35,9 @@ Object.assign(pan_ocpapers.vpp_data, {
     // 1. switch to a different oc/itable
     // 2. switch to a different arm
     is_wp_ac_inited: true,
+
+    // working paper filter for the outcome name
+    working_paper_oc_fileter: ''
 });
 
 // Extend the vpp methods
