@@ -555,7 +555,7 @@ def set_paper_pmid(paper_id, pmid):
         pass
     else:
         # this pmid exists!!!
-        return None, existed_papers[0]
+        return False, existed_papers[0]
 
     # need to check if this pmid exists    
     paper.pid = pmid
