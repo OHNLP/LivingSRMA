@@ -238,8 +238,8 @@ html {
 
                         <div v-for="(cate, cate_idx) in group.cates"
                             v-show="extract_tree[oc_type.oc_type].groups[group.abbr]._is_shown">
-
                             <div class="chk-oc-h3 d-flex flex-row justify-content-between cursor-pointer"
+                                v-if="working_paper_oc_fileter==''"
                                 v-on:click="on_click_toggle(extract_tree[oc_type.oc_type].groups[group.abbr].cates[cate.name])">
                                 <div class="ml-1">
                                     <i v-if="extract_tree[oc_type.oc_type].groups[group.abbr].cates[cate.name]._is_shown" 
@@ -252,7 +252,7 @@ html {
                             </div>
 
                             <div v-for="(oc, oc_idx) in cate.ocs"
-                                v-if="extract_tree[oc_type.oc_type].groups[group.abbr].cates[cate.name]._is_shown && (!only_show_selected || working_paper_oc_selections[oc.abbr])"
+                                v-if="extract_tree[oc_type.oc_type].groups[group.abbr].cates[cate.name]._is_shown && (!only_show_selected || working_paper_oc_selections[oc.abbr]) && (working_paper_oc_fileter=='' || oc.meta.full_name.indexOf(working_paper_oc_fileter)>=0)"
                                 v-bind:id="'chk_oc_line_' + oc.abbr"
                                 class="chk-oc d-flex flex-row">
                                 <div>
