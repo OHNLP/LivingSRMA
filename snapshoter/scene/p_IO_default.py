@@ -25,13 +25,17 @@ def kacha(output_path):
     # first, make the folders
     make_folders(keystr, cq_abbr, output_path)
 
+    pcq_output_path = os.path.join(
+        output_path, keystr, cq_abbr
+    )
+
     # second, copy static files
-    copy_static_files(keystr, output_path, [
+    copy_static_files(keystr, pcq_output_path, [
         'lib/d3'
     ])
     
     # third, copy the graph data
-    copy_graphdata_files(keystr, output_path, [
+    copy_graphdata_files(keystr, pcq_output_path, [
         'img',
         'CONCEPT_IMAGE.svg'
     ])
@@ -70,8 +74,7 @@ def kacha(output_path):
             for rule in rules:
                 # 
                 full_fn = os.path.join(
-                    output_path,
-                    keystr,
+                    pcq_output_path,
                     rule[1]
                 )
                 make_page(client, rule[0], full_fn)

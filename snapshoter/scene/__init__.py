@@ -6,14 +6,22 @@ import pathlib
 def make_folders(keystr, cq_abbr, output_path):
     '''
     Make folders for the static in the given output_path
+
+    The folders will look like:
+
+    output_path/keystr/cq_abbr/
+    output_path/keystr/cq_abbr/pub
+    output_path/keystr/cq_abbr/pub/graphdata
+    output_path/keystr/cq_abbr/pub/graphdata/keystr
+
     '''
     # first, the pub
     folders = [
-        '',
+        '',   # this means create sub-folder under `output_path`
         'pub',
         'pub/graphdata',
         'pub/graphdata/' + keystr,
-        'pub/graphdata/' + keystr + '/' + cq_abbr
+        'static'
     ]
 
     for folder in folders:
@@ -60,7 +68,7 @@ def copy_static_files(keystr, output_path, libs=None):
 
     # get the destination path
     _output_path = os.path.join(
-        output_path, keystr, 'static'
+        output_path, 'static'
     )
 
     # copy these two folders
@@ -95,7 +103,7 @@ def copy_graphdata_files(keystr, output_path, paths):
 
     # get the destination path
     _output_path = os.path.join(
-        output_path, keystr, 'pub', 'graphdata', keystr
+        output_path, 'pub', 'graphdata', keystr
     )
     print('* got _output_path: %s' % _output_path)
 
