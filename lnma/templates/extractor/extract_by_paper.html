@@ -242,7 +242,9 @@ html {
                             <div class="chk-oc-h3 d-flex flex-row justify-content-between cursor-pointer"
                                 v-on:click="on_click_toggle(extract_tree[oc_type.oc_type].groups[group.abbr].cates[cate.name])">
                                 <div class="ml-1">
-                                    <i v-if="cate._is_shown" class="far fa-folder-open"></i>
+                                    <i v-if="extract_tree[oc_type.oc_type].groups[group.abbr].cates[cate.name]._is_shown" 
+                                        class="far fa-folder-open">
+                                    </i>
                                     <i v-else class="far fa-folder"></i>
                                     &nbsp;
                                     - {{ cate.name }}
