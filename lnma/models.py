@@ -525,6 +525,22 @@ class Paper(db.Model):
 
         return full_dict
 
+    
+    def as_quite_simple_dict(self):
+        '''
+        Return the very very simple data of this paper
+        '''
+        d = self.as_simple_dict()
+        del d['paper_id']
+        del d['pid_type']
+        del d['date_updated']
+
+        # delete those for import information
+        if 'xml' in d['meta']: del d['meta']['xml']
+        if 'raw_type' in d['meta']: del d['meta']['raw_type']
+
+        return d
+
 
     def as_very_simple_dict(self):
         '''
@@ -546,22 +562,6 @@ class Paper(db.Model):
         del simple_dict['project_id']
 
         return simple_dict
-
-    
-    def as_quite_simple_dict(self):
-        '''
-        Return the very very simple data of this paper
-        '''
-        d = self.as_simple_dict()
-        del d['paper_id']
-        del d['pid_type']
-        del d['date_updated']
-
-        # delete those for import information
-        if 'xml' in d['meta']: del d['meta']['xml']
-        if 'raw_type' in d['meta']: del d['meta']['raw_type']
-
-        return d
 
 
     def as_endnote_xml(self):
@@ -989,7 +989,7 @@ class Extract(db.Model):
             # itable is not prepared for this purpose
             return None
 
-        if self.oc_type == 'pwma':
+        elif self.oc_type == 'pwma':
             rs = self._get_rs_pwma(paper_dict, is_skip_unselected)
             cfg = self._get_cfg_pwma()
             return {
@@ -997,15 +997,45 @@ class Extract(db.Model):
                 'cfg': cfg
             }
 
+        elif self.oc_type == 'nma':
+            rs = self._get_rs_nma(paper_dict, is_skip_unselected)
+            cfg = self._get_cfg_nma()
+            return {
+                'rs': rs,
+                'cfg': cfg
+            }
+
+        else:
+            # what???
+            return None
+
 
     def _get_cfg_pwma(self):
         '''
         Get the PWMA cfg for analyzer
         '''
-        cfg = copy.deepcopy(self.meta)
+        cfg = {}
 
-        del cfg['attrs']
-        del cfg['cate_attrs']
+        for item in settings.META_ANALYSIS_CONFIG['pwma']:
+            if item in settings.META_ANALYSIS_CONFIG['pwma']:
+                cfg[item] = self.meta[item]
+            else:
+                pass
+
+        return cfg
+
+
+    def _get_cfg_nma(self):
+        '''
+        Get the NMA cfg for analyzer
+        '''
+        cfg = {}
+
+        for item in settings.META_ANALYSIS_CONFIG['nma']:
+            if item in settings.META_ANALYSIS_CONFIG['nma']:
+                cfg[item] = self.meta[item]
+            else:
+                pass
 
         return cfg
 
@@ -1037,25 +1067,51 @@ class Extract(db.Model):
             # copy values of main arm to rs
             r = copy.deepcopy(ext['attrs']['main']['g0'])
 
+            # convert the data type
+            r = util.convert_extract_r_to_number(
+                r,
+                self.meta['input_format']
+            )
+
             # add other information?
             r['pid'] = pid
             r['study'] = study
             r['year'] = year
             r['treatment'] = r_treatment
             r['control'] = r_control
+
+            # ok ...
             rs.append(r)
 
             # copy other arms if exists
             if ext['n_arms'] > 2:
-                for arm in ext['attrs']['other']:
+                for arm_idx, arm in enumerate(ext['attrs']['other']):
                     r = copy.deepcopy(arm['g0'])
+
+                    # convert the data type
+                    r = util.convert_extract_r_to_number(
+                        r,
+                        self.meta['input_format']
+                    )
+
+                    # add other information?
                     r['pid'] = pid
-                    r['study'] = study
+                    r['study'] = study + " (%s)" % (arm_idx+1)
                     r['year'] = year
                     r['treatment'] = r_treatment
                     r['control'] = r_control
+
+                    # ok, finally
                     rs.append(r)
         
+        return rs
+        
+
+    def _get_rs_nma(self, paper_dict, is_skip_unselected=True):
+        '''
+        Get the NMA rs from this outcome for analyzer
+        '''
+        rs = []
         return rs
 
 

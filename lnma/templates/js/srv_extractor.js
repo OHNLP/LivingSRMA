@@ -455,6 +455,11 @@ var srv_extractor = {
             is_copy_main = true;
         }
 
+        // fix the data type error
+        if (typeof(n_arms)=='string') {
+            n_arms = parseInt(n_arms);
+        }
+
         // set the n_arms
         paper_data.n_arms = n_arms;
 

@@ -325,6 +325,11 @@ var pan_ocpapers = {
         on_change_itable_n_arms: function(pmid, event) {
             let n_arms = event.target.value;
             console.log('* change ' + pmid + ' n_arms to ' + n_arms);
+
+            // fix the data type error
+            if (typeof(n_arms)=='string') {
+                n_arms = parseInt(n_arms);
+            }
             
             this.working_oc.data[pmid] = srv_extractor.set_n_arms(
                 this.working_oc.data[pmid], n_arms

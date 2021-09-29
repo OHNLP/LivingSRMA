@@ -76,6 +76,37 @@ SOFTABLE_NMA_COLS = {
                     'Ec_t1', 'Et_t1', 'Ec_t2', 'Et_t2']]
 }
 
+META_ANALYSIS_CONFIG = {
+    "pwma": [
+        # basic config
+        "input_format",
+        "measure_of_effect",
+        "fixed_or_random",
+        "which_is_better",
+
+        # advanced config
+        "pooling_method",
+        "tau_estimation_method",
+        "hakn_adjustment",
+        "smd_estimation_method",
+        "prediction_interval",
+        "sensitivity_analysis",
+        "cumulative_meta_analysis",
+        "cumulative_meta_analysis_sortby",
+    ],
+    "nma": [
+        # basic settings
+        "input_format",
+        "analysis_method",
+        "measure_of_effect",
+        "fixed_or_random",
+        "which_is_better",
+
+        # temp
+        "reference_treatment",
+    ]
+}
+
 OC_TYPE_TPL = {
     "pwma": {
         "default": {

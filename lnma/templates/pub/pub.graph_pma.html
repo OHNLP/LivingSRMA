@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+
+<title>Pairwise MA Results</title>
+<link rel="icon" href="/static/img/favicon.png" type="image/png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" />
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-F3w7mX95PdgyTmZZMECAngseQB83DfGTowi0iMjiWaeVhAn4FJkqJByhZMI3AhiU" crossorigin="anonymous">
+<style>
+
+{% include 'css/basic.css' %}
+{% include 'css/box.css' %}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+.d3-tip {
+    line-height: 1;
+    padding: 6px;
+    background: rgba(0, 0, 0, 0.7);
+    color: #fff;
+    border-radius: 4px;
+    font-size: 12px;
+}
+#league_table_explain {
+    margin: 0 0 10px 0;
+    padding: 0 0 0 40px;
+    font-size: 12px;
+}
+</style>
+</head>
+<body>
+<div id="start-screen">
+    <h1>
+        <i class="fa fa-chart-bar"></i>
+        Study Outcome Graphs
+    </h1>
+    <div id="ss-msg">System initializing ...</div>
+</div>
+
+<div class="flex-container" style="width:100%; height:100%;">
+
+<div id="main-pane">
+    <div class="pane-row">
+        <div class="box" style="width: auto; padding-right: 10px; display: none;" id="tb-nma-league">
+            <div class="box-header">
+                <h4>
+                    <span class="fa fa-table"></span>
+                    LEAGUE TABLE 
+                </h4>
+                <!-- <div style="margin-left: 5px;">
+                    <button onclick="fig_saver.save_png(tb_lgtbd3.svg, 'figure_league_table');">
+                        <i class="far fa-save"></i> Save PNG
+                    </button>
+                </div> -->
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+                <svg id="tb_lgtbd3"></svg>
+
+                <p id="league_table_explain">
+                    The values in each cell represent the relative treatment effect
+                    (and 95% CI) of the treatment on the top, compared to the treatment on the left.
+                </p>
+            </div>
+        </div><!-- .box league table -->
+        
+        <div class="box" style="width: 320px; display: none;" id="tb_ranktb">
+            <div class="box-header">
+                <h4>
+                    <span class="fa fa-dice-d6"></span>
+                    RANK TABLE
+                </h4>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+                <table class="rank_table">
+                    <thead>
+                        <tr>
+                            <th v-for="item in header">
+                                {{ item }}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="item in tabledata">
+                            <td>{{ item.treat }}</td>
+                            <td>{{ item.value }}</td>
+                            <td>{{ item.value_rank }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+        </div><!-- .box rankogram / RANK TABLE -->
+
+        
+    </div>
+        
+
+    <div class="pane-row">
+        <div class="box" style="width: 300px;" id="fg-nma-netplt">
+            <div class="box-header">
+                <h4>
+                    <span class="fa fa-project-diagram"></span>
+                    NETWORK PLOT
+                </h4>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+                <svg id="fg-nma-netplt-svg"></svg>
+            </div>
+        </div><!-- .box network plot -->
+
+        <div class="box" style="width: 360px;" id="fg-nma-frsplt">
+            <div class="box-header">
+                <h4>
+                    <span class="fa fa-align-left"></span>
+                    FOREST PLOT
+                </h4>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+                <svg id="fg-nma-frsplt-svg"></svg>
+            </div>
+        </div><!-- .box forest plot -->
+
+        <div class="box" style="width: 300px; display: none;" id="fg-nma-pscplt">
+            <div class="box-header">
+                <h4>
+                    <span class="fa fa-chart-line"></span>
+                    P-Score PLOT
+                </h4>
+                <!-- <div style="margin-left: 5px;">
+                    <button onclick="var svg = d3.select('#fg-nma-pscplt-div svg');fig_saver.save_png(svg, 'figure_p-score_plot');">
+                        <i class="far fa-save"></i> Save PNG
+                    </button>
+                </div> -->
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+                <div id="fg-nma-pscplt-div"></div>
+            </div>
+        </div><!-- .box P-Score plot -->
+
+        
+
+    </div><!-- .pane-row -->
+    
+    
+    
+</div>
+
+</div><!-- .flex-container -->
+
+<!-- use third party libs -->
+
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<!-- jQuery UI -->
+<script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
+<!-- Vue.js -->
+<script src="https://cdn.jsdelivr.net/npm/vue@2.6.11"></script>
+<!-- filesaver -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js"></script>
+<!-- dayjs -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.8.36/dayjs.min.js"></script>
+
+<!-- chart.js -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
+<!-- PapaParse -->
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.1/papaparse.min.js"></script> -->
+<!-- Shepherd -->
+<script src="https://cdn.jsdelivr.net/npm/shepherd.js@8.3.1/dist/js/shepherd.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/shepherd.js@8.3.1/dist/css/shepherd.css">
+
+<!-- bootstrap -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-/bQdsTh/da6pkI1MST/rWKFNjaCP5gBSY4sEBT38Q/9RBh9AH40zEOg7Hlq2THRZ" crossorigin="anonymous"></script>
+
+
+<!-- for IE -->
+<script>
+var isIE = /*@cc_on!@*/false || !!document.documentMode;
+if (isIE) {
+    document.getElementById('ss-msg').innerHTML = 'The functions used in this website require advanced web technologies, which are <b>NOT</b> supported by Internet Explorer<br>Try using Google Chrome, Apple Safari, Mozilla Firefox or other modern browsers.';
+}
+</script>
+
+<!-- My Scripts -->
+<script>
+
+{% include 'js/srv_pubmed.js' %}
+
+///////////////////////////////////////////////////////////
+// The plots for PWMA
+///////////////////////////////////////////////////////////
+{% include 'js/fgmk_prim_forest.js' %}
+
+// Alias for the pwma plots
+var fg_pwma_prim_forest = fgmk_prim_forest.make_fig(
+    'fg_pwma_prim_forest'
+);
+
+var jarvis = {
+    get_url_paramter: function(name) {
+        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+        var results = regex.exec(location.search);
+        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    },
+
+    ssmsg: function(msg) {
+        $('#ss-msg').html(msg);
+    },
+
+    ssclose: function() {
+        $('#start-screen').hide();
+    },
+
+    draw: function(data) {
+
+        // update the network plot
+        fg_netplt.draw(data.netplt);
+
+        // update the league table
+        tb_lgtbd3.draw(data.league);
+
+        // update the forest plot
+        data.forest.subtitle = '';
+        // data.forest.sm = 'RR';
+        fg_frsplt.draw(data.forest);
+
+        // update the sucra rank
+        if (typeof(data.tmrank) != 'undefined') {
+            tb_ranktb.draw(data.tmrank);
+        }
+        
+        // update the pscore rank
+        if (typeof(data.psrank) != 'undefined') {
+            tb_ranktb.draw(data.psrank);
+            fg_pscplt.draw(data.psrank);
+        }
+    },
+    
+    init: function() {
+        
+        var isIE = /*@cc_on!@*/false || !!document.documentMode;
+
+        console.log('* User is using IE:', isIE);
+        if (isIE) {
+            jarvis.ssmsg('The functions used in this website require advanced web technologies, which are <b>NOT</b> supported by Internet Explorer<br>Try using Google Chrome, Apple Safari, Mozilla Firefox or other modern browsers.')
+            return;
+        }
+
+        fg_netplt.init();
+        fg_frsplt.init();
+        
+        // increase the table size
+        tb_lgtbd3.width_cell = 78;
+        tb_lgtbd3.height_cell = 38;
+        tb_lgtbd3.init();
+        tb_ranktb.init();
+        
+        fg_pscplt.width = 350;
+        fg_pscplt.height = 270;
+        fg_pscplt.init();
+
+        // get filename
+        var prj = jarvis.get_url_paramter('prj');
+        var fn = jarvis.get_url_paramter('fn');
+        jarvis.ssmsg('Loading data ...');
+
+        $.get(
+            "/pub/graphdata/" + prj + "/" + fn,
+            {ver: Math.random()},
+            function(data) {
+                jarvis.draw(data.data);
+                jarvis.ssmsg('Data loaded!');
+                setTimeout('jarvis.ssclose();', 300);
+            }, 'json'
+        );
+
+        
+    }
+};
+
+$(document).ready(function() {
+    jarvis.init();
+})
+
+</script>
+</body>
+</html>

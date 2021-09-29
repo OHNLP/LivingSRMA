@@ -1218,6 +1218,60 @@ def make_ss_cq_decision(d, r, c):
     }
 
 
+def hash_json(j):
+    '''
+    Hash a json (Python Dictionary) object
+    '''
+    # first, convert the json to a string
+    s = json.dumps(j, sort_keys=True, indent=2)
+
+    # second, hash it!
+    h = hashlib.md5(s.encode("utf-8")).hexdigest()
+
+    return h
+
+
+def val2int(v):
+    ret = v
+    if type(v) == str:
+        ret = float(v)
+    elif type(v) == int:
+        ret = v
+    elif type(v) == float:
+        ret = int(v)
+
+    return ret
+
+
+def val2float(v):
+    ret = v
+    if type(v) == str:
+        ret = float(v)
+    elif type(v) == int:
+        ret = float(v)
+    elif type(v) == float:
+        ret = v
+
+    return ret
+
+
+def convert_extract_r_to_number(r, input_format):
+    '''
+    A helper function to change the values
+    '''
+    if input_format == 'PRIM_CAT_RAW':
+        for col in ['Et', 'Nt', 'Ec', 'Nc']:
+            r[col] = val2int(r[col])
+
+    elif input_format == 'PRIM_CAT_PRE':
+        for col in ['TE', 'lowerci', 'upperci']:
+            r[col] = val2float(r[col])
+    else:
+        pass
+
+    return r
+
+
 if __name__ == "__main__":
     fn = '/home/hehuan/Downloads/endnote_test.xml'
     fn = '/home/hehuan/Downloads/endnote_test_large.xml'

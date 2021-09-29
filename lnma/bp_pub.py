@@ -31,6 +31,7 @@ from lnma import srv_extract
 from lnma import srv_project
 from lnma import srv_pub_itable
 from lnma import srv_pub_prisma
+from lnma import srv_pub_pma
 
 import PythonMeta as PMA
 
@@ -396,7 +397,6 @@ def oplot_v2():
     return render_template('pub/pub.oplot_v2.html')
 
 
-
 @bp.route('/softable_pma.html')
 def softable_pma():
     prj = request.args.get('prj')
@@ -713,7 +713,7 @@ def graphdata_softable_pma_json(keystr):
         return jsonify(ret)
 
     if src == 'db':
-        ret = srv_extract.get_sof_pma_data_from_db(
+        ret = srv_pub_pma.get_sof_pma_data_from_db(
             keystr, cq_abbr, is_calc_pma=True
         )
 

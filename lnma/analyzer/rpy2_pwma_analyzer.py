@@ -4,6 +4,8 @@ from pprint import pprint
 import pandas as pd
 import warnings
 
+import numpy as np
+
 import rpy2.robjects as ro
 from rpy2.robjects.packages import importr
 
@@ -19,13 +21,15 @@ rpy2_logger.setLevel(logging.ERROR)
 from rpy2.robjects import pandas2ri
 pandas2ri.activate()
 
-from lnma.analyzer.rpadapter import _meta_trans_metabin, _meta_trans_metacum, _meta_trans_metaprop
+from lnma.analyzer.rpadapter import _meta_trans_metabin
+from lnma.analyzer.rpadapter import _meta_trans_metagen
+from lnma.analyzer.rpadapter import _meta_trans_metacum
+from lnma.analyzer.rpadapter import _meta_trans_metaprop
 
 #%% load R packages
 meta = importr('meta')
 jsonlite = importr('jsonlite')
 
-#%% create dataframe
 def demo():
     '''
     A demo case for showing how to use
@@ -73,39 +77,71 @@ def demo():
     print('cumuma: ', j['cumuma']['TE'][-1])
 
 
-#%% analyzer
-
-def analyze(rs, cfg):
+def demo2():
     '''
-    Analyze the records as the parameters in cfg
+    A demo case for showing how to use
     '''
-    if cfg['analyzer_model'] == 'PWMA_PRCM':
-        return analyze_pwma_prcm(rs, cfg)
+    df = pd.DataFrame(
+        [
+            [1,131,0,132,'S1',2021],
+            [2,380,0,132,'S2',2021],
+            [2,355,0,342,'S3',2021],
+            [9,348,4,344,'S4',2021],
+        ], 
+        columns=['Et','Nt','Ec','Nc','study','year']
+    )
 
-    elif cfg['analyzer_model'] == 'PWMA_PRBN':
-        return analyze_pwma_prcm(rs, cfg, has_cumu=False)
+    #%% analyze!
+    r_prim = meta.metabin(
+        df.Et,df.Nt,df.Ec,df.Nc,
+        studlab=df.study,
+        comb_random=True,
+        sm='OR'
+    )
 
-    elif cfg['analyzer_model'] == 'PWMA_INCD':
-        return analyze_pwma_incd(rs, cfg, has_cumu=True)
+    # get the cumulative
+    r_cumu = meta.metacum(
+        r_prim,
+        pooled="random",
+        sortvar=df['year']
+    )
 
-    else:
-        return analyze_pwma_prcm(rs, cfg)
+    # convert to R json object
+    r_j_prim = jsonlite.toJSON(r_prim, force=True)
+    r_j_cumu = jsonlite.toJSON(r_cumu, force=True)
+
+    # convert to Python JSON object
+    j_prim = json.loads(r_j_prim[0])
+    j_cumu = json.loads(r_j_cumu[0])
+
+    # for compability
+    j = {
+        'primma': j_prim,
+        'cumuma': j_cumu,
+    }
+    pprint(j)
+    print('primma: ', j['primma']['TE.random'])
+    print('cumuma: ', j['cumuma']['TE'][-1])
 
 
-def analyze_pwma_cat_pre(rs, cfg):
+def analyze_pwma_cat_raw(rs, cfg):
     '''
-    Analyze the primary of Categorical pre-calculated
+    Analyze the primary of Categorical Raw Data
+
+    The given rs should contains:
+
+    study, Et, Nt, Ec, Nc
     '''
     # create a dataframe first
     df = pd.DataFrame(rs)
 
     # get the primary
-    r_prim = meta.metagen(
-        df.TE, df.SE,
+    r_prim = meta.metabin(
+        df.Et, df.Nt, df.Ec, df.Nc,
         studlab=df.study,
         comb_random=cfg['fixed_or_random']=='random',
         sm=cfg['measure_of_effect'],
-        hakn=True if cfg['is_hakn'] == 'TRUE' else False,
+        hakn=True if cfg['hakn_adjustment'] == 'TRUE' else False,
         method=cfg['pooling_method'],
         method_tau=cfg['tau_estimation_method']
     )
@@ -132,6 +168,91 @@ def analyze_pwma_cat_pre(rs, cfg):
     }
 
     return ret
+
+
+def analyze_pwma_cat_pre(rs, cfg):
+    '''
+    Analyze the primary of Categorical pre-calculated
+
+    The given rs should contains:
+
+    study, TE, upperci, lowerci
+    '''
+    # create a dataframe first
+    df = pd.DataFrame(rs)
+
+    # convert the TE
+    df['TE'] = np.log(df['TE'])
+
+    # usually the SE is not in the data
+    if 'SE' not in df.columns:
+        # need to convert the SE
+        df['SE'] = (np.log(df['upperci']) - np.log(df['lowerci'])) / 3.92
+
+    # get the primary
+    r_prim = meta.metagen(
+        df.TE, df.SE,
+        studlab=df.study,
+        sm=cfg['measure_of_effect'],
+        comb_fixed=cfg['fixed_or_random']=='fixed',
+        comb_random=cfg['fixed_or_random']=='random',
+        method_tau=cfg['tau_estimation_method'],
+        hakn=True if cfg['hakn_adjustment'] == 'TRUE' else False
+    )
+
+    # convert to R json object
+    r_j_prim = jsonlite.toJSON(r_prim, force=True)
+
+    # convert to Python JSON object
+    j_prim = json.loads(r_j_prim[0])
+
+    # for compability
+    j = {
+        'primma': j_prim,
+    }
+
+    # build the return
+    ret = {
+        'submission_id': 'rpy2',
+        'params': cfg,
+        'success': True,
+        'data': {
+            'primma': _meta_trans_metagen(j, cfg)
+        }
+    }
+
+    return ret
+
+
+###########################################################
+# Analyzer for the IO project API usage
+###########################################################
+
+def analyze(rs, cfg):
+    '''
+    Analyze the records as the parameters in cfg
+    '''
+    # for IO API
+    if 'analyzer_model' in cfg:
+        if cfg['analyzer_model'] == 'PWMA_PRCM':
+            return analyze_pwma_prcm(rs, cfg)
+
+        elif cfg['analyzer_model'] == 'PWMA_PRBN':
+            return analyze_pwma_prcm(rs, cfg, has_cumu=False)
+
+        elif cfg['analyzer_model'] == 'PWMA_INCD':
+            return analyze_pwma_incd(rs, cfg, has_cumu=True)
+
+        else:
+            return analyze_pwma_prcm(rs, cfg)
+
+    # for general analyze
+    if 'input_format' in cfg:
+        if cfg['input_format'] == 'PRIM_CAT_PRE':
+            return analyze_pwma_cat_pre(rs, cfg)
+
+        elif cfg['input_format'] == 'PRIM_CAT_RAW':
+            return analyze_pwma_cat_raw(rs, cfg)
 
 
 def analyze_pwma_prcm(rs, cfg, has_cumu=True):
@@ -245,6 +366,10 @@ def analyze_pwma_incd(rs, cfg, has_cumu=True):
     return ret
 
 
+###########################################################
+# A wrapper for compatibility with py_pwma_analyzer
+###########################################################
+
 def get_pma(dataset, datatype='CAT_RAW', 
     sm='RR', method='MH', fixed_or_random='random'):
     '''
@@ -301,3 +426,7 @@ def get_pma(dataset, datatype='CAT_RAW',
         ret['stus'][i]['upper'] = ret['stus'][i]['bt_upper']
 
     return ret
+
+
+if __name__ == '__main__':
+    demo()
