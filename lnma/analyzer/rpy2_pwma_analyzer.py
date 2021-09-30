@@ -194,7 +194,6 @@ def analyze_pwma_cat_pre(rs, cfg):
         df.TE, df.SE,
         studlab=df.study,
         sm=cfg['measure_of_effect'],
-        comb_fixed=cfg['fixed_or_random']=='fixed',
         comb_random=cfg['fixed_or_random']=='random',
         method_tau=cfg['tau_estimation_method'],
         hakn=True if cfg['hakn_adjustment'] == 'TRUE' else False

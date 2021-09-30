@@ -97,8 +97,7 @@ a {
     font-weight: bold;
 }
 .oc-type-selected {
-    background-color: #555555;
-    color: #ffffff;
+    border: 1px dotted #555555;
     font-weight: bold;
 }
 .oc-cate {
@@ -370,9 +369,15 @@ a {
     <div id="tb_sofpma">
         <div class="box" style="height: 100%;">
             <div class="box-header">
-                <h4>
-                    <i class="fa fa-table"></i>
-                </h4>
+                <div class="d-flex fx-row">
+
+
+                    <button class="btn"
+                        v-on:click="remove_all_ocs();">
+                        <i class="far fa-trash-alt"></i>
+                        Remove All
+                    </button>
+                </div>
                 <div class="d-flex fx-row">
                     <div class="box-menu-group d-flex fx-row">
                         <div>
@@ -453,7 +458,9 @@ a {
                     </tr>
                     <tbody v-for="grade in ['GA', 'G3H', 'G5N']">
                         <tr>
-                            <th class="col-ta-left" colspan="7">{{ get_grade_label(grade) }}</th>
+                            <th class="col-ta-left" colspan="7">
+                                {{ get_grade_label(grade) }}
+                            </th>
                         </tr>
 
                         <tr v-for="r, oc_abbr in tbrs[grade]">
@@ -583,6 +590,19 @@ var app_softpma = {
                     jarvis.toggle_oc(oc_abbr, oc_group, oc_cate, oc_name, ae_grade);
                 },
 
+                remove_all_ocs: function() {
+                    for (const ae_grade in this.tbrs) {
+                        if (Object.hasOwnProperty.call(this.tbrs, ae_grade)) {
+                            this.tbrs[ae_grade] = {};
+                        }
+                    }
+                    
+                    this.$forceUpdate();
+
+                    // update the UI
+                    $('.oc-type-selected').removeClass('oc-type-selected');
+                },
+
                 get_grade_label: function(g) {
                     return jarvis.texts[g];
                 },
@@ -710,6 +730,7 @@ var app_softpma = {
                     }
                     if (sm < 1) {
                         return 'cie-bene-' + cie;
+                        // return '';
                     } else if (sm > 1) {
                         return 'cie-harm-' + cie;
                     } else {

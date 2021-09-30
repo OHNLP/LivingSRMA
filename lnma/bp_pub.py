@@ -617,8 +617,10 @@ def graphdata_graph_pma_json(keystr):
         return jsonify(ret)
 
     # get the result for database
-    ret = srv_extract.get_sof_pma_data_from_db(
-        keystr, cq_abbr, is_calc_pma= calc is 'yes'
+    ret = srv_pub_pma.get_sof_pma_data_from_db(
+        keystr, 
+        cq_abbr, 
+        is_calc_pma= calc is 'yes'
     )
 
     # catch the result

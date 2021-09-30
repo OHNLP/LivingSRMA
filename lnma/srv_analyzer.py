@@ -35,5 +35,6 @@ def get_pma(extract, paper_dict, is_skip_unselected=True):
         rscfg['cfg']
     )
     
-    return result
+    # we only the data part
+    return rscfg['rs'], rscfg['cfg'], result['data']
     

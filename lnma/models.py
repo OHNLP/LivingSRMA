@@ -1022,6 +1022,13 @@ class Extract(db.Model):
             else:
                 pass
 
+        # more information about the config
+        cfg['external_val'] = 0
+        cfg['has_internal_val'] = self.meta['input_format'] == 'PRIM_CAT_RAW'
+        cfg['survival_in_control'] = 0
+        cfg['internal_val_ec'] = 0
+        cfg['internal_val_et'] = 0
+
         return cfg
 
 
@@ -1036,6 +1043,13 @@ class Extract(db.Model):
                 cfg[item] = self.meta[item]
             else:
                 pass
+
+        # more information about the config
+        cfg['external_val'] = 0
+        cfg['has_internal_val'] = self.meta['input_format'] == 'PRIM_CAT_RAW'
+        cfg['survival_in_control'] = 0
+        cfg['internal_val_ec'] = 0
+        cfg['internal_val_et'] = 0
 
         return cfg
 

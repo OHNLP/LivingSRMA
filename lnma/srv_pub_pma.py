@@ -80,13 +80,22 @@ def get_pma_by_cq(keystr, cq_abbr="default", included_in='sof'):
             continue
 
         # put the oc into dict
+        oc_rs, oc_cfg, oc_result = srv_analyzer.get_pma(
+            extract, 
+            paper_dict, 
+            is_skip_unselected=True
+        )
         oc_dict[abbr] = {
             'extract': extract.as_very_simple_dict(),
-            'result': srv_analyzer.get_pma(
-                extract, 
-                paper_dict, 
-                is_skip_unselected=True
-            )
+
+            # add the detail cfg
+            'config': oc_cfg,
+
+            # use the sm as the key, since there may be more results
+            # for example, HR, RR, OR, etc.
+            'result': {
+                extract.meta['measure_of_effect']: oc_result
+            }
         }
     
     ret = {
