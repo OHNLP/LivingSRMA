@@ -748,10 +748,10 @@ var app_softpma = {
 
                 flip_cell: function(ae_grade, r, cell) {
                     // first, find this ae in rs
-                    if (this.rs[ae_grade].hasOwnProperty(r.abbr)) {
+                    if (this.tbrs[ae_grade].hasOwnProperty(r.abbr)) {
                         // flip this cell!
-                        this.rs[ae_grade][r.abbr].is_show[cell] = 
-                            !this.rs[ae_grade][r.abbr].is_show[cell];
+                        this.tbrs[ae_grade][r.abbr].is_show[cell] = 
+                            !this.tbrs[ae_grade][r.abbr].is_show[cell];
                     } else {
                         // how can it be ???
                     }
