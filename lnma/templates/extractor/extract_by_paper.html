@@ -252,7 +252,7 @@ html {
                             </div>
 
                             <div v-for="(oc, oc_idx) in cate.ocs"
-                                v-if="extract_tree[oc_type.oc_type].groups[group.abbr].cates[cate.name]._is_shown && (!only_show_selected || working_paper_oc_selections[oc.abbr]) && (working_paper_oc_fileter=='' || oc.meta.full_name.indexOf(working_paper_oc_fileter)>=0)"
+                                v-if="extract_tree[oc_type.oc_type].groups[group.abbr].cates[cate.name]._is_shown && (!only_show_selected || working_paper_oc_selections[oc.abbr]) && (working_paper_oc_fileter=='' || is_substr(oc.meta.full_name, working_paper_oc_fileter))"
                                 v-bind:id="'chk_oc_line_' + oc.abbr"
                                 class="chk-oc d-flex flex-row">
                                 <div>

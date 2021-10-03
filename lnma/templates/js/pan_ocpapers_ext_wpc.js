@@ -192,6 +192,20 @@ Object.assign(pan_ocpapers.vpp_methods, {
 
     },
 
+    is_substr: function(text, sub) {
+        if (typeof(sub)=='undefined' || sub == null) {
+            return true;
+        }
+        sub = sub.trim();
+        var upper_text = text.toLocaleUpperCase();
+        var upper_sub = sub.toLocaleUpperCase();
+        if (upper_text.indexOf(upper_sub) >= 0) {
+            return true;
+        } else {
+            return false;
+        }
+    },
+
     clear_input: function() {
 
     }
