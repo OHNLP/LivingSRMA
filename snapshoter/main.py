@@ -6,6 +6,8 @@
 # This source code is licensed under the Apache 2.0 license found in the
 # LICENSE file in the root directory of this source tree.
 #
+import sys
+sys.path.append('..')
 
 import os
 import json
@@ -33,7 +35,7 @@ def kacha(keystr, cq_abbr, output_path):
     '''
     Take a snapshot
 
-    This function will create a 
+    This function will create a sub folder in the output_path.
     '''
     # first of all, remove the old kacha?
     prj_path = os.path.join(
