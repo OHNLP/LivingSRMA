@@ -112,10 +112,14 @@ var vw_uploader_userinput = {
         // update UI
         this.vpp.btn_import.disabled = true;
 
+        // remove blanks
+        var pid = this.vpp.$data.paper.pid.trim();
+        var nct = this.vpp.$data.paper.nct.trim();
+
         // create form for upload
         srv_importer.import_one_pmid(
-            this.vpp.$data.paper.pid,
-            this.vpp.$data.paper.nct,
+            pid,
+            nct,
             function(data) {
                 vw_uploader_userinput.show_result(data);
             }

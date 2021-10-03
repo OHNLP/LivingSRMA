@@ -153,6 +153,10 @@ def import_one_pmid():
             'msg': 'project not found'
         })
 
+    # check data
+    pmid = pmid.strip()
+    nct = nct.strip()
+
     is_success, paper = srv_import.import_by_pmid(
         project.keystr, 
         pmid,

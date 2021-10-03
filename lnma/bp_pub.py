@@ -536,7 +536,10 @@ def graphdata_itable_json(keystr):
         return jsonify(ret)
 
     if src == 'db':
-        ret = srv_pub_itable.get_itable_attr_rs_cfg_from_db(keystr)
+        ret = srv_pub_itable.get_itable_attr_rs_cfg_from_db(
+            keystr,
+            cq_abbr
+        )
 
         if ret is None:
             ret = {
