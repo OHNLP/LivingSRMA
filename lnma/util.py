@@ -1266,6 +1266,15 @@ def convert_extract_r_to_number(r, input_format):
     elif input_format == 'PRIM_CAT_PRE':
         for col in ['TE', 'lowerci', 'upperci']:
             r[col] = val2float(r[col])
+
+    elif input_format == 'NMA_PRE_SMLU':
+        for col in ['sm', 'lowerci', 'upperci']:
+            r[col] = val2float(r[col])
+
+    elif input_format == 'NMA_RAW_ET':
+        for col in ['event_t1', 'total_t1', 'event_t2', 'total_t2']:
+            r[col] = val2int(r[col])
+
     else:
         pass
 

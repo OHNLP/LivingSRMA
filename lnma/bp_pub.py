@@ -32,6 +32,8 @@ from lnma import srv_project
 from lnma import srv_pub_itable
 from lnma import srv_pub_prisma
 from lnma import srv_pub_pma
+from lnma import srv_pub_nma
+
 
 import PythonMeta as PMA
 
@@ -642,8 +644,50 @@ def graphdata_graph_pma_json(keystr):
     return jsonify(ret)
 
 
+@bp.route('/graphdata/<keystr>/GRAPH_NMA.json')
+def graphdata_graph_nma_json(keystr):
+    '''
+    Special rule for the grpah data of NMA
+    '''
+    src = request.args.get('src')
+    if src is None or src == '':
+        # set the default to get things from db
+        src = 'db'
+
+    cq_abbr = request.args.get('cq')
+    if cq_abbr is None or cq_abbr == '':
+        cq_abbr = 'default'
+
+    # get the cache path
+    output_fn = 'GRAPH_NMA.json'
+    full_output_fn = os.path.join(
+        current_app.instance_path, 
+        settings.PUBLIC_PATH_PUBDATA, 
+        keystr, 
+        cq_abbr,
+        output_fn
+    )
+
+    # make the cache
+    mk_graphdata_path(keystr, cq_abbr)
+
+    if src == 'cache':
+        ret = json.load(open(full_output_fn))
+        return jsonify(ret)
+
+    # get the result for database
+    ret = srv_pub_nma.get_graph_nma_data_from_db(
+        keystr, 
+        cq_abbr
+    )
+
+    # catch the result
+    json.dump(ret, open(full_output_fn, 'w'), default=util.json_encoder)
+
+    return jsonify(ret)
+
+
 @bp.route('/graphdata/<prj>/GRAPH.json')
-@bp.route('/graphdata/<prj>/GRAPH_NMA.json')
 def graphdata_graph_json(prj):
     '''
     Special rule for the graphs.

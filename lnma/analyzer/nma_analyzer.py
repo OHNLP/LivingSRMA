@@ -81,14 +81,14 @@ def analyze(rs, cfg):
             ret = analyze_raw_by_bugsnet(rs, params)
 
     elif cfg['backend'] == 'freq':
-        if cfg['input_format'] == INPUT_FORMATS_ET:
+        if cfg['input_format'] == INPUT_FORMATS_ET or cfg['input_format'] == 'NMA_RAW_ET':
             ret = analyze_raw_by_freq(rs, params)
         elif cfg['input_format'] == INPUT_FORMATS_FTET:
             ret = analyze_raw_by_freq(rs, params)
-        elif cfg['input_format'] == INPUT_FORMATS_HRLU:
+        elif cfg['input_format'] == INPUT_FORMATS_HRLU or cfg['input_format'] == 'NMA_PRE_SMLU':
             ret = analyze_pre_by_freq(rs, params)
         else:
-            ret = {}
+            ret = analyze_pre_by_freq(rs, params)
     else:
         ret = {}
 
@@ -291,6 +291,7 @@ def analyze_raw_by_freq(rs, params):
         measure_of_effect
         reference_treatment
         which_is_better
+        format_converted
     '''
     
     # prepare the r script
@@ -312,29 +313,36 @@ def analyze_raw_by_freq(rs, params):
     # convert to dataframe
     df = pd.DataFrame(rs)
 
-    # output data for netmeta pairwise
-    rs2 = OrderedDict()
-    for idx, row in df.iterrows():
-        # add the treatment 1
-        study = row['study']
-        
-        if study not in rs2: rs2[study] = { 'study': study }
-        if 'treat1' not in rs2[study]:
-            rs2[study]['treat1'] = row['treat']
-            rs2[study]['event1'] = row['event']
-            rs2[study]['n1'] = row['total']
-        elif 'treat2' not in rs2[study]:
-            rs2[study]['treat2'] = row['treat']
-            rs2[study]['event2'] = row['event']
-            rs2[study]['n2'] = row['total']
-        else:
-            pass
-    
-    rs2 = list(rs2.values())
+    if 'format_converted' in params:
+        # output data for netmeta pairwise
+        # this means this rs has been converted to t1e1n1 - t2e2n2 format
+        df.to_csv(full_filename_csvfile, index=False)
 
-    # output the rs2 as csv
-    df2 = pd.DataFrame(rs2)
-    df2.to_csv(full_filename_csvfile, index=False)
+    else:
+        # output data for netmeta pairwise
+        rs2 = OrderedDict()
+        for idx, row in df.iterrows():
+            # add the treatment 1
+            study = row['study']
+            
+            if study not in rs2: rs2[study] = { 'study': study }
+            if 'treat1' not in rs2[study]:
+                rs2[study]['treat1'] = row['treat']
+                rs2[study]['event1'] = row['event']
+                rs2[study]['n1'] = row['total']
+            elif 'treat2' not in rs2[study]:
+                rs2[study]['treat2'] = row['treat']
+                rs2[study]['event2'] = row['event']
+                rs2[study]['n2'] = row['total']
+            else:
+                pass
+        
+        rs2 = list(rs2.values())
+
+        # output the rs2 as csv
+        df2 = pd.DataFrame(rs2)
+        df2.to_csv(full_filename_csvfile, index=False)
+
 
     # generate an R script for producing the results
     gen_rscript(

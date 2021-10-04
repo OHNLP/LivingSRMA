@@ -1126,6 +1126,77 @@ class Extract(db.Model):
         Get the NMA rs from this outcome for analyzer
         '''
         rs = []
+        for pid in self.data:
+            ext = self.data[pid]
+
+            if pid in paper_dict:
+                study = paper_dict[pid].get_short_name()
+                year = paper_dict[pid].get_year()
+            else:
+                study = '%s' % pid
+                year = 'NA'
+
+            if not ext['is_selected'] and is_skip_unselected:
+                continue
+            
+            # copy values of main arm to rs
+            r = copy.deepcopy(ext['attrs']['main']['g0'])
+
+            # convert the data type
+            r = util.convert_extract_r_to_number(
+                r,
+                self.meta['input_format']
+            )
+
+            # add other information?
+            r['pid'] = pid
+            r['study'] = study
+            r['year'] = year
+
+            # add alia names if the data type is raw
+            if self.meta['input_format'] == 'NMA_PRE_SMLU':
+                pass
+            elif self.meta['input_format'] == 'NMA_RAW_ET':
+                r['treat1'] = r['t1']
+                r['treat2'] = r['t2']
+                r['event1'] = r['event_t1']
+                r['event2'] = r['event_t2']
+                r['n1'] = r['total_t1']
+                r['n2'] = r['total_t2']
+
+            # ok ...
+            rs.append(r)
+
+            # copy other arms if exists
+            if ext['n_arms'] > 2:
+                for arm_idx, arm in enumerate(ext['attrs']['other']):
+                    r = copy.deepcopy(arm['g0'])
+
+                    # convert the data type
+                    r = util.convert_extract_r_to_number(
+                        r,
+                        self.meta['input_format']
+                    )
+
+                    # add other information?
+                    r['pid'] = pid
+                    r['study'] = study + " (%s)" % (arm_idx+1)
+                    r['year'] = year
+
+                    # add alia names if the data type is raw
+                    if self.meta['input_format'] == 'NMA_PRE_SMLU':
+                        pass
+                    elif self.meta['input_format'] == 'NMA_RAW_ET':
+                        r['treat1'] = r['t1']
+                        r['treat2'] = r['t2']
+                        r['event1'] = r['event_t1']
+                        r['event2'] = r['event_t2']
+                        r['n1'] = r['total_t1']
+                        r['n2'] = r['total_t2']
+
+                    # ok, finally
+                    rs.append(r)
+        
         return rs
 
 
