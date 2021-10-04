@@ -48,7 +48,7 @@ var srv_shared = {
 
     /**
      * Create an extract tree
-     *  the extract tree is a tree-shape data structure
+     * the extract tree is a tree-shape data structure
         {
             itable: {},
             pwma: {

@@ -183,8 +183,13 @@
         PAIRWISE META-ANALYSIS
     </h3>
     <p>
-        Results are summarized as forest plots for primary analysis, sensitivity analysis and subgroup pairwise meta-analysis. Users can choose to view results for their outcome of interest using the dropdown menu (“Select outcome”).
+        Results are summarized as forest plots for primary analysis. Users can choose to view results for their outcome of interest.
     </p>
+    <div class="row">
+        <div class="col">
+            <iframe src="[[ url_for('pub.graph_pma', prj='RCC', cq='adjrcc', group='primary') ]]" frameborder="0" style="width: 100%; min-height: 500px;"></iframe>
+        </div>
+    </div>
 </div>
 
 

@@ -246,12 +246,15 @@ def analyze(rs, cfg):
             return analyze_pwma_prcm(rs, cfg)
 
     # for general analyze
+    ret = None
     if 'input_format' in cfg:
         if cfg['input_format'] == 'PRIM_CAT_PRE':
-            return analyze_pwma_cat_pre(rs, cfg)
+            ret = analyze_pwma_cat_pre(rs, cfg)
 
         elif cfg['input_format'] == 'PRIM_CAT_RAW':
-            return analyze_pwma_cat_raw(rs, cfg)
+            ret = analyze_pwma_cat_raw(rs, cfg)
+
+    return ret
 
 
 def analyze_pwma_prcm(rs, cfg, has_cumu=True):

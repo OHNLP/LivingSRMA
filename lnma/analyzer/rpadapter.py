@@ -920,7 +920,12 @@ def _meta_trans_metagen(j, params):
                 'seTE': data['seTE.random'][0],
                 'sm': _round(np.e ** data['TE.random'][0], 3),
                 'lower': _round(np.e ** data['lower.random'][0], 3),
-                'upper': _round(np.e ** data['upper.random'][0], 3)
+                'upper': _round(np.e ** data['upper.random'][0], 3),
+                'bt_TE': _round(np.e ** data['TE.random'][0], 3),
+                'bt_lower': _round(np.e ** data['lower.random'][0], 3),
+                'bt_upper': _round(np.e ** data['upper.random'][0], 3),
+                'w_random': 1,
+                'w_fixed': 1
             }
         },
         'heterogeneity': {
@@ -940,8 +945,11 @@ def _meta_trans_metagen(j, params):
             'sm': _round(np.e ** data['TE'][i], 3),
             'lower': _round(np.e ** data['lower'][i], 3),
             'upper': _round(np.e ** data['upper'][i], 3),
-            'w.random': _round(data['w.random'][i] / np.sum(data['w.random']), 4),
-            'w.fixed': _round(data['w.fixed'][i] / np.sum(data['w.fixed']), 4)
+            'bt_TE': _round(np.e ** data['TE'][i], 3),
+            'bt_lower': _round(np.e ** data['lower'][i], 3),
+            'bt_upper': _round(np.e ** data['upper'][i], 3),
+            'w_random': _round(data['w.random'][i] / np.sum(data['w.random']), 4),
+            'w_fixed': _round(data['w.fixed'][i] / np.sum(data['w.fixed']), 4)
         })
 
     return ret

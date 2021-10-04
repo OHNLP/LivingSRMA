@@ -1,3 +1,4 @@
+import enum
 from lnma import settings
 from lnma import util
 from lnma.analyzer import rpy2_pwma_analyzer as pwma_analyzer
@@ -34,6 +35,25 @@ def get_pma(extract, paper_dict, is_skip_unselected=True):
         rscfg['rs'],
         rscfg['cfg']
     )
+
+    # patch the pid into the result stus
+    dict_stu2pid = {}
+    for r in rscfg['rs']:
+        study = r['study']
+        pid = r['pid']
+        dict_stu2pid[study] = pid
+
+    if 'primma' in result['data']:
+        for i, _ in enumerate(result['data']['primma']['stus']):
+            # get the study name which is used for analysis
+            study_name = result['data']['primma']['stus'][i]['name']
+
+            # convert to the pid
+            pid = dict_stu2pid[study_name]
+
+            # set the pid to this record
+            result['data']['primma']['stus'][i]['pid'] = pid
+
     
     # we only the data part
     return rscfg['rs'], rscfg['cfg'], result['data']

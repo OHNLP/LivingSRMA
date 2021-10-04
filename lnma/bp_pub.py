@@ -357,6 +357,16 @@ def itable():
     return render_template('pub/pub.itable.html')
 
 
+@bp.route('/graph_nma.html')
+def graph_nma():
+    return render_template('pub/pub.graph_nma.html')
+
+
+@bp.route('/graph_pma.html')
+def graph_pma():
+    return render_template('pub/pub.graph_pma.html')
+
+
 @bp.route('/slide.html')
 def slide():
     return render_template('pub/pub.slide.html')
