@@ -52,12 +52,10 @@ def get_graph_nma_data_from_db(keystr, cq_abbr):
     # OK, let's check each outcome
     ret = {
         'oc_dict': {},
-        'oc_names': [],
         'graph_dict': {}
     }
     for extract in tqdm(extracts):
-        oc_name = extract.meta['full_name']
-        ret['oc_names'].append(oc_name)
+        oc_name = extract.abbr
 
         # create an oc object for ... what?
         treat_list = extract.meta['treatments']
