@@ -369,6 +369,10 @@ def graph_pma():
     return render_template('pub/pub.graph_pma.html')
 
 
+###########################################################
+# Modules for archive public page
+###########################################################
+
 @bp.route('/slide.html')
 def slide():
     return render_template('pub/pub.slide.html')

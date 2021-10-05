@@ -46,14 +46,24 @@ var tb_ranktb = {
         $(this.box_id).hide();
     },
 
-    draw: function(newdata) {
+    draw: function(newdata, which_has_highrank) {
+        if (typeof(which_has_highrank) == 'undefined') {
+            which_has_highrank = 'higher';
+        }
         // show
         $(this.box_id).show();
         this.data = newdata;
         // sort the values to get rank
-        newdata.rs.sort(function(a, b) {
-            return b.value - a.value;
-        });
+        if (which_has_highrank == 'lower') {
+            newdata.rs.sort(function(a, b) {
+                return a.value - b.value;
+            });
+
+        } else {
+            newdata.rs.sort(function(a, b) {
+                return b.value - a.value;
+            });
+        }
         for (let i = 0; i < newdata.rs.length; i++) {
             const r = newdata.rs[i];
             newdata.rs[i]['value_rank'] = i + 1;

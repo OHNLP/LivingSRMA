@@ -145,6 +145,8 @@ var tb_lgtbd3 = {
             }
         }
 
+        this.clear();
+
         // bind and transform data
         this.data = data;
         this.conv_table2list();
@@ -297,88 +299,88 @@ var tb_lgtbd3 = {
         }
     },
 
-    draw2: function(data) {
-        this.data = data;
-        // show
-        $(this.box_id).show();
+    // draw2: function(data) {
+    //     this.data = data;
+    //     // show
+    //     $(this.box_id).show();
 
-        // update the width and height of svg
-        // + 1 is for the top+left header
-        // + 0.5 is for the header name
-        this.width = (data.n + 1 + 0.5) * this.width_cell;
-        this.height = (data.n + 1 + 0.5) * this.height_cell;
-        this.svg.attr('width', this.width)
-            .attr('height', this.height);
+    //     // update the width and height of svg
+    //     // + 1 is for the top+left header
+    //     // + 0.5 is for the header name
+    //     this.width = (data.n + 1 + 0.5) * this.width_cell;
+    //     this.height = (data.n + 1 + 0.5) * this.height_cell;
+    //     this.svg.attr('width', this.width)
+    //         .attr('height', this.height);
 
-        // remove all old nodes and links
-        // this.svg.selectAll("*").remove();
+    //     // remove all old nodes and links
+    //     // this.svg.selectAll("*").remove();
         
-        // draw the header name
-        this._draw_header();
+    //     // draw the header name
+    //     this._draw_header();
         
-        // draw the table body
-        for (let i = 0; i < this.data.n; i++) {
-            var row = this.data.cols[i];
+    //     // draw the table body
+    //     for (let i = 0; i < this.data.n; i++) {
+    //         var row = this.data.cols[i];
 
-            for (let j = 0; j < this.data.n; j++) {
-                var col = this.data.cols[j];
-                var val = this.data.tabledata[i].stat[j];
-                var lci = this.data.tabledata[i].lci[j];
-                var uci = this.data.tabledata[i].uci[j];
-                // console.log('* add row ' + row + ' col ' + col);
+    //         for (let j = 0; j < this.data.n; j++) {
+    //             var col = this.data.cols[j];
+    //             var val = this.data.tabledata[i].stat[j];
+    //             var lci = this.data.tabledata[i].lci[j];
+    //             var uci = this.data.tabledata[i].uci[j];
+    //             // console.log('* add row ' + row + ' col ' + col);
 
-                // draw a cell here
-                var cell_x = (this.r_header + 1 + j) * this.width_cell;
-                var cell_y = (this.r_header * 2 + i) * this.height_cell;
-                var g_cell = this.svg.append('g')
-                    .attr('class', 'cell')
-                    .attr('transform', 'translate('+cell_x+', '+cell_y+')');
+    //             // draw a cell here
+    //             var cell_x = (this.r_header + 1 + j) * this.width_cell;
+    //             var cell_y = (this.r_header * 2 + i) * this.height_cell;
+    //             var g_cell = this.svg.append('g')
+    //                 .attr('class', 'cell')
+    //                 .attr('transform', 'translate('+cell_x+', '+cell_y+')');
 
-                // draw a cell background rect
+    //             // draw a cell background rect
                 
-                // the text if ctc?
-                if (row == col) {
-                    g_cell.append('rect')
-                        .attr('width', this.width_cell)
-                        .attr('height', this.height_cell)
-                        .attr('fill', this.color_ctc)
-                        .attr('stroke', this.color_border);
-                    // g_cell.append('text')
-                    //     .attr('x', this.width_cell / 2)
-                    //     .attr('y', this.height_cell / 2)
-                    //     .attr('text-anchor', 'middle')
-                    //     .attr('alignment-baseline', 'middle')
-                    //     .attr('font-size', this.font_size * 1.1)
-                    //     .attr('font-weight', 'bold')
-                    //     .text(row);
-                    continue
-                }
+    //             // the text if ctc?
+    //             if (row == col) {
+    //                 g_cell.append('rect')
+    //                     .attr('width', this.width_cell)
+    //                     .attr('height', this.height_cell)
+    //                     .attr('fill', this.color_ctc)
+    //                     .attr('stroke', this.color_border);
+    //                 // g_cell.append('text')
+    //                 //     .attr('x', this.width_cell / 2)
+    //                 //     .attr('y', this.height_cell / 2)
+    //                 //     .attr('text-anchor', 'middle')
+    //                 //     .attr('alignment-baseline', 'middle')
+    //                 //     .attr('font-size', this.font_size * 1.1)
+    //                 //     .attr('font-weight', 'bold')
+    //                 //     .text(row);
+    //                 continue
+    //             }
 
-                // the val and others
-                g_cell.append('rect')
-                    .attr('width', this.width_cell)
-                    .attr('height', this.height_cell)
-                    .attr('fill', this.color_scale2(val, lci, uci))
-                    .attr('stroke', this.color_border)
-                    .on('mouseover', this.tip.show) // bind hover event
-                    .on('mouseout', this.tip.hide);
+    //             // the val and others
+    //             g_cell.append('rect')
+    //                 .attr('width', this.width_cell)
+    //                 .attr('height', this.height_cell)
+    //                 .attr('fill', this.color_scale2(val, lci, uci))
+    //                 .attr('stroke', this.color_border)
+    //                 .on('mouseover', this.tip.show) // bind hover event
+    //                 .on('mouseout', this.tip.hide);
 
-                var t_vals = g_cell.append('text')
-                    .attr('x', this.width_cell / 2)
-                    .attr('y', this.height_cell / 2)
-                    .attr('font-size', this.font_size)
-                    .attr('alignment-baseline', 'middle')
-                    .attr('text-anchor', 'middle');
-                t_vals.append('tspan')
-                    .attr('x', this.width_cell / 2)
-                    .attr('y', this.height_cell / 2)
-                    .text(val.toFixed(2));
-                t_vals.append('tspan')
-                    .attr('x', this.width_cell / 2)
-                    .attr('y', this.height_cell / 2 + this.font_size)
-                    .text('('+lci.toFixed(2)+', '+uci.toFixed(2)+')');
+    //             var t_vals = g_cell.append('text')
+    //                 .attr('x', this.width_cell / 2)
+    //                 .attr('y', this.height_cell / 2)
+    //                 .attr('font-size', this.font_size)
+    //                 .attr('alignment-baseline', 'middle')
+    //                 .attr('text-anchor', 'middle');
+    //             t_vals.append('tspan')
+    //                 .attr('x', this.width_cell / 2)
+    //                 .attr('y', this.height_cell / 2)
+    //                 .text(val.toFixed(2));
+    //             t_vals.append('tspan')
+    //                 .attr('x', this.width_cell / 2)
+    //                 .attr('y', this.height_cell / 2 + this.font_size)
+    //                 .text('('+lci.toFixed(2)+', '+uci.toFixed(2)+')');
                 
-            }
-        }
-    }
+    //         }
+    //     }
+    // }
 };
