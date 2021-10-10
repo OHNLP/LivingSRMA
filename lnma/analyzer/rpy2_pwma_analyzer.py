@@ -154,7 +154,7 @@ def analyze_pwma_cat_raw(rs, cfg):
 
     # for compability
     j = {
-        'primma': j_prim,
+        'primma': j_prim
     }
 
     # build the return
@@ -164,6 +164,55 @@ def analyze_pwma_cat_raw(rs, cfg):
         'success': True,
         'data': {
             'primma': _meta_trans_metabin(j, cfg)
+        }
+    }
+
+    return ret
+
+
+def analyze_pwma_catraw_incd(rs, cfg):
+    '''
+    Analyze the incidence rate of Categorical Raw Data
+
+    The given rs should contains:
+
+    study, Et, Nt
+    '''
+    # create a dataframe first
+    df = pd.DataFrame(rs)
+
+    # set the sm if not correct
+    if cfg['measure_of_effect'] not in ['PLOGIT', 'PAS', "PFT", "PLN", "PRAW"]:
+        cfg['measure_of_effect'] = 'PLOGIT'
+
+    # get the incd
+    r_incd = meta.metaprop(
+        df.Et, df.Nt,
+        studlab=df.study,
+        comb_random=cfg['fixed_or_random']=='random',
+        sm=cfg['measure_of_effect'],
+        hakn=True if cfg['hakn_adjustment'] == 'TRUE' else False,
+        method=cfg['pooling_method'],
+        method_tau=cfg['tau_estimation_method']
+    )
+    # convert to R json object
+    r_j_incd = jsonlite.toJSON(r_incd, force=True)
+
+    # convert to Python JSON object
+    j_incd = json.loads(r_j_incd[0])
+
+    # for compability
+    j = {
+        'incdma': j_incd
+    }
+
+    # build the return
+    ret = {
+        'submission_id': 'rpy2',
+        'params': cfg,
+        'success': True,
+        'data': {
+            'incdma': _meta_trans_metaprop(j, cfg)
         }
     }
 

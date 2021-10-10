@@ -966,9 +966,13 @@ def _meta_trans_metaprop(j, params):
         data = j['primma']
 
     # 2021-04-09: the meta package doesn't give the 
-    # when getting the result, need to make sure the value is transback to normaled
+    # when getting the result, need to make sure the value is transback to normaled    
     sm = params['measure_of_effect']
-    ab = params['assumed_baseline']
+
+    if 'assumed_baseline' in params:
+        ab = params['assumed_baseline']
+    else:
+        ab = 100
 
     # first, put the basic values
     ret = {

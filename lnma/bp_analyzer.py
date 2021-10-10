@@ -18,6 +18,8 @@ from werkzeug.utils import secure_filename
 from lnma.settings import *
 
 from lnma import dora
+from lnma import srv_analyzer
+from lnma import srv_paper
 from lnma.analyzer import freq_analyzer
 from lnma.analyzer import bayes_analyzer
 from lnma.analyzer import pwma_analyzer
@@ -139,6 +141,87 @@ def read_data_file():
 ###############################################################################
 # Analyzer general endpoint
 ###############################################################################
+
+@bp.route('/analyze_oc', methods=['GET'])
+@login_required
+def analyze_oc():
+    '''
+    Analyze an oc 
+
+    Args:
+
+    project_id (or keystr)
+    cq_abbr
+    abbr
+    '''
+    project_id = request.args.get('project_id')
+    keystr = request.args.get('keystr')
+    cq_abbr = request.args.get('cq_abbr')
+    abbr = request.args.get('abbr')
+
+    # try to get the project first
+    project = dora.get_project(project_id)
+
+    if project is None:
+        project = dora.get_project_by_keystr(keystr)
+
+        if project is None:
+            return jsonify({'success': False, 'msg': 'project not found'})
+        else:
+            pass
+    else:
+        pass
+
+    # ok, try to get this oc
+    extract = dora.get_extract_by_project_id_and_abbr(
+        project.project_id,
+        abbr
+    )
+
+    if extract is None:
+        return jsonify({'success': False, 'msg': 'outcome not found'})
+
+    # now let's try to analyze this oc
+    # first, need to get the papers related to this oc
+    papers = srv_paper.get_included_papers_by_cq(
+        project.project_id, cq_abbr
+    )
+
+    # make a dictionary for lookup
+    paper_dict = {}
+    rs = []
+    for paper in papers:
+        paper_dict[paper.pid] = paper
+
+    # now get the pma result
+    results = srv_analyzer.get_pma(
+        extract, 
+        paper_dict, 
+        is_skip_unselected=True
+    )
+
+    # now build the result
+    ret = {
+        'papers': [ p.as_quite_simple_dict() for p in papers ],
+        'oc_dict': {
+            abbr: {
+                'extract': extract.as_very_simple_dict()
+            }
+        },
+        'graph_dict': {
+            abbr: {
+                'data': {}
+            }
+        }
+    }
+
+    # attatch the results
+    for result in results:
+        for key in result[2]['data']:
+            ret['graph_dict'][abbr]['data'][key] = result[2]['data'][key]
+
+    return jsonify(ret)
+
 
 @bp.route('/analyze', methods=['GET', 'POST'])
 @login_required

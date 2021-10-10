@@ -1,4 +1,4 @@
-import enum
+import copy
 from lnma import settings
 from lnma import util
 from lnma.analyzer import rpy2_pwma_analyzer as pwma_analyzer
@@ -7,6 +7,21 @@ from lnma.analyzer import rpy2_pwma_analyzer as pwma_analyzer
 def get_pma(extract, paper_dict, is_skip_unselected=True):
     '''
     Get the pma result in the given extract with paper dict
+
+    The pma result may be complex depends on the given input
+
+    Returns
+
+    A list of results:
+
+    [
+        {
+            'rs': rs,
+            'cfg': cfg,
+            'result':
+        },
+        ...
+    ]    
     '''
     # double check the type
     if extract.oc_type != 'pwma':
@@ -31,30 +46,84 @@ def get_pma(extract, paper_dict, is_skip_unselected=True):
     rscfg_hash = util.hash_json(rscfg)
 
     # run pma
-    result = pwma_analyzer.analyze(
-        rscfg['rs'],
-        rscfg['cfg']
-    )
+    # result = pwma_analyzer.analyze(
+    #     rscfg['rs'],
+    #     rscfg['cfg']
+    # )
 
-    # patch the pid into the result stus
-    dict_stu2pid = {}
-    for r in rscfg['rs']:
-        study = r['study']
-        pid = r['pid']
-        dict_stu2pid[study] = pid
 
-    if 'primma' in result['data']:
-        for i, _ in enumerate(result['data']['primma']['stus']):
-            # get the study name which is used for analysis
-            study_name = result['data']['primma']['stus'][i]['name']
+    # the return object is a list, which may contains multiple
+    # results, e.g., prim, cumu, 
+    results = []
+    if 'input_format' in rscfg['cfg']:
+        if rscfg['cfg']['input_format'] == 'PRIM_CAT_PRE':
+            rc = copy.deepcopy(rscfg)
+            result = pwma_analyzer.analyze_pwma_cat_pre(
+                rc['rs'],
+                rc['cfg']
+            )
+            results.append([rc['rs'], rc['cfg'], result])
 
-            # convert to the pid
-            pid = dict_stu2pid[study_name]
+        elif rscfg['cfg']['input_format'] == 'PRIM_CAT_RAW':
+            rc = copy.deepcopy(rscfg)
+            result = pwma_analyzer.analyze_pwma_cat_raw(
+                rc['rs'],
+                rc['cfg']
+            )
+            results.append([rc['rs'], rc['cfg'], result])
 
-            # set the pid to this record
-            result['data']['primma']['stus'][i]['pid'] = pid
+            # RAW format also could do incd analysis
+            # but by default this option may not be available.
+            # so, just put a default value there:
+            rc = copy.deepcopy(rscfg)
+            if 'incd_measure_of_effect' not in rc['cfg']:
+                rc['cfg']['incd_measure_of_effect'] = 'PLOGIT'
+
+            result = pwma_analyzer.analyze_pwma_catraw_incd(
+                rc['rs'],
+                rc['cfg']
+            )
+            results.append([rc['rs'], rc['cfg'], result])
+
+    else:
+        # what??? something wrong!
+        return None
+
+    # now, let's do some quick patch to the result
+    # 1. add the pid to the PMA result stus
+    # 2. second thing, I don't have any idea yet.
+    for result in results:
+        # patch the pid into the result stus
+        dict_stu2pid = {}
+        for r in result[0]:
+            study = r['study']
+            pid = r['pid']
+            dict_stu2pid[study] = pid
+
+        if 'primma' in result[2]['data']:
+            for i, _ in enumerate(result[2]['data']['primma']['stus']):
+                # get the study name which is used for analysis
+                study_name = result[2]['data']['primma']['stus'][i]['name']
+
+                # convert to the pid
+                pid = dict_stu2pid[study_name]
+
+                # set the pid to this record
+                result[2]['data']['primma']['stus'][i]['pid'] = pid
+        
+
+        if 'incdma' in result[2]['data']:
+            for i, _ in enumerate(result[2]['data']['incdma']['stus']):
+                # get the study name which is used for analysis
+                study_name = result[2]['data']['incdma']['stus'][i]['name']
+
+                # convert to the pid
+                pid = dict_stu2pid[study_name]
+
+                # set the pid to this record
+                result[2]['data']['incdma']['stus'][i]['pid'] = pid
 
     
     # we only the data part
-    return rscfg['rs'], rscfg['cfg'], result['data']
+    return results
     
