@@ -193,7 +193,8 @@ def analyze_oc():
     for paper in papers:
         paper_dict[paper.pid] = paper
 
-    # now get the pma result
+    # now get the pma results
+    # there may be a lot of results from one outcome
     results = srv_analyzer.get_pma(
         extract, 
         paper_dict, 
@@ -205,20 +206,11 @@ def analyze_oc():
         'papers': [ p.as_quite_simple_dict() for p in papers ],
         'oc_dict': {
             abbr: {
-                'extract': extract.as_very_simple_dict()
-            }
-        },
-        'graph_dict': {
-            abbr: {
-                'data': {}
+                'extract': extract.as_very_simple_dict(),
+                'results': results
             }
         }
     }
-
-    # attatch the results
-    for result in results:
-        for key in result[2]['data']:
-            ret['graph_dict'][abbr]['data'][key] = result[2]['data'][key]
 
     return jsonify(ret)
 

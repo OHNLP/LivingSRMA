@@ -170,7 +170,7 @@ def analyze_pwma_cat_raw(rs, cfg):
     return ret
 
 
-def analyze_pwma_catraw_incd(rs, cfg):
+def analyze_pwma_cat_raw_incd(rs, cfg):
     '''
     Analyze the incidence rate of Categorical Raw Data
 

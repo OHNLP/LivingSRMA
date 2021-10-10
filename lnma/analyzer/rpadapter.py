@@ -65,7 +65,7 @@ def _round(v, d):
     try:
         return round(v, d)
     except Exception as err:
-        print(err)
+        # print(err)
         return None
 
 
@@ -959,15 +959,16 @@ def _meta_trans_metaprop(j, params):
     '''
     Convert the metaprop result of PWMA Incidence Analysis
     '''
-    if 'incdma' in j:
-        # by default, should use incdma
-        data = j['incdma']
-    else:
-        data = j['primma']
+    # it should contain incdma
+    data = j['incdma']
 
     # 2021-04-09: the meta package doesn't give the 
     # when getting the result, need to make sure the value is transback to normaled    
     sm = params['measure_of_effect']
+
+    # special rule for this
+    if 'incd_measure_of_effect' in params:
+        sm = params['incd_measure_of_effect']
 
     if 'assumed_baseline' in params:
         ab = params['assumed_baseline']

@@ -62,7 +62,11 @@ def get_pma(extract, paper_dict, is_skip_unselected=True):
                 rc['rs'],
                 rc['cfg']
             )
-            results.append([rc['rs'], rc['cfg'], result])
+            results.append({
+                'rs': rc['rs'],
+                'cfg': rc['cfg'],
+                'rst': result
+            })
 
         elif rscfg['cfg']['input_format'] == 'PRIM_CAT_RAW':
             rc = copy.deepcopy(rscfg)
@@ -70,20 +74,30 @@ def get_pma(extract, paper_dict, is_skip_unselected=True):
                 rc['rs'],
                 rc['cfg']
             )
-            results.append([rc['rs'], rc['cfg'], result])
+            results.append({
+                'rs': rc['rs'],
+                'cfg': rc['cfg'],
+                'rst': result
+            })
 
             # RAW format also could do incd analysis
             # but by default this option may not be available.
             # so, just put a default value there:
             rc = copy.deepcopy(rscfg)
             if 'incd_measure_of_effect' not in rc['cfg']:
+                # set these two to make sure the analysis could be correct
+                rc['cfg']['measure_of_effect'] = 'PLOGIT'
                 rc['cfg']['incd_measure_of_effect'] = 'PLOGIT'
 
-            result = pwma_analyzer.analyze_pwma_catraw_incd(
+            result = pwma_analyzer.analyze_pwma_cat_raw_incd(
                 rc['rs'],
                 rc['cfg']
             )
-            results.append([rc['rs'], rc['cfg'], result])
+            results.append({
+                'rs': rc['rs'],
+                'cfg': rc['cfg'],
+                'rst': result
+            })
 
     else:
         # what??? something wrong!
@@ -95,33 +109,33 @@ def get_pma(extract, paper_dict, is_skip_unselected=True):
     for result in results:
         # patch the pid into the result stus
         dict_stu2pid = {}
-        for r in result[0]:
+        for r in result['rs']:
             study = r['study']
             pid = r['pid']
             dict_stu2pid[study] = pid
 
-        if 'primma' in result[2]['data']:
-            for i, _ in enumerate(result[2]['data']['primma']['stus']):
+        if 'primma' in result['rst']['data']:
+            for i, _ in enumerate(result['rst']['data']['primma']['stus']):
                 # get the study name which is used for analysis
-                study_name = result[2]['data']['primma']['stus'][i]['name']
+                study_name = result['rst']['data']['primma']['stus'][i]['name']
 
                 # convert to the pid
                 pid = dict_stu2pid[study_name]
 
                 # set the pid to this record
-                result[2]['data']['primma']['stus'][i]['pid'] = pid
+                result['rst']['data']['primma']['stus'][i]['pid'] = pid
         
 
-        if 'incdma' in result[2]['data']:
-            for i, _ in enumerate(result[2]['data']['incdma']['stus']):
+        if 'incdma' in result['rst']['data']:
+            for i, _ in enumerate(result['rst']['data']['incdma']['stus']):
                 # get the study name which is used for analysis
-                study_name = result[2]['data']['incdma']['stus'][i]['name']
+                study_name = result['rst']['data']['incdma']['stus'][i]['name']
 
                 # convert to the pid
                 pid = dict_stu2pid[study_name]
 
                 # set the pid to this record
-                result[2]['data']['incdma']['stus'][i]['pid'] = pid
+                result['rst']['data']['incdma']['stus'][i]['pid'] = pid
 
     
     # we only the data part

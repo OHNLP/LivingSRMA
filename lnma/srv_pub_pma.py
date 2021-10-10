@@ -80,22 +80,17 @@ def get_pma_by_cq(keystr, cq_abbr="default", included_in='sof'):
             continue
 
         # put the oc into dict
-        oc_rs, oc_cfg, oc_result = srv_analyzer.get_pma(
+        results = srv_analyzer.get_pma(
             extract, 
             paper_dict, 
             is_skip_unselected=True
         )
         oc_dict[abbr] = {
             'extract': extract.as_very_simple_dict(),
-
-            # add the detail cfg
-            'config': oc_cfg,
-
+            
             # use the sm as the key, since there may be more results
-            # for example, HR, RR, OR, etc.
-            'result': {
-                extract.meta['measure_of_effect']: oc_result
-            }
+            # for example, HR, RR, OR, INCD
+            'results': results
         }
     
     ret = {
@@ -150,7 +145,7 @@ def get_sof_pma_data_from_db_IO(cq_abbr="default", is_calc_pma=True):
         }
 
     # the measures
-    sms = ['OR', 'RR']
+    sms = ['OR', 'RR', 'INCD']
     # the grades for AEs
     grades = ['GA', 'G3H', 'G5N']
     # columns for int type
@@ -368,36 +363,79 @@ def get_sof_pma_data_from_db_IO(cq_abbr="default", is_calc_pma=True):
                 
                 else:
                     # get the pma result
-                    try:
-                        # use Python package to calculate the OR/RR
-                        pma_r = pwma_analyzer.get_pma(
-                            ds, datatype="CAT_RAW", 
-                            sm=sm, fixed_or_random='random'
-                        )
-                        # validate the result, if isNaN, just set None
-                        if np.isnan(pma_r['model']['sm']): pma_r = None
 
-                        # pma_f = pwma_analyzer.get_pma(
-                        #     ds, datatype="CAT_RAW", 
-                        #     sm=sm, fixed_or_random='fixed'
-                        # )
-                        # if np.isnan(pma_f['model']['sm']): pma_f = None
-                        # no enough space, just set to None
+                    # for INCD incidence
+                    if sm == 'INCD':
+                        # default 
                         pma_f = None
-
-                        # use R package to calculate the OR/RR
-                        # pma_r = get_pma_by_rplt(ds, datetype="CAT_RAW", sm=sm, fixed_or_random='random')
-                        # pma_f = get_pma_by_rplt(ds, datetype="CAT_RAW", sm=sm, fixed_or_random='fixed')
-                        
-                    except Exception as err:
-                        print('* %s: [%s] [%s] [%s]' % (
-                            'ISSUE Data cause error'.ljust(25, ' '),
-                            oc_name.rjust(35, ' '), 
-                            grade.rjust(3, ' '),
-                            ds
-                        ), err)
                         pma_r = None
-                        pma_f = None
+
+                        # need to convert the format for this
+                        ds_2 = []
+                        for v in ds:
+                            ds_2.append({
+                                'Et': v[0],
+                                'Nt': v[1],
+                                'Ec': v[2],
+                                'Nc': v[3],
+                                'study': v[4],
+                            })
+                        cfg = {
+                            "external_val": 0, 
+                            "fixed_or_random": "random", 
+                            "hakn_adjustment": "FALSE", 
+                            "incd_measure_of_effect": "PLOGIT", 
+                            "input_format": "PRIM_CAT_RAW", 
+                            "internal_val_ec": 0, 
+                            "internal_val_et": 0, 
+                            "measure_of_effect": "PLOGIT", 
+                            "pooling_method": "Inverse", 
+                            "prediction_interval": "FALSE", 
+                            "sensitivity_analysis": "no", 
+                            "smd_estimation_method": "Hedges", 
+                            "survival_in_control": 0, 
+                            "tau_estimation_method": "DL", 
+                            "which_is_better": "lower"
+                        }
+                        pma_r = pwma_analyzer.analyze_pwma_cat_raw_incd(
+                            ds_2,
+                            cfg
+                        )
+                    else:
+                            
+                        # for OR and RR
+                        try:
+                            # use Python package to calculate the OR/RR
+                            pma_r = pwma_analyzer.get_pma(
+                                ds, 
+                                datatype="CAT_RAW", 
+                                sm=sm, 
+                                fixed_or_random='random'
+                            )
+                            # validate the result, if isNaN, just set None
+                            if np.isnan(pma_r['model']['sm']): pma_r = None
+
+                            # pma_f = pwma_analyzer.get_pma(
+                            #     ds, datatype="CAT_RAW", 
+                            #     sm=sm, fixed_or_random='fixed'
+                            # )
+                            # if np.isnan(pma_f['model']['sm']): pma_f = None
+                            # no enough space, just set to None
+                            pma_f = None
+
+                            # use R package to calculate the OR/RR
+                            # pma_r = get_pma_by_rplt(ds, datetype="CAT_RAW", sm=sm, fixed_or_random='random')
+                            # pma_f = get_pma_by_rplt(ds, datetype="CAT_RAW", sm=sm, fixed_or_random='fixed')
+                            
+                        except Exception as err:
+                            print('* %s: [%s] [%s] [%s]' % (
+                                'ISSUE Data cause error'.ljust(25, ' '),
+                                oc_name.rjust(35, ' '), 
+                                grade.rjust(3, ' '),
+                                ds
+                            ), err)
+                            pma_r = None
+                            pma_f = None
 
                 oc_dict[oc_abbr]['results'][grade]['result'][sm] = {
                     'random': pma_r,
