@@ -397,10 +397,20 @@ def get_sof_pma_data_from_db_IO(cq_abbr="default", is_calc_pma=True):
                             "tau_estimation_method": "DL", 
                             "which_is_better": "lower"
                         }
-                        pma_r = pwma_analyzer.analyze_pwma_cat_raw_incd(
+                        rst_incd = pwma_analyzer.analyze_pwma_cat_raw_incd(
                             ds_2,
                             cfg
                         )
+
+                        if rst_incd is not None:
+                            pma_r = {
+                                'model': rst_incd['data']['incdma']['model']['random']
+                            }
+
+                            pma_r['model'].update(
+                                rst_incd['data']['incdma']['heterogeneity']
+                            )
+
                     else:
                             
                         # for OR and RR
