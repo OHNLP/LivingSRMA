@@ -38,29 +38,28 @@
                 </button>
             </div>
 
-            <div class="btn-group mr-2" role="group" aria-label="Delete outcome">
-                <button v-on:click="delete_extract(extract)"
-                    type="button" class="btn btn-danger btn-sm">
-                    Delete this outcome
-                </button>
-            </div>
-
             <!-- Example single danger button -->
-            <div class="btn-group">
+            <div class="btn-group mr-2">
                 <button type="button" 
                     class="btn btn-default btn-sm dropdown-toggle" 
                     data-toggle="dropdown" 
                     aria-haspopup="true" 
                     aria-expanded="false">
-                    <i class="fa fa-tools"></i>
-                    Actions
+                    <i class="fa fa-file-export"></i>
+                    Export
                 </button>
                 <div class="dropdown-menu">
                     <a class="dropdown-item" href="javascript:void(0);"
                         v-on:click="export_extract(extract)"
                         title="Export this outcome settings and extracted data as a file">
                         <i class="fa fa-file-export"></i>
-                        Export this outcome
+                        As JSON
+                    </a>
+                    <a class="dropdown-item" href="javascript:void(0);"
+                        v-on:click="export_extract_csv(extract)"
+                        title="Export this outcome settings and extracted data as a file">
+                        <i class="fa fa-file-export"></i>
+                        As CSV
                     </a>
                     <!-- <div class="dropdown-divider"></div>
                     <a class="dropdown-item" href="#">
@@ -73,6 +72,15 @@
                     <a class="dropdown-item" href="#">Separated link</a> -->
                 </div>
             </div>
+
+            <div class="btn-group mr-2" role="group" aria-label="Delete outcome">
+                <button v-on:click="delete_extract(extract)"
+                    type="button" class="btn btn-danger btn-sm">
+                    Delete this outcome
+                </button>
+            </div>
+
+            
 
             <div style="color: white;">
                 {{ extract.abbr }}

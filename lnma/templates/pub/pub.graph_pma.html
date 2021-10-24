@@ -269,15 +269,19 @@ var app_graphpma = {
 
                 plot_oc: function(oc) {
                     var sm = oc.extract.meta.measure_of_effect;
-                    var plot_data = oc.result[sm];
+                    
+                    // by default, the first oc is plotted.
+                    var plot_data = oc.results[0];
+
+                    // but 
                     var cfg = {
                         sm: this.sms[sm],
                         mode: 'pwma_prcm',
-                        params: oc.config
+                        params: plot_data.cfg
                     };
                     
                     fg_pwma_forest.draw(
-                        plot_data.primma, 
+                        plot_data.rst.data.primma, 
                         cfg
                     );
                 },
