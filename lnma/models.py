@@ -943,14 +943,20 @@ class Extract(db.Model):
         # add the survival_in_control
         ret['survival_in_control'] = self.get_survival_in_control()
 
-        # add the has_internal_val
-        ret['has_internal_val'] = self.get_has_internal_val()
+        # add the internal_val
+        ret['internal_val'] = self.get_internal_val()
+        ret['has_internal_val'] = ret['internal_val'] != 0
+
 
         # add the data_type
         ret['data_type'] = self.get_data_type()
 
         # add the certainty
         ret['certainty'] = self.get_certainty()
+
+        # patch the certainty
+        if 'certainty' not in self.meta:
+            self.meta['certainty'] = self.get_certainty()
 
         return ret
 
@@ -1021,6 +1027,8 @@ class Extract(db.Model):
                 else:
                     survival_in_controls.append(_srvc)
 
+                # now check other arms
+
             if len(survival_in_controls) > 0:
                 survival_in_control = sum(survival_in_controls) / len(survival_in_controls)
             else:
@@ -1032,19 +1040,60 @@ class Extract(db.Model):
         return survival_in_control
 
 
-    def get_has_internal_val(self):
+    def get_internal_val(self):
         '''
-        Get the has_internal_val for this extract
-
-        If raw input format, alwasy True,
-        Else, need to check the internal_val_et and internal_val_ec
+        Get the internal_val for this extract
         '''
-        if 'RAW' in self.meta['input_format']:
-            return True
-        
-        # for others, check interval_et first
+        internal_val = None
 
-        return False
+        if self.oc_type == 'pwma':
+            if self.get_data_type() == 'pre':
+
+                for pid in self.data:
+                    ext = self.data[pid]
+                    if not ext['is_selected']:
+                        continue
+
+                    Ec = 0
+                    Et = 0
+
+                    # check all arms
+                    for arm in [ext['attrs']['main']] + ext['attrs']['other']:
+                        try:
+                            Ec += int(arm['g0']['Ec']) * 1000 / int(arm['g0']['Et'])
+                            Et += 1000
+                        except:
+                            pass
+
+                    if Ec != 0:
+                        internal_val = int(
+                            1000 * Ec / Et
+                        )
+
+            elif self.get_data_type() == 'raw':
+                # check each study
+                for pid in self.data:
+                    ext = self.data[pid]
+                    if not ext['is_selected']:
+                        continue
+
+                    Ec = 0
+                    Et = 0
+
+                    # check all arms
+                    for arm in [ext['attrs']['main']] + ext['attrs']['other']:
+                        try:
+                            Ec += int(arm['g0']['Ec']) * 1000 / int(arm['g0']['Et'])
+                            Et += 1000
+                        except:
+                            pass
+
+                    if Ec != 0:
+                        internal_val = int(
+                            1000 * Ec / Et
+                        )
+
+        return internal_val
 
     
     def get_data_type(self):
@@ -1079,6 +1128,10 @@ class Extract(db.Model):
         elif self.oc_type == 'nma':
             ret = copy.deepcopy(settings.OC_TYPE_TPL['pwma']['default']['certainty'])
 
+        else:
+            # not need for itable in fact
+            ret = copy.deepcopy(settings.OC_TYPE_TPL['pwma']['default']['certainty'])
+            
         return ret
 
 

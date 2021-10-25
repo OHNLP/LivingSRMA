@@ -243,6 +243,8 @@
 
                 </div>
 
+                
+
                 <div class="row">
                     <div v-if="extract.meta.oc_type == 'nma'"
                         class="form-group col-md-12">
@@ -281,6 +283,111 @@
             </div>
 
         </div>
+
+        <div class="card border-dark mt-2 mb-2 ml-2 mr-2" >
+            <div class="card-body text-dark">
+                <h5 class="card-title">Certainty of Evidence Settings</h5>
+
+                <p class="card-text">The following settings will be used for the calculation of certainty in evidence.</p>
+
+                <div v-if="extract.meta.oc_type == 'pwma'"
+                    class="row">
+                    <div class="form-group col-md-2">
+                        <label for="input_rob">Risk of Bias</label>
+
+                        <select v-model="extract.meta.certainty.risk_of_bias"
+                            class="form-control" id="input_rob" 
+                            aria-describedby="input_rob_help">
+                            <option value="3">Very serious</option>
+                            <option value="2">Serious</option>
+                            <option value="1">No serious</option>
+                        </select>
+
+                        <small id="input_rob_help" class="form-text text-muted">
+                            The risk of Bias
+                        </small>
+                    </div>
+
+                    <div class="form-group col-md-2">
+                        <label>Inconsistency</label>
+
+                        <select v-model="extract.meta.certainty.inconsistency"
+                            class="form-control">
+                            <option value="3">Very serious</option>
+                            <option value="2">Serious</option>
+                            <option value="1">No serious</option>
+                        </select>
+
+                        <small class="form-text text-muted">
+                            Inconsistency
+                        </small>
+                    </div>
+
+                    <div class="form-group col-md-2">
+                        <label>Indirectness</label>
+
+                        <select v-model="extract.meta.certainty.indirectness"
+                            class="form-control">
+                            <option value="3">Very serious</option>
+                            <option value="2">Serious</option>
+                            <option value="1">No serious</option>
+                        </select>
+
+                        <small class="form-text text-muted">
+                            Indirectness
+                        </small>
+                    </div>
+
+                    <div class="form-group col-md-2">
+                        <label>Imprecision</label>
+
+                        <select v-model="extract.meta.certainty.imprecision"
+                            class="form-control">
+                            <option value="3">Very serious</option>
+                            <option value="2">Serious</option>
+                            <option value="1">No serious</option>
+                        </select>
+
+                        <small class="form-text text-muted">
+                            Imprecision
+                        </small>
+                    </div>
+
+                    <div class="form-group col-md-2">
+                        <label>Publication Bias</label>
+
+                        <select v-model="extract.meta.certainty.publication_bias"
+                            class="form-control">
+                            <option value="2">Strongly suspected</option>
+                            <option value="1">Undetected</option>
+                            <option value="0">Not applicable</option>
+                        </select>
+
+                        <small class="form-text text-muted">
+                            Publication Bias
+                        </small>
+                    </div>
+
+                    <div class="form-group col-md-2">
+                        <label>Importance</label>
+
+                        <select v-model="extract.meta.certainty.importance"
+                            class="form-control">
+                            <option value="2">Critical</option>
+                            <option value="1">Important</option>
+                            <option value="0">Not applicable</option>
+                        </select>
+
+                        <small class="form-text text-muted">
+                            Importance
+                        </small>
+                    </div>
+                    
+                    
+                </div>
+            </div>
+        </div>
+
 
         <div class="card border-dark mt-2 mb-2 ml-2 mr-2" >
             <div class="card-body text-dark">
