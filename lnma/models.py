@@ -940,6 +940,18 @@ class Extract(db.Model):
         # add how many selected
         ret['n_selected'] = self.get_n_selected()
 
+        # add the survival_in_control
+        ret['survival_in_control'] = self.get_survival_in_control()
+
+        # add the has_internal_val
+        ret['has_internal_val'] = self.get_has_internal_val()
+
+        # add the data_type
+        ret['data_type'] = self.get_data_type()
+
+        # add the certainty
+        ret['certainty'] = self.get_certainty()
+
         return ret
 
 
@@ -973,6 +985,102 @@ class Extract(db.Model):
     #######################################################
     # For analyzer purpose
     #######################################################
+
+    def get_survival_in_control(self):
+        '''
+        Get the survival_in_control for this extract.
+        
+        The survival_in_control depends on the input format.
+        For different type (e.g., raw, pre), the calculation is different
+        '''
+
+        if self.get_data_type() == 'raw':
+            return 0
+
+        # for pre data
+        survival_in_control = 0
+        if self.oc_type == 'pwma':
+
+            # there must be a column 'survival_in_control'
+            survival_in_controls = []
+            for pid in self.data:
+                ext = self.data[pid]
+
+                if not ext['is_selected']:
+                    continue
+
+                # now check the main arm
+                try:
+                    _srvc = float(ext['attrs']['main']['g0']['survival_in_control'])
+                except:
+                    _srvc = None
+
+                if _srvc is None:
+                    # some thing wrong with the value
+                    pass
+                else:
+                    survival_in_controls.append(_srvc)
+
+            if len(survival_in_controls) > 0:
+                survival_in_control = sum(survival_in_controls) / len(survival_in_controls)
+            else:
+                pass
+
+        elif self.oc_type == 'nma':
+            pass
+
+        return survival_in_control
+
+
+    def get_has_internal_val(self):
+        '''
+        Get the has_internal_val for this extract
+
+        If raw input format, alwasy True,
+        Else, need to check the internal_val_et and internal_val_ec
+        '''
+        if 'RAW' in self.meta['input_format']:
+            return True
+        
+        # for others, check interval_et first
+
+        return False
+
+    
+    def get_data_type(self):
+        '''
+        Get the data type
+
+        This is a simple flag for input_format
+        Usually we don't need to have a complete input_format
+        '''
+        if 'RAW' in self.meta['input_format']:
+            return 'raw'
+
+        if 'PRE' in self.meta['input_format']:
+            return 'pre'
+
+        return 'raw'
+
+
+    def get_certainty(self):
+        '''
+        Get certainty of evidence 
+
+        This could be done automatically
+        But if not available, this will return a default value
+        '''
+        if 'certainty' in self.meta:
+            return self.meta['certainty']
+
+        if self.oc_type == 'pwma':
+            ret = copy.deepcopy(settings.OC_TYPE_TPL['pwma']['default']['certainty'])
+
+        elif self.oc_type == 'nma':
+            ret = copy.deepcopy(settings.OC_TYPE_TPL['pwma']['default']['certainty'])
+
+        return ret
+
 
     def get_raw_rs_cfg(self, paper_dict, is_skip_unselected=True):
         '''

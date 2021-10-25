@@ -130,6 +130,17 @@ OC_TYPE_TPL = {
             "included_in_plots": 'no',
             "included_in_sof": 'no',
 
+            # for sof
+            'certainty': {
+                'cie': '4',
+                'risk_of_bias': '1',
+                'inconsistency': '1',
+                'indirectness': '1',
+                'imprecision': '1',
+                'publication_bias': '0',
+                'importance': '1'
+            },
+
             # for the MA
             "input_format": 'PRIM_CAT_RAW',
             "measure_of_effect": 'RR',

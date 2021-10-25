@@ -777,7 +777,9 @@ def graphdata_softable_pma_json(keystr):
 
     if src == 'db':
         ret = srv_pub_pma.get_sof_pma_data_from_db(
-            keystr, cq_abbr, is_calc_pma=True
+            keystr, 
+            cq_abbr, 
+            is_calc_pma=True
         )
 
         if ret is None:

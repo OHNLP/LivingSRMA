@@ -8,7 +8,7 @@
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
 
-<title>Summary of Findings: PMA</title>
+<title>Summary of Findings: Pairwise Meta-Analysis</title>
 
 <link rel="icon" href="/static/img/favicon.png" type="image/png">
 <!-- <script src="https://kit.fontawesome.com/cb45cc91b0.js" crossorigin="anonymous"></script> -->
@@ -199,7 +199,7 @@ a {
 .sof-table td {
     text-align: center;
     line-height: 1.45em;
-    padding: 3px 0;
+    padding: 3px 3px;
     border-bottom: 1px solid #e6e6e6;
     border-right: 1px solid #e6e6e6;
     cursor: default;
@@ -269,36 +269,17 @@ a {
 </div>
 <!-- /div#legend -->
 
-<div id="app" class="d-flex fx-row">
+<div id="app_softpma" class="d-flex fx-row">
 
     <!-- {% include 'pub/pub._vw_simple_oclist_v2.html' %} -->
 
     <div id="tb_simple_sofpma">
         <div class="box" style="width: 100%; height: 100%;">
             <div class="box-header">
-                <h4>
-                    <i class="fa fa-table"></i>
-                </h4>
                 <div class="d-flex fx-row">
-                    <!-- <div class="box-menu-group d-flex fx-row">
-                        <div>
-                            <i class="fa fa-cog"></i>
-                            Measure of effect: 
-                        </div>
-                        <div>
-                            <select v-model='measure'>
-                                <option v-for="m in measure_list"
-                                    v-bind:value="m.abbr">
-                                    {{ m.name }}
-                                </option>
-                            </select>
-                        </div>
-                    </div> -->
-
                     <div class="box-menu-group d-flex fx-row">
                         <div>
-                            <i class="fa fa-cog"></i>
-                            Display risks per: 
+                            Risks per: 
                         </div>
                         <div>
                             <select v-model="baseline">
@@ -312,7 +293,18 @@ a {
 
                     <div class="box-menu-group d-flex fx-row">
                         <div>
-                            <i class="fa fa-cog"></i>
+                            Show raw data: 
+                        </div>
+                        <div>
+                            <select v-model="show_raw">
+                                <option value="yes">Yes</option>
+                                <option value="no">No</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="box-menu-group d-flex fx-row">
+                        <div>
                             Show survival data: 
                         </div>
                         <div>
@@ -339,6 +331,8 @@ a {
                     <tr>
                         <th class="col-oc-name" rowspan="2">Outcome</th>
                         <th rowspan="2">Relative</th>
+                        <th rowspan="2" v-if="show_raw=='yes'">Raw</th>
+
                         <th colspan="6" v-if="show_survival=='yes'">Absolute</th>
                         <th colspan="3" v-else>Absolute</th>
                         <th rowspan="2">Certainty in <br>Evidence</th>
@@ -348,54 +342,52 @@ a {
                         <th>Intervention</th>
                         <th>Control</th>
                         <th>Risk Difference</th>
-                        <th v-if="show_survival=='yes'">Survival in Intervention</th>
-                        <th v-if="show_survival=='yes'">Survival in Control</th>
-                        <th v-if="show_survival=='yes'">Survival Difference</th>
+                        <th v-if="show_survival=='yes'">Survival in <br>Intervention</th>
+                        <th v-if="show_survival=='yes'">Survival in <br>Control</th>
+                        <th v-if="show_survival=='yes'">Survival <br>Difference</th>
                     </tr>
 
-                    <tr v-for="r, oc_name in rs">
-                        <td class="col-oc-name"
-                            v-on:click="show_ctrl_options(r.oc_name)">
-                            {{ r.oc_fullname }}
+                    <tr v-for="r, r_idx in rs">
+                        <td class="col-oc-name">
+                            {{ r.oc_fullname }} <br>
+                            {{ r.n_stu }} Studies
                         </td>
 
-                        <td v-if="r.is_show['sm']" class="col-flipable"
-                            v-on:click="flip_cell(r, 'sm')">
-                            {{ get_a_measure(r) }} {{ _round2(r.oc.result[get_a_measure(r)].random.model.sm) }}<br>
-                            ({{ _round2(r.oc.result[get_a_measure(r)].random.model.lower) }} to 
-                            {{ _round2(r.oc.result[get_a_measure(r)].random.model.upper) }})
+                        <td>
+                            {{ r.oc.extract.meta.measure_of_effect }} 
+                            {{ _round2(r.sm) }}<br>
+                            ({{ _round2(r.lower) }} to 
+                             {{ _round2(r.upper) }})
                         </td>
-                        <td v-else class="col-ta-left col-flipable"
-                            v-on:click="flip_cell(r, 'sm')">
-                            <b>{{ r.n_stu }}</b> Studies<br>
+
+                        <td v-if="show_raw == 'yes'">
                             Events: <b>{{ r.Et }}</b><br>
                             Participants: <b>{{ r.Nt }}</b>
                         </td>
 
-                        <td v-if="r.is_show['CIR']" class="col-flipable"
-                            v-on:click="flip_cell(r, 'CIR')">
-                            {{ Math.round(get_CIR(r) * baseline) }} per {{ baseline }}
-                        </td>
-                        <td v-else class="col-flipable"
-                            v-on:click="flip_cell(r, 'CIR')">
-                            {{ Math.round(get_CIR(r) * baseline) }} per {{ baseline }}<br>
-                            CI: {{ Math.round(get_CIR(r, 'lower') * baseline) }} to 
-                                {{ Math.round(get_CIR(r, 'upper') * baseline) }}
-                        </td>
                         <td>
-                            {{ Math.round(get_ACR(r) * baseline) }} per {{ baseline }}
+                            {{ _int(get_CIR(r) * baseline) }} per {{ baseline }}
+                            
+                            <span v-if="show_CIR == 'yes'">
+                                <br>
+                                CI: {{ _int(get_CIR(r, 'lower') * baseline) }} to 
+                                {{ _int(get_CIR(r, 'upper') * baseline) }}
+                            </span>
                         </td>
-                        <td v-if="r.is_show['ARD']" class="col-flipable"
-                            v-on:click="flip_cell(r, 'ARD')">
-                            {{ get_ARD_txt(r) }} per {{ baseline }}
+
+                        <td>
+                            {{ _int(get_ACR(r) * baseline) }} per {{ baseline }}
                         </td>
-                        <td v-else class="col-flipable"
-                            v-on:click="flip_cell(r, 'ARD')">
-                            {{ get_ARD_txt(r) }} per {{ baseline }}<br>
-                            CI: {{ get_ARD_txt(r, 'lower') }} to 
+
+                        <td>
+                            {{ get_ARD_txt(r) }} per {{ baseline }} 
+                            <span v-if="show_ARD == 'yes'">
+                                <br>
+                                CI: {{ get_ARD_txt(r, 'lower') }} to 
                                 {{ get_ARD_txt(r, 'upper') }}<br>
-                            RD(%): {{ get_ARDp_txt(r) }}<br>
-                            CI: {{ get_ARDp_txt(r, 'lower')}} to {{ get_ARDp_txt(r, 'upper')}}
+                                RD(%): {{ get_ARDp_txt(r) }}<br>
+                                CI: {{ get_ARDp_txt(r, 'lower')}} to {{ get_ARDp_txt(r, 'upper')}}
+                            </span>
                         </td>
 
                         <td v-if="show_survival=='yes'">
@@ -410,12 +402,13 @@ a {
                             {{ get_SRVD_txt(r, 'sm') }}
                         </td>
 
-                        <td v-bind:class="get_cieclr_v2(r.oc.param.which_is_better, r.oc.result[get_a_measure(r)].random.model, r.oc.cie)"
-                            v-on:click="show_cie_detail(r.oc_name)">
-                            {{ txt('CIE_TOT_' + r.oc.cie) }}
+                        <td v-bind:class="get_cie_clr(r)"
+                            v-on:click="">
+                            {{ _txt('CIE_TOT_' + r.oc.extract.certainty.cie) }}
                         </td>
+
                         <td>
-                            {{ r.oc.importance }}
+                            {{ _txt('IMPORTANCE_' + r.oc.extract.certainty.importance) }}
                         </td>
                     </tr>
                 </table>
@@ -425,73 +418,6 @@ a {
             </div>
         </div>
 
-
-        <div id="tb_simple_sofpma_cie_detail" class="box"
-            v-bind:title="'Certainty in Evidence'">
-            <div class="box-header">
-                <h4>
-                    Certainty in Evidence: 
-                    <b class="txt-lg"
-                        style="padding: 3px 5px"
-                        v-bind:class="get_cieclr(oc_dict[detail.cie.oc_name].result[get_a_measure(rs[detail.cie.oc_name])].random.model.sm, oc_dict[detail.cie.oc_name].cie)">
-                        {{ txt('CIE_TOT_' + oc_dict[detail.cie.oc_name].cie) }}
-                    </b>
-                </h4>
-            </div>
-            <div class="box-bod">
-                <table class="cie-table">
-                    <tr>
-                        <th>Risk of bias</th>
-                        <td>{{ txt('CIE_VAL_' + oc_dict[detail.cie.oc_name].cie_rob) }}</td>
-                    </tr>
-                    <tr>
-                        <th>Inconsistency</th>
-                        <td>{{ txt('CIE_VAL_' + oc_dict[detail.cie.oc_name].cie_inc) }}</td>
-                    </tr>
-                    <tr>
-                        <th>Indirectness</th>
-                        <td>{{ txt('CIE_VAL_' + oc_dict[detail.cie.oc_name].cie_ind) }}</td>
-                    </tr>
-                    <tr>
-                        <th>Imprecision</th>
-                        <td>{{ txt('CIE_VAL_' + oc_dict[detail.cie.oc_name].cie_imp) }}</td>
-                    </tr>
-                    <tr>
-                        <th>Publication bias</th>
-                        <td>{{ txt('PUB_BIA_' + oc_dict[detail.cie.oc_name].pub_bia) }}</td>
-                    </tr>
-                </table>
-            </div>
-        </div>
-
-        <div id="tb_simple_sofpma_ctrl_select" class="box dlg-sm" title="Assumed Baseline Risk">
-            <div class="box-body">
-                <h4>Assumed Baseline Risk for {{ set_ctrl_oc_name }}</h4>
-                <p>
-                    <input type="radio" name="ipt_which_ctrl" value="external" 
-                    v-model="rs[set_ctrl_oc_name].which_ACR.use_which_val"> 
-                    User provided
-                    <input type="text"
-                        v-bind:disabled="rs[set_ctrl_oc_name].which_ACR.use_which_val == 'internal'"
-                        v-model="rs[set_ctrl_oc_name].which_ACR.external_val">
-                </p>
-                <hr>
-                <div v-if="rs[set_ctrl_oc_name].oc.has_internal_val">
-                    <p>
-                        <input type="radio" name="ipt_which_ctrl" value="internal"
-                            v-model="rs[set_ctrl_oc_name].which_ACR.use_which_val">
-                        Pre-specified
-                    </p>
-                    <!-- <p>&nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" name="ipt_ctrl"> Mean
-                       &nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" name="ipt_ctrl"> High risk
-                       &nbsp;&nbsp;&nbsp;&nbsp;<input type="radio" name="ipt_ctrl"> Low risk</p> -->
-                    <p></p>
-                </div>
-                <div v-else>
-                    Internal data not available.
-                </div>
-            </div>
-        </div>
     </div>
     
 </div>
@@ -516,39 +442,455 @@ var app_softpma = {
     vpp: null,
     vpp_id: '#app_softpma',
 
-    init: function(data) {
+    vpp_methods: {
+        /****************************************************
+         * functions related to UI
+         ***************************************************/
+
         
+
+
+        /****************************************************
+         * functions related to MA
+         ***************************************************/
+        // get the UI text
+        get_a_measure: function(r) {
+            return r.oc_measure;
+        },
+
+        // get survival in control
+        get_SRVC: function(r) {
+            if (r.has_survival_data) {
+                return r.oc.extract.survival_in_control;
+            } else {
+                return null;
+            }
+        },
+
+        get_SRVC_txt: function(r) {
+            if (r.has_survival_data) {
+                return this.get_SRVC(r).toFixed(1) + ' (mo)';
+            } else {
+                return 'NA';
+            }
+        },
+
+        // get survival of intervention
+        get_SRVI: function(r, obj) {
+            if (r.has_survival_data) {
+                // if we have survival data, it's usually HR
+                var hr = r[obj];
+                var srvi = (1 / hr) * r.oc.extract.survival_in_control;
+                return srvi;
+            } else {
+                return null;
+            }
+        },
+
+        get_SRVI_txt: function(r, obj) {
+            // obj could be
+            // sm, lower, upper
+            if (r.has_survival_data) {
+                var srvi = this.get_SRVI(r, obj);
+                return srvi.toFixed(1) + ' (mo)';
+
+            } else {
+                return 'NA';
+            }
+        },
+
+        // get survival difference
+        get_SRVD: function(r, obj) {
+            var SRVC = this.get_SRVC(r);
+            var SRVI = this.get_SRVI(r, obj);
+            
+            if (SRVC == null) { return null; }
+            if (SRVI == null) { return null; }
+
+            var SRVD = SRVC - SRVI;
+            return SRVD;
+        },
+
+        get_SRVD_txt: function(r, obj) {
+            var SRVD = this.get_SRVD(r, obj);
+            if (SRVD == null) {
+                return 'NA';
+            }
+            var txt = '';
+            if (SRVD < 0) {
+                txt = ' more';
+            } else if (SRVD > 0) {
+                txt = ' fewer';
+            } else {
+                txt = '';
+            }
+            return Math.abs(SRVD).toFixed(1) + ' (mo)' + txt;
+        },
+
+        // calc the ACR, CIR, ARD
+        get_ACR: function(r) {
+            if (r.which_ACR.use_which_val == 'internal') {
+                if (r.oc_data_type == 'raw') {
+                    return r.Ec / r.Nc;
+                } else {
+                    return r.oc.internal_val / 1000;
+                }
+            }
+            if (r.which_ACR.use_which_val == 'external') {
+                return r.which_ACR.external_val / this.baseline;
+            }
+        },
+
+        get_ACR_txt: function(r) {
+            var ACR = this.get_ACR(r);
+            if (ACR == null) {
+                // it means no available data for this treat
+                return 'NA';
+            } else {
+                return Math.round(ACR * this.baseline) + ' per ' + this.baseline;
+            }
+        },
+
+        get_CIR: function(r, obj) {
+            // get the obj of this CIR
+            // obj could be
+            // sm, lower, upper
+            if (typeof(obj)=='undefined') {
+                obj = 'sm';
+            }
+            // val is the value of measure
+            var val = r[obj];
+
+            // calculate the CIR based on measure
+            if (this.get_a_measure(r) == 'OR') {
+                var a = this.get_ACR(r) * val;
+                var b = 1 - this.get_ACR(r);
+                var c = a + b;
+                var d = a / c;
+                var e = d * this.baseline;
+                return d;
+
+            } else if (this.get_a_measure(r) == 'RR') {
+                var a = this.get_ACR(r) * val;
+                return a;
+
+            } else if (this.get_a_measure(r) == 'HR') {
+                var a = 1 - this.get_ACR(r);
+                var b = Math.log(a);
+                var c = b * val;
+                var d = Math.exp(c);
+                var e = 1 - d;
+                return e;
+            }
+        },
+
+        get_ARD: function(r, obj) {
+            // obj could be
+            // sm, lower, upper
+            if (typeof(obj)=='undefined') {
+                obj = 'sm';
+            }
+            var val = r[obj];
+
+            // calc the ARD
+            if (this.get_a_measure(r) == 'OR') {
+                var ACR = this.get_ACR(r);
+                var CIR = this.get_CIR(r, obj);
+                var ARD = ACR - CIR;
+                return ARD;
+
+            } else if (this.get_a_measure(r) == 'RR') {
+                var a = this.get_ACR(r) * (1 - val);
+                return a;
+
+            } else if (this.get_a_measure(r) == 'HR') {
+                var ACR = this.get_ACR(r);
+                var CIR = this.get_CIR(r, obj);
+                var ARD = ACR - CIR;
+                return ARD;
+            }
+        },
+
+        get_ARD_txt: function(r, obj) {
+            var ARD = this.get_ARD(r, obj);
+            var txt = ' fewer';
+            if (ARD < 0) {
+                txt = ' more';
+            }
+            return Math.abs(Math.round(ARD * this.baseline)) + txt;
+        },
+
+        get_ARDp_txt: function(r, obj) {
+            var ARDp = 100 * this.get_ARD(r, obj);
+            var txt = ' fewer';
+            if (ARDp < 0) {
+                txt = ' more';
+            }
+            return Math.abs(ARDp).toFixed(1) + '%' + txt;
+        },
+
+        get_cie_clr: function(r) {
+            // use the two digits rounded value instead of the real value
+            var sm = parseFloat(this._round2(r.sm));
+            var lower = parseFloat(this._round2(r.lower));
+            var upper = parseFloat(this._round2(r.upper));
+            var which_is_better = r.oc.extract.meta.which_is_better;
+            var cie = r.oc.extract.certainty.cie;
+
+            var delta_sm = Math.abs(1 - sm);
+            var is_ci_cross_one = lower <= 1 && upper >= 1;
+            var ci_diff = upper - lower;
+
+            var _d2c = function(wib, sm, cie) {
+                if (sm == 1) { return 'cie-nner-' + cie; }
+                if (wib == 'lower') {
+                    if (sm < 1) { return 'cie-bene-' + cie; }
+                    else { return 'cie-harm-' + cie; }
+                } else {
+                    if (sm > 1) { return 'cie-bene-' + cie; }
+                    else { return 'cie-harm-' + cie; }
+                }
+            }
+
+            /**
+             * 2021-03-28: update the rule for color
+                1. if sm = 1 -> grey
+                2. if sm not = 1 then:
+                    a. if CI not cross -> red / green depends on direction of sm
+                    b. if CI cross 1 then:
+                        i. if the difference between upper and lower < 0.3, then
+                            1. if the 1- sm =<0.1 -> grey
+                            2. if the 1- sm >0.1 -> depends on direction of sm
+                        ii. if the difference between upper and lower >= 0.3, then
+                            1. depends upon direction of sm
+                */
+
+            // Rule 1
+            if (sm == 1) {
+                return 'cie-nner-' + cie;
+            }
+
+            // small is green, big is red
+            if (is_ci_cross_one) {
+                // Rule 2b
+                if (ci_diff < 0.3) {
+                    // Rule 2bi
+                    if (delta_sm <= 0.1) {
+                        return 'cie-nner-' + cie; 
+                    } else {
+                        return _d2c(which_is_better, sm, cie);
+                    }
+                } else {
+                    // Rule 2bii
+                    return _d2c(which_is_better, sm, cie);
+                }
+            } else {
+                // Rule 2a
+                return _d2c(which_is_better, sm, cie);
+            }
+
+        },
+
+        _txt: function(c) {
+            if (this.code_texts.hasOwnProperty(c)) {
+                return this.code_texts[c];
+            } else {
+                return 'NA';
+            }
+        },
+
+        _int: function(v) {
+            return Math.round(v);
+        },
+
+        _round2: function(v) {
+            return (Math.round(v * 100) / 100).toFixed(2);
+        }
+    },
+
+    init: function(data) {
+        // pre-processing data
+        // sort the outcomes by name
+        var rs = [];
+        for (const abbr in data.oc_dict) {
+            if (Object.hasOwnProperty.call(data.oc_dict, abbr)) {
+                const oc = data.oc_dict[abbr];
+                // we need to convert this oc to a format for vpp
+                var r = this.conv_oc2r(oc);
+                rs.push(r);
+            }
+        }
+
+        // sort
+        rs.sort(function(a, b) {
+            return a.oc_fullname.localeCompare(b.oc_fullname);
+        });
+        
+        // init the vpp
         this.vpp = new Vue({
+            el: this.vpp_id,
             data: {
                 oc_dict: data.oc_dict,
-                oc_list: oc_list,
+                // for the results
+                rs: rs,
 
                 // for the table part
+                baseline: 1000,
 
-                baseline: this.default_external_base,
+                // switches for detail information
                 show_survival: 'yes',
-            }
+                show_raw: 'no',
+                show_CIR: 'no',
+                show_ARD: 'no',
+
+                // for display
+                code_texts: {
+                    'OR': 'Odds Ratio (OR)',
+                    'RR': 'Risk Ratio (RR)',
+                    'HR': 'Hazard Ratio (HR)',
+                    'CIE_TOT_4': 'High',
+                    'CIE_TOT_3': 'Moderate',
+                    'CIE_TOT_2': 'Low',
+                    'CIE_TOT_1': 'Very Low',
+                    'CIE_VAL_4': 'Very serious',
+                    'CIE_VAL_3': 'Very serious',
+                    'CIE_VAL_2': 'Serious',
+                    'CIE_VAL_1': 'No serious',
+                    'PUB_BIA_2': 'Strongly suspected',
+                    'PUB_BIA_1': 'Undetected',
+                    'PUB_BIA_0': 'Not applicable',
+                    'IMPORTANCE_2': 'Critical',
+                    'IMPORTANCE_1': 'Important',
+                    'IMPORTANCE_0': 'NA',
+                },
+            },
+
+            methods: this.vpp_methods,
         });
+    },
+
+
+    // make a record for display
+    // the oc object is an item in the oc_dict
+    // looks like:
+    // {
+    //     extract: {
+    //         abbr: '',
+    //         meta: {
+    //             cq_abbr: ...
+    //         },
+    //         oc_type: ''
+    //     },
+    //     results [{
+    //         cfg: {},
+    //         rs: [{
+    //             Ec: 0, Et: ...
+    //         }],
+    //         rst: {
+    //             data: {
+    //                 primma: {
+    //                     heterogeneity: {},
+    //                     model: {
+    //                         fixed: {},
+    //                         random: {}
+    //                     },
+    //                     stus: [{}, {}, ...]
+    //                 }
+    //             }
+    //         }
+    //     }]
+    // }
+    // due to the complixity of the data format
+    // 
+    conv_oc2r: function(oc) {
+        if (oc.results.length == 0) {
+            // no results binded with oc, skip
+            return null;
+        }
+
+        var rst_idx = 0;
+        var fixed_or_random = 'random';
+        
+        if (oc.results[rst_idx].rs.length == 0) {
+            // this means no studies in this oc + grade 
+            return;
+        }
+
+        // for quick access the result
+        var oc_rst = oc.results[rst_idx].rst.data.primma.model[fixed_or_random];
+    
+        // build the r for display
+        var r = {
+            // bind the oc itself
+            oc: oc,
+
+            // bind the rst
+            oc_rst: oc_rst,
+
+            // abbr
+            oc_name: oc.extract.abbr,
+
+            // name for quick access
+            oc_fullname: oc.extract.meta.full_name,
+
+            // measure for quick access
+            oc_measure: oc.extract.meta.measure_of_effect,
+
+            // input_format / datatype for quick access
+            oc_data_type: oc.extract.data_type,
+
+            // for the raw format, 
+            // will be undefined if pre
+            Et: oc_rst.Et,
+            Nt: oc_rst.Nt,
+            Ec: oc_rst.Ec,
+            Nc: oc_rst.Nc,
+
+            // core results, use the back_traced values
+            sm: oc_rst.bt_TE,
+            lower: oc_rst.bt_lower,
+            upper: oc_rst.bt_upper,
+
+            // get the survival_in_control
+            has_survival_data: oc.extract.survival_in_control > 0,
+
+            // general data
+            n_stu: oc.results[rst_idx].rs.length,
+
+            // for ACR and others
+            which_ACR: {
+                // internal is available only when data type is raw
+                // pre data won't have this option
+                has_internal: oc.extract.has_internal_val,
+
+                // the default value
+                use_which_val: oc.extract.has_internal_val?'internal':'external',
+
+                // the external value
+                external_val: 100,
+
+                // decide which internal to use
+                use_internal_avg: true,
+                use_internal_min: false,
+                use_internal_max: false
+            },
+
+            // for display setting
+            is_show: {
+                // show sm, study info
+                sm: true,
+                // show ARD, or ARD CI
+                ARD: true,
+                // show CIR, or CIR CI
+                CIR: true
+            }
+        }
+        return r;
     }
+
 };
 
 var jarvis = {
-    txt: {
-        'OR': 'Odds Ratio (OR)',
-        'RR': 'Risk Ratio (RR)',
-        'HR': 'Hazard Ratio (HR)',
-        'CIE_TOT_4': 'High',
-        'CIE_TOT_3': 'Moderate',
-        'CIE_TOT_2': 'Low',
-        'CIE_TOT_1': 'Very Low',
-        'CIE_VAL_4': 'Very serious',
-        'CIE_VAL_3': 'Very serious',
-        'CIE_VAL_2': 'Serious',
-        'CIE_VAL_1': 'No serious',
-        'PUB_BIA_2': 'Strongly suspected',
-        'PUB_BIA_1': 'Undetected',
-        'PUB_BIA_0': 'Not applicable'
-    },
 
     // for the PMA table
     default_measure: '',
@@ -579,20 +921,21 @@ var jarvis = {
         if (cq == null) {
             cq = 'default';
         }
+        var gp = jarvis.get_url_paramter('gp');
+        if (gp == '') {
+            gp = 'primary';
+        }
+        jarvis.ssmsg('Loading data ...');
         
-        // set the measures in SoF PMA
-        tb_simple_sofpma.default_measure = this.default_measure;
-        tb_simple_sofpma.measure_list = this.measure_list;
-
+        
         $.get(
             '/pub/graphdata/'+prj+'/SOFTABLE_PMA.json',
-            {src: 'db', cq: cq, ver: Math.random()},
+            {src: 'cache', cq: cq, ver: Math.random()},
             function(data) {
-                vw_simple_oclist.init(data);
-                tb_simple_sofpma.init(data);
-
-                // show the first one
-                // vw_simple_oclist.toggle_oc(data.oc_list[0].oc_names[0]);
+                console.log(data);
+                
+                // init the app
+                app_softpma.init(data);
 
                 // ok, remove the 
                 jarvis.ssmsg('Almost initialized.');
