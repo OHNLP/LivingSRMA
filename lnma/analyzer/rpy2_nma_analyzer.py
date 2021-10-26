@@ -112,7 +112,6 @@ def demo():
     pprint(ret)
 
 
-
 def analyze_nma_freq_pre(rs, cfg):
     '''
     Analyze the pre-calculated data 

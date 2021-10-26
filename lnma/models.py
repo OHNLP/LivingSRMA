@@ -1,6 +1,7 @@
 import copy
 import enum
 import json
+import logging
 from xml.sax.saxutils import escape
 
 from . import db
@@ -1133,6 +1134,141 @@ class Extract(db.Model):
             ret = copy.deepcopy(settings.OC_TYPE_TPL['pwma']['default']['certainty'])
             
         return ret
+
+
+    def get_treatments_in_data(self):
+        '''
+        Get available treatments
+        '''
+        if self.oc_type != 'nma':
+            return None
+
+        treatments = []
+        for pid in self.data:
+            ext = self.data[pid]
+            if not ext['is_selected']:
+                continue
+
+            # check all arms
+            for arm in [ext['attrs']['main']] + ext['attrs']['other']:
+                try:
+                    # no matter pre or raw format
+                    # there always be t1 and t2
+                    t1 = arm['t1'].strip()
+                    t2 = arm['t2'].strip()
+
+                    if t1 not in treatments: treatments.append(t1)
+                    if t2 not in treatments: treatments.append(t2)
+
+                except:
+                    pass
+
+        treatments.sort()
+
+        return treatments
+
+
+    def get_nma_trtable(self):
+        '''
+        Get treat table for details in this extract
+        '''
+        treatments = self.get_treatments_in_data()
+        data_type = self.get_data_type()
+
+        # build treatment table
+        trtable = {}
+
+        for pid in self.data:
+            ext = self.data[pid]
+            if not ext['is_selected']:
+                continue
+
+            # check all arms
+            for arm in [ext['attrs']['main']] + ext['attrs']['other']:
+                # no matter pre or raw format
+                # there always be t1 and t2
+                for tx in ['t1', 't2']:
+                    treat_name = arm['g0'][tx].strip()
+
+                    if data_type == 'raw':
+                
+                        if treat_name not in trtable:
+                            trtable[treat_name] = {
+                                "n_stus": 0,
+                                "event": 0,
+                                "total": 0,
+                                'internal_val_ec': 0,
+                                'internal_val_et': 0,
+                                'has_internal_val': True,
+                                'has_survival_data': False,
+                                'survival_in_control': 0
+                            }
+                        
+                        # update the numbers of this treatment
+                        trtable[treat_name]['n_stus'] += 1
+                        try:
+                            trtable[treat_name]['event'] += int(arm['g0']['event_'+tx])
+                            trtable[treat_name]['total'] += int(arm['g0']['total_'+tx])
+                        except Exception as err:
+                            logging.warning(err)
+
+                        trtable[treat_name]['internal_val_ec'] += trtable[treat_name]['event']
+                        trtable[treat_name]['internal_val_et'] += trtable[treat_name]['total']
+
+                    elif data_type == 'pre':
+                        if treat_name not in trtable:
+                            trtable[treat_name] = {
+                                'n_stus': 0,
+                                'internal_val_ec': 0,
+                                'internal_val_et': 0,
+                                'has_internal_val': False,
+                                'has_survival_data': False,
+                                'survival_in_control': 0,
+                            }
+
+                        # update the numbers of this treatment
+                        trtable[treat_name]['n_stus'] += 1
+
+                        # try to add survival
+                        try:
+                            _srvc = float(arm['g0']['survival_'+tx])
+                        except Exception as err:
+                            _srvc = None
+                            logging.warning(err)
+
+                        if _srvc is None:
+                            pass
+                        else:
+                            trtable[treat_name]['survival_in_control'] += _srvc
+                            trtable[treat_name]['has_survival_data'] = True
+                    
+                        # try to add internal
+                        try: 
+                            trtable[treat_name]['internal_val_ec'] += int(arm['g0']['Ec_'+tx]) * 1000 / int(arm['g0']['Et_'+tx])
+                            trtable[treat_name]['internal_val_et'] += 1000
+                        except Exception as err:
+                            logging.warning(err)
+
+                    else:
+                        # what???
+                        pass
+
+        # ok, get the survival_in_control
+        for treat_name in trtable:
+            # final check the has_survival_data flag
+            trtable[treat_name]['has_survival_data'] = trtable[treat_name]['survival_in_control'] != 0
+
+            # update the survival in control
+            trtable[treat_name]['survival_in_control'] = trtable[treat_name]['survival_in_control'] / trtable[treat_name]['n_stus']
+
+            # update the external base data
+            trtable[treat_name]['has_internal_val'] = trtable[treat_name]['internal_val_et'] != 0
+            if trtable[treat_name]['has_internal_val']:
+                trtable[treat_name]['internal_val'] = int(1000 * trtable[treat_name]['internal_val_ec'] / trtable[treat_name]['internal_val_et'])
+            else:
+                trtable[treat_name]['internal_val'] = 100
+
+        return trtable
 
 
     def get_raw_rs_cfg(self, paper_dict, is_skip_unselected=True):

@@ -620,6 +620,11 @@ RSCRIPT_TPL = {
     'nma_bayes_ET': 'lnma_nma_bayes_ET.tpl.r',
     'nma_bayes_HRLU': 'lnma_nma_bayes_HRLU.tpl.r',
 
+    # for NMA full input_format
+    'nma_freq_NMA_RAW_ET': 'lnma_nma_freq_ET.tpl.r',
+    'nma_freq_NMA_PRE_SMLU': 'lnma_nma_freq_HRLU.tpl.r',
+    'nma_bayes_NMA_RAW_ET': 'lnma_nma_bayes_ET.tpl.r',
+    'nma_bayes_NMA_PRE_SMLU': 'lnma_nma_bayes_HRLU.tpl.r',
 
     # for R Plots (RPLT)
     #'rplt_IOTOX_FOREST': 'lnma_rplt_IOTOX_FOREST.tpl.r',

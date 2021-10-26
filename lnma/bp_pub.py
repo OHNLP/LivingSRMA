@@ -776,6 +776,9 @@ def graphdata_softable_pma_json(keystr):
         return jsonify(ret)
 
     if src == 'db':
+        print('* reading database for %s.%s %s' % (
+            keystr, cq_abbr, fn_json
+        ))
         ret = srv_pub_pma.get_sof_pma_data_from_db(
             keystr, 
             cq_abbr, 
@@ -819,52 +822,100 @@ def graphdata_softable_pma_json(keystr):
     return jsonify(ret)
 
 
-@bp.route('/graphdata/<prj>/SOFTABLE_NMA.json')
-def graphdata_softable_nma_json(prj):
-    '''Special rule for the SoF Table NMA which does not exist
-    In this function, all the data are stored in ALL_DATA.xlsx
+@bp.route('/graphdata/<keystr>/SOFTABLE_NMA.json')
+def graphdata_softable_nma_json(keystr):
+    '''
+    Special rule for the SoF Table NMA which does not exist
+    
+    If get the result from Excel file, all the data are stored in ALL_DATA.xlsx
     The first tab is Study characteristics
     The second tab is Adverse events
     From third tab all the events
     '''
-    fn = 'SOFTABLE_NMA_DATA.xlsx'
-    full_fn = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, fn)
-
-    fn_json = 'SOFTABLE_NMA.json'
-    full_fn_json = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, fn_json)
-
-    # get parameters
-    use_cache = request.args.get('use_cache')
-    v = request.args.get('v')
+    src = request.args.get('src')
+    if src is None or src == '':
+        # set the default to get things from db
+        src = 'db'
 
     # get the cq_abbr
     cq_abbr = request.args.get('cq')
     if cq_abbr is None or cq_abbr == '':
         cq_abbr = 'default'
 
-    if use_cache == 'yes':
-        return send_from_directory(
-            os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj),
-            fn_json
+    fn_json = 'SOFTABLE_NMA.json'
+    full_fn_json = os.path.join(
+        current_app.instance_path, 
+        settings.PUBLIC_PATH_PUBDATA, 
+        keystr,
+        cq_abbr,
+        fn_json
+    )
+
+    # make the cache
+    mk_graphdata_path(keystr, cq_abbr)
+
+    if src == 'cache':
+        print('* using cache for %s.%s %s' % (
+            keystr, cq_abbr, fn_json
+        ))
+        ret = json.load(open(full_fn_json))
+        return jsonify(ret)
+
+    if src == 'db':
+        print('* reading database for %s.%s %s' % (
+            keystr, cq_abbr, fn_json
+        ))
+
+        ret = srv_pub_nma.get_sof_nma_data_from_db(
+            keystr, cq_abbr
         )
-    full_fn = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, fn)
 
-    backend = 'freq'
-    if prj == 'RCC':
+        if ret is None:
+            ret = {
+                'success': False,
+                'msg': 'SOFTABLE NMA DATA NOT EXISTS FOR THIS PROJECT'
+            }
+
+        # catch the result
+        json.dump(ret, open(full_fn_json, 'w'), default=util.json_encoder)
+
+        return jsonify(ret)
+
+    # ok ... read file
+    # read file
+    if src == 'xls':
+            
         backend = 'freq'
-    elif prj == 'CAT':
-        backend = 'bayes'
+        if keystr == 'RCC':
+            backend = 'freq'
+        elif keystr == 'CAT':
+            backend = 'bayes'
 
-    ret = {}
-    if v is None or v == '' or v == '1':
-        ret = get_ae_nma_data(full_fn, backend=backend)
-        # cache the result
-        json.dump(ret, open(full_fn_json, 'w'))
-    elif v == '2':
-        ret = get_sof_nma_data(full_fn)
-        # cache the result
-        json.dump(ret, open(full_fn_json, 'w'))
+        # get parameters
+        v = request.args.get('v')
 
+        ret = {}
+        fn = 'SOFTABLE_NMA_DATA.xlsx'
+        full_fn = os.path.join(
+            current_app.instance_path, 
+            settings.PUBLIC_PATH_PUBDATA, 
+            keystr, 
+            fn
+        )
+        if v is None or v == '' or v == '1':
+            ret = get_ae_nma_data(full_fn, backend=backend)
+            # cache the result
+            json.dump(ret, open(full_fn_json, 'w'))
+        elif v == '2':
+            ret = get_sof_nma_data(full_fn)
+            # cache the result
+            json.dump(ret, open(full_fn_json, 'w'))
+
+    # 
+    ret = {
+        'success': False,
+        'msg': 'SOFTABLE_PMA DATA NOT EXISTS FOR THIS PROJECT'
+    }
     return jsonify(ret)
 
 

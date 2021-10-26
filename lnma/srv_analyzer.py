@@ -2,11 +2,83 @@ import copy
 from lnma import settings
 from lnma import util
 from lnma.analyzer import rpy2_pwma_analyzer as pwma_analyzer
+from lnma.analyzer import nma_analyzer
 
+
+def get_nma(extract, paper_dict, is_skip_unselected=True):
+    '''
+    Get the NMA result in the given extract with paper dict
+
+    The NMA result may be complex depends on the given input
+
+    Returns
+
+    A list of results:
+
+    [
+        {
+            'rs': rs,
+            'cfg': cfg,
+            'result':
+        },
+        ...
+    ]    
+    '''
+    # double check the type
+    if extract.oc_type != 'nma':
+        return None
+
+    # get the input_format
+    # input_format affect the way of calc
+    input_format = extract.meta['input_format']
+
+    if input_format not in settings.INPUT_FORMAT_TPL['nma']:
+        # what??? how could it be??
+        print('* unknown input_format %s for NMA' % input_format)
+        return None
+
+    # treatments
+    treat_list = extract.meta['treatments']
+
+    # the second, build the rs
+    rscfg = extract.get_raw_rs_cfg(
+        paper_dict, 
+        is_skip_unselected=is_skip_unselected
+    )
+
+    # may use it in future
+    rscfg_hash = util.hash_json(rscfg)
+    rs = rscfg['rs']
+
+    results = []
+
+    # get the config
+    cfg = {
+        # for init analyzer
+        "backend": extract.meta['analysis_method'],
+        "input_format": input_format,
+        "reference_treatment": treat_list[0],
+        "measure_of_effect": extract.meta['measure_of_effect'],
+        "fixed_or_random": extract.meta['fixed_or_random'],
+        "which_is_better": 'small' if extract.meta['fixed_or_random'] == 'lower' else 'big',
+
+        # a special rule for database format
+        'format_converted': 'yes'
+    }
+    ret_nma = nma_analyzer.analyze(rs, cfg)
+
+    results.append({
+        'rs': rs,
+        'cfg': rscfg['cfg'],
+        'rst': ret_nma
+    })
+
+    return results
+        
 
 def get_pma(extract, paper_dict, is_skip_unselected=True):
     '''
-    Get the pma result in the given extract with paper dict
+    Get the PMA result in the given extract with paper dict
 
     The pma result may be complex depends on the given input
 
@@ -33,7 +105,7 @@ def get_pma(extract, paper_dict, is_skip_unselected=True):
 
     if input_format not in settings.INPUT_FORMAT_TPL['pwma']:
         # what??? how could it be??
-        print('* unknown input_format %s' % input_format)
+        print('* unknown input_format %s for PMA' % input_format)
         return None
 
     # the second, build the rs

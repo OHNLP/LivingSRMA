@@ -8,11 +8,11 @@
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
 
-<title>Summary of Findings: NMA</title>
+<title>Summary of Findings: Network Meta-Analysis</title>
 
 <link rel="icon" href="/static/img/favicon.png" type="image/png">
-<script src="https://kit.fontawesome.com/cb45cc91b0.js" crossorigin="anonymous"></script>
-<link rel="stylesheet" href="/static/lib/jquery-ui/jquery-ui.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" />
 <link rel="stylesheet" href="/static/css/mybox-0.9.1.css">
 
 <style>
@@ -393,11 +393,10 @@ a {
 
 </div>
 
-<script src="/static/lib/jquery/jquery-3.4.1.min.js"></script>
-<script src="/static/lib/jquery-ui/jquery-ui.min.js"></script>
-<script src="/static/lib/vue.js/vue.min.js"></script>
-<script src="/static/lib/alasql/alasql.min.js"></script>
-<script src="/static/lib/d3/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/alasql/0.5.5/alasql.min.js"></script>
 
 <script>
 var isIE = /*@cc_on!@*/false || !!document.documentMode;
@@ -408,26 +407,32 @@ if (isIE) {
 
 <script>
 
-{% include 'js/vw_simple_oclist.js' %}
-{% include 'js/tb_simple_sofnma.js' %}
+var app_softnma = {
+    vpp: null,
+    vpp_id: '#app_softnma',
+
+    vpp_methods: {
+
+    },
+
+    init: function(data) {
+        // pre-processing
+
+        // init the vpp
+        this.vpp = new Vue({
+            el: this.vpp_id,
+
+            data: {
+
+            },
+
+            methods: this.vpp_methods
+        });
+    }
+};
 
 
 var jarvis = {
-    txt: {
-        'OR': 'Odds Ratio (OR)',
-        'RR': 'Risk Ratio (RR)',
-        'CIE_TOT_4': 'High',
-        'CIE_TOT_3': 'Moderate',
-        'CIE_TOT_2': 'Low',
-        'CIE_TOT_1': 'Very Low',
-        'CIE_VAL_4': 'Very serious',
-        'CIE_VAL_3': 'Very serious',
-        'CIE_VAL_2': 'Serious',
-        'CIE_VAL_1': 'No serious',
-        'PUB_BIA_2': 'Strongly suspected',
-        'PUB_BIA_1': 'Undetected',
-        'PUB_BIA_0': 'Not applicable'
-    },
     default_comparator: null,
 
     init: function() {
@@ -446,16 +451,37 @@ var jarvis = {
             return;
         }
 
-        // set default_comparator
-        this.default_comparator = jarvis.get_url_paramter('dc');
-        if (this.default_comparator == null || this.default_comparator == '') {
-            this.default_comparator == null;
+        // get the cq_abbr for this project
+        var cq = jarvis.get_url_paramter('cq');
+        if (cq == null) {
+            cq = 'default';
         }
 
+        // get the analysis group, by default just show the primary
+        var gp = jarvis.get_url_paramter('gp');
+        if (gp == '') {
+            gp = 'primary';
+        }
+
+        // set default_comparator
+        var dc = jarvis.get_url_paramter('dc');
+        if (dc == '') {
+            this.default_comparator = null;
+        } else {
+            this.default_comparator = dc;
+        }
+
+        jarvis.ssmsg('Loading data ...');
+
         $.get(
-            './graphdata/' + prj + '/SOFTABLE_NMA.json',
+            '/pub/graphdata/' + prj + '/SOFTABLE_NMA.json',
             // { ver: Math.random() },
-            { ver: Math.random(), use_cache: 'yes' },
+            {
+                src: 'db',
+                cq: cq,
+                gp: gp,
+                ver: Math.random()
+            },
             function(data) {
                 // init the oc list
                 vw_simple_oclist.init(data);

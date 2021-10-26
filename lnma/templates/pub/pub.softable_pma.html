@@ -11,7 +11,6 @@
 <title>Summary of Findings: Pairwise Meta-Analysis</title>
 
 <link rel="icon" href="/static/img/favicon.png" type="image/png">
-<!-- <script src="https://kit.fontawesome.com/cb45cc91b0.js" crossorigin="anonymous"></script> -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" />
 
@@ -278,10 +277,10 @@ a {
             <div class="box-header">
                 <div class="d-flex fx-row">
                     <div class="box-menu-group d-flex fx-row">
-                        <div>
+                        <div class="cfg-name">
                             Risks per: 
                         </div>
-                        <div>
+                        <div class="cfg-value">
                             <select v-model="baseline">
                                 <option value="100">100</option>
                                 <option value="1000">1000</option>
@@ -831,6 +830,8 @@ var app_softpma = {
     // }
     // due to the complixity of the data format
     // 
+
+
     conv_oc2r: function(oc) {
         if (oc.results.length == 0) {
             // no results binded with oc, skip
@@ -946,20 +947,27 @@ var jarvis = {
             jarvis.ssmsg('Project information error.')
             return;
         }
+        // get the cq_abbr for this project
         var cq = jarvis.get_url_paramter('cq');
         if (cq == null) {
             cq = 'default';
         }
+        // get the analysis group, by default just show the primary
         var gp = jarvis.get_url_paramter('gp');
         if (gp == '') {
             gp = 'primary';
         }
+
         jarvis.ssmsg('Loading data ...');
-        
         
         $.get(
             '/pub/graphdata/'+prj+'/SOFTABLE_PMA.json',
-            {src: 'db', cq: cq, ver: Math.random()},
+            {
+                src: 'db', 
+                cq: cq, 
+                gp: gp,
+                ver: Math.random()
+            },
             function(data) {
                 console.log(data);
                 
