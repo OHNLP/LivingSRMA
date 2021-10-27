@@ -183,6 +183,11 @@ def get_nma_by_cq(keystr, cq_abbr="default"):
         # get the trttable
         trtable = extract.get_nma_trtable()
 
+        # update the SoF-level treat list
+        for treat_name in trtable:
+            if treat_name not in treat_list:
+                treat_list.append(treat_name)
+
         # OK, bind the result
         oc_dict[abbr] = {
             'extract': extract.as_very_simple_dict(),
@@ -199,6 +204,9 @@ def get_nma_by_cq(keystr, cq_abbr="default"):
             # the treat table 
             'trtable': trtable
         }
+
+    # before returning, sort the treat_list
+    treat_list.sort()
 
     ret = {
         'treat_list': treat_list,
