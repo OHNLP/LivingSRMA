@@ -147,6 +147,18 @@ a {
 .cell-treat:hover {
     /* background: #efefef; */
 }
+
+#tb_simple_sofnma_detail {
+    position: absolute;
+    margin: 10px auto;
+    padding: 10px;
+    width: 500px;
+    height: 400px;
+    background: white;
+    border: 1px solid #9e9e9e;
+    box-shadow: 5px 5px 5px #c7c7c7;
+}
+
 .cie-bene-4 { background: rgb(55, 86, 35); color: white; }
 .cie-bene-3 { background: rgb(84, 130, 53); color: white; }
 .cie-bene-2 { background: rgb(169, 208, 142); color: black; }
@@ -234,6 +246,19 @@ a {
                     <div class="box-menu-group d-flex fx-row">
                         <div>
                             <i class="fa fa-cog"></i>
+                            Show survival data: 
+                        </div>
+                        <div>
+                            <select v-model="show_survival">
+                                <option value="yes">Yes</option>
+                                <option value="no">No</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="box-menu-group d-flex fx-row">
+                        <div>
+                            <i class="fa fa-cog"></i>
                             Display risks per: 
                         </div>
                         <div>
@@ -261,19 +286,45 @@ a {
                 <table class="sof-table">
                     <tr>
                         <th class="col-ae-name">Outcome</th>
-                        <th class="col-treat">Comparator: <b class="red">{{ comparator }}</b></th>
+                        <th class="col-treat">
+                            Comparator: <br>
+                            <b class="red">{{ comparator }}</b>
+                        </th>
                         <th class="col-treat" 
                             v-for="treat in treat_list" 
                             v-if="treat != comparator">
                             {{ treat }}
                         </th>
                     </tr>
-                    <tr v-for="r in rs">
+                    <tr v-for="r, r_idx in rs">
                         <td class="col-ae-name">
-                            {{ r.oc_fullname }}<br>
+                            {{ r.oc_full_name }}<br>
                             <span class="grey">( {{ r.oc_measure }} )</span>
                         </td>
                         
+                        <td class="col-comparator">
+                            <span v-if="show_survival == 'yes'">
+                                {{ get_SRVC_txt(r, comparator) }} <br>
+                                <b>{{ get_rank_txt(r, comparator) }}</b>
+                            </span>
+                            <span v-else>
+                                {{ get_ACR_txt(r, comparator) }} <br>
+                                <b>{{ get_rank_txt(r, comparator) }}</b>
+                            </span>
+                        </td>
+
+                        <td class="cell-treat"
+                            v-for="treat in treat_list" 
+                            v-if="treat != comparator"
+                            v-on:click="show_detail(r_idx, treat)">
+                            <span v-if="show_survival == 'yes'">
+                                {{ get_SRVD_txt(r, comparator, treat, 'sm') }}<br>
+                            </span>
+                            <span v-else>
+                                {{ get_ARD_txt(r, comparator, treat, 'sm') }}<br>
+                            </span>
+                            <b>{{ get_rank_txt(r, treat) }}</b>
+                        </td>
                     </tr>
                 </table>
 
@@ -283,7 +334,76 @@ a {
 
         
     </div>
+    <!-- /#tb_simple_sofnma -->
+
+    <div id="tb_simple_sofnma_detail" 
+        v-if="detail.r_idx != null && detail.treat_name != null"
+        v-show="detail.is_show == 'yes'"
+        class="box">
+        <div class="box-header">
+            <h4>    
+                <i class="fa fa-table"></i>
+                <b class="txt-lg">{{ rs[detail.r_idx].oc_full_name }}</b>
+            </h4>
+        </div>
+        <div class="box-body">
+
+            <div class="d-flex fx-row">
+                <p>
+                    Treatment: <b class="txt-lg">{{ detail.treat_name }}</b>, 
+                    Comparator: <b class="txt-lg">{{ comparator }}</b>
+                </p>
+            </div>
+            <div class="d-flex fx-row">
+                <div style="width: 50%;">
+                    <h5>Summary of data</h5>
+                    
+                </div>
+
+                <div style="width: 50%;">
+                    <h5>Summary of measure: {{ rs[detail.r_idx].oc_measure }}</h5>
+                    
+                </div>
+            </div>
+
+            <hr>
+
+            <div>
+                <p>Certainty in Evidence: 
+                    <b class="txt-lg" style="padding: 0 5px;">
+                        {{ get_detail_cie_txt('cie') }}
+                    </b>
+                </p>
+                <table class="cie-table">
+                    <tr>
+                        <th>Risk of bias</th>
+                        <td>{{ get_detail_cie_txt('risk_of_bias') }}</td>
+                    </tr>
+                    <tr>
+                        <th>Inconsistency</th>
+                        <td>{{ get_detail_cie_txt('inconsistency') }}</td>
+                    </tr>
+                    <tr>
+                        <th>Indirectness</th>
+                        <td>{{ get_detail_cie_txt('indirectness') }}</td>
+                    </tr>
+                    <tr>
+                        <th>Imprecision</th>
+                        <td>{{ get_detail_cie_txt('imprecision') }}</td>
+                    </tr>
+                    <tr>
+                        <th>Publication</th>
+                        <td>{{ get_detail_cie_txt('publication_bias') }}</td>
+                    </tr>
+                </table>
+            </div>
+
+        </div>
+    </div>
+    <!-- /#tb_simple_sofnma_detail -->
+
 </div>
+<!-- /#app_softnma -->
 
 </div>
 
@@ -308,6 +428,373 @@ var app_softnma = {
 
     vpp_methods: {
 
+        /***********************************************
+         * Rank Related
+         ***********************************************/
+        get_rank: function(r, t) {
+            if (r.oc.rktable.hasOwnProperty(t)) {
+                return r.oc.rktable[t].rank;
+            } else {
+                // this treat is not available in this study
+                return null;
+            }
+        },
+
+        get_rank_txt: function(r, t) {
+            var rank = this.get_rank(r, t);
+            if (rank == null) {
+                return 'NA';
+            } else {
+                return 'Rank ' + rank;
+            }
+        },
+
+        /***********************************************
+         * ACR, CIR, ARD, ARDp Related
+         ***********************************************/
+        get_ACR: function(r, t) {
+            // the t is a treat
+            // t may be missing in this r
+            if (!r.oc.trtable.hasOwnProperty(t)) {
+                // this treat is not available in this study
+                return null;
+            }
+
+            if (r.oc.trtable[t].which_ACR.use_which_val == 'internal') {
+                if (r.oc.trtable[t].has_internal_val) {
+
+                    if (r.oc_data_type == 'raw') {
+                        return r.oc.trtable[t].event / r.oc.trtable[t].total; 
+                    } else {
+                        return r.oc.trtable[t].internal_val / 1000;
+                    }
+
+                } else {
+                    return 0.1;
+                }
+
+            } else {
+
+                return r.oc.trtable[t].which_ACR.external_val / this.baseline;
+            }
+
+        },
+
+        get_ACR_txt: function(r, t) {
+            var ACR = this.get_ACR(r, t);
+            if (ACR == null) {
+                // it means no available data for this treat
+                return 'NA';
+                
+            } else {
+                if (r.oc.trtable[t].which_ACR.use_which_val == 'internal') {
+                    return Math.round(ACR * this.baseline) + 
+                        ' per ' + 
+                        this.baseline;
+                } else {
+                    return Math.round(ACR * this.baseline) + 
+                        ' per ' + 
+                        this.baseline +
+                        ' (E)';
+                }
+            }
+        },
+
+        get_CIR: function(r, c, t, obj) {
+            // calculate the CIR based on measure
+            // r is the oc r object
+            // obj: sm, lw, up
+            // c is comparator, t is treatment
+            var ACR = this.get_ACR(r, c);
+            if (ACR == null) {
+                // if ACR is not available, no need to calcuate others
+                return null;
+            }
+
+            // get an available measure for this oc
+            var measure = r.oc_measure;
+
+            // v is the value of the sm/lw/up of this measure
+            if (!r.oc.lgtable.hasOwnProperty(t)) {
+                // this t is not available for this oc
+                return null;
+            }
+            var v = r.oc.lgtable[c][t][obj];
+
+            if (measure == 'OR') {
+                var a = ACR * v;
+                var b = 1 - ACR;
+                var c = a + b;
+                var d = a / c;
+                return d;
+
+            } else if (measure == 'RR') {
+                var a = ACR * v;
+                return a;
+                
+            } else if (measure == 'HR') {
+                var a = 1 - ACR;
+                var b = Math.log(a);
+                var c = b * v;
+                var d = Math.exp(c);
+                var e = 1 - d;
+                return e;
+            }
+        },
+
+        get_CIR_txt: function(r, c, t, obj) {
+            var CIR = this.get_CIR(r, c, t, obj);
+            if (CIR == null) {
+                // it means no available data for this treat
+                return 'NA';
+            } else {
+                return Math.round(CIR * this.baseline) + 
+                    ' per ' + 
+                    this.baseline;
+            }
+        },
+
+        get_ARD: function(r, c, t, obj) {
+            // calculate the ARD based on measure
+            // r is the oc_r
+            // obj: sm, lw, up
+            // c is comparator, t is treatment
+
+            var ACR = this.get_ACR(r, c);
+            if (ACR == null) {
+                // if ACR is not available, no need to calcuate others
+                return null;
+            }
+            var CIR = this.get_CIR(r, c, t, obj);
+            if (CIR == null) {
+                // if CIR is not available, no need to calcuate others
+                return null;
+            }
+
+            // get an available measure for this oc
+            var measure = r.oc_measure;
+            
+            // v is the value of the sm/lw/up of this measure
+            var v = r.oc.lgtable[c][t][obj];
+
+            if (measure == 'OR') {
+                var ARD = ACR - CIR;
+                return ARD;
+
+            } else if (measure == 'RR') {
+                var a = ACR * (1 - v);
+                return a;
+
+            } else if (measure == 'HR') {
+                var ARD = ACR - CIR;
+                return ARD;
+            }
+        },
+
+        get_ARD_txt: function(r, c, t, obj) {
+            var ARD = this.get_ARD(r, c, t, obj);
+            if (ARD == null) {
+                return 'NA';
+            }
+            var txt = ' fewer';
+            if (ARD < 0) {
+                txt = ' more';
+            }
+            return Math.abs(Math.round(ARD * this.baseline)) + txt;
+        },
+
+        get_ARDp: function(r, c, t, obj) {
+            var ARD = this.get_ARD(r, c, t, obj);
+            if (ARD == null) {
+                return null;
+            }
+            var ARDp = 100 * ARD;
+            return ARDp;
+        },
+
+        get_ARDp_txt: function(r, c, t, obj) {
+            var ARDp = this.get_ARDp(r, c, t, obj);
+            if (ARDp == null) {
+                return 'NA';
+            }
+            var txt = ' fewer';
+            if (ARDp < 0) {
+                txt = ' more';
+            }
+            return Math.abs(ARDp).toFixed(1) + '%' + txt;
+        },
+
+        /***********************************************
+         * Survival Related
+         ***********************************************/
+
+        // get survival in control
+        get_SRVC: function(r, c) {
+            if (!r.oc.trtable.hasOwnProperty(c)) {
+                // this comparator is not available in this oc
+                return null;
+            }
+            if (!r.oc.trtable[c].has_survival_data) {
+                // this oc doesn't have survival data
+                return null;
+            }
+            var SRVC = r.oc.trtable[c].survival_in_control;
+            return SRVC;
+        },
+
+        get_SRVC_txt: function(r, c) {
+            var SRVC = this.get_SRVC(r, c);
+            if (SRVC == null) {
+                return 'NA';
+            }
+            return SRVC.toFixed(1) + ' (mo)';
+        },
+
+        get_SRVI: function(r, c, t, obj) {
+            var SRVC = this.get_SRVC(r, c);
+            if (SRVC == null) {
+                // this comparator doesn't have survival data
+                return null;
+            }
+            // currently, only HR has survival data
+            var measure = 'HR';
+            
+            // v is the value of the sm/lw/up of this measure
+            var v = r.oc.lgtable[c][t][obj];
+
+            // get the survival in 
+            var SRVI = (1 / v) * SRVC;
+
+            return SRVI;
+        },
+
+        get_SRVI_txt: function(r, c, t, obj) {
+            var SRVI = this.get_SRVI(r, c, t, obj);
+            if (SRVI == null) {
+                return 'NA';
+            }
+            return SRVI.toFixed(1) + ' (mo)';
+        },
+
+        get_SRVD: function(r, c, t, obj) {
+            var SRVC = this.get_SRVC(r, c);
+            var SRVI = this.get_SRVI(r, c, t, obj);
+            
+            if (SRVC == null) { return null; }
+            if (SRVI == null) { return null; }
+
+            var SRVD = SRVC - SRVI;
+            return SRVD;
+        },
+
+        get_SRVD_txt: function(r, c, t, obj) {
+            var SRVD = this.get_SRVD(r, c, t, obj);
+            if (SRVD == null) {
+                return 'NA';
+            }
+            var txt = '';
+            if (SRVD < 0) {
+                txt = ' more';
+            } else if (SRVD > 0) {
+                txt = ' fewer';
+            } else {
+                txt = '';
+            }
+            return Math.abs(SRVD).toFixed(1) + ' (mo)' + txt;
+        },
+
+        /***********************************************
+         * Detail Information Related
+         ***********************************************/
+
+        show_detail: function(r_idx, treat_name) {
+            this.detail.r_idx = r_idx;
+            this.detail.treat_name = treat_name;
+
+            // enable display
+            this.detail.is_show = 'yes';
+        },
+
+        /**
+         * Get the current detail cie
+         * 
+         * item: the cie item name
+         */
+        get_detail_cie_txt: function(item) {
+            return this.get_cie_txt(
+                this.rs[this.detail.r_idx],
+                this.comparator,
+                this.detail.treat_name,
+                item
+            );
+        },
+
+        /**
+         * Get the Certainty in Evidence text
+         * 
+         * r: oc record
+         * c: comparator
+         * t: treatment
+         * i: cie item name, such as risk_of_bias, indirectness
+         */
+        get_cie_txt: function(r, c, t, i) {
+            if (r.oc.cetable.hasOwnProperty(c)) {
+                if (r.oc.cetable[c].hasOwnProperty(t)) {
+                    if (r.oc.cetable[c][t].hasOwnProperty(i)) {
+                        // ok, let's try to get the final 
+                        return this._cie2txt(
+                            i,
+                            r.oc.cetable[c][t][i]
+                        );
+
+                    } else {
+                        // which means for this pair of c-t
+                        // the specific cie item is not available
+                        // or not specificed
+                        return 'None';
+                    }
+
+                } else {
+                    // which means this treatment is not available 
+                    // in this outcome for this comparator
+                    return 'NA';
+                }
+            } else {
+                // which means this comparator is not available
+                // in this outcome
+                return 'NA';
+            }
+        },
+
+        /**
+         * Get the CiE text
+         * 
+         * For the given item, return the text
+         */
+        _cie2txt: function(item, value) {
+            var item_code = '';
+
+            if (item == 'cie') {
+                item_code = 'CIE_TOT_' + value;
+
+            } else if (item == 'pub_bia' ||
+                       item == 'publication_bias') {
+                item_code = 'PUB_BIA_' + value;
+
+            } else if (item == 'importance') {
+                item_code = 'IMPORTANCE_' + value;
+
+            } else {
+                item_code = 'CIE_VAL_' + value;
+            }
+
+            if (this.code_texts.hasOwnProperty(item_code)) {
+                return this.code_texts[item_code];
+
+            } else {
+                return 'NA';
+            }
+        }
     },
 
     init: function(data) {
@@ -325,7 +812,7 @@ var app_softnma = {
 
         // sort
         rs.sort(function(a, b) {
-            return a.oc_fullname.localeCompare(b.oc_fullname);
+            return a.oc_full_name.localeCompare(b.oc_full_name);
         });
 
         // set the app_softnma.default_comparator
@@ -342,14 +829,41 @@ var app_softnma = {
             data: {
                 baseline: 1000,
                 show_survival: 'no',
-                show_detail: {
-                    oc_name: null,
+                detail: {
+                    is_show: 'no',
+                    r_idx: null,
+                    treat_name: null
                 },
                 comparator: this.default_comparator,
                 
                 oc_dict: data.oc_dict,
                 treat_list: data.treat_list,
-                rs: rs
+                rs: rs,
+
+                // for display
+                code_texts: {
+                    'OR': 'Odds Ratio (OR)',
+                    'RR': 'Risk Ratio (RR)',
+                    'HR': 'Hazard Ratio (HR)',
+
+                    'CIE_TOT_4': 'High',
+                    'CIE_TOT_3': 'Moderate',
+                    'CIE_TOT_2': 'Low',
+                    'CIE_TOT_1': 'Very Low',
+
+                    'CIE_VAL_4': 'Very serious',
+                    'CIE_VAL_3': 'Very serious',
+                    'CIE_VAL_2': 'Serious',
+                    'CIE_VAL_1': 'No serious',
+
+                    'PUB_BIA_2': 'Strongly suspected',
+                    'PUB_BIA_1': 'Undetected',
+                    'PUB_BIA_0': 'Not applicable',
+
+                    'IMPORTANCE_2': 'Critical',
+                    'IMPORTANCE_1': 'Important',
+                    'IMPORTANCE_0': 'NA',
+                },
             },
 
             methods: this.vpp_methods
@@ -361,6 +875,24 @@ var app_softnma = {
     },
 
     conv_oc2r: function(oc) {
+        // add which_ACR to oc.trtable
+        for (const t in oc.trtable) {
+            if (Object.hasOwnProperty.call(oc.trtable, t)) {
+                oc.trtable[t]['which_ACR'] = {
+                    // decide which value to use
+                    use_which_val: oc.trtable[t].has_internal_val?'internal':'external',
+                    // the external value
+                    external_val: 0,
+                    // decide which internal to use
+                    // use avg always.
+                    use_internal_avg: true,
+                    use_internal_min: false,
+                    use_internal_max: false
+                }
+                
+            }
+        }
+        // create a record
         var r = {
             // bind the oc itself
             oc: oc,
@@ -369,7 +901,7 @@ var app_softnma = {
             oc_name: oc.extract.abbr,
 
             // name for quick access
-            oc_fullname: oc.extract.meta.full_name,
+            oc_full_name: oc.extract.meta.full_name,
 
             // measure for quick access
             oc_measure: oc.extract.meta.measure_of_effect,
