@@ -223,9 +223,7 @@ a {
     <div id="tb_simple_sofnma">
         <div class="box" style="height: 100%;">
             <div class="box-header">
-                <h4>
-                    <i class="fa fa-table"></i>
-                </h4>
+                
                 <div class="d-flex fx-row">
 
                     <div class="box-menu-group d-flex fx-row">
@@ -362,12 +360,78 @@ a {
             <div class="d-flex fx-row">
                 <div style="width: 50%;">
                     <h5>Summary of data</h5>
-                    
+                    <p>
+                        Randomized controlled trials: 
+                        <span class="txt-lg txt-fb">
+                            {{ get_n_stus_txt(rs[detail.r_idx], detail.treat_name) }}
+                        </span>
+                    </p>
+
+                    <div v-if="rs[detail.r_idx].oc_data_type == 'raw'">
+                        <p>
+                            Number of events in arm: 
+                            <span class="txt-lg txt-fb">
+                                {{ get_treat_attr_txt(rs[detail.r_idx], detail.treat_name, 'event') }}
+                            </span>
+                        </p>
+                        <p>
+                            Total participants in arm: 
+                            <span class="txt-lg txt-fb">
+                                {{ get_treat_attr_txt(rs[detail.r_idx], detail.treat_name, 'total') }}
+                            </span>
+                        </p>
+                    </div>
                 </div>
 
                 <div style="width: 50%;">
                     <h5>Summary of measure: {{ rs[detail.r_idx].oc_measure }}</h5>
-                    
+                    <p>
+                        Relative effect: 
+                        <span class="txt-lg txt-fb">
+                            {{ get_effect_txt(rs[detail.r_idx], comparator, detail.treat_name, 'sm') }} 
+                        </span>
+                        (
+                        {{ get_effect_txt(rs[detail.r_idx], comparator, detail.treat_name, 'lw') }}
+                        to 
+                        {{ get_effect_txt(rs[detail.r_idx], comparator, detail.treat_name, 'up') }}
+                        )
+                    </p>
+                    <p>
+                        Absolute risk: 
+                        <span class="txt-lg txt-fb">
+                            {{ get_CIR_txt(rs[detail.r_idx], comparator, detail.treat_name, 'sm') }}
+                        </span>
+                        <br>
+                        (
+                        {{ get_CIR_txt(rs[detail.r_idx], comparator, detail.treat_name, 'lw') }} 
+                        to 
+                        {{ get_CIR_txt(rs[detail.r_idx], comparator, detail.treat_name, 'up') }}
+                        )
+                    </p>
+                    <p>
+                        Absolute risk difference: 
+                        <span class="txt-lg txt-fb">
+                            {{ get_ARD_txt(rs[detail.r_idx], comparator, detail.treat_name, 'sm') }}
+                        </span>
+                        <br>
+                        (
+                        {{ get_ARD_txt(rs[detail.r_idx], comparator, detail.treat_name, 'lw') }} 
+                        to 
+                        {{ get_ARD_txt(rs[detail.r_idx], comparator, detail.treat_name, 'up') }}
+                        )
+                    </p>
+                    <p>
+                        Absolute risk percentage:
+                        <span class="txt-lg txt-fb">
+                            {{ get_ARDp_txt(rs[detail.r_idx], comparator, detail.treat_name, 'sm') }}
+                        </span>
+                        <br>
+                        (
+                        {{ get_ARDp_txt(rs[detail.r_idx], comparator, detail.treat_name, 'lw') }} 
+                        to 
+                        {{ get_ARDp_txt(rs[detail.r_idx], comparator, detail.treat_name, 'up') }}
+                        )
+                    </p>
                 </div>
             </div>
 
@@ -432,6 +496,40 @@ var app_softnma = {
     default_comparator: null,
 
     vpp_methods: {
+        /**
+         * Get the effect of a measure of outcome
+         * @param {any} oc_name
+         * @param {any} c comparator
+         * @param {any} t treatment
+         * @param {any} obj sm/lw/up
+         * @returns {any}
+         */
+        get_effect: function(r, c, t, obj) {
+            if (!r.oc.lgtable.hasOwnProperty(c)) { 
+                // this oc doesn't have this c
+                return null;
+            }
+
+            if (!r.oc.lgtable[c].hasOwnProperty(t)) { 
+                // this oc doesn't have this t
+                return null;
+            }
+
+            return r.oc.lgtable[c][t][obj];
+        },
+
+        get_effect_txt: function(r, c, t, obj) {
+            var e = this.get_effect(r, c, t, obj);
+
+            if (e == null) {
+                return 'NA';
+            }
+
+            // make sure the `e` is a float value
+            e = parseFloat('' + e);
+
+            return e.toFixed(2);
+        },
 
         /***********************************************
          * Rank Related
@@ -723,6 +821,39 @@ var app_softnma = {
             // $('#tb_simple_sofnma_detail').draggable({
             //     handle: 'div.box-header'
             // });
+        },
+
+        get_treat: function(r, treat_name) {
+            if (r.oc.trtable.hasOwnProperty(treat_name)) {
+                return r.oc.trtable[treat_name];
+            } else {
+                return null;
+            }
+        },
+
+        get_treat_attr_txt: function(r, treat_name, attr) {
+            var t = this.get_treat(r, treat_name);
+
+            if (t == null) { 
+                return 'NA';
+            } else {
+                
+                if (t.hasOwnProperty(attr)) {
+                    return t[attr];
+                } else {
+                    return 'NA';
+                }
+            }
+        },
+
+        get_n_stus_txt: function(r, treat_name) {
+            var t = this.get_treat(r, treat_name);
+
+            if (t == null) { 
+                return 'NA';
+            } else {
+                return t.n_stus;
+            }
         },
 
         /**
