@@ -340,11 +340,16 @@ a {
         v-if="detail.r_idx != null && detail.treat_name != null"
         v-show="detail.is_show == 'yes'"
         class="box">
-        <div class="box-header">
+        <div class="box-header box-header-grey d-flex fx-row fx-jc-space-between">
             <h4>    
                 <i class="fa fa-table"></i>
                 <b class="txt-lg">{{ rs[detail.r_idx].oc_full_name }}</b>
             </h4>
+            <div>
+                <button v-on:click="detail.is_show = 'no'">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
         </div>
         <div class="box-body">
 
@@ -713,6 +718,11 @@ var app_softnma = {
 
             // enable display
             this.detail.is_show = 'yes';
+
+            // // init the jquery UI draggable
+            // $('#tb_simple_sofnma_detail').draggable({
+            //     handle: 'div.box-header'
+            // });
         },
 
         /**
@@ -866,7 +876,20 @@ var app_softnma = {
                 },
             },
 
-            methods: this.vpp_methods
+            methods: this.vpp_methods,
+
+            mounted: function() {
+                
+            },
+
+            updated: function() {
+                if (this.detail.is_show == 'yes') {
+                    // init the jquery UI draggable
+                    $('#tb_simple_sofnma_detail').draggable({
+                        handle: 'div.box-header'
+                    });
+                }
+            }
         });
     },
 
