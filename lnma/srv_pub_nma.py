@@ -188,7 +188,12 @@ def get_nma_by_cq(keystr, cq_abbr="default"):
         lgtable = _conv_nmarst_league_to_lgtable(rst)
 
         # convert the ranks to rktable format
-        rktable = _conv_nmarst_rank_to_rktable(rst)
+        flag_reverse = extract.meta['which_is_better'] == 'higher' or \
+                    extract.meta['which_is_better'] == 'bigger'
+        rktable = _conv_nmarst_rank_to_rktable(
+            rst,
+            reverse=flag_reverse
+        )
 
         # get the cetable?
         cetable = {}
