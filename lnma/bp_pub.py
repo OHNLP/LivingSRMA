@@ -454,12 +454,40 @@ def evmap_tr_v2():
 # Data services
 ###########################################################
 
-@bp.route('/graphdata/<prj>/<fn>')
-def graphdata(prj, fn):
-    '''General data files
+@bp.route('/graphdata/<keystr>/<fn>')
+def graphdata(keystr, fn):
     '''
-    full_path = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj)
-    return send_from_directory(full_path, fn)
+    General rule for accessing project data files
+
+    The cq is required to determine sub-folder
+    '''
+    # get the cq for sub folder
+    cq_abbr = request.args.get('cq')
+    if cq_abbr is None or cq_abbr == '':
+        cq_abbr = 'default'
+
+    # get the full path to the file
+    full_path = os.path.join(
+        current_app.instance_path, 
+        settings.PUBLIC_PATH_PUBDATA, 
+        keystr, 
+        cq_abbr
+    )
+    # get the full name for display
+    full_fn = os.path.join(
+        full_path, 
+        fn
+    )
+    if os.path.exists(full_fn):
+        print('* requesting project file: %s' % full_fn)
+        return send_from_directory(
+            full_path,
+            fn
+        )
+    else:
+        # this file not exists???
+        print('* not found project file: %s' % full_fn)
+        return '', 404
 
 
 @bp.route('/graphdata/<prj>/img/<fn>')

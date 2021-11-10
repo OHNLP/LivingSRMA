@@ -513,10 +513,16 @@ a {
 
 </div>
 
+<!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<!-- jquery UI -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+<!-- vue.js  -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.min.js"></script>
+<!-- AlaSQL for SQL query -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/alasql/0.5.5/alasql.min.js"></script>
+<!-- papaparse for CSV -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.1/papaparse.min.js"></script>
 
 <script>
 var isIE = /*@cc_on!@*/false || !!document.documentMode;
@@ -1117,6 +1123,12 @@ var app_softnma = {
 
 
 var jarvis = {
+    // the main sof table data
+    data: null,
+
+    // the cie patch data
+    data_cie: null,
+
     init: function() {
         var isIE = /*@cc_on!@*/false || !!document.documentMode;
 
@@ -1164,16 +1176,130 @@ var jarvis = {
                 ver: Math.random()
             },
             function(data) {
-                // init the NMA table
-                app_softnma.init(data);
+                // create a mapping for later use
+                // from oc_full_name
+                // to oc_abbr
+                data['ocfn2abbr'] = {}
+                for (const oc_abbr in data.oc_dict) {
+                    if (Object.hasOwnProperty.call(data.oc_dict, oc_abbr)) {
+                        const oc = data.oc_dict[oc_abbr];
+                        // get the full name
+                        var ocfn = oc.extract.meta.full_name;
+                        // update the mapping
+                        data.ocfn2abbr[ocfn] = oc_abbr;
+                    }
+                }
 
-                // ok, remove the start screen
-                jarvis.ssmsg('Almost initialized.');
-                setTimeout('jarvis.ssclose();', 400);
+                // put this data as main data
+                jarvis.data = data;
+
+                // now try to get the cie patch
+                $.ajax({
+                    type: 'GET',
+                    dataType: 'text',
+                    url: '/pub/graphdata/' + prj + '/CIE.csv',
+                    data: {
+                        src: 'cache',
+                        cq: cq,
+                        gp: gp,
+                        ver: Math.random()
+                    },
+                    cache: false,
+                    success: function(data) {
+                        // OK, we the patch data here
+                        jarvis.add_cetable_patch(data);
+
+                        // then, init the app
+                        app_softnma.init(jarvis.data);
+
+                        // ok, remove the start screen
+                        jarvis.ssmsg('Almost initialized.');
+                        setTimeout('jarvis.ssclose();', 400);
+
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        console.error(textStatus, errorThrown);
+                        // we know that this is correct if not found
+                        // the patch data is just optional
+                        // init the app now
+                        // init the NMA table with jarvis.data
+                        app_softnma.init(jarvis.data);
+
+                        // ok, remove the start screen
+                        jarvis.ssmsg('Almost initialized.');
+                        setTimeout('jarvis.ssclose();', 400);
+                    }
+                });
 
             }, 'json'
         );
 
+    },
+
+    add_cetable_patch: function(data) {
+        // console.log(data);
+        jarvis.data_cie = data;
+
+        // first, convert the text to json
+        var j = Papa.parse(data, {
+            header: true
+        });
+
+        console.log(j['data']);
+
+        // now parse and patch the cetable
+        for (let i = 0; i < j['data'].length; i++) {
+            const c = j['data'][i];
+            
+            if (!c.hasOwnProperty('name')) {
+                // wrong item for this row
+                continue;
+            }
+            // get the oc full name
+            var ocfn = c.name;
+
+            // get the oc abbr
+            if (!jarvis.data.ocfn2abbr.hasOwnProperty(ocfn)) {
+                // ??? it's possible that this oc doesn't exists
+                console.error('* not found ' + ocfn + ' in softable NMA');
+                continue;
+            }
+
+            // get the abbr
+            var abbr = jarvis.data.ocfn2abbr[ocfn];
+
+            // try to locate the ce table item by comparator
+            if (!jarvis.data.oc_dict[abbr].cetable.hasOwnProperty(c.comparator)) {
+                // no such comparator? add it
+                jarvis.data.oc_dict[abbr].cetable[c.comparator] = {};
+            }
+
+            // try to locate this treatment
+            if (!jarvis.data.oc_dict[abbr].cetable[c.comparator].hasOwnProperty(c.treatment)) {
+                // no such treatment? add it 
+                jarvis.data.oc_dict[abbr].cetable[c.comparator][c.treatment] = {};
+            }
+
+            // update the following infomation
+            var cols = ["risk_of_bias","inconsistency","indirectness","imprecision","publication_bias","incoherence","intransitivity"];
+            for (let col_idx = 0; col_idx < cols.length; col_idx++) {
+                const col = cols[col_idx];
+                
+                if (!c.hasOwnProperty(col)) {
+                    // no such col in this row???
+                    continue;
+                }
+
+                // get the value
+                var val = c[col];
+
+                // convert whatever to int number
+                val = parseInt('' + val);
+
+                // overwrite the cetable
+                jarvis.data.oc_dict[abbr].cetable[c.comparator][c.treatment][col] = val;
+            }
+        }
     },
 
     get_url_paramter: function(name) {
