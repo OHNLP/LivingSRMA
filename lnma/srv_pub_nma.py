@@ -57,6 +57,11 @@ def get_graph_nma_data_from_db(keystr, cq_abbr):
     for extract in tqdm(extracts):
         oc_name = extract.abbr
 
+        # check if included in sof
+        if extract.meta['included_in_plots'] != 'yes':
+            # this oc is NOT included
+            continue
+
         # create an oc object for ... what?
         treat_list = extract.meta['treatments']
         input_format = settings.INPUT_FORMATS_HRLU
@@ -158,10 +163,10 @@ def get_nma_by_cq(keystr, cq_abbr="default"):
         abbr = extract.abbr
 
         # check if included in sof
-        if extract.meta['included_in_sof'] == 'no':
+        if extract.meta['included_in_sof'] != 'yes':
             # this oc is NOT included
             continue
-        
+
         treatments = extract.get_treatments_in_data()
 
         results = srv_analyzer.get_nma(
