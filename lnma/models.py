@@ -1395,7 +1395,7 @@ class Extract(db.Model):
             rs.append(r)
 
             # copy other arms if exists
-            if ext['n_arms'] > 2:
+            if len(ext['attrs']['other']) > 0:
                 for arm_idx, arm in enumerate(ext['attrs']['other']):
                     r = copy.deepcopy(arm['g0'])
 
@@ -1465,7 +1465,7 @@ class Extract(db.Model):
             rs.append(r)
 
             # copy other arms if exists
-            if ext['n_arms'] > 2:
+            if len(ext['attrs']['other']) > 0:
                 for arm_idx, arm in enumerate(ext['attrs']['other']):
                     r = copy.deepcopy(arm['g0'])
 

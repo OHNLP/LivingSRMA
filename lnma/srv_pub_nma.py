@@ -60,6 +60,7 @@ def get_graph_nma_data_from_db(keystr, cq_abbr):
         # check if included in sof
         if extract.meta['included_in_plots'] != 'yes':
             # this oc is NOT included
+            print('* skip extract %s due to NOT_INCLUDED_IN_SOF' % (oc_name))
             continue
 
         # create an oc object for ... what?
@@ -165,6 +166,7 @@ def get_nma_by_cq(keystr, cq_abbr="default"):
         # check if included in sof
         if extract.meta['included_in_sof'] != 'yes':
             # this oc is NOT included
+            print('* skip extract %s due to NOT_INCLUDED_IN_SOF' % (abbr))
             continue
 
         treatments = extract.get_treatments_in_data()
