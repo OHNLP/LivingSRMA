@@ -153,7 +153,7 @@ a {
     margin: 10px auto;
     padding: 10px;
     width: 500px;
-    height: 400px;
+    /* height: 400px; */
     background: white;
     border: 1px solid #9e9e9e;
     box-shadow: 5px 5px 5px #c7c7c7;
@@ -380,6 +380,43 @@ a {
                                 {{ get_treat_attr_txt(rs[detail.r_idx], detail.treat_name, 'total') }}
                             </span>
                         </p>
+                    </div>
+
+                    <div v-else-if="get_SRVC(rs[detail.r_idx], comparator) != null">
+                        <p>
+                            Survival in comparator: 
+                            <span class="txt-lg txt-fb">
+                                {{ get_SRVC_txt(rs[detail.r_idx], comparator) }}
+                            </span>
+                        </p>
+                        <p>
+                            Survival in intervention:
+                            <span class="txt-lg txt-fb">
+                                {{ get_SRVI_txt(rs[detail.r_idx], comparator, detail.treat_name, 'sm') }}
+                            </span>
+                            <br>
+                            (
+                            {{ get_SRVI_txt(rs[detail.r_idx], comparator, detail.treat_name, 'up') }} 
+                            to 
+                            {{ get_SRVI_txt(rs[detail.r_idx], comparator, detail.treat_name, 'lw') }}
+                            )
+                        </p>
+                        <p>
+                            Survival difference:
+                            <span class="txt-lg txt-fb">
+                                {{ get_SRVD_txt(rs[detail.r_idx], comparator, detail.treat_name, 'sm') }} 
+                            </span>
+                            <br>
+                            (
+                            {{ get_SRVD_txt(rs[detail.r_idx], comparator, detail.treat_name, 'up') }}
+                            to 
+                            {{ get_SRVD_txt(rs[detail.r_idx], comparator, detail.treat_name, 'lw') }}
+                            )
+                        </p>
+                    </div>
+
+                    <div v-else>
+                        &nbsp;
                     </div>
                 </div>
 
