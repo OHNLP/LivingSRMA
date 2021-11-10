@@ -156,6 +156,12 @@ def get_nma_by_cq(keystr, cq_abbr="default"):
     treat_list = []
     for extract in extracts:
         abbr = extract.abbr
+
+        # check if included in sof
+        if extract.meta['included_in_sof'] == 'no':
+            # this oc is NOT included
+            continue
+        
         treatments = extract.get_treatments_in_data()
 
         results = srv_analyzer.get_nma(
