@@ -1098,7 +1098,13 @@ var app_softnma = {
             }
 
             // get the cie for this c-t pair
-            var cie = r.oc.cetable[c][t].cie;
+            // var cie = r.oc.cetable[c][t].cie;
+            var cie = this.get_cie(r, c, t, 'cie');
+
+            if (cie == null) {
+                // maybe not found in the data
+                return '';
+            }
             
             if (r.oc.extract.meta.which_is_better == 'lower') {
                 if (v < 1) {
