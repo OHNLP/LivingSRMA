@@ -71,6 +71,10 @@
             </li>
 
             <li class="nav-item">
+                <a class="nav-link" href="#sec-evmap">EVIDENCE MAP</a>
+            </li>
+
+            <li class="nav-item">
                 <a class="nav-link" href="#sec-pubs">PUBLICATIONS</a>
             </li>
         </ul>
@@ -87,7 +91,7 @@
         <div class="row">
 
             <div class="col">
-                <img width="100%" src="[[ url_for('pub.graphdata', prj='ADJRCC', fn='CONCEPT_IMAGE.svg') ]]" />
+                <img width="100%" src="[[ url_for('pub.graphdata', keystr='RCC', fn='CONCEPT_IMAGE.svg', cq='adjrcc') ]]" />
             </div>
         </div>
 
@@ -227,6 +231,7 @@
     </div>
 
 </div>
+<!-- /#sec-sof-pwma -->
 
 
 <br id="sec-sof-nma">
@@ -243,11 +248,36 @@
     </p>
     <div class="row">
         <div class="col">
-            <iframe id="ifm-ocplots" src="[[ url_for('pub.softable_pma_v2', prj='ADJRCC', msrs='OR,RR,HR') ]]" frameborder="0" style="width: 100%; min-height: 350px;"></iframe>
+            <iframe id="ifm-ocplots" src="[[ url_for('pub.softable_nma', prj='RCC', cq='adjrcc', dc='Placebo', cp='yes') ]]" frameborder="0" style="width: 100%; min-height: 450px;"></iframe>
         </div>
     </div>
 
 </div>
+<!-- /#sec-sof-nma -->
+
+
+<br id="sec-evmap">
+<div class="container">
+    <h3>
+        EVIDENCE MAP
+    </h3>
+    <p>
+        The evidence map visually summarizes the evidence for available treatment comparisons and identifies evidence gaps that warrant future research.  User can select a treatment option of interest from the dropdown to visualize whether it is comparable, beneficial or harmful (color), certainty of evidence (size of the circle) as compared to other treatment options in the network. Empty slots (no circles) denote the complete lack of evidence (either direct or indirect). 
+    </p>
+    
+    <div class="row">
+        <div class="col">
+            <iframe id="iframe-evmap" 
+                src="[[ url_for('pub.evmap', prj='RCC', cq='adjrcc') ]]" 
+                frameborder="0" 
+                style="width: 100%; min-height: 700px;">
+            </iframe>
+        </div>
+    </div>
+
+</div>
+<!-- /#sec-evmap -->
+
 
 <br id="sec-pubs">
 <div class="container" style="margin-top: 3rem; margin-bottom:2rem;">

@@ -343,16 +343,6 @@ def prisma():
     return render_template('pub/pub.prisma.html')
 
 
-@bp.route('/prisma_v2.html')
-def prisma_v2():
-    return render_template('pub/pub.prisma_v2.html')
-
-
-@bp.route('/prisma_v3.html')
-def prisma_v3():
-    return render_template('pub/pub.prisma_v3.html')
-
-
 @bp.route('/itable')
 @bp.route('/itable.html')
 def itable():
@@ -369,13 +359,39 @@ def graph_pma():
     return render_template('pub/pub.graph_pma.html')
 
 
+@bp.route('/softable_nma.html')
+def softable_nma():
+    return render_template('pub/pub.softable_nma.html')
+
+
+@bp.route('/softable_pma.html')
+def softable_pma():
+    fn = 'pub/pub.softable_pma.html'
+    return render_template(fn)
+
+
+@bp.route('/evmap.html')
+def evmap():
+    return render_template('pub/pub.evmap.html')
+
+
 ###########################################################
-# Modules for archive public page
+# Archived modules for public page
 ###########################################################
 
 @bp.route('/slide.html')
 def slide():
     return render_template('pub/pub.slide.html')
+
+
+@bp.route('/prisma_v2.html')
+def prisma_v2():
+    return render_template('pub/pub.prisma_v2.html')
+
+
+@bp.route('/prisma_v3.html')
+def prisma_v3():
+    return render_template('pub/pub.prisma_v3.html')
 
 
 @bp.route('/graph_v1.html')
@@ -413,31 +429,14 @@ def oplot_v2():
     return render_template('pub/pub.oplot_v2.html')
 
 
-@bp.route('/softable_pma.html')
-def softable_pma():
-    prj = request.args.get('prj')
-    fn = 'pub/pub.softable_pma.html'
-    return render_template(fn)
-
-
 @bp.route('/softable_pma_v2.html')
 def softable_pma_v2():
     return render_template('pub/pub.softable_pma_v2.html')
 
 
-@bp.route('/softable_nma.html')
-def softable_nma():
-    return render_template('pub/pub.softable_nma.html')
-
-
 @bp.route('/softable_nma_v2.html')
 def softable_nma_v2():
     return render_template('pub/pub.softable_nma_v2.html')
-
-
-@bp.route('/evmap.html')
-def evmap():
-    return render_template('pub/pub.evmap.html')
 
 
 @bp.route('/evmap_tr.html')
