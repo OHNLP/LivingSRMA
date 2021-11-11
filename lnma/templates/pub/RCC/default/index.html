@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="en">
+<head>
+<!-- Required meta tags -->
+
+<title>Metastatic Renal Cell Cancer | Living Interactive Systematic Reviews</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+
+<link rel="icon" href="/static/img/favicon.ico">
+<!-- Bootstrap CSS -->
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" />
+
+{% include 'pub/pub._pubstyle.html' %}
+</head>
+<body>
+<br id="sec-concept">
+<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark" style="height: 70px;">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <a class="navbar-brand" href="#">
+        <img src="/static/img/logo-lisr.png" alt="" width="180px">
+    </a>
+
+    <div class="navbar" style="padding:0;">
+        <ul class="navbar-nav">
+            <li class="nav-item" style="color: white;">                
+                Metastatic Renal Cell Cancer<br>
+                <i class="far fa-calendar-alt"></i> Update: 3/6/2021
+            </li>
+        </ul>
+    </div>
+    
+    <div class="collapse navbar-collapse" id="navbarsExampleDefault" style="justify-content: flex-end;">
+        <ul class="navbar-nav">
+            <li class="nav-item active">
+                <a class="nav-link" href="./">HOME <span class="sr-only">(current)</span></a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="#sec-intro">INTRODUCTION</a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="#sec-studysel">PRISMA</a>
+            </li>
+
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="dropdown02" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">TABLES</a>
+                <div class="dropdown-menu" aria-labelledby="dropdown02">
+                <a class="dropdown-item" href="#sec-intertable">INTERACTIVE TABLE</a>
+                </div>
+            </li>
+
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">PAIRWISE MA</a>
+                <div class="dropdown-menu" aria-labelledby="dropdown01">
+                    {% for tp in pwma %}
+                    <a class="dropdown-item" href="#sec-pwma-[[ tp[:4] ]]">[[ tp ]]</a>
+                    {% endfor %}
+                </div>
+            </li>
+
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">NMA</a>
+                <div class="dropdown-menu" aria-labelledby="dropdown01">
+                {% for tp in nma %}
+                    <a class="dropdown-item" href="#sec-nma-[[ tp[:4] ]]">[[ tp ]]</a>
+                {% endfor %}
+                </div>
+            </li>
+
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="dropdown02" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">SOF TABLE</a>
+                <div class="dropdown-menu" aria-labelledby="dropdown02">
+                    <a class="dropdown-item" href="#sec-sof-pma">Summary of Findings: Pairwise MA</a>
+                    <a class="dropdown-item" href="#sec-sof-nma">Summary of Findings: Network MA</a>
+                </div>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="#sec-evmap">EVIDENCE MAP</a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="#sec-limitations">LIMITATIONS</a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="#sec-pubs">PUBLICATIONS</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+
+<div id="sec-intro" style="position: absolute; top: 0;"></div>
+<div class="container" style="margin-top: 1rem;">
+        <h3 style="margin-bottom: 2rem;font-size: 2rem;color: black;text-decoration: none;">
+            First-line Treatment of Metastatic Renal Cell Carcinoma: A Living, Interactive Systematic Review and Network Meta-Analysis
+        </h3>
+
+        <div class="row">
+
+            <div class="col">
+                <img width="100%" src="[[ url_for('pub.graphdata', keystr='RCC', fn='CONCEPT_IMAGE.svg') ]]" />
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <p class="mt-3">
+                    The landscape of first-line treatment options for metastatic renal cell cancer (mRCC) is rapidly changing. Recently, six large randomized controlled trials studying different combinations of immune checkpoint inhibitors (ICI) and anti-angiogenesis therapy have been reported and several others are under way. JAVELIN Renal 101 and IMmotion151 showed that avelumab plus axitinib and atezolizumab plus bevacizumab, respectively, improved progression-free survival (PFS), whereas Checkmate 214, KEYNOTE-426, CheckMate 9ER, and CLEAR showed that Ipilimumab plus nivolumab, pembrolizumab plus axitinib, nivolumab plus cabozantinib, and lenvatinib plus pembrolizumab, respectively improved both PFS and overall survival (OS) when compared to sunitinib. The long-term data from most of these trials is awaited and several ongoing trials such as COSMIC 313, and A031704 PDIGREE are well underway. Treatment options, estimates of benefits and harms, and certainty in evidence are therefore rapidly evolving. Confronted with this evidence, it is a challenging task to choose amongst several frontline options in patients with previously untreated mRCC, especially since direct comparisons between different combinations of ICI and anti-angiogenesis therapy have not been assessed in head-to-head trials. Therefore, we conducted a network meta-analysis (NMA), which allows for comparing all treatments with each other, even if randomized controlled trials are not available for some treatment comparisons and we keep it living and interactive to provide most contemporary evidence as soon as new information becomes available.
+                </p>
+            </div>
+            <!-- 
+            <div class="col-md-6">
+                <img src="/static/img/rcc-drugs.png" alt="bg" style="width:90%;">    
+            </div>
+            -->
+        </div>
+    </div>
+
+
+
+<br id="sec-studysel">
+<div class="container" style="margin-top: 3rem; margin-bottom:2rem;">
+    <h3 style="margin-bottom: 2rem;">
+        INTERACTIVE, MODIFIED PRISMA
+    </h3>
+    <div class="row">
+        <div class="col">
+            <p>
+                The search strategy has been developed in consultation with an information specialist. The strategy is used to generate “auto” searches every month (from Medline, Embase and Cochrane Central Register of Controlled Trials [CENTRAL]). The numbers in the flowsheet are dynamically updated as new studies are considered for inclusion. The red limb on the right-hand side of the flowsheet represents real-time living updates. Users can click the colored boxes for additional details.
+            </p>
+
+            <p>How to use this flowsheet? <a href="javascript:;" data-toggle="modal" data-target="#exampleModalCenter">Video demonstration</a></p>
+        </div>
+    </div>
+    <div class="row">
+        <iframe src="[[ url_for('pub.prisma_v2', prj='RCC') ]]" frameborder="0" style="width: 100%; min-height: 850px;"></iframe>
+    </div>
+</div>
+
+
+<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 995px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">How to use this flowsheet?</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <iframe width="960" height="550" frameborder="0" allowtransparency="true" allowfullscreen="allowfullscreen" style="border: none;" src="https://share.getcloudapp.com/lluDolxp?embed=true"></iframe>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<br id="sec-intertable">
+<div class="container" style="margin-top: 3rem; margin-bottom: 3rem;">
+
+    <h3 style="margin-bottom: 2rem;">
+        INTERACTIVE TABLE
+    </h3>
+    <p>
+        The interactive table summarizes study characteristics, population characteristics and results from the clinical trials included in this systematic review and meta-analysis. This table is dynamically updated as new studies are included in the living review. Users can select filter options to view only studies with certain characteristics or interactively construct the results table from the available menu.
+    </p>
+
+    <p>How to use this table? <a href="javascript:;" data-toggle="modal" data-target="#exampleModalCenter2">Video demonstration</a></p>
+
+    <div class="row">
+        <iframe src="[[ url_for('pub.itable', prj='RCC') ]]" frameborder="0" style="width: 100%; min-height: 880px;"></iframe>
+    </div>
+</div>
+
+
+<div class="modal fade" id="exampleModalCenter2" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenter2Title"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 995px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">How to use this table?</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- https://share.getcloudapp.com/p9u7Zmy7 -->
+                <iframe width="960" height="550" frameborder="0" allowtransparency="true" allowfullscreen="allowfullscreen" style="border: none;" src="https://share.getcloudapp.com/p9u7Zmy7?embed=true"></iframe>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="exampleModalCenter3" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenter3Title"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 995px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">How to use this figure?</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <iframe width="960" height="550" frameborder="0" allowtransparency="true" allowfullscreen="allowfullscreen" style="border: none;" src="https://share.getcloudapp.com/KouqEo4G?embed=true"></iframe>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<br id="sec-pwma-oucome">
+<!-- to reduce the spacing between this section and next, adding -3.5rem bottom -->
+<div class="container" style="margin-bottom: -3.5rem;">
+    <h3>
+        PAIRWISE META-ANALYSIS
+    </h3>
+    <p>
+        Results are summarized as forest plots for primary analysis, sensitivity analysis and subgroup pairwise meta-analysis. Users can choose to view results for their outcome of interest using the dropdown menu (“Select outcome”).
+    </p>
+</div>
+
+{% for tp in pwma %}
+<br id="sec-pwma-[[ tp[:4] ]]">
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <h4 style="margin-bottom: 2rem;">[[ tp ]]</h4>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-4">
+            <div class="dropdown">
+                <button class="btn btn-primary bg-dark bd-dark dropdown-toggle" type="button" id="dropdownMenuButton-pwma-[[ tp[:4] ]]" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  Select outcome
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton-pwma-[[ tp[:4] ]]">
+                    {% for option_text in pwma[tp] %}
+                    {% if not option_text.startswith('_') %}
+                    <a class="dropdown-item" href="javascript:switch_pwma_data('[[ tp[:4] ]]', '[[ "|".join(pwma[tp][option_text]['slides']) ]]', '[[ option_text ]]');">[[ option_text ]]</a>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col-8 d-flex justify-content-end">
+            <div class="outcome-name" style="padding: .5rem; margin-right: 1rem;">
+                <span id="optext-pwma-[[ tp[:4] ]]" style="font-weight: bold;"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <iframe id="iframe-pwma-[[ tp[:4] ]]" class="auto-height" 
+                src="" scrolling="no" frameborder="0"
+                style="width: 100%; min-height: 400px;"></iframe>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+
+
+<br id="sec-nma-oucome">
+<!-- to reduce the spacing between this section and next, adding -3.5rem bottom -->
+<div class="container mb-2">
+    <h3>
+        NETWORK META-ANALYSIS
+    </h3>
+    <p>
+        Results are summarized as forest plots for primary analysis and sensitivity network meta-analysis. Users can choose to view results for their outcome of interest using the dropdown menu (“Select outcome”).
+    </p>
+    <p>
+        How to use this figure? 
+        <a href="javascript:;" data-toggle="modal" data-target="#exampleModalCenter3">Video demonstration</a>
+    </p>
+</div>
+
+
+{% for tp in nma %}
+<br id="sec-nma-[[ tp[:4] ]]">
+<div class="container mt-3">
+    <div class="row">
+        <div class="col">
+            <h4 style="margin-bottom: 2rem;">[[ tp ]]</h4>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-4">
+            <div class="dropdown">
+                <button class="btn btn-primary bg-dark bd-dark dropdown-toggle" type="button" id="dropdownMenuButton-nma-[[ tp[:4] ]]" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fa fa-clipboard"></i>
+                    Select outcome
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton-nma-[[ tp[:4] ]]">
+                    {% for oc in nma[tp]['oc_names'] %}
+                    <a class="dropdown-item" href="javascript:switch_nma_data('[[ tp[:4] ]]', '[[ oc['oc_name'] ]]', '[[ oc['oc_fullname'] ]]');">[[ oc['oc_fullname'] ]]</a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col-8 d-flex justify-content-end">
+            <div class="outcome-name" style="padding: .5rem; margin-right: 1rem;">
+                <span id="optext-nma-[[ tp[:4] ]]" style="font-weight: bold;"></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-2 mb-3" style="max-width: 1250px;">
+    <div class="row">
+        <div class="col">
+            <iframe id="iframe-nma-[[ tp[:4] ]]" class="auto-height" 
+                src="" scrolling="no" frameborder="0"
+                style="width: 100%; height: 950px; min-height: 700px;"></iframe>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+
+
+<br id="sec-sof-pma">
+<div class="container">
+
+    <h3>
+        SUMMARY OF FINDINGS: PAIRWISE META-ANALYSIS
+    </h3>
+    <p>
+        The Summary of Findings (SoF) table is designed to summarize the key results of pairwise meta-analysis and to evaluate confidence in the estimates of effect. This table summarizes results for patient-important outcomes for all treatment options investigated in included trials as compared to control, in untreated mRCC. Users can select their outcome of interest from the left-hand panel by clicking on it and enter any baseline risk for that outcome, to visualize the absolute risk differences due to treatment.
+    </p>
+    <p>
+        <b>Choose measure of effect and denominator for absolute effect.</b>
+    </p>
+    <div class="row">
+        <div class="col">
+            <iframe id="ifm-ocplots" src="[[ url_for('pub.softable_pma_v2', prj='RCC', msrs='OR,RR,HR') ]]" frameborder="0" style="width: 100%; min-height: 500px;"></iframe>
+        </div>
+    </div>
+
+</div>
+
+
+<br id="sec-sof-nma">
+<div class="container">
+
+    <h3>
+        SUMMARY OF FINDINGS: NETWORK META-ANALYSIS
+    </h3>
+    <p>
+        The Summary of Findings (SoF) table is designed to display multiple comparisons in an interactive manner. All possible combinations in network meta-analysis can be compared using this framework. Users can interactively select or deselect SoF for a given clinical outcome by clicking the outcome of interest from the left-hand panel. Users can also enter any baseline risk for an outcome, to visualize the absolute risk differences due to treatment. Clicking on any of the colored boxes displays details of that effect estimate as well as its associated certainty of evidence assessment.
+    </p>
+    <p>
+        <b>Choose reference treatment, measure of effect, and denominator for absolute effect</b>
+    </p>
+    <div class="row">
+        <div class="col">
+            <iframe id="ifm-ocplots" src="[[ url_for('pub.softable_nma_v2', prj='RCC', msrs='OR,RR,HR', dc='Suni') ]]" frameborder="0" style="width: 100%; min-height: 500px;"></iframe>
+        </div>
+    </div>
+</div>
+
+
+<br id="sec-evmap">
+<div class="container">
+    <h3>
+        EVIDENCE MAP
+    </h3>
+    <p>
+        The evidence map visually summarizes the evidence for available treatment comparisons and identifies evidence gaps that warrant future research.  User can select a treatment option of interest from the dropdown to visualize whether it is comparable, beneficial or harmful (color), certainty of evidence (size of the circle) as compared to other treatment options in the network. Empty slots (no circles) denote the complete lack of evidence (either direct or indirect). 
+    </p>
+    <div class="row">
+        <div class="col-4">
+            <div class="dropdown">
+                <button class="btn btn-primary bg-dark bd-dark dropdown-toggle" type="button" id="dropdownMenuButton-evmap" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fa fa-clipboard"></i>
+                    Select treatment
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton-evmap">
+                    {% for tr in evmap['treat_list'] %}
+                    <a class="dropdown-item" href="javascript:switch_evmap_data('[[ tr ]]', '[[ evmap['treat_dict'][tr]['tr_fullname'] ]]');">[[ evmap['treat_dict'][tr]['tr_fullname'] ]]</a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="col-8 d-flex justify-content-end">
+            <div class="outcome-name" style="padding: .5rem; margin-right: 1rem;">
+                <span id="optext-evmap" style="font-weight: bold;">
+                    [[ evmap['treat_dict'][evmap['treat_list'][0]]['tr_fullname'] ]]
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <iframe id="iframe-evmap" src="[[ url_for('pub.evmap_tr_v2', prj='RCC', tr=evmap['treat_list'][0]) ]]" frameborder="0" style="width: 100%; min-height: 700px;"></iframe>
+        </div>
+    </div>
+
+</div>
+<!-- /#sec-evmap -->
+
+
+
+<br id="sec-limitations">
+<div class="container" style="margin-top: 3rem; margin-bottom:2rem;">
+    <h3 style="margin-bottom: 2rem;">
+        LIMITATIONS &amp; CONSIDERATIONS
+    </h3>
+    <div class="row">
+        <div class="col">
+            <p>1. Included trials are limited to patients with clear cell histology and results are not applicable to non-clear cell histological subtypes.</p>
+            <p>2. Treatment rankings should be interpreted cautiously based on their congruence with pairwise (direct) estimates.</p>
+            <p>3. The small number of trials led to scarce direct evidence with sparse and open network that precludes the formal assessment of consistency and leads to imprecision.</p>
+            <p>4. There is lack of consistent reporting in trials for results by subgroups leading to decreased credibility of subgroup analyses.</p>
+            <p>5. There is lack of reporting in trials for immune related adverse events which may be different than treatment related adverse events, hence results about safety of ICI cannot be generalized and careful considerations must be taken before interpreting conclusions.</p>
+            <p>6. Certain patient important endpoints such as durability of response or durability of complete response can not be addressed yet due to different follow-up durations of the included trials.</p>
+        </div>
+    </div>
+</div>
+<!-- /#sec-limitations -->
+
+
+
+<br id="sec-pubs">
+<div class="container" style="margin-top: 3rem; margin-bottom:2rem;">
+    <h3 style="margin-bottom: 2rem;">
+        PUBLICATIONS
+    </h3>
+    <div class="row">
+        <div class="col">
+            <p>There are no associated publications with this living NMA at this point.</p>
+        </div>
+    </div>
+</div>
+<!-- /#sec-pubs -->
+
+
+</div>
+
+<hr class="featurette-divider">
+
+<!-- FOOTER -->
+<footer class="container">
+    <p class="float-right"><a href="#">Back to top</a></p>
+    <p>&copy; 2020 &middot; <a href="#">Terms</a></p>
+</footer>
+
+<!-- Estimated HR(OR) reflect outcomes for treatment in columns compared to treatment in rows 
+The HR for 1,2 , The OR for the last one!
+-->
+
+<!-- Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+
+<script>
+var prj = 'RCC';
+var default_treat = 'Suni';
+
+function resizeIFrameToFitContent( id ) {
+    var iFrame = document.getElementById(id);
+    iFrame.height = iFrame.contentWindow.document.body.scrollHeight;
+    // console.log('* ' + id + ': ' + iFrame.height);
+}
+
+
+function switch_nma_data(tag, oc_name, oc_fullname, tr) {
+    if (typeof(tr) == 'undefined') {
+        tr = default_treat;
+    }
+    var oc = tag;
+    var url = "[[ url_for('pub.graph_nma_RCC') ]]";
+    url += '?prj=' + prj + '&oc=' + oc_name + '&tr=' + tr;
+    console.log('* switch nma: ' + url);
+    $('#iframe-nma-' + tag).attr('src', url);
+    $('#optext-nma-' + tag).html(oc_fullname);
+}
+
+
+function switch_pwma_data(tag, slides, display_name) {
+    if (typeof(display_name) == 'undefined') {
+        display_name = '';
+    }
+    var url = '[[ url_for("pub.slide") ]]';
+    url += '?prj=' + prj;
+    url += '&slides=' + slides;
+
+    if (tag == 'Subg') {
+        // special rule for Subg plots
+        url += '&pt=25'
+    }
+    $('#iframe-pwma-' + tag).attr('src', url);
+    $('#optext-pwma-' + tag).html(display_name);
+}
+
+function switch_evmap_data(treat, treat_fullname) {
+    // var url = '[[ url_for("pub.evmap") ]]';
+    // url += '?prj=' + prj;
+    // url += '&dc=' + treat;
+    // $('#iframe-evmap').attr('src', url);
+
+    var win_evmap = $('#iframe-evmap')[0].contentWindow;
+    win_evmap.fg_evmap.draw(treat);
+
+    // update the display name
+    $('#optext-evmap').html(treat_fullname);
+}
+
+$(document).ready(function() {
+    // show the PWMA
+    {% for tp in pwma %}
+    switch_pwma_data(
+        '[[ tp[:4] ]]', 
+        '[[ "|".join(pwma[tp][pwma[tp]["_default_option"]]["slides"]) ]]', 
+        '[[ pwma[tp]["_default_option"] ]]'
+    );
+    // resize the iframe to fit content
+    $('#iframe-pwma-[[ tp[:4] ]]').on('load', function() {
+        // console.log('* loaded iframe#' + 'iframe-pwma-[[ tp[:4] ]]');
+        resizeIFrameToFitContent('iframe-pwma-[[ tp[:4] ]]');
+        setTimeout("resizeIFrameToFitContent('iframe-pwma-[[ tp[:4] ]]');", 300);
+        setTimeout("resizeIFrameToFitContent('iframe-pwma-[[ tp[:4] ]]');", 900);
+    });
+    {% endfor %}
+    
+    // show the NMA
+    {% for tp in nma %}
+    switch_nma_data(
+        '[[ tp[:4] ]]', 
+        '[[ nma[tp]["oc_names"][0]["oc_name"] ]]', 
+        '[[ nma[tp]["oc_names"][0]["oc_fullname"] ]]',
+        'Suni'
+    );
+        // resizeIFrameToFitContent('iframe-nma-[[ tp[:4] ]]');
+        // setTimeout("resizeIFrameToFitContent('iframe-nma-[[ tp[:4] ]]');", 300);
+        setTimeout("resizeIFrameToFitContent('iframe-nma-[[ tp[:4] ]]');", 900);
+    {% endfor %}
+
+    // show the evmap
+    // switch_evmap_data('[[ evmap["treat_list"][0] ]]', "[[ evmap['treat_dict'][evmap['treat_list'][0]]['tr_fullname'] ]]");
+});
+</script>
+</body>
+</html>
