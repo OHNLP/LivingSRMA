@@ -155,7 +155,7 @@ def get_nma_by_cq(keystr, cq_abbr="default"):
     )
     print('* found %s extracts defined in %s-%s' % (
         len(extracts), keystr, cq_abbr
-    ))
+    ))  
 
     # then create oc_dict
     oc_dict = {}
