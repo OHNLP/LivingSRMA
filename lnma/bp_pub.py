@@ -489,60 +489,60 @@ def graphdata(keystr, fn):
         return '', 404
 
 
-@bp.route('/graphdata/<prj>/img/<fn>')
-def graphdata_img(prj, fn):
-    '''get image files of specific project
+@bp.route('/graphdata/<keystr>/PRISMA.json')
+def graphdata_prisma_json(keystr):
     '''
-    full_path = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, 'img')
-    return send_from_directory(full_path, fn)
+    Special rule for the PRISMA.json
 
+    This JSON file is for the PRISMA plot
+    '''
+    # get the itable from database directly
+    src = request.args.get('src')
+    if src is None or src == '':
+        # set the default to get things from db
+        src = 'db'
 
-@bp.route('/graphdata/<prj>/decision_aid/<cmp>/<fn>')
-def graphdata_da_cmp(prj, cmp, fn):
-    '''
-    Get decision aid image files of specific project
-    '''
-    full_path = os.path.join(
-        current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, 
-        'decision_aid',
-        cmp
+    # get the cq_abbr
+    cq_abbr = request.args.get('cq')
+    if cq_abbr is None or cq_abbr == '':
+        cq_abbr = 'default'
+
+    fn_json = 'PRISMA.json'
+    full_fn_json = os.path.join(
+        current_app.instance_path, 
+        settings.PUBLIC_PATH_PUBDATA, 
+        keystr, 
+        cq_abbr,
+        fn_json
     )
-    return send_from_directory(full_path, fn)
+
+    # make the cache
+    mk_graphdata_path(keystr, cq_abbr)
+    
+    if src == 'cache':
+        ret = json.load(open(full_fn_json))
+        return jsonify(ret)
+
+    if src == 'db':
+        ret = srv_pub_prisma.get_prisma_from_db(keystr)
+        latest = srv_project.get_project_latest_stat_by_keystr(keystr)
+
+        if ret is None:
+            ret = {
+                'success': False,
+                'msg': 'ITABLE DATA NOT EXISTS FOR THIS PROJECT'
+            }
+
+        ret['latest'] = latest
+
+        # catch the result
+        json.dump(ret, open(full_fn_json, 'w'), default=util.json_encoder)
+
+        return jsonify(ret)
 
 
-@bp.route('/graphdata/<prj>/ITABLE_CFG.json')
-def graphdata_itable_cfg_json(prj):
-    full_fn_itable_cfg_json = os.path.join(
-        current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, 'ITABLE_CFG.json')
-
-    # just send the ITABLE_CFG.json if exists
-    # if os.path.exists(full_fn_itable_cfg_json):
-    #     return send_from_directory(
-    #         os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj),
-    #         'ITABLE_CFG.json'
-    #     )
-
-    # just load the existing filters
-    fn = 'ITABLE_FILTERS.json'
-    full_fn = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, fn)
-    if os.path.exists(full_fn):
-        filters = json.load(open(full_fn))['filters']
-    else:
-        # get the filters from the excel file
-        fn = 'ITABLE_FILTERS.xlsx'
-        full_fn = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, fn)
-        filters = get_filters_from_itable(full_fn)
-
-    ret = {
-        "cols": {
-            "fixed": [],
-            "default": []
-        },
-        "filters": filters
-    }
-
-    # make a cache
-    json.dump(ret, open(full_fn_itable_cfg_json, 'w'))
+    # read from xls?
+    ret = srv_pub_prisma.get_prisma_from_xls(keystr)
 
     return jsonify(ret)
 
@@ -718,52 +718,6 @@ def graphdata_graph_nma_json(keystr):
     return jsonify(ret)
 
 
-@bp.route('/graphdata/<prj>/GRAPH.json')
-def graphdata_graph_json(prj):
-    '''
-    Special rule for the graphs.
-    Generate a GRAPH.json for this project.
-    And, it will also generate a set of outcome seperate file
-    '''
-
-    fn = 'SOFTABLE_NMA_DATA.xlsx'
-    full_fn = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, fn)
-
-    # hold all the outcomes
-    fn_json = 'GRAPH.json'
-    full_fn_json = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, fn_json)
-
-    # hold one outcome
-    fn_oc_json = 'GRAPH_%s.json'
-    full_oc_fn_json = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, fn_oc_json)
-
-    # hold the outcome list 
-    fn_nma_list_json = 'NMA_LIST.json'
-    full_nma_list_json = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, fn_nma_list_json)
-
-    # use cache to haste the loading
-    use_cache = request.args.get('use_cache')
-    if use_cache == 'yes':
-        return send_from_directory(
-            os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj),
-            fn_json
-        )
-    
-    # generate the NMA List data
-    nma = get_nma_list_data(full_fn)
-
-    # cache the NMA list
-    json.dump(nma, open(full_nma_list_json, 'w'))
-
-    # get the graph json data
-    ret = get_oc_graph_data(full_fn)
-
-    # save the GRAPH.json
-    json.dump(ret, open(full_fn_json, 'w'))
-
-    return jsonify(ret)
-
-
 @bp.route('/graphdata/<keystr>/SOFTABLE_PMA.json')
 def graphdata_softable_pma_json(keystr):
     '''
@@ -869,6 +823,7 @@ def graphdata_softable_nma_json(keystr):
     if cq_abbr is None or cq_abbr == '':
         cq_abbr = 'default'
 
+    # 
     fn_json = 'SOFTABLE_NMA.json'
     full_fn_json = os.path.join(
         current_app.instance_path, 
@@ -946,14 +901,13 @@ def graphdata_softable_nma_json(keystr):
     return jsonify(ret)
 
 
-@bp.route('/graphdata/<keystr>/PRISMA.json')
-def graphdata_prisma_json(keystr):
+@bp.route('/graphdata/<keystr>/EVMAP.json')
+def graphdata_evmap_json(keystr):
     '''
-    Special rule for the PRISMA.json
+    Special rule for the EVMAP.json
 
-    This JSON file is for the PRISMA plot
+    This JSON file is for the evidence map plot
     '''
-    # get the itable from database directly
     src = request.args.get('src')
     if src is None or src == '':
         # set the default to get things from db
@@ -964,11 +918,11 @@ def graphdata_prisma_json(keystr):
     if cq_abbr is None or cq_abbr == '':
         cq_abbr = 'default'
 
-    fn_json = 'PRISMA.json'
+    fn_json = 'EVMAP.json'
     full_fn_json = os.path.join(
         current_app.instance_path, 
         settings.PUBLIC_PATH_PUBDATA, 
-        keystr, 
+        keystr,
         cq_abbr,
         fn_json
     )
@@ -977,40 +931,32 @@ def graphdata_prisma_json(keystr):
     mk_graphdata_path(keystr, cq_abbr)
     
     if src == 'cache':
+        print('* using cache for %s.%s %s' % (
+            keystr, cq_abbr, fn_json
+        ))
         ret = json.load(open(full_fn_json))
         return jsonify(ret)
 
     if src == 'db':
-        ret = srv_pub_prisma.get_prisma_from_db(keystr)
-        latest = srv_project.get_project_latest_stat_by_keystr(keystr)
+        print('* reading database for %s.%s %s' % (
+            keystr, cq_abbr, fn_json
+        ))
+
+        ret = None
 
         if ret is None:
             ret = {
                 'success': False,
-                'msg': 'ITABLE DATA NOT EXISTS FOR THIS PROJECT'
+                'msg': 'SOFTABLE NMA DATA NOT EXISTS FOR THIS PROJECT'
             }
-
-        ret['latest'] = latest
 
         # catch the result
         json.dump(ret, open(full_fn_json, 'w'), default=util.json_encoder)
 
         return jsonify(ret)
 
-
-    # read from xls?
-    ret = srv_pub_prisma.get_prisma_from_xls(keystr)
-
-    return jsonify(ret)
-
-
-@bp.route('/graphdata/<prj>/EVMAP.json')
-def graphdata_evmap_json(prj):
-    '''Special rule for the EVMAP.json
-
-    This JSON file is for the evidence map plot
-    '''
-
+    # what????
+    # reading the file?
     fn = 'EVMAP_DATA.xlsx'
     fn = 'SOFTABLE_NMA_DATA.xlsx'
     full_fn = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, fn)
@@ -1018,13 +964,6 @@ def graphdata_evmap_json(prj):
     # hold all the outcomes
     fn_json = 'EVMAP.json'
     full_fn_json = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, fn_json)
-
-    use_cache = request.args.get('use_cache')
-    if use_cache == 'yes':
-        return send_from_directory(
-            os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj),
-            fn_json
-        )
 
     # no cache
     ret = get_evmap_data(full_fn)
@@ -1045,6 +984,114 @@ def graphdata_latest_json(prj):
     result = srv_project.get_project_latest_stat_by_keystr(prj)
 
     return jsonify(result)
+
+
+###########################################################
+# Archieved Data services
+###########################################################
+
+@bp.route('/graphdata/<prj>/img/<fn>')
+def graphdata_img(prj, fn):
+    '''get image files of specific project
+    '''
+    full_path = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, 'img')
+    return send_from_directory(full_path, fn)
+
+
+@bp.route('/graphdata/<prj>/decision_aid/<cmp>/<fn>')
+def graphdata_da_cmp(prj, cmp, fn):
+    '''
+    Get decision aid image files of specific project
+    '''
+    full_path = os.path.join(
+        current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, 
+        'decision_aid',
+        cmp
+    )
+    return send_from_directory(full_path, fn)
+
+
+@bp.route('/graphdata/<prj>/ITABLE_CFG.json')
+def graphdata_itable_cfg_json(prj):
+    full_fn_itable_cfg_json = os.path.join(
+        current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, 'ITABLE_CFG.json')
+
+    # just send the ITABLE_CFG.json if exists
+    # if os.path.exists(full_fn_itable_cfg_json):
+    #     return send_from_directory(
+    #         os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj),
+    #         'ITABLE_CFG.json'
+    #     )
+
+    # just load the existing filters
+    fn = 'ITABLE_FILTERS.json'
+    full_fn = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, fn)
+    if os.path.exists(full_fn):
+        filters = json.load(open(full_fn))['filters']
+    else:
+        # get the filters from the excel file
+        fn = 'ITABLE_FILTERS.xlsx'
+        full_fn = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, fn)
+        filters = get_filters_from_itable(full_fn)
+
+    ret = {
+        "cols": {
+            "fixed": [],
+            "default": []
+        },
+        "filters": filters
+    }
+
+    # make a cache
+    json.dump(ret, open(full_fn_itable_cfg_json, 'w'))
+
+    return jsonify(ret)
+
+
+@bp.route('/graphdata/<prj>/GRAPH.json')
+def graphdata_graph_json(prj):
+    '''
+    Special rule for the graphs.
+    Generate a GRAPH.json for this project.
+    And, it will also generate a set of outcome seperate file
+    '''
+
+    fn = 'SOFTABLE_NMA_DATA.xlsx'
+    full_fn = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, fn)
+
+    # hold all the outcomes
+    fn_json = 'GRAPH.json'
+    full_fn_json = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, fn_json)
+
+    # hold one outcome
+    fn_oc_json = 'GRAPH_%s.json'
+    full_oc_fn_json = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, fn_oc_json)
+
+    # hold the outcome list 
+    fn_nma_list_json = 'NMA_LIST.json'
+    full_nma_list_json = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, fn_nma_list_json)
+
+    # use cache to haste the loading
+    use_cache = request.args.get('use_cache')
+    if use_cache == 'yes':
+        return send_from_directory(
+            os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj),
+            fn_json
+        )
+    
+    # generate the NMA List data
+    nma = get_nma_list_data(full_fn)
+
+    # cache the NMA list
+    json.dump(nma, open(full_nma_list_json, 'w'))
+
+    # get the graph json data
+    ret = get_oc_graph_data(full_fn)
+
+    # save the GRAPH.json
+    json.dump(ret, open(full_fn_json, 'w'))
+
+    return jsonify(ret)
 
 
 @bp.route('/graphdata/<prj>/OPLOTS.json')
