@@ -769,6 +769,17 @@ PROJECT_DEFAULT_SETTINGS = {
     ]
 }
 
+# Certainty in Evidence
+CIE_NMA_COLUMNS = [
+    "risk_of_bias",
+    "inconsistency",
+    "incoherence",
+    "indirectness",
+    "imprecision",
+    "publication_bias",
+    "intransitivity"
+]
+
 # the maximum length
 PID_TYPE_MAX_LENGTH = 32
 PID_TYPE_NONE_TYPE = 'UNKNOWN'

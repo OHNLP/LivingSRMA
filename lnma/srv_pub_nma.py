@@ -1,3 +1,4 @@
+from genericpath import exists
 import os
 import json
 
@@ -155,7 +156,7 @@ def get_nma_by_cq(keystr, cq_abbr="default"):
     )
     print('* found %s extracts defined in %s-%s' % (
         len(extracts), keystr, cq_abbr
-    ))  
+    ))     
 
     # then create oc_dict
     oc_dict = {}
@@ -226,6 +227,9 @@ def get_nma_by_cq(keystr, cq_abbr="default"):
     # before returning, sort the treat_list
     treat_list.sort()
 
+    # last, add CIE patch
+    oc_dict = _add_cie_patch(keystr, cq_abbr, oc_dict)
+
     ret = {
         'treat_list': treat_list,
         'oc_dict': oc_dict
@@ -234,6 +238,72 @@ def get_nma_by_cq(keystr, cq_abbr="default"):
     return ret
 
 
+def _add_cie_patch(keystr, cq_abbr, oc_dict):
+    '''
+    Add patch to  
+    '''
+    # try to read the file
+    fn = 'CIE.csv'
+    full_fn = os.path.join(
+        current_app.instance_path, 
+        settings.PUBLIC_PATH_PUBDATA, 
+        keystr,
+        cq_abbr,
+        fn
+    )
+
+    if not os.path.exists(full_fn):
+        # ok, no such file
+        print('* No CIE patch for %s-%s')
+        return oc_dict
+
+    # try to build a dict from full name to abbr
+    ocfn2abbr = {}
+    for abbr in oc_dict:
+        ocfn = oc_dict[abbr]['extract']['meta']['full_name']
+        ocfn2abbr[ocfn] = abbr
+
+    # load csv
+    import csv
+
+    with open(full_fn) as csv_file:
+        csv_reader = csv.DictReader(csv_file, delimiter=',')
+        for row in csv_reader:
+            c = row['comparator']
+            t = row['treatment']
+            ocfn = row['name']
+
+            if ocfn not in ocfn2abbr:
+                # which means this oc not defined yet?
+                continue
+            
+            oc_abbr = ocfn2abbr[ocfn]
+
+            # check comparator
+            if c not in oc_dict[oc_abbr]['cetable']:
+                oc_dict[oc_abbr]['cetable'][c] = {}
+
+            # check treatment
+            if t not in oc_dict[oc_abbr]['cetable'][c]:
+                oc_dict[oc_abbr]['cetable'][c][t] = {}
+
+            # put the values
+            for k in row:
+                if k in ['category', 'name', 'comparator', 'treatment']:
+                    continue
+                # make sure the value type is int
+                oc_dict[oc_abbr]['cetable'][c][t][k] = int('%s'%row[k])
+
+            # no matter cie is there or not
+            # update cie
+            # then get the final cie
+            oc_dict[oc_abbr]['cetable'][c][t]['cie'] = util.calc_nma_cie(
+                oc_dict[oc_abbr]['cetable'][c][t],
+                settings.CIE_NMA_COLUMNS
+            )
+
+    return oc_dict
+    
 
 def _conv_nmarst_league_to_lgtable(nmarst):
     '''

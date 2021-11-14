@@ -1255,6 +1255,53 @@ def val2float(v):
     return ret
 
 
+def calc_nma_cie(r, cols):
+    '''
+    Calculate the CiE by the given record on the columns
+    '''
+    cie = 4
+    for i in range(len(cols)):
+        col = cols[i]
+
+        if col not in r:
+            # what??? why???
+            continue
+
+        val = r[col]
+
+        # make sure the value type is int
+        val = int('%s'%val)
+
+        if val == 0:
+            # not applicable
+            pass
+
+        elif val == 1:
+            # not serious
+            pass
+
+        elif val == 2:
+            # downgrade 1
+            cie -= 1
+
+        elif val == 3:
+            # downgrade 2
+            cie -= 2
+
+        elif val == 4:
+            # downgrade 3
+            cie -= 3
+
+        else:
+            # what???
+            pass
+
+    # final check
+    if cie <= 0: cie = 1
+
+    return cie
+
+
 def convert_extract_r_to_number(r, input_format):
     '''
     A helper function to change the values
