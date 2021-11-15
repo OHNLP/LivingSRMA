@@ -919,11 +919,14 @@ def graphdata_evmap_json(keystr):
         cq_abbr = 'default'
 
     fn_json = 'EVMAP.json'
-    full_fn_json = os.path.join(
+    full_path = os.path.join(
         current_app.instance_path, 
         settings.PUBLIC_PATH_PUBDATA, 
         keystr,
-        cq_abbr,
+        cq_abbr
+    )
+    full_fn_json = os.path.join(
+        full_path,
         fn_json
     )
 
@@ -935,6 +938,22 @@ def graphdata_evmap_json(keystr):
             keystr, cq_abbr, fn_json
         ))
         ret = json.load(open(full_fn_json))
+        return jsonify(ret)
+
+    if src == 'sofnma_cache':
+        full_fn_sofnama = os.path.join(
+            full_path,
+            'SOFTABLE_NMA.json'
+        )
+        print('* using sof name cache for %s.%s %s by %s' % (
+            keystr, cq_abbr, fn_json, full_fn_sofnama
+        ))
+        j = json.load(open(full_fn_sofnama))
+        ret = srv_pub_nma.parse_evmap_data_from_json(j)
+
+        # catch the result
+        json.dump(ret, open(full_fn_json, 'w'), default=util.json_encoder)
+
         return jsonify(ret)
 
     if src == 'db':
@@ -957,13 +976,14 @@ def graphdata_evmap_json(keystr):
 
     # what????
     # reading the file?
-    fn = 'EVMAP_DATA.xlsx'
+    # fn = 'EVMAP_DATA.xlsx'
     fn = 'SOFTABLE_NMA_DATA.xlsx'
-    full_fn = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, fn)
-
-    # hold all the outcomes
-    fn_json = 'EVMAP.json'
-    full_fn_json = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, fn_json)
+    full_fn = os.path.join(
+        current_app.instance_path, 
+        settings.PUBLIC_PATH_PUBDATA, 
+        keystr, 
+        fn
+    )
 
     # no cache
     ret = get_evmap_data(full_fn)

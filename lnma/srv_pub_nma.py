@@ -238,6 +238,106 @@ def get_nma_by_cq(keystr, cq_abbr="default"):
     return ret
 
 
+def parse_evmap_data_from_json(j):
+    '''
+    Parse the Evidence Map data from the calculation result
+
+    The `j` is the return of get_nma_by_cq()
+
+    The evmap data focus on the evidence visualization,
+    So it summarizes the results of all treatments for visualization.
+    The selection is a treatment-based effect
+
+    The effects are defined as follows:
+    effects = {
+        3: 'significant benefit',
+        2: 'no significant effect',
+        1: 'significant harm',
+        0: 'na'
+    }
+    '''
+    # the final result is a bout treatment
+    treat_dict = {}
+
+    # get all information for this treat in each result
+    for abbr in j['oc_dict']:
+        oc = j['oc_dict'][abbr]
+        # check all par
+        for cmprt in oc['lgtable']:
+            for treat in oc['lgtable'][cmprt]:
+                # skip the same, no need to compare
+                if treat == cmprt: continue
+
+                # get the certainty
+                cie = oc['cetable'][cmprt][treat]['cie']
+
+                # get the values for effect
+                sm = oc['lgtable'][cmprt][treat]['sm']
+                lw = oc['lgtable'][cmprt][treat]['lw']
+                up = oc['lgtable'][cmprt][treat]['up']
+                which_is_better = oc['extract']['meta']['which_is_better']
+
+                # get the effect
+                effect = _get_effect(
+                    sm,
+                    lw,
+                    up,
+                    which_is_better
+                )
+
+                # create a record if not exists yet
+                if treat not in treat_dict:
+                    treat_dict[treat] = {
+                        'rs': []
+                    }
+
+                # save this record
+                treat_dict[treat]['rs'].append({
+                    'cie': cie,
+                    'effect': effect,
+                    'comparator': cmprt,
+                    'treatment': treat,
+                    'oc_abbr': abbr
+                })
+
+    # bind the treat_dict to j
+    j['treat_dict'] = treat_dict
+
+    return j
+
+
+def _get_effect(sm, lw, up, which_is_better='lower'):
+    '''
+    Get the effect value
+    effects = {
+        3: 'significant benefit',
+        2: 'no significant effect',
+        1: 'significant harm',
+        0: 'na'
+    }
+    '''
+    if sm == 1:
+        return 2
+
+    elif lw < 1 and up > 1:
+        return 2
+
+    elif sm > 1:
+        if which_is_better == 'higher':
+            return 3
+        else:
+            return 1
+
+    elif sm < 1:
+        if which_is_better == 'higher':
+            return 1
+        else:
+            return 3
+    
+    else:
+        return 0    
+
+
 def _add_cie_patch(keystr, cq_abbr, oc_dict):
     '''
     Add patch to  
