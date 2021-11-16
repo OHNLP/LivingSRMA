@@ -8,7 +8,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-<title>Study Selection</title>
+<title>PRISMA V2</title>
 <link rel="icon" href="/static/img/favicon.png" type="image/png">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" />
@@ -16,8 +16,11 @@
 <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/mybox-0.9.1.css">
 
 <style>
+{% include 'css/start_screen.css' %}
+
 html, body {
     width: 100%;
     height: 100%;
@@ -36,174 +39,6 @@ a {
     color: #333333;
     text-decoration: none;
 }
-.d-flex {
-    display: flex;
-}
-.flex-container {
-    display: flex;
-    justify-content: flex-start;
-    width: 100%;
-    height: 100%;
-}
-.box {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-}
-.box-header {
-    width: 100%;
-    padding: 3px 0;
-    display: flex;
-    flex-direction: row;
-}
-.box-header a {
-    font-size: .8em;
-}
-.box-header h4 {
-    padding: 0;
-    margin: 0;
-    font-size: .95em;
-    height: 1.6em;
-    line-height: 1.6em;
-    margin: 3px 0;
-}
-.box-header button, 
-.box-body button, 
-.box-footer button {
-    height: 1.6em;
-    line-height: 1em;
-    font-size: .8em;
-    margin: 4px;
-}
-.box-header input,
-.box-body input {
-    height: 1em;
-    line-height: 1em;
-    font-size: 1em;
-    margin: 4px 4px 0 4px;
-}
-.box-header select {
-    height: 1.6em;
-    line-height: 1.2em;
-    font-size: .8em;
-    margin: 4px;
-}
-.box-header p {
-    height: 1.6em;
-    line-height: 1.2em;
-    font-size: 1em;
-    margin: 5px 0 0 2px;
-}
-.box-header span {
-    font-size: .9em;
-}
-.box-header-right {
-    font-size: .95em;
-    height: 1.6em;
-    line-height: 1.6em;
-    margin: 3px 0;
-    text-align: right;
-}
-.box-header a {
-    padding: 1px 3px;
-    margin: 0 5px;
-    height: 1.6em;
-    line-height: 1.6em;
-}
-.box-header a:hover {
-    text-decoration: underline;
-}
-.box-body {
-    width: 100%;
-}
-.box-body-item {
-    padding: 5px 0 5px 0;
-    display: flex;
-    flex-direction: column;
-    border-bottom: 1px dotted #cccccc;
-}
-/* for left - right items */
-.box-body-item-left {
-    width: 73%;
-}
-.box-body-item-right {
-    width: 24%;
-    display: flex;
-    flex-direction: row;
-}
-.box-body-item-label {
-    width: 54%;
-    font-size: .9em;
-    line-height: 1.8em;
-}
-.box-body-item-value {
-    width: 45%;
-}
-.box-body-item select {
-    width: 100%;
-}
-/* the label values items */
-.bbi-label {
-    width: 100%;
-    padding: 0 0 3px 0;
-    font-size: .8em;
-    color: #666666;
-    /* just for using the question marks */
-    justify-content: space-between;
-}
-.bbi-value {
-    width: 100%;
-    padding: 2px 0px 2px 10px;
-    font-size: .9em;
-    color: #000000;
-}
-.bbi-label-hint {
-    color: #999999;
-    cursor: help;
-}
-.bbi-label-hint:hover {
-    color: #333333;
-}
-.box-body h5 {
-    padding: 0;
-    margin: 0;
-    font-size: .95em;
-    height: 1.6em;
-    line-height: 1.6em;
-    margin: 3px 0;
-}
-.box-p {
-    width: 100%;
-    padding: 0;
-    margin: 0;
-    font-size: .9em;
-}
-.box-p-fixlen {    
-    white-space: nowrap;
-    text-overflow:ellipsis;
-    overflow: hidden;
-}
-.box-footer {
-    width: 100%;
-    min-height: 20px;
-    padding: 5px 0 5px 0;
-}
-.footer {
-    width: 100%;
-    align-items: flex-end;
-    font-size: .75em;
-    line-height: 1.5em;
-    height: 1.5em;
-}
-.footer div {
-    height: 1em;
-    line-height: 1em;
-}
-.footer-link a {
-    padding: 0 5px;
-    color: #999999;
-}
-
 /* element ui css */
 .text-start {
     font-size: 10px;
@@ -233,7 +68,7 @@ a {
 /* page */
 .ss-box {
     position: absolute;
-    width: 150px;
+    width: 157px;
     /* height: 50px; */
     border: 1px solid #666666;
     padding: 5px;
@@ -259,6 +94,7 @@ a {
     line-height: 15px;
     text-overflow: ellipsis;
     overflow: hidden;
+    font-size: small;
 }
 .ss-box-stage {
     font-weight: normal;
@@ -343,95 +179,110 @@ a {
 
         <div class="ss-box" style="left: 15px; top: 10px; cursor: default;">
             <div class="ss-info">{{ vals.b1.text }}</div>
-            <div class="ss-number">(n = {{ fmt_num(vals.b1.number) }})</div>
+            <div class="ss-number">(n = {{ fmt_num(vals.b1.n_pmids) }})</div>
         </div>
 
         <div class="ss-box" style="left: 190px; top: 10px; cursor: default;">
             <div class="ss-info">{{ vals.b2.text }}</div>
-            <div class="ss-number">(n = {{ fmt_num(vals.b2.number) }})</div>
+            <div class="ss-number">(n = {{ fmt_num(vals.b2.n_pmids) }})</div>
         </div>
 
         <div class="ss-box" style="left: 15px; top: 110px; width: 300px !important; cursor: default;">
             <div class="ss-info">{{ vals.b3.text }}</div>
-            <div class="ss-number">(n = {{ fmt_num(vals.b3.number) }})</div>
+            <div class="ss-number">(n = {{ fmt_num(vals.b3.n_pmids) }})</div>
         </div>
         
         <div class="ss-box" style="left: 85px; top: 195px; cursor: default;">
             <div class="ss-info">{{ vals.b4.text }}</div>
-            <div class="ss-number">(n = {{ fmt_num(vals.b4.number) }})</div>
+            <div class="ss-number">(n = {{ fmt_num(vals.b4.n_pmids) }})</div>
         </div>
 
         <div class="ss-box" style="left: 85px; top: 300px; cursor: default;">
             <div class="ss-info">{{ vals.b5.text }}</div>
-            <div class="ss-number">(n = {{ fmt_num(vals.b5.number) }})</div>
+            <div class="ss-number">(n = {{ fmt_num(vals.b5.n_pmids) }})</div>
         </div>
 
-        <div class="ss-box ss-box2 ss-box-stage" style="left: 85px; top: 400px;" v-on:click="update_study_list(vals.b6)">
+        <div class="ss-box ss-box2 ss-box-stage" style="left: 85px; top: 400px;" v-on:click="update_study_list('b6')">
             <div class="ss-info">{{ vals.b6.text }}</div>
             <div class="ss-number">(n = {{ fmt_num(vals.b6.number) }})</div>
         </div>
 
-        <div class="ss-box ss-box2 ss-box-stage" style="left: 85px; top: 500px;" v-on:click="update_study_list(vals.b7)">
+        <div class="ss-box ss-box2 ss-box-stage" style="left: 85px; top: 500px;" v-on:click="update_study_list('b7')">
             <div class="ss-info">{{ vals.b7.text }}</div>
             <div class="ss-number">(n = {{ fmt_num(vals.b7.number) }})</div>
         </div>
         
         <!-- Exclude Part -->
         <div class="ss-box" style="left: 255px; top: 230px; width: 100px; cursor: default;">
-            <div class="ss-info">{{ vals.e1.text }}</div>
-            <div class="ss-number">(n = {{ fmt_num(vals.e1.number) }})</div>
-        </div>
-
-        <div class="ss-box ss-box2 ss-box-stage" style="left: 255px; top: 330px; width: 100px;" v-on:click="show_excluded_studies(vals.e2)">
             <div class="ss-info">{{ vals.e2.text }}</div>
-            <div class="ss-number">(n = {{ fmt_num(vals.e2.number) }})</div>
+            <div class="ss-number">(n = {{ fmt_num(vals.e1.n_pmids) }})</div>
         </div>
 
-        <div class="ss-box ss-box2 ss-box-stage" style="left: 255px; top: 430px; width: 100px;" v-on:click="update_study_list(vals.e3)">
+        <div class="ss-box ss-box2 ss-box-stage" style="left: 255px; top: 330px; width: 100px;" v-on:click="show_excluded_studies('e2')">
             <div class="ss-info">{{ vals.e3.text }}</div>
-            <div class="ss-number">(n = {{ fmt_num(vals.e3.number) }})</div>
+            <div class="ss-number">(n = {{ fmt_num(vals.e2.n_pmids) }})</div>
+        </div>
+
+        <div class="ss-box ss-box2 ss-box-stage" style="left: 255px; top: 430px; width: 100px;" v-on:click="update_study_list('e3')">
+            <div class="ss-info">{{ vals.f3n.text }}</div>
+            <div class="ss-number">(n = {{ fmt_num(vals.f3n.n_pmids) }})</div>
         </div>
 
         <!-- LNMA Part -->
-        <div class="ss-box ss-box2 ss-box3 ss-box-stage" style="left: 370px; top: 10px; border: 3px solid red;" v-on:click="update_study_list(vals.a1)">
+        <div class="ss-box ss-box2 ss-box3 ss-box-stage" style="left: 370px; top: 10px; border: 3px solid red;" v-on:click="update_study_list('a1')">
             <div class="ss-info">{{ vals.a1.text }}</div>
             <div class="ss-number">(n = {{ fmt_num(vals.a1.number) }})</div>
+            <div class="ss-info">({{ fmt_num(vals.a1.n_pmids) }} references)</div>
         </div>
 
-        <div class="ss-box ss-box2 ss-box3" style="left: 370px; top: 355px;">
-            <div class="ss-box-stage" v-on:click="update_study_list(vals.a2)">
+        <div class="ss-box ss-box2 ss-box3" style="left: 370px; top: 255px;">
+            <div class="ss-box-stage" v-on:click="update_study_list('a2')">
                 <div class="ss-info">{{ vals.a2.text }}</div>
-                <div class="ss-number">(n = {{ fmt_num(vals.a2.number) }})</div>
+                <div class="ss-number">
+                    (n = {{ fmt_num(vals.a2.number) }})<br>
+                    <span class="ss-info">({{ fmt_num(vals.a2.n_pmids) }} references)</span>
+                </div>
             </div>
             <div class="ss-box-stage" style="border-top: 1px solid black; margin-top: 5px; padding-top: 3px;"
-                v-on:click="update_study_list(vals.u1)">
+                v-on:click="update_study_list('u1')">
                 <div class="ss-info">{{ vals.u1.text }}</div>
-                <div class="ss-number">(n = {{ fmt_num(vals.u1.number) }})</div>
+                <div class="ss-number">
+                    (n = {{ fmt_num(vals.u1.number) }})<br>
+                    <span class="ss-info">({{ fmt_num(vals.u1.n_pmids) }} references)</span>
+                </div>
             </div>
         </div>
 
-        <div class="ss-box ss-box2 ss-box3" style="left: 370px; top: 490px; z-index: 10;">
-            <div class="ss-box-stage" v-on:click="update_study_list(vals.a3)">
+        <div class="ss-box ss-box2 ss-box3" style="left: 370px; top: 425px; z-index: 10;">
+            <div class="ss-box-stage" v-on:click="update_study_list('a3')">
                 <div class="ss-info">{{ vals.a3.text }}</div>
-                <div class="ss-number">(n = {{ fmt_num(vals.a3.number) }})</div>
+                <div class="ss-number">
+                    (n = {{ fmt_num(vals.a3.number) }})<br>
+                    <span class="ss-info">({{ fmt_num(vals.a3.n_pmids) }} references)</span>
+                </div>
             </div>
             <div class="ss-box-stage" style="border-top: 1px solid black; margin-top: 5px; padding-top: 3px;"
-                v-on:click="update_study_list(vals.u2)">
+                v-on:click="update_study_list('u2')">
                 <div class="ss-info">{{ vals.u2.text }}</div>
-                <div class="ss-number">(n = {{ fmt_num(vals.u2.number) }})</div>
+                <div class="ss-number">
+                    (n = {{ fmt_num(vals.u2.number) }})<br>
+                    <span class="ss-info">({{ fmt_num(vals.u2.n_pmids) }} references)</span>
+                </div>
             </div>
         </div>
 
         <!-- Merge Part -->
 
-        <div class="ss-box ss-box2 ss-box3 ss-box-stage" style="left: 236px; top: 635px; " v-on:click="update_study_list(vals.f1)">
+        <div class="ss-box ss-box2 ss-box3 ss-box-stage" style="left: 236px; top: 625px; " v-on:click="update_study_list('f1')">
             <div class="ss-info">{{ vals.f1.text }}</div>
             <div class="ss-number">(n = {{ fmt_num(vals.f1.number) }})</div>
+            <div class="ss-info">({{ fmt_num(vals.f1.n_pmids) }} references)</div>
         </div>
 
-        <div class="ss-box ss-box2 ss-box3 ss-box-stage" style="left: 235px; top: 745px;" v-on:click="update_study_list(vals.f2)">
+        <div class="ss-box ss-box2 ss-box3 ss-box-stage" style="left: 235px; top: 745px;" v-on:click="update_study_list('f2')">
             <div class="ss-info">{{ vals.f2.text }}</div>
             <div class="ss-number">(n = {{ fmt_num(vals.f2.number) }})</div>
+            <div class="ss-info">({{ fmt_num(vals.f2.n_pmids) }} references)</div>
         </div>
 
         <!-- Legend Part -->
@@ -483,32 +334,20 @@ a {
             <i class="fa fa-long-arrow-alt-right"></i>
         </div>
 
-        <div class="ss-arrow" style="left: 370px; top: 255px;">
-            <i class="fa fa-long-arrow-alt-left"></i>
-        </div>
-
-        <div class="ss-arrow" style="left: 370px; top: 325px;">
-            <i class="fa fa-long-arrow-alt-left"></i>
-        </div>
-
-        <div class="ss-arrow" style="left: 370px; top: 455px;">
-            <i class="fa fa-long-arrow-alt-left"></i>
-        </div>
-
         <!-- Arrows for LNMA -->
-        <div class="ss-arrow" style="width: 6px; left: 445px; top: 90px; border-top: 235px solid black;">
+        <div class="ss-arrow" style="width: 6px; left: 445px; top: 105px; border-top: 120px solid black;">
             <div style="margin-top: -5px; margin-left: -5px;">
                 <i class="fa fa-long-arrow-alt-down"></i>
             </div>
         </div>
 
-        <div class="ss-arrow" style="left: 440px; top: 456px;">
+        <div class="ss-arrow" style="left: 440px; top: 392px;">
             <i class="fa fa-long-arrow-alt-down"></i>
         </div>
 
         <!-- Arrows for Merge -->
-        <div class="ss-arrow" style="width: 295px; height: 40px; left: 155px; top: 570px; border-bottom: 5px solid black; border-left: 5px solid black; border-right: 5px solid black; position: relative; z-index:1;">
-            <div style="position: absolute; left: 145px; bottom: -35px;">
+        <div class="ss-arrow" style="width: 282px; height: 40px; left: 166px; top: 564px; border-bottom: 5px solid black; border-left: 5px solid black; border-right: 5px solid black; position: relative; z-index:1;">
+            <div style="position: absolute; left: 135px; bottom: -35px;">
                 <i class="fa fa-long-arrow-alt-down"></i>
             </div>
         </div>
@@ -529,7 +368,7 @@ a {
             Study List | 
         </h4>
         <div>
-            <p>{{ stage.text }} (n = {{ stage.number }})</p>
+            <p>{{ prisma[stage].text }} (n = {{ prisma[stage].n_ctids }})</p>
         </div>
     </div>
 
@@ -553,12 +392,10 @@ a {
                 {{ r.date }} 
                 <span class="study-journal">{{ r.journal }}</span class="">. 
                     
-                <a class="study-pmid" target="_blank" title="Open the page in ClinicalTrials.gov" 
-                    v-if="r.pmid[0]=='N'"
-                    v-bind:href="url.ctgov.view_ct + r.pmid">{{ r.pmid }}</a>
-                <a class="study-pmid" target="_blank" title="Open the page in PubMed" 
-                    v-else
+                <a class="study-pmid" target="_blank" title="Show in PubMed" 
                     v-bind:href="url.pubmed.view_pmid + r.pmid">{{ r.pmid }}</a>
+                <a class="study-pmid" target="_blank" title="Show clinical trial detail" 
+                    v-bind:href="url.ctgov.view_ct + r.ctid">{{ r.ctid }}</a>
             </div>
 
         </div>
@@ -609,11 +446,11 @@ if (isIE) {
 }
 </script>
 <script>
-{% include "js/fg_prisma.js" %}
-{% include "js/tb_studylist.js" %}
 
-var jarvis = {
-    data: null,
+var app_prisma = {
+    vpp: null,
+    vpp_id: '#app_prisma',
+
     url: {
         sel_pred: './hsra_pred',
         ctgov: {
@@ -627,12 +464,179 @@ var jarvis = {
         },
     },
 
-    get_url_paramter: function(name) {
-        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
-        var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
-        var results = regex.exec(location.search);
-        return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    init: function(data) {
+        this.data = data;
+        // set n_ctids as number of each stage
+        for (var stage in this.data.prisma) {
+            this.data.prisma[stage].number = this.data.prisma[stage].n_ctids;
+        }
+
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: { 
+                // for prisma
+                vals: this.data.prisma,
+
+                // for study list
+                total: this.all_rs.length,
+                pn: 0,
+                tp: 1,
+                prisma: this.data.prisma,
+                stage: stage,
+                url: jarvis.url,
+                studies: this.all_rs
+            },
+            methods: {
+                fmt_num: function(x) {
+                    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                },
+
+                update_study_list: function(stage) {
+                    tb_studylist.set_stage(stage);
+                },
+
+                show_excluded_studies: function(stage) {
+                    if (stage == 'e2') {
+                        $( "#dialog-message-e2" ).dialog( "open" );
+                    }
+                },
+
+                show_study_by_pmid: function(pmid) {
+
+                },
+                
+                prev_page: function() {
+                    if (this.pn > 0) {
+                        this.pn -= 1;
+                        tb_search.search(
+                            tb_search.vpp.keyword,
+                            tb_search.vpp.pn * tb_search.retmax
+                        );
+                    }
+                },
+
+                next_page: function() {
+                    if (this.pn < this.tp) {
+                        this.pn += 1;
+                        tb_search.search(
+                            tb_search.vpp.keyword,
+                            tb_search.vpp.pn * tb_search.retmax
+                        );
+                    }
+                },
+
+                show_study_by_pmid: function(pmid) {
+
+                }
+            }
+        });
     },
+
+    unpack: function(rows, key) {
+        return rows.map(function(row) {
+            return row[key];
+        });
+    },
+
+    clear: function() {
+        this.vpp.n = 0;
+        this.vpp.headers = [];
+        this.vpp.studies = [];
+    },
+
+    set_stage: function(stage) {
+        // set the stage
+        this.vpp.stage = stage;
+
+        // put the papers in this stage
+        var studies = [];
+        for (var i = 0; i < this.data.prisma[stage].paper_list.length; i++) {
+            var pmid = this.data.prisma[stage].paper_list[i];
+            var paper = this.data.paper_dict[pmid];
+            var ctid = paper.ctid;
+
+            if (paper.hasOwnProperty('title')) {
+                // this paper is a real PMID data or we put data in xls
+                studies.push(paper);
+            } else {
+                studies.push(this.data.study_dict[ctid]);
+            }
+        }
+        this.vpp.studies = studies;
+        this.vpp.total = studies.length;
+        console.log('* set vpp studies', studies);
+    },
+
+    set_stage_to_nct_latest: function(stage) {
+        // set the stage
+        this.vpp.stage = stage;
+
+        // put the papers in this stage
+        var studies = [];
+        for (var i = 0; i < this.data.prisma[stage].study_list.length; i++) {
+            var ctid = this.data.prisma[stage].study_list[i];
+            var latest_pmid = this.data.study_dict[ctid].latest_pmid;
+            var paper = this.data.paper_dict[latest_pmid];
+
+            if (paper.hasOwnProperty('title')) {
+                // this paper is a real PMID data or we put data in xls
+                studies.push(paper);
+            } else {
+                studies.push(this.data.study_dict[ctid]);
+            }
+        }
+        this.vpp.studies = studies;
+        this.vpp.total = studies.length;
+        console.log('* set vpp studies', studies);
+    },
+
+    get_summary_of_search_results: function(ids, callback) {
+        $.get(
+            jarvis.url.pubmed.esummary,
+            {id: ids.join(',')},
+            callback, 'xml'
+        );
+    },
+
+    parse_summary_results: function(data) {
+        var xml = $(data);
+        var docsums = xml.find('DocSum');
+        
+        for (var i = 0; i < docsums.length; i++) {
+            var docsum_xml = $(docsums[i]);
+
+            // get PMID
+            var pmid = docsum_xml.find('Id')[0].textContent;
+
+            // get title
+            var title = docsum_xml.find('Item[Name="Title"]')[0].textContent;
+
+            // get authors
+            var authors = [];
+            var authors_elems = docsum_xml.find('Item[Name="Author"]');
+            for (var j = 0; j < authors_elems.length; j++) {
+                var elem = authors_elems[j];
+                authors.push(elem.textContent);
+            }
+
+            // get journal
+            var journal = docsum_xml.find('Item[Name="FullJournalName"]')[0].textContent;
+
+            // get date
+            var date = docsum_xml.find('Item[Name="PubDate"]')[0].textContent;
+
+            // update the record
+            this.data.paper_dict[pmid].title = title;
+            this.data.paper_dict[pmid].date = date;
+            this.data.paper_dict[pmid].journal = journal;
+            this.data.paper_dict[pmid].authors = authors.join(', ');
+        }
+    }
+};
+
+
+var jarvis = {
+    data: null,
 
     init: function() {
         // for the message boxes
@@ -640,107 +644,42 @@ var jarvis = {
             autoOpen: false
         });
 
+        // OK, let's get the project key first
         var prj = jarvis.get_url_paramter('prj');
+        if (prj == null || prj == '') {
+            jarvis.ssmsg('Project information error.')
+            return;
+        }
+
+        // get the cq_abbr for this project
+        var cq = jarvis.get_url_paramter('cq');
+        if (cq == null || cq == '') {
+            cq = 'default';
+        }
 
         $.get(
             '/pub/graphdata/' + prj + '/PRISMA.json',
-            {ver: Math.random()},
+            {
+                src: 'db',
+                cq: cq,
+                ver: Math.random()
+            },
             function(data) {
-                fg_prisma.init(data.prisma);
-                tb_studylist.load(data);
-
+                app_prisma.init(data);
+                
                 // update the e2 detail
-                var e2_details = data.info.e2_details;
-                e2_details = e2_details.split('\n');
-                e2_details = e2_details.map(v=>'<p>'+v+'</p>').join('');
-                $('#dialog-message-e2').html(e2_details);
+                // var e2_details = data.prisma.e2.detail;
+                // e2_details = '<p>'+e2_details+'</p>';
+                // $('#dialog-message-e2').html(e2_details);
 
                 // OK!
                 jarvis.ssmsg('Data loaded!');
                 setTimeout('jarvis.ssclose();', 300);
+
             }, 'json'
         );
 
     },
-
-    gen_sample: function(n1, n2) {
-        var rs = [];
-        // gen n1
-        for (let i = 0; i < n1 + n2; i++) {
-            var r = {
-                study_id: i,
-                nct: 'NCT' + Math.round(Math.random() * 100000000),
-                pmid: Math.round(Math.random() * 100000000),
-                author: chance.name() + ' et al',
-                journal: chance.word().toUpperCase(),
-                year: chance.birthday().getFullYear(),
-                title: chance.sentence({ words: 15 })
-            };
-            if (i < n1) {
-                r['b1'] = 1;
-                for (let j = 2; j <=7 ; j++) {
-                    if (Math.random() > 1 / j) {
-                        r['b' + j] = r['b' + (j-1)];
-                    } else {
-                        r['b' + j] = -1;
-                    }
-                }
-                r['a1'] = 0;
-                r['a2'] = 0;
-                r['a3'] = 0;
-                r['f1'] = r['b6'];
-                r['f2'] = r['b7'];
-            } else {
-                for (let j = 1; j <=7 ; j++) {
-                    r['b' + j] = 0;
-                }
-                r['a1'] = 1;
-                for (let j = 2; j <=3 ; j++) {
-                    if (Math.random() > 1 / j) {
-                        r['a' + j] = r['a' + (j-1)];
-                    } else {
-                        r['a' + j] = -1;
-                    }
-                }
-                r['f1'] = r['a2'];
-                r['f2'] = r['a3'];
-            }
-            rs.push(r);
-        }
-        return rs;
-    },
-
-    get_test_data: function() {
-        var n1 = 5043;
-        var a1 = 203;
-        
-        var rs = this.gen_sample(n1, a1);
-        alasql('create table rs');
-        alasql('select * into rs from ?', [rs]);
-        this.rs_db = alasql('select * from rs where f2=1');
-
-        var vals = {};
-        for (let i = 1; i <= 7; i++) {
-            vals['b'+i] = { number: alasql('select count(*) as cnt from rs where b'+i + '=1')[0]['cnt'] }
-        }
-        for (let i = 1; i <= 3; i++) {
-            vals['a'+i] = { number: alasql('select count(*) as cnt from rs where a'+i + '=1')[0]['cnt'] }
-        }
-        for (let i = 1; i <= 2; i++) {
-            vals['f'+i] = { number: alasql('select count(*) as cnt from rs where f'+i + '=1')[0]['cnt'] }
-        }
-
-        return [{
-            vals: vals
-        }, {
-            studies: this.rs_db
-        }];
-    },
-
-    // update_study_list: function(stage) {
-    //     var rs = alasql('select * from rs where ' + stage.stage + '=1');
-    //     tb_studylist.set_stage(stage, rs);
-    // },
 
     ssmsg: function(msg) {
         $('#ss-msg').html(msg);
@@ -750,6 +689,7 @@ var jarvis = {
         $('#start-screen').hide();
     }
 };
+{% include 'js/jarvis_ext_utils.js' %}
 
 $(document).ready(function() {
     jarvis.init();

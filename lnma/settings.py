@@ -769,6 +769,90 @@ PROJECT_DEFAULT_SETTINGS = {
     ]
 }
 
+# Past PRISMA Template
+# For each item, it contains:
+# n_ctids: the number of clinical_trials
+# n_pmids: the number of papers (pmid)
+# paper_list: the list of pmids
+# study_list: the list of clinical trials (NCTXXXXXXXX)
+# stage: stage id
+# text: describe what it is for this stage
+PRISMA_PAST_TEMPLATE = {
+    "b1": {
+        "n_ctids": 0,
+        "n_pmids": 0,
+        "paper_list": [],
+        "stage": "b1",
+        "study_list": [],
+        "text": "Records retrieved from database search"
+    },
+    "b2": {
+        "n_ctids": 0,
+        "n_pmids": 0,
+        "paper_list": [],
+        "stage": "b2",
+        "study_list": [],
+        "text": "Records identified through other sources"
+    },
+    "b3": {
+        "n_ctids": 0,
+        "n_pmids": 0,
+        "paper_list": [],
+        "stage": "b3",
+        "study_list": [],
+        "text": "Records after removing duplicates"
+    },
+    "b4": {
+        "n_ctids": 0,
+        "n_pmids": 0,
+        "paper_list": [],
+        "stage": "b4",
+        "study_list": [],
+        "text": "Records initially screened"
+    },
+    "b5": {
+        "n_ctids": 0,
+        "n_pmids": 0,
+        "paper_list": [],
+        "stage": "b5",
+        "study_list": [],
+        "text": "Full-text articles assessed for eligibility"
+    },
+    "b6": {
+        "n_ctids": 0,
+        "n_pmids": 0,
+        "paper_list": [],
+        "stage": "b6",
+        "study_list": [],
+        "text": "Studies included in systematic review"
+    },
+    "b7": {
+        "n_ctids": 0,
+        "n_pmids": 0,
+        "paper_list": [],
+        "stage": "b7",
+        "study_list": [],
+        "text": "Studies included in meta-analysis"
+    },
+    "e2": {
+        "n_ctids": 0,
+        "n_pmids": 748,
+        "paper_list": [],
+        "stage": "e1",
+        "study_list": [],
+        "text": "Excluded by title and abstract review"
+    },
+    "e3": {
+        "n_ctids": 0,
+        "n_pmids": 30,
+        "paper_list": [],
+        "stage": "e2",
+        "study_list": [],
+        "text": "Excluded by full text review"
+    }
+}
+
+
 # Certainty in Evidence
 CIE_NMA_COLUMNS = [
     "risk_of_bias",

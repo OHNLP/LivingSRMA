@@ -1,4 +1,5 @@
 import os
+import copy
 import pandas as pd
 
 from flask import current_app
@@ -58,6 +59,11 @@ def get_prisma_by_cq(project_id, cq_abbr="default", do_include_papers=False):
         if paper.ss_ex['ss_cq'][cq_abbr]['d'] == 'yes':
             # nothing 
             stat['f1']['pids'].append(paper.pid)
+
+            # update the rct id if not exists
+            if rct_id not in stat['f1']['rcts']:
+                stat['f1']['rcts'].append(rct_id)
+
             f1_pids.append(paper.pid)
         else:
             # this study is not included in this cq
@@ -193,8 +199,179 @@ def get_prisma_by_cq(project_id, cq_abbr="default", do_include_papers=False):
     return ret
 
 
+def get_pub_prisma_from_db(keystr, cq_abbr='default'):
+    '''
+    Get the PRISMA from db for public site
+
+    This will combine the information from project meta and DB
+    '''
+    # get this project
+    project = dora.get_project_by_keystr(keystr)
+
+    if project is None:
+        return None
+
+    # get the ID for this func
+    project_id = project.project_id
+
+    # get the living part
+    living_prisma = get_prisma_by_cq(
+        project_id,
+        cq_abbr,
+        True
+    )
+
+    # check if exists
+    past_prisma = None
+    if 'prisma' not in project.settings:
+        # if no history is provided, use empty
+        past_prisma = copy.deepcopy(settings.PRISMA_PAST_TEMPLATE)
+
+    elif cq_abbr not in project.settings['prisma']:
+        # if no history is provided, use empty
+        past_prisma = copy.deepcopy(settings.PRISMA_PAST_TEMPLATE)
+
+    else:
+        # great, you have user input information
+        # just use this for the past_prisma
+        past_prisma = copy.deepcopy(
+            project.settings['prisma'][cq_abbr]
+        )
+
+    # start to merge?
+    # we just need the following from living
+    # a1: the records in living
+    # e2: ex by title in living 
+    # e22: ex by abs in living
+    # e3: ex by fulltext
+    # e3_by_reason: e3
+    # f1: the final number in SR
+    # f3: the final number in MA
+    # we need to calculate the a2 and a3.
+    # And also the u1 and u2
+    prisma = {}
+
+    # first, the living
+    for s in ['a1', 'e2', 'e22', 'e3', 'f1', 'f3']:
+        tmp = copy.deepcopy(living_prisma['stat'][s])
+        tmp['paper_list'] = tmp['pids']
+        tmp['study_list'] = tmp['rcts']
+        tmp['n_pmids'] = tmp['n']
+        tmp['n_ctids'] = len(tmp['rcts'])
+
+        prisma[s] = tmp
+
+    # then, the living details for the e3 reasons
+    prisma['e3_by_reason'] = copy.deepcopy(
+        living_prisma['stat']['e3_by_reason']
+    )
+
+    # second, copy the past directly
+    for s in ['b1', 'b2', 'b3', 'b4', 'b5', 'b6', 'b7']:
+        prisma[s] = past_prisma[s]
+
+    # backup the e2
+    prisma['e21'] = copy.deepcopy(prisma['e2'])
+    # start to merge e2, pub.e2 is the sum of ex by title and abs
+    prisma['e2']['n_pmids'] += prisma['e22']['n_pmids']
+    prisma['e2']['n_pmids'] += past_prisma['e2']['n_pmids']
+    prisma['e2']['text'] += ' and abstract'
+
+    # merge e3
+    prisma['e3']['n_pmids'] += past_prisma['e3']['n_pmids']
+
+    # build final ret
+    ret = {
+        'prisma': prisma,
+        "paper_dict": living_prisma['paper_dict'],
+        "study_dict": living_prisma['study_dict'],
+    }
+    return ret
+
+
+def get_stat_aef(project_id):
+    '''
+    Get the statistics of the project for the PRISMA
+    Including:
+
+    - a auto + import
+    - e excluded
+    - f final
+
+    '''
+    stages = [
+        { "stage": "a1",  "text": "Records identified through automatic update" },
+        { "stage": "a2",  "text": "Records identified through batch import" },
+
+        { "stage": "ax_na_na",  "text": "Unscreened records" },
+        { "stage": "ax_p2_na",  "text": "Full-text reviewing" },
+
+        { "stage": "e2",  "text": "Excluded by title" },
+        { "stage": "e22", "text": "Excluded by abstract review" },
+        { "stage": "e3",  "text": "Excluded by full-text review" },
+
+        { "stage": "f1", "text": "Final number in qualitative synthesis (systematic review)" },
+        { "stage": "f3", "text": "Final number in quantitative synthesis (meta-analysis)" }
+    ]
+    sql = """
+    select project_id,
+        
+        count(case when ss_st in ('a10', 'a11', 'a12') then paper_id else null end) as a1,
+        count(case when ss_st in ('a21', 'a22', 'a23') then paper_id else null end) as a2,
+
+        count(case when ss_pr = 'na' and ss_rs = 'na' then paper_id else null end) as ax_na_na,
+        count(case when ss_pr = 'p20' and ss_rs = 'na' then paper_id else null end) as ax_p2_na,
+        
+        count(case when ss_rs = 'e2' then paper_id else null end) as e2,
+        count(case when ss_rs = 'e22' then paper_id else null end) as e22,
+        count(case when ss_rs = 'e3' then paper_id else null end) as e3,
+        
+        count(case when ss_rs in ('f1', 'f3') then paper_id else null end) as f1,
+        0 as f3
+        
+
+    from papers
+    where project_id = '{project_id}'
+        and is_deleted = 'no'
+    group by project_id
+    """.format(project_id=project_id)
+    r = db.session.execute(sql).fetchone()
+
+    if r is None:
+        stat = {
+            'stages': stages
+        }
+        for k in stages:
+            stat[k['stage']] = {
+                'n': 0,
+                'text': k['text'],
+                'pids': [],
+                'rcts': []
+            }
+
+        return stat
+
+    # put the values in prisma dict
+    stat = {
+        'stages': stages
+    }
+    for k in stages:
+        stat[k['stage']] = {
+            'n': r[k['stage']],
+            'text': k['text'],
+            'pids': [],
+            'rcts': []
+        }
+
+    return stat
+    
+
+#####################################################################
+# Deprecated functions
+#####################################################################
 def get_prisma_from_db(prj, cq_abbr="default"):
     '''
+    Deprecated
     Get PRISMA JSON data from database
     '''
     project = dora.get_project_by_keystr(prj)
@@ -233,6 +410,9 @@ def get_prisma_from_db(prj, cq_abbr="default"):
             "title": paper.title,
         }
 
+        # 2021-11-15: fix empty rct_id
+        if rct_id == '': continue
+
         # add this RCT to the study dict
         if rct_id not in study_dict:
             study_dict[rct_id] = {
@@ -266,6 +446,7 @@ def get_prisma_from_db(prj, cq_abbr="default"):
 
 def get_prisma_from_xls(prj):
     '''
+    Deprecated
     Get PRISMA JSON data from Excel file
     '''
     import numpy as np
@@ -426,6 +607,7 @@ def get_prisma_from_xls(prj):
 
 def get_prisma_bef(project_id):
     '''
+    Deprecated
     Get the statistics for the PRISMA
     Including:
 
@@ -524,85 +706,6 @@ def get_prisma_bef(project_id):
 
     return prisma, stat
 
-
-def get_stat_aef(project_id):
-    '''
-    Get the statistics of the project for the PRISMA
-    Including:
-
-    - a auto + import
-    - e excluded
-    - f final
-
-    '''
-    stages = [
-        { "stage": "a1",  "text": "Records identified through automatic update" },
-        { "stage": "a2",  "text": "Records identified through batch import" },
-
-        { "stage": "ax_na_na",  "text": "Unscreened records" },
-        { "stage": "ax_p2_na",  "text": "Full-text reviewing" },
-
-        { "stage": "e2",  "text": "Excluded by title" },
-        { "stage": "e22", "text": "Excluded by abstract review" },
-        { "stage": "e3",  "text": "Excluded by full-text review" },
-
-        { "stage": "f1", "text": "Final number in qualitative synthesis (systematic review)" },
-        { "stage": "f3", "text": "Final number in quantitative synthesis (meta-analysis)" }
-    ]
-    sql = """
-    select project_id,
-        
-        count(case when ss_st in ('a10', 'a11', 'a12') then paper_id else null end) as a1,
-        count(case when ss_st in ('a21', 'a22', 'a23') then paper_id else null end) as a2,
-
-        count(case when ss_pr = 'na' and ss_rs = 'na' then paper_id else null end) as ax_na_na,
-        count(case when ss_pr = 'p20' and ss_rs = 'na' then paper_id else null end) as ax_p2_na,
-        
-        count(case when ss_rs = 'e2' then paper_id else null end) as e2,
-        count(case when ss_rs = 'e22' then paper_id else null end) as e22,
-        count(case when ss_rs = 'e3' then paper_id else null end) as e3,
-        
-        count(case when ss_rs in ('f1', 'f3') then paper_id else null end) as f1,
-        0 as f3
-        
-
-    from papers
-    where project_id = '{project_id}'
-        and is_deleted = 'no'
-    group by project_id
-    """.format(project_id=project_id)
-    r = db.session.execute(sql).fetchone()
-
-    if r is None:
-        stat = {
-            'stages': stages
-        }
-        for k in stages:
-            stat[k['stage']] = {
-                'n': 0,
-                'text': k['text'],
-                'pids': []
-            }
-
-        return stat
-
-    # put the values in prisma dict
-    stat = {
-        'stages': stages
-    }
-    for k in stages:
-        stat[k['stage']] = {
-            'n': r[k['stage']],
-            'text': k['text'],
-            'pids': []
-        }
-
-    return stat
-    
-
-#####################################################################
-# Deprecated functions
-#####################################################################
 
 def get_prisma_abeuf(project_id):
     '''

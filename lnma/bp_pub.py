@@ -44,12 +44,12 @@ bp = Blueprint("pub", __name__, url_prefix="/pub")
 
 @bp.route('/')
 def index():
-    return render_template('pub/pub.index.html')
+    return render_template('pub/index.html')
 
 
 @bp.route('/blankindex')
 def blankindex():
-    return render_template('pub/pub.blankindex.html')
+    return render_template('pub/blankindex.html')
 
 
 @bp.route('/subindex/<prj>')
@@ -60,13 +60,13 @@ def subindex(prj):
         'IO': { 'prj': 'IO', 'title': 'Toxicity of Immune'},
         'ADJRCC': { 'prj': 'ADJRCC', 'title': 'Adjuvant Renal Cell Carcinoma'},
     }[prj]
-    return render_template('pub/pub.subindex.html', prj_data=prj_data)
+    return render_template('pub/subindex.html', prj_data=prj_data)
 
 
-@bp.route('/prjcqhp.html')
-def prjcqhp():
+@bp.route('/php.html')
+def php():
     '''
-    The homepage for a cq in a project
+    The project homepage for a cq
     '''
     # first, check this prj and cq exist or not
     keystr = request.args.get('k')
@@ -82,7 +82,6 @@ def prjcqhp():
     )
     # last, check this path exists or not
     # if not os.path.exists(os.path.join()):
-
 
     return render_template(path_to_homepage)
 
@@ -129,26 +128,6 @@ def graph_pma_IO():
 @bp.route('/softable_pma_IO.html')
 def softable_pma_IO():
     return render_template('pub/IO/softable_pma_IO.html')
-
-
-###############################################################################
-# For the public webpage of each project
-###############################################################################
-
-@bp.route('/ADJRCC.html')
-def ADJRCC():
-    prj = 'ADJRCC'
-
-    # load the pwma data
-    full_fn = os.path.join(
-        current_app.instance_path, 
-        settings.PUBLIC_PATH_PUBDATA, 
-        prj, 
-        'PWMA_DATA.xlsx'
-    )
-    pwma = get_pwma_data(full_fn)
-
-    return render_template('pub/ADJRCC/pub.ADJRCC.html', pwma=pwma)
 
 
 ###############################################################################
@@ -244,7 +223,7 @@ def mRCC():
     full_fn = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, 'EVMAP.json')
     evmap = json.load(open(full_fn))
 
-    return render_template('pub/RCC/pub.mRCC.html', nma=nma, pwma=pwma, evmap=evmap)
+    return render_template('pub/RCC/mRCC.html', nma=nma, pwma=pwma, evmap=evmap)
 
 
 @bp.route('/graph_nma_RCC.html')
@@ -295,7 +274,7 @@ def CAT():
         })
         dma[dma_type][option_text]['slides'].append(filename + '$' + legend_text)
     
-    return render_template('pub/pub.CAT_v2.html', dma=dma, nma=nma)
+    return render_template('pub/CAT/default/index.html', dma=dma, nma=nma)
 
 
 @bp.route('/CAT_v1.html')
@@ -340,48 +319,65 @@ def CAT_v1():
 
 @bp.route('/prisma.html')
 def prisma():
-    return render_template('pub/pub.prisma.html')
+    return render_template('pub/prisma.html')
 
 
 @bp.route('/itable')
 @bp.route('/itable.html')
 def itable():
-    return render_template('pub/pub.itable.html')
+    return render_template('pub/itable.html')
 
 
 @bp.route('/graph_nma.html')
 def graph_nma():
-    return render_template('pub/pub.graph_nma.html')
+    return render_template('pub/graph_nma.html')
 
 
 @bp.route('/graph_pma.html')
 def graph_pma():
-    return render_template('pub/pub.graph_pma.html')
+    return render_template('pub/graph_pma.html')
 
 
 @bp.route('/softable_nma.html')
 def softable_nma():
-    return render_template('pub/pub.softable_nma.html')
+    return render_template('pub/softable_nma.html')
 
 
 @bp.route('/softable_pma.html')
 def softable_pma():
-    fn = 'pub/pub.softable_pma.html'
+    fn = 'pub/softable_pma.html'
     return render_template(fn)
 
 
 @bp.route('/evmap.html')
 def evmap():
-    return render_template('pub/pub.evmap.html')
+    return render_template('pub/evmap.html')
 
 
 ###########################################################
 # Archived modules for public page
 ###########################################################
 
+
+@bp.route('/ADJRCC.html')
+def ADJRCC():
+    prj = 'ADJRCC'
+
+    # load the pwma data
+    full_fn = os.path.join(
+        current_app.instance_path, 
+        settings.PUBLIC_PATH_PUBDATA, 
+        prj, 
+        'PWMA_DATA.xlsx'
+    )
+    pwma = get_pwma_data(full_fn)
+
+    return render_template('pub/ADJRCC/pub.ADJRCC.html', pwma=pwma)
+
+
 @bp.route('/slide.html')
 def slide():
-    return render_template('pub/pub.slide.html')
+    return render_template('pub/slide.html')
 
 
 @bp.route('/prisma_v2.html')
@@ -524,7 +520,7 @@ def graphdata_prisma_json(keystr):
         return jsonify(ret)
 
     if src == 'db':
-        ret = srv_pub_prisma.get_prisma_from_db(keystr)
+        ret = srv_pub_prisma.get_pub_prisma_from_db(keystr, cq_abbr)
         latest = srv_project.get_project_latest_stat_by_keystr(keystr)
 
         if ret is None:
