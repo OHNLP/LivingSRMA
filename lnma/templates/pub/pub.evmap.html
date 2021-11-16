@@ -62,25 +62,53 @@ a {
 
 <div class="flex-container" style="width:100%; height:100%;">
 
-<div id="main-pane">
+<div id="app_evmap" 
+    class="container-fluid my-1">
+    <div class="row">
+        <div class="col-auto">
+            <label for="treatment" 
+                class="col-form-label fs-6 fw-bold">
+                Select treatment:
+            </label>
+          </div>
+        <div class="col-auto">
+            <select class="form-select form-select-sm" 
+                aria-label="Default select example"
+                id="treatment"
+                v-model="treatment"
+                v-on:change="on_change_treat">
+                <option v-for="t in treat_list"
+                    v-bind:value="t">
+                    {{ t }}
+                </option>
+            </select>
+        </div>
 
-    <div class="pane-row">
-        <div class="box" style="width: 100%;">
-            <div class="box-body d-flex fx-col">
-                <div style="text-align: center;">
-                    {% include 'svg/EVMAP_LEG.svg' %}
-                </div>
-                <div id="fg_evmap" style="width: 100%; height: 600px;"></div>
-                
+        <div class="col-auto">
+            <div style="text-align: center;">
+                {% include 'svg/EVMAP_LEG.svg' %}
             </div>
         </div>
-        <!-- .box league table -->
-
     </div>
-    <!-- .pane-row -->
 
+    <div id="main-pane">
+        <div class="pane-row">
+            <div class="box" style="width: 100%;">
+                <div class="box-body d-flex fx-col">
+                    
+                    <div id="fg_evmap" style="width: 100%; height: 600px;"></div>
+                    
+                </div>
+            </div>
+            <!-- .box -->
+    
+        </div>
+        <!-- .pane-row -->
+    
+    </div>
+    <!-- /#main-pane -->
 </div>
-<!-- /#main-pane -->
+
 
 </div><!-- .flex-container -->
 
@@ -88,7 +116,9 @@ a {
 <!-- jQuery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <!-- Plotly -->
-<script src="https://cdn.plot.ly/plotly-1.2.0.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-2.6.3.js" charset="utf-8"></script>
+<!-- vue.js  -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.min.js"></script>
 
 <!-- for IE -->
 <script>
@@ -100,6 +130,35 @@ if (isIE) {
 
 <!-- My Scripts -->
 <script>
+
+var app_evmap = {
+    vpp: null,
+    vpp_id: '#app_evmap',
+    
+    init: function(data, treat) {
+        this.data = data;
+        this.vpp = new Vue({
+            el: this.vpp_id,
+
+            data: {
+                treatment: treat,
+                treat_list: data.treat_list
+            },
+
+            methods: {
+                on_change_treat: function() {
+                    fg_evmap.draw(this.treatment);
+                }
+            }
+        });
+
+        // update the plotly
+        fg_evmap.init(
+            data,
+            treat
+        );
+    }
+};
 
 var fg_evmap = {
     plot_id: 'fg_evmap',
@@ -115,14 +174,14 @@ var fg_evmap = {
             2: 'gold',
             3: 'green'
         },
-        cert2opacity: {
+        cie2opacity: {
             0: 0,
             1: 0.25,
             2: 0.50,
             3: 0.75,
             4: 1
         },
-        cert2txt: {
+        cie2txt: {
             0: 'NA',
             1: 'Very Low',
             2: 'Low',
@@ -135,7 +194,8 @@ var fg_evmap = {
             2: 'No Significant Effect',
             3: 'Significant Benefit'
         },
-        xaxis_title: 'Outcomes of Interest'
+        xaxis_title: 'Outcomes of Interest',
+        yaxis_title: 'Comparator'
     },
 
     init: function(data, treat) {
@@ -156,109 +216,130 @@ var fg_evmap = {
     draw: function(treat) {
         this.treat = treat;
         var treatment = treat;
-        var treatment_fullname = this.data.treat_dict[treatment].tr_fullname;
 
         // oc list for x axis
         var oc_list = [];
-        for (var oc_name in this.data.oc_dict) {
-            oc_list.push(oc_name);
+        for (const oc_abbr in this.data.oc_dict) {
+            if (Object.hasOwnProperty.call(this.data.oc_dict, oc_abbr)) {
+                const oc = this.data.oc_dict[oc_abbr];
+                oc_list.push(oc.extract.meta.full_name);
+            }
         }
 
         // treat list for y axis
         var treat_list = [];
         for (var i = 0; i < this.data.treat_list.length; i++) {
-            var treat = this.data.treat_list[i];
-            treat_list.push(this.data.treat_dict[treat].tr_fullname);
+            var t = this.data.treat_list[i];
+
+            if (t == treatment) {
+                // skip the current treatment
+                continue;
+            }
+            treat_list.push(t);
         }
+        treat_list.sort();
 
         // to hold all the traces of all combinations.
         var trace_dict = {};
 
-        for (var comparator in this.data.data) {
-            for (var i = 0; i<this.data.data[comparator].length; i++) {
-                var d = this.data.data[comparator][i];
-                var x = d.oc;
+        // check each record
+        for (let i = 0; i < this.data.treat_dict[treatment].rs.length; i++) {
+            const d = this.data.treat_dict[treatment].rs[i];
 
-                // cert == 0 and effect == 0?
-                if (d.c == 0 && d.e == 0) {
-                    continue;
+            // no need to add empty record
+            // certainty == 0 and effect == 0?
+            if (d.cie == 0 && d.effect == 0) {
+                continue;
+            }
+            
+            // get the full name as x
+            var oc_full_name = this.data.oc_dict[d.oc_abbr].extract.meta.full_name;
+
+            // get others
+            var comparator = d.comparator;
+
+            // get the bubble size
+            var size = d.cie * 12;
+
+            // get the color
+            var color = this.cfg.color[d.effect];
+
+            // get the opacity
+            var opacity = this.cfg.cie2opacity[d.cie];
+
+            // get the cie text content
+            var cie_text = this.cfg.cie2txt[d.cie];
+
+            // get the effect text content
+            var effect_text = this.cfg.effect2txt[d.effect];
+
+            // get the detail
+            var text = 'Outcome: <b>' + oc_full_name + '</b><br>' +
+                'Comparator: <b>' + comparator + '</b><br>' + 
+                'Treatment: <b>' + treatment + '</b><br>' + 
+                'Certainty: <b>' + cie_text + '</b><br>' + 
+                'Effect: <b>' + effect_text  + '</b>';
+
+            // if has SM, show me details
+            if (this.data.oc_dict[d.oc_abbr].lgtable.hasOwnProperty(comparator)) {
+                if (this.data.oc_dict[d.oc_abbr].lgtable[comparator].hasOwnProperty(treatment)) {
+                    var sm_txt = this.data.oc_dict[d.oc_abbr].extract.meta.measure_of_effect;
+                    var sm_val = this.data.oc_dict[d.oc_abbr].lgtable[comparator][treatment].sm;
+                    var sm_low = this.data.oc_dict[d.oc_abbr].lgtable[comparator][treatment].lw;
+                    var sm_upp = this.data.oc_dict[d.oc_abbr].lgtable[comparator][treatment].up;
+
+                    text += "<br>" + sm_txt + ': <b>' + 
+                        sm_val.toFixed(2) + 
+                        ' (' + 
+                        sm_low.toFixed(2)+  
+                        ', ' + 
+                        sm_upp.toFixed(2) + 
+                        ') </b>';
                 }
-
-                // if the t is not the treatment we are looking for
-                // then just continue
-                if (d.t != treatment) {
-                    continue;
-                }
-
-                var y = comparator;
-                var y_fullname = this.data.treat_dict[comparator].tr_fullname;
-                var s = d.c * 12;
-                var c = this.cfg.color[d.e];
-                var o = this.cfg.cert2opacity[d.c];
-                var sm = this.data.oc_dict[x].oc_measures[0];
-                var sm_val = null;
-                var sm_low = null;
-                var sm_upp = null;
-                var has_sm = false;
-
-                if (this.data.oc_dict[x].lgtable[sm].hasOwnProperty(comparator)) {
-                    if (this.data.oc_dict[x].lgtable[sm][comparator].hasOwnProperty(treatment)) {
-                        has_sm = true;
-                        sm_val = this.data.oc_dict[x].lgtable[sm][comparator][treatment].sm;
-                        sm_low = this.data.oc_dict[x].lgtable[sm][comparator][treatment].lw;
-                        sm_upp = this.data.oc_dict[x].lgtable[sm][comparator][treatment].up;
-                    }
-                }
-    
-                var txt = 'Outcome: <b>' + this.data.oc_dict[x].oc_fullname + '</b><br>' +
-                    'Comparator: <b>' + y_fullname + '</b><br>' + 
-                    'Treatment: <b>' + treatment_fullname + '</b><br>' + 
-                    'Certainty: <b>' + this.cfg.cert2txt[d.c] + '</b><br>' + 
-                    'Effect: <b>' + d.e_txt + '</b>';
-
-                if (has_sm) {
-                    txt += "<br>" + sm + ': <b>' + sm_val.toFixed(2) + ' (' + sm_low.toFixed(2)+  ', ' + sm_upp.toFixed(2) + ')</b>';
-                }
-
-                // put this bubble to a specified group
-                // first, whether this effect + cert exists?
-                var trace_group_id = this._get_trace_group_id(d.e, d.c);
-                if (trace_dict.hasOwnProperty(trace_group_id)) {
-                    // OK, the effect array exists
-                } else {
-                    trace_dict[trace_group_id] = {
-                        _trace_group_id: trace_group_id,
-                        name: this.cfg.effect2txt[d.e] + ' (' + this.cfg.cert2txt[d.c] + ')',
-                        x: [],
-                        y: [],
-                        mode: 'markers',
-                        text: [],
-                        hovertemplate: '%{text}',
-                        // legendgroup: this.cfg.effect2txt[d.e],
-                        marker: {
-                            size: [],
-                            color: [],
-                            opacity: []
-                        },
-                        hoverlabel: {
-                            font: {
-                                size: 13
-                            },
-                            align: 'left'
-                        }
-                    }
-                }
-                // append to list
-                trace_dict[trace_group_id].x.push(x);
-                trace_dict[trace_group_id].y.push(y_fullname);
-                trace_dict[trace_group_id].text.push(txt);
-                trace_dict[trace_group_id].marker.size.push(s);
-                trace_dict[trace_group_id].marker.color.push(c);
-                trace_dict[trace_group_id].marker.opacity.push(o);
             }
 
+            // now, put the information into list
+            // put this bubble to a specified group
+            // first, whether this effect + certainty exists?
+            var trace_group_id = this._get_trace_group_id(d.effect, d.cie);
+
+            if (trace_dict.hasOwnProperty(trace_group_id)) {
+                // OK, the effect array exists
+                // nowthing to do here
+
+            } else {
+                trace_dict[trace_group_id] = {
+                    _trace_group_id: trace_group_id,
+                    name: this.cfg.effect2txt[d.effect] + ' (' + this.cfg.cie2txt[d.cie] + ')',
+                    x: [],
+                    y: [],
+                    mode: 'markers',
+                    text: [],
+                    hovertemplate: '%{text}',
+                    // legendgroup: this.cfg.effect2txt[d.e],
+                    marker: {
+                        size: [],
+                        color: [],
+                        opacity: []
+                    },
+                    hoverlabel: {
+                        font: {
+                            size: 13
+                        },
+                        align: 'left'
+                    }
+                }
+            }
+            // append to list
+            trace_dict[trace_group_id].x.push(oc_full_name);
+            trace_dict[trace_group_id].y.push(comparator);
+            trace_dict[trace_group_id].text.push(text);
+            trace_dict[trace_group_id].marker.size.push(size);
+            trace_dict[trace_group_id].marker.color.push(color);
+            trace_dict[trace_group_id].marker.opacity.push(opacity);
         }
-          
+
+        // update the plot data.
         // put all traces into plot data
         this.plot_data = [];
         for (var e = 3; e > 0; e--) {
@@ -308,17 +389,20 @@ var fg_evmap = {
                 // https://plotly.com/javascript/reference/layout/xaxis/
                 automargin: true,
                 tickvals: oc_list,
-                tickangle: 270
+                tickangle: 0
             },
             yaxis: {
-                automargin: true,
+                // title: this.cfg.yaxis_title,
                 type: 'category',
+                automargin: true,
                 title: {
-                    text: 'Comparator',
+                    text: this.cfg.yaxis_title,
                     standoff: 10
                 },
                 autorange: true,
-                tickvals: treat_list
+                // tickvals: treat_list,
+                categoryorder: 'category ascending',
+                // categoryarray: treat_list
             },
             legend: {
                 y: 1.01,
@@ -371,14 +455,6 @@ var jarvis = {
     ssclose: function() {
         $('#start-screen').hide();
     },
-
-    draw: function(data) {
-        // bind all the data to this
-        this.all_data = data;
-        
-        // draw the bubble plot
-        fg_evmap.init(data, this.default_treatment);
-    },
     
     init: function() {
         var isIE = /*@cc_on!@*/false || !!document.documentMode;
@@ -399,7 +475,7 @@ var jarvis = {
         // get the default treatment
         var tr = jarvis.get_url_paramter('tr');
         if (tr == null || tr == '') {
-            tr = 'default';
+            tr = null;
         }
         this.default_treatment = tr;
 
@@ -426,7 +502,10 @@ var jarvis = {
                 ver: Math.random(), 
             },
             function(data) {
-                jarvis.draw(data);
+                app_evmap.init(
+                    data,
+                    jarvis.default_treatment
+                );
                 jarvis.ssmsg('Data loaded!');
                 setTimeout('jarvis.ssclose();', 300);
             }, 'json'
