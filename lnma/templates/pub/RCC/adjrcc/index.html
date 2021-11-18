@@ -12,8 +12,9 @@
 
 <link rel="icon" href="/static/img/favicon.ico">
 <!-- Bootstrap CSS -->
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" />
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 {% include 'pub/_shared/_pubstyle.html' %}
 </head>
 <body>
@@ -29,9 +30,10 @@
 
     <div class="navbar" style="padding:0;">
         <ul class="navbar-nav">
-            <li class="nav-item" style="color: white;">                
-                Adjuvant RCC<br>
-                <i class="far fa-calendar-alt"></i> Update: 9/22/2021
+            <li class="nav-item" style="color: white;">
+                <i class="far fa-calendar-alt"></i> 
+                Update: 
+                <span id="latest_update_time">&nbsp;</span>
             </li>
         </ul>
     </div>
@@ -314,21 +316,19 @@
 <!-- FOOTER -->
 <footer class="container">
     <p class="float-right"><a href="#">Back to top</a></p>
-    <p>&copy; 2020 &middot; <a href="#">Terms</a></p>
+    <p>&copy; 2021 &middot; <a href="#">Terms</a></p>
 </footer>
 
-<!-- Estimated HR(OR) reflect outcomes for treatment in columns compared to treatment in rows 
-The HR for 1,2 , The OR for the last one!
--->
-
-<!-- Optional JavaScript -->
 <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<!-- Bootstrap -->
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+
 
 <script>
-var prj = 'ADJRCC';
+var prj = 'RCC';
+var cq = 'adjrcc';
 var default_treat = 'Suni';
 
 function resizeIFrameToFitContent( id ) {
@@ -337,8 +337,23 @@ function resizeIFrameToFitContent( id ) {
     // console.log('* ' + id + ': ' + iFrame.height);
 }
 
+var jarvis = {
+    init: function() {
+
+        $.get(
+            "[[ url_for('pub.graphdata_latest_json', prj='RCC') ]]",
+            {},
+            function(data) {
+                console.log(data);
+                // update the time
+                $('#latest_update_time').html(data.last_created);
+            }, 'json'
+        );
+    }
+}
+
 $(document).ready(function() {
-    
+    jarvis.init();
 });
 </script>
 </body>
