@@ -279,6 +279,56 @@ def get_pub_prisma_from_db(keystr, cq_abbr='default'):
 
     # merge e3
     prisma['e3']['n_pmids'] += past_prisma['e3']['n_pmids']
+    
+    # calc a2
+    prisma['a2'] = {
+        "n_ctids": 0,
+        "n_pmids": 0,
+        "paper_list": [],
+        "stage": "a1",
+        "study_list": [],
+        "text": "New studies included in SR"
+    }
+
+    # calc a3
+    prisma['a3'] = {
+        "n_ctids": 0,
+        "n_pmids": 0,
+        "paper_list": [],
+        "stage": "a3",
+        "study_list": [],
+        "text": "New studies included in MA"
+    }
+
+    # calc u1 
+    prisma['u1'] = {
+        "n_ctids": 0,
+        "n_pmids": 0,
+        "paper_list": [],
+        "stage": "u1",
+        "study_list": [],
+        "text": "Updated studies in SR"
+    }
+
+    # calc u2 
+    prisma['u2'] = {
+        "n_ctids": 0,
+        "n_pmids": 0,
+        "paper_list": [],
+        "stage": "u2",
+        "study_list": [],
+        "text": "Updated studies in MA"
+    }
+
+    # calc f3n
+    prisma['f3n'] = {
+        "n_ctids": 0,
+        "n_pmids": 0,
+        "paper_list": [],
+        "stage": "f3n",
+        "study_list": [],
+        "text": "Studies not in MA"
+    }
 
     # build final ret
     ret = {

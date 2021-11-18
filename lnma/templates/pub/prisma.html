@@ -8,14 +8,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-<title>PRISMA V2</title>
+<title>PRISMA</title>
 <link rel="icon" href="/static/img/favicon.png" type="image/png">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" />
+<!-- font awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+<!-- jquery ui -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" />
-
+<!-- google font -->
 <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+
 <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
-<link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+
 <link rel="stylesheet" href="/static/css/mybox-0.9.1.css">
 
 <style>
@@ -39,6 +42,12 @@ a {
     color: #333333;
     text-decoration: none;
 }
+.flex-container {
+    display: flex;
+    justify-content: flex-start;
+    width: 100%;
+    height: 100%;
+}
 /* element ui css */
 .text-start {
     font-size: 10px;
@@ -50,25 +59,16 @@ a {
 #wrapper {
     flex-direction: row;
 }
-#start-screen {
+
+/* app */
+#app_prisma {
     width: 100%;
     height: 100%;
-    z-index: 9999;
-    background: white;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-}
-#ss-msg {
-    width: 100%;
-    padding: 10px 0;
-    text-align: center;
 }
 /* page */
 .ss-box {
     position: absolute;
-    width: 157px;
+    width: 150px;
     /* height: 50px; */
     border: 1px solid #666666;
     padding: 5px;
@@ -171,10 +171,15 @@ a {
     <div id="ss-msg">Table Initializing ...</div>
 </div>
 
-<div id="wrapper" class="flex-container">
+<div id="wrapper" 
+    class="flex-container">
 
-<div id="fg-prisma" class="box" style="width: 580px; min-width: 580px;">
+<div id="app_prisma"
+    class="flex-container">
 
+<div id="fg-prisma" 
+    class="box" 
+    style="width: 580px; min-width: 580px;">
     <div class="box-body" style="width: 100%; height:100%; position: relative;">
 
         <div class="ss-box" style="left: 15px; top: 10px; cursor: default;">
@@ -204,23 +209,23 @@ a {
 
         <div class="ss-box ss-box2 ss-box-stage" style="left: 85px; top: 400px;" v-on:click="update_study_list('b6')">
             <div class="ss-info">{{ vals.b6.text }}</div>
-            <div class="ss-number">(n = {{ fmt_num(vals.b6.number) }})</div>
+            <div class="ss-number">(n = {{ fmt_num(vals.b6.n_pmids) }})</div>
         </div>
 
         <div class="ss-box ss-box2 ss-box-stage" style="left: 85px; top: 500px;" v-on:click="update_study_list('b7')">
             <div class="ss-info">{{ vals.b7.text }}</div>
-            <div class="ss-number">(n = {{ fmt_num(vals.b7.number) }})</div>
+            <div class="ss-number">(n = {{ fmt_num(vals.b7.n_pmids) }})</div>
         </div>
         
         <!-- Exclude Part -->
         <div class="ss-box" style="left: 255px; top: 230px; width: 100px; cursor: default;">
             <div class="ss-info">{{ vals.e2.text }}</div>
-            <div class="ss-number">(n = {{ fmt_num(vals.e1.n_pmids) }})</div>
+            <div class="ss-number">(n = {{ fmt_num(vals.e2.n_pmids) }})</div>
         </div>
 
         <div class="ss-box ss-box2 ss-box-stage" style="left: 255px; top: 330px; width: 100px;" v-on:click="show_excluded_studies('e2')">
             <div class="ss-info">{{ vals.e3.text }}</div>
-            <div class="ss-number">(n = {{ fmt_num(vals.e2.n_pmids) }})</div>
+            <div class="ss-number">(n = {{ fmt_num(vals.e3.n_pmids) }})</div>
         </div>
 
         <div class="ss-box ss-box2 ss-box-stage" style="left: 255px; top: 430px; width: 100px;" v-on:click="update_study_list('e3')">
@@ -229,9 +234,11 @@ a {
         </div>
 
         <!-- LNMA Part -->
-        <div class="ss-box ss-box2 ss-box3 ss-box-stage" style="left: 370px; top: 10px; border: 3px solid red;" v-on:click="update_study_list('a1')">
+        <div class="ss-box ss-box2 ss-box3 ss-box-stage" 
+            style="left: 370px; top: 10px; border: 3px solid red;" 
+            v-on:click="update_study_list('a1')">
             <div class="ss-info">{{ vals.a1.text }}</div>
-            <div class="ss-number">(n = {{ fmt_num(vals.a1.number) }})</div>
+            <div class="ss-number">(n = {{ fmt_num(vals.a1.n_pmids) }})</div>
             <div class="ss-info">({{ fmt_num(vals.a1.n_pmids) }} references)</div>
         </div>
 
@@ -239,7 +246,7 @@ a {
             <div class="ss-box-stage" v-on:click="update_study_list('a2')">
                 <div class="ss-info">{{ vals.a2.text }}</div>
                 <div class="ss-number">
-                    (n = {{ fmt_num(vals.a2.number) }})<br>
+                    (n = {{ fmt_num(vals.a2.n_pmids) }})<br>
                     <span class="ss-info">({{ fmt_num(vals.a2.n_pmids) }} references)</span>
                 </div>
             </div>
@@ -247,25 +254,28 @@ a {
                 v-on:click="update_study_list('u1')">
                 <div class="ss-info">{{ vals.u1.text }}</div>
                 <div class="ss-number">
-                    (n = {{ fmt_num(vals.u1.number) }})<br>
+                    (n = {{ fmt_num(vals.u1.n_pmids) }})<br>
                     <span class="ss-info">({{ fmt_num(vals.u1.n_pmids) }} references)</span>
                 </div>
             </div>
         </div>
 
-        <div class="ss-box ss-box2 ss-box3" style="left: 370px; top: 425px; z-index: 10;">
-            <div class="ss-box-stage" v-on:click="update_study_list('a3')">
+        <div class="ss-box ss-box2 ss-box3" 
+            style="left: 370px; top: 425px; z-index: 10;">
+            <div class="ss-box-stage" 
+                v-on:click="update_study_list('a3')">
                 <div class="ss-info">{{ vals.a3.text }}</div>
                 <div class="ss-number">
-                    (n = {{ fmt_num(vals.a3.number) }})<br>
+                    (n = {{ fmt_num(vals.a3.n_pmids) }})<br>
                     <span class="ss-info">({{ fmt_num(vals.a3.n_pmids) }} references)</span>
                 </div>
             </div>
-            <div class="ss-box-stage" style="border-top: 1px solid black; margin-top: 5px; padding-top: 3px;"
+            <div class="ss-box-stage" 
+                style="border-top: 1px solid black; margin-top: 5px; padding-top: 3px;"
                 v-on:click="update_study_list('u2')">
                 <div class="ss-info">{{ vals.u2.text }}</div>
                 <div class="ss-number">
-                    (n = {{ fmt_num(vals.u2.number) }})<br>
+                    (n = {{ fmt_num(vals.u2.n_pmids) }})<br>
                     <span class="ss-info">({{ fmt_num(vals.u2.n_pmids) }} references)</span>
                 </div>
             </div>
@@ -273,26 +283,30 @@ a {
 
         <!-- Merge Part -->
 
-        <div class="ss-box ss-box2 ss-box3 ss-box-stage" style="left: 236px; top: 625px; " v-on:click="update_study_list('f1')">
+        <div class="ss-box ss-box2 ss-box3 ss-box-stage" 
+            style="left: 236px; top: 625px; " 
+            v-on:click="update_study_list('f1')">
             <div class="ss-info">{{ vals.f1.text }}</div>
-            <div class="ss-number">(n = {{ fmt_num(vals.f1.number) }})</div>
+            <div class="ss-number">(n = {{ fmt_num(vals.f1.n_ctids) }})</div>
             <div class="ss-info">({{ fmt_num(vals.f1.n_pmids) }} references)</div>
         </div>
 
-        <div class="ss-box ss-box2 ss-box3 ss-box-stage" style="left: 235px; top: 745px;" v-on:click="update_study_list('f2')">
-            <div class="ss-info">{{ vals.f2.text }}</div>
-            <div class="ss-number">(n = {{ fmt_num(vals.f2.number) }})</div>
-            <div class="ss-info">({{ fmt_num(vals.f2.n_pmids) }} references)</div>
+        <div class="ss-box ss-box2 ss-box3 ss-box-stage" 
+            style="left: 235px; top: 745px;" 
+            v-on:click="update_study_list('f3')">
+            <div class="ss-info">{{ vals.f3.text }}</div>
+            <div class="ss-number">(n = {{ fmt_num(vals.f3.n_ctids) }})</div>
+            <div class="ss-info">({{ fmt_num(vals.f3.n_pmids) }} references)</div>
         </div>
 
         <!-- Legend Part -->
-        <div class="ss-box" style="left: 15px; top: 730px; width: 30px; height: 20px;">
+        <div class="ss-box" style="left: 15px; top: 730px; width: 20px; height: 10px;">
             <div class="ss-box-legend-text">Traditional process</div>
         </div>
-        <div class="ss-box ss-box2" style="left: 15px; top: 760px; width: 30px; height: 20px;">
+        <div class="ss-box ss-box2" style="left: 15px; top: 760px; width: 20px; height: 10px;">
             <div class="ss-box-legend-text">Clickable with data</div>
         </div>
-        <div class="ss-box ss-box3" style="left: 15px; top: 790px; width: 30px; height: 20px;">
+        <div class="ss-box ss-box3" style="left: 15px; top: 790px; width: 16px; height: 10px;">
             <div class="ss-box-legend-text" style="margin-top: -2px;">Automatic process</div>
         </div>
 
@@ -360,7 +374,9 @@ a {
 
 </div><!-- /#fg-prisma -->
 
-<div id="tb-studylist" class="box" style="width: calc(100%-580px); min-width: 500px;">
+<div id="tb-studylist" 
+    class="box" 
+    style="width: calc(100%-580px); min-width: 500px;">
 
     <div class="box-header">
         <h4>
@@ -368,61 +384,68 @@ a {
             Study List | 
         </h4>
         <div>
-            <p>{{ prisma[stage].text }} (n = {{ prisma[stage].n_ctids }})</p>
+            <p>{{ vals[stage].text }}</p>
         </div>
     </div>
 
     <div class="box-body" style="overflow-y: auto;"
-        v-if="total > 0">
+        v-if="vals[stage].paper_list.length > 0">
+        <p>
+            {{ vals[stage].n_ctids }} clinical trials, 
+            {{ vals[stage].n_pmids }} references
+        </p>
+
         <div class="box-body-item result-list-item"
-            v-for="r, idx in studies">
+            v-for="pid, idx in vals[stage].paper_list">
 
             <div class="study-title" style="cursor: pointer;"
-                v-bind:title="'[' + r.title + ']'"
-                v-on:click="show_study_by_pmid(r.pmid)">
+                v-on:click="show_study_by_pmid(pid)">
                 <span class="study-badge">{{ idx + 1 }}</span>
-                {{ r.title }}
+                {{ get_paper(pid).title }}
             </div>
 
             <div class="study-authors">
-                {{ r.authors }}
+                {{ get_paper(pid).authors }}
             </div>
 
             <div class="study-pub">
-                {{ r.date }} 
-                <span class="study-journal">{{ r.journal }}</span class="">. 
-                    
-                <a class="study-pmid" target="_blank" title="Show in PubMed" 
-                    v-bind:href="url.pubmed.view_pmid + r.pmid">{{ r.pmid }}</a>
-                <a class="study-pmid" target="_blank" title="Show clinical trial detail" 
-                    v-bind:href="url.ctgov.view_ct + r.ctid">{{ r.ctid }}</a>
+                {{ get_paper(pid).date }} 
+                <span class="study-journal">
+                    {{ get_paper(pid).journal }}
+                </span>. 
+                <a class="study-pmid" 
+                    target="_blank" 
+                    title="Show in PubMed" 
+                    v-bind:href="url.pubmed.view_pmid + pid">
+                    {{ pid }}
+                </a>
+
+                <a class="study-pmid" 
+                    target="_blank" 
+                    title="Show clinical trial detail" 
+                    v-bind:href="url.ctgov.view_ct + get_paper(pid).ctid">
+                    {{ get_paper(pid).ctid }}
+                </a>
             </div>
 
         </div>
+
     </div>
 
-    <div class="box-footer" style="text-align: right; padding: 0 0 10px 0;">
-        <div v-if="tp>1">
-            <button class="btn"
-                v-on:click="prev_page">
-                <i class="fa fa-arrow-left"></i>
-                Prev Page
-            </button>
-            <button class="btn"
-                v-on:click="next_page">
-                <i class="fa fa-arrow-right"></i>
-                Next Page
-            </button>
-        </div>
-    </div>
 </div><!-- /#tbl_study -->
 
 </div>
+<!-- /#app_prisma -->
+
+</div>
+<!-- /#wrapper -->
+
 <div id="dialog-message-e2" class="dialog" title="Excluded by full text review">
     <p>
     Full-text articles excluded.
     </p>
 </div>
+
 <div style="display:none;" id="data_pub">
 [[j|safe]]
 </div>
@@ -452,7 +475,6 @@ var app_prisma = {
     vpp_id: '#app_prisma',
 
     url: {
-        sel_pred: './hsra_pred',
         ctgov: {
             view_ct: 'https://clinicaltrials.gov/ct2/show/'
         },
@@ -466,25 +488,29 @@ var app_prisma = {
 
     init: function(data) {
         this.data = data;
-        // set n_ctids as number of each stage
-        for (var stage in this.data.prisma) {
-            this.data.prisma[stage].number = this.data.prisma[stage].n_ctids;
-        }
-
+        
+        // init the data
         this.vpp = new Vue({
             el: this.vpp_id,
             data: { 
                 // for prisma
                 vals: this.data.prisma,
 
-                // for study list
-                total: this.all_rs.length,
+                // for paper
+                paper_dict: this.data.paper_dict,
+
+                // for study
+                study_dict: this.data.study_dict,
+
+                // for paging
                 pn: 0,
                 tp: 1,
-                prisma: this.data.prisma,
-                stage: stage,
-                url: jarvis.url,
-                studies: this.all_rs
+
+                // for study list label?
+                stage: 'f3',
+
+                // what?
+                url: this.url,
             },
             methods: {
                 fmt_num: function(x) {
@@ -492,7 +518,7 @@ var app_prisma = {
                 },
 
                 update_study_list: function(stage) {
-                    tb_studylist.set_stage(stage);
+                    this.stage = stage;
                 },
 
                 show_excluded_studies: function(stage) {
@@ -527,6 +553,25 @@ var app_prisma = {
 
                 show_study_by_pmid: function(pmid) {
 
+                },
+
+                get_paper: function(pid) {
+                    if (this.paper_dict.hasOwnProperty(pid)) {
+                        // good, just return this paper
+                        return this.paper_dict[pid];
+
+                    } else {
+                        // that's weird, just return an empty record
+                        return {
+                            authors: "" + pid,
+                            ctid: "" + pid,
+                            date: "NA",
+                            journal: "NA",
+                            pid: pid,
+                            pid_type: "NA",
+                            title: ''
+                        }
+                    }
                 }
             }
         });
