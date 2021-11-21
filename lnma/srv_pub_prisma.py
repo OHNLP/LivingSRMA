@@ -132,6 +132,12 @@ def get_prisma_by_cq(project_id, cq_abbr="default", do_include_papers=False):
                 else:
                     stat['f3']['n'] += 1
                     stat['f3']['pids'].append(pid)
+
+                    # check the ctid
+                    rct_id = paper_dict[pid]['ctid']
+                    if rct_id not in stat['f3']['rcts']:
+                        stat['f3']['rcts'].append(rct_id)
+                        
             else:
                 # this paper is extracted but not selected yet.
                 pass
@@ -281,26 +287,31 @@ def get_pub_prisma_from_db(keystr, cq_abbr='default'):
     prisma['e3']['n_pmids'] += past_prisma['e3']['n_pmids']
     
     # calc a2
+    # the a2 is the difference between b6 and f1
     prisma['a2'] = {
-        "n_ctids": 0,
-        "n_pmids": 0,
-        "paper_list": [],
+        "paper_list": [ i for i in prisma['f1']['paper_list'] if i not in prisma['b6']['paper_list'] ],
+        "study_list": [ i for i in prisma['f1']['study_list'] if i not in prisma['b6']['study_list'] ],
         "stage": "a1",
-        "study_list": [],
         "text": "New studies included in SR"
     }
+    # then calculate the n_pmids and n_ctids
+    prisma['a2']['n_pmids'] = len(prisma['a2']['paper_list'])
+    prisma['a2']['n_ctids'] = len(prisma['a2']['study_list'])
 
     # calc a3
+    # the a3 is the difference between b7 and f3
     prisma['a3'] = {
-        "n_ctids": 0,
-        "n_pmids": 0,
-        "paper_list": [],
+        "paper_list": [ i for i in prisma['f3']['paper_list'] if i not in prisma['b7']['paper_list'] ],
+        "study_list": [ i for i in prisma['f3']['study_list'] if i not in prisma['b7']['study_list'] ],
         "stage": "a3",
-        "study_list": [],
         "text": "New studies included in MA"
     }
+    # then calculate the n_pmids and n_ctids
+    prisma['a3']['n_pmids'] = len(prisma['a3']['paper_list'])
+    prisma['a3']['n_ctids'] = len(prisma['a3']['study_list'])
 
     # calc u1 
+    # u1 is those pmid with 
     prisma['u1'] = {
         "n_ctids": 0,
         "n_pmids": 0,
