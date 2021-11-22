@@ -137,7 +137,7 @@ def get_prisma_by_cq(project_id, cq_abbr="default", do_include_papers=False):
                     rct_id = paper_dict[pid]['ctid']
                     if rct_id not in stat['f3']['rcts']:
                         stat['f3']['rcts'].append(rct_id)
-                        
+
             else:
                 # this paper is extracted but not selected yet.
                 pass
@@ -857,3 +857,15 @@ def get_prisma_abeuf(project_id):
 
     return prisma
     
+
+def _get_prisma_updated(b_stage, f_stage, paper_dict):
+    '''
+    Get the study and paper list of updated records
+    '''
+    for pid in f_stage['paper_list']:
+        # if this 
+        pass
+
+    ret = None
+
+    return ret

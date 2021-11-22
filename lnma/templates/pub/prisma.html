@@ -184,53 +184,55 @@ a {
 
         <div class="ss-box" style="left: 15px; top: 10px; cursor: default;">
             <div class="ss-info">{{ vals.b1.text }}</div>
-            <div class="ss-number">(n = {{ fmt_num(vals.b1.n_pmids) }})</div>
+            <div class="ss-info">({{ fmt_num(vals.b1.n_pmids) }} references)</div>
         </div>
 
         <div class="ss-box" style="left: 190px; top: 10px; cursor: default;">
             <div class="ss-info">{{ vals.b2.text }}</div>
-            <div class="ss-number">(n = {{ fmt_num(vals.b2.n_pmids) }})</div>
+            <div class="ss-info">({{ fmt_num(vals.b2.n_pmids) }} references)</div>
         </div>
 
         <div class="ss-box" style="left: 15px; top: 110px; width: 300px !important; cursor: default;">
             <div class="ss-info">{{ vals.b3.text }}</div>
-            <div class="ss-number">(n = {{ fmt_num(vals.b3.n_pmids) }})</div>
+            <div class="ss-info">({{ fmt_num(vals.b3.n_pmids) }} references)</div>
         </div>
         
         <div class="ss-box" style="left: 85px; top: 195px; cursor: default;">
             <div class="ss-info">{{ vals.b4.text }}</div>
-            <div class="ss-number">(n = {{ fmt_num(vals.b4.n_pmids) }})</div>
+            <div class="ss-info">({{ fmt_num(vals.b4.n_pmids) }} references)</div>
         </div>
 
-        <div class="ss-box" style="left: 85px; top: 300px; cursor: default;">
+        <div class="ss-box" style="left: 85px; top: 280px; cursor: default;">
             <div class="ss-info">{{ vals.b5.text }}</div>
-            <div class="ss-number">(n = {{ fmt_num(vals.b5.n_pmids) }})</div>
+            <div class="ss-info">({{ fmt_num(vals.b5.n_pmids) }} references)</div>
         </div>
 
-        <div class="ss-box ss-box2 ss-box-stage" style="left: 85px; top: 400px;" v-on:click="update_study_list('b6')">
+        <div class="ss-box ss-box2 ss-box-stage" style="left: 85px; top: 370px;" v-on:click="update_study_list('b6')">
             <div class="ss-info">{{ vals.b6.text }}</div>
-            <div class="ss-number">(n = {{ fmt_num(vals.b6.n_pmids) }})</div>
+            <div class="ss-number">(n = {{ fmt_num(vals.b6.n_ctids) }})</div>
+            <div class="ss-info">({{ fmt_num(vals.b6.n_pmids) }} references)</div>
         </div>
 
-        <div class="ss-box ss-box2 ss-box-stage" style="left: 85px; top: 500px;" v-on:click="update_study_list('b7')">
+        <div class="ss-box ss-box2 ss-box-stage" style="left: 85px; top: 480px;" v-on:click="update_study_list('b7')">
             <div class="ss-info">{{ vals.b7.text }}</div>
-            <div class="ss-number">(n = {{ fmt_num(vals.b7.n_pmids) }})</div>
+            <div class="ss-number">(n = {{ fmt_num(vals.b7.n_ctids) }})</div>
+            <div class="ss-info">({{ fmt_num(vals.b7.n_pmids) }} references)</div>
         </div>
         
         <!-- Exclude Part -->
         <div class="ss-box" style="left: 255px; top: 230px; width: 100px; cursor: default;">
             <div class="ss-info">{{ vals.e2.text }}</div>
-            <div class="ss-number">(n = {{ fmt_num(vals.e2.n_pmids) }})</div>
+            <div class="ss-info">({{ fmt_num(vals.e2.n_pmids) }} references)</div>
         </div>
 
         <div class="ss-box ss-box2 ss-box-stage" style="left: 255px; top: 330px; width: 100px;" v-on:click="show_excluded_studies('e2')">
             <div class="ss-info">{{ vals.e3.text }}</div>
-            <div class="ss-number">(n = {{ fmt_num(vals.e3.n_pmids) }})</div>
+            <div class="ss-info">({{ fmt_num(vals.e3.n_pmids) }} references)</div>
         </div>
 
         <div class="ss-box ss-box2 ss-box-stage" style="left: 255px; top: 430px; width: 100px;" v-on:click="update_study_list('e3')">
             <div class="ss-info">{{ vals.f3n.text }}</div>
-            <div class="ss-number">(n = {{ fmt_num(vals.f3n.n_pmids) }})</div>
+            <div class="ss-info">({{ fmt_num(vals.f3n.n_pmids) }} references)</div>
         </div>
 
         <!-- LNMA Part -->
@@ -238,7 +240,7 @@ a {
             style="left: 370px; top: 10px; border: 3px solid red;" 
             v-on:click="update_study_list('a1')">
             <div class="ss-info">{{ vals.a1.text }}</div>
-            <div class="ss-number">(n = {{ fmt_num(vals.a1.n_pmids) }})</div>
+            <!-- <div class="ss-number">(n = {{ fmt_num(vals.a1.n_pmids) }})</div> -->
             <div class="ss-info">({{ fmt_num(vals.a1.n_pmids) }} references)</div>
         </div>
 
@@ -246,7 +248,7 @@ a {
             <div class="ss-box-stage" v-on:click="update_study_list('a2')">
                 <div class="ss-info">{{ vals.a2.text }}</div>
                 <div class="ss-number">
-                    (n = {{ fmt_num(vals.a2.n_pmids) }})<br>
+                    (n = {{ fmt_num(vals.a2.n_ctids) }})<br>
                     <span class="ss-info">({{ fmt_num(vals.a2.n_pmids) }} references)</span>
                 </div>
             </div>
@@ -254,7 +256,7 @@ a {
                 v-on:click="update_study_list('u1')">
                 <div class="ss-info">{{ vals.u1.text }}</div>
                 <div class="ss-number">
-                    (n = {{ fmt_num(vals.u1.n_pmids) }})<br>
+                    (n = {{ fmt_num(vals.u1.n_ctids) }})<br>
                     <span class="ss-info">({{ fmt_num(vals.u1.n_pmids) }} references)</span>
                 </div>
             </div>
@@ -266,7 +268,7 @@ a {
                 v-on:click="update_study_list('a3')">
                 <div class="ss-info">{{ vals.a3.text }}</div>
                 <div class="ss-number">
-                    (n = {{ fmt_num(vals.a3.n_pmids) }})<br>
+                    (n = {{ fmt_num(vals.a3.n_ctids) }})<br>
                     <span class="ss-info">({{ fmt_num(vals.a3.n_pmids) }} references)</span>
                 </div>
             </div>
@@ -275,7 +277,7 @@ a {
                 v-on:click="update_study_list('u2')">
                 <div class="ss-info">{{ vals.u2.text }}</div>
                 <div class="ss-number">
-                    (n = {{ fmt_num(vals.u2.n_pmids) }})<br>
+                    (n = {{ fmt_num(vals.u2.n_ctids) }})<br>
                     <span class="ss-info">({{ fmt_num(vals.u2.n_pmids) }} references)</span>
                 </div>
             </div>
@@ -323,28 +325,28 @@ a {
             <i class="fa fa-long-arrow-alt-down"></i>
         </div>
 
-        <div class="ss-arrow" style="left: 160px; top: 260px;">
+        <div class="ss-arrow" style="left: 160px; top: 244px;">
             <i class="fa fa-long-arrow-alt-down"></i>
         </div>
 
-        <div class="ss-arrow" style="left: 160px; top: 365px;">
+        <div class="ss-arrow" style="left: 160px; top: 339px;">
             <i class="fa fa-long-arrow-alt-down"></i>
         </div>
 
-        <div class="ss-arrow" style="left: 160px; top: 465px;">
+        <div class="ss-arrow" style="left: 160px; top: 445px;">
             <i class="fa fa-long-arrow-alt-down"></i>
         </div>
 
         <!-- Arrows for exclude -->
-        <div class="ss-arrow" style="left: 215px; top: 255px;">
+        <div class="ss-arrow" style="left: 215px; top: 242px;">
             <i class="fa fa-long-arrow-alt-right"></i>
         </div>
 
-        <div class="ss-arrow" style="left: 215px; top: 360px;">
+        <div class="ss-arrow" style="left: 215px; top: 339px;">
             <i class="fa fa-long-arrow-alt-right"></i>
         </div>
 
-        <div class="ss-arrow" style="left: 215px; top: 460px;">
+        <div class="ss-arrow" style="left: 215px; top: 446px;">
             <i class="fa fa-long-arrow-alt-right"></i>
         </div>
 
@@ -360,7 +362,7 @@ a {
         </div>
 
         <!-- Arrows for Merge -->
-        <div class="ss-arrow" style="width: 282px; height: 40px; left: 166px; top: 564px; border-bottom: 5px solid black; border-left: 5px solid black; border-right: 5px solid black; position: relative; z-index:1;">
+        <div class="ss-arrow" style="width: 282px; height: 40px; left: 166px; top: 555px; border-bottom: 5px solid black; border-left: 5px solid black; border-right: 5px solid black; position: relative; z-index:1;">
             <div style="position: absolute; left: 135px; bottom: -35px;">
                 <i class="fa fa-long-arrow-alt-down"></i>
             </div>
