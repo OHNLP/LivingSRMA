@@ -286,11 +286,24 @@ def get_pub_prisma_from_db(keystr, cq_abbr='default'):
     # merge e3
     prisma['e3']['n_pmids'] += past_prisma['e3']['n_pmids']
     
-    # calc a2
+    # calc a2 and u1
     # the a2 is the difference between b6 and f1
+    # first, get all new studies
+    # but these studies could be categorized into 2 types:
+    # 1. pure new study and new paper
+    # 2. existing study but new follow-up paper
+    # So, we need to check each new paper and decide which belong to which
+    a2_study_list = [] # for pure new study
+    a2_paper_list = [] # for pure new study's paper
+    u1_study_list = [] # for follow-up study
+    u1_paper_list = [] # for follow-up study's paper
+    a2_study_list, a2_paper_list, u1_study_list, u1_paper_list = _get_prisma_updated(
+        prisma['b6'], prisma['f1'], living_prisma['paper_dict']
+    )
+
     prisma['a2'] = {
-        "paper_list": [ i for i in prisma['f1']['paper_list'] if i not in prisma['b6']['paper_list'] ],
-        "study_list": [ i for i in prisma['f1']['study_list'] if i not in prisma['b6']['study_list'] ],
+        "study_list": a2_study_list,
+        "paper_list": a2_paper_list,
         "stage": "a1",
         "text": "New studies included in SR"
     }
@@ -300,9 +313,17 @@ def get_pub_prisma_from_db(keystr, cq_abbr='default'):
 
     # calc a3
     # the a3 is the difference between b7 and f3
+    # the calculation follows the same process
+    a3_study_list = [] # for pure new study
+    a3_paper_list = [] # for pure new study's paper
+    u2_study_list = [] # for follow-up study
+    u2_paper_list = [] # for follow-up study's paper
+    a3_study_list, a3_paper_list, u2_study_list, u2_paper_list = _get_prisma_updated(
+        prisma['b7'], prisma['f3'], living_prisma['paper_dict']
+    )
     prisma['a3'] = {
-        "paper_list": [ i for i in prisma['f3']['paper_list'] if i not in prisma['b7']['paper_list'] ],
-        "study_list": [ i for i in prisma['f3']['study_list'] if i not in prisma['b7']['study_list'] ],
+        "study_list": a3_study_list,
+        "paper_list": a3_paper_list,
         "stage": "a3",
         "text": "New studies included in MA"
     }
@@ -310,34 +331,35 @@ def get_pub_prisma_from_db(keystr, cq_abbr='default'):
     prisma['a3']['n_pmids'] = len(prisma['a3']['paper_list'])
     prisma['a3']['n_ctids'] = len(prisma['a3']['study_list'])
 
-    # calc u1 
     # u1 is those pmid with 
     prisma['u1'] = {
-        "n_ctids": 0,
-        "n_pmids": 0,
-        "paper_list": [],
+        "n_ctids": len(u1_study_list),
+        "n_pmids": len(u1_paper_list),
+        "study_list": u1_study_list,
+        "paper_list": u1_paper_list,
         "stage": "u1",
-        "study_list": [],
         "text": "Updated studies in SR"
     }
 
     # calc u2 
     prisma['u2'] = {
-        "n_ctids": 0,
-        "n_pmids": 0,
-        "paper_list": [],
+        "n_ctids": len(u2_study_list),
+        "n_pmids": len(u2_paper_list),
+        "study_list": u2_study_list,
+        "paper_list": u2_paper_list,
         "stage": "u2",
-        "study_list": [],
         "text": "Updated studies in MA"
     }
 
     # calc f3n
+    f3n_study_list = [ i for i in prisma['f1']['study_list'] if i not in prisma['f3']['study_list'] ]
+    f3n_paper_list = [ i for i in prisma['f1']['paper_list'] if i not in prisma['f3']['paper_list'] ]
     prisma['f3n'] = {
-        "n_ctids": 0,
-        "n_pmids": 0,
-        "paper_list": [],
+        "n_ctids": len(f3n_study_list),
+        "n_pmids": len(f3n_paper_list),
+        "study_list": f3n_study_list,
+        "paper_list": f3n_paper_list,
         "stage": "f3n",
-        "study_list": [],
         "text": "Studies not in MA"
     }
 
@@ -862,10 +884,33 @@ def _get_prisma_updated(b_stage, f_stage, paper_dict):
     '''
     Get the study and paper list of updated records
     '''
-    for pid in f_stage['paper_list']:
-        # if this 
-        pass
+    new_paper_list = [ i for i in f_stage['paper_list'] if i not in b_stage['paper_list'] ]
+    a_study_list = [] # for pure new study
+    a_paper_list = [] # for pure new study's paper
+    u_study_list = [] # for follow-up study
+    u_paper_list = [] # for follow-up study's paper
+    for pid in new_paper_list:
+        # get this paper from the paper dict
+        # since this pid is from the same source, it must be in the paper dict
+        paper = paper_dict[pid]
 
-    ret = None
+        # get the nct/rct/ctid of this paper
+        ctid = paper['ctid']
+        if ctid in b_stage['study_list']:
+            # which means this new paper is a follow up study
+            u_paper_list.append(pid)
 
-    return ret
+            # now, put this ctid in the list if not yet
+            # we must do this checking because the Clinical Trail may contain more
+            if ctid in u_study_list: pass
+            else: u_study_list.append(ctid)
+        
+        else:
+            # which means this is a pure new study
+            a_paper_list.append(pid)
+
+            # and put the ctid
+            if ctid in a_study_list: pass
+            else: a_study_list.append(ctid)
+
+    return a_study_list, a_paper_list, u_study_list, u_paper_list
