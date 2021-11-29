@@ -154,7 +154,7 @@ def get_prisma_by_cq(project_id, cq_abbr="default", do_include_papers=True):
     #######################################################
     # the s0
     stat['s0'] = {
-        'n': stat['a1']['n'],
+        'n': stat['a1']['n'] + stat['a2']['n'],
         'text': 'Search',
         'pids': []
     }
