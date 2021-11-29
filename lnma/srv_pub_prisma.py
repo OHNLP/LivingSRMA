@@ -162,6 +162,12 @@ def get_prisma_by_cq(project_id, cq_abbr="default", do_include_papers=True):
     if 'prisma' in project.settings and 's0' in project.settings['prisma']:
         stat['s0']['n'] = project.settings['prisma']['s0']['n']
 
+    # use the cq-specific s0 as the number
+    if 'prisma' in project.settings and \
+        cq_abbr in project.settings['prisma'] and \
+        's0' in project.settings['prisma'][cq_abbr]:
+        stat['s0']['n'] = project.settings['prisma'][cq_abbr]['s0']['n_pmids']
+
     stat['e1'] = {
         'n': stat['s0']['n'] - stat['a1']['n'],
         'text': 'Excluded by duplicates',
