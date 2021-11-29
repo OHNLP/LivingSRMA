@@ -14,7 +14,7 @@ from lnma import db
 Services of PRISMA for publication site
 '''
 
-def get_prisma_by_cq(project_id, cq_abbr="default", do_include_papers=False):
+def get_prisma_by_cq(project_id, cq_abbr="default", do_include_papers=True):
     '''
     Get the PRISMA numbers from database
     '''
@@ -134,9 +134,16 @@ def get_prisma_by_cq(project_id, cq_abbr="default", do_include_papers=False):
                     stat['f3']['pids'].append(pid)
 
                     # check the ctid
-                    rct_id = paper_dict[pid]['ctid']
-                    if rct_id not in stat['f3']['rcts']:
-                        stat['f3']['rcts'].append(rct_id)
+                    if pid in paper_dict:
+                        rct_id = paper_dict[pid]['ctid']
+                        if rct_id not in stat['f3']['rcts']:
+                            stat['f3']['rcts'].append(rct_id)
+                    else:
+                        # what???
+                        # if this pid not in paper_dict
+                        # which means the rct info is missing
+                        print('* ERROR missing %s in paper_dict')
+                        pass
 
             else:
                 # this paper is extracted but not selected yet.
