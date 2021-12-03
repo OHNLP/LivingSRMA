@@ -1,0 +1,249 @@
+{% extends '_layout_adminlte.html' %}
+
+{% block title %}
+Public Website
+{% endblock %}
+
+{% block style %}
+{% endblock %}
+
+
+{% block section_cq %}
+{% include 'shared_module/_cq_selector_toolbar.html' %}
+{% endblock %}
+
+{% block page_name %}
+<i class="far fa-folder"></i>
+Public Website
+{% endblock %}
+
+{% block content %}
+
+<div id="app_public" class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-6">
+                <p>
+                    Due to performance concerns, some of the contents on the public website are not updated directly with database. 
+                    On this page, there are some functions to update the contens on the public site.
+                </p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fa fa-project-diagram"></i>
+                            PRISMA Diagram
+                        </h3>
+            
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
+                            </button>
+                        </div>
+                        <!-- /.card-tools -->
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body" style="display: block;">
+                        <div>
+                            <button class="btn btn-default"
+                                v-on:click="get_prisma_json('db')">
+                                Reload Data
+                            </button>
+                        </div>
+                        
+                        <div v-if="json.prisma == null">
+                            <p>
+                                Data not found.
+                            </p>
+                        </div>
+                        <div v-else>
+                            <p>
+                                Last update: {{ json.prisma.latest.last_updated }}
+                            </p>
+                            <div>
+                                <a target="_blank" 
+                                    href="[[ url_for('pub.prisma', prj=project.keystr, cq=cq_abbr) ]]">
+                                    <i class="fa fa-project-diagram"></i>
+                                    Check PRISMA Diagram
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.col-md-3 -->
+
+            
+            <div class="col-md-3">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fa fa-table"></i>
+                            Interactive Table
+                        </h3>
+            
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i>
+                            </button>
+                        </div>
+                        <!-- /.card-tools -->
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body" style="display: block;">
+                        <div>
+                            <button class="btn btn-default"
+                                v-on:click="get_itable_json('db')">
+                                Reload Data
+                            </button>
+                        </div>
+                        
+                        <div v-if="json.itable == null">
+                            <p>
+                                Data not found.
+                            </p>
+                        </div>
+                        <div v-else>
+                            <p>
+                                Last update: {{ json.itable.latest.last_updated }}
+                            </p>
+                            <div>
+                                <a target="_blank" 
+                                    href="[[ url_for('pub.itable', prj=project.keystr, cq=cq_abbr) ]]">
+                                    <i class="fa fa-table"></i>
+                                    Check Interactive Table
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.col-md-3 -->
+
+            
+
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block active_nav_link %}project-public-website{% endblock %}
+
+{% block script %}
+<script>
+var app_public = {
+    // the project keystr
+    prj: '[[ project.keystr ]]',
+
+    // the cq for current project
+    cq: '[[ cq_abbr ]]',
+
+    // vpp
+    vpp: null,
+
+    vpp_id: '#app_public',
+
+    vpp_methods: {
+        get_prisma_json: function(src) {
+            if (typeof(src)=='undefined') {
+                src = 'cache';
+            }
+
+            $.get(
+                '/pub/graphdata/' + this.prj + '/PRISMA.json',
+                {
+                    src: src,
+                    cq: this.cq,
+                    ver: Math.random()
+                },
+                function(data) {
+                    console.log(data);
+                    toast('Updated PRISMA JSON data');
+
+                    // update the prisma
+                    app_public.vpp.$data.json.prisma = data;
+
+                }, 'json'
+            );
+        },
+
+        get_itable_json: function(src) {
+            if (typeof(src)=='undefined') {
+                src = 'cache';
+            }
+            $.get(
+                '/pub/graphdata/'+this.prj+'/ITABLE.json',
+                {
+                    ver: Math.random(), 
+                    src: src, 
+                    cq: this.cq
+                },
+                function(data) {
+                    console.log(data);
+                    toast('Updated interactive table JSON data!');
+
+                    // update the itable
+                    app_public.vpp.$data.json.itable = data;
+
+                }, 'json'
+            );
+        }
+    },
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+
+            data: {
+                prj: this.prj,
+                cq: this.cq,
+
+                json: {
+                    // the prisma content
+                    prisma: null,
+
+                    // the itable
+                    itable: null,
+
+                    // the sof table PMA
+                    softable_pma: null,
+
+                    // the sof table NMA
+                    softable_nma: null,
+
+                    // the evmap
+                    evmap: null,
+                },
+
+                ui_disabled: false,
+            },
+
+            methods: this.vpp_methods
+        });
+    },
+    
+}
+
+
+var jarvis = {
+
+    init: function() {
+        app_public.init();
+
+    }
+};
+
+
+$(document).ready(function() {
+    jarvis.init();
+});
+</script>
+{% endblock %}

@@ -579,6 +579,8 @@ def graphdata_itable_json(keystr):
             keystr,
             cq_abbr
         )
+        latest = srv_project.get_project_latest_stat_by_keystr(keystr)
+        ret['latest'] = latest
 
         if ret is None:
             ret = {

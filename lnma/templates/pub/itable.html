@@ -764,7 +764,11 @@ var jarvis = {
         if (jarvis.src == 'db') {
             $.get(
                 '/pub/graphdata/'+prj+'/ITABLE.json',
-                {ver: Math.random(), src: jarvis.src, cq: cq},
+                {
+                    ver: Math.random(), 
+                    src: jarvis.src, 
+                    cq: cq
+                },
                 function(data) {
                     console.log(data);
 

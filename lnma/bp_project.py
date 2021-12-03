@@ -99,6 +99,28 @@ def editor():
     )
 
 
+@bp.route('/public_website', methods=['GET'])
+@login_required
+def public_website():
+    project_id = request.cookies.get('project_id')
+    cq_abbr = request.cookies.get('cq_abbr')
+
+    if project_id is None:
+        return redirect(url_for('project.mylist'))
+
+    if cq_abbr is None:
+        cq_abbr = 'default'
+
+    project = dora.get_project(project_id)
+
+    return render_template(
+        'project/public_website.html',
+        cq_abbr=cq_abbr,
+        project=project,
+        project_json_str=json.dumps(project.as_dict())
+    )
+
+
 ###############################################################
 # APIs for project
 ###############################################################
