@@ -547,7 +547,7 @@
                 <table class="table" style="table-layout:auto;">
                     <thead class="paper-table-header">
                         <tr>
-                            <th class="paper-table-header-th" colspan="6">
+                            <th class="paper-table-header-th" colspan="7">
                                 &nbsp;
                             </th>
                             <th v-for="thr1 in thr1s"
@@ -563,6 +563,9 @@
                             </th>
                             <th class="paper-table-header-th" style="width: 40px;">
                                 #
+                            </th>
+                            <th class="paper-table-header-th" style="width: 90px">
+                                NCT
                             </th>
                             <th class="paper-table-header-th" style="width: 90px">
                                 PMID
@@ -603,6 +606,9 @@
                             </td>
                             <td class="paper-table-body-td">
                                 <span class="badge badge-pill badge-light">{{ paper.seq_num }}</span> 
+                            </td>
+                            <td class="paper-table-body-td">
+                                <span class="text-sm">{{ paper.rct_id }}</span> 
                             </td>
                             <td class="paper-table-body-td">
                                 <span class="text-sm">{{ paper.pid }}</span> 
