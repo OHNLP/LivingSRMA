@@ -18,6 +18,9 @@ INPUT_FORMATS_HRLU = 'HRLU'
 INPUT_FORMATS_FTET = 'FTET'
 INPUT_FORMATS_ET = 'ET'
 
+INPUT_FORMAT_NMA_RAW_ET = 'NMA_RAW_ET'
+INPUT_FORMAT_NMA_PRE_SMLU = 'NMA_PRE_SMLU'
+
 STANDARD_DATA_COLS = {
     # for NMA, the column `hr` could be `sm` or `TE`, the analyzer will handle
     'HRLU': ['study', 't1', 't2', 'hr', 'upperci', 'lowerci'],

@@ -65,7 +65,10 @@ def get_nma(extract, paper_dict, is_skip_unselected=True):
         # a special rule for database format
         'format_converted': 'yes'
     }
-    ret_nma = nma_analyzer.analyze(rs, cfg)
+    ret_nma = nma_analyzer.analyze(
+        rs, 
+        cfg
+    )
 
     results.append({
         'rs': rs,

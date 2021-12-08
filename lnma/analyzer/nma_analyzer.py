@@ -73,20 +73,29 @@ def analyze(rs, cfg):
     if cfg['backend'] == 'bayes':
         if cfg['input_format'] == INPUT_FORMATS_ET:
             ret = analyze_raw_by_bugsnet(rs, params)
+
         elif cfg['input_format'] == INPUT_FORMATS_FTET:
             ret = analyze_raw_by_bugsnet(rs, params)
-        elif cfg['input_format'] == INPUT_FORMATS_HRLU:
+
+        elif cfg['input_format'] == INPUT_FORMATS_HRLU or \
+             cfg['input_format'] == INPUT_FORMAT_NMA_PRE_SMLU:
             ret = analyze_pre_by_gemtc(rs, params)
+
         else:
             ret = analyze_raw_by_bugsnet(rs, params)
 
     elif cfg['backend'] == 'freq':
-        if cfg['input_format'] == INPUT_FORMATS_ET or cfg['input_format'] == 'NMA_RAW_ET':
+        if cfg['input_format'] == INPUT_FORMATS_ET or \
+           cfg['input_format'] == INPUT_FORMAT_NMA_RAW_ET:
             ret = analyze_raw_by_freq(rs, params)
+
         elif cfg['input_format'] == INPUT_FORMATS_FTET:
             ret = analyze_raw_by_freq(rs, params)
-        elif cfg['input_format'] == INPUT_FORMATS_HRLU or cfg['input_format'] == 'NMA_PRE_SMLU':
+
+        elif cfg['input_format'] == INPUT_FORMATS_HRLU or \
+             cfg['input_format'] == INPUT_FORMAT_NMA_PRE_SMLU:
             ret = analyze_pre_by_freq(rs, params)
+
         else:
             ret = analyze_pre_by_freq(rs, params)
     else:
