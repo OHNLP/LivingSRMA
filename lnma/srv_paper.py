@@ -372,6 +372,14 @@ def delete_paper_from_db_by_seq_num(keystr, seq_num, is_stop_when_used=True):
         print('* found %s#%s used in %s extracts' % (
             keystr, seq_num, len(has_used_in_extracts)
         ))
+        for ext in has_used_in_extracts:
+            print('* - %s|%s|%s - %s|%s' % (
+                ext.meta['cq_abbr'],
+                ext.meta['oc_type'],
+                ext.meta['group'],
+                ext.meta['category'],
+                ext.meta['full_name'],
+            ))
         if is_stop_when_used:
             return False
 
