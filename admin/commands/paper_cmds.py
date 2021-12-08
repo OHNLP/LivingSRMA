@@ -37,6 +37,20 @@ class Paper:
         else:
             cprint('* Paper [%s][%s] is NOT RCT!' % (
                 seq_num, paper.title[:40]), 'red')
+    
+
+    @command
+    @argument("keystr", type=str, description="The keystr for a project")
+    @argument("seq_num", type=int, description="The sequence number of the paper in project")
+    async def check_ext(self, keystr:str, seq_num:int):
+        """
+        Check the extraction for a paper
+        """
+        has_used_in_extracts = srv_paper.check_usage_in_extracts(
+            keystr, seq_num
+        )
+
+        print('* checked')
 
 
     # @command
