@@ -1549,6 +1549,19 @@ class Extract(db.Model):
         return rs
 
 
+    def get_repr_str(self):
+        '''
+        Get a representation string
+        '''
+        return '%s|%s|%s|%s|%s' % (
+            self.meta['cq_abbr'],
+            self.meta['oc_type'],
+            self.meta['group'],
+            self.meta['category'],
+            self.meta['full_name']
+        )
+        
+
     def __repr__(self):
         return '<Extract {0} {1}: {2}>'.format(
             self.oc_type, self.abbr, self.extract_id)

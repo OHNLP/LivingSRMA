@@ -124,12 +124,12 @@ def get_sof_nma_data_from_db(keystr, cq_abbr):
     '''
 
     # for most cases:
-    return get_nma_by_cq(keystr, cq_abbr)
+    return get_sof_nma_by_cq(keystr, cq_abbr)
 
 
-def get_nma_by_cq(keystr, cq_abbr="default"):
+def get_sof_nma_by_cq(keystr, cq_abbr="default"):
     '''
-    Get the NMA result
+    Get the NMA result for SoF table
     '''
     # get basic information
     project = dora.get_project_by_keystr(keystr)
@@ -175,6 +175,10 @@ def get_nma_by_cq(keystr, cq_abbr="default"):
 
         treatments = extract.get_treatments_in_data()
 
+        print('* analyzing %s' % (
+            extract.get_repr_str()
+        ))
+        
         results = srv_analyzer.get_nma(
             extract, paper_dict
         )
@@ -245,7 +249,7 @@ def parse_evmap_data_from_json(j):
     '''
     Parse the Evidence Map data from the calculation result
 
-    The `j` is the return of get_nma_by_cq()
+    The `j` is the return of get_sof_nma_by_cq()
 
     The evmap data focus on the evidence visualization,
     So it summarizes the results of all treatments for visualization.
