@@ -1,5 +1,6 @@
 import time
 import datetime
+from numpy.lib.function_base import delete
 
 from sqlalchemy import and_, or_, not_
 from sqlalchemy.orm.attributes import flag_modified
@@ -338,6 +339,46 @@ def update_all_srma_paper_pub_date(keystr):
 
     return True
     
+
+def delete_paper_from_db_by_seq_num(keystr, seq_num, is_stop_when_used=True):
+    '''
+    Delete a paper from DB
+    '''
+    project = dora.get_project_by_keystr(keystr)
+
+    if project is None:
+        return False
+
+    paper = dora.get_paper_by_keystr_and_seq(keystr, seq_num)
+
+    if paper is None:
+        return False
+    
+    # get the pid for later use
+    pid = paper.pid
+
+    # ok, need to check if this paper exists in extraction
+    extracts = dora.get_extracts_by_keystr(keystr)
+
+    has_used_in_extracts = []
+
+    for ext in extracts:
+        if pid in ext.data:
+            has_used_in_extracts.append(ext)
+        else:
+            pass
+
+    if len(has_used_in_extracts)>0:
+        print('* found %s#%s used in %s extracts' % (
+            keystr, seq_num, len(has_used_in_extracts)
+        ))
+        if is_stop_when_used:
+            return False
+
+    # checked, delete this paper
+    ret = dora.delete_paper(paper.paper_id)
+
+    return ret
 
 
 # if __name__ == '__main__':

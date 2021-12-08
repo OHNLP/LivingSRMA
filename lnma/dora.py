@@ -251,6 +251,23 @@ def list_projects_by_uid(owner_uid):
     return projects
 
 
+def delete_paper(paper_id):
+    '''
+    Delete a paper
+    '''
+    p = Paper.query.filter_by(
+        paper_id=paper_id
+    ).first()
+
+    if p is None:
+        return False
+
+    db.session.delete(p)
+    db.session.commit()
+
+    return True
+
+
 def delete_project(project_id):
     '''
     Delete a project (and related relations with users)

@@ -101,6 +101,25 @@ def timeline():
 # AJAX API functions for screener
 ###############################################################################
 
+# @bp.route('/delete_paper_from_project')
+# @login_required
+# def delete_paper_from_project():
+#     '''
+#     Delete a paper from a project
+#     '''
+#     project_id = request.cookies.get('project_id')
+#     paper_id = request.args.get('paper_id')
+
+#     if project_id is None:
+#         return redirect(url_for('project.mylist'))
+
+#     paper = dora.get_paper_by_id(paper_id)
+
+#     # now need to check if this paper is really deletable
+
+
+
+
 @bp.route('/get_timeline')
 @login_required
 def get_timeline():

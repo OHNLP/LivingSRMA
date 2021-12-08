@@ -7,7 +7,7 @@ from nubia import command, argument, context
 from prettytable import PrettyTable
 
 # app settings
-from lnma import db, create_app
+from lnma import db, create_app, srv_paper
 from lnma.models import *
 from lnma import dora
 from lnma import ss_state
@@ -39,22 +39,53 @@ class Paper:
                 seq_num, paper.title[:40]), 'red')
 
 
+    # @command
+    # @argument("keystr", type=str, description="The keystr for a project")
+    # @argument("seq_num", type=int, description="The sequence number of the paper in project")
+    # @argument("is_del", type=str, description="[y]es/[n]o?")
+    # async def mark_del(self, keystr:str, seq_num:int, is_del:str):
+    #     """
+    #     Mark is_delete to a paper
+    #     """
+    #     is_deleted = is_del == 'y'
+    #     paper = dora.set_paper_is_deleted_by_keystr_and_seq_num(keystr, seq_num, is_deleted)
+    #     if paper.is_deleted == 'yes':
+    #         cprint('* Paper [%s][%s] is deleted!' % (
+    #             seq_num, paper.title[:40]), 'red')
+    #     else:
+    #         cprint('* Paper [%s][%s] is still there!' % (
+    #             seq_num, paper.title[:40]), 'green')
+
+
     @command
     @argument("keystr", type=str, description="The keystr for a project")
     @argument("seq_num", type=int, description="The sequence number of the paper in project")
-    @argument("is_del", type=str, description="[y]es/[n]o?")
-    async def mark_del(self, keystr:str, seq_num:int, is_del:str):
+    @argument("force", type=str, description="Force delete even if used in extracts?")
+    @argument("are_you_sure", type=str, description="yes for final confirmation")
+    async def delete(self, keystr:str, seq_num:int, are_you_sure:str, force:str='no'):
         """
-        Mark is_delete to a paper
+        Delete a paper from DB
         """
-        is_deleted = is_del == 'y'
-        paper = dora.set_paper_is_deleted_by_keystr_and_seq_num(keystr, seq_num, is_deleted)
-        if paper.is_deleted == 'yes':
-            cprint('* Paper [%s][%s] is deleted!' % (
-                seq_num, paper.title[:40]), 'red')
+        if are_you_sure != 'yes':
+            print('* delete cancelled')
+            return 
+
+        if force == 'yes':
+            is_stop_when_used = False
         else:
-            cprint('* Paper [%s][%s] is still there!' % (
-                seq_num, paper.title[:40]), 'green')
+            is_stop_when_used = True
+
+        success = srv_paper.delete_paper_from_db_by_seq_num(
+            keystr,
+            seq_num,
+            is_stop_when_used
+        )
+
+        if success:
+            print('* deleted!')
+
+        else:
+            print('* failed to delete')
 
 
     @command
