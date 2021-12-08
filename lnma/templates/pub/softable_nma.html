@@ -1127,24 +1127,28 @@ var app_softnma = {
             var fn_b = b.oc_full_name.toLocaleLowerCase();
             var loc_a = app_softnma.oc_orders.indexOf(fn_a);
             var loc_b = app_softnma.oc_orders.indexOf(fn_b);
-            var ret = 0
+            var ret = 0;
+            var flag = 0;
                 
             if (loc_a>=0) {
                 if (loc_b>=0) {
                     ret = loc_b - loc_a;
+                    flag = 3;
 
                 } else {
                     ret = -1;
+                    flag = 2;
                 }
             } else if (loc_b>=0) {
                 ret = -1;
+                flag = 1;
 
             } else {
                 // just compare these two
                 ret = a.oc_full_name.localeCompare(b.oc_full_name);
             }
             console.log(
-                '* compare:',
+                '* compare['+flag+']:',
                 ret, '=', 
                 fn_a, '<=>',
                 fn_b
