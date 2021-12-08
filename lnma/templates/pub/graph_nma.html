@@ -581,14 +581,14 @@ var jarvis = {
 
         // update the sucra rank
         if (typeof(data.tmrank) != 'undefined') {
-            tb_ranktb.draw(data.tmrank, params.which_is_better);
-            fg_scrplt.draw(data.scrplt, params.which_is_better);
+            tb_ranktb.draw(data.tmrank);
+            fg_scrplt.draw(data.scrplt);
         }
         
         // update the pscore rank
         if (typeof(data.psrank) != 'undefined') {
-            tb_ranktb.draw(data.psrank, params.which_is_better);
-            fg_pscplt.draw(data.psrank, params.which_is_better);
+            tb_ranktb.draw(data.psrank);
+            fg_pscplt.draw(data.psrank);
         }
     },
     
