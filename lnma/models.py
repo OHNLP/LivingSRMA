@@ -1431,6 +1431,29 @@ class Extract(db.Model):
         
         return rs
         
+    
+    def _get_nma_treat_list(self, is_skip_unselected=True):
+        '''
+        Get the NMA treat list
+        '''
+        treat_list = []
+        for pid in self.data:
+            ext = self.data[pid]
+
+            if not ext['is_selected'] and is_skip_unselected:
+                continue
+
+            for arm in [ext['attrs']['main']] + ext['attrs']['other']:
+                # add the t1 if not exists
+                if arm['g0']['t1'] not in treat_list:
+                    treat_list.append(arm['g0']['t1'])
+
+                # add the t2 if not exists
+                if arm['g0']['t2'] not in treat_list:
+                    treat_list.append(arm['g0']['t2'])
+
+        return treat_list
+
 
     def _get_rs_nma(self, paper_dict, is_skip_unselected=True):
         '''

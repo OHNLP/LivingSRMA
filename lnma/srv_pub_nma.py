@@ -66,6 +66,9 @@ def get_graph_nma_data_from_db(keystr, cq_abbr):
 
         # create an oc object for ... what?
         treat_list = extract.meta['treatments']
+        # but the treat_list may not be available
+        treat_list = extract._get_nma_treat_list()
+
         input_format = settings.INPUT_FORMATS_HRLU
         if extract.meta['input_format'] == 'NMA_RAW_ET':
             input_format = settings.INPUT_FORMATS_ET
