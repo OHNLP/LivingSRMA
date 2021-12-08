@@ -38,7 +38,7 @@ def get_nma(extract, paper_dict, is_skip_unselected=True):
         return None
 
     # treatments
-    treat_list = extract.meta['treatments']
+    treat_list = extract.get_treatments_in_data()
 
     # the second, build the rs
     rscfg = extract.get_raw_rs_cfg(

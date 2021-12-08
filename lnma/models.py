@@ -1168,8 +1168,8 @@ class Extract(db.Model):
                 try:
                     # no matter pre or raw format
                     # there always be t1 and t2
-                    t1 = arm['t1'].strip()
-                    t2 = arm['t2'].strip()
+                    t1 = arm['g0']['t1'].strip()
+                    t2 = arm['g0']['t2'].strip()
 
                     if t1 not in treatments: treatments.append(t1)
                     if t2 not in treatments: treatments.append(t2)
@@ -1436,23 +1436,26 @@ class Extract(db.Model):
         '''
         Get the NMA treat list
         '''
-        treat_list = []
-        for pid in self.data:
-            ext = self.data[pid]
+        # treat_list = []
+        # for pid in self.data:
+        #     ext = self.data[pid]
 
-            if not ext['is_selected'] and is_skip_unselected:
-                continue
+        #     if not ext['is_selected'] and is_skip_unselected:
+        #         continue
 
-            for arm in [ext['attrs']['main']] + ext['attrs']['other']:
-                # add the t1 if not exists
-                if arm['g0']['t1'] not in treat_list:
-                    treat_list.append(arm['g0']['t1'])
+        #     for arm in [ext['attrs']['main']] + ext['attrs']['other']:
+        #         t1 = arm['g0']['t1'].strip()
+        #         t2 = arm['g0']['t2'].strip()
+        #         # add the t1 if not exists
+        #         if t1 not in treat_list:
+        #             treat_list.append(t1)
 
-                # add the t2 if not exists
-                if arm['g0']['t2'] not in treat_list:
-                    treat_list.append(arm['g0']['t2'])
+        #         # add the t2 if not exists
+        #         if t2 not in treat_list:
+        #             treat_list.append(t2)
 
-        return treat_list
+        # return treat_list
+        return self.get_treatments_in_data()
 
 
     def _get_rs_nma(self, paper_dict, is_skip_unselected=True):
