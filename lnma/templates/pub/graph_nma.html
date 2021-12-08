@@ -256,7 +256,9 @@ a {
 
 
     <div class="pane-row">
-        <div class="box" style="width: auto; padding-right: 10px; display: none;" id="tb-nma-league">
+        <div id="tb-nma-league"
+            class="box" 
+            style="width: auto; padding-right: 10px; display: none;">
             <div class="box-header">
                 <h4>
                     <span class="fa fa-table"></span>
@@ -274,7 +276,9 @@ a {
             </div>
         </div><!-- .box league table -->
         
-        <div class="box" style="width: 320px; display: none;" id="tb_ranktb">
+        <div id="tb_ranktb"
+            class="box" 
+            style="width: 320px; display: none;">
             <div class="box-header">
                 <h4>
                     <span class="fa fa-dice-d6"></span>
@@ -534,6 +538,7 @@ var jarvis = {
     draw_oc: function(oc_name) {
         // bind current data to this oc
         var data = this.all_data.graph_dict[oc_name].data;
+        var params = this.all_data.graph_dict[oc_name].params;
         this.data = data;
 
         // show the name
@@ -576,14 +581,14 @@ var jarvis = {
 
         // update the sucra rank
         if (typeof(data.tmrank) != 'undefined') {
-            tb_ranktb.draw(data.tmrank);
-            fg_scrplt.draw(data.scrplt);
+            tb_ranktb.draw(data.tmrank, params.which_is_better);
+            fg_scrplt.draw(data.scrplt, params.which_is_better);
         }
         
         // update the pscore rank
         if (typeof(data.psrank) != 'undefined') {
-            tb_ranktb.draw(data.psrank);
-            fg_pscplt.draw(data.psrank);
+            tb_ranktb.draw(data.psrank, params.which_is_better);
+            fg_pscplt.draw(data.psrank, params.which_is_better);
         }
     },
     

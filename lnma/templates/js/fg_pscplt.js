@@ -47,11 +47,16 @@ var fg_pscplt = {
         $(this.box_id).hide();
     },
 
-    draw: function(data) {
+    draw: function(data, which_has_highrank) {
+        if (typeof(which_has_highrank) == 'undefined') {
+            which_has_highrank = 'higher';
+        }
         // show
         $(this.box_id).show();
+
         // bind data
         this.data = data;
+
         // create x data and values
         var treats = [];
         var values = [];
@@ -60,6 +65,7 @@ var fg_pscplt = {
             treats.push(item.treat);
             values.push(item.value);
         }
+        
         // update option
         this.option = {
             grid: {

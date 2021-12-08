@@ -54,7 +54,8 @@ var tb_ranktb = {
         $(this.box_id).show();
         this.data = newdata;
         // sort the values to get rank
-        if (which_has_highrank == 'lower') {
+        if (which_has_highrank == 'lower' ||
+            which_has_highrank == 'small' ) {
             newdata.rs.sort(function(a, b) {
                 return a.value - b.value;
             });
