@@ -29,29 +29,6 @@ def get_project_latest_stat_by_keystr(keystr):
     return result
 
 
-def delete_all_papers_by_keystr(keystr):
-    '''
-    Delete all papers in a project
-    '''
-    project = dora.get_project_by_keystr(keystr)
-
-    if project is None:
-        # what???
-        return None
-
-    project_id = project.project_id
-
-    # first, delete those paper under this project
-    Paper.query.filter_by(
-        project_id=project_id
-    ).delete()
-
-    # commit
-    db.session.commit()
-
-    return True
-
-
 def get_project_latest_stat(project_id):
     '''
     Get the latest statistics for a project
@@ -70,7 +47,8 @@ def get_project_latest_stat(project_id):
     if r is not None:
         result = {
             'last_created': r['last_created'].strftime('%Y-%m-%d'),
-            'last_updated': r['last_updated'].strftime('%Y-%m-%d')
+            'last_updated': r['last_updated'].strftime('%Y-%m-%d'),
+            'last_queried': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         }
     else:
         # Hmmm ... I don't think this would happen
@@ -275,3 +253,26 @@ def set_project_keystr_by_keystr(keystr, new_keystr):
         project.project_id,
         new_keystr
     )
+
+
+def delete_all_papers_by_keystr(keystr):
+    '''
+    Delete all papers in a project
+    '''
+    project = dora.get_project_by_keystr(keystr)
+
+    if project is None:
+        # what???
+        return None
+
+    project_id = project.project_id
+
+    # first, delete those paper under this project
+    Paper.query.filter_by(
+        project_id=project_id
+    ).delete()
+
+    # commit
+    db.session.commit()
+
+    return True

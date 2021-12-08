@@ -681,6 +681,8 @@ def graphdata_graph_pma_json(keystr):
         cq_abbr, 
         is_calc_pma= calc is 'yes'
     )
+    latest = srv_project.get_project_latest_stat_by_keystr(keystr)
+    ret['latest'] = latest
 
     # catch the result
     json.dump(ret, open(full_output_fn, 'w'), default=util.json_encoder)
@@ -724,6 +726,8 @@ def graphdata_graph_nma_json(keystr):
         keystr, 
         cq_abbr
     )
+    latest = srv_project.get_project_latest_stat_by_keystr(keystr)
+    ret['latest'] = latest
 
     # catch the result
     json.dump(ret, open(full_output_fn, 'w'), default=util.json_encoder)
@@ -784,6 +788,9 @@ def graphdata_softable_pma_json(keystr):
                 'success': False,
                 'msg': 'SOFTABLE_PMA DATA NOT EXISTS FOR THIS PROJECT'
             }
+
+        latest = srv_project.get_project_latest_stat_by_keystr(keystr)
+        ret['latest'] = latest
 
         # catch the result
         json.dump(ret, open(full_fn_json, 'w'), default=util.json_encoder)
@@ -870,6 +877,9 @@ def graphdata_softable_nma_json(keystr):
                 'success': False,
                 'msg': 'SOFTABLE NMA DATA NOT EXISTS FOR THIS PROJECT'
             }
+
+        latest = srv_project.get_project_latest_stat_by_keystr(keystr)
+        ret['latest'] = latest
 
         # catch the result
         json.dump(ret, open(full_fn_json, 'w'), default=util.json_encoder)
@@ -963,6 +973,8 @@ def graphdata_evmap_json(keystr):
         ))
         j = json.load(open(full_fn_sofnama))
         ret = srv_pub_nma.parse_evmap_data_from_json(j)
+        latest = srv_project.get_project_latest_stat_by_keystr(keystr)
+        ret['latest'] = latest
 
         # catch the result
         json.dump(ret, open(full_fn_json, 'w'), default=util.json_encoder)
