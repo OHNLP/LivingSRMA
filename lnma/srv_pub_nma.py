@@ -110,7 +110,10 @@ def get_graph_nma_data_from_db(keystr, cq_abbr):
         rs = rscfg['rs']
 
         # calc!
-        ret_nma = nma_analyzer.analyze(rs, cfg)
+        ret_nma = nma_analyzer.analyze(
+            rs, 
+            cfg
+        )
 
         # put in result
         ret['graph_dict'][oc_name] = ret_nma
