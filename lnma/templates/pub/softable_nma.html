@@ -1123,7 +1123,25 @@ var app_softnma = {
 
         // sort
         rs.sort(function(a, b) {
-            return a.oc_full_name.localeCompare(b.oc_full_name);
+            var fn_a = a.oc_full_name.toLocaleLowerCase();
+            var fn_b = b.oc_full_name.toLocaleLowerCase();
+            var loc_a = app_softnma.oc_orders.indexOf(fn_a);
+            var loc_b = app_softnma.oc_orders.indexOf(fn_b);
+                
+            if (loc_a>=0) {
+                if (loc_b>=0) {
+                    return loc_a - loc_b;
+
+                } else {
+                    return -1;
+                }
+            } else if (loc_b>=0) {
+                return -1;
+
+            } else {
+                // just compare these two
+                return a.oc_full_name.localeCompare(b.oc_full_name);
+            }
         });
 
         // set the app_softnma.default_comparator
@@ -1310,6 +1328,14 @@ var jarvis = {
             app_softnma.default_comparator = null;
         } else {
             app_softnma.default_comparator = dc;
+        }
+
+        // set the sorting
+        var od = jarvis.get_url_paramter('od');
+        if (od == '') {
+            app_softnma.oc_orders = [];
+        } else {
+            app_softnma.oc_orders = od.split(';');
         }
 
         jarvis.ssmsg('Loading data ...');
