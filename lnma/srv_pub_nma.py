@@ -96,7 +96,7 @@ def get_graph_nma_data_from_db(keystr, cq_abbr):
             "reference_treatment": treat_list[0],
             "measure_of_effect": extract.meta['measure_of_effect'],
             "fixed_or_random": extract.meta['fixed_or_random'],
-            "which_is_better": 'small' if extract.meta['fixed_or_random'] == 'lower' else 'big',
+            "which_is_better": 'small' if extract.meta['which_is_better'] == 'lower' else 'big',
 
             # a special rule for database format
             'format_converted': 'yes'
@@ -178,7 +178,7 @@ def get_sof_nma_by_cq(keystr, cq_abbr="default"):
         print('* analyzing %s' % (
             extract.get_repr_str()
         ))
-        
+
         results = srv_analyzer.get_nma(
             extract, paper_dict
         )
@@ -197,7 +197,8 @@ def get_sof_nma_by_cq(keystr, cq_abbr="default"):
 
         # convert the ranks to rktable format
         flag_reverse = extract.meta['which_is_better'] == 'higher' or \
-                    extract.meta['which_is_better'] == 'bigger'
+                    extract.meta['which_is_better'] == 'bigger' or \
+                    extract.meta['which_is_better'] == 'big'
         rktable = _conv_nmarst_rank_to_rktable(
             rst,
             reverse=flag_reverse

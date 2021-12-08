@@ -60,7 +60,7 @@ def get_nma(extract, paper_dict, is_skip_unselected=True):
         "reference_treatment": treat_list[0],
         "measure_of_effect": extract.meta['measure_of_effect'],
         "fixed_or_random": extract.meta['fixed_or_random'],
-        "which_is_better": 'small' if extract.meta['fixed_or_random'] == 'lower' else 'big',
+        "which_is_better": 'small' if extract.meta['which_is_better'] == 'lower' else 'big',
 
         # a special rule for database format
         'format_converted': 'yes'
