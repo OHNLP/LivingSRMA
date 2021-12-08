@@ -350,7 +350,7 @@ p {
 
                     <tr v-for="r, r_idx in rs">
                         <td class="col-oc-name">
-                            {{ r.oc_fullname }} <br>
+                            {{ r.oc_full_name }} <br>
                             {{ r.n_stu }} Studies
                         </td>
 
@@ -837,7 +837,7 @@ var app_softpma = {
             oc_name: oc.extract.abbr,
 
             // name for quick access
-            oc_fullname: oc.extract.meta.full_name,
+            oc_full_name: oc.extract.meta.full_name,
 
             // measure for quick access
             oc_measure: oc.extract.meta.measure_of_effect,
