@@ -13,7 +13,10 @@ from flask import url_for
 from flask_login import login_required
 from flask_login import current_user
 
-from lnma import dora, srv_paper, srv_pub_prisma
+from lnma import dora
+from lnma import srv_paper
+from lnma import srv_pub_prisma
+from lnma import srv_project
 from lnma.models import *
 from lnma import ss_state
 from lnma.util import get_today_date_str
@@ -34,6 +37,9 @@ def index():
 @bp.route('/overview')
 @login_required
 def overview():
+    '''
+    The overview of the
+    '''
     project_id = request.cookies.get('project_id')
 
     if project_id is None:
@@ -51,6 +57,9 @@ def overview():
 @bp.route('/pcq_selector')
 @login_required
 def pcq_selector():
+    '''
+    Show project cq - selection match
+    '''
     project_id = request.cookies.get('project_id')
 
     if project_id is None:
@@ -65,9 +74,45 @@ def pcq_selector():
     )
 
 
+@bp.route('/timeline')
+@login_required
+def timeline():
+    '''
+    Show the timeline
+    '''
+    project_id = request.cookies.get('project_id')
+
+    if project_id is None:
+        return redirect(url_for('project.mylist'))
+
+    project = dora.get_project(project_id)
+
+    # timeline = srv_project.get_project_timeline_by_keystr(project.keystr)
+
+    return render_template(
+        'screener/timeline.html',
+        # timeline=timeline,
+        project=project,
+        project_json_str=json.dumps(project.as_dict())
+    )
+
+
 ###############################################################################
 # AJAX API functions for screener
 ###############################################################################
+
+@bp.route('/get_timeline')
+@login_required
+def get_timeline():
+    '''
+    Get the timeline JSON
+    '''
+    project_id = request.cookies.get('project_id')
+    project = dora.get_project(project_id)
+    timeline = srv_project.get_project_timeline_by_keystr(project.keystr)
+
+    return jsonify(timeline)
+
 
 @bp.route('/get_paper_by_id')
 @login_required

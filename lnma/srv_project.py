@@ -82,6 +82,69 @@ def get_project_latest_stat(project_id):
     return result
 
 
+def get_project_timeline_by_keystr(keystr):
+    '''
+    Get the timeline of the given project
+    '''
+    # project = dora.get_project_by_keystr(keystr)
+    papers = dora.get_papers_by_keystr(keystr)
+
+    # timeline is a date-based dictionary for sorting events
+    # by looping on each paper in a project
+    # to generate a statistics on the paper process.
+    # It looks like:
+    #
+    # {
+    #    date: {
+    #        category: {
+    #            event: {
+    #                pids: int, # which paper related to this event
+    #            }
+    #        }
+    #    }, ...     
+    # }
+    # 
+    # According to the event define, one paper may show in 
+    # several events (create, update, and decision, etc)
+    timeline = {}
+
+    for paper in tqdm(papers):
+        # get the pid of this paper for shortcut
+        pid = paper.pid
+
+        # get all dates related to this paper
+        # date_updated = paper.get_date_updated_in_date()
+        date_created = paper.get_date_created_in_date()
+        date_decided = paper.ss_ex['date_decided'] if 'date_decided' in paper.ss_ex else None
+
+        # add this date and default category
+        # dates = [date_created, date_updated]
+        dates = [date_created]
+        if date_decided is not None:
+            dates.append(date_decided)
+
+        for _d in dates:
+            if _d not in timeline:
+                timeline[_d] = {
+                    'created': {},
+                    'decision': {}
+                }
+
+        # add event of this paper
+        # event, import
+        if paper.ss_st not in timeline[date_created]['created']:
+            timeline[date_created]['created'][paper.ss_st] = []
+        timeline[date_created]['created'][paper.ss_st].append(pid)
+
+        # event, decision
+        if date_decided is not None and paper.ss_rs != ss_state.SS_RS_NA:
+            if paper.ss_rs not in timeline[date_decided]['decision']:
+                timeline[date_decided]['decision'][paper.ss_rs] = []
+            timeline[date_decided]['decision'][paper.ss_rs].append(pid)
+
+    return timeline
+
+
 def update_project_last_update_by_keystr(keystr):
     '''
     Update the project last_update by the keystr

@@ -96,6 +96,19 @@ var srv_screener = {
 
     // stage states
     ss: {
+        st: {
+            b10: { name: 'Batch search', color: 'green'},
+            b12: { name: 'Other sources', color: 'green'},
+            a10: { name: 'Automatic search', color: 'skyblue'},
+            a11: { name: 'Automatic email update', color: 'skyblue'},
+            a12: { name: 'Other automatic method', color: 'skyblue'},
+            a21: { name: 'Endnote exported XML file', color: 'limegreen'},
+            a22: { name: 'OVID exported XML file', color: 'limegreen'},
+            a23: { name: 'PMID and NCT CSV file', color: 'limegreen'},
+            a24: { name: 'Manual input', color: 'limegreen'},
+
+            na:  { name: 'Unknown data source', color: 'grey'}
+        },
         rs: {
             e1:  { name: 'Duplicate record(s)', color: 'grey' },
             e2:  { name: 'Excluded by title', color: 'grey' },
@@ -108,6 +121,18 @@ var srv_screener = {
             f3:  { name: 'Included in SR and MA', color: 'green' },
 
             na:  { name: 'Not decided', color: 'white' }
+        }
+    },
+
+    get_ss: function(code) {
+        if (this.ss.st.hasOwnProperty(code)) {
+            return this.ss.st[code];
+
+        } else if (this.ss.rs.hasOwnProperty(code)) {
+            return this.ss.rs[code];
+            
+        } else {
+            return null;
         }
     },
 

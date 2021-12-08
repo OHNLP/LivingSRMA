@@ -1,0 +1,273 @@
+{% extends '_layout_adminlte.html' %}
+
+{% block title %}
+Study Timeline
+{% endblock %}
+
+{% block style %}
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css">
+<style>
+</style>
+{% endblock %}
+
+{% block page_name %}
+<i class="fa fa-clock"></i>
+Study Timeline
+{% endblock %}
+
+{% block content %}
+
+<div id="app_timeline" 
+    class="container-fluid">
+
+<div class="row">
+<div class="col ml-3">
+
+
+<div v-if="timeline != null" class="timeline">
+    
+    <div v-for="t in timeline"
+        v-bind:class="{'time-label':t.type=='date'}">
+
+        <span v-if="t.type=='date'"
+            class="bg-green">
+                {{ t.date }}
+        </span>
+
+        <i v-if="t.type=='event'" class="fa fa-clock bg-green"></i>
+        <div v-if="t.type=='event'" class="timeline-item">
+            <h3 class="timeline-header no-border">
+                <b>{{ get_cate_name(t.cate) }}</b> - 
+                <b>{{ get_ss_name(t.event) }}</b>:  
+                {{ t.pids.length }} 
+                <span v-if="t.pids.length == 1">
+                    paper
+                </span>
+                <span v-else>
+                    papers
+                </span>
+            </h3>
+
+            <!--
+            <div class="card collapsed-card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <b>{{ get_cate_name(t.cate) }}</b> - 
+                        <b>{{ get_ss_name(t.event) }}</b>:  
+                        {{ t.pids.length }} 
+                        <span v-if="t.pids.length == 1">
+                            paper
+                        </span>
+                        <span v-else>
+                            papers
+                        </span>
+                    </h3>
+            
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    
+                </div>
+                <div class="card-body" style="display: none;">
+                    The body of the card
+                </div>
+            </div>
+            -->
+        </div>
+
+        
+        
+    </div>
+
+    
+
+</div>
+
+<div v-else>
+    <p>
+        Loading data ...
+    </p>
+
+</div>
+
+
+
+</div>
+<!-- /.col -->
+
+</div>
+<!-- /.row -->
+
+</div>
+<!-- /#app_timeline -->
+
+{% endblock %}
+
+{% block active_nav_link %}screener-timeline{% endblock %}
+
+{% block script %}
+<script src="https://unpkg.com/dayjs@1.8.21/dayjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.4.0/clipboard.min.js"></script>
+
+<!-- my scripts -->
+<script>
+
+///////////////////////////////////////////////////////////
+// bind the project information to srv_screener.js
+///////////////////////////////////////////////////////////
+{% include 'js/srv_screener.js' %}
+srv_screener.project = [[ project_json_str|safe ]];
+
+var app_timeline = {
+    vpp: null,
+    vpp_id: '#app_timeline',
+
+    vpp_data: {
+        timeline: null,
+        dates: null
+    },
+
+    vpp_methods: {
+        get_ss_name: function(c) {
+            var ss = srv_screener.get_ss(c);
+
+            if (ss == null) {
+                return '';
+            }
+
+            return ss.name;
+        },
+
+        get_cate_name: function(c) {
+            if (c == 'created') {
+                return 'Import new records';
+
+            } else if (c == 'decision') {
+                return 'Made decision';
+
+            } else {
+                return '';
+            }
+        }
+    },
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: this.vpp_data,
+            methods: this.vpp_methods
+        });
+    },
+
+    set_timeline: function(data) {
+        var dates = Object.keys(data);
+
+        // sort and desc
+        dates.sort();
+        dates.reverse();
+        var timeline = [];
+        
+        // fill the timeline to follow the format of adminlte
+        for (let i = 0; i < dates.length; i++) {
+            const date = dates[i];
+            
+            // add this date
+            timeline.push({
+                date: date,
+                type: 'date'
+            });
+
+            // add the events
+            for (const evt in data[date]['created']) {
+                if (Object.hasOwnProperty.call(data[date]['created'], evt)) {
+                    // get the pids of this event
+                    const pids = data[date]['created'][evt];
+                    
+                    timeline.push({
+                        date: date,
+                        type: 'event',
+                        cate: 'created',
+                        event: evt,
+                        pids: pids
+                    });
+                }
+            }
+
+            for (const evt in data[date]['decision']) {
+                if (Object.hasOwnProperty.call(data[date]['decision'], evt)) {
+                    // get the pids of this event
+                    const pids = data[date]['decision'][evt];
+                    
+                    timeline.push({
+                        date: date,
+                        type: 'event',
+                        cate: 'decision',
+                        event: evt,
+                        pids: pids
+                    });
+                }
+            }
+        }
+
+        // set 
+        this.vpp.$data.dates = dates;
+        this.vpp.$data.timeline = timeline;
+    }
+};
+
+var jarvis = {
+
+    project: [[ project_json_str|safe ]],
+
+    init: function () {
+        // bind resize event
+        this.bind_resize_event();
+
+        // init the app
+        app_timeline.init();
+
+        $.ajax({
+            url: "[[ url_for('screener.get_timeline') ]]",
+            type: 'get',
+            dataType: 'json',
+            data: { 
+                
+                rnd: Math.random() 
+            },
+            success: function(data) {
+                console.log(data);
+
+                app_timeline.set_timeline(data);
+            },
+            error: function(data) {
+                toast('System error when getting timeline data, please try later.', 'error');
+            }
+        });
+    },
+
+    toast: function(msg, type) {
+        toast(msg, type);
+    },
+
+    prompt: function(text, value) {
+        return window.prompt(text, value);
+    },
+
+    confirm: function(text) {
+        return window.confirm(text);
+    },
+
+    bind_resize_event: function() {
+        $(window).on('resize', function(){
+            // pan_ocpapers.resize();
+        });
+    }
+};
+
+$(document).ready(function () {
+    jarvis.init();
+})
+</script>
+{% endblock %}

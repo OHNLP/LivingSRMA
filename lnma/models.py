@@ -673,6 +673,20 @@ class Paper(db.Model):
         self.journal = pubmed_record['source']
 
 
+    def get_date_created_in_date(self):
+        '''
+        Get the YYYY-MM-DD format date_created
+        '''
+        return self.date_created.strftime('%Y-%m-%d')
+
+
+    def get_date_updated_in_date(self):
+        '''
+        Get the YYYY-MM-DD format date_updated
+        '''
+        return self.date_updated.strftime('%Y-%m-%d')
+
+
     def __repr__(self):
         return '<Paper {0}: {1} {2}>'.format(self.paper_id, self.pub_date, self.title)
 

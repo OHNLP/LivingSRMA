@@ -7,6 +7,7 @@ SS_ST_AUTO_OTHER         = 'a12'
 SS_ST_IMPORT_ENDNOTE_XML = 'a21'
 SS_ST_IMPORT_OVID_XML    = 'a22'
 SS_ST_IMPORT_SIMPLE_CSV  = 'a23'
+SS_ST_IMPORT_MANUAL      = 'a24'
 SS_ST_NA                 = 'na'
 
 # for study screening process
