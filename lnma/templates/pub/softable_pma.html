@@ -728,9 +728,7 @@ var app_softpma = {
         }
 
         // sort
-        rs.sort(function(a, b) {
-            return a.oc_fullname.localeCompare(b.oc_fullname);
-        });
+        rs.sort(jarvis.compare_oc_names);
         
         // init the vpp
         this.vpp = new Vue({
@@ -936,6 +934,15 @@ var jarvis = {
             gp = 'primary';
         }
 
+        // set the sorting
+        var od = jarvis.get_url_paramter('od');
+        if (od == '') {
+            jarvis.oc_orders = [];
+        } else {
+            od = od.toLocaleLowerCase();
+            jarvis.oc_orders = od.split(';');
+        }
+
         jarvis.ssmsg('Loading data ...');
         
         $.get(
@@ -991,6 +998,8 @@ var jarvis = {
         });
     }
 };
+
+{% include 'js/jarvis_ext_compare_oc_names.js' %}
 
 $(document).ready(function() {
     jarvis.init();
