@@ -1463,6 +1463,7 @@ class Extract(db.Model):
         Get the NMA rs from this outcome for analyzer
         '''
         rs = []
+        study_dict = {}
         for pid in self.data:
             ext = self.data[pid]
 
@@ -1472,6 +1473,17 @@ class Extract(db.Model):
             else:
                 study = '%s' % pid
                 year = 'NA'
+
+            # 2021-12-08: fix duplicate study name
+            # Some studies have same first author, 
+            # so need to rename
+            if study in study_dict:
+                # put this study in list again for 
+                study_dict[study] += 1
+                # put the pid 
+                study = '%s (%s)' % (study, pid)
+            else:
+                study_dict[study] = 1
 
             if not ext['is_selected'] and is_skip_unselected:
                 continue
