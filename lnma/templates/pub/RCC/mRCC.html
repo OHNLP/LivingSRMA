@@ -15,7 +15,7 @@
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" />
 
-{% include 'pub/pub._pubstyle.html' %}
+{% include 'pub/_shared/_pubstyle.html' %}
 </head>
 <body>
 <br id="sec-concept">
@@ -173,7 +173,7 @@
     </p>
     <div class="row">
         <div class="col">
-            <iframe id="ifm-ocplots" src="[[ url_for('pub.softable_nma_v2', keystr='RCC', msrs='OR,RR,HR', dc='Suni') ]]" frameborder="0" style="width: 100%; min-height: 500px;"></iframe>
+            <iframe id="ifm-ocplots" src="[[ url_for('pub.softable_nma_v2', prj='RCC', msrs='OR,RR,HR', dc='Suni') ]]" frameborder="0" style="width: 100%; min-height: 500px;"></iframe>
         </div>
     </div>
 </div>
@@ -212,7 +212,7 @@
 
     <div class="row">
         <div class="col">
-            <iframe id="iframe-evmap" src="[[ url_for('pub.evmap_tr_v2', keystr='RCC', tr=evmap['treat_list'][0]) ]]" frameborder="0" style="width: 100%; min-height: 620px;"></iframe>
+            <iframe id="iframe-evmap" src="[[ url_for('pub.evmap_tr_v2', prj='RCC', tr=evmap['treat_list'][0]) ]]" frameborder="0" style="width: 100%; min-height: 620px;"></iframe>
         </div>
     </div>
 
@@ -258,7 +258,7 @@ function switch_nma_data(tag, oc_name, oc_fullname, tr) {
         tr = default_treat;
     }
     var oc = tag;
-    var url = "[[ url_for('pub.graph_nma_RCC') ]]";
+    var url = "[[ url_for('pub.graph_RCC') ]]";
     url += '?prj=' + prj + '&oc=' + oc_name + '&tr=' + tr;
     console.log('* switch nma: ' + url);
     $('#iframe-nma-' + tag).attr('src', url);

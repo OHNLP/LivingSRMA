@@ -190,11 +190,21 @@ def RCC():
 def mRCC():
     prj = 'RCC'
     # load the graph data
-    full_fn = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, 'NMA_LIST.json')
+    full_fn = os.path.join(
+        current_app.instance_path, 
+        settings.PUBLIC_PATH_PUBDATA, 
+        prj, 
+        'NMA_LIST.json'
+    )
     nma = json.load(open(full_fn))
     
     # load the dma data
-    full_fn = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, 'PWMA_DATA.xlsx')
+    full_fn = os.path.join(
+        current_app.instance_path, 
+        settings.PUBLIC_PATH_PUBDATA, 
+        prj, 
+        'PWMA_DATA.xlsx'
+    )
     df = pd.read_excel(full_fn)
     pwma = OrderedDict()
     for idx, row in df.iterrows():
@@ -228,6 +238,11 @@ def mRCC():
 
 @bp.route('/graph_nma_RCC.html')
 def graph_nma_RCC():
+    return render_template('pub/RCC/graph_nma.html')
+
+
+@bp.route('/graph_RCC.html')
+def graph_RCC():
     return render_template('pub/RCC/graph_nma.html')
 
 
@@ -432,7 +447,7 @@ def softable_pma_v2():
 
 @bp.route('/softable_nma_v2.html')
 def softable_nma_v2():
-    return render_template('pub/pub.softable_nma_v2.html')
+    return render_template('archive/pub/pub.softable_nma_v2.html')
 
 
 @bp.route('/evmap_tr.html')
@@ -442,7 +457,7 @@ def evmap_tr():
 
 @bp.route('/evmap_tr_v2.html')
 def evmap_tr_v2():
-    return render_template('pub/pub.evmap_tr_v2.html')
+    return render_template('archive/pub/pub.evmap_tr_v2.html')
 
 
 ###########################################################
