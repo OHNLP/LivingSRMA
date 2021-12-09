@@ -696,12 +696,13 @@ var jarvis = {
                         data.oc_dict, 
                         jarvis.ocfn2abbr[jarvis.default_oc_abbr]
                     );
-                    // fm_oc_selector.vpp.$data.ocs[0].oc_abbr;
                 } else {
-                    // just use default
+                    // which means this oc_name is missing or wrong,
+                    // so just use default
                     fm_oc_selector.init(
                         data.oc_dict
                     );
+                    jarvis.default_oc_abbr = fm_oc_selector.vpp.$data.ocs[0].oc_abbr;
                 }
 
                 // set the default one
