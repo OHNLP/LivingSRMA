@@ -56,12 +56,12 @@ def get_graph_nma_data_from_db(keystr, cq_abbr):
         'graph_dict': {}
     }
     for extract in tqdm(extracts):
-        oc_name = extract.abbr
+        oc_abbr = extract.abbr
 
         # check if included in sof
         if extract.meta['included_in_plots'] != 'yes':
             # this oc is NOT included
-            print('* skip extract %s due to NOT_INCLUDED_IN_SOF' % (oc_name))
+            print('* skip extract %s due to NOT_INCLUDED_IN_SOF' % (oc_abbr))
             continue
 
         # create an oc object for ... what?
@@ -75,6 +75,7 @@ def get_graph_nma_data_from_db(keystr, cq_abbr):
 
         oc = {
             "oc_method": extract.meta['analysis_method'],
+            "oc_abbr": extract.abbr,
             "oc_name": extract.abbr,
             "oc_fullname": extract.meta['full_name'],
             "oc_measures": [extract.meta['measure_of_effect']],
@@ -116,7 +117,7 @@ def get_graph_nma_data_from_db(keystr, cq_abbr):
         )
 
         # put in result
-        ret['graph_dict'][oc_name] = ret_nma
+        ret['graph_dict'][oc_abbr] = ret_nma
 
     return ret
 

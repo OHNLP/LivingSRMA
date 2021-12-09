@@ -228,7 +228,7 @@
     </p>
     <div class="row">
         <div class="col">
-            <iframe id="ifm-ocplots" src="[[ url_for('pub.softable_pma', prj='RCC', cq='adjrcc', msrs='OR,RR,HR') ]]" frameborder="0" style="width: 100%; min-height: 450px;"></iframe>
+            <iframe id="ifm-ocplots" src="[[ url_for('pub.softable_pma', prj='RCC', cq='adjrcc', msrs='OR,RR,HR', od=';'.join(['disease free survival','overall survival'])) ]]" frameborder="0" style="width: 100%; min-height: 450px;"></iframe>
         </div>
     </div>
 

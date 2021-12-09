@@ -245,7 +245,7 @@ a {
                 <select v-model="selected_oc_abbr"
                     @change="change_oc">
                     <option v-for="oc in ocs"
-                        v-bind:value="oc.oc_name">
+                        v-bind:value="oc.oc_abbr">
                         {{ oc.oc_fullname }}
                     </option>
                 </select>
@@ -451,7 +451,7 @@ var fm_oc_selector = {
     vpp: null,
     vpp_id: '#fm_oc_selector',
 
-    init: function(oc_dict) {
+    init: function(oc_dict, selected_oc_abbr) {
         var ocs = Object.values(oc_dict);
 
         // sort the ocs
@@ -460,7 +460,10 @@ var fm_oc_selector = {
             if(a.oc_fullname > b.oc_fullname) { return 1; }
             return 0;
         });
-        var selected_oc_abbr = ocs[0].oc_name;
+
+        if (typeof(selected_oc_abbr)=='undefined') {
+            selected_oc_abbr = ocs[0].oc_abbr;
+        }
 
         this.vpp = new Vue({
             el: this.vpp_id,
@@ -528,26 +531,26 @@ var jarvis = {
         this.all_data = data;
 
         // draw the first oc as default
-        var oc_name = this.default_oc_name;
-        this.draw_oc(oc_name);
+        var oc_abbr = this.default_oc_abbr;
+        this.draw_oc(oc_abbr);
 
         // set comparator
         this.set_comparator(this.default_treat);
     },
 
-    draw_oc: function(oc_name) {
+    draw_oc: function(oc_abbr) {
         // bind current data to this oc
-        var data = this.all_data.graph_dict[oc_name].data;
-        var params = this.all_data.graph_dict[oc_name].params;
+        var data = this.all_data.graph_dict[oc_abbr].data;
+        var params = this.all_data.graph_dict[oc_abbr].params;
         this.data = data;
 
         // show the name
-        // var oc_fullname = this.all_data.oc_dict[oc_name].oc_fullname;
+        // var oc_fullname = this.all_data.oc_dict[oc_abbr].oc_fullname;
         var oc_fullname = '';
         // $('#tb-nma-league-name').html(oc_fullname);
 
         // set the color_scale according to the outcome
-        // this.default_is_lb = this.all_data.oc_dict[oc_name].param.which_is_better == 'lower'? true : false;
+        // this.default_is_lb = this.all_data.oc_dict[oc_abbr].param.which_is_better == 'lower'? true : false;
         this.default_is_lb = true;
 
         if (this.default_is_lb) {
@@ -601,36 +604,48 @@ var jarvis = {
             return;
         }
 
-        // get filename
+        // get the project
         var prj = jarvis.get_url_paramter('prj');
+
+        // which default oc
         var oc = jarvis.get_url_paramter('oc');
+        if (oc == '') {
+            oc = null;
+        } else {
+            oc = oc.toLocaleLowerCase();
+        }
+        this.default_oc_abbr = oc;
+
+        // which default treatment
         var treat = jarvis.get_url_paramter('tr');
-        var is_lower_better = jarvis.get_url_paramter('lb');
-
-
-        var cq = jarvis.get_url_paramter('cq');
-        var gp = jarvis.get_url_paramter('gp');
-        // the first oc to show
-        var foc = jarvis.get_url_paramter('foc');
-
-        if (cq == '') {
-            cq = 'default';
-        }
-        if (gp == '') {
-            gp = 'primary';
-        }
-        if (foc == '') {
-            foc = null;
-        }
-
-        this.default_oc_name = oc;
         this.default_treat = treat;
 
+        // lower is better?
+        var is_lower_better = jarvis.get_url_paramter('lb');
         this.default_is_lb = true;
         if (is_lower_better == 'no') {
             this.default_is_lb = false;
         }
 
+        // which clinical question
+        var cq = jarvis.get_url_paramter('cq');
+        if (cq == '') {
+            cq = 'default';
+        }
+
+        // which group 
+        var gp = jarvis.get_url_paramter('gp');
+        if (gp == '') {
+            gp = 'primary';
+        }
+
+        // the first oc to show
+        var foc = jarvis.get_url_paramter('foc');
+        if (foc == '') {
+            foc = null;
+        }
+        
+        // init the plots
         fg_netplt.init();
         fg_frsplt.init();
         
@@ -664,12 +679,32 @@ var jarvis = {
             "/pub/graphdata/" + prj + "/GRAPH_NMA.json",
             {ver: Math.random(), src: 'cache', cq: cq},
             function(data) {
+                // first, convert the name to abbr
+                jarvis.ocfn2abbr = {};
+                for (const abbr in data.oc_dict) {
+                    if (Object.hasOwnProperty.call(data.oc_dict, abbr)) {
+                        const oc = data.oc_dict[abbr];
+                        var oc_full_name = oc.oc_fullname.toLocaleLowerCase();
+                        jarvis.ocfn2abbr[oc_full_name] = abbr;
+                    }
+                }
                 
-                // init the selector first
-                fm_oc_selector.init(data.oc_dict);
+                if (jarvis.ocfn2abbr.hasOwnProperty(jarvis.default_oc_abbr)) {
+                    // init the selector 
+                    // with the default oc abbr
+                    fm_oc_selector.init(
+                        data.oc_dict, 
+                        jarvis.ocfn2abbr[jarvis.default_oc_abbr]
+                    );
+                    // fm_oc_selector.vpp.$data.ocs[0].oc_abbr;
+                } else {
+                    // just use default
+                    fm_oc_selector.init(
+                        data.oc_dict
+                    );
+                }
 
                 // set the default one
-                jarvis.default_oc_name = fm_oc_selector.vpp.$data.ocs[0].oc_name;
 
                 jarvis.draw(data);
                 jarvis.ssmsg('Data loaded!');
