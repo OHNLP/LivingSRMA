@@ -614,7 +614,8 @@ var jarvis = {
         } else {
             oc = oc.toLocaleLowerCase();
         }
-        this.default_oc_abbr = oc;
+        this.default_oc_abbr = null;
+        this.default_oc_full_name = oc;
 
         // which default treatment
         var treat = jarvis.get_url_paramter('tr');
@@ -689,13 +690,15 @@ var jarvis = {
                     }
                 }
                 
-                if (jarvis.ocfn2abbr.hasOwnProperty(jarvis.default_oc_abbr)) {
+                if (jarvis.ocfn2abbr.hasOwnProperty(jarvis.default_oc_full_name)) {
                     // init the selector 
                     // with the default oc abbr
                     fm_oc_selector.init(
                         data.oc_dict, 
-                        jarvis.ocfn2abbr[jarvis.default_oc_abbr]
+                        jarvis.ocfn2abbr[jarvis.default_oc_full_name]
                     );
+                    jarvis.default_oc_abbr = jarvis.ocfn2abbr[jarvis.default_oc_full_name];
+
                 } else {
                     // which means this oc_name is missing or wrong,
                     // so just use default
