@@ -995,6 +995,22 @@ def get_papers_by_pmids(project_id, pmids):
     return papers
 
 
+def get_papers_of_included_sr(project_id):
+    '''
+    Get all papers of included sr stage
+    '''
+    papers = Paper.query.filter(and_(
+        Paper.project_id == project_id,
+        Paper.ss_rs.in_([
+            ss_state.SS_RS_INCLUDED_ONLY_SR,
+            ss_state.SS_RS_INCLUDED_SRMA
+        ]),
+        Paper.is_deleted == settings.PAPER_IS_DELETED_NO
+    )).order_by(Paper.date_updated.desc()).all()
+
+    return papers
+
+
 def get_papers_by_stage(project_id, stage, cq_abbr="default"):
     '''
     Get all papers of specified stage

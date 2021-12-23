@@ -576,6 +576,16 @@ INPUT_FORMAT_TPL = {
     }
 }
 
+DEFAULT_EXTRACT_DATA_PID_TPL = {
+    'is_selected': False,
+    'is_checked': False,
+    'n_arms': 2,
+    'attrs': {
+        'main': {},
+        'other': []
+    }
+}
+
 FILTER_TPL = {
     'display_name': '',
     'type': 'radio',

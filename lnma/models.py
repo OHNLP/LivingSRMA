@@ -899,17 +899,7 @@ class Extract(db.Model):
                 self.abbr
             ))
             # if not exist, add this paper
-            self.data[pid] = {
-                'is_selected': False,
-                'is_checked': False,
-                'n_arms': 2,
-                'attrs': {}
-            }
-
-            self.data[pid]['attrs'] = {
-                'main': {},
-                'other': []
-            }
+            self.data[pid] = copy.deepcopy(settings.DEFAULT_EXTRACT_DATA_PID_TPL)
 
             # fill the main track with empty values
             for g_idx, g in enumerate(self.meta['sub_groups']):

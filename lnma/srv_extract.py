@@ -86,7 +86,7 @@ def get_extracts_by_cate_and_name(keystr, cq_abbr, oc_type, group, category, ful
     return exts
     
 
-def create_extract(keystr, cq_abbr, oc_type, group, category, full_name, other_meta={}):
+def create_empty_extract(keystr, cq_abbr, oc_type, group, category, full_name, other_meta={}):
     '''
     Create an extract with some infos
     '''
@@ -125,10 +125,93 @@ def create_extract(keystr, cq_abbr, oc_type, group, category, full_name, other_m
     return ext
 
 
+def update_extract_nma_pre_data(extract, df, papers):
+    '''
+    Update extract data with a df of pre data format
+    '''
+    # only one group when nma
+    g_idx = 0
+
+    # empty data
+    data = {}
+
+    def __get_sm(row):
+        if 'sm' in row: return row['sm']
+        if 'hr' in row: return row['hr']
+        return ''
+
+    def __get_val(v):
+        if pd.isna(v): return ''
+        return ''
+
+    pids = [ p.pid for p in papers ]
+    missing_pids = []
+
+    # check each row
+    for idx, row in df.iterrows():
+        pid = row['pid']
+
+        # check this pid in pids or not
+        if pid not in pids:
+            print('* MISSING %s - pid: %s' % (
+                extract.meta['full_name'],
+                pid
+            ))
+            if pid not in missing_pids:
+                missing_pids.append(pid)
+
+        arm = dict(
+            t1 = str(row['t1']),
+            t2 = str(row['t2']),
+            sm = str(__get_sm(row)),
+            lowerci = str(row['lowerci']),
+            upperci = str(row['upperci']),
+            survival_t1 = str(__get_val(row['survival in t1'])),
+            survival_t2 = str(__get_val(row['survival in t2'])),
+            Ec_t1 = str(__get_val(row['Ec_t1'])),
+            Et_t1 = str(__get_val(row['Et_t1'])),
+            Ec_t2 = str(__get_val(row['Ec_t2'])),
+            Et_t2 = str(__get_val(row['Et_t2'])),
+        )
+
+        # ok, let's add this record
+        if pid not in data:
+            # nice! first time add
+            data[pid] = copy.deepcopy(settings.DEFAULT_EXTRACT_DATA_PID_TPL)
+
+            # add this to the main arm
+            data[pid]['attrs']['main']['g0'] = arm
+
+            # update the status
+            data[pid]['is_selected'] = True
+            data[pid]['is_checked'] = True
+
+        else:
+            # wow! it's multi arm study??
+            data[pid]['attrs']['other'].append(
+                {'g0': arm}
+            )
+
+            # and increase the n_arms
+            data[pid]['n_arms'] += 1
+    
+    # update the extract
+    ext = dora.update_extract_data(
+        extract.project_id,
+        extract.oc_type,
+        extract.abbr,
+        data
+    )
+
+    return ext, missing_pids
+
+
 def import_extracts_from_xls(full_path, keystr, cq_abbr, oc_type):
     '''
     Import extracts to database
     '''
+    project = dora.get_project_by_keystr(keystr)
+
     # load data
     xls = pd.ExcelFile(full_path)
 
@@ -139,11 +222,17 @@ def import_extracts_from_xls(full_path, keystr, cq_abbr, oc_type):
     
     print(dft.head())
 
+    # get all included papers for decision
+    papers = dora.get_papers_of_included_sr(
+        project.project_id
+    )
+
+    missing_pids = []
     # columns we could use 
     for idx, row in dft.iterrows():
         tab_name = row['name'].strip()
         data_type = row['data_type'].strip()
-        print('*'*60)
+        print('*'*40, tab_name)
         
         meta = dict(
             cq_abbr = cq_abbr,
@@ -181,7 +270,7 @@ def import_extracts_from_xls(full_path, keystr, cq_abbr, oc_type):
                 )
                 print('* removed ext %s' % ext.abbr)
         
-        ext = create_extract(
+        ext = create_empty_extract(
             keystr, 
             cq_abbr,
             oc_type,
@@ -192,9 +281,22 @@ def import_extracts_from_xls(full_path, keystr, cq_abbr, oc_type):
         )
         print('* created ext %s' % ext.abbr)
 
-        # print('* tab: %s' % (tab_name))
+        # now let's update data
+        df_oc = xls.parse(tab_name)
+
+        if data_type == 'pre':
+            ext, ms_pids = update_extract_nma_pre_data(ext, df_oc, papers)
+            missing_pids = list(set(missing_pids + ms_pids))
+
+            print('* updated ext pre data %s' % ext.abbr)
+    
+    print('\n\n\n* MISSING pids:')
+    for pid in missing_pids:
+        print(pid)
 
     return dft
+
+
 
 ###########################################################
 # Utils for management
