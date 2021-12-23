@@ -1964,6 +1964,17 @@ def get_itable_by_project_id_and_cq(project_id, cq_abbr):
     return extract
 
 
+def get_extract(extract_id):
+    '''
+    Get an extract by its primary key
+    '''
+    extract = Extract.query.filter(
+        Extract.extract_id == extract_id
+    ).first()
+
+    return extract
+
+
 def get_extract_by_project_id_and_cq_and_abbr(project_id, cq_abbr, abbr):
     '''
     Get an extract

@@ -840,6 +840,12 @@ class Extract(db.Model):
             if attr_name not in self.meta:
                 self.meta[attr_name] = meta_template[attr_name]
                 print(f'* fixed missing attr[{attr_name}] in meta')
+        
+        # 2021-12-22: fix the cate_attr missing in meta
+        if self.meta['cate_attrs'] is None:
+            self.meta['cate_attrs'] = copy.deepcopy(
+                settings.INPUT_FORMAT_TPL[self.oc_type][self.meta['input_format']]
+            )
 
 
     def update_data(self):

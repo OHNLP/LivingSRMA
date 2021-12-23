@@ -189,6 +189,17 @@ OC_TYPE_TPL = {
             # for the evidence map
             "included_in_em": 'yes',
 
+            # for sof
+            'certainty': {
+                'cie': '4',
+                'risk_of_bias': '1',
+                'inconsistency': '1',
+                'indirectness': '1',
+                'imprecision': '1',
+                'publication_bias': '0',
+                'importance': '1'
+            },
+
             # for the MA
             "input_format": 'NMA_PRE_SMLU',
             "analysis_method": 'freq',

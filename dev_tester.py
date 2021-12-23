@@ -1,6 +1,7 @@
 #%% load packages and env
 import os
 import json
+import random
 import requests
 import argparse
 
@@ -21,7 +22,7 @@ from datetime import timedelta
 from imbox import Imbox
 
 # app settings
-from lnma import db, create_app
+from lnma import db, create_app, srv_extract
 from lnma.models import *
 from lnma import dora
 from lnma import util
@@ -33,7 +34,6 @@ db.init_app(app)
 app.app_context().push()
 
 
-
 def test_pred():
     project_id = '119bdd6a-2ae9-11eb-8100-bf78cc92e08e'
     pids = ['32966830']
@@ -43,5 +43,39 @@ def test_pred():
         pprint(pred)
     
 
+def test1():
+    srv_extract.import_extracts_from_xls(
+        '/tmp/nma.xlsx',
+        'RCC',
+        'default',
+        'nma',
+    )
+
+def test2():
+    ext_ids = srv_extract.get_extracts_by_cate_and_name(
+        'RCC',
+        'default',
+        'nma',
+        'default',
+        'PFS'
+    )
+    print(ext_ids)
+
+    ext = srv_extract.create_extract(
+        'RCC',
+        'default',
+        'nma',
+        'primary',
+        'default',
+        'Big Name Here %s' % random.randint(0, 1000),
+        other_meta={
+
+        }
+    )
+
+    print(ext.as_very_simple_dict())
+
+
 if __name__ == "__main__":
     print("* Now you have the app and db to access the env")
+    test1()

@@ -61,7 +61,7 @@ Public Website
                         </div>
                         <div v-else>
                             <p>
-                                Last update: {{ json.prisma.latest.last_updated }}
+                                Last update: {{ json.prisma.latest.last_queried }}
                             </p>
                             <div>
                                 <a target="_blank" 
@@ -109,7 +109,7 @@ Public Website
                         </div>
                         <div v-else>
                             <p>
-                                Last update: {{ json.itable.latest.last_updated }}
+                                Last update: {{ json.itable.latest.last_queried }}
                             </p>
                             <div>
                                 <a target="_blank" 
@@ -126,7 +126,56 @@ Public Website
             </div>
             <!-- /.col-md-3 -->
 
+
+            <div class="col-md-3">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fa fa-table"></i>
+                            SoF Table Pairwise MA
+                        </h3>
             
+                        <div class="card-tools">
+                            <button type="button" 
+                                class="btn btn-tool" 
+                                data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                        </div>
+                        <!-- /.card-tools -->
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body" style="display: block;">
+                        <div>
+                            <button class="btn btn-default"
+                                v-on:click="get_sofpma_json('db')">
+                                Reload Data
+                            </button>
+                        </div>
+                        
+                        <div v-if="json.softable_pma == null">
+                            <p>
+                                Data not found.
+                            </p>
+                        </div>
+                        <div v-else>
+                            <p>
+                                Last update: {{ json.softable_pma.latest.last_queried }}
+                            </p>
+                            <div>
+                                <a target="_blank" 
+                                    href="[[ url_for('pub.graphdata_softable_pma_json', keystr=project.keystr, cq=cq_abbr, src='cache') ]]">
+                                    <i class="fa fa-table"></i>
+                                    Check SoF Table Data JSON
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.col-md-3 -->
 
         </div>
     </div>
@@ -151,7 +200,65 @@ var app_public = {
 
     vpp_id: '#app_public',
 
+    vpp_data: {
+        prj: '[[ project.keystr ]]',
+        cq: '[[ cq_abbr ]]',
+
+        json: {
+            // the prisma content
+            prisma: null,
+
+            // the itable
+            itable: null,
+
+            // the sof table PMA
+            softable_pma: null,
+
+            // the sof table NMA
+            softable_nma: null,
+
+            // the evmap
+            evmap: null,
+        },
+
+        ui_disabled: false,
+    },
+
     vpp_methods: {
+
+        get_sofpma_json: function(src, gp) {
+            if (typeof(src)=='undefined') {
+                src = 'cache';
+            }
+            if (typeof(gp)=='undefined') {
+                gp = 'primary';
+            }
+
+            $.ajax({
+                url: '/pub/graphdata/'+this.prj+'/SOFTABLE_PMA.json',
+                type: 'get',
+                data: {
+                    src: src, 
+                    cq: this.cq, 
+                    gp: gp,
+                    ver: Math.random()
+                },
+                dataType: 'json',
+                success: function(data) {
+                    toast('Updated SoF PMA JSON data');
+                    console.log(data);
+
+                    // update the prisma
+                    app_public.vpp.$data.json.softable_pma = data;
+                }, 
+                error: function(jqXHR, textStatus, errorThrown) {
+                    toast('Something wrong when creating the extraction.', 'alert');
+                    console.error(textStatus, errorThrown);
+                }
+            });
+        },
+
+
         get_prisma_json: function(src) {
             if (typeof(src)=='undefined') {
                 src = 'cache';
@@ -165,8 +272,8 @@ var app_public = {
                     ver: Math.random()
                 },
                 function(data) {
-                    console.log(data);
                     toast('Updated PRISMA JSON data');
+                    console.log(data);
 
                     // update the prisma
                     app_public.vpp.$data.json.prisma = data;
@@ -187,8 +294,8 @@ var app_public = {
                     cq: this.cq
                 },
                 function(data) {
-                    console.log(data);
                     toast('Updated interactive table JSON data!');
+                    console.log(data);
 
                     // update the itable
                     app_public.vpp.$data.json.itable = data;
@@ -202,29 +309,7 @@ var app_public = {
         this.vpp = new Vue({
             el: this.vpp_id,
 
-            data: {
-                prj: this.prj,
-                cq: this.cq,
-
-                json: {
-                    // the prisma content
-                    prisma: null,
-
-                    // the itable
-                    itable: null,
-
-                    // the sof table PMA
-                    softable_pma: null,
-
-                    // the sof table NMA
-                    softable_nma: null,
-
-                    // the evmap
-                    evmap: null,
-                },
-
-                ui_disabled: false,
-            },
+            data: this.vpp_data,
 
             methods: this.vpp_methods
         });
@@ -238,6 +323,7 @@ var jarvis = {
     init: function() {
         app_public.init();
 
+        app_public.vpp.get_sofpma_json();
     }
 };
 
