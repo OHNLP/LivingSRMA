@@ -392,11 +392,17 @@ class Paper(db.Model):
 
     
     def update_ss_cq_by_cqs(self, cqs, 
-        decision=settings.SCREENER_DEFAULT_DECISION_FOR_CQ_INCLUSION):
+        decision=settings.SCREENER_DEFAULT_DECISION_FOR_CQ_INCLUSION,
+        reason=settings.SCREENER_DEFAULT_REASON_FOR_CQ_INCLUSION):
         '''
         Update the ss_cq in the ss_ex
 
         This attiribute is used only for those included studies.
+
+        cqs: [{
+            abbr: 'default',
+            name: 'Long name'
+        }, ...]
         '''
         if self.is_ss_included_in_project():
             # ok, let's check the cq
@@ -408,9 +414,9 @@ class Paper(db.Model):
             # check each cq
             if len(cqs) == 1:
                 # if there is only one cq, just set to yes
-                decision = util.make_ss_cq_decision(
-                    settings.PAPER_SS_EX_SS_CQ_YES,
-                    '',
+                ss_cq_decision = util.make_ss_cq_decision(
+                    decision,
+                    reason,
                     'yes'
                 )
 
@@ -423,28 +429,30 @@ class Paper(db.Model):
                         # we need a dict format to put more information
                         self.ss_ex['ss_cq'][cq['abbr']] = util.make_ss_cq_decision(
                             self.ss_ex['ss_cq'][cq['abbr']],
-                            '',
+                            reason,
                             'no'
                         )
                     else:
                         # great! we already have this cq set in dict format
-                        if 'c' in self.ss_ex['ss_cq'][cq['abbr']]:
-                            pass
-                        else:
-                            self.ss_ex['ss_cq'][cq['abbr']]['c'] = 'no'
+                        # 2022-01-05: just update the decision
+                        self.ss_ex['ss_cq'][cq['abbr']] = ss_cq_decision
+
+                        # if 'c' in self.ss_ex['ss_cq'][cq['abbr']]:
+                        # else:
+                            # self.ss_ex['ss_cq'][cq['abbr']]['c'] = 'no'
                 else:
                     # nice! just add this lovely new cq
-                    self.ss_ex['ss_cq'][cq['abbr']] = util.make_ss_cq_decision(
-                        decision,
-                        '',
-                        'no'
-                    )
+                    self.ss_ex['ss_cq'][cq['abbr']] = ss_cq_decision
+
+            return True, 'Updated'
+
         else:
             # ok, this study is not included in SR
             # so ... no need to add this ss_cq
-            pass
+            return False, 'Not included in this project'
 
         # ok, that's all
+
 
     def get_simple_pid_type(self):
         '''

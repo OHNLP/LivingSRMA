@@ -906,6 +906,7 @@ SCREENER_REASON_INCLUDED_IN_SR_BY_IMPORT_PMIDS = 'User import'
 
 # default screening decision for each cq when study is included in project
 SCREENER_DEFAULT_DECISION_FOR_CQ_INCLUSION = 'yes'
+SCREENER_DEFAULT_REASON_FOR_CQ_INCLUSION = 'SYSTEM'
 
 # Study type?
 PAPER_STUDY_TYPE_ORIGINAL = 'original'

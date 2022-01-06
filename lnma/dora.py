@@ -814,6 +814,72 @@ def update_paper_rct_result(paper):
     return paper
 
 
+def update_paper_ss_cq_decision(paper_id, 
+    cqs,
+    decision=settings.SCREENER_DEFAULT_DECISION_FOR_CQ_INCLUSION, 
+    reason=settings.SCREENER_DEFAULT_REASON_FOR_CQ_INCLUSION):
+    '''
+    Update paper ss_cq decision
+
+    cqs: [{
+            abbr: 'default',
+            name: 'Long name'
+        }, ...]
+
+    '''
+    paper = get_paper_by_id(paper_id)
+
+    # now update the ss cq for just this 
+    is_success, msg = paper.update_ss_cq_by_cqs(
+        cqs,
+        decision,
+        reason
+    )
+
+    if is_success:
+        flag_modified(paper, "ss_ex")
+        
+        # commit this
+        db.session.add(paper)
+        db.session.commit()
+        print('* updated %s ss_cq:' % (paper_id), cqs, decision, reason)
+
+    else:
+        print('* failed update_paper_ss_cq_decision! %s' % (
+            msg
+        ))
+
+    return paper
+
+
+def update_paper_ss_cq_decision_by_keystr_and_pid(
+    keystr, pid,
+    cqs,
+    decision=settings.SCREENER_DEFAULT_DECISION_FOR_CQ_INCLUSION, 
+    reason=settings.SCREENER_DEFAULT_REASON_FOR_CQ_INCLUSION
+):
+    '''
+    Update paper ss_cq decision by keystr and pid
+    
+    '''
+    paper = get_paper_by_keystr_and_pid(keystr, pid)
+
+    # now update the ss cq for just this 
+    paper.update_ss_cq_by_cqs(
+        cqs,
+        decision,
+        reason
+    )
+
+    flag_modified(paper, "ss_ex")
+    
+    # commit this
+    db.session.add(paper)
+    db.session.commit()
+
+    return paper
+
+
 def _update_paper_meta(paper):
     '''
     The internal function of updating meta 
