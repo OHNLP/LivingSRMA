@@ -563,10 +563,18 @@ def set_paper_pmid(paper_id, pmid):
     '''
     Set the PMID (pid) for a paper
     '''
+    # just call the set pid
+    return set_paper_pid(paper_id, pmid, 'PubMed MEDLINE')
+
+
+def set_paper_pid(paper_id, pid, pid_type='UNKNOWN'):
+    '''
+    Set the pid) for a paper
+    '''
     paper = get_paper_by_id(paper_id)
     project_id = paper.project_id
 
-    existed_papers = get_papers_by_pmids(project_id, [pmid])
+    existed_papers = get_papers_by_pids(project_id, [pid])
     if existed_papers == []:
         # which means it is not exists
         pass
@@ -575,8 +583,8 @@ def set_paper_pmid(paper_id, pmid):
         return False, existed_papers[0]
 
     # need to check if this pmid exists    
-    paper.pid = pmid
-    paper.pid_type = 'PubMed MEDLINE'
+    paper.pid = pid
+    paper.pid_type = pid_type
 
     # automatic update the date_updated
     paper.date_updated = datetime.datetime.now()
@@ -842,7 +850,7 @@ def update_paper_ss_cq_decision(paper_id,
         # commit this
         db.session.add(paper)
         db.session.commit()
-        print('* updated %s ss_cq:' % (paper_id), cqs, decision, reason)
+        # print('* updated %s ss_cq:' % (paper_id), cqs, decision, reason)
 
     else:
         print('* failed update_paper_ss_cq_decision! %s' % (
@@ -1050,7 +1058,7 @@ def get_papers_by_seq_nums(project_id, seq_nums):
     return papers
 
 
-def get_papers_by_pmids(project_id, pmids):
+def get_papers_by_pids(project_id, pmids):
     '''
     Get all the papers according to pmid list
     '''

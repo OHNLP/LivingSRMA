@@ -229,7 +229,7 @@ def import_pmids():
             pmid2idx[pmid].append(idx)
 
     # before search in PubMed, check local
-    exist_papers = dora.get_papers_by_pmids(project_id, pmids)
+    exist_papers = dora.get_papers_by_pids(project_id, pmids)
     exist_pmids = [ p.pid for p in exist_papers ]
 
     # for those existed papers

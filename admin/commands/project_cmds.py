@@ -14,6 +14,7 @@ from lnma import ss_state
 
 from lnma import bp_extractor
 from lnma import srv_import
+from lnma import srv_extract
 
 # app for using LNMA functions and tables
 app = create_app()
@@ -146,23 +147,57 @@ class Project:
     @command
     @argument("keystr", type=str, description="The keystr for a project")
     @argument("cq_abbr", type=str, description="The cq_abbr for a clinical question")
-    @argument("fn", type=str, description="The file name of the data file")
-    @argument("group", type=str, description="The default analysis group for a project")
+    @argument("full_path", type=str, description="The full path to the data file")
+    @argument("oc_type", type=str, description="The oc type, nma or pma")
     @argument("are_you_sure", type=str, description="yes for final confirmation")
-    def import_softable_pma(self, keystr:str, cq_abbr:str, fn:str, group:str, are_you_sure:str):
+    def import_extracts(self, 
+        keystr:str, 
+        cq_abbr:str, 
+        full_path:str, 
+        oc_type:str, 
+        are_you_sure:str
+    ):
         '''
-        Import the SOFTABLE PWMA data from Excel file
+        Import the extacts data from Excel file
         '''
         if are_you_sure != 'yes':
             print('* import cancelled')
             return 
+        
+        if oc_type not in ['nma', 'pwma']:
+            print("* not supported oc_type=%s" % oc_type)
+            return
 
-        # extracts = bp_extractor.import_softable_pma_from_xls(keystr, cq_abbr, fn, group)
+        srv_extract.import_extracts_from_xls(
+            full_path,
+            keystr,
+            cq_abbr,
+            oc_type,
+        )
 
-        # print('* imported %s extracts!' % (
-        #     len(extracts)
-        # ))
-        print('* not fully implemented yet')
+        print('* done import extracts')
+    
+
+    # @command
+    # @argument("keystr", type=str, description="The keystr for a project")
+    # @argument("cq_abbr", type=str, description="The cq_abbr for a clinical question")
+    # @argument("fn", type=str, description="The file name of the data file")
+    # @argument("group", type=str, description="The default analysis group for a project")
+    # @argument("are_you_sure", type=str, description="yes for final confirmation")
+    # def import_softable_pma(self, keystr:str, cq_abbr:str, fn:str, group:str, are_you_sure:str):
+    #     '''
+    #     Import the SOFTABLE PWMA data from Excel file
+    #     '''
+    #     if are_you_sure != 'yes':
+    #         print('* import cancelled')
+    #         return 
+
+    #     # extracts = bp_extractor.import_softable_pma_from_xls(keystr, cq_abbr, fn, group)
+
+    #     # print('* imported %s extracts!' % (
+    #     #     len(extracts)
+    #     # ))
+    #     print('* not fully implemented yet')
 
 
     @command
@@ -173,7 +208,7 @@ class Project:
     @argument("are_you_sure", type=str, description="yes for final confirmation")
     def import_itable(self, keystr:str, cq_abbr:str, fn_itable:str, fn_filter:str, are_you_sure:str):
         '''
-        Replace or create the itable data from Excel file
+        Import and itable data from Excel file
         '''
         if are_you_sure != 'yes':
             print('* import cancelled')

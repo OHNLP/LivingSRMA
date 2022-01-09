@@ -279,7 +279,12 @@ def set_rct_id():
 def set_pmid():
     paper_id = request.form.get('paper_id')
     pmid = request.form.get('pmid')
-    is_success, paper = dora.set_paper_pmid(paper_id, pmid)
+
+    if util.is_valid_pmid(pmid):
+        is_success, paper = dora.set_paper_pmid(paper_id, pmid)
+
+    else:
+        is_success, paper = dora.set_paper_pid(paper_id, pmid)
 
     ret = {
         'success': is_success,

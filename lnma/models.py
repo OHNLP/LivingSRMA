@@ -412,13 +412,13 @@ class Paper(db.Model):
                 self.ss_ex['ss_cq'] = {}
             
             # check each cq
-            if len(cqs) == 1:
-                # if there is only one cq, just set to yes
-                ss_cq_decision = util.make_ss_cq_decision(
-                    decision,
-                    reason,
-                    'yes'
-                )
+            # if len(cqs) == 1:
+            #     # if there is only one cq, just set to yes
+            #     ss_cq_decision = util.make_ss_cq_decision(
+            #         decision,
+            #         reason,
+            #         'yes'
+            #     )
 
             for cq in cqs:
                 if cq['abbr'] in self.ss_ex['ss_cq']:
@@ -435,14 +435,22 @@ class Paper(db.Model):
                     else:
                         # great! we already have this cq set in dict format
                         # 2022-01-05: just update the decision
-                        self.ss_ex['ss_cq'][cq['abbr']] = ss_cq_decision
+                        self.ss_ex['ss_cq'][cq['abbr']] = util.make_ss_cq_decision(
+                            decision,
+                            reason,
+                            'yes'
+                        )
 
                         # if 'c' in self.ss_ex['ss_cq'][cq['abbr']]:
                         # else:
                             # self.ss_ex['ss_cq'][cq['abbr']]['c'] = 'no'
                 else:
                     # nice! just add this lovely new cq
-                    self.ss_ex['ss_cq'][cq['abbr']] = ss_cq_decision
+                    self.ss_ex['ss_cq'][cq['abbr']] = util.make_ss_cq_decision(
+                        decision,
+                        reason,
+                        'yes'
+                    )
 
             return True, 'Updated'
 

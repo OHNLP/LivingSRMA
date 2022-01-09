@@ -61,7 +61,7 @@ def get_extracts_by_cate_and_name(keystr, cq_abbr, oc_type, group, category, ful
     select extract_id
     from extracts
     where project_id = '{project_id}'
-        and oc_type = 'nma'
+        and oc_type = '{oc_type}'
         and JSON_EXTRACT(meta, '$.cq_abbr') = '{cq_abbr}'
         and JSON_EXTRACT(meta, '$.group') = '{group}'
         and JSON_EXTRACT(meta, '$.category') = '{category}'
@@ -125,6 +125,185 @@ def create_empty_extract(keystr, cq_abbr, oc_type, group, category, full_name, o
     return ext
 
 
+def update_extract_pwma_pre_data(extract, df, papers):
+    '''
+    Update extract data with a df of pre PWMA foramt
+
+    study, year, TE, lowerci, upperci, treatment, control, survival in control, Ec, Et, pid
+
+    The `TE, lowerci, upperci, survival in control, Ec, Et, pid` are required.
+    '''
+    # only one group when nma
+    g_idx = 0
+
+    # empty data
+    data = {}
+
+    # prepare the pids for detection
+    pids = [ p.pid for p in papers ]
+    pid2paper_id = {}
+    for p in papers:
+        pid2paper_id[p.pid] = p.paper_id
+    missing_pids = []
+
+    # check each row
+    for idx, row in df.iterrows():
+        pid = __get_pid(__get_val(row['pid']))
+
+        # check this pid in pids or not
+        if pid not in pids:
+            print('* MISSING %s - pid: %s' % (
+                extract.meta['full_name'],
+                pid
+            ))
+            if pid not in missing_pids:
+                missing_pids.append(pid)
+
+            # now it is the difficult part
+            # how to deal with this missing?
+            # I think we need to skip these records first
+            continue
+
+        # next need to include this paper to this ext if not
+        dora.update_paper_ss_cq_decision(
+            pid2paper_id[pid],
+            [{ 'abbr': extract.meta['cq_abbr'] }],
+            'yes', 'Import'
+        )
+        
+        # build the data object for this paper
+        # the format is from the settings
+        # this has to be a manually mapping
+        arm = dict(
+            TE = __get_val(row['TE']),
+            lowerci = __get_val(row['lowerci']),
+            upperci = __get_val(row['upperci']),
+
+            survival_in_control = __get_val(row['survival in control']),
+            Et = __get_val(row['Et']),
+            Ec = __get_val(row['Ec']),
+        )
+
+        # ok, let's add this record
+        if pid not in data:
+            # nice! first time add
+            data[pid] = copy.deepcopy(settings.DEFAULT_EXTRACT_DATA_PID_TPL)
+
+            # add this to the main arm
+            data[pid]['attrs']['main']['g0'] = arm
+
+            # update the status
+            data[pid]['is_selected'] = True
+            data[pid]['is_checked'] = True
+
+        else:
+            # wow! it's multi arm study??
+            data[pid]['attrs']['other'].append(
+                {'g0': arm}
+            )
+
+            # and increase the n_arms
+            data[pid]['n_arms'] += 1
+
+    # update the extract
+    ext = dora.update_extract_data(
+        extract.project_id,
+        extract.oc_type,
+        extract.abbr,
+        data
+    )
+
+    return ext, missing_pids
+
+
+def update_extract_pwma_raw_data(extract, df, papers):
+    '''
+    Update extract data with a df of raw PWMA foramt
+
+    study, year, Et, Nt, Ec, Nc, treatment, control, pid
+
+    The Et, Nt, Ec, Nc, pid are required.
+    '''
+    # only one group when nma
+    g_idx = 0
+
+    # empty data
+    data = {}
+
+    # prepare the pids for detection
+    pids = [ p.pid for p in papers ]
+    pid2paper_id = {}
+    for p in papers:
+        pid2paper_id[p.pid] = p.paper_id
+    missing_pids = []
+
+    # check each row
+    for idx, row in df.iterrows():
+        pid = __get_pid(__get_val(row['pid']))
+
+        # check this pid in pids or not
+        if pid not in pids:
+            print('* MISSING %s - pid: %s' % (
+                extract.meta['full_name'],
+                pid
+            ))
+            if pid not in missing_pids:
+                missing_pids.append(pid)
+
+            # now it is the difficult part
+            # how to deal with this missing?
+            # I think we need to skip these records first
+            continue
+
+        # next need to include this paper to this ext if not
+        dora.update_paper_ss_cq_decision(
+            pid2paper_id[pid],
+            [{ 'abbr': extract.meta['cq_abbr'] }],
+            'yes', 'Import'
+        )
+        
+        # build the data object for this paper
+        # the format is from the settings
+        # this has to be a manually mapping
+        arm = dict(
+            Et = __get_val(row['Et']),
+            Nt = __get_val(row['Nt']),
+            Ec = __get_val(row['Ec']),
+            Nc = __get_val(row['Nc']),
+        )
+
+        # ok, let's add this record
+        if pid not in data:
+            # nice! first time add
+            data[pid] = copy.deepcopy(settings.DEFAULT_EXTRACT_DATA_PID_TPL)
+
+            # add this to the main arm
+            data[pid]['attrs']['main']['g0'] = arm
+
+            # update the status
+            data[pid]['is_selected'] = True
+            data[pid]['is_checked'] = True
+
+        else:
+            # wow! it's multi arm study??
+            data[pid]['attrs']['other'].append(
+                {'g0': arm}
+            )
+
+            # and increase the n_arms
+            data[pid]['n_arms'] += 1
+
+    # update the extract
+    ext = dora.update_extract_data(
+        extract.project_id,
+        extract.oc_type,
+        extract.abbr,
+        data
+    )
+
+    return ext, missing_pids
+
+
 def update_extract_nma_pre_data(extract, df, papers):
     '''
     Update extract data with a df of pre data format
@@ -140,6 +319,7 @@ def update_extract_nma_pre_data(extract, df, papers):
         if 'hr' in row: return row['hr']
         return ''
 
+    # prepare the pids for detection
     pids = [ p.pid for p in papers ]
     pid2paper_id = {}
     for p in papers:
@@ -366,8 +546,9 @@ def import_extracts_from_xls(full_path, keystr, cq_abbr, oc_type):
     for idx, row in dft.iterrows():
         tab_name = row['name'].strip()
         data_type = row['data_type'].strip()
-        print('*'*40, tab_name, '|', data_type)
+        print('*'*40, keystr, cq_abbr, oc_type, '[%s]' % tab_name, '|', data_type)
         
+        # the general meta information for an outcome
         meta = dict(
             cq_abbr = cq_abbr,
             oc_type = oc_type,
@@ -376,13 +557,49 @@ def import_extracts_from_xls(full_path, keystr, cq_abbr, oc_type):
             full_name = row['full_name'].strip(),
             which_is_better = row['which_is_better'].strip(),
             fixed_or_random = row['fixed_or_random'].strip(),
-            analysis_method = row['method'].strip(),
             measure_of_effect = row['measure'].strip(),
             included_in_plots = row['included_in_plots'].strip(),
-            included_in_sof = row['included_in_sof'].strip(),
-            included_in_em = row['included_in_em'].strip(),
-            input_format = {'pre':'NMA_PRE_SMLU', 'raw':'NMA_RAW_ET'}[data_type]
+            included_in_sof = row['included_in_sof'].strip()
         )
+
+        # special rule for NMA
+        if oc_type == 'nma':
+            # include this extract in evidence map or not
+            meta['included_in_em'] = row['included_in_em'].strip()
+
+            # for NMA, freq or bayes?
+            meta['analysis_method'] = row['method'].strip()
+
+            # the current data type
+            meta['input_format'] = {
+                'pre':'NMA_PRE_SMLU', 
+                'raw':'NMA_RAW_ET'
+            }[data_type]
+
+        # special rule for PWMA
+        if oc_type == 'pwma':
+            # the certainty for this outcome
+            meta['certainty'] = {
+                'cie': '0',
+                'risk_of_bias': row['risk_of_bias'],
+                'inconsistency': row['inconsistency'],
+                'indirectness': row['indirectness'],
+                'imprecision': row['imprecision'],
+                'publication_bias': row['publication_bias'],
+                'importance': row['importance'],
+            }
+
+            # the treatment and control
+            meta['treatments'] = [
+                row['treatment'],
+                row['control']
+            ]
+
+            # the data type
+            meta['input_format'] = {
+                'pre': 'PRIM_CAT_PRE', 
+                'raw': 'PRIM_CAT_RAW'
+            }[data_type]
 
         # check exist
         exts = get_extracts_by_cate_and_name(
@@ -421,23 +638,32 @@ def import_extracts_from_xls(full_path, keystr, cq_abbr, oc_type):
         # need to exclude those with empty study name
         df_oc = df_oc[~df_oc['study'].isna()]
 
-        if data_type == 'pre':
-            ext, ms_pids = update_extract_nma_pre_data(ext, df_oc, papers)
-            missing_pids = list(set(missing_pids + ms_pids))
+        if oc_type == 'nma':
+            if data_type == 'pre':
+                ext, ms_pids = update_extract_nma_pre_data(ext, df_oc, papers)
+                missing_pids = list(set(missing_pids + ms_pids))
 
-            print('* updated ext pre data %s' % ext.abbr)
+                print('* updated ext pre data %s' % ext.abbr)
 
-        elif data_type == 'raw':
-            ext, ms_pids = update_extract_nma_raw_data(ext, df_oc, papers)
-            missing_pids = list(set(missing_pids + ms_pids))
-            print('* updated ext raw data %s' % ext.abbr)
+            elif data_type == 'raw':
+                ext, ms_pids = update_extract_nma_raw_data(ext, df_oc, papers)
+                missing_pids = list(set(missing_pids + ms_pids))
+                print('* updated ext raw data %s' % ext.abbr)
+
+        elif oc_type == 'pwma':
+            if data_type == 'pre':
+                pass
+
+            elif data_type == 'raw': 
+                ext, ms_pids = update_extract_pwma_raw_data(ext, df_oc, papers)
+                missing_pids = list(set(missing_pids + ms_pids))
+                print('* updated ext raw data %s' % ext.abbr)
     
     print('\n\n\n* MISSING pids:')
     for pid in missing_pids:
         print(pid)
 
     return dft
-
 
 
 ###########################################################

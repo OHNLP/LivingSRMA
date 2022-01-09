@@ -44,11 +44,16 @@ def test_pred():
     
 
 def test1():
+    print('is_valid_pmid:', util.is_valid_pmid('12345678'))
+    print('is_valid_pmid:', util.is_valid_pmid('223456783212323212'))
+
+
+def test3():
     srv_extract.import_extracts_from_xls(
-        '/tmp/nma.xlsx',
+        '/tmp/pma.xlsx',
         'RCC',
         'default',
-        'nma',
+        'pwma',
     )
 
 def test2():

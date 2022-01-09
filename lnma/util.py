@@ -241,7 +241,7 @@ def is_valid_pmid(pmid):
 
     Just a basic check
     '''
-    valid_pmids = re.findall('\d{6,8}', pmid, re.MULTILINE)
+    valid_pmids = re.findall('^\d{6,8}$', pmid, re.MULTILINE)
 
     if valid_pmids == []:
         return False
