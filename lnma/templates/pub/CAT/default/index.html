@@ -15,7 +15,7 @@
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" />
 
-{% include 'pub/pub._pubstyle.html' %}
+{% include 'pub/_shared/_pubstyle.html' %}
 </head>
 <body>
 <br id="sec-concept">
@@ -33,7 +33,7 @@
             <li class="nav-item" style="color: white;">
                 Cancer Associated Thrombosis <br>
                 <i class="far fa-calendar-alt"></i>
-                Update: 9/5/2020
+                <span id="latest_update_time">&nbsp;</span>
             </li>
         </ul>
     </div>
@@ -58,20 +58,12 @@
 
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">PAIRWISE MA</a>
-                <div class="dropdown-menu" aria-labelledby="dropdown01">
-                    {% for tp in dma %}
-                    <a class="dropdown-item" href="#sec-dma-[[ tp[:4] ]]">[[ tp ]]</a>
-                    {% endfor %}
-                </div>
+                
             </li>
 
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" href="#" id="dropdown02" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">NMA</a>
-                <div class="dropdown-menu" aria-labelledby="dropdown02">
-                    {% for item in nma['nma'] %}
-                    <a class="dropdown-item" href="#sec-nma-[[ item['sname'] ]]">[[ item['name'] ]]</a>
-                    {% endfor %}
-                </div>
+                
             </li>
 
             <li class="nav-item dropdown">
@@ -108,7 +100,7 @@
 
     <div class="row">
         <div class="col">
-            <img src="[[ url_for('pub.graphdata', prj='CAT', fn='CONCEPT.svg') ]]" />
+            <img src="[[ url_for('pub.graphdata', keystr='CAT', cq='default', fn='CONCEPT_IMAGE.svg') ]]" />
         </div>
         <div class="col">
             <p>
@@ -132,7 +124,7 @@
         </div>
     </div>
     <div class="row">
-        <iframe src="[[ url_for('pub.prisma_v2', prj='CAT') ]]" frameborder="0" style="width: 100%; min-height: 830px;"></iframe>
+        <iframe src="[[ url_for('pub.prisma', prj='CAT', cq='default') ]]" frameborder="0" style="width: 100%; min-height: 850px;"></iframe>
     </div>
 </div>
 
@@ -169,8 +161,8 @@
 
     <div class="row">
         <div class="col">
-            <iframe src="[[ url_for('pub.itable', prj='CAT') ]]" frameborder="0" style="width: 100%; min-height: 720px;"></iframe>
-        </div>
+            <iframe src="[[ url_for('pub.itable', prj='CAT', cq='default', src='db') ]]" frameborder="0" style="width: 100%; min-height: 700px;"></iframe>
+    </div>
     </div>
 </div>
 
@@ -208,45 +200,6 @@
     </p>
 </div>
 
-{% for tp in dma %}
-<br id="sec-dma-[[ tp[:4] ]]">
-<div class="container">
-    <div class="row">
-        <div class="col">
-            <h4 style="margin-bottom: 2rem;">[[ tp ]]</h4>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-4">
-            <div class="dropdown">
-                <button class="btn btn-primary bg-dark bd-dark dropdown-toggle" type="button" id="dropdownMenuButton-dma-[[ tp[:4] ]]" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  Select outcome
-                </button>
-                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton-dma-[[ tp[:4] ]]">
-                    {% for option_text in dma[tp] %}
-                    {% if not option_text.startswith('_') %}
-                    <a class="dropdown-item" href="javascript:switch_dma_data('[[ tp[:4] ]]', '[[ "|".join(dma[tp][option_text]['slides']) ]]', '[[ option_text ]]');">[[ option_text ]]</a>
-                    {% endif %}
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-        <div class="col-8 d-flex justify-content-end">
-            <div style="padding: .5rem; margin-right: 1rem;">
-                <span id="optext-dma-[[ tp[:4] ]]" style="font-weight: bold;"></span>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col">
-            <iframe id="iframe-dma-[[ tp[:4] ]]" class="auto-height" 
-                src="" scrolling="no" frameborder="0"
-                style="width: 100%; min-height: 400px;"></iframe>
-        </div>
-    </div>
-</div>
-{% endfor %}
 
 
 <br id="sec-nma-outcome" style="margin-top: 4rem;">
@@ -280,44 +233,6 @@
         </div>
     </div>
 </div>
-
-{% for item in nma['nma'] %}
-<br id="sec-nma-[[ item['sname'] ]]">
-<div class="container">
-    <div class="row">
-        <div class="col">
-            <h4>[[ item['name'] ]]</h3>
-        </div>
-        <div class="col d-flex justify-content-end">
-            <div style="padding: .5rem; margin-right: 1rem;">
-                Reference: <span id="refname-nma-[[ item['sname'] ]]" style="font-weight:bold;">[[ item['treats'][0] ]]</span>
-            </div>
-            <div class="dropdown">
-                <button class="btn btn-primary bg-dark bd-dark dropdown-toggle" type="button" id="dropdownMenuButton-[[ item['sname'] ]]" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  Select reference treatment
-                </button>
-                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton-[[ item['sname'] ]]">
-                    {% for it in item['treats'] %}
-                    <a class="dropdown-item" href="javascript:switch_nma_data('[[ item['sname'] ]]', '[[ it ]]');">[[ it ]]</a>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col">
-            <p>
-                How to use this figure? 
-                <a href="javascript:;" data-toggle="modal" data-target="#exampleModalCenter3">Video demonstration</a>
-            </p>
-
-            <iframe id="iframe-nma-[[ item['sname'] ]]" src="" frameborder="0" style="width: 100%; min-height: 590px; overflow: hidden;" scrolling="no" ></iframe>
-        </div>
-    </div>
-</div>
-
-{% endfor %}
 
 
 
@@ -421,21 +336,21 @@
     <br id="sec-evmap-de" style="margin-top: 1rem;">
     <div class="row" style="margin-bottom:2rem;">
         <div class="col">
-            {% include 'pub/pub.CAT._EVMAP_DE.html' %}
+            {% include 'pub/CAT/default/_EVMAP_DE.html' %}
         </div>
     </div>
 
     <br id="sec-evmap-crem" style="margin-top: 3rem;">
     <div class="row" style="margin-top: 2rem; margin-bottom:2rem;">
         <div class="col">
-            {% include 'pub/pub.CAT._EVMAP_CREM.html' %}
+            {% include 'pub/CAT/default/_EVMAP_CREM.html' %}
         </div>
     </div>
 
     <br id="sec-evmap-ne" style="margin-top: 3rem;">
     <div class="row" style="margin-top: 2rem; margin-bottom:2rem;">
         <div class="col">
-            {% include 'pub/pub.CAT._EVMAP_NE.html' %}
+            {% include 'pub/CAT/default/_EVMAP_NE.html' %}
         </div>
     </div>
 </div>
@@ -515,26 +430,7 @@ function switch_nma_data(tag, trt, display_name) {
 }
 
 $(document).ready(function() {
-    // init the dma
-    {% for tp in dma %}
-    switch_dma_data(
-        '[[ tp[:4] ]]', 
-        '[[ "|".join(dma[tp][dma[tp]["_default_option"]]["slides"]) ]]', 
-        '[[ dma[tp]["_default_option"] ]]'
-    );
-    // resize the iframe to fit content
-    $('#iframe-dma-[[ tp[:4] ]]').on('load', function() {
-        // console.log('* loaded iframe#' + 'iframe-dma-[[ tp[:4] ]]');
-        resizeIFrameToFitContent('iframe-dma-[[ tp[:4] ]]');
-        setTimeout("resizeIFrameToFitContent('iframe-dma-[[ tp[:4] ]]');", 300);
-        setTimeout("resizeIFrameToFitContent('iframe-dma-[[ tp[:4] ]]');", 900);
-    });
-    {% endfor %}
-
-    // init the nma
-    {% for item in nma['nma'] %}
-    switch_nma_data('[[ item["sname"] ]]', '[[ item["treats"][0] ]]');
-    {% endfor %}
+    
 });
 </script>
 </body>

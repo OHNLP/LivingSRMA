@@ -334,8 +334,7 @@ p {
                         <th rowspan="2">Relative</th>
                         <th rowspan="2" v-if="show_raw=='yes'">Raw</th>
 
-                        <th colspan="6" v-if="show_survival=='yes'">Absolute</th>
-                        <th colspan="3" v-else>Absolute</th>
+                        <th colspan="3">Absolute</th>
                         <th rowspan="2">Certainty in <br>Evidence</th>
                         <th rowspan="2">Importance</th>
                     </tr>
@@ -343,9 +342,6 @@ p {
                         <th>Intervention</th>
                         <th>Control</th>
                         <th>Risk Difference</th>
-                        <th v-if="show_survival=='yes'">Survival in <br>Intervention</th>
-                        <th v-if="show_survival=='yes'">Survival in <br>Control</th>
-                        <th v-if="show_survival=='yes'">Survival <br>Difference</th>
                     </tr>
 
                     <tr v-for="r, r_idx in rs">
@@ -379,10 +375,20 @@ p {
                                 CI: {{ _int(get_CIR(r, 'lower') * baseline) }} to 
                                 {{ _int(get_CIR(r, 'upper') * baseline) }}
                             </span>
+
+                            <span v-if="show_survival=='yes' && get_SRVI_txt(r, 'sm') !='NA' ">
+                                <br>
+                                Survival: {{ get_SRVI_txt(r, 'sm') }}
+                            </span>
                         </td>
 
                         <td>
                             {{ _int(get_ACR(r) * baseline) }} per {{ baseline }}
+
+                            <span v-if="show_survival=='yes' && get_SRVI_txt(r, 'sm') !='NA' ">
+                                <br>
+                                Survival: {{ get_SRVC_txt(r) }}
+                            </span>
                         </td>
 
                         <td>
@@ -394,18 +400,11 @@ p {
                                 RD(%): {{ get_ARDp_txt(r) }}<br>
                                 CI: {{ get_ARDp_txt(r, 'lower')}} to {{ get_ARDp_txt(r, 'upper')}}
                             </span>
-                        </td>
 
-                        <td v-if="show_survival=='yes'">
-                            {{ get_SRVI_txt(r, 'sm') }}
-                        </td>
-
-                        <td v-if="show_survival=='yes'">
-                            {{ get_SRVC_txt(r) }}
-                        </td>
-
-                        <td v-if="show_survival=='yes'">
-                            {{ get_SRVD_txt(r, 'sm') }}
+                            <span v-if="show_survival=='yes' && get_SRVI_txt(r, 'sm') !='NA' ">
+                                <br>
+                                Survival: {{ get_SRVD_txt(r, 'sm') }}
+                            </span>
                         </td>
 
                         <td v-bind:class="get_cie_clr(r)"

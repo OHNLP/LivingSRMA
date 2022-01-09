@@ -203,10 +203,10 @@ class Project:
     @command
     @argument("keystr", type=str, description="The keystr for a project")
     @argument("cq_abbr", type=str, description="The cq_abbr for a clinical question")
-    @argument("fn_itable", type=str, description="The file name of the data file")
-    @argument("fn_filter", type=str, description="The file name of the data file")
+    @argument("full_fn_itable", type=str, description="The full file name of the data file")
+    @argument("full_fn_filter", type=str, description="The full file name of the data file")
     @argument("are_you_sure", type=str, description="yes for final confirmation")
-    def import_itable(self, keystr:str, cq_abbr:str, fn_itable:str, fn_filter:str, are_you_sure:str):
+    def import_itable(self, keystr:str, cq_abbr:str, full_fn_itable:str, full_fn_filter:str, are_you_sure:str):
         '''
         Import and itable data from Excel file
         '''
@@ -215,9 +215,10 @@ class Project:
             return 
 
         itable = bp_extractor.import_itable_from_xls(
-            keystr, cq_abbr, 
-            fn_itable,
-            fn_filter
+            keystr, 
+            cq_abbr, 
+            full_fn_itable,
+            full_fn_filter
         )
 
         if itable is None:

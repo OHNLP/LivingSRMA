@@ -857,12 +857,13 @@ def import_itable():
     '''
     prj = request.args.get('prj')
     cq = request.args.get('cq')
-    itable = import_itable_from_xls(prj, cq)
+    # itable = import_itable_from_xls(prj, cq)
+    itable = None
 
     # build the return obj
     ret = {
-        'success': True,
-        'extract': itable.as_dict()
+        'success': itable is not None,
+        'extract': itable.as_dict() if itable is not None else None
     }
     return jsonify(ret)
 
@@ -892,8 +893,9 @@ def import_softable_pma():
 def import_itable_from_xls(
     keystr, 
     cq_abbr, 
-    fn_itable = 'ITABLE_ATTR_DATA.xlsx', 
-    fn_filter = 'ITABLE_FILTERS.xlsx'):
+    full_fn_itable, 
+    full_fn_filter
+):
     '''
     Import itable all data from xls file
 
@@ -902,6 +904,9 @@ def import_itable_from_xls(
     1. meta data for attributes
     2. data of extraction
     3. filters
+
+    the itable file name is 'ITABLE_ATTR_DATA.xlsx'.
+    the filters name is ITABLE_FILTERS.xlsx
     '''
     project = dora.get_project_by_keystr(keystr)
 
@@ -940,14 +945,20 @@ def import_itable_from_xls(
         )
 
     # get the itable data
-    cad, cate_attrs, i2a, data = get_itable_from_itable_data_xls(project.keystr, fn_itable)
+    cad, cate_attrs, i2a, data = get_itable_from_itable_data_xls(
+        project.keystr, 
+        full_fn_itable
+    )
 
     # update the meta
     meta = extract.meta
     meta['cate_attrs'] = cate_attrs
 
     # get the filters
-    filters = get_itable_filters_from_xls(project.keystr, fn_filter)
+    filters = get_itable_filters_from_xls(
+        project.keystr, 
+        full_fn_filter
+    )
     meta['filters'] = filters
 
     # update the extract
@@ -959,23 +970,25 @@ def import_itable_from_xls(
     return itable
 
 
-def get_itable_from_itable_data_xls(keystr, fn = 'ITABLE_ATTR_DATA.xlsx'):
+def get_itable_from_itable_data_xls(keystr, full_fn):
     '''
     Get the itable extract from ITABLE_ATTR_DATA.xlsx
     '''
-
     # get the ca list first
-    ca_dict, ca_list, i2a = get_cate_attr_subs_from_itable_data_xls(keystr, fn)
+    ca_dict, ca_list, i2a = get_cate_attr_subs_from_itable_data_xls(
+        keystr, full_fn
+    )
 
     import pandas as pd
 
     
-    full_fn = os.path.join(
-        current_app.instance_path, 
-        settings.PATH_PUBDATA, 
-        keystr, 
-        fn
-    )
+    # full_fn = os.path.join(
+    #     current_app.instance_path, 
+    #     settings.PATH_PUBDATA, 
+    #     keystr, 
+    #     fn
+    # )
+
     if not os.path.exists(full_fn):
         # try the xls file
         full_fn = full_fn[:-1]
@@ -1146,18 +1159,18 @@ def get_itable_from_itable_data_xls(keystr, fn = 'ITABLE_ATTR_DATA.xlsx'):
     return ca_dict, ca_list, i2a, data
 
 
-def get_cate_attr_subs_from_itable_data_xls(keystr, fn = 'ITABLE_ATTR_DATA.xlsx'):
+def get_cate_attr_subs_from_itable_data_xls(keystr, full_fn):
     '''
     Get the cate, attr, and subs from
     '''
     import pandas as pd
 
-    full_fn = os.path.join(
-        current_app.instance_path, 
-        settings.PATH_PUBDATA, 
-        keystr, 
-        fn
-    )
+    # full_fn = os.path.join(
+    #     current_app.instance_path, 
+    #     settings.PATH_PUBDATA, 
+    #     keystr, 
+    #     fn
+    # )
 
     if not os.path.exists(full_fn):
         # try the xls file
@@ -1273,22 +1286,22 @@ def get_cate_attr_subs_from_itable_data_xls(keystr, fn = 'ITABLE_ATTR_DATA.xlsx'
     return cate_attr_dict, cate_attr_list, idx2abbr
 
 
-def get_itable_filters_from_xls(keystr, fn = 'ITABLE_FILTERS.xlsx'):
+def get_itable_filters_from_xls(keystr, full_fn):
     '''
     Get the filters from ITABLE_FILTER.xlsx
     '''
-    import pandas as pd
 
-    full_fn = os.path.join(
-        current_app.instance_path, 
-        settings.PATH_PUBDATA, 
-        keystr, fn
-    )
+    # full_fn = os.path.join(
+    #     current_app.instance_path, 
+    #     settings.PATH_PUBDATA, 
+    #     keystr, fn
+    # )
     if not os.path.exists(full_fn):
         # try the xls file
-        full_fn = full_fn[:-1]
+        return []
 
     # load the data file
+    import pandas as pd
     xls = pd.ExcelFile(full_fn)
     # load the Filters tab
     sheet_name = 'Filters'
