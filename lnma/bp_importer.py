@@ -25,8 +25,6 @@ from lnma import dora, settings, srv_import
 from lnma import util
 from lnma import ss_state
 
-from lnma.bp_screener import create_pr_rs_details
-
 from tqdm import tqdm
 
 import json
@@ -186,7 +184,7 @@ def import_pmids():
 
     # convert stage to pr and rs
     ss_pr, ss_rs = ss_state.SS_STAGE_TO_PR_AND_RS[stage]
-    ss_ex = create_pr_rs_details('User specified', stage)
+    ss_ex = util.create_pr_rs_details('User specified', stage)
 
     # TODO check the pmids and project_id
 
@@ -563,7 +561,7 @@ def save_papers():
 
     # convert stage to pr and rs
     ss_pr, ss_rs = ss_state.SS_STAGE_TO_PR_AND_RS[stage]
-    ss_ex = create_pr_rs_details('User specified', stage)
+    ss_ex = util.create_pr_rs_details('User specified', stage)
 
     ret = {
         "success": True,

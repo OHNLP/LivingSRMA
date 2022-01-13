@@ -22,7 +22,7 @@ from datetime import timedelta
 from imbox import Imbox
 
 # app settings
-from lnma import db, create_app, srv_extract
+from lnma import db, create_app, srv_extract, srv_paper
 from lnma.models import *
 from lnma import dora
 from lnma import util
@@ -44,8 +44,15 @@ def test_pred():
     
 
 def test1():
-    print('is_valid_pmid:', util.is_valid_pmid('12345678'))
-    print('is_valid_pmid:', util.is_valid_pmid('223456783212323212'))
+    ret = srv_paper.check_existed_paper_by_file(
+        'IO',
+        'ovid',
+        # '/tmp/IO-0110-149.xml'
+        '/tmp/IO-0107-1336.xml'
+    )
+    print(ret['cnt'])
+    # print('is_valid_pmid:', util.is_valid_pmid('12345678'))
+    # print('is_valid_pmid:', util.is_valid_pmid('223456783212323212'))
 
 
 def test3():

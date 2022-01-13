@@ -715,19 +715,23 @@ def parse_endnote_exported_xml(full_fn):
         paper['journal'] = check_paper_journal('; '.join(paper['journal']))
         paper['pid_type'] = check_paper_pid_type(', '.join(paper['pid_type']))
 
-        # if the pid is empty, just ignore this study
+        # if the pid is empty, 
         paper['pid'] = check_paper_pid(paper['pid'])
         paper['doi'] = check_paper_doi(paper['doi'])
         
         if paper['pid'] == '':
-            paper['pid'] = mk_md5_by_title(
-                paper['title']
-            )
-            paper['pid_type'] = 'MD5'
-            
+            # what a ... anyway, check doi
             if paper['doi'] == '':
+                # I don't have anything to say, just make a fake pid for this
+                paper['pid'] = mk_md5_by_title(
+                    paper['title']
+                )
+                paper['pid_type'] = 'MD5'
+
                 cnt['no_id'] += 1
             else:
+                paper['pid'] = paper['doi']
+                paper['pid_type'] = 'DOI'
                 cnt['no_pid_has_doi'] += 1
                 
         else:
@@ -1326,6 +1330,19 @@ def convert_extract_r_to_number(r, input_format):
         pass
 
     return r
+
+
+def create_pr_rs_details(reason, decision):
+    """
+    Create detail_dict for the pr_rs for screening
+    """
+    detail_dict = {
+        'date_decided': get_today_date_str(),
+        'reason': reason,
+        'decision': decision
+    }
+
+    return detail_dict
 
 
 if __name__ == "__main__":

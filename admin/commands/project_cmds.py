@@ -148,7 +148,7 @@ class Project:
     @argument("keystr", type=str, description="The keystr for a project")
     @argument("cq_abbr", type=str, description="The cq_abbr for a clinical question")
     @argument("full_path", type=str, description="The full path to the data file")
-    @argument("oc_type", type=str, description="The oc type, nma or pma")
+    @argument("oc_type", type=str, description="The oc type, nma or pwma")
     @argument("are_you_sure", type=str, description="yes for final confirmation")
     def import_extracts(self, 
         keystr:str, 

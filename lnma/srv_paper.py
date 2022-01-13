@@ -430,6 +430,212 @@ def delete_paper_from_db_by_seq_num(keystr, seq_num, is_stop_when_used=True):
     return ret
 
 
+def check_existed_paper_by_file(keystr, data_type, full_path):
+    '''
+    Check existed papers by a given file
+    '''
+    # has this project?
+    project = dora.get_project_by_keystr(keystr)
+
+    if project is None:
+        print('* no such project %s' % keystr)
+        return
+
+    # read the content from that file
+    raw_text = open(full_path, encoding='utf-8').read()
+
+    if data_type == 'ovid':
+        # remove illegal chars in the text, usually the \x00 or others
+        xml_text = util.escape_illegal_xml_characters(raw_text)
+
+        # get the json papers
+        jsonpapers = util.parse_ovid_exported_xml_text(xml_text)
+
+        # check
+        ret = check_existed_paper_by_jsonpapers(
+            project.project_id, 
+            jsonpapers
+        )
+
+    else:
+        ret = None
+
+    return ret
+
+
+def check_existed_paper_by_jsonpapers(project_id, jsonpapers):
+    '''
+    Check existed papers by a given json papers
+    '''
+    ret = {
+        "cnt": {
+            'total': len(jsonpapers),
+            'existed': 0,
+            'new': 0
+        },
+        "papers": {
+            'existed': [],
+            'new': []
+        }
+    }
+
+    # check each one
+    for p in tqdm(jsonpapers):
+        pid = p['pid']
+        title = p['title']
+
+        # check this paper in database
+        is_existed, paper = dora.is_existed_paper(
+            project_id,
+            pid,
+            title
+        )
+
+        if is_existed:
+            ret['cnt']['existed'] += 1
+            _p = {
+                'result': 'existed',
+                'seq': paper.seq_num,
+                'p': p,
+            }
+            ret['papers']['existed'].append(_p)
+        else:
+            ret['cnt']['new'] += 1
+            _p = {
+                'result': 'new',
+                'seq': 0,
+                'p': p,
+            }
+            ret['papers']['new'].append(_p)
+
+    return ret
+
+
+def save_paper_by_file(keystr, data_type, full_path):
+    '''
+    Save papers by a given file
+    '''
+    # has this project?
+    project = dora.get_project_by_keystr(keystr)
+
+    if project is None:
+        print('* no such project %s' % keystr)
+        return
+
+    # read the content from that file
+    raw_text = open(full_path, encoding='utf-8').read()
+
+    if data_type == 'ovid':
+        # remove illegal chars in the text, usually the \x00 or others
+        xml_text = util.escape_illegal_xml_characters(raw_text)
+
+        # get the json papers
+        jsonpapers = util.parse_ovid_exported_xml_text(xml_text)
+
+        # check
+        ret = save_paper_by_jsonpapers(
+            project.project_id, 
+            jsonpapers
+        )
+
+    else:
+        ret = None
+
+    return ret
+
+
+def save_paper_by_jsonpapers(project_id, jsonpapers, stage=ss_state.SS_STAGE_UNSCREENED):
+    '''
+    Save paper object by a JSON object parsed by OVID
+    '''
+    # get the screening stage information
+    # convert stage to pr and rs
+    ss_pr, ss_rs = ss_state.SS_STAGE_TO_PR_AND_RS[stage]
+    ss_ex = util.create_pr_rs_details('User specified', stage)
+
+    # for the results
+    ret = {
+        "success": True,
+        "cnt": {
+            'total': len(jsonpapers),
+            'existed': 0,
+            'created': 0,
+        },
+        "papers": {
+            'existed': [],
+            'created': []
+        }
+    }
+
+    for p in jsonpapers:
+        # create the `meta` object for a paper
+        # meta
+        meta = {}
+        if 'raw_type' in p:
+            if p['raw_type'] in ['pubmed_xml', 'endnote_xml', 'ovid_xml']:
+                meta['raw_type'] = p['raw_type']
+                meta['xml'] = p['xml']
+        else:
+            meta['raw_type'] = None
+
+        # add the DOI when uploading a new study
+        if 'doi' in p:
+            meta['doi'] = p['doi']
+        else:
+            meta['doi'] = ''
+        # create
+        try:
+            is_exist, paper = dora.create_paper_if_not_exist_and_predict_rct(
+                project_id, 
+                p['pid'], 
+                p['pid_type'],
+                p['title'],
+                p['abstract'],
+                util.check_paper_pub_date(p['pub_date']),
+                util.check_paper_authors(p['authors']),
+                util.check_paper_journal(p['journal']),
+                meta,
+                ss_state.SS_ST_IMPORT_ENDNOTE_XML,
+                ss_pr,
+                ss_rs,
+                ss_ex,
+                None,
+            )
+        except Exception as err:
+            # give some feedback to frontend
+            ret['papers'].append({
+                'result': 'error',
+                'success': False,
+                'seq': p['seq']
+            })
+            continue
+        
+        # save the result
+        _p = {
+            'result': '',
+            'success': None,
+            'seq': p['seq']
+        }
+        if is_exist:
+            ret['cnt']['existed'] += 1
+            _p = {
+                'result': 'existed',
+                'success': False,
+                'seq': paper.seq_num
+            }
+            ret['papers']['existed'].append(_p)
+        else:
+            ret['cnt']['created'] += 1
+            _p = {
+                'result': 'created',
+                'success': False,
+                'seq': p['seq']
+            }
+            ret['papers']['created'].append(_p)
+
+    return ret
+
+    
 # if __name__ == '__main__':
 #     # for debug purpose
 #     from lnma import db, create_app

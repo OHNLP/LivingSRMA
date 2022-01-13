@@ -652,7 +652,9 @@ def import_extracts_from_xls(full_path, keystr, cq_abbr, oc_type):
 
         elif oc_type == 'pwma':
             if data_type == 'pre':
-                pass
+                ext, ms_pids = update_extract_pwma_pre_data(ext, df_oc, papers)
+                missing_pids = list(set(missing_pids + ms_pids))
+                print('* updated ext pre data %s' % ext.abbr)
 
             elif data_type == 'raw': 
                 ext, ms_pids = update_extract_pwma_raw_data(ext, df_oc, papers)

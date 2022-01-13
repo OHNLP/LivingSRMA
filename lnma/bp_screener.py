@@ -19,7 +19,6 @@ from lnma import srv_pub_prisma
 from lnma import srv_project
 from lnma.models import *
 from lnma import ss_state
-from lnma.util import get_today_date_str
 
 bp = Blueprint("screener", __name__, url_prefix="/screener")
 
@@ -756,16 +755,3 @@ def sspr_set_rct_feedback():
 #     '''
 #     paper = dora.unset_paper_ss_label(paper_id, ss_state.SS_LABEL_CKL)
 #     return paper
-
-
-def create_pr_rs_details(reason, decision):
-    """
-    Create detail_dict
-    """
-    detail_dict = {
-        'date_decided': get_today_date_str(),
-        'reason': reason,
-        'decision': decision
-    }
-
-    return detail_dict
