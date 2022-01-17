@@ -905,6 +905,13 @@ def _get_prisma_updated(b_stage, f_stage, paper_dict):
     for pid in new_paper_list:
         # get this paper from the paper dict
         # since this pid is from the same source, it must be in the paper dict
+        # but it is possible that due to encoding or other issue
+        # the pid is not there
+        if pid not in paper_dict:
+            print("* NO PID [%s] for PRISMA" % (pid))
+            continue
+        
+        # get this paper
         paper = paper_dict[pid]
 
         # get the nct/rct/ctid of this paper

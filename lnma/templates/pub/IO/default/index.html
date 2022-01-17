@@ -17,7 +17,7 @@
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" />
 
-{% include 'pub/pub._pubstyle.html' %}
+{% include 'pub/_shared/_pubstyle.html' %}
 </head>
 <body>
 <br id="sec-concept">
@@ -85,7 +85,7 @@
                         width: 100%;
                     }
                 </style>
-                <img width="100%" src="[[ url_for('pub.graphdata', prj='IO', fn='CONCEPT_IMAGE.svg') ]]" />
+                <img width="100%" src="[[ url_for('pub.graphdata', keystr='IO', cq='default', fn='CONCEPT_IMAGE.svg') ]]" />
             </div>
         </div>
     </div>

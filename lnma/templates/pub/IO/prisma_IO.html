@@ -407,7 +407,7 @@ a {
 </div>
 <div id="dialog-message-e2" class="dialog" title="Excluded by full text review">
     <p>
-    Full-text articles excluded.
+    Full-text articles excluded.
     </p>
 </div>
 <div style="display:none;" id="data_pub">
@@ -855,6 +855,20 @@ var jarvis = {
             },
             function(data) {
                 console.log(data);
+                // the definition of PRISMA is different from 
+                // others, so need to update the data structure
+                // first, the f2 is the f3 from API
+                data.prisma['f2'] = JSON.parse(
+                    JSON.stringify(data.prisma.f3)
+                );
+                // then, the e1 (excluded by title) is e21 from API
+                data.prisma['e1'] = JSON.parse(
+                    JSON.stringify(data.prisma.e21)
+                );
+                // last, the e2 should be e22 from API
+                data.prisma['e2'] = data.prisma.e22;
+
+                // bind the data
                 jarvis.raw_prisma = data;
 
                 // update the data and add the st by merging
@@ -881,6 +895,7 @@ var jarvis = {
 
                 for (let i = 0; i < jarvis.tokens.length; i++) {
                     var token = jarvis.tokens[i];
+                    console.log('* parsing token', token);
                     st_prisma[token] += data.prisma[token].n_pmids;
                 }
 
@@ -908,7 +923,7 @@ var jarvis = {
                 // replace the total numbers
                 svgtxt = svgtxt.replace('$tt_f1$', prisma_data.prisma.st.f1);
                 svgtxt = svgtxt.replace('$tt_b1$', prisma_data.prisma.st.b1);
-                svgtxt = svgtxt.replace('$tt_stage_screening$', jarvis.raw_prisma.stat.unscreened);
+                // svgtxt = svgtxt.replace('$tt_stage_screening$', jarvis.raw_prisma.stat.unscreened);
 
                 // replace the numbers
                 for (var i = 0; i < sns.length; i++) {
