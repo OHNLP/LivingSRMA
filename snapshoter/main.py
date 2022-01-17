@@ -16,7 +16,8 @@ import shutil
 import argparse
 import datetime
 
-from scene import p_IO_default
+from scene import p_IO_default as snpt4IOdefault
+from scene import general_project as snpt4general
 
 
 def make_archive(source, destination):
@@ -62,15 +63,17 @@ def kacha(keystr, cq_abbr, output_path):
             keystr, cq_abbr
         ))
     
-    if keystr == 'IO':
-        if cq_abbr == 'default':
-            p_IO_default.kacha(output_path)
+    if keystr == 'IO' and cq_abbr == 'default':
+        # a special rule for IO default
+        snpt4IOdefault.kacha(output_path)
     
     else:
-        print('* not defined [%s].[%s]' % (
-            keystr, cq_abbr
-        ))
-
+        snpt4general.kacha(
+            keystr,
+            cq_abbr,
+            output_path
+        )
+        
     return 1
 
 

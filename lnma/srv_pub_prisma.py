@@ -1,3 +1,7 @@
+'''
+Services of PRISMA for publication site
+'''
+
 import os
 import copy
 import pandas as pd
@@ -9,215 +13,6 @@ from lnma import util
 from lnma import ss_state
 from lnma import settings
 from lnma import db
-
-'''
-Services of PRISMA for publication site
-'''
-
-def get_prisma_by_cq(project_id, cq_abbr="default", do_include_papers=True):
-    '''
-    Get the PRISMA numbers from database
-    '''
-    project = dora.get_project(project_id)
-    # project_id = project.project_id
-
-    # get the living prisma from database
-    stat = get_stat_aef(project_id)
-
-    # get the paper information from database
-    # the paper dict is PMID based
-    paper_dict = {}
-
-    # the study dict is NCT based
-    study_dict = {}
-
-    # update the e3 reasons
-    papers = dora.get_papers_by_stage(
-        project_id, 
-        ss_state.SS_STAGE_EXCLUDED_BY_FULLTEXT
-    )
-    stat['e3_by_reason'] = {}
-    for paper in papers:
-        reason = paper.ss_ex['reason']
-        if reason not in stat['e3_by_reason']:
-            stat['e3_by_reason'][reason] = {
-                'n': 0
-            }
-        stat['e3_by_reason'][reason]['n'] += 1
-
-    # update the f1 decisions
-    papers = dora.get_papers_by_stage(
-        project_id,
-        ss_state.SS_STAGE_INCLUDED_SR
-    )
-    # using this to check whether a study is used in MA
-    f1_pids = []
-    for paper in papers:
-        rct_id = paper.get_rct_id()
-
-        # decide the cq level decision
-        if paper.ss_ex['ss_cq'][cq_abbr]['d'] == 'yes':
-            # nothing 
-            stat['f1']['pids'].append(paper.pid)
-
-            # update the rct id if not exists
-            if rct_id not in stat['f1']['rcts']:
-                stat['f1']['rcts'].append(rct_id)
-
-            f1_pids.append(paper.pid)
-        else:
-            # this study is not included in this cq
-            stat['f1']['n'] -= 1
-            stat['e3']['n'] += 1
-
-            # update the reason
-            reason = paper.ss_ex['ss_cq'][cq_abbr]['r']
-            if reason in stat['e3_by_reason']:
-                stat['e3_by_reason'][reason]['n'] += 1
-            else:
-                # this reason is NOT in existing reasons
-                if ss_state.SS_REASON_OTHER not in stat['e3_by_reason']:
-                    stat['e3_by_reason'][ss_state.SS_REASON_OTHER] = {
-                        'n': 0
-                    }
-                stat['e3_by_reason'][ss_state.SS_REASON_OTHER]['n'] += 1
-
-        # add this paper to the paper dict
-        if do_include_papers:
-            paper_dict[paper.pid] = {
-                "authors": paper.authors,
-                "ctid": rct_id,
-                "date": paper.pub_date,
-                "journal": paper.journal,
-                "pid": paper.pid,
-                "pid_type": paper.pid_type,
-                "title": paper.title,
-            }
-
-            # add this RCT to the study dict
-            if rct_id not in study_dict:
-                study_dict[rct_id] = {
-                    "authors": paper.authors,
-                    "ctid": rct_id,
-                    "date": paper.pub_date,
-                    "journal": paper.journal,
-                    "pid": paper.pid,
-                    "title": paper.title,
-
-                    # the followings are for RCT
-                    "study_id": rct_id,
-                    "latest_pid": '',
-                    "pids": [],
-                }
-        
-            # then add this paper to the study list
-            study_dict[rct_id]['latest_pid'] = paper.pid
-            study_dict[rct_id]['pids'].append(paper.pid)
-
-    # update the f3 decisions
-    ocs = dora.get_extracts_by_keystr_and_cq(
-        project.keystr,
-        cq_abbr
-    )
-    # check each outcome
-    for oc in ocs:
-        # check papaer extracted in this outcome
-        for pid in oc.data:
-            p = oc.data[pid]
-
-            if p['is_selected']:
-                if pid in stat['f3']['pids']:
-                    # this pid has been counted
-                    pass
-                else:
-                    stat['f3']['n'] += 1
-                    stat['f3']['pids'].append(pid)
-
-                    # check the ctid
-                    if pid in paper_dict:
-                        rct_id = paper_dict[pid]['ctid']
-                        if rct_id not in stat['f3']['rcts']:
-                            stat['f3']['rcts'].append(rct_id)
-                    else:
-                        # what???
-                        # if this pid not in paper_dict
-                        # which means the rct info is missing
-                        print('* ERROR missing %s in paper_dict' % (
-                            pid
-                        ))
-                        pass
-
-            else:
-                # this paper is extracted but not selected yet.
-                pass
-
-    #######################################################
-    # add other stages
-    #######################################################
-    # the s0
-    stat['s0'] = {
-        'n': stat['a1']['n'] + stat['a2']['n'],
-        'text': 'Search',
-        'pids': []
-    }
-    # use the given s0 as the number
-    if 'prisma' in project.settings and 's0' in project.settings['prisma']:
-        stat['s0']['n'] = project.settings['prisma']['s0']['n']
-
-    # use the cq-specific s0 as the number
-    if 'prisma' in project.settings and \
-        cq_abbr in project.settings['prisma'] and \
-        's0' in project.settings['prisma'][cq_abbr]:
-        stat['s0']['n'] = project.settings['prisma'][cq_abbr]['s0']['n_pmids']
-
-    stat['e1'] = {
-        'n': stat['s0']['n'] - stat['a1']['n'],
-        'text': 'Excluded by duplicates',
-        'pids': []
-    }
-    stat['all'] = {
-        'n': stat['a1']['n'] + 
-             stat['a2']['n'],
-        'text': 'Records for screening',
-        'pids': []
-    }
-    stat['uns'] = {
-        'n': stat['ax_na_na']['n'],
-        'text': 'Unscreened',
-        'pids': []
-    }
-    stat['fte'] = {
-        'n': stat['a1']['n'] + 
-                 stat['a2']['n'] -
-                 stat['e2']['n'] - 
-                 stat['e22']['n'] - 
-                 stat['uns']['n'],
-        'text': 'Eligible for full-text review',
-        'pids': []
-    }
-    stat['unr'] = {
-        'n': stat['ax_p2_na']['n'],
-        'text': 'Reviewing full text',
-        'pids': []
-    }
-    stat['f3n'] = {
-        'n': stat['f1']['n'] -
-                 stat['f3']['n'],
-        'text': 'Not in MA',
-        'pids': []
-    }
-
-    # remove the stages
-    del stat['stages']
-    
-    # finally, we present this object
-    ret = {
-        "stat": stat,
-        "paper_dict": paper_dict,
-        "study_dict": study_dict,
-    }
-
-    return ret
 
 
 def get_pub_prisma_from_db(keystr, cq_abbr='default'):
@@ -387,6 +182,232 @@ def get_pub_prisma_from_db(keystr, cq_abbr='default'):
     return ret
 
 
+def get_prisma_by_cq(project_id, cq_abbr="default", do_include_papers=True):
+    '''
+    Get the PRISMA numbers from database
+    '''
+    project = dora.get_project(project_id)
+
+    if project is None:
+        return None
+
+    # project_id = project.project_id
+
+    # get the living prisma from database
+    stat = get_stat_aef(project_id)
+
+    # get the paper information from database
+    # the paper dict is PMID based
+    paper_dict = {}
+
+    # the study dict is NCT based
+    study_dict = {}
+
+    # update the e3 reasons
+    papers = dora.get_papers_by_stage(
+        project_id, 
+        ss_state.SS_STAGE_EXCLUDED_BY_FULLTEXT
+    )
+    stat['e3_by_reason'] = {}
+    for paper in papers:
+        reason = paper.ss_ex['reason']
+        if reason not in stat['e3_by_reason']:
+            stat['e3_by_reason'][reason] = {
+                'n': 0
+            }
+        stat['e3_by_reason'][reason]['n'] += 1
+
+    # update the f1 decisions
+    papers = dora.get_papers_by_stage(
+        project_id,
+        ss_state.SS_STAGE_INCLUDED_SR
+    )
+    # create a dict for later checking pid existence
+    paper_dict = {}
+    for p in papers:
+        paper_dict[p.pid] = p
+
+    # using this to check whether a study is used in MA
+    f1_pids = []
+    for paper in papers:
+        rct_id = paper.get_rct_id()
+
+        # decide the cq level decision
+        if paper.ss_ex['ss_cq'][cq_abbr]['d'] == 'yes':
+            # nothing 
+            stat['f1']['pids'].append(paper.pid)
+
+            # update the rct id if not exists
+            if rct_id not in stat['f1']['rcts']:
+                stat['f1']['rcts'].append(rct_id)
+
+            f1_pids.append(paper.pid)
+        else:
+            # this study is not included in this cq
+            stat['f1']['n'] -= 1
+            stat['e3']['n'] += 1
+
+            # update the reason
+            reason = paper.ss_ex['ss_cq'][cq_abbr]['r']
+            if reason in stat['e3_by_reason']:
+                stat['e3_by_reason'][reason]['n'] += 1
+            else:
+                # this reason is NOT in existing reasons
+                if ss_state.SS_REASON_OTHER not in stat['e3_by_reason']:
+                    stat['e3_by_reason'][ss_state.SS_REASON_OTHER] = {
+                        'n': 0
+                    }
+                stat['e3_by_reason'][ss_state.SS_REASON_OTHER]['n'] += 1
+
+        # add this paper to the paper dict
+        if do_include_papers:
+            paper_dict[paper.pid] = {
+                "authors": paper.authors,
+                "ctid": rct_id,
+                "date": paper.pub_date,
+                "journal": paper.journal,
+                "pid": paper.pid,
+                "pid_type": paper.pid_type,
+                "title": paper.title,
+            }
+
+            # add this RCT to the study dict
+            if rct_id not in study_dict:
+                study_dict[rct_id] = {
+                    "authors": paper.authors,
+                    "ctid": rct_id,
+                    "date": paper.pub_date,
+                    "journal": paper.journal,
+                    "pid": paper.pid,
+                    "title": paper.title,
+
+                    # the followings are for RCT
+                    "study_id": rct_id,
+                    "latest_pid": '',
+                    "pids": [],
+                }
+        
+            # then add this paper to the study list
+            study_dict[rct_id]['latest_pid'] = paper.pid
+            study_dict[rct_id]['pids'].append(paper.pid)
+
+    # update the f3 decisions
+    ocs = dora.get_extracts_by_keystr_and_cq(
+        project.keystr,
+        cq_abbr
+    )
+    # check each outcome
+    for oc in ocs:
+        # check papaer extracted in this outcome
+        for pid in oc.data:
+            # 2022-01-17 fix the MA>SR issue
+            # need to check whether this pid exists in papers
+            if pid not in paper_dict:
+                # which means this extraction is not linked with a paper,
+                # maybe due to import issue or pid update.
+                # so, just skip this
+                continue
+
+            # get the data
+            p = oc.data[pid]
+
+            if p['is_selected']:
+                if pid in stat['f3']['pids']:
+                    # this pid has been counted
+                    pass
+                else:
+                    stat['f3']['n'] += 1
+                    stat['f3']['pids'].append(pid)
+
+                    # check the ctid
+                    if pid in paper_dict:
+                        rct_id = paper_dict[pid]['ctid']
+                        if rct_id not in stat['f3']['rcts']:
+                            stat['f3']['rcts'].append(rct_id)
+                    else:
+                        # what???
+                        # if this pid not in paper_dict
+                        # which means the rct info is missing
+                        print('* ERROR missing %s in paper_dict' % (
+                            pid
+                        ))
+                        pass
+
+            else:
+                # this paper is extracted but not selected yet.
+                pass
+
+    #######################################################
+    # add other stages
+    #######################################################
+    # the s0
+    stat['s0'] = {
+        'n': stat['a1']['n'] + stat['a2']['n'],
+        'text': 'Search',
+        'pids': []
+    }
+    # use the given s0 as the number
+    if 'prisma' in project.settings and 's0' in project.settings['prisma']:
+        stat['s0']['n'] = project.settings['prisma']['s0']['n']
+
+    # use the cq-specific s0 as the number
+    if 'prisma' in project.settings and \
+        cq_abbr in project.settings['prisma'] and \
+        's0' in project.settings['prisma'][cq_abbr]:
+        stat['s0']['n'] = project.settings['prisma'][cq_abbr]['s0']['n_pmids']
+
+    stat['e1'] = {
+        'n': stat['s0']['n'] - stat['a1']['n'],
+        'text': 'Excluded by duplicates',
+        'pids': []
+    }
+    stat['all'] = {
+        'n': stat['a1']['n'] + 
+             stat['a2']['n'],
+        'text': 'Records for screening',
+        'pids': []
+    }
+    stat['uns'] = {
+        'n': stat['ax_na_na']['n'],
+        'text': 'Unscreened',
+        'pids': []
+    }
+    stat['fte'] = {
+        'n': stat['a1']['n'] + 
+                 stat['a2']['n'] -
+                 stat['e2']['n'] - 
+                 stat['e22']['n'] - 
+                 stat['uns']['n'],
+        'text': 'Eligible for full-text review',
+        'pids': []
+    }
+    stat['unr'] = {
+        'n': stat['ax_p2_na']['n'],
+        'text': 'Reviewing full text',
+        'pids': []
+    }
+    stat['f3n'] = {
+        'n': stat['f1']['n'] -
+                 stat['f3']['n'],
+        'text': 'Not in MA',
+        'pids': []
+    }
+
+    # remove the stages
+    del stat['stages']
+    
+    # finally, we present this object
+    ret = {
+        "stat": stat,
+        "paper_dict": paper_dict,
+        "study_dict": study_dict,
+    }
+
+    return ret
+
+
+
+
 def get_stat_aef(project_id):
     '''
     Get the statistics of the project for the PRISMA
@@ -453,6 +474,9 @@ def get_stat_aef(project_id):
     stat = {
         'stages': stages
     }
+
+    # attention, f3 is always zero
+    # because the value couldn't be decided by the screener
     for k in stages:
         stat[k['stage']] = {
             'n': r[k['stage']],

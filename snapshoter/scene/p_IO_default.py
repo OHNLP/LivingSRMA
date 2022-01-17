@@ -46,7 +46,7 @@ def kacha(output_path):
 
         # for the PRISMA
         ['/pub/prisma_IO.html', 'pub/prisma_IO.html'],
-        ['/pub/graphdata/%s/PRISMA.json?src=db' % (keystr), 'pub/graphdata/%s/PRISMA.json' % (keystr)],
+        ['/pub/graphdata/%s/PRISMA.json?src=db&cq=%s' % (keystr, cq_abbr), 'pub/graphdata/%s/PRISMA.json' % (keystr)],
 
         # for the itable
         ['/pub/itable.html?prj=%s&src=db' % (keystr), 'pub/itable.html'],
