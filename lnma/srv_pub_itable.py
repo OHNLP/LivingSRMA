@@ -31,6 +31,9 @@ def get_itable_attr_rs_cfg_from_db(keystr, cq_abbr="default"):
     for p in papers:
         paper_dict[p.pid] = p
 
+    # this is for output as some papers are not selected for output
+    selected_paper_dict = {}
+
     # get the extract meta and data
     meta = extract.meta
     data = extract.data
@@ -187,6 +190,9 @@ def get_itable_attr_rs_cfg_from_db(keystr, cq_abbr="default"):
 
         # get this paper from dict instead of SQL
         paper = paper_dict[pid]
+
+        # add this paper to dict for output
+        selected_paper_dict[pid] = paper.as_extreme_simple_dict()
         
         # the `r` is for the output
         # first, let's get the main arm
@@ -236,6 +242,7 @@ def get_itable_attr_rs_cfg_from_db(keystr, cq_abbr="default"):
         'rs': rs,
         'cfg': cfg,
         'attrs': attrs,
+        'paper_dict': selected_paper_dict
     }
 
     return ret

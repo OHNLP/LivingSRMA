@@ -372,7 +372,7 @@ a {
                 Data of Studies |
             </h4>
             <div>
-                <p>{{ rs.length }} Records</p>
+                <p>{{ rs.length }} records ({{ n_citations }} citations)</p>
             </div>
         </div>
         <div id="tb_schtab_view" class="box-body" style="overflow-x: auto; padding-bottom: 10px;">
@@ -467,6 +467,8 @@ var dt_tbcore = {
     // translator for db
     t_a2c: {},
     t_c2a: {},
+    papers: [],
+    paper_dict: {},
 
     has_attr: function(attr_name_or_id) {
         var attr_id = this.attr_nm2id(attr_name_or_id);
@@ -496,12 +498,14 @@ var dt_tbcore = {
         return attr_id;
     },
 
-    init: function(rs, attrs) {
+    init: function(rs, attrs, paper_dict) {
         // init the data
         // this.rs = JSON.parse($('#data_rs').html());
         // this.attrs = JSON.parse($('#data_attrs').html());
         this.rs = rs;
         this.attrs = attrs;
+        this.paper_dict = paper_dict;
+        this.papers = Object.values(paper_dict);
 
         // further init the attrs
         // since we don't have any information with the attrs
@@ -681,7 +685,9 @@ var tb_schtab = {
                 },
                 attrs: dt_tbcore.attrs,
                 cols: dt_tbcore.cols,
-                rs: dt_tbcore.rs_db
+                rs: dt_tbcore.rs_db,
+
+                n_citations: dt_tbcore.papers.length
             },
             methods: {
                 get_th_cls: function(idx) {
@@ -790,7 +796,7 @@ var jarvis = {
 
 
                     // init the modules
-                    dt_tbcore.init(data.rs, data.attrs);
+                    dt_tbcore.init(data.rs, data.attrs, data.paper_dict);
                     console.log('* inited dt_tbcore');
 
                     tb_filter.init();

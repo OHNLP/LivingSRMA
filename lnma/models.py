@@ -4,6 +4,8 @@ import json
 import logging
 from xml.sax.saxutils import escape
 
+from matplotlib.pyplot import title
+
 from . import db
 from . import settings
 from werkzeug.security import generate_password_hash
@@ -498,6 +500,13 @@ class Paper(db.Model):
                 return True
             else:
                 return False
+        else:
+            # sometimes, we don't know ...
+            if util.is_valid_pmid(self.pid):
+                return True
+            else:
+                return False
+
 
         return False
         
@@ -579,6 +588,24 @@ class Paper(db.Model):
         del simple_dict['project_id']
 
         return simple_dict
+
+    def as_extreme_simple_dict(self):
+        '''
+        Return an extreme simple dict for small file size
+        '''
+        d = dict(
+            pid = self.pid,
+            pid_type = self.pid_type,
+            title = self.title,
+            is_pmid = self.is_pmid(),
+            year = self.get_year(),
+            rct_id = self.get_rct_id(),
+            short_name = self.get_short_name(),
+            study_type = self.get_study_type(),
+            journal = self.journal,
+            pub_date = self.pub_date
+        )
+        return d
 
 
     def as_endnote_xml(self):
