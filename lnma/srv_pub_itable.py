@@ -25,6 +25,12 @@ def get_itable_attr_rs_cfg_from_db(keystr, cq_abbr="default"):
     if extract is None:
         return None
 
+    # get the papers for this project
+    papers = dora.get_papers_of_included_sr(project_id)
+    paper_dict = {}
+    for p in papers:
+        paper_dict[p.pid] = p
+
     # get the extract meta and data
     meta = extract.meta
     data = extract.data
@@ -173,12 +179,14 @@ def get_itable_attr_rs_cfg_from_db(keystr, cq_abbr="default"):
         if paper_ext['is_selected'] == False: continue
 
         # now, let's parse this paper
-        paper = dora.get_paper_by_project_id_and_pid(project_id, pid)
-
-        if paper is None:
+        # paper = dora.get_paper_by_project_id_and_pid(project_id, pid)
+        if pid not in paper_dict:
             # what???
             print('* MISSING %s when building ITABLE.json' % pid)
             continue
+
+        # get this paper from dict instead of SQL
+        paper = paper_dict[pid]
         
         # the `r` is for the output
         # first, let's get the main arm

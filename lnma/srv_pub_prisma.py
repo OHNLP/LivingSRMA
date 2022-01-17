@@ -142,7 +142,9 @@ def get_prisma_by_cq(project_id, cq_abbr="default", do_include_papers=True):
                         # what???
                         # if this pid not in paper_dict
                         # which means the rct info is missing
-                        print('* ERROR missing %s in paper_dict')
+                        print('* ERROR missing %s in paper_dict' % (
+                            pid
+                        ))
                         pass
 
             else:
@@ -910,7 +912,7 @@ def _get_prisma_updated(b_stage, f_stage, paper_dict):
         if pid not in paper_dict:
             print("* NO PID [%s] for PRISMA" % (pid))
             continue
-        
+
         # get this paper
         paper = paper_dict[pid]
 
