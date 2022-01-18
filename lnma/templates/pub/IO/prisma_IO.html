@@ -1031,8 +1031,9 @@ var jarvis = {
             + data.prisma.f1.n_pmids;
 
         // update the b1 as the b4
-        prisma_data.prisma.lv.b1 = prisma_data.prisma.lv.b4 > data.prisma.a1.n_pmids ?
-            prisma_data.prisma.lv.b4 : data.prisma.a1.n_pmids;
+        prisma_data.prisma.lv.b1 = data.prisma.a1.n_pmids + data.prisma.a2x.n_pmids;
+        // prisma_data.prisma.lv.b1 = prisma_data.prisma.lv.b4 > data.prisma.a1.n_pmids ?
+            // prisma_data.prisma.lv.b4 : data.prisma.a1.n_pmids;
 
         // the full-text eligibility
         prisma_data.prisma.lv.b5 = data.prisma.e3.n_pmids

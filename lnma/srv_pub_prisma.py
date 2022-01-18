@@ -68,7 +68,7 @@ def get_pub_prisma_from_db(keystr, cq_abbr='default'):
     prisma = {}
 
     # first, the living
-    for s in ['a1', 'e2', 'e22', 'e3', 'f1', 'f3']:
+    for s in ['a1', 'a2x', 'e2', 'e22', 'e3', 'f1', 'f3']:
         tmp = copy.deepcopy(living_prisma['stat'][s])
         tmp['paper_list'] = tmp['pids']
         tmp['study_list'] = tmp['rcts']
@@ -342,7 +342,7 @@ def get_prisma_by_cq(project_id, cq_abbr="default", do_include_papers=True):
     #######################################################
     # the s0
     stat['s0'] = {
-        'n': stat['a1']['n'] + stat['a2']['n'],
+        'n': stat['a1']['n'] + stat['a2x']['n'],
         'text': 'Search',
         'pids': []
     }
@@ -363,7 +363,7 @@ def get_prisma_by_cq(project_id, cq_abbr="default", do_include_papers=True):
     }
     stat['all'] = {
         'n': stat['a1']['n'] + 
-             stat['a2']['n'],
+             stat['a2x']['n'],
         'text': 'Records for screening',
         'pids': []
     }
@@ -374,7 +374,7 @@ def get_prisma_by_cq(project_id, cq_abbr="default", do_include_papers=True):
     }
     stat['fte'] = {
         'n': stat['a1']['n'] + 
-                 stat['a2']['n'] -
+                 stat['a2x']['n'] -
                  stat['e2']['n'] - 
                  stat['e22']['n'] - 
                  stat['uns']['n'],
@@ -420,7 +420,7 @@ def get_stat_aef(project_id):
     '''
     stages = [
         { "stage": "a1",  "text": "Records identified through automatic update" },
-        { "stage": "a2",  "text": "Records identified through batch import" },
+        { "stage": "a2x",  "text": "Records identified through batch import" },
 
         { "stage": "ax_na_na",  "text": "Unscreened records" },
         { "stage": "ax_p2_na",  "text": "Full-text reviewing" },
@@ -436,7 +436,7 @@ def get_stat_aef(project_id):
     select project_id,
         
         count(case when ss_st in ('a10', 'a11', 'a12') then paper_id else null end) as a1,
-        count(case when ss_st in ('a21', 'a22', 'a23') then paper_id else null end) as a2,
+        count(case when ss_st in ('a21', 'a22', 'a23') then paper_id else null end) as a2x,
 
         count(case when ss_pr = 'na' and ss_rs = 'na' then paper_id else null end) as ax_na_na,
         count(case when ss_pr = 'p20' and ss_rs = 'na' then paper_id else null end) as ax_p2_na,
