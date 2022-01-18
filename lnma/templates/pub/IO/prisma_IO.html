@@ -1025,12 +1025,15 @@ var jarvis = {
         // 2. update the prisma number
         // merge the living part
         prisma_data.prisma.lv.b1 = data.prisma.a1.n_pmids;
-        prisma_data.prisma.lv.b3 = data.prisma.a1.n_pmids;
-        prisma_data.prisma.lv.b4 = data.prisma.a1.n_pmids;
+        // b4 is the screened, which is the sum of included and excluded
+        prisma_data.prisma.lv.b4 = data.prisma.e1.n_pmids
+            + data.prisma.e2.n_pmids
+            + data.prisma.e3.n_pmids
+            + data.prisma.f1.n_pmids;
+
         // the full-text eligibility
-        prisma_data.prisma.lv.b5 = data.prisma.a1.n_pmids
-            - data.prisma.e1.n_pmids
-            - data.prisma.e2.n_pmids;
+        prisma_data.prisma.lv.b5 = data.prisma.e3.n_pmids
+            + data.prisma.f1.n_pmids;
         // the excluded
         prisma_data.prisma.lv.e1 = data.prisma.e1.n_pmids;
         prisma_data.prisma.lv.e2 = data.prisma.e2.n_pmids;
