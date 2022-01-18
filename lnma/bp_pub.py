@@ -91,24 +91,24 @@ def php():
 # Every thing is special designed
 ###############################################################################
 
-@bp.route('/IO.html')
-def static_IO():
-    prj = 'IO'
-    return render_template('pub/IO/pub.IO.html')
+# @bp.route('/IO.html')
+# def static_IO():
+#     prj = 'IO'
+#     return render_template('pub/IO/pub.IO.html')
 
 
-@bp.route('/IOTOX.html')
-def IOTOX():
-    prj = 'IOTOX'
-    return render_template('pub/pub.IOTOX.html')
+# @bp.route('/IOTOX.html')
+# def IOTOX():
+#     prj = 'IOTOX'
+#     return render_template('pub/pub.IOTOX.html')
 
 
-@bp.route('/IO/default/index.html')
-def pub_IO_default_index():
-    '''
-    The index page for IO default project
-    '''
-    return render_template('pub/IO/default/index.html')
+# @bp.route('/IO/default/index.html')
+# def pub_IO_default_index():
+#     '''
+#     The index page for IO default project
+#     '''
+#     return render_template('pub/IO/default/index.html')
 
 
 @bp.route('/prisma_IO.html')
