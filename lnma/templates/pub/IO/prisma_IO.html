@@ -543,6 +543,9 @@ var tb_studylist = {
 }
 
 var prisma_data = {
+    "sns": [
+        's1', 's2', 's3', 's4', 's5', 's6', 's7', 'lv', 'st'
+    ],
     "search": {
         "s1": { "date": "09/11/2018" },
         "s2": { "date": "01/13/2019" },
@@ -550,7 +553,11 @@ var prisma_data = {
         "s4": { "date": "06/04/2019" },
         "s5": { "date": "10/04/2019" },
         "s6": { "date": "04/06/2020" },
-        "s7": { "date": "08/04/2020" }
+        "s7": { "date": "08/04/2020" },
+        // st is the total part
+        'st': { 'date': '' },
+        // lv is the living part
+        'lv': { 'date': '' }
     },
     "prisma": {
         "s1": { "b1": 5663, "b2": 0, "b3": 5648, "b4": 5648, "b5": 2022, "f1": 39, "f2": 37, "e1": 3626, "e3": 1938, "e2": 0},
@@ -559,7 +566,11 @@ var prisma_data = {
         "s4": { "b1": 444,  "b2": 0, "b3":  444, "b4":  444, "b5":  282, "f1":  6, "f2":  5, "e1":  162, "e3":  276, "e2": 0},
         "s5": { "b1": 663,  "b2": 0, "b3":  663, "b4":  663, "b5":  404, "f1":  6, "f2":  6, "e1":  259, "e3":  398, "e2": 0},
         "s6": { "b1": 1218, "b2": 0, "b3": 1196, "b4": 1196, "b5":  802, "f1": 12, "f2":  7, "e1":  394, "e3":  790, "e2": 0},
-        "s7": { "b1": 539,  "b2": 0, "b3":  539, "b4":  539, "b5":  356, "f1": 16, "f2": 13, "e1":  183, "e3":  340, "e2": 0}
+        "s7": { "b1": 539,  "b2": 0, "b3":  539, "b4":  539, "b5":  356, "f1": 16, "f2": 13, "e1":  183, "e3":  340, "e2": 0},
+        // st is the total
+        "st": { "b1": 0,  "b2": 0, "b3":  0, "b4":  0, "b5":  0, "f1": 0, "f2": 0, "e1":  0, "e3":  0, "e2": 0},
+        // lv is the living
+        "lv": { "b1": 0,  "b2": 0, "b3":  0, "b4":  0, "b5":  0, "f1": 0, "f2": 0, "e1":  0, "e3":  0, "e2": 0},
     },
     "studylist": {
         "s1": {
@@ -775,6 +786,16 @@ var prisma_data = {
                 "32271354",
                 "32673417"
             ]
+        },
+        // st is the total
+        'st': {
+            'sr': [],
+            'ma': []
+        },
+        // lv is the living
+        'lv': {
+            'sr': [],
+            'ma': []
         }
     },
 }
@@ -820,6 +841,7 @@ var jarvis = {
             's5': 'search 5',
             's6': 'search 6',
             's7': 'search 7',
+            'lv': 'living update',
             'st': 'all searches'
         }[sn];
     },
@@ -833,7 +855,7 @@ var jarvis = {
         return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
     },
 
-    init: function() {
+    load: function() {
         // for the message boxes
         $( ".dialog" ).dialog({
             autoOpen: false
@@ -854,152 +876,220 @@ var jarvis = {
                 cq: cq
             },
             function(data) {
-                console.log(data);
-                // the definition of PRISMA is different from 
-                // others, so need to update the data structure
-                // first, the f2 is the f3 from API
-                data.prisma['f2'] = JSON.parse(
-                    JSON.stringify(data.prisma.f3)
-                );
-                // then, the e1 (excluded by title) is e21 from API
-                data.prisma['e1'] = JSON.parse(
-                    JSON.stringify(data.prisma.e21)
-                );
-                // last, the e2 should be e22 from API
-                data.prisma['e2'] = data.prisma.e22;
+                jarvis.init(data);
+            }
+        );
+    },
 
-                // bind the data
-                jarvis.raw_prisma = data;
+    init: function(data) {
+        console.log(data);
+        // the definition of PRISMA is different from 
+        // others, so need to update the data structure
+        // first, the f2 is the f3 from API
+        data.prisma['f2'] = JSON.parse(
+            JSON.stringify(data.prisma.f3)
+        );
+        // then, the e1 (excluded by title) is e21 from API
+        data.prisma['e1'] = JSON.parse(
+            JSON.stringify(data.prisma.e21)
+        );
+        // last, the e2 should be e22 from API
+        data.prisma['e2'] = data.prisma.e22;
 
-                // update the data and add the st by merging
-                var st_sr_pids = [];
-                var st_ma_pids = [];
-                var sns = ['st'];
-                var st_prisma = { 
-                    "b1": 0, "b2": 0, "b3": 0, "b4": 0, "b5": 0, 
-                    "e1": 0, "e2": 0, "e3": 0,
-                    "f1": 0, "f2": 0, 
-                };
+        // bind the raw data
+        jarvis.raw_prisma = data;
 
-                for (var i = 1; i <= jarvis.current.total; i++) {
-                    var sn = 's' + i;
-                    st_sr_pids = st_sr_pids.concat(prisma_data.studylist[sn]['sr']);
-                    st_ma_pids = st_ma_pids.concat(prisma_data.studylist[sn]['ma']);
-                    sns.push(sn);
-
-                    for (var j = 0; j < jarvis.tokens.length; j++) {
-                        var token = jarvis.tokens[j];
-                        st_prisma[token] += prisma_data.prisma[sn][token];
-                    }
-                }
-
-                for (let i = 0; i < jarvis.tokens.length; i++) {
-                    var token = jarvis.tokens[i];
-                    console.log('* parsing token', token);
-                    st_prisma[token] += data.prisma[token].n_pmids;
-                }
-
-                // update the st for the data
-                prisma_data.search['st'] = {'date': data.latest.last_created}
-                prisma_data.studylist['st'] = {
-                    sr: data.prisma.f1.paper_list,
-                    ma: data.prisma.f2.paper_list
-                };
-                st_prisma['f1'] = prisma_data.studylist['st']['sr'].length;
-                st_prisma['f2'] = prisma_data.studylist['st']['ma'].length;
-                prisma_data.prisma['st'] = st_prisma;
-                prisma_data['sns'] = sns;
-
-                // bind data to jarvis
-                jarvis.data = prisma_data;
-
-                // init the figure
-                // replace the $$ with jquery findable tag
-                var svgtxt = document.getElementById('fg_prisma').innerHTML;
-
-                // replace the prisma title
-                svgtxt = svgtxt.replace('$prisma_title$', '<span id="'+jarvis.prisma_title_id+'">&nbsp;</span>');
-
-                // replace the total numbers
-                svgtxt = svgtxt.replace('$tt_f1$', prisma_data.prisma.st.f1);
-                svgtxt = svgtxt.replace('$tt_b1$', prisma_data.prisma.st.b1);
-                // svgtxt = svgtxt.replace('$tt_stage_screening$', jarvis.raw_prisma.stat.unscreened);
-
-                // replace the numbers
-                for (var i = 0; i < sns.length; i++) {
-                    var sn = sns[i];
-                    svgtxt = svgtxt.replace('$'+sn+'_cnt_sr$', '' + prisma_data.studylist[sn]['sr'].length);
-                    svgtxt = svgtxt.replace('$'+sn+'_cnt_ma$', '' + prisma_data.studylist[sn]['ma'].length);
-                    svgtxt = svgtxt.replace('$'+sn+'_date$', '' + prisma_data.search[sn].date);
-                }
-
-                // replace the PRISMA token
-                for (var i = 0; i < jarvis.tokens.length; i++) {
-                    var token = jarvis.tokens[i];
-                    svgtxt = svgtxt.replace('$'+token+'$', '<span id="val_'+token+'"> - </span>');
-                }
-                document.getElementById('fg_prisma').innerHTML = svgtxt;
-
-                jarvis.update_prisma('st');
-
-                tb_studylist.init({
-                    prisma_data: prisma_data,
-                    study_paper: data
-                });
-
-                // set the default view
-                tb_studylist.update_study_list('st', 'ma');
-
-                // bind the click event
-                $('svg a').on('click', function(evt) {
-                    var link = $(this).attr('xlink:href');
-                    console.log("* clicked: " + link);
-                    
-                    // click the studylist link
-                    var ps = link.split('_');
-                    var sn = ps[1];
-                    var op = ps[2];
-                    var stage = ps[3];
-
-                    // decide what to do with op
-                    if (op == 'sch') {
-                        // clicked the search item
-                        // update the PRISMA plot
-                        jarvis.update_prisma(sn);
-
-                    } else if (op == 'cnt') {
-                        // clicked the number
-                        // update the study list
-                        if (sn == 'xx') {
-                            // clicked the cell in the PRISMA plot
-                            tb_studylist.update_study_list(jarvis.current.sn, stage);
-
-                        } else {
-                            // update plot
-                            jarvis.update_prisma(sn);
-
-                            // update list
-                            tb_studylist.update_study_list(sn, stage);
-                        }
-                    }
-                    return false;
-                });
-                $('svg a').hover(
-                    function(evt) {
-                        var fill = $($(this)[0].childNodes[1]).attr('fill');
-                        $($(this)[0].childNodes[1]).attr('fill_bak', fill);
-                        $($(this)[0].childNodes[1]).attr('fill', '#fdec12');
-                    },
-                    function(evt) {
-                        var fill = $($(this)[0].childNodes[1]).attr('fill_bak');
-                        $($(this)[0].childNodes[1]).attr('fill', fill);
-                    }
-                );
+        // update the prisma_data
+        this.init_prisma_data(data);
         
-                jarvis.ssmsg('Data loaded!');
-                setTimeout('jarvis.ssclose();', 300);
-            }, 'json'
-        )
+        // bind data to jarvis
+        jarvis.data = prisma_data;
+
+        // init the figure
+        this.init_prisma_figure(data);
+
+        // bind events
+        this.bind_events();
+
+        // change to the total
+        jarvis.update_prisma('st');
+
+        // init the studylist
+        tb_studylist.init({
+            prisma_data: prisma_data,
+            study_paper: data
+        });
+
+        // set the default view
+        tb_studylist.update_study_list('st', 'ma');
+
+        // done!
+        jarvis.ssmsg('Data loaded!');
+        setTimeout('jarvis.ssclose();', 300);
+
+    },
+
+    bind_events: function() {
+        // bind the click event
+        $('svg a').on('click', function(evt) {
+            var link = $(this).attr('xlink:href');
+            console.log("* clicked: " + link);
+            
+            // click the studylist link
+            var ps = link.split('_');
+            var sn = ps[1];
+            var op = ps[2];
+            var stage = ps[3];
+
+            // decide what to do with op
+            if (op == 'sch') {
+                // clicked the search item
+                // update the PRISMA plot
+                jarvis.update_prisma(sn);
+
+            } else if (op == 'cnt') {
+                // clicked the number
+                // update the study list
+                if (sn == 'xx') {
+                    // clicked the cell in the PRISMA plot
+                    tb_studylist.update_study_list(jarvis.current.sn, stage);
+
+                } else {
+                    // update plot
+                    jarvis.update_prisma(sn);
+
+                    // update list
+                    tb_studylist.update_study_list(sn, stage);
+                }
+            }
+            return false;
+        });
+        $('svg a').hover(
+            function(evt) {
+                var fill = $($(this)[0].childNodes[1]).attr('fill');
+                $($(this)[0].childNodes[1]).attr('fill_bak', fill);
+                $($(this)[0].childNodes[1]).attr('fill', '#fdec12');
+            },
+            function(evt) {
+                var fill = $($(this)[0].childNodes[1]).attr('fill_bak');
+                $($(this)[0].childNodes[1]).attr('fill', fill);
+            }
+        );
+    },
+
+    init_prisma_figure: function(data) {
+        // replace the $$ with jquery findable tag
+        var svgtxt = document.getElementById('fg_prisma').innerHTML;
+
+        // replace the prisma title
+        svgtxt = svgtxt.replace(
+            '$prisma_title$', 
+            '<span id="'+jarvis.prisma_title_id+'">&nbsp;</span>'
+        );
+
+        // replace the total numbers
+        svgtxt = svgtxt.replace('$tt_f1$', prisma_data.prisma.st.f1);
+        svgtxt = svgtxt.replace('$tt_b1$', prisma_data.prisma.st.b1);
+        // svgtxt = svgtxt.replace('$tt_stage_screening$', jarvis.raw_prisma.stat.unscreened);
+
+        // replace the numbers
+        for (var i = 0; i < prisma_data.sns.length; i++) {
+            var sn = prisma_data.sns[i];
+            svgtxt = svgtxt.replace('$'+sn+'_cnt_sr$', '' + prisma_data.studylist[sn]['sr'].length);
+            svgtxt = svgtxt.replace('$'+sn+'_cnt_ma$', '' + prisma_data.studylist[sn]['ma'].length);
+            svgtxt = svgtxt.replace('$'+sn+'_date$', '' + prisma_data.search[sn].date);
+        }
+
+        // replace the PRISMA token
+        for (var i = 0; i < jarvis.tokens.length; i++) {
+            var token = jarvis.tokens[i];
+            svgtxt = svgtxt.replace('$'+token+'$', '<span id="val_'+token+'"> - </span>');
+        }
+        document.getElementById('fg_prisma').innerHTML = svgtxt;
+    },
+
+
+    init_prisma_data: function(data) {
+        // merge the living part
+        this.__merge_living_prisma(data);
+
+        // merge the total part
+        this.__merge_total_prisma(data);
+    },
+
+    __merge_living_prisma: function(data) {
+        // there are 3 things to do for the prisma
+        // 1. update the date
+        prisma_data.search.lv.date = data.latest.last_updated;
+
+        // 2. update the prisma number
+        // merge the living part
+        prisma_data.prisma.lv.b1 = data.prisma.a1.n_pmids;
+        prisma_data.prisma.lv.b3 = data.prisma.a1.n_pmids;
+        prisma_data.prisma.lv.b4 = data.prisma.a1.n_pmids;
+        // the full-text eligibility
+        prisma_data.prisma.lv.b5 = data.prisma.a1.n_pmids
+            - data.prisma.e1.n_pmids
+            - data.prisma.e2.n_pmids;
+        // the excluded
+        prisma_data.prisma.lv.e1 = data.prisma.e1.n_pmids;
+        prisma_data.prisma.lv.e2 = data.prisma.e2.n_pmids;
+        prisma_data.prisma.lv.e3 = data.prisma.e3.n_pmids;
+        // the included
+        prisma_data.prisma.lv.f1 = data.prisma.f1.n_pmids;
+        prisma_data.prisma.lv.f2 = data.prisma.f3.n_pmids;
+
+        // 3. update the studylist
+        prisma_data.studylist.lv.sr = data.prisma.f1.paper_list;
+        prisma_data.studylist.lv.ma = data.prisma.f3.paper_list;
+    },
+
+    __merge_total_prisma: function(data) {
+        // 1. update the date
+        prisma_data.search['st'] = {
+            'date': data.latest.last_created
+        }
+
+        // 2. update the prisma number
+        // the total SR pids
+        var st_sr_pids = [];
+
+        // the total MA pids
+        var st_ma_pids = [];
+
+        var st_prisma = { 
+            "b1": 0, "b2": 0, "b3": 0, "b4": 0, "b5": 0, 
+            "e1": 0, "e2": 0, "e3": 0,
+            "f1": 0, "f2": 0, 
+        };
+
+        // merge the prisma total numbers of each stage
+        for (var i = 1; i <= 7; i++) {
+            var sn = 's' + i;
+            st_sr_pids = st_sr_pids.concat(prisma_data.studylist[sn]['sr']);
+            st_ma_pids = st_ma_pids.concat(prisma_data.studylist[sn]['ma']);
+
+            for (var j = 0; j < jarvis.tokens.length; j++) {
+                var token = jarvis.tokens[j];
+                st_prisma[token] += prisma_data.prisma[sn][token];
+            }
+        }
+
+        // merge the living part
+        for (let i = 0; i < jarvis.tokens.length; i++) {
+            var token = jarvis.tokens[i];
+            console.log('* parsing token', token);
+            st_prisma[token] += data.prisma[token].n_pmids;
+        }
+
+        // 3. update the sr and ma in st
+        prisma_data.studylist['st'] = {
+            sr: data.prisma.f1.paper_list,
+            ma: data.prisma.f2.paper_list
+        };
+        st_prisma['f1'] = prisma_data.studylist['st']['sr'].length;
+        st_prisma['f2'] = prisma_data.studylist['st']['ma'].length;
+        prisma_data.prisma['st'] = st_prisma;
     },
 
     update_prisma: function(sn) {
@@ -1010,7 +1100,6 @@ var jarvis = {
         $('#' + jarvis.prisma_title_id).html(title);
 
         for (let i = 0; i < jarvis.tokens.length; i++) {
-
             var token = jarvis.tokens[i];
             var val = jarvis.data.prisma[sn][token];
             $('#val_' + token).html(val);
@@ -1027,7 +1116,7 @@ var jarvis = {
 };
 
 $(document).ready(function() {
-    jarvis.init();
+    jarvis.load();
 })
 </script>
 </body>
