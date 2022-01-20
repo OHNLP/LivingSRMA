@@ -569,9 +569,9 @@ var prisma_data = {
     },
     "prisma": {
         /**
-         * b1: Records retrieved from Database search
-           b3: Records Screened
-           b5: Full text articles assessed for eligibility
+         * b1: Records retrieved from database search 
+           b3: Records Screened (b3 = b5 + e1)
+           b5: Full text articles assessed for eligibility (b5 = f1 + e3)
            e1: Records excluded by title and abstract
            e3: Full text excluded with reasons
            f1: Studies included in systematic review
@@ -931,7 +931,7 @@ var jarvis = {
         this.bind_events();
 
         // change to the total
-        jarvis.update_prisma('lv');
+        jarvis.update_prisma('st');
 
         // init the studylist
         tb_studylist.init({
@@ -1043,29 +1043,27 @@ var jarvis = {
 
         // 2. update the prisma number
         // merge the living part
-        // b4 is the screened, which is the sum of included and excluded
-        prisma_data.prisma.lv.b3 = data.prisma.e1.n_pmids
-            + data.prisma.e2.n_pmids
-            + data.prisma.e3.n_pmids
-            + data.prisma.f1.n_pmids;
 
-        // update the b1 as the b4
-        prisma_data.prisma.lv.b1 = data.prisma.a1.n_pmids + data.prisma.a2x.n_pmids;
-        // prisma_data.prisma.lv.b1 = prisma_data.prisma.lv.b4 > data.prisma.a1.n_pmids ?
-            // prisma_data.prisma.lv.b4 : data.prisma.a1.n_pmids;
+        // the a1 from API is just the living part
+        prisma_data.prisma.lv.b1 = data.prisma.a1.n_pmids;
 
-        // the full-text eligibility
-        prisma_data.prisma.lv.b5 = data.prisma.e3.n_pmids
-            + data.prisma.f1.n_pmids;
-            
-        // update the excluded
-        prisma_data.prisma.lv.e1 = data.prisma.e1.n_pmids + data.prisma.e2.n_pmids;
+        // the e1 and e2 from the API is the living part
+        prisma_data.prisma.lv.e1 = data.prisma.e1.n_pmids 
+                                 + data.prisma.e2.n_pmids;
         prisma_data.prisma.lv.e2 = data.prisma.e2.n_pmids;
         prisma_data.prisma.lv.e3 = data.prisma.e3.n_pmids;
 
-        // the included
+        // the f1 and f3 from API are the sum, so need to exclude search 1-7
         prisma_data.prisma.lv.f1 = data.prisma.f1.n_pmids - 96;
         prisma_data.prisma.lv.f2 = data.prisma.f3.n_pmids - 76;
+
+        // the b5 is the sum of f1 and e3
+        prisma_data.prisma.lv.b5 = prisma_data.prisma.lv.f1
+                                 + prisma_data.prisma.lv.e3;
+
+        // the b3 is the sum of b5 and e1
+        prisma_data.prisma.lv.b3 = prisma_data.prisma.lv.b5
+                                 + prisma_data.prisma.lv.e1;
 
         // 3. update the studylist
         prisma_data.studylist.lv.sr = data.prisma.f1.paper_list;
@@ -1091,32 +1089,52 @@ var jarvis = {
             "f1": 0, "f2": 0, 
         };
 
-        // merge the prisma total numbers of each stage
+        // merge the prisma total numbers of the previous 7 searches
         for (var i = 1; i <= 7; i++) {
             var sn = 's' + i;
+
+            // merge the pids of 7 searches
             st_sr_pids = st_sr_pids.concat(prisma_data.studylist[sn]['sr']);
             st_ma_pids = st_ma_pids.concat(prisma_data.studylist[sn]['ma']);
 
+            // merge the numbers of 7 searches
             for (var j = 0; j < jarvis.tokens.length; j++) {
                 var token = jarvis.tokens[j];
                 st_prisma[token] += prisma_data.prisma[sn][token];
             }
         }
 
-        // merge the living part
-        for (let i = 0; i < jarvis.tokens.length; i++) {
-            var token = jarvis.tokens[i];
-            console.log('* parsing token', token);
-            st_prisma[token] += data.prisma[token].n_pmids;
-        }
+        // merge the b1
+        st_prisma.b1 += data.prisma.a1.n_pmids;
+
+        // the f1 from API is the sum of all included in SR
+        st_prisma.f1 = data.prisma.f1.n_pmids;
+
+        // the f3 from API is the sum of all included in MA
+        st_prisma.f2 = data.prisma.f3.n_pmids;
+
+        // the e3 from API is just the living part of excluded by full-text
+        st_prisma.e3 += data.prisma.e3.n_pmids;
+
+        // the e1 and e2 from API is just the living part of exclude by title and abs
+        st_prisma.e1 += data.prisma.e1.n_pmids 
+                      + data.prisma.e2.n_pmids;
+
+        // then the b5 is the sum of f1 and e3
+        st_prisma.b5 = st_prisma.f1 
+                     + st_prisma.e3;
+
+        // then the b3 is the sum of b5 and e1
+        st_prisma.b3 = st_prisma.b5 
+                     + st_prisma.e1;
 
         // 3. update the sr and ma in st
+        // the list in f1 and f2 from API is the sum of all included
         prisma_data.studylist['st'] = {
             sr: data.prisma.f1.paper_list,
             ma: data.prisma.f2.paper_list
         };
-        st_prisma['f1'] = prisma_data.studylist['st']['sr'].length;
-        st_prisma['f2'] = prisma_data.studylist['st']['ma'].length;
+
         prisma_data.prisma['st'] = st_prisma;
     },
 
