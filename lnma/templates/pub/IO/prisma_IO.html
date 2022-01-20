@@ -999,8 +999,8 @@ var jarvis = {
         // replace the numbers
         for (var i = 0; i < prisma_data.sns.length; i++) {
             var sn = prisma_data.sns[i];
-            svgtxt = svgtxt.replace('$'+sn+'_cnt_sr$', '' + prisma_data.studylist[sn]['sr'].length);
-            svgtxt = svgtxt.replace('$'+sn+'_cnt_ma$', '' + prisma_data.studylist[sn]['ma'].length);
+            svgtxt = svgtxt.replace('$'+sn+'_cnt_sr$', '' + prisma_data.prisma[sn].f1);
+            svgtxt = svgtxt.replace('$'+sn+'_cnt_ma$', '' + prisma_data.prisma[sn].f1);
             svgtxt = svgtxt.replace('$'+sn+'_date$', '' + prisma_data.search[sn].date);
         }
 
