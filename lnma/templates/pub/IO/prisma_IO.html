@@ -1029,11 +1029,11 @@ var jarvis = {
 
 
     init_prisma_data: function(data) {
-        // merge the living part
-        this.__merge_living_prisma(data);
-
         // merge the total part
         this.__merge_total_prisma(data);
+
+        // merge the living part
+        this.__merge_living_prisma(data);
     },
 
     __merge_living_prisma: function(data) {
@@ -1066,8 +1066,33 @@ var jarvis = {
                                  + prisma_data.prisma.lv.e1;
 
         // 3. update the studylist
-        prisma_data.studylist.lv.sr = data.prisma.f1.paper_list;
-        prisma_data.studylist.lv.ma = data.prisma.f3.paper_list;
+        // 3.1 get the total list of search 1 - 7
+
+        // the total SR pids
+        var s17_sr_pids = [];
+        // the total MA pids
+        var s17_ma_pids = [];
+
+        for (var i = 1; i <= 7; i++) {
+            var sn = 's' + i;
+            // merge the pids of 7 searches
+            s17_sr_pids = s17_sr_pids.concat(prisma_data.studylist[sn]['sr']);
+            s17_ma_pids = s17_ma_pids.concat(prisma_data.studylist[sn]['ma']);
+        }
+
+        // 3.2 get different part, which is the living?
+        var lv_sr = jarvis.difference_set(
+            new Set( data.prisma.f1.paper_list ),
+            new Set( s17_sr_pids )
+        );
+        var lv_ma = jarvis.difference_set(
+            new Set( data.prisma.f3.paper_list ),
+            new Set( s17_ma_pids )
+        );
+
+        // 3.3 update the list
+        prisma_data.studylist.lv.sr = Array.from(lv_sr);
+        prisma_data.studylist.lv.ma = Array.from(lv_ma);
     },
 
     __merge_total_prisma: function(data) {
@@ -1077,26 +1102,14 @@ var jarvis = {
         }
 
         // 2. update the prisma number
-        // the total SR pids
-        var st_sr_pids = [];
-
-        // the total MA pids
-        var st_ma_pids = [];
-
         var st_prisma = { 
             "b1": 0, "b2": 0, "b3": 0, "b4": 0, "b5": 0, 
             "e1": 0, "e2": 0, "e3": 0,
             "f1": 0, "f2": 0, 
         };
-
         // merge the prisma total numbers of the previous 7 searches
         for (var i = 1; i <= 7; i++) {
             var sn = 's' + i;
-
-            // merge the pids of 7 searches
-            st_sr_pids = st_sr_pids.concat(prisma_data.studylist[sn]['sr']);
-            st_ma_pids = st_ma_pids.concat(prisma_data.studylist[sn]['ma']);
-
             // merge the numbers of 7 searches
             for (var j = 0; j < jarvis.tokens.length; j++) {
                 var token = jarvis.tokens[j];
@@ -1130,11 +1143,10 @@ var jarvis = {
 
         // 3. update the sr and ma in st
         // the list in f1 and f2 from API is the sum of all included
-        prisma_data.studylist['st'] = {
-            sr: data.prisma.f1.paper_list,
-            ma: data.prisma.f2.paper_list
-        };
-
+        prisma_data.studylist['st'].sr = data.prisma.f1.paper_list;
+        prisma_data.studylist['st'].ma = data.prisma.f2.paper_list;
+    
+        // set result
         prisma_data.prisma['st'] = st_prisma;
     },
 
