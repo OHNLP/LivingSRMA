@@ -1047,8 +1047,8 @@ var jarvis = {
         prisma_data.prisma.lv.e2 = data.prisma.e2.n_pmids;
         prisma_data.prisma.lv.e3 = data.prisma.e3.n_pmids;
         // the included
-        prisma_data.prisma.lv.f1 = data.prisma.f1.n_pmids;
-        prisma_data.prisma.lv.f2 = data.prisma.f3.n_pmids;
+        prisma_data.prisma.lv.f1 = data.prisma.f1.n_pmids - 96;
+        prisma_data.prisma.lv.f2 = data.prisma.f3.n_pmids - 76;
 
         // 3. update the studylist
         prisma_data.studylist.lv.sr = data.prisma.f1.paper_list;
