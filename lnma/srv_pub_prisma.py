@@ -298,6 +298,11 @@ def get_prisma_by_cq(project_id, cq_abbr="default", do_include_papers=True):
     )
     # check each outcome
     for oc in ocs:
+        # 2022-01-19: fix the number issue
+        # the itable should be excluded from the counting
+        if oc.oc_type == 'itable':
+            continue
+        
         # check papaer extracted in this outcome
         for pid in oc.data:
             # 2022-01-17 fix the MA>SR issue

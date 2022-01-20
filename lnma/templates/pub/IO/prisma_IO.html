@@ -378,11 +378,19 @@ a {
                 {{ r.date }} 
                 <span class="study-journal">{{ r.journal }}</span class="">. 
                     
-                <a class="study-pmid" target="_blank" title="Open the page in PubMed" 
-                    v-bind:href="url.pubmed.view_pmid + r.pmid">{{ r.pmid }}</a>
-
-                <a class="study-pmid" target="_blank" title="Open the page in ClinicalTrials.gov" 
-                    v-bind:href="url.ctgov.view_ct + r.ctid">{{ r.ctid }}</a> 
+                <a class="study-pmid" 
+                    target="_blank" 
+                    title="Open the page in PubMed" 
+                    v-bind:href="url.pubmed.view_pmid + r.pmid">
+                    {{ r.pid }}
+                </a>
+                &nbsp;
+                <a class="study-pmid" 
+                    target="_blank" 
+                    title="Open the page in ClinicalTrials.gov" 
+                    v-bind:href="url.ctgov.view_ct + r.ctid">
+                    {{ r.ctid }}
+                </a>
             </div>
 
         </div>
@@ -560,17 +568,28 @@ var prisma_data = {
         'lv': { 'date': '' }
     },
     "prisma": {
-        "s1": { "b1": 5663, "b2": 0, "b3": 5648, "b4": 5648, "b5": 2022, "f1": 42, "f2": 38, "e1": 3626, "e3": 1980, "e2": 0},
-        "s2": { "b1": 824,  "b2": 0, "b3":  802, "b4":  802, "b5":  292, "f1":  7, "f2":  5, "e1":  510, "e3":  285, "e2": 0},
-        "s3": { "b1": 406,  "b2": 0, "b3":  386, "b4":  386, "b5":  237, "f1":  7, "f2":  6, "e1":  149, "e3":  230, "e2": 0},
-        "s4": { "b1": 444,  "b2": 0, "b3":  444, "b4":  444, "b5":  282, "f1":  6, "f2":  5, "e1":  162, "e3":  276, "e2": 0},
-        "s5": { "b1": 663,  "b2": 0, "b3":  663, "b4":  663, "b5":  404, "f1":  6, "f2":  6, "e1":  259, "e3":  398, "e2": 0},
-        "s6": { "b1": 1218, "b2": 0, "b3": 1196, "b4": 1196, "b5":  802, "f1": 12, "f2":  7, "e1":  394, "e3":  790, "e2": 0},
-        "s7": { "b1": 539,  "b2": 0, "b3":  539, "b4":  539, "b5":  356, "f1": 16, "f2": 13, "e1":  183, "e3":  340, "e2": 0},
-        // st is the total
-        "st": { "b1": 0,  "b2": 0, "b3":  0, "b4":  0, "b5":  0, "f1": 0, "f2": 0, "e1":  0, "e3":  0, "e2": 0},
-        // lv is the living
-        "lv": { "b1": 0,  "b2": 0, "b3":  0, "b4":  0, "b5":  0, "f1": 0, "f2": 0, "e1":  0, "e3":  0, "e2": 0},
+        /**
+         * b1: Records retrieved from Database search
+           b3: Records Screened
+           b4: Records excluded after title and abstarct screening
+           b5: Full text articles assessed for eligibility
+           e3: Full text excluded with reasons
+           f1: Studies included in systematic review
+           f2: Studies included in meta-analysis
+
+           for different stage:
+           s1-7 is each search
+           st is the total, lv is the living part
+         */
+        "s1": { "b1": 5663, "b2": 0, "b3":  0, "b4": 5648, "b5": 2022, "f1": 42, "f2": 38, "e1": 3626, "e3": 1980, "e2": 0},
+        "s2": { "b1": 824,  "b2": 0, "b3":  0, "b4":  802, "b5":  292, "f1":  7, "f2":  5, "e1":  510, "e3":  285, "e2": 0},
+        "s3": { "b1": 406,  "b2": 0, "b3":  0, "b4":  386, "b5":  237, "f1":  7, "f2":  5, "e1":  149, "e3":  230, "e2": 0},
+        "s4": { "b1": 444,  "b2": 0, "b3":  0, "b4":  444, "b5":  282, "f1":  6, "f2":  5, "e1":  162, "e3":  276, "e2": 0},
+        "s5": { "b1": 663,  "b2": 0, "b3":  0, "b4":  663, "b5":  404, "f1":  6, "f2":  4, "e1":  259, "e3":  398, "e2": 0},
+        "s6": { "b1": 1218, "b2": 0, "b3":  0, "b4": 1196, "b5":  802, "f1": 12, "f2":  6, "e1":  394, "e3":  790, "e2": 0},
+        "s7": { "b1": 539,  "b2": 0, "b3":  0, "b4":  539, "b5":  356, "f1": 16, "f2": 13, "e1":  183, "e3":  340, "e2": 0},
+        "st": { "b1": 0,    "b2": 0, "b3":  0, "b4":  0,   "b5":  0,   "f1": 0,  "f2": 0,  "e1":  0,   "e3":  0,   "e2": 0},
+        "lv": { "b1": 0,    "b2": 0, "b3":  0, "b4":  0,   "b5":  0,   "f1": 0,  "f2": 0,  "e1":  0,   "e3":  0,   "e2": 0},
     },
     "studylist": {
         "s1": {
@@ -691,7 +710,6 @@ var prisma_data = {
                 "30779531",
                 "30779529",
                 "30138764",
-                "30664989",
                 "30620668",
                 "30659987"
             ]
@@ -726,9 +744,7 @@ var prisma_data = {
                 "31427204",
                 "31562796",
                 "31171878",
-                "30422243",
-                "31327687",
-                "31327689"
+                "30422243"
             ]
         },
         "s6": {
@@ -752,8 +768,7 @@ var prisma_data = {
                 "31582355",
                 "31590988",
                 "31679945",
-                "32201234",
-                "31880964"
+                "32201234"
             ]
         },
         "s7": {
@@ -1000,7 +1015,7 @@ var jarvis = {
         for (var i = 0; i < prisma_data.sns.length; i++) {
             var sn = prisma_data.sns[i];
             svgtxt = svgtxt.replace('$'+sn+'_cnt_sr$', '' + prisma_data.prisma[sn].f1);
-            svgtxt = svgtxt.replace('$'+sn+'_cnt_ma$', '' + prisma_data.prisma[sn].f1);
+            svgtxt = svgtxt.replace('$'+sn+'_cnt_ma$', '' + prisma_data.prisma[sn].f2);
             svgtxt = svgtxt.replace('$'+sn+'_date$', '' + prisma_data.search[sn].date);
         }
 
