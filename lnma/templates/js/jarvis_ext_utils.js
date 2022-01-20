@@ -46,5 +46,13 @@ Object.assign(jarvis, {
 
     get_link_nct: function(nct) {
         return '<a target="_blank" href="https://clinicaltrials.gov/ct2/show/'+nct+'" title="Check this clinical trial '+nct+'">'+nct+'</a>';
+    },
+
+    add_commas_to_number: function(x) {
+        x = x.toString();
+        var pattern = /(-?\d+)(\d{3})/;
+        while (pattern.test(x))
+            x = x.replace(pattern, "$1,$2");
+        return x;
     }
 });

@@ -1160,6 +1160,7 @@ var jarvis = {
         for (let i = 0; i < jarvis.tokens.length; i++) {
             var token = jarvis.tokens[i];
             var val = jarvis.data.prisma[sn][token];
+            val = jarvis.add_commas_to_number(val);
             $('#val_' + token).html(val);
         }
     },
@@ -1188,6 +1189,7 @@ var jarvis = {
         return _difference;
     }
 };
+{% include 'js/jarvis_ext_utils.js' %}
 
 $(document).ready(function() {
     jarvis.load();
