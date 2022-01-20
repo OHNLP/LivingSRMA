@@ -376,8 +376,8 @@ a {
 
             <div class="study-pub">
                 {{ r.date }} 
-                <span class="study-journal">{{ r.journal }}</span class="">. 
-                    
+                <span class="study-journal">{{ r.journal }}</span class="">
+                &nbsp;
                 <a class="study-pmid" 
                     target="_blank" 
                     title="Open the page in PubMed" 
@@ -1044,7 +1044,7 @@ var jarvis = {
         // 2. update the prisma number
         // merge the living part
         // b4 is the screened, which is the sum of included and excluded
-        prisma_data.prisma.lv.b4 = data.prisma.e1.n_pmids
+        prisma_data.prisma.lv.b3 = data.prisma.e1.n_pmids
             + data.prisma.e2.n_pmids
             + data.prisma.e3.n_pmids
             + data.prisma.f1.n_pmids;
@@ -1057,10 +1057,12 @@ var jarvis = {
         // the full-text eligibility
         prisma_data.prisma.lv.b5 = data.prisma.e3.n_pmids
             + data.prisma.f1.n_pmids;
-        // the excluded
-        prisma_data.prisma.lv.e1 = data.prisma.e1.n_pmids;
+            
+        // update the excluded
+        prisma_data.prisma.lv.e1 = data.prisma.e1.n_pmids + data.prisma.e2.n_pmids;
         prisma_data.prisma.lv.e2 = data.prisma.e2.n_pmids;
         prisma_data.prisma.lv.e3 = data.prisma.e3.n_pmids;
+
         // the included
         prisma_data.prisma.lv.f1 = data.prisma.f1.n_pmids - 96;
         prisma_data.prisma.lv.f2 = data.prisma.f3.n_pmids - 76;
