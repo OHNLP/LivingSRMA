@@ -381,7 +381,13 @@ a {
                 <a class="study-pmid" 
                     target="_blank" 
                     title="Open the page in PubMed" 
+                    v-if="r.is_pmid"
                     v-bind:href="url.pubmed.view_pmid + r.pid">
+                    {{ r.pid }}
+                </a>
+                <a v-else
+                    class="study-pmid"
+                    href="javascript:void(0);">
                     {{ r.pid }}
                 </a>
                 &nbsp;

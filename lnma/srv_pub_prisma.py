@@ -268,6 +268,7 @@ def get_prisma_by_cq(project_id, cq_abbr="default", do_include_papers=True):
                 "journal": paper.journal,
                 "pid": paper.pid,
                 "pid_type": paper.pid_type,
+                "is_pmid": paper.is_pmid(),
                 "title": paper.title,
             }
 
@@ -302,7 +303,7 @@ def get_prisma_by_cq(project_id, cq_abbr="default", do_include_papers=True):
         # the itable should be excluded from the counting
         if oc.oc_type == 'itable':
             continue
-        
+
         # check papaer extracted in this outcome
         for pid in oc.data:
             # 2022-01-17 fix the MA>SR issue
