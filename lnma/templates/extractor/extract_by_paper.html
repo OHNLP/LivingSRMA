@@ -120,7 +120,7 @@ html {
             <tbody id="pan_ocpapers_paperlist_tbody">
                 <tr v-for="paper in papers"
                     v-if="is_search_match(paper)"
-                    v-bind:id="'paper-table-row-' + paper.pid"
+                    v-bind:id="'paper-table-row-' + paper.paper_id"
                     class="paper-table-row">
                     <td v-on:click="on_click_paper(paper)">
                         {{ paper.seq_num }}
@@ -495,7 +495,7 @@ var pan_ocpapers = {
 
             // highlight this line
             $('.paper-table-row').removeClass('paper-table-row-clicked');
-            $('#paper-table-row-' + paper.pid).addClass('paper-table-row-clicked');
+            $('#paper-table-row-' + paper.paper_id).addClass('paper-table-row-clicked');
 
             // notifiy the ocpaper to show the working paper
             pan_ocpapers.show_working_paper(paper);

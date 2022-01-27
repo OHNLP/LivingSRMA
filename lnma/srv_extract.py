@@ -231,7 +231,7 @@ def update_extract_pwma_pre_data(extract, df, papers, is_subg=False):
                 # the duplicated pid means 
                 # wow! it's multi arm study??
                 data[pid]['attrs']['other'].append(
-                    {'g0': arm}
+                    {subg_code: arm}
                 )
 
                 # and increase the n_arms
@@ -624,7 +624,7 @@ def import_extracts_from_xls(full_path, keystr, cq_abbr, oc_type):
             included_in_plots = row['included_in_plots'].strip(),
             included_in_sof = row['included_in_sof'].strip(),
             is_subg_analysis = 'no',
-            sub_groups = []
+            sub_groups = ['A']
         )
 
         # special rule for NMA

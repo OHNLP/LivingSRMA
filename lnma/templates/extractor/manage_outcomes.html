@@ -888,6 +888,7 @@ var pan_ocpapers = {
                  * which attr or attr_sub?
                  */
                 get_extracted_data: function(pid, main_or_other, group_idx, attr_sub_abbr) {
+                    console.log(pid, main_or_other, group_idx, attr_sub_abbr);
                     if (!this.extract.data.hasOwnProperty(pid)) {
                         // no such paper???
                         return '';
