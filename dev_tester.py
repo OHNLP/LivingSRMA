@@ -43,7 +43,16 @@ def test_pred():
         pprint(pred)
     
 
-def test1():
+def test():
+    srv_extract.import_extracts_from_xls(
+        '/tmp/mrcc-pma.xlsx',
+        'RCC',
+        'default',
+        'pwma',
+    )
+    
+
+def test2():
     ret = srv_paper.check_existed_paper_by_file(
         'IO',
         'ovid',
@@ -90,4 +99,4 @@ def test2():
 
 if __name__ == "__main__":
     print("* Now you have the app and db to access the env")
-    test1()
+    test()

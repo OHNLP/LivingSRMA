@@ -125,13 +125,17 @@ def create_empty_extract(keystr, cq_abbr, oc_type, group, category, full_name, o
     return ext
 
 
-def update_extract_pwma_pre_data(extract, df, papers):
+def update_extract_pwma_pre_data(extract, df, papers, is_subg=False):
     '''
     Update extract data with a df of pre PWMA foramt
 
     study, year, TE, lowerci, upperci, treatment, control, survival in control, Ec, Et, pid
 
     The `TE, lowerci, upperci, survival in control, Ec, Et, pid` are required.
+
+    But the `survival in control`, `Ec`, `Et` may not be available.
+
+    If this extract is about subgroup analysis, there should be an `subgroup` column
     '''
     # only one group when nma
     g_idx = 0
@@ -146,8 +150,12 @@ def update_extract_pwma_pre_data(extract, df, papers):
         pid2paper_id[p.pid] = p.paper_id
     missing_pids = []
 
+    # special for subg analysis
+    subgroup_dict = {}
+
     # check each row
     for idx, row in df.iterrows():
+        # no matter what, get the pid first
         pid = __get_pid(__get_val(row['pid']))
 
         # check this pid in pids or not
@@ -179,10 +187,25 @@ def update_extract_pwma_pre_data(extract, df, papers):
             lowerci = __get_val(row['lowerci']),
             upperci = __get_val(row['upperci']),
 
-            survival_in_control = __get_val(row['survival in control']),
-            Et = __get_val(row['Et']),
-            Ec = __get_val(row['Ec']),
+            survival_in_control = __get_val(__get_col(row, 'survival in control')),
+            Et = __get_val(__get_col(row, 'Et')),
+            Ec = __get_val(__get_col(row, 'Ec')),
         )
+
+        # now, need to check if this is a subg analysis
+        # by default, the subg_code is always g0
+        # which means there is only one group for this analysis
+        subg_code = 'g0'
+        if is_subg:
+            subg = row['subgroup']
+
+            # if this a new subgroup?
+            if subg not in subgroup_dict:
+                # this is a new subgroup, assign a group id for this
+                subgroup_dict[subg] = 'g%s' % (len(subgroup_dict))
+
+            # get the subg_code for this subgroup
+            subg_code = subgroup_dict[subg]
 
         # ok, let's add this record
         if pid not in data:
@@ -190,20 +213,60 @@ def update_extract_pwma_pre_data(extract, df, papers):
             data[pid] = copy.deepcopy(settings.DEFAULT_EXTRACT_DATA_PID_TPL)
 
             # add this to the main arm
-            data[pid]['attrs']['main']['g0'] = arm
+            data[pid]['attrs']['main'][subg_code] = arm
 
             # update the status
             data[pid]['is_selected'] = True
             data[pid]['is_checked'] = True
 
         else:
-            # wow! it's multi arm study??
-            data[pid]['attrs']['other'].append(
-                {'g0': arm}
+            # then need to check subg
+            if is_subg:
+                # as long as this paper has been added
+                # we just need to add this subgroup
+                data[pid]['attrs']['main'][subg_code] = arm
+
+            else:
+                # so this is not for subgroup analysis
+                # the duplicated pid means 
+                # wow! it's multi arm study??
+                data[pid]['attrs']['other'].append(
+                    {'g0': arm}
+                )
+
+                # and increase the n_arms
+                data[pid]['n_arms'] += 1
+
+    # update the subg settings if is subgroup analysis
+    if is_subg:
+        # need to update the extract meta
+        new_meta = copy.deepcopy(extract.meta)
+
+        # get the sub_groups
+        sub_groups = []
+
+        # create a dict for reverse search
+        g2subg_dict = {}
+        for k in subgroup_dict:
+            v = subgroup_dict[k]
+            g2subg_dict[v] = k
+
+        # loop on the values and convert to the ordered list
+        for i in range(len(g2subg_dict)):
+            sub_groups.append(
+                g2subg_dict['g%s'%i]
             )
 
-            # and increase the n_arms
-            data[pid]['n_arms'] += 1
+        # set the subgs
+        new_meta['sub_groups'] = sub_groups
+
+        # update meta
+        ext = dora.update_extract_meta(
+            extract.project_id,
+            extract.oc_type,
+            extract.abbr,
+            new_meta
+        )
 
     # update the extract
     ext = dora.update_extract_data(
@@ -216,7 +279,7 @@ def update_extract_pwma_pre_data(extract, df, papers):
     return ext, missing_pids
 
 
-def update_extract_pwma_raw_data(extract, df, papers):
+def update_extract_pwma_raw_data(extract, df, papers, is_subg=False):
     '''
     Update extract data with a df of raw PWMA foramt
 
@@ -360,12 +423,12 @@ def update_extract_nma_pre_data(extract, df, papers):
             sm = str(__get_sm(row)),
             lowerci = str(row['lowerci']),
             upperci = str(row['upperci']),
-            survival_t1 = str(__get_val(row['survival in t1'])),
-            survival_t2 = str(__get_val(row['survival in t2'])),
-            Ec_t1 = str(__get_val(row['Ec_t1'])),
-            Et_t1 = str(__get_val(row['Et_t1'])),
-            Ec_t2 = str(__get_val(row['Ec_t2'])),
-            Et_t2 = str(__get_val(row['Et_t2'])),
+            survival_t1 = str(__get_val(__get_col(row, 'survival in t1'))),
+            survival_t2 = str(__get_val(__get_col(row, 'survival in t2'))),
+            Ec_t1 = str(__get_val(__get_col(row, 'Ec_t1'))),
+            Et_t1 = str(__get_val(__get_col(row, 'Et_t1'))),
+            Ec_t2 = str(__get_val(__get_col(row, 'Ec_t2'))),
+            Et_t2 = str(__get_val(__get_col(row, 'Et_t2'))),
         )
 
         # ok, let's add this record
@@ -559,7 +622,9 @@ def import_extracts_from_xls(full_path, keystr, cq_abbr, oc_type):
             fixed_or_random = row['fixed_or_random'].strip(),
             measure_of_effect = row['measure'].strip(),
             included_in_plots = row['included_in_plots'].strip(),
-            included_in_sof = row['included_in_sof'].strip()
+            included_in_sof = row['included_in_sof'].strip(),
+            is_subg_analysis = 'no',
+            sub_groups = []
         )
 
         # special rule for NMA
@@ -579,14 +644,15 @@ def import_extracts_from_xls(full_path, keystr, cq_abbr, oc_type):
         # special rule for PWMA
         if oc_type == 'pwma':
             # the certainty for this outcome
+            # the values could be NaN, so need to check
             meta['certainty'] = {
                 'cie': '0',
-                'risk_of_bias': row['risk_of_bias'],
-                'inconsistency': row['inconsistency'],
-                'indirectness': row['indirectness'],
-                'imprecision': row['imprecision'],
-                'publication_bias': row['publication_bias'],
-                'importance': row['importance'],
+                'risk_of_bias': __get_val(__get_col(row, 'risk_of_bias'), '0'),
+                'inconsistency': __get_val(__get_col(row, 'inconsistency'), '0'),
+                'indirectness': __get_val(__get_col(row, 'indirectness'), '0'),
+                'imprecision': __get_val(__get_col(row, 'imprecision'), '0'),
+                'publication_bias': __get_val(__get_col(row, 'publication_bias'), '0'),
+                'importance': __get_val(__get_col(row, 'importance'), '0'),
             }
 
             # the treatment and control
@@ -600,6 +666,10 @@ def import_extracts_from_xls(full_path, keystr, cq_abbr, oc_type):
                 'pre': 'PRIM_CAT_PRE', 
                 'raw': 'PRIM_CAT_RAW'
             }[data_type]
+
+            # now need to check subg analysis
+            if meta['group'] == 'subgroup':
+                meta['is_subg_analysis'] = 'yes'
 
         # check exist
         exts = get_extracts_by_cate_and_name(
@@ -651,13 +721,15 @@ def import_extracts_from_xls(full_path, keystr, cq_abbr, oc_type):
                 print('* updated ext raw data %s' % ext.abbr)
 
         elif oc_type == 'pwma':
+            # one more thing for pwma is that is this a subg analysis
+            is_subg = meta['is_subg_analysis'] == 'yes'
             if data_type == 'pre':
-                ext, ms_pids = update_extract_pwma_pre_data(ext, df_oc, papers)
+                ext, ms_pids = update_extract_pwma_pre_data(ext, df_oc, papers, is_subg)
                 missing_pids = list(set(missing_pids + ms_pids))
                 print('* updated ext pre data %s' % ext.abbr)
 
             elif data_type == 'raw': 
-                ext, ms_pids = update_extract_pwma_raw_data(ext, df_oc, papers)
+                ext, ms_pids = update_extract_pwma_raw_data(ext, df_oc, papers, is_subg)
                 missing_pids = list(set(missing_pids + ms_pids))
                 print('* updated ext raw data %s' % ext.abbr)
     
@@ -697,13 +769,24 @@ def reset_extracts_includes(keystr, cq_abbr, include_in, yes_or_no):
     print('* done reset')
 
 
-def __get_val(v):
+def __get_val(v, default_value=''):
     '''
     Helper function for getting values from df cell
     '''
     if pd.isna(v): 
-        return ''
+        return default_value
     return str(v).strip()
+
+
+def __get_col(row, col):
+    '''
+    Helper function for getting values from df row by column name
+    '''
+    if col not in row.keys():
+        return None
+    
+    else:
+        return row[col]
 
 
 def __get_pid(v):
