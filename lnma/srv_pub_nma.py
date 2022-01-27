@@ -64,11 +64,18 @@ def get_graph_nma_data_from_db(keystr, cq_abbr):
             print('* skip extract %s due to NOT_INCLUDED_IN_SOF' % (oc_abbr))
             continue
 
+        print("* NMA %s|%s|%s" % (
+            extract.meta['group'],
+            extract.meta['category'],
+            extract.meta['full_name']
+        ))
         # create an oc object for ... what?
         treat_list = extract.meta['treatments']
+
         # but the treat_list may not be available
         treat_list = extract._get_nma_treat_list()
 
+        # get the input format for selecting template
         input_format = settings.INPUT_FORMATS_HRLU
         if extract.meta['input_format'] == 'NMA_RAW_ET':
             input_format = settings.INPUT_FORMATS_ET

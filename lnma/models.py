@@ -1527,63 +1527,95 @@ class Extract(db.Model):
             if not ext['is_selected'] and is_skip_unselected:
                 continue
             
-            # copy values of main arm to rs
-            r = copy.deepcopy(ext['attrs']['main']['g0'])
+            # there may be other arms, so just join all
+            for arm_idx, record in enumerate([ext['attrs']['main']] + ext['attrs']['other']):
+                # copy values of main arm to rs
+                r = copy.deepcopy(record['g0'])
 
-            # convert the data type
-            r = util.convert_extract_r_to_number(
-                r,
-                self.meta['input_format']
-            )
+                # convert the data type
+                r = util.convert_extract_r_to_number(
+                    r,
+                    self.meta['input_format']
+                )
 
-            # add other information?
-            r['pid'] = pid
-            r['study'] = study
-            r['year'] = year
+                # add other information?
+                r['pid'] = pid
+                r['study'] = study
 
-            # add alia names if the data type is raw
-            if self.meta['input_format'] == 'NMA_PRE_SMLU':
-                pass
-            elif self.meta['input_format'] == 'NMA_RAW_ET':
-                r['treat1'] = r['t1']
-                r['treat2'] = r['t2']
-                r['event1'] = r['event_t1']
-                r['event2'] = r['event_t2']
-                r['n1'] = r['total_t1']
-                r['n2'] = r['total_t2']
+                # for multi arm study, need to have different name
+                if arm_idx > 0:
+                    r['study'] = '%s (%s)' % (study, arm_idx)
+                    
+                r['year'] = year
 
-            # ok ...
-            rs.append(r)
+                # add alia names if the data type is raw
+                if self.meta['input_format'] == 'NMA_PRE_SMLU':
+                    # for the pre format, it's very simple, one r is one r
+                    rs.append(r)
+
+                elif self.meta['input_format'] == 'NMA_RAW_ET':
+                    # the raw format is different by the method
+                    if self.meta['analysis_method'] == 'bayes':
+                        # if use bayes, need to use two row format
+                        # two rows form a record
+                        #     study, treat1, event, total
+                        #     study, treat2, event, total
+                        # so need to convert
+                        for i in [1, 2]:
+                            # create two rows
+                            _r = dict(
+                                study = r['study'],
+                                treat = r['t%s' % i],
+                                event = r['event_t%s' % i],
+                                total = r['total_t%s' % i]
+                            )
+                            rs.append(_r)
+
+                    else:
+                        # if use freq, just need to use one row format
+                        _r = {}
+                        _r['study'] = r['study']
+                        _r['treat1'] = r['t1']
+                        _r['treat2'] = r['t2']
+                        _r['event1'] = r['event_t1']
+                        _r['event2'] = r['event_t2']
+                        _r['n1'] = r['total_t1']
+                        _r['n2'] = r['total_t2']
+                        rs.append(_r)
+
+                # ok ...
+                # rs.append(r)
 
             # copy other arms if exists
-            if len(ext['attrs']['other']) > 0:
-                for arm_idx, arm in enumerate(ext['attrs']['other']):
-                    r = copy.deepcopy(arm['g0'])
+            # if len(ext['attrs']['other']) > 0:
+            #     for arm_idx, arm in enumerate(ext['attrs']['other']):
+            #         r = copy.deepcopy(arm['g0'])
 
-                    # convert the data type
-                    r = util.convert_extract_r_to_number(
-                        r,
-                        self.meta['input_format']
-                    )
+            #         # convert the data type
+            #         r = util.convert_extract_r_to_number(
+            #             r,
+            #             self.meta['input_format']
+            #         )
 
-                    # add other information?
-                    r['pid'] = pid
-                    r['study'] = study + " (%s)" % (arm_idx+1)
-                    r['year'] = year
+            #         # add other information?
+            #         r['pid'] = pid
+            #         r['study'] = study + " (%s)" % (arm_idx+1)
+            #         r['year'] = year
 
-                    # add alia names if the data type is raw
-                    if self.meta['input_format'] == 'NMA_PRE_SMLU':
-                        pass
-                    elif self.meta['input_format'] == 'NMA_RAW_ET':
-                        r['treat1'] = r['t1']
-                        r['treat2'] = r['t2']
-                        r['event1'] = r['event_t1']
-                        r['event2'] = r['event_t2']
-                        r['n1'] = r['total_t1']
-                        r['n2'] = r['total_t2']
+            #         # add alia names if the data type is raw
+            #         if self.meta['input_format'] == 'NMA_PRE_SMLU':
+            #             pass
 
-                    # ok, finally
-                    rs.append(r)
+            #         elif self.meta['input_format'] == 'NMA_RAW_ET':
+            #             r['treat1'] = r['t1']
+            #             r['treat2'] = r['t2']
+            #             r['event1'] = r['event_t1']
+            #             r['event2'] = r['event_t2']
+            #             r['n1'] = r['total_t1']
+            #             r['n2'] = r['total_t2']
+
+            #         # ok, finally
+            #         rs.append(r)
         
         return rs
 

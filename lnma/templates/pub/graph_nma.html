@@ -645,6 +645,12 @@ var jarvis = {
         if (foc == '') {
             foc = null;
         }
+
+        // where to get the data
+        var src = jarvis.get_url_paramter('src');
+        if (src == '') {
+            src = 'cache';
+        }
         
         // init the plots
         fg_netplt.init();
@@ -678,7 +684,7 @@ var jarvis = {
 
         $.get(
             "/pub/graphdata/" + prj + "/GRAPH_NMA.json",
-            {ver: Math.random(), src: 'cache', cq: cq},
+            {ver: Math.random(), src: src, cq: cq},
             function(data) {
                 // first, convert the name to abbr
                 jarvis.ocfn2abbr = {};

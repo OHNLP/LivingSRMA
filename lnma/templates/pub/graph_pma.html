@@ -318,27 +318,37 @@ var jarvis = {
 
         // get filename
         var prj = jarvis.get_url_paramter('prj');
-        var cq = jarvis.get_url_paramter('cq');
-        var gp = jarvis.get_url_paramter('gp');
-        
-        // the first oc to show
-        var foc = jarvis.get_url_paramter('foc');
 
+        // the cq abbr
+        var cq = jarvis.get_url_paramter('cq');
         if (cq == '') {
             cq = 'default';
         }
+
+        // the analysis group
+        var gp = jarvis.get_url_paramter('gp');
         if (gp == '') {
             gp = 'primary';
         }
+        
+        // the first oc to show
+        var foc = jarvis.get_url_paramter('foc');
         if (foc == '') {
             foc = null;
         }
+
+        // where to get the data
+        var src = jarvis.get_url_paramter('src');
+        if (src == '') {
+            src = 'db';
+        }
+
         jarvis.ssmsg('Loading data ...');
 
         // send request to get data for initializing app
         $.get(
             "/pub/graphdata/" + prj + "/GRAPH_PMA.json",
-            {ver: Math.random(), src: 'db', cq: cq},
+            {ver: Math.random(), src: src, cq: cq},
             (function(gp, foc){
                 return function(data) {
                     app_graphpma.init(data, gp, foc);
