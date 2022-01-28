@@ -492,23 +492,33 @@ var jarvis = {
             gp = 'primary';
         }
 
+        // where to get the data
+        var src = jarvis.get_url_paramter('src');
+        if (src == '') {
+            src = 'cache';
+        }
+
         jarvis.ssmsg('Loading data ...');
 
         $.get(
             "/pub/graphdata/" + prj + "/EVMAP.json",
             {
-                src: 'cache',
+                src: src,
                 cq: cq,
                 gp: gp,
                 ver: Math.random(), 
             },
             function(data) {
-                app_evmap.init(
-                    data,
-                    jarvis.default_treatment
-                );
-                jarvis.ssmsg('Data loaded!');
-                setTimeout('jarvis.ssclose();', 300);
+                // if (data.success) {
+                    app_evmap.init(
+                        data,
+                        jarvis.default_treatment
+                    );
+                    jarvis.ssmsg('Data loaded!');
+                    setTimeout('jarvis.ssclose();', 300);
+                // } else {
+                //     jarvis.ssmsg('Data file is not ready, try later.');
+                // }
             }, 'json'
         );
     }

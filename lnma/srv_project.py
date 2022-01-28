@@ -178,7 +178,7 @@ def update_project_papers_ss_cq_by_keystr(keystr, decision):
     return project
 
 
-def delete_all_extracts_by_keystr(keystr):
+def delete_all_extracts_by_keystr(keystr, cq_abbr='default', oc_type='all'):
     '''
     Delete all extract by a given project keystr
     '''
@@ -191,9 +191,23 @@ def delete_all_extracts_by_keystr(keystr):
     project_id = project.project_id
 
     # first, delete those extracts under this project
-    Extract.query.filter_by(
-        project_id=project_id
-    ).delete()
+    if oc_type == 'all':
+        Extract.query.filter(and_(
+            Extract.project_id == project_id,
+            Extract.meta['cq_abbr'] == cq_abbr
+        )).delete()
+
+    else:
+        # Extract.query.filter(and_(
+        #     Extract.project_id == project.project_id,
+        #     Extract.oc_type == oc_type,
+        #     Extract.meta['cq_abbr'] == cq_abbr
+        # )).delete()
+        Extract.query.filter(
+            Extract.project_id == project_id,
+            Extract.meta['cq_abbr'] == cq_abbr,
+            Extract.oc_type == oc_type
+        ).delete(synchronize_session=False)
 
     # commit
     db.session.commit()

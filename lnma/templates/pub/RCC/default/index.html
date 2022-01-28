@@ -230,7 +230,7 @@
     </p>
     <div class="row">
         <div class="col">
-            <iframe src="[[ url_for('pub.graph_pma', prj='RCC', cq='default', group='primary') ]]" frameborder="0" style="width: 100%; min-height: 500px;"></iframe>
+            <iframe src="[[ url_for('pub.graph_pma', prj='RCC', cq='default', group='primary', src='cache') ]]" frameborder="0" style="width: 100%; min-height: 500px;"></iframe>
         </div>
     </div>
 </div>
@@ -251,7 +251,7 @@
         <a href="javascript:;" data-toggle="modal" data-target="#exampleModalCenter3">Video demonstration</a>
     </p>
     <div class="row">
-        <iframe src="[[ url_for('pub.graph_nma', prj='RCC', cq='default', tr='Suni') ]]" frameborder="0" style="width: 100%; min-height: 800px;"></iframe>
+        <iframe src="[[ url_for('pub.graph_nma', prj='RCC', cq='default', tr='Suni', od=';'.join(['Progression free survival', 'Overall survival'])) ]]" frameborder="0" style="width: 100%; min-height: 800px;"></iframe>
     </div>
 </div>
 
@@ -272,7 +272,7 @@
     
     <div class="row">
         <div class="col">
-            <iframe id="ifm-ocplots" src="[[ url_for('pub.softable_pma', prj='RCC', cq='default', msrs='OR,RR,HR') ]]" frameborder="0" style="width: 100%; min-height: 450px;"></iframe>
+            <iframe id="ifm-ocplots" src="[[ url_for('pub.softable_pma', prj='RCC', cq='default', msrs='OR,RR,HR', od=';'.join(['Progression free survival', 'Overall survival'])) ]]" frameborder="0" style="width: 100%; min-height: 450px;"></iframe>
         </div>
     </div>
 
@@ -294,7 +294,7 @@
     </p>
     <div class="row">
         <div class="col">
-            <iframe id="ifm-ocplots" src="[[ url_for('pub.softable_nma', prj='RCC', cq='default', dc='Suni', cp='yes') ]]" frameborder="0" style="width: 100%; min-height: 450px;"></iframe>
+            <iframe id="ifm-ocplots" src="[[ url_for('pub.softable_nma', prj='RCC', cq='default', dc='Suni', cp='yes', od=';'.join(['Progression free survival', 'Overall survival'])) ]]" frameborder="0" style="width: 100%; min-height: 450px;"></iframe>
         </div>
     </div>
 </div>

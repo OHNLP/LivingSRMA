@@ -425,10 +425,10 @@ def update_extract_nma_pre_data(extract, df, papers):
             upperci = str(row['upperci']),
             survival_t1 = str(__get_val(__get_col(row, 'survival in t1'))),
             survival_t2 = str(__get_val(__get_col(row, 'survival in t2'))),
-            Ec_t1 = str(__get_val(__get_col(row, 'Ec_t1'))),
-            Et_t1 = str(__get_val(__get_col(row, 'Et_t1'))),
-            Ec_t2 = str(__get_val(__get_col(row, 'Ec_t2'))),
-            Et_t2 = str(__get_val(__get_col(row, 'Et_t2'))),
+            Ec_t1 = __get_int_val(row['Ec_t1']),
+            Et_t1 = __get_int_val(row['Et_t1']),
+            Ec_t2 = __get_int_val(row['Ec_t2']),
+            Et_t2 = __get_int_val(row['Et_t2']),
         )
 
         # ok, let's add this record
@@ -538,14 +538,14 @@ def update_extract_nma_raw_data(extract, df, papers):
 
         # build the arm
         arm = dict(
-            t1 = __get_val(rows[0]['treat']),
-            t2 = __get_val(rows[1]['treat']),
+            t1 = __get_int_val(rows[0]['treat']),
+            t2 = __get_int_val(rows[1]['treat']),
 
-            event_t1 = __get_val(rows[0]['event']),
-            total_t1 = __get_val(rows[0]['total']),
+            event_t1 = __get_int_val(rows[0]['event']),
+            total_t1 = __get_int_val(rows[0]['total']),
 
-            event_t2 = __get_val(rows[1]['event']),
-            total_t2 = __get_val(rows[1]['total']),
+            event_t2 = __get_int_val(rows[1]['event']),
+            total_t2 = __get_int_val(rows[1]['total']),
         )
 
         # check this data
@@ -707,6 +707,9 @@ def import_extracts_from_xls(full_path, keystr, cq_abbr, oc_type):
 
         # need to exclude those with empty study name
         df_oc = df_oc[~df_oc['study'].isna()]
+        print('* found %s records for this oc' % (
+            len(df_oc)
+        ))
 
         if oc_type == 'nma':
             if data_type == 'pre':
@@ -776,6 +779,19 @@ def __get_val(v, default_value=''):
     if pd.isna(v): 
         return default_value
     return str(v).strip()
+
+
+def __get_int_val(v, default_value=''):
+    '''
+    Helper function for getting the int value
+    '''
+    if pd.isna(v): 
+        return default_value
+    try:
+        val = str(int(float(v)))
+        return val
+    except:
+        return v
 
 
 def __get_col(row, col):

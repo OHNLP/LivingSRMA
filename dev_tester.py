@@ -22,7 +22,7 @@ from datetime import timedelta
 from imbox import Imbox
 
 # app settings
-from lnma import db, create_app, srv_extract, srv_paper
+from lnma import db, create_app, srv_extract, srv_paper, srv_project
 from lnma.models import *
 from lnma import dora
 from lnma import util
@@ -44,13 +44,18 @@ def test_pred():
     
 
 def test():
-    srv_extract.import_extracts_from_xls(
-        '/tmp/mrcc-pma.xlsx',
+    srv_project.delete_all_extracts_by_keystr(
         'RCC',
         'default',
-        'pwma',
+        'nma'
     )
-    
+    srv_extract.import_extracts_from_xls(
+        '/tmp/mrcc-nma.xlsx',
+        'RCC',
+        'default',
+        'nma',
+    )
+
 
 def test2():
     ret = srv_paper.check_existed_paper_by_file(

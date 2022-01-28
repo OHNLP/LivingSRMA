@@ -99,16 +99,22 @@ class Project:
 
     @command
     @argument("keystr", type=str, description="The keystr for a project")
+    @argument("cq_abbr", type=str, description="The cq_abbr for a clinical question")
+    @argument("oc_type", type=str, description="The oc type, nma or pwma or itable or all")
     @argument("are_you_sure", type=str, description="yes for final confirmation")
-    def delete_all_extracts(self, keystr:str, are_you_sure:str):
+    def delete_all_extracts(self, keystr:str, cq_abbr:str, oc_type:str, are_you_sure:str):
         '''
         Delete all extracts in a project
         '''
         if are_you_sure != 'yes':
             print('* deletion cancelled')
-            return 
+            return
 
-        srv_project.delete_all_extracts_by_keystr(keystr)
+        if oc_type not in ['nma', 'pwma', 'itable', 'all']:
+            print('* which oc type?')
+            return
+
+        srv_project.delete_all_extracts_by_keystr(keystr, cq_abbr, oc_type)
 
         print('* deleted all extracts!')
 

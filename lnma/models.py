@@ -1237,11 +1237,12 @@ class Extract(db.Model):
                 continue
 
             # check all arms
-            for arm in [ext['attrs']['main']] + ext['attrs']['other']:
+            for record in [ext['attrs']['main']] + ext['attrs']['other']:
+                arm = record['g0']
                 # no matter pre or raw format
                 # there always be t1 and t2
                 for tx in ['t1', 't2']:
-                    treat_name = arm['g0'][tx].strip()
+                    treat_name = arm[tx].strip()
 
                     if data_type == 'raw':
                 
@@ -1260,8 +1261,8 @@ class Extract(db.Model):
                         # update the numbers of this treatment
                         trtable[treat_name]['n_stus'] += 1
                         try:
-                            trtable[treat_name]['event'] += int(arm['g0']['event_'+tx])
-                            trtable[treat_name]['total'] += int(arm['g0']['total_'+tx])
+                            trtable[treat_name]['event'] += int(arm['event_'+tx])
+                            trtable[treat_name]['total'] += int(arm['total_'+tx])
                         except Exception as err:
                             logging.warning(err)
 
@@ -1270,6 +1271,7 @@ class Extract(db.Model):
 
                     elif data_type == 'pre':
                         if treat_name not in trtable:
+                            # ok, this treatment doesn't exist yet
                             trtable[treat_name] = {
                                 'n_stus': 0,
                                 'internal_val_ec': 0,
@@ -1284,10 +1286,10 @@ class Extract(db.Model):
 
                         # try to add survival
                         try:
-                            _srvc = float(arm['g0']['survival_'+tx])
+                            _srvc = float(arm['survival_'+tx])
                         except Exception as err:
                             _srvc = None
-                            logging.warning(err)
+                            # logging.warning(err)
 
                         if _srvc is None:
                             pass
@@ -1297,7 +1299,8 @@ class Extract(db.Model):
                     
                         # try to add internal
                         try: 
-                            trtable[treat_name]['internal_val_ec'] += int(arm['g0']['Ec_'+tx]) * 1000 / int(arm['g0']['Et_'+tx])
+                            trtable[treat_name]['internal_val_ec'] += \
+                                float(arm['Ec_'+tx]) * 1000 / float(arm['Et_'+tx])
                             trtable[treat_name]['internal_val_et'] += 1000
                         except Exception as err:
                             logging.warning(err)
@@ -1545,7 +1548,7 @@ class Extract(db.Model):
                 # for multi arm study, need to have different name
                 if arm_idx > 0:
                     r['study'] = '%s (%s)' % (study, arm_idx)
-                    
+
                 r['year'] = year
 
                 # add alia names if the data type is raw

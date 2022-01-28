@@ -963,7 +963,7 @@ def graphdata_evmap_json(keystr):
         ret = json.load(open(full_fn_json))
         return jsonify(ret)
 
-    if src == 'sofnma_cache':
+    if src == 'sofnma_cache' or src == 'db':
         full_fn_sofnama = os.path.join(
             full_path,
             'SOFTABLE_NMA.json'
@@ -975,24 +975,6 @@ def graphdata_evmap_json(keystr):
         ret = srv_pub_nma.parse_evmap_data_from_json(j)
         latest = srv_project.get_project_latest_stat_by_keystr(keystr)
         ret['latest'] = latest
-
-        # catch the result
-        json.dump(ret, open(full_fn_json, 'w'), default=util.json_encoder)
-
-        return jsonify(ret)
-
-    if src == 'db':
-        print('* reading database for %s.%s %s' % (
-            keystr, cq_abbr, fn_json
-        ))
-
-        ret = None
-
-        if ret is None:
-            ret = {
-                'success': False,
-                'msg': 'SOFTABLE NMA DATA NOT EXISTS FOR THIS PROJECT'
-            }
 
         # catch the result
         json.dump(ret, open(full_fn_json, 'w'), default=util.json_encoder)

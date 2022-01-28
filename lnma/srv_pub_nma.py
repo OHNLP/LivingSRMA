@@ -1,6 +1,7 @@
 from genericpath import exists
 import os
 import json
+from matplotlib.pyplot import flag
 
 from tqdm import tqdm
 
@@ -175,7 +176,7 @@ def get_sof_nma_by_cq(keystr, cq_abbr="default"):
     # then create oc_dict
     oc_dict = {}
     treat_list = []
-    for extract in extracts:
+    for extract in tqdm(extracts):
         abbr = extract.abbr
 
         # check if included in sof
@@ -207,9 +208,11 @@ def get_sof_nma_by_cq(keystr, cq_abbr="default"):
         lgtable = _conv_nmarst_league_to_lgtable(rst)
 
         # convert the ranks to rktable format
-        flag_reverse = extract.meta['which_is_better'] == 'higher' or \
-                    extract.meta['which_is_better'] == 'bigger' or \
-                    extract.meta['which_is_better'] == 'big'
+        # flag_reverse = extract.meta['which_is_better'] == 'higher' or \
+        #             extract.meta['which_is_better'] == 'bigger' or \
+        #             extract.meta['which_is_better'] == 'big'
+        # in fact, the rank table should always be like this
+        flag_reverse = True
         rktable = _conv_nmarst_rank_to_rktable(
             rst,
             reverse=flag_reverse
@@ -287,6 +290,12 @@ def parse_evmap_data_from_json(j):
                 # skip the same, no need to compare
                 if treat == cmprt: continue
 
+                # try to locate this cmprt first
+                if cmprt not in oc['cetable']: continue
+
+                # try to get the treat
+                if treat not in oc['cetable'][cmprt]: continue
+
                 # get the certainty
                 cie = oc['cetable'][cmprt][treat]['cie']
 
@@ -359,7 +368,7 @@ def _get_effect(sm, lw, up, which_is_better='lower'):
 
 def _add_cie_patch(keystr, cq_abbr, oc_dict):
     '''
-    Add patch to  
+    Add patch to NMA result
     '''
     # try to read the file
     fn = 'CIE.csv'
