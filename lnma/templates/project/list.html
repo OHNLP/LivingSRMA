@@ -25,6 +25,18 @@ My Projects
 {% block content %}
 <div class="content">
     <div class="container-fluid">
+
+        <div class="row">
+            <div class="col">
+                <a id="nav-link-project-create" 
+                    href="[[ url_for('project.create') ]]" 
+                    class="btn btn-primary">
+                    <i class="nav-icon far fa-folder"></i>
+                    <p>Create New Project</p>
+                </a>
+            </div>
+        </div>
+
         <div class="row">
             <div id="tb_project_list" class="col">
                 <div class="row">

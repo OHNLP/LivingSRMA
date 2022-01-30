@@ -19,6 +19,7 @@ from lnma import srv_pub_prisma
 from lnma import srv_project
 from lnma.models import *
 from lnma import ss_state
+from lnma import util
 
 bp = Blueprint("screener", __name__, url_prefix="/screener")
 
@@ -480,7 +481,7 @@ def sspr_exclude_papers_tt():
 
     # create a dict for the details
     detail_dict = {
-        'date_decided': get_today_date_str(),
+        'date_decided': util.get_today_date_str(),
         'reason': reason,
         'decision': ss_state.SS_STAGE_EXCLUDED_BY_TITLE
     }
@@ -511,7 +512,7 @@ def sspr_exclude_papers_ab():
 
     # create a dict for the details
     detail_dict = {
-        'date_decided': get_today_date_str(),
+        'date_decided': util.get_today_date_str(),
         'reason': reason,
         'decision': ss_state.SS_STAGE_EXCLUDED_BY_ABSTRACT
     }
@@ -544,7 +545,7 @@ def sspr_exclude_papers_ft():
     
     # create a dict for the details
     detail_dict = {
-        'date_decided': get_today_date_str(),
+        'date_decided': util.get_today_date_str(),
         'reason': reason,
         'decision': ss_state.SS_STAGE_EXCLUDED_BY_FULLTEXT
     }
@@ -576,7 +577,7 @@ def sspr_include_papers_sr():
     
     # create a dict for the details
     # detail_dict = {
-    #     'date_decided': get_today_date_str(),
+    #     'date_decided': util.get_today_date_str(),
     #     'reason': reason,
     #     'decision': ss_state.SS_STAGE_INCLUDED_SR
     # }
@@ -616,7 +617,7 @@ def sspr_include_papers_srma():
 
     # create a dict for the details
     detail_dict = {
-        'date_decided': get_today_date_str(),
+        'date_decided': util.get_today_date_str(),
         'reason': reason,
         'decision': ss_state.SS_STAGE_INCLUDED_SR
     }

@@ -31,8 +31,9 @@ Public Website
         </div>
 
         <div class="row">
+
             <div class="col-md-3">
-                <div class="card card-primary">
+                <div class="card card-info">
                     <div class="card-header">
                         <h3 class="card-title">
                             <i class="fa fa-project-diagram"></i>
@@ -50,7 +51,7 @@ Public Website
                         <div>
                             <button class="btn btn-default"
                                 v-on:click="get_prisma_json('db')">
-                                Reload Data
+                                Generate JSON data file
                             </button>
                         </div>
                         
@@ -80,7 +81,7 @@ Public Website
 
             
             <div class="col-md-3">
-                <div class="card card-primary">
+                <div class="card card-info">
                     <div class="card-header">
                         <h3 class="card-title">
                             <i class="fa fa-table"></i>
@@ -98,7 +99,7 @@ Public Website
                         <div>
                             <button class="btn btn-default"
                                 v-on:click="get_itable_json('db')">
-                                Reload Data
+                                Generate JSON data file
                             </button>
                         </div>
                         
@@ -126,13 +127,68 @@ Public Website
             </div>
             <!-- /.col-md-3 -->
 
+        </div>
+
+        <div class="row">
+
+            <div class="col-md-3">
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fa fa-chart-line"></i>
+                            Graphs of Pairwise MA
+                        </h3>
+            
+                        <div class="card-tools">
+                            <button type="button" 
+                                class="btn btn-tool" 
+                                data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                        </div>
+                        <!-- /.card-tools -->
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body" style="display: block;">
+                        <div>
+                            <button class="btn btn-default"
+                                v-on:click="get_graphpma_json('db')">
+                                Generate JSON data file
+                            </button>
+                        </div>
+                        
+                        <div v-if="json.graph_pma == null">
+                            <p>
+                                Data not found.
+                            </p>
+                        </div>
+                        <div v-else>
+                            <p>
+                                Last update: {{ json.graph_pma.latest.last_queried }}
+                            </p>
+                            <div>
+                                <a target="_blank" 
+                                    href="[[ url_for('pub.graphdata_graph_pma_json', keystr=project.keystr, cq=cq_abbr, src='cache') ]]">
+                                    <i class="fa fa-table"></i>
+                                    Check SoF Table Data JSON
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.col-md-3 -->
+
+
 
             <div class="col-md-3">
                 <div class="card card-primary">
                     <div class="card-header">
                         <h3 class="card-title">
                             <i class="fa fa-table"></i>
-                            SoF Table Pairwise MA
+                            SoF Table of Pairwise MA
                         </h3>
             
                         <div class="card-tools">
@@ -149,7 +205,7 @@ Public Website
                         <div>
                             <button class="btn btn-default"
                                 v-on:click="get_sofpma_json('db')">
-                                Reload Data
+                                Generate JSON data file
                             </button>
                         </div>
                         
@@ -165,6 +221,112 @@ Public Website
                             <div>
                                 <a target="_blank" 
                                     href="[[ url_for('pub.graphdata_softable_pma_json', keystr=project.keystr, cq=cq_abbr, src='cache') ]]">
+                                    <i class="fa fa-table"></i>
+                                    Check SoF Table Data JSON
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.col-md-3 -->
+
+        </div>
+
+        <div class="row">
+
+            <div class="col-md-3">
+                <div class="card card-success">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fa fa-chart-line"></i>
+                            Graphs of Network MA
+                        </h3>
+            
+                        <div class="card-tools">
+                            <button type="button" 
+                                class="btn btn-tool" 
+                                data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                        </div>
+                        <!-- /.card-tools -->
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body" style="display: block;">
+                        <div>
+                            <button class="btn btn-default"
+                                v-on:click="get_graphnma_json('db')">
+                                Generate JSON data file
+                            </button>
+                        </div>
+                        
+                        <div v-if="json.graph_nma == null">
+                            <p>
+                                Data not found.
+                            </p>
+                        </div>
+                        <div v-else>
+                            <p>
+                                Last update: {{ json.graph_nma.latest.last_queried }}
+                            </p>
+                            <div>
+                                <a target="_blank" 
+                                    href="[[ url_for('pub.graphdata_graph_nma_json', keystr=project.keystr, cq=cq_abbr, src='cache') ]]">
+                                    <i class="fa fa-table"></i>
+                                    Check SoF Table Data JSON
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.col-md-3 -->
+
+
+
+            <div class="col-md-3">
+                <div class="card card-success">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fa fa-table"></i>
+                            SoF Table of Network MA
+                        </h3>
+            
+                        <div class="card-tools">
+                            <button type="button" 
+                                class="btn btn-tool" 
+                                data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                        </div>
+                        <!-- /.card-tools -->
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body" style="display: block;">
+                        <div>
+                            <button class="btn btn-default"
+                                v-on:click="get_sofnma_json('db')">
+                                Generate JSON data file
+                            </button>
+                        </div>
+                        
+                        <div v-if="json.softable_nma == null">
+                            <p>
+                                Data not found.
+                            </p>
+                        </div>
+                        <div v-else>
+                            <p>
+                                Last update: {{ json.softable_nma.latest.last_queried }}
+                            </p>
+                            <div>
+                                <a target="_blank" 
+                                    href="[[ url_for('pub.graphdata_softable_nma_json', keystr=project.keystr, cq=cq_abbr, src='cache') ]]">
                                     <i class="fa fa-table"></i>
                                     Check SoF Table Data JSON
                                 </a>
@@ -211,6 +373,12 @@ var app_public = {
             // the itable
             itable: null,
 
+            // the graphs for PMA
+            graph_pma: null,
+
+            // the graphs for NMA
+            graph_nma: null,
+
             // the sof table PMA
             softable_pma: null,
 
@@ -225,6 +393,102 @@ var app_public = {
     },
 
     vpp_methods: {
+
+        get_graphnma_json: function(src, gp) {
+            if (typeof(src)=='undefined') {
+                src = 'cache';
+            }
+            if (typeof(gp)=='undefined') {
+                gp = 'primary';
+            }
+
+            $.ajax({
+                url: '/pub/graphdata/'+this.prj+'/GRAPH_NMA.json',
+                type: 'get',
+                data: {
+                    src: src, 
+                    cq: this.cq, 
+                    gp: gp,
+                    ver: Math.random()
+                },
+                dataType: 'json',
+                success: function(data) {
+                    toast('Updated Graph NMA JSON data');
+                    console.log(data);
+
+                    // update the prisma
+                    app_public.vpp.$data.json.graph_nma = data;
+                }, 
+                error: function(jqXHR, textStatus, errorThrown) {
+                    toast('Something wrong when creating the extraction.', 'alert');
+                    console.error(textStatus, errorThrown);
+                }
+            });
+        },
+
+        get_sofnma_json: function(src, gp) {
+            if (typeof(src)=='undefined') {
+                src = 'cache';
+            }
+            if (typeof(gp)=='undefined') {
+                gp = 'primary';
+            }
+
+            $.ajax({
+                url: '/pub/graphdata/'+this.prj+'/SOFTABLE_NMA.json',
+                type: 'get',
+                data: {
+                    src: src, 
+                    cq: this.cq, 
+                    gp: gp,
+                    ver: Math.random()
+                },
+                dataType: 'json',
+                success: function(data) {
+                    toast('Updated SoF NMA JSON data');
+                    console.log(data);
+
+                    // update the prisma
+                    app_public.vpp.$data.json.softable_nma = data;
+                }, 
+                error: function(jqXHR, textStatus, errorThrown) {
+                    toast('Something wrong when creating the extraction.', 'alert');
+                    console.error(textStatus, errorThrown);
+                }
+            });
+        },
+
+        get_graphpma_json: function(src, gp) {
+            if (typeof(src)=='undefined') {
+                src = 'cache';
+            }
+            if (typeof(gp)=='undefined') {
+                gp = 'primary';
+            }
+
+            $.ajax({
+                url: '/pub/graphdata/'+this.prj+'/GRAPH_PMA.json',
+                type: 'get',
+                data: {
+                    src: src, 
+                    cq: this.cq, 
+                    gp: gp,
+                    ver: Math.random()
+                },
+                dataType: 'json',
+                success: function(data) {
+                    toast('Updated Graph PMA JSON data');
+                    console.log(data);
+
+                    // update the prisma
+                    app_public.vpp.$data.json.graph_pma = data;
+                }, 
+                error: function(jqXHR, textStatus, errorThrown) {
+                    toast('Something wrong when creating the extraction.', 'alert');
+                    console.error(textStatus, errorThrown);
+                }
+            });
+        },
 
         get_sofpma_json: function(src, gp) {
             if (typeof(src)=='undefined') {
@@ -323,7 +587,21 @@ var jarvis = {
     init: function() {
         app_public.init();
 
+        // get the JSON data of current status
+
+        app_public.vpp.get_prisma_json();
+        app_public.vpp.get_itable_json();
+
+        // the PWMA JSON
+        app_public.vpp.get_graphpma_json();
         app_public.vpp.get_sofpma_json();
+
+        // the NMA JSON
+        app_public.vpp.get_graphnma_json();
+        app_public.vpp.get_sofnma_json();
+
+        // the EVMAP JSON
+
     }
 };
 

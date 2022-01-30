@@ -348,7 +348,12 @@ var jarvis = {
         // send request to get data for initializing app
         $.get(
             "/pub/graphdata/" + prj + "/GRAPH_PMA.json",
-            {ver: Math.random(), src: src, cq: cq},
+            {
+                ver: Math.random(), 
+                src: src, 
+                cq: cq,
+                gp: gp
+            },
             (function(gp, foc){
                 return function(data) {
                     app_graphpma.init(data, gp, foc);
