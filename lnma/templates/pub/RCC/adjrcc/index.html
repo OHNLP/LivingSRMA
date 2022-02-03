@@ -119,7 +119,10 @@
         </div>
     </div>
     <div class="row">
-        <iframe src="[[ url_for('pub.prisma', prj='RCC', cq='adjrcc') ]]" frameborder="0" style="width: 100%; min-height: 850px;"></iframe>
+        <iframe id="ifm_prisma"
+            src="[[ url_for('pub.prisma', prj='RCC', cq='adjrcc') ]]" frameborder="0" 
+            style="width: 100%; min-height: 850px;">
+        </iframe>
     </div>
 </div>
 
@@ -155,7 +158,11 @@
     <p>How to use this table? <a href="javascript:void(0);" data-toggle="modal" data-target="#exampleModalCenter2">Video demonstration</a></p>
 
     <div class="row">
-        <iframe src="[[ url_for('pub.itable', prj='RCC', cq='adjrcc', src='db') ]]" frameborder="0" style="width: 100%; min-height: 700px;"></iframe>
+        <iframe id="ifm_itable" 
+            src="[[ url_for('pub.itable', prj='RCC', cq='adjrcc', src='db') ]]" 
+            frameborder="0" 
+            style="width: 100%; min-height: 700px;">
+        </iframe>
     </div>
 </div>
 
@@ -194,7 +201,11 @@
     </p>
     <div class="row">
         <div class="col">
-            <iframe src="[[ url_for('pub.graph_pma', prj='RCC', cq='adjrcc', group='primary') ]]" frameborder="0" style="width: 100%; min-height: 500px;"></iframe>
+            <iframe id="ifm_pwma_prim"
+                src="[[ url_for('pub.graph_pma', prj='RCC', cq='adjrcc', group='primary') ]]" 
+                frameborder="0" 
+                style="width: 100%; min-height: 500px;">
+            </iframe>
         </div>
     </div>
 </div>
@@ -210,7 +221,11 @@
         Results are summarized as forest plots for primary analysis and sensitivity network meta-analysis. Users can choose to view results for their outcome of interest using the dropdown menu (“Select outcome”).
     </p>
     <div class="row">
-        <iframe src="[[ url_for('pub.graph_nma', prj='RCC', cq='adjrcc', tr='Placebo', oc='disease free survival') ]]" frameborder="0" style="width: 100%; min-height: 800px;"></iframe>
+        <iframe id="ifm_nma_prim" 
+            src="[[ url_for('pub.graph_nma', prj='RCC', cq='adjrcc', gp='primary', tr='Placebo', oc='disease free survival') ]]" 
+            frameborder="0" 
+            style="width: 100%; min-height: 800px;">
+        </iframe>
     </div>
 </div>
 
@@ -229,7 +244,11 @@
     </p>
     <div class="row">
         <div class="col">
-            <iframe id="ifm-ocplots" src="[[ url_for('pub.softable_pma', prj='RCC', cq='adjrcc', msrs='OR,RR,HR', od=';'.join(['disease free survival','overall survival'])) ]]" frameborder="0" style="width: 100%; min-height: 450px;"></iframe>
+            <iframe id="ifm_sofpma" 
+                src="[[ url_for('pub.softable_pma', prj='RCC', cq='adjrcc', msrs='OR,RR,HR', od=';'.join(['disease free survival','overall survival'])) ]]" 
+                frameborder="0" 
+                style="width: 100%; min-height: 450px;">
+            </iframe>
         </div>
     </div>
 
@@ -251,7 +270,11 @@
     </p>
     <div class="row">
         <div class="col">
-            <iframe id="ifm-ocplots" src="[[ url_for('pub.softable_nma', prj='RCC', cq='adjrcc', dc='Placebo', cp='yes', od=';'.join(['disease free survival','overall survival'])) ]]" frameborder="0" style="width: 100%; min-height: 450px;"></iframe>
+            <iframe id="ifm_sofnma" 
+                src="[[ url_for('pub.softable_nma', prj='RCC', cq='adjrcc', dc='Placebo', cp='yes', od=';'.join(['disease free survival','overall survival'])) ]]" 
+                frameborder="0" 
+                style="width: 100%; min-height: 450px;">
+            </iframe>
         </div>
     </div>
 
@@ -270,7 +293,7 @@
     
     <div class="row">
         <div class="col">
-            <iframe id="iframe-evmap" 
+            <iframe id="ifm_evmap" 
                 src="[[ url_for('pub.evmap', prj='RCC', cq='adjrcc', tr='Pembro') ]]" 
                 frameborder="0" 
                 style="width: 100%; min-height: 700px;">
@@ -332,10 +355,18 @@ var prj = 'RCC';
 var cq = 'adjrcc';
 var default_treat = 'Suni';
 
-function resizeIFrameToFitContent( id ) {
-    var iFrame = document.getElementById(id);
-    iFrame.height = iFrame.contentWindow.document.body.scrollHeight;
-    // console.log('* ' + id + ': ' + iFrame.height);
+
+function resize_iframe( iFrame ) {
+    iFrame.height = iFrame.contentWindow.document.body.scrollHeight + "px";
+    console.log('* resize iframe#'+iFrame.id+' height to ' + iFrame.height);
+}
+
+function resize_iframes() {
+    $('iframe').each(function(idx) {
+        if ($(this).is('[resize_by_content]')) {
+            resize_iframe(this);
+        }
+    });
 }
 
 var jarvis = {

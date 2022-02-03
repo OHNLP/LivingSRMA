@@ -458,6 +458,9 @@ var fm_oc_selector = {
     vpp_id: '#fm_oc_selector',
 
     init: function(oc_dict, group, selected_oc_abbr) {
+        if (typeof(group) == 'undefined') {
+            group = 'primary';
+        }
         var raw_ocs = Object.values(oc_dict);
         var ocs = [];
         var group_oc_dict = {};
