@@ -93,7 +93,9 @@ def get_graph_nma_data_from_db(keystr, cq_abbr):
                 "fixed_or_random": extract.meta['fixed_or_random'],
                 "which_is_better": extract.meta['which_is_better']
             },
-            "treat_list": treat_list
+            "treat_list": treat_list,
+            # just give all information to frontend
+            "meta": extract.meta
         }
         ret['oc_dict'][extract.abbr] = oc
 

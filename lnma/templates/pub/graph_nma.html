@@ -23,7 +23,7 @@
 {% include 'css/start_screen.css' %}
 html, body {
     width: 100%;
-    height: 100%;
+    /* height: 100%; */
     padding: 0;
     margin: 0;
 }
@@ -36,15 +36,15 @@ a {
     color: #333333;
     text-decoration: none;
 }
-#main-pane {
+#main_pane {
     width: 100%;
-    height: 100%;
+    /* height: 100%; */
     padding: 5px;
     background-color: #FFFFFF;
     display: flex;
     flex-direction: column;
 }
-#main-pane .box {
+#main_pane .box {
     margin: 0 5px 0 0;
 }
 .pane-row {
@@ -233,13 +233,13 @@ a {
 
 <div class="flex-container" style="width:100%; height:100%;">
 
-<div id="main-pane">
+<div id="main_pane">
     <div class="pane-row">
         <div id="fm_oc_selector"
             class="d-flex flex-row">
             <div class="mr-1">
                 <i class="fa fa-cog"></i>
-                Select outcome: 
+                Select outcome: &nbsp;
             </div>
             <div>
                 <select v-model="selected_oc_abbr"
@@ -327,7 +327,9 @@ a {
             </div>
         </div><!-- .box network plot -->
 
-        <div class="box" style="width: 360px;" id="fg-nma-frsplt">
+        <div id="fg-nma-frsplt"
+            class="box" 
+            style="width: 360px;">
             <div class="box-header">
                 <h4>
                     <span class="fa fa-align-left"></span>
@@ -359,7 +361,9 @@ a {
             </p>
         </div><!-- .box forest plot -->
 
-        <div class="box" style="width: 300px; display: none;" id="fg-nma-pscplt">
+        <div id="fg-nma-pscplt"
+            class="box" 
+            style="width: 300px; display: none;">
             <div class="box-header">
                 <h4>
                     <span class="fa fa-chart-line"></span>
@@ -377,7 +381,9 @@ a {
             </div>
         </div><!-- .box P-Score plot -->
 
-        <div class="box" style="width: 300px; display: none;" id="fg-nma-scrplt">
+        <div id="fg-nma-scrplt"
+            class="box" 
+            style="width: 300px; display: none;" >
             <div class="box-header">
                 <h4>
                     <span class="fa fa-chart-line"></span>
@@ -451,8 +457,18 @@ var fm_oc_selector = {
     vpp: null,
     vpp_id: '#fm_oc_selector',
 
-    init: function(oc_dict, selected_oc_abbr) {
-        var ocs = Object.values(oc_dict);
+    init: function(oc_dict, group, selected_oc_abbr) {
+        var raw_ocs = Object.values(oc_dict);
+        var ocs = [];
+        var group_oc_dict = {};
+        for (let i = 0; i < raw_ocs.length; i++) {
+            const oc = raw_ocs[i];
+            if (oc.meta.group != group) {
+                continue;
+            }
+            ocs.push(oc);
+            group_oc_dict[oc.oc_abbr] = oc;
+        }
 
         // sort the ocs
         ocs.sort(function(a, b) {
@@ -464,6 +480,13 @@ var fm_oc_selector = {
         if (typeof(selected_oc_abbr)=='undefined') {
             selected_oc_abbr = ocs[0].oc_abbr;
         }
+        if (!group_oc_dict.hasOwnProperty(selected_oc_abbr)) {
+            selected_oc_abbr = ocs[0].oc_abbr;
+        }
+
+        // and ... reset the jarvis here
+        // it's not a good practice, but I have to
+        jarvis.default_oc_abbr = selected_oc_abbr;
 
         this.vpp = new Vue({
             el: this.vpp_id,
@@ -586,12 +609,23 @@ var jarvis = {
         if (typeof(data.tmrank) != 'undefined') {
             tb_ranktb.draw(data.tmrank);
             fg_scrplt.draw(data.scrplt);
+            // clear existing ps-rank plot if exists
+            fg_pscplt.clear();
         }
         
         // update the pscore rank
         if (typeof(data.psrank) != 'undefined') {
             tb_ranktb.draw(data.psrank);
             fg_pscplt.draw(data.psrank);
+            // clear existing sucra plot if exists
+            fg_scrplt.clear();
+        }
+        
+        // the last thing is to notify that the height may changed
+        if (parent.hasOwnProperty('resize_iframes')) {
+            // which means this is iframed
+            parent.resize_iframes();
+            console.log('* graph_nma sent resize request to parent window');
         }
     },
     
@@ -612,10 +646,10 @@ var jarvis = {
         if (oc == '') {
             oc = null;
         } else {
-            oc = oc.toLocaleLowerCase();
+            oc = oc.toLocaleUpperCase();
         }
-        this.default_oc_abbr = null;
-        this.default_oc_full_name = oc;
+        this.default_oc_abbr = oc;
+        // this.default_oc_full_name = oc;
 
         // which default treatment
         var treat = jarvis.get_url_paramter('tr');
@@ -639,6 +673,7 @@ var jarvis = {
         if (gp == '') {
             gp = 'primary';
         }
+        jarvis.show_group = gp;
 
         // the first oc to show
         var foc = jarvis.get_url_paramter('foc');
@@ -687,34 +722,38 @@ var jarvis = {
             {ver: Math.random(), src: src, cq: cq},
             function(data) {
                 // first, convert the name to abbr
-                jarvis.ocfn2abbr = {};
-                for (const abbr in data.oc_dict) {
-                    if (Object.hasOwnProperty.call(data.oc_dict, abbr)) {
-                        const oc = data.oc_dict[abbr];
-                        var oc_full_name = oc.oc_fullname.toLocaleLowerCase();
-                        jarvis.ocfn2abbr[oc_full_name] = abbr;
-                    }
-                }
-                
-                if (jarvis.ocfn2abbr.hasOwnProperty(jarvis.default_oc_full_name)) {
-                    // init the selector 
-                    // with the default oc abbr
-                    fm_oc_selector.init(
-                        data.oc_dict, 
-                        jarvis.ocfn2abbr[jarvis.default_oc_full_name]
-                    );
-                    jarvis.default_oc_abbr = jarvis.ocfn2abbr[jarvis.default_oc_full_name];
+                // jarvis.ocfn2abbr = {};
+                // for (const abbr in data.oc_dict) {
+                //     if (Object.hasOwnProperty.call(data.oc_dict, abbr)) {
+                //         const oc = data.oc_dict[abbr];
+                //         var oc_full_name = oc.oc_fullname.toLocaleLowerCase();
+                //         jarvis.ocfn2abbr[oc_full_name] = abbr;
+                //     }
+                // }
+                // if (jarvis.ocfn2abbr.hasOwnProperty(jarvis.default_oc_full_name)) {
+                //     // init the selector 
+                //     // with the default oc abbr
+                //     fm_oc_selector.init(
+                //         data.oc_dict, 
+                //         jarvis.ocfn2abbr[jarvis.default_oc_full_name]
+                //     );
+                //     jarvis.default_oc_abbr = jarvis.ocfn2abbr[jarvis.default_oc_full_name];
 
-                } else {
-                    // which means this oc_name is missing or wrong,
-                    // so just use default
-                    fm_oc_selector.init(
-                        data.oc_dict
-                    );
-                    jarvis.default_oc_abbr = fm_oc_selector.vpp.$data.ocs[0].oc_abbr;
-                }
+                // } else {
+                //     // which means this oc_name is missing or wrong,
+                //     // so just use default
+                //     fm_oc_selector.init(
+                //         data.oc_dict
+                //     );
+                //     jarvis.default_oc_abbr = fm_oc_selector.vpp.$data.ocs[0].oc_abbr;
+                // }
 
                 // set the default one
+                fm_oc_selector.init(
+                    data.oc_dict, 
+                    jarvis.show_group,
+                    jarvis.default_oc_abbr
+                );
 
                 jarvis.draw(data);
                 jarvis.ssmsg('Data loaded!');
@@ -808,6 +847,9 @@ var jarvis = {
         var h = $(document).height();
     }
 };
+
+// include the jarvis extensions
+{% include 'js/jarvis_ext_compare_oc_names.js' %}
 
 $(document).ready(function() {
     jarvis.init();

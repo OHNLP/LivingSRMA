@@ -159,7 +159,10 @@ var srv_shared = {
      * @param extract_tree An extract_tree
      * @returns A sorted tree structured extracts
      */
-    create_extract_tree_sorted: function(extract_tree) {
+    create_extract_tree_sorted: function(extract_tree, flag_use_jarvis_oc_order) {
+        if (typeof(flag_use_jarvis_oc_order)=='undefined') {
+            flag_use_jarvis_oc_order = false;
+        }
         var sorted = [];
 
         var oc_types = Object.keys(extract_tree).sort();
@@ -188,11 +191,21 @@ var srv_shared = {
                     // now, check the ocs
                     var ocs = extract_tree[oc_type].groups[group].cates[cate].ocs;
                     var ocs_list = Object.keys(ocs).map(function(abbr) {
+                        // for sorting
+                        ocs[abbr].oc_full_name = ocs[abbr].meta.full_name;
                         return ocs[abbr];
                     });
-                    ocs_list.sort(function(a, b) {
-                        return a.meta.full_name > b.meta.full_name ? 1 : -1;
-                    });
+
+                    if (flag_use_jarvis_oc_order) {
+                        // for this case, the order is not empty
+                        ocs_list.sort(jarvis.compare_oc_names);
+
+                    } else {
+                        // just use alphabet
+                        ocs_list.sort(function(a, b) {
+                            return a.meta.full_name > b.meta.full_name ? 1 : -1;
+                        });
+                    }
                     
                     var sorted_cate = {
                         name: cate,

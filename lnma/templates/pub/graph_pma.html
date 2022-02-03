@@ -37,8 +37,16 @@ body {
     border-right: 1px solid #aaaaaa;
     padding: 5px;
 }
+.chk-oc-group {
+    margin-bottom: 3px;
+}
+.chk-oc-h3 {
+    border-top: 1px solid whitesmoke;
+    padding-top: 3px;
+    font-weight: bold;
+}
 .chk-oc {
-    padding: 5px;
+    padding: 3px 5px;
     cursor: pointer;
 }
 .chk-oc:hover {
@@ -83,10 +91,12 @@ body {
                 </div>
             </div>
 
-            <div v-for="(cate, cate_idx) in group.cates">
+            <div v-for="(cate, cate_idx) in group.cates"
+                class="chk-oc-group">
                 <div class="chk-oc-h3 d-flex flex-row justify-content-between cursor-pointer"
                     v-if="group.cates.length > 1">
                     <div class="ml-1">
+                        <i class="far fa-folder-open"></i>
                         {{ cate.name }}
                     </div>
                 </div>
@@ -112,6 +122,9 @@ body {
         <div>
             <h4>
                 Forest Plot for 
+                <span v-if="oc_dict[selected_oc_abbr].extract.meta.category != 'default'">
+                    {{ oc_dict[selected_oc_abbr].extract.meta.category }} | 
+                </span>
                 {{ oc_dict[selected_oc_abbr].extract.meta.full_name }}
             </h4>
         </div>
@@ -342,6 +355,15 @@ var jarvis = {
         if (src == '') {
             src = 'cache';
         }
+        
+        // set the sorting
+        var od = jarvis.get_url_paramter('od');
+        if (od == '') {
+            jarvis.oc_orders = [];
+        } else {
+            od = od.toLocaleLowerCase();
+            jarvis.oc_orders = od.split(';');
+        }
 
         jarvis.ssmsg('Loading data ...');
 
@@ -381,6 +403,9 @@ var jarvis = {
         $('#start-screen').hide();
     }
 };
+
+// include the jarvis extensions
+{% include 'js/jarvis_ext_compare_oc_names.js' %}
 
 $(document).ready(function() {
     jarvis.init();

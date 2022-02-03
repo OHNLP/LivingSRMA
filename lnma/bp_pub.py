@@ -83,7 +83,12 @@ def php():
     # last, check this path exists or not
     # if not os.path.exists(os.path.join()):
 
-    return render_template(path_to_homepage)
+    return render_template(
+        path_to_homepage,
+        keystr=keystr,
+        cq_abbr=cq_abbr,
+        project=project
+    )
 
 
 ###############################################################################
@@ -676,10 +681,9 @@ def graphdata_graph_pma_json(keystr):
         return jsonify(ret)
 
     # get the result for database
-    ret = srv_pub_pma.get_sof_pma_data_from_db(
+    ret = srv_pub_pma.get_graph_pma_data_from_db(
         keystr, 
-        cq_abbr, 
-        is_calc_pma= calc is 'yes'
+        cq_abbr
     )
     latest = srv_project.get_project_latest_stat_by_keystr(keystr)
     ret['latest'] = latest

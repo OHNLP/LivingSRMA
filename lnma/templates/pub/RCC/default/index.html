@@ -228,18 +228,42 @@
     <p>
         Results are summarized as forest plots for primary analysis, sensitivity analysis and subgroup pairwise meta-analysis. Users can choose to view results for their outcome of interest using the dropdown menu (“Select outcome”).
     </p>
+
+    <br id="sec-pwma-Prim">
+    <h4 style="margin-bottom: 2rem;">Primary Analysis</h4>
+
     <div class="row">
         <div class="col">
-            <iframe src="[[ url_for('pub.graph_pma', prj='RCC', cq='default', group='primary', src='cache') ]]" frameborder="0" style="width: 100%; min-height: 500px;"></iframe>
+            <iframe id="ifm_pwma_prim"
+                src="[[ url_for('pub.graph_pma', prj='RCC', cq='default', gp='primary', src='cache', od=';'.join(['Progression free survival', 'Overall survival'])) ]]" 
+                frameborder="0" 
+                style="width: 100%; min-height: 350px;">
+            </iframe>
         </div>
     </div>
+
+
+    <br id="sec-pwma-Sens">
+    <h4 style="margin-bottom: 0;">Sensitivity Analysis</h4>
+
+    <div class="row">
+        <div class="col">
+            <iframe id="ifm_pwma_sens"
+                src="[[ url_for('pub.graph_pma', prj='RCC', cq='default', gp='sensitivity', src='cache', od=';'.join(['Progression free survival', 'Overall survival'])) ]]" 
+                frameborder="0" 
+                style="width: 100%; min-height: 450px;">
+            </iframe>
+        </div>
+    </div>
+
+
 </div>
 
 
 
 <br id="sec-nma-oucome">
 <!-- to reduce the spacing between this section and next, adding -3.5rem bottom -->
-<div class="container mb-2">
+<div class="container mt-3">
     <h3>
         NETWORK META-ANALYSIS
     </h3>
@@ -250,8 +274,41 @@
         How to use this figure? 
         <a href="javascript:;" data-toggle="modal" data-target="#exampleModalCenter3">Video demonstration</a>
     </p>
+</div>
+
+
+<br id="sec-nma-Prim">
+<div class="container mt-0">
+    <h4 style="margin-bottom: 0;">Primary Analysis</h4>
+</div>
+
+<div class="container mt-2"
+    style="max-width: 1300px;">
     <div class="row">
-        <iframe src="[[ url_for('pub.graph_nma', prj='RCC', cq='default', tr='Suni', od=';'.join(['Progression free survival', 'Overall survival'])) ]]" frameborder="0" style="width: 100%; min-height: 800px;"></iframe>
+        <iframe id="ifm_nma_prim"
+            src="[[ url_for('pub.graph_nma', prj='RCC', cq=cq_abbr, gp='primary', tr='Suni', oc=project.settings['public_website'][cq_abbr]['graph_nma']['default_oc_abbr'], od=';'.join(['Progression free survival', 'Overall survival'])) ]]" 
+            frameborder="0" 
+            style="width: 100%; min-height: 800px;"
+            resize_by_content>
+        </iframe>
+    </div>
+</div>
+
+
+
+<br id="sec-nma-Sens">
+<div class="container mt-1">
+    <h4 style="margin-bottom: 0;">Sensitivity Analysis</h4>
+</div>
+
+<div class="container mt-2"
+    style="max-width: 1300px;">
+    <div class="row">
+        <iframe src="[[ url_for('pub.graph_nma', prj='RCC', cq='default', gp='sensitivity', tr='Suni', oc=project.settings['public_website'][cq_abbr]['graph_nma']['default_oc_abbr_for_sensitivity'], od=';'.join(['Progression free survival', 'Overall survival'])) ]]" 
+            frameborder="0" 
+            style="width: 100%; min-height: 800px;"
+            resize_by_content>
+        </iframe>
     </div>
 </div>
 
@@ -379,16 +436,21 @@ The HR for 1,2 , The OR for the last one!
 var prj = 'RCC';
 var default_treat = 'Suni';
 
-function resizeIFrameToFitContent( id ) {
-    var iFrame = document.getElementById(id);
-    iFrame.height = iFrame.contentWindow.document.body.scrollHeight;
-    // console.log('* ' + id + ': ' + iFrame.height);
+function resize_iframe( iFrame ) {
+    iFrame.height = iFrame.contentWindow.document.body.scrollHeight + "px";
+    console.log('* resize iframe#'+iFrame.id+' height to ' + iFrame.height);
 }
 
+function resize_iframes() {
+    $('iframe').each(function(idx) {
+        if ($(this).is('[resize_by_content]')) {
+            resize_iframe(this);
+        }
+    });
+}
 
 var jarvis = {
     init: function() {
-
         $.get(
             "[[ url_for('pub.graphdata_latest_json', prj='RCC') ]]",
             {},

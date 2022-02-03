@@ -16,6 +16,13 @@ from lnma import db
 from lnma import srv_paper
 
 
+def get_graph_pma_data_from_db(keystr, cq_abbr):
+    '''
+    Get the graph data for PWMA
+    '''
+    return get_pma_by_cq(keystr, cq_abbr, 'plots')
+
+
 def get_sof_pma_data_from_db(keystr, cq_abbr, is_calc_pma=True):
     '''
     Get the SoF table data for PWMA
