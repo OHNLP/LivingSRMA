@@ -50,8 +50,15 @@ Public Website
                     <div class="card-body" style="display: block;">
                         <div>
                             <button class="btn btn-default"
+                                v-bind:disabled="ui_disabled"
                                 v-on:click="get_prisma_json('db')">
-                                Generate JSON data file
+                                <span v-if="ui_disabled">
+                                    Backend is updating ... 
+                                    <i class="fas fa-sync fa-spin"></i>
+                                </span>
+                                <span v-else>
+                                    Generate JSON data file
+                                </span>
                             </button>
                         </div>
                         
@@ -98,8 +105,15 @@ Public Website
                     <div class="card-body" style="display: block;">
                         <div>
                             <button class="btn btn-default"
+                                v-bind:disabled="ui_disabled"
                                 v-on:click="get_itable_json('db')">
-                                Generate JSON data file
+                                <span v-if="ui_disabled">
+                                    Backend is updating ... 
+                                    <i class="fas fa-sync fa-spin"></i>
+                                </span>
+                                <span v-else>
+                                    Generate JSON data file
+                                </span>
                             </button>
                         </div>
                         
@@ -152,8 +166,15 @@ Public Website
                     <div class="card-body" style="display: block;">
                         <div>
                             <button class="btn btn-default"
+                                v-bind:disabled="ui_disabled"
                                 v-on:click="get_graphpma_json('db')">
-                                Generate JSON data file
+                                <span v-if="ui_disabled">
+                                    Backend is updating ... 
+                                    <i class="fas fa-sync fa-spin"></i>
+                                </span>
+                                <span v-else>
+                                    Generate JSON data file
+                                </span>
                             </button>
                         </div>
                         
@@ -204,8 +225,15 @@ Public Website
                     <div class="card-body" style="display: block;">
                         <div>
                             <button class="btn btn-default"
+                                v-bind:disabled="ui_disabled"
                                 v-on:click="get_sofpma_json('db')">
-                                Generate JSON data file
+                                <span v-if="ui_disabled">
+                                    Backend is updating ... 
+                                    <i class="fas fa-sync fa-spin"></i>
+                                </span>
+                                <span v-else>
+                                    Generate JSON data file
+                                </span>
                             </button>
                         </div>
                         
@@ -258,8 +286,15 @@ Public Website
                     <div class="card-body" style="display: block;">
                         <div>
                             <button class="btn btn-default"
+                                v-bind:disabled="ui_disabled"
                                 v-on:click="get_graphnma_json('db')">
-                                Generate JSON data file
+                                <span v-if="ui_disabled">
+                                    Backend is updating ... 
+                                    <i class="fas fa-sync fa-spin"></i>
+                                </span>
+                                <span v-else>
+                                    Generate JSON data file
+                                </span>
                             </button>
                         </div>
                         
@@ -310,8 +345,15 @@ Public Website
                     <div class="card-body" style="display: block;">
                         <div>
                             <button class="btn btn-default"
+                                v-bind:disabled="ui_disabled"
                                 v-on:click="get_sofnma_json('db')">
-                                Generate JSON data file
+                                <span v-if="ui_disabled">
+                                    Backend is updating ... 
+                                    <i class="fas fa-sync fa-spin"></i>
+                                </span>
+                                <span v-else>
+                                    Generate JSON data file
+                                </span>
                             </button>
                         </div>
                         
@@ -338,6 +380,69 @@ Public Website
                 <!-- /.card -->
             </div>
             <!-- /.col-md-3 -->
+
+        </div>
+
+
+        <div class="row">
+
+            <div class="col-md-3">
+                <div class="card card-default">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fa fa-chart-line"></i>
+                            Evidence Map
+                        </h3>
+            
+                        <div class="card-tools">
+                            <button type="button" 
+                                class="btn btn-tool" 
+                                data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                        </div>
+                        <!-- /.card-tools -->
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body" style="display: block;">
+                        <div>
+                            <button class="btn btn-default"
+                                v-bind:disabled="ui_disabled"
+                                v-on:click="get_evmap_json('db')">
+                                <span v-if="ui_disabled">
+                                    Backend is updating ... 
+                                    <i class="fas fa-sync fa-spin"></i>
+                                </span>
+                                <span v-else>
+                                    Generate JSON data file
+                                </span>
+                            </button>
+                        </div>
+                        
+                        <div v-if="json.evmap == null">
+                            <p>
+                                Data not found.
+                            </p>
+                        </div>
+                        <div v-else>
+                            <p>
+                                Last update: {{ json.evmap.latest.last_queried }}
+                            </p>
+                            <div>
+                                <a target="_blank" 
+                                    href="[[ url_for('pub.graphdata_evmap_json', keystr=project.keystr, cq=cq_abbr, src='cache') ]]">
+                                    <i class="fa fa-table"></i>
+                                    Check SoF Table Data JSON
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.card-body -->
+                </div>
+                <!-- /.card -->
+            </div>
+            <!-- /.col-md-3 -->
+
 
         </div>
     </div>
@@ -394,6 +499,14 @@ var app_public = {
 
     vpp_methods: {
 
+        freeze_ui: function() {
+            this.ui_disabled = true;
+        },
+
+        unfreeze_ui: function() {
+            this.ui_disabled = false;
+        },
+
         get_graphnma_json: function(src, gp) {
             if (typeof(src)=='undefined') {
                 src = 'cache';
@@ -401,6 +514,8 @@ var app_public = {
             if (typeof(gp)=='undefined') {
                 gp = 'primary';
             }
+
+            this.freeze_ui();
 
             $.ajax({
                 url: '/pub/graphdata/'+this.prj+'/GRAPH_NMA.json',
@@ -418,6 +533,9 @@ var app_public = {
 
                     // update the prisma
                     app_public.vpp.$data.json.graph_nma = data;
+
+                    // update the UI
+                    app_public.vpp.unfreeze_ui();
                 }, 
                 error: function(jqXHR, textStatus, errorThrown) {
                     toast('Something wrong when creating the extraction.', 'alert');
@@ -433,6 +551,8 @@ var app_public = {
             if (typeof(gp)=='undefined') {
                 gp = 'primary';
             }
+
+            this.freeze_ui();
 
             $.ajax({
                 url: '/pub/graphdata/'+this.prj+'/SOFTABLE_NMA.json',
@@ -450,6 +570,9 @@ var app_public = {
 
                     // update the prisma
                     app_public.vpp.$data.json.softable_nma = data;
+
+                    // update the UI
+                    app_public.vpp.unfreeze_ui();
                 }, 
                 error: function(jqXHR, textStatus, errorThrown) {
                     toast('Something wrong when creating the extraction.', 'alert');
@@ -465,6 +588,8 @@ var app_public = {
             if (typeof(gp)=='undefined') {
                 gp = 'primary';
             }
+
+            this.freeze_ui();
 
             $.ajax({
                 url: '/pub/graphdata/'+this.prj+'/GRAPH_PMA.json',
@@ -482,6 +607,9 @@ var app_public = {
 
                     // update the prisma
                     app_public.vpp.$data.json.graph_pma = data;
+
+                    // update the UI
+                    app_public.vpp.unfreeze_ui();
                 }, 
                 error: function(jqXHR, textStatus, errorThrown) {
                     toast('Something wrong when creating the extraction.', 'alert');
@@ -497,6 +625,8 @@ var app_public = {
             if (typeof(gp)=='undefined') {
                 gp = 'primary';
             }
+
+            this.freeze_ui();
 
             $.ajax({
                 url: '/pub/graphdata/'+this.prj+'/SOFTABLE_PMA.json',
@@ -514,6 +644,9 @@ var app_public = {
 
                     // update the prisma
                     app_public.vpp.$data.json.softable_pma = data;
+
+                    // update the UI
+                    app_public.vpp.unfreeze_ui();
                 }, 
                 error: function(jqXHR, textStatus, errorThrown) {
                     toast('Something wrong when creating the extraction.', 'alert');
@@ -527,6 +660,8 @@ var app_public = {
             if (typeof(src)=='undefined') {
                 src = 'cache';
             }
+
+            this.freeze_ui();
 
             $.get(
                 '/pub/graphdata/' + this.prj + '/PRISMA.json',
@@ -542,6 +677,9 @@ var app_public = {
                     // update the prisma
                     app_public.vpp.$data.json.prisma = data;
 
+                    // update the UI
+                    app_public.vpp.unfreeze_ui();
+
                 }, 'json'
             );
         },
@@ -550,6 +688,9 @@ var app_public = {
             if (typeof(src)=='undefined') {
                 src = 'cache';
             }
+
+            this.freeze_ui();
+
             $.get(
                 '/pub/graphdata/'+this.prj+'/ITABLE.json',
                 {
@@ -563,6 +704,31 @@ var app_public = {
 
                     // update the itable
                     app_public.vpp.$data.json.itable = data;
+
+                    // update the UI
+                    app_public.vpp.unfreeze_ui();
+
+                }, 'json'
+            );
+        },
+
+        get_evmap_json: function(src) {
+            $.get(
+                '/pub/graphdata/'+this.prj+'/EVMAP.json',
+                {
+                    ver: Math.random(), 
+                    src: src, 
+                    cq: this.cq
+                },
+                function(data) {
+                    toast('Updated evmap JSON data!');
+                    console.log(data);
+
+                    // update the evmap
+                    app_public.vpp.$data.json.evmap = data;
+
+                    // update the UI
+                    app_public.vpp.unfreeze_ui();
 
                 }, 'json'
             );
