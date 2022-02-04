@@ -225,12 +225,14 @@ a {
             <div class="ss-info">({{ fmt_num(vals.e2.n_pmids) }} references)</div>
         </div>
 
-        <div class="ss-box ss-box2 ss-box-stage" style="left: 255px; top: 330px; width: 100px;" v-on:click="show_excluded_studies('e2')">
+        <div class="ss-box" 
+            style="left: 255px; top: 330px; width: 100px; cursor: default;">
             <div class="ss-info">{{ vals.e3.text }}</div>
             <div class="ss-info">({{ fmt_num(vals.e3.n_pmids) }} references)</div>
         </div>
 
-        <div class="ss-box ss-box2 ss-box-stage" style="left: 255px; top: 430px; width: 100px;" v-on:click="update_study_list('e3')">
+        <div class="ss-box" 
+            style="left: 255px; top: 430px; width: 100px; cursor: default;">
             <div class="ss-info">{{ vals.f3n.text }}</div>
             <div class="ss-info">({{ fmt_num(vals.f3n.n_pmids) }} references)</div>
         </div>

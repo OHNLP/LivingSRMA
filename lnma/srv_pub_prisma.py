@@ -162,13 +162,22 @@ def get_pub_prisma_from_db(keystr, cq_abbr='default'):
     }
 
     # calc f3n
-    f3n_study_list = [ i for i in prisma['f1']['study_list'] if i not in prisma['f3']['study_list'] ]
-    f3n_paper_list = [ i for i in prisma['f1']['paper_list'] if i not in prisma['f3']['paper_list'] ]
+    # f3n_study_list = [ i for i in prisma['f1']['study_list'] if i not in prisma['f3']['study_list'] ]
+    # f3n_paper_list = [ i for i in prisma['f1']['paper_list'] if i not in prisma['f3']['paper_list'] ]
+    # prisma['f3n'] = {
+    #     "n_ctids": len(f3n_study_list),
+    #     "n_pmids": len(f3n_paper_list),
+    #     "study_list": f3n_study_list,
+    #     "paper_list": f3n_paper_list,
+    #     "stage": "f3n",
+    #     "text": "Studies not in MA"
+    # }
+    # get a simple f3n
     prisma['f3n'] = {
-        "n_ctids": len(f3n_study_list),
-        "n_pmids": len(f3n_paper_list),
-        "study_list": f3n_study_list,
-        "paper_list": f3n_paper_list,
+        "n_ctids": 0,
+        "n_pmids": prisma['f1']['n_pmids'] - prisma['f3']['n_pmids'],
+        "study_list": [],
+        "paper_list": [],
         "stage": "f3n",
         "text": "Studies not in MA"
     }
@@ -227,14 +236,14 @@ def get_prisma_by_cq(project_id, cq_abbr="default", do_include_papers=True):
     for p in papers:
         paper_dict[p.pid] = p
 
-    # using this to check whether a study is used in MA
+    # using this to check whether a study is used in SR
     f1_pids = []
     for paper in papers:
         rct_id = paper.get_rct_id()
 
         # decide the cq level decision
         if paper.ss_ex['ss_cq'][cq_abbr]['d'] == 'yes':
-            # nothing 
+            # nothing, just add this study
             stat['f1']['pids'].append(paper.pid)
 
             # update the rct id if not exists
@@ -245,6 +254,7 @@ def get_prisma_by_cq(project_id, cq_abbr="default", do_include_papers=True):
         else:
             # this study is not included in this cq
             stat['f1']['n'] -= 1
+            # this study should be counted in the excluded by full-text
             stat['e3']['n'] += 1
 
             # update the reason
@@ -410,8 +420,6 @@ def get_prisma_by_cq(project_id, cq_abbr="default", do_include_papers=True):
     }
 
     return ret
-
-
 
 
 def get_stat_aef(project_id):
