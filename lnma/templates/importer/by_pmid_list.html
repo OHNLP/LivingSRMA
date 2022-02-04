@@ -110,7 +110,17 @@ Study Importer
                             v-for="r, i in rs"
                             :class="'paper-result-' + r.result">
                             <div style="text-align: center;">
-                                {{ r.pmid }}
+                                {{ r.pmid }} <br>
+                                <span v-if="r.hasOwnProperty('paper') && r.paper != null">
+                                    {{ r.paper.seq_num }}.{{ r.paper.ss_rs }} <br>
+                                    <span v-for="cq, cq_abbr in r.paper.ss_ex.ss_cq">
+                                        {{ cq_abbr }}: {{ cq.d }}
+                                    </span>
+                                </span>
+                                <span v-else>
+                                    &nbsp; <br>
+                                    &nbsp;
+                                </span>
                             </div>
                         </div>
                     </div>
@@ -203,6 +213,7 @@ var vw_uploader_pmidlist = {
                             const _r = data.rs[j];
                             var idx = _r.idx;
                             vw_uploader_pmidlist.vpp.$data.rs[idx].result = _r.result;
+                            vw_uploader_pmidlist.vpp.$data.rs[idx].paper = _r.paper;
                         }
 
                         vw_uploader_pmidlist.vpp.$forceUpdate();

@@ -367,6 +367,8 @@ def upload_pmid_data_file():
             pmid = row['PubMed ID']
         else:
             pmid = row.values[1]
+
+        # try to get the values
         
         ret['rs'].append({
             'idx': idx,

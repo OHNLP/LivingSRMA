@@ -470,10 +470,10 @@ def update_extract_nma_raw_data(extract, df, papers):
     The df format looks like the following:
 
     study	treat	event	total	pid
-    name_x	LenPem	244	355	33616314
-    name_x	Suni	122	357	33616314
-    name_y	LenPem	244	355	33616312
-    name_y	Suni	122	357	33616312
+    name_x	LenPem	244  	355	    33616314
+    name_x	Suni	122	    357	    33616314
+    name_y	LenPem	244	    355	    33616312
+    name_y	Suni	122	    357	    33616312
 
     there should be 5 columns and each study will have two rows.
 
