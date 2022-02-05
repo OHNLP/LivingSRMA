@@ -816,6 +816,12 @@ def import_itable_from_xls(
         # something wrong???
         return None
 
+    print('* not found pid %s' % (
+        len(not_found_pids)
+    ))
+    for _ in not_found_pids:
+        print('* - %s' % (_))
+
     # update the meta
     meta = extract.meta
     meta['cate_attrs'] = cate_attrs
@@ -1039,8 +1045,8 @@ def get_itable_from_itable_data_xls(keystr, full_fn):
             
             # print('* added col[%s] as abbr[%s] val[%s]' % (col, abbr, val))
 
-        print('* added %s %s' % (
-            pmid, data[pmid]['n_arms']
+        print('* added %s %s arms with [%s]' % (
+            pmid, data[pmid]['n_arms'], nct8
         ))
 
     return ca_dict, ca_list, i2a, data, not_found_pids
