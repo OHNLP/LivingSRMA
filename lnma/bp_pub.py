@@ -1023,9 +1023,15 @@ def graphdata_latest_json(prj):
 
 @bp.route('/graphdata/<prj>/img/<fn>')
 def graphdata_img(prj, fn):
-    '''get image files of specific project
     '''
-    full_path = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, 'img')
+    get image files of specific project
+    '''
+    full_path = os.path.join(
+        current_app.instance_path, 
+        settings.PUBLIC_PATH_PUBDATA, 
+        prj, 
+        'img'
+    )
     return send_from_directory(full_path, fn)
 
 

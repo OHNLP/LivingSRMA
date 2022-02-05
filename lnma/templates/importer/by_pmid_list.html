@@ -45,7 +45,7 @@ Study Importer
             <div class="col-md-4">
 
                 <h5>Upload a XLS/CSV file</h5>
-                <p class="card-text">This file contains two columns: 'NCT ID' and 'PMID'</p>
+                <p class="card-text">This file contains two columns: 'NCT' and 'PMID'</p>
                 <form id="upload_file" method="post" enctype="multipart/form-data">
                     <div class="form-group">
                         <input type="file" class="form-control-file" name="input_file" id="input_file">
@@ -80,7 +80,6 @@ Study Importer
                 <div>
 
                     <div class="form-inline">
-            
 
                         <button class="btn btn-primary"
                             v-bind:disabled="btn_import.disabled"

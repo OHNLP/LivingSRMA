@@ -67,11 +67,20 @@ var jarvis = {
     init: function() {
         // get filename
         var prj = jarvis.get_url_paramter('prj');
+
+        // which clinical question
+        var cq = jarvis.get_url_paramter('cq');
+        if (cq == '') {
+            cq = 'default';
+        }
+
+        // add offset to top
+        var pt = jarvis.get_url_paramter('pt');
+        
         /**
          * slides is a string defined as follows:
          * filename.png$a sentence for legend|filename.png$xxx
          */
-        var pt = jarvis.get_url_paramter('pt');
 
         var slides = jarvis.get_url_paramter('slides');
         var slides = slides.split('|');
