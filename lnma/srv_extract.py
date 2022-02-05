@@ -176,7 +176,8 @@ def update_extract_pwma_pre_data(extract, df, papers, is_subg=False):
         dora.update_paper_ss_cq_decision(
             pid2paper_id[pid],
             [{ 'abbr': extract.meta['cq_abbr'] }],
-            'yes', 'Import'
+            'yes', 
+            'Import'
         )
         
         # build the data object for this paper
@@ -322,7 +323,8 @@ def update_extract_pwma_raw_data(extract, df, papers, is_subg=False):
         dora.update_paper_ss_cq_decision(
             pid2paper_id[pid],
             [{ 'abbr': extract.meta['cq_abbr'] }],
-            'yes', 'Import'
+            'yes', 
+            'Import'
         )
         
         # build the data object for this paper
@@ -411,7 +413,8 @@ def update_extract_nma_pre_data(extract, df, papers):
         dora.update_paper_ss_cq_decision(
             pid2paper_id[pid],
             [{ 'abbr': extract.meta['cq_abbr'] }],
-            'yes', 'Import'
+            'yes', 
+            'Import'
         )
 
         # build the data object for this paper
@@ -533,7 +536,8 @@ def update_extract_nma_raw_data(extract, df, papers):
         dora.update_paper_ss_cq_decision(
             pid2paper_id[pid],
             [{ 'abbr': extract.meta['cq_abbr'] }],
-            'yes', 'Import'
+            'yes', 
+            'Import'
         )
 
         # build the arm

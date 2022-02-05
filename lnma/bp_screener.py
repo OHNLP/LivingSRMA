@@ -152,7 +152,7 @@ def get_paper_by_id():
         json_paper = None
     else:
         if paper.is_ss_included_in_project():
-            paper.update_ss_cq_by_cqs(
+            paper.update_ss_cq_ds(
                 project.settings['clinical_questions']
             )
         json_paper = paper.as_dict()
