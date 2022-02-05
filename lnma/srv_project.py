@@ -155,24 +155,31 @@ def update_project_papers_ss_cq_by_keystr(keystr, decision):
     ))
 
     cnt = {
-        'total': 0
+        'n_changed': 0,
+        'n_all': 0
     }
 
     for paper in tqdm(papers):
         if paper.is_ss_included_in_project():
-            paper.update_ss_cq_by_cqs(
+            # ok, this paper is select
+            is_changed, reason = paper.update_ss_cq_ds(
                 project.settings['clinical_questions'],
-                decision
             )
+            if is_changed:
+                flag_modified(paper, "ss_ex")
+                cnt['n_changed'] += 1
 
-            flag_modified(paper, "ss_ex")
-            cnt['total'] += 1
+                db.session.add(paper)
+                db.session.commit()
+            else:
+                # ok, since we didn't change anything, no need to update
+                pass
+            
+            cnt['n_all'] += 1
 
-            db.session.add(paper)
-            db.session.commit()
-
-    print('* found and upgraded %s studies for the ss_cq' % (
-        cnt['total']
+    print('* found %s and upgraded %s studies for the ss_cq' % (
+        cnt['n_all'],
+        cnt['n_changed']
     ))
 
     return project

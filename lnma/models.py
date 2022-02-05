@@ -392,6 +392,63 @@ class Paper(db.Model):
         '''
         return util.get_year(self.pub_date)
 
+
+    def update_ss_cq_ds(self, cqs):
+        '''
+        Update the ss_cq data structure in the ss_ex without changing decision
+        
+        This attiribute is used only for those included studies.
+
+        cqs: [{
+            abbr: 'default',
+            name: 'Long name'
+        }, ...]
+        '''
+        if self.is_ss_included_in_project():
+            # ok, let's check the cq
+            if 'ss_cq' in self.ss_ex:
+                pass
+            else:
+                self.ss_ex['ss_cq'] = {}
+
+            # set a flag for this changing
+            is_changed = False
+
+            for cq in cqs:
+                if cq['abbr'] in self.ss_ex['ss_cq']:
+                    # update the format
+                    if (type(self.ss_ex['ss_cq'][cq['abbr']]) == str):
+                        # oh, it's not the format we need now
+                        # str format yes/no is the old format for cq
+                        # we need a dict format to put more information
+                        self.ss_ex['ss_cq'][cq['abbr']] = util.make_ss_cq_decision(
+                            self.ss_ex['ss_cq'][cq['abbr']],
+                            settings.SCREENER_DEFAULT_REASON_FOR_CQ_INCLUSION,
+                            'no'
+                        )
+                        is_changed = True
+                        
+                    else:
+                        # great! we already have this cq set in dict format
+                        # 2022-02-04: just update the decision
+                        pass
+
+                else:
+                    # nice! just add this lovely new cq
+                    self.ss_ex['ss_cq'][cq['abbr']] = util.make_ss_cq_decision(
+                        settings.SCREENER_DEFAULT_DECISION_FOR_CQ_INCLUSION,
+                        settings.SCREENER_DEFAULT_REASON_FOR_CQ_INCLUSION,
+                        'yes'
+                    )
+                    is_changed = True
+
+            return is_changed, 'Updated'
+
+        else:
+            # ok, this study is not included in SR
+            # so ... no need to add this ss_cq
+            return False, 'Not included in this project'
+
     
     def update_ss_cq_by_cqs(self, cqs, 
         decision=settings.SCREENER_DEFAULT_DECISION_FOR_CQ_INCLUSION,
