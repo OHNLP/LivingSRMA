@@ -194,6 +194,25 @@ def set_paper_ss_cq(paper_id, cq_abbr, ss_cq, ss_cq_ex_reason=''):
     return True, paper
 
 
+def set_paper_ss_cq_ds(paper_id, cqs):
+    '''
+    Set the ss_cq data structure to a given paper
+    '''
+    paper = dora.get_paper_by_id(paper_id)
+
+    # 2022-02-04: update the cq for this
+    is_changed, reason = paper.update_ss_cq_ds(
+        cqs,
+    )
+    if is_changed:
+        flag_modified(paper, "ss_ex")
+
+        db.session.add(paper)
+        db.session.commit()
+
+    return True, paper
+    
+
 def set_paper_rct_id(keystr, pid, rct_id):
     '''
     Set the RCT ID for a paper

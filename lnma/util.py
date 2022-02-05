@@ -1349,6 +1349,14 @@ def create_pr_rs_details(reason, decision):
     return detail_dict
 
 
+def create_ss_ex(reason, decision):
+    '''
+    Create empty info
+    '''
+    d = create_pr_rs_details(reason, decision)
+    return d
+    
+
 if __name__ == "__main__":
     fn = '/home/hehuan/Downloads/endnote_test.xml'
     fn = '/home/hehuan/Downloads/endnote_test_large.xml'

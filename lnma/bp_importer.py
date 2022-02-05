@@ -21,7 +21,10 @@ import pandas as pd
 
 from werkzeug.utils import secure_filename
 
-from lnma import dora, settings, srv_import
+from lnma import dora
+from lnma import settings
+from lnma import srv_import
+from lnma import srv_paper
 from lnma import util
 from lnma import ss_state
 
@@ -236,15 +239,29 @@ def import_pmids():
         paper_id = paper.paper_id
         rct_id = pmid2rct_id[pmid]
         # update the stage
-        detail_dict = {
-            'date_decided': util.get_today_date_str(),
-            'reason': settings.SCREENER_REASON_INCLUDED_IN_SR_BY_IMPORT_PMIDS,
-            'decision': stage
-        }
+        detail_dict = util.create_pr_rs_details(
+            settings.SCREENER_REASON_INCLUDED_IN_SR_BY_IMPORT_PMIDS,
+            stage
+        )
+        # {
+        #     'date_decided': util.get_today_date_str(),
+        #     'reason': settings.SCREENER_REASON_INCLUDED_IN_SR_BY_IMPORT_PMIDS,
+        #     'decision': stage
+        # }
         
         # Well. just update the information
-        _ = dora.set_paper_rct_id(paper_id, rct_id)
-        _paper = dora.set_paper_pr_rs_with_details(paper_id, ss_pr, ss_rs, detail_dict)
+        _ = dora.set_paper_rct_id(
+            paper_id, 
+            rct_id
+        )
+
+        # update the paper
+        _paper = dora.set_paper_pr_rs_with_details(
+            paper_id, 
+            ss_pr, 
+            ss_rs, 
+            detail_dict
+        )
         
         for idx in pmid2idx[pmid]:
             rs_dict[idx]['result'] = 'existed'
@@ -561,6 +578,9 @@ def save_papers():
     # get the default stage
     stage = request.form.get('stage')
 
+    # get the project for cq information
+    project = dora.get_project(project_id)
+
     # convert stage to pr and rs
     ss_pr, ss_rs = ss_state.SS_STAGE_TO_PR_AND_RS[stage]
     ss_ex = util.create_pr_rs_details('User specified', stage)
@@ -609,12 +629,22 @@ def save_papers():
                 ss_ex,
                 None,
             )
+
+            # 2022-02-04: update the cq for this
+            srv_paper.set_paper_ss_cq_ds(
+                paper.paper_id,
+                project.settings['clinical_questions']
+            )
+
         except Exception as err:
+            print(err)
             # give some feedback to frontend
+
             ret['papers'].append({
                 'result': 'error',
                 'success': False,
-                'seq': p['seq']
+                'seq': p['seq'],
+                'msg': str(err)
             })
             continue
         
