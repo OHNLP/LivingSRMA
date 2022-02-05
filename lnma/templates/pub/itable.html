@@ -432,6 +432,19 @@ a {
                                 </a>
                                 
                             </span>
+                            <span v-else-if="attrs[idx].attr_id=='_NCT|NCT'">
+                                <a v-if="r[col] == 'NA'"
+                                    v-bind:href="r[attr_id2col('_URL|URL')]"
+                                    class="url_pubmed" target="_blank">
+                                    {{ r[attr_id2col('_URL|URL')] }}
+                                </a>
+                                <a v-else
+                                    v-bind:href="url.ctgov + r[col]"
+                                    class="url_pubmed" target="_blank">
+                                    {{ r[col] }}
+                                </a>
+                                
+                            </span>
                             <span v-else>{{ r[col] }}</span>
                         </td>
                     </tr>
@@ -681,6 +694,7 @@ var tb_schtab = {
             el: this.vpp_id,
             data: {
                 url: {
+                    ctgov: 'https://clinicaltrials.gov/ct2/show/',
                     pubmed: 'https://pubmed.ncbi.nlm.nih.gov/'
                 },
                 attrs: dt_tbcore.attrs,
