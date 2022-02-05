@@ -1021,7 +1021,10 @@ def get_paper_by_keystr_and_pid(keystr, pid):
     project = get_project_by_keystr(keystr)
     if project is None:
         return None
-    paper = get_paper_by_project_id_and_pid(project.project_id, pid)
+    paper = get_paper_by_project_id_and_pid(
+        project.project_id, 
+        pid
+    )
 
     return paper
 

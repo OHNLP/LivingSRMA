@@ -1,8 +1,9 @@
+import os
 import time
-from unicodedata import category
+import math
 
 import numpy as np
-from numpy.lib.function_base import extract
+from collections import OrderedDict
 import pandas as pd
 from tqdm import tqdm 
 
@@ -13,40 +14,10 @@ from lnma import settings
 from lnma import util
 from lnma import dora
 from lnma import ss_state
+from lnma import srv_paper
 from lnma.models import *
 
 from lnma import db
-
-
-def get_itable_by_keystr_and_cq_abbr(keystr, cq_abbr):
-    '''
-    Get the specific CQ itable in a project
-    '''
-    project = dora.get_project_by_keystr(keystr)
-
-    if project is None:
-        return None
-
-    extract = Extract.query.filter(and_(
-        Extract.project_id == project.project_id,
-        Extract.meta['cq_abbr'] == cq_abbr,
-        Extract.oc_type == 'itable'
-    )).first()
-
-    return extract
-
-
-def get_itable_by_project_id_and_cq_abbr(project_id, cq_abbr):
-    '''
-    Get the specific CQ itable in a project
-    '''
-    extract = Extract.query.filter(and_(
-        Extract.project_id == project_id,
-        Extract.meta['cq_abbr'] == cq_abbr,
-        Extract.oc_type == 'itable'
-    )).first()
-
-    return extract
 
 
 def get_extracts_by_cate_and_name(keystr, cq_abbr, oc_type, group, category, full_name):
@@ -745,6 +716,525 @@ def import_extracts_from_xls(full_path, keystr, cq_abbr, oc_type):
         print(pid)
 
     return dft
+
+
+###############################################################################
+# Utils for the itable
+###############################################################################
+
+def get_itable_by_keystr_and_cq_abbr(keystr, cq_abbr):
+    '''
+    Get the specific CQ itable in a project
+    '''
+    project = dora.get_project_by_keystr(keystr)
+
+    if project is None:
+        return None
+
+    extract = Extract.query.filter(and_(
+        Extract.project_id == project.project_id,
+        Extract.meta['cq_abbr'] == cq_abbr,
+        Extract.oc_type == 'itable'
+    )).first()
+
+    return extract
+
+
+def get_itable_by_project_id_and_cq_abbr(project_id, cq_abbr):
+    '''
+    Get the specific CQ itable in a project
+    '''
+    extract = Extract.query.filter(and_(
+        Extract.project_id == project_id,
+        Extract.meta['cq_abbr'] == cq_abbr,
+        Extract.oc_type == 'itable'
+    )).first()
+
+    return extract
+
+
+def import_itable_from_xls(
+    keystr, 
+    cq_abbr, 
+    full_fn_itable, 
+    full_fn_filter
+):
+    '''
+    Import itable all data from xls file
+
+    Including:
+
+    1. meta data for attributes
+    2. data of extraction
+    3. filters
+
+    the itable file name is 'ITABLE_ATTR_DATA.xlsx' or other
+    the filters name is ITABLE_FILTERS.xlsx or other
+    '''
+    project = dora.get_project_by_keystr(keystr)
+
+    # if project is None:
+    #     project_id = request.cookies.get('project_id')
+    #     project = dora.get_project(project_id)
+
+    if project is None:
+        return None
+    
+    project_id = project.project_id
+    oc_type = 'itable'
+
+    # in fact, due to the update the cq, this is also needed to be updated
+    # cq_abbr = 'default'
+
+    # get the exisiting extracts
+    # extract = dora.get_extract_by_project_id_and_abbr(
+    #     project.project_id, abbr
+    # )
+    extract = dora.get_itable_by_project_id_and_cq(
+        project_id, 
+        cq_abbr
+    )
+    abbr = extract.abbr
+
+    # if not exist, create a new one which is empty
+    if extract is None:
+        abbr = util.mk_abbr()
+        meta = copy.deepcopy(settings.OC_TYPE_TPL['itable']['default'])
+        meta['cq_abbr'] = cq_abbr
+        extract = dora.create_extract(
+            project_id, oc_type, abbr, 
+            settings.OC_TYPE_TPL['itable']['default'],
+            {}
+        )
+
+    # get the itable data
+    cad, cate_attrs, i2a, data, not_found_pids = get_itable_from_itable_data_xls(
+        project.keystr, 
+        full_fn_itable
+    )
+    if cate_attrs is None:
+        # something wrong???
+        return None
+
+    # update the meta
+    meta = extract.meta
+    meta['cate_attrs'] = cate_attrs
+
+    # get the filters
+    filters = get_itable_filters_from_xls(
+        project.keystr, 
+        full_fn_filter
+    )
+    meta['filters'] = filters
+
+    # update the extract
+    # pprint(filters)
+    itable = dora.update_extract_meta_and_data(
+        project_id, oc_type, abbr, meta, data
+    )
+
+    return itable
+
+
+def get_itable_from_itable_data_xls(keystr, full_fn):
+    '''
+    Get the itable extract from ITABLE_ATTR_DATA.xlsx
+    '''
+    if not os.path.exists(full_fn):
+        # try the xls file
+        # full_fn = full_fn[:-1]
+        # what's wrong???
+        return None, None, None, None, None
+
+    # get this project
+    project = dora.get_project_by_keystr(keystr)
+    if project is None:
+        return None, None, None, None, None
+
+    # get the ca list first
+    ca_dict, ca_list, i2a = get_cate_attr_subs_from_itable_data_xls(
+        full_fn
+    )
+
+    # read the first sheet, but skip the first row
+    xls = pd.ExcelFile(full_fn)
+    first_sheet_name = xls.sheet_names[0]
+    df = xls.parse(first_sheet_name, skiprows=1)
+
+    # 2021-06-27: weird bug, read so many NaN columns
+    df = df.dropna(axis=1, how='all')
+
+    cols = df.columns
+    n_cols = len(df.columns)
+    cols_lower = [ _.lower() for _ in cols ]
+
+    # a pmid/pid based dictionary
+    data = {}
+
+    # use this to locate those not found pid
+    not_found_pids = []
+
+    # begin loop 
+    for _, row in df.iterrows():
+        # find the pmid first
+        if 'PMID' in row:
+            pmid = row['PMID']
+        else:
+            pmid = row['PubMed ID']
+
+        # try to make sure it's NOT something like 12345678.0
+        if pd.isna(pmid):
+            # this is a NaN value for pmid
+            # can not parse this kind of value
+            print('* error when parsing NaN pmid at Row[%s]' % ( _ ))
+            continue
+
+        try:
+            pmid = int(pmid)
+
+            # must make sure the pmid is a string
+            pmid = '%s' % pmid
+
+            # the pmid may contain blank
+            pmid = pmid.strip()
+            pmid = '%s' % int(pmid)
+        except:
+            print('* error when parsing pmid[%s]' % ( pmid ))
+            # 2022-02-04: now we support DOI as pid
+            # just remove the blanks
+            # last try, just
+            pmid = pmid.strip()
+
+        # get the NCT
+        if 'Trial registration #' in row:
+            nct8 = row['Trial registration #'].strip()
+        else:
+            nct8 = ''
+
+        # 2022-02-04: sometimes the nct is from Col NCT
+        if 'NCT' in row:
+            nct8 = row['NCT']
+
+        # get the decision
+        if 'Included in MA' in row:
+            included_in_ma = ('%s'%row['Included in MA']).strip().upper()
+        else:
+            included_in_ma = 'NO'
+
+        # check if this pmid exists
+        is_main = False
+        if pmid in data:
+            # which means this row is an multi arm
+            # add a new object in `other`
+            # that's all we need to do
+            data[pmid]['n_arms'] += 1
+            data[pmid]['attrs']['other'].append({'g0':{}}) # subg 0 (in fact no subg)
+
+        else:
+            # ok, this is a new study
+            # by default not selected and not checked
+            # 
+            # `main` is for the main records
+            # `other` is for other arms, by default, other is empty
+            data[pmid] = {
+                'is_selected': True,
+                'is_checked': True,
+                'n_arms': 2,
+                'attrs': {
+                    'main': {'g0': {}}, # follow the pattern shared by subg
+                    'other': []
+                }
+            }
+            is_main = True
+
+            # it's better to update the nct information
+            is_success, p = srv_paper.set_paper_rct_id(
+                keystr, pmid, nct8
+            )
+
+            if is_success:
+                # ok, updated the nct for this paper
+                pass
+            else:
+                print('* warning when setting rct_id [%s] to %s, skipped' % (
+                    nct8, pmid
+                ))
+
+            # next, if a study is in itable.xls,
+            # it must be included sr at least
+            p = dora.get_paper_by_project_id_and_pid(
+                project.project_id, pmid
+            )
+
+            if p is None:
+                # BUT, it is possible that this pmid is not found
+                print('* NOT found pid[%s]' % (
+                    pmid
+                ))
+                not_found_pids.append(
+                    pmid
+                )
+
+            else:
+                # OK, we found this paper!
+                sss = p.get_ss_stages()
+                if ss_state.SS_STAGE_INCLUDED_SR in sss:
+                    # OK, this study is included in SR at least
+                    pass
+                else:
+                    # change stage!
+                    if included_in_ma == 'YES':
+                        _, p = srv_paper.set_paper_ss_decision(
+                            keystr, pmid, 
+                            ss_state.SS_PR_CHECKED_BY_ADMIN,
+                            ss_state.SS_RS_INCLUDED_SRMA,
+                            ss_state.SS_REASON_CHECKED_BY_ADMIN,
+                            ss_state.SS_STAGE_INCLUDED_SRMA
+                        )
+                    else:
+                        _, p = srv_paper.set_paper_ss_decision(
+                            keystr, pmid, 
+                            ss_state.SS_PR_CHECKED_BY_ADMIN,
+                            ss_state.SS_RS_INCLUDED_ONLY_SR,
+                            ss_state.SS_REASON_CHECKED_BY_ADMIN,
+                            ss_state.SS_STAGE_INCLUDED_ONLY_SR
+                        )
+
+                    # OK, updated
+                    print('* updated %s from %s to %s' % (
+                        pmid, sss, p.get_ss_stages()
+                    ))
+
+        # now check each column for this study
+        for idx in range(n_cols):
+            col = cols[idx]
+
+            # skip the pmid column
+            # since we already use this column as the key
+            if col.upper() in settings.EXTRACTOR_ITABLE_IMPORT_SKIP_COLUMNS:
+                continue
+
+            # get the value in this column
+            val = row[col]
+
+            # try to clear the blanks
+            try: val = val.strip()
+            except: pass
+            
+            # for NaN value
+            if pd.isna(val): val = None
+
+            abbr = i2a[idx]
+
+            if is_main:
+                data[pmid]['attrs']['main']['g0'][abbr] = val
+            else:
+                # check if this value is same in the main track
+                if val == data[pmid]['attrs']['main']['g0'][abbr]: 
+                    # for the same value, also set ...
+                    data[pmid]['attrs']['other'][-1]['g0'][abbr] = val
+                else:
+                    # just save the different values
+                    data[pmid]['attrs']['other'][-1]['g0'][abbr] = val
+            
+            # print('* added col[%s] as abbr[%s] val[%s]' % (col, abbr, val))
+
+        print('* added %s %s' % (
+            pmid, data[pmid]['n_arms']
+        ))
+
+    return ca_dict, ca_list, i2a, data, not_found_pids
+
+
+def get_cate_attr_subs_from_itable_data_xls(full_fn):
+    '''
+    Get the cate, attr, and subs from the given file
+    '''
+    if not os.path.exists(full_fn):
+        # try the xls file ? wh
+        # full_fn = full_fn[:-1]
+
+        # 2022-02-04: no matter what it is, return None
+        return None, None, None
+
+    # read the first sheet
+    xls = pd.ExcelFile(full_fn)
+    first_sheet_name = xls.sheet_names[0]
+    df = xls.parse(first_sheet_name, header=None, nrows=2)
+
+    # 2021-06-27: weird bug, read so many NaN columns
+    # df = pd.read_excel(full_fn)
+    df = df.dropna(axis=1, how='all')
+
+    # convert to other shape
+    dft = df.T
+    df_attrs = dft.rename(columns={0: 'cate', 1: 'attr'})
+
+    # not conver to tree format
+    cate_attr_dict = OrderedDict()
+    idx2abbr = {}
+
+    # check each attr
+    for idx, row in df_attrs.iterrows():
+        vtype = 'text'
+
+        if type(row['cate']) != str:
+            if math.isnan(row['cate']) \
+                or math.isnan(row['attr']):
+                print('* skip nan cate or attr idx %s' % idx)
+                continue
+
+
+        print("* found %s | %s" % (
+            row['cate'], row['attr']
+        ))
+
+        # found cate and attr
+        cate = row['cate'].strip()
+        attr = row['attr'].strip()
+
+        # skip some attrs
+        if attr.upper() in settings.EXTRACTOR_ITABLE_IMPORT_SKIP_COLUMNS:
+            continue
+        
+        # put this cate if not exists
+        if cate not in cate_attr_dict:
+            cate_attr_dict[cate] = {
+                'abbr': util.mk_abbr_12(),
+                'name': cate,
+                'attrs': {}
+            }
+
+        # split the name into different parts
+        attr_subs = attr.split('|')
+        if len(attr_subs) > 1:
+            attr = attr_subs[0].strip()
+            sub = attr_subs[1].strip()
+        else:
+            attr = attr
+            sub = None
+
+        # put this attr if not exists
+        if attr not in cate_attr_dict[cate]['attrs']:
+            cate_attr_dict[cate]['attrs'][attr] = {
+                'abbr': util.mk_abbr_12(),
+                'name': attr,
+                'subs': None
+            }
+        
+        # put this sub
+        if sub is not None:
+            if cate_attr_dict[cate]['attrs'][attr]['subs'] is None:
+                cate_attr_dict[cate]['attrs'][attr]['subs'] = [{
+                    'abbr': util.mk_abbr_12(),
+                    'name': sub
+                }]
+            else:
+                cate_attr_dict[cate]['attrs'][attr]['subs'].append({
+                    'abbr': util.mk_abbr_12(),
+                    'name': sub
+                })
+            # point the idx to the last sub in current attr
+            idx2abbr[idx] = cate_attr_dict[cate]['attrs'][attr]['subs'][-1]['abbr']
+        else:
+            # point the idx to the attr
+            idx2abbr[idx] = cate_attr_dict[cate]['attrs'][attr]['abbr']
+    
+    # convert the dict to list
+    cate_attr_list = []
+    for _i in cate_attr_dict:
+        cate = cate_attr_dict[_i]
+        # put this cate
+        _cate = {
+            'abbr': cate['abbr'],
+            'name': cate['name'],
+            'attrs': []
+        }
+
+        for _j in cate['attrs']:
+            attr = cate['attrs'][_j]
+            # put this attr
+            _attr = {
+                'abbr': attr['abbr'],
+                'name': attr['name'],
+                'subs': attr['subs']
+            }
+            _cate['attrs'].append(_attr)
+
+        cate_attr_list.append(_cate)
+
+    return cate_attr_dict, cate_attr_list, idx2abbr
+
+
+def get_itable_filters_from_xls(keystr, full_fn):
+    '''
+    Get the filters from ITABLE_FILTER.xlsx
+    '''
+
+    # full_fn = os.path.join(
+    #     current_app.instance_path, 
+    #     settings.PATH_PUBDATA, 
+    #     keystr, fn
+    # )
+    if not os.path.exists(full_fn):
+        # try the xls file
+        return []
+
+    # load the data file
+    import pandas as pd
+    xls = pd.ExcelFile(full_fn)
+    # load the Filters tab
+    sheet_name = 'Filters'
+    dft = xls.parse(sheet_name)
+
+    # build Filters data
+    ft_list = []
+    for col in dft.columns[1:]:
+        display_name = col
+        tmp = dft[col].tolist()
+        # the first line of dft is the column name / attribute name
+        ft_attr = '%s' % tmp[0]
+
+        if ft_attr == 'nan': continue
+
+        # the second line of dft is the filter type: radio or select
+        ft_type = ("%s" % tmp[1]).strip().lower()
+        # get those rows not NaN, which means containing option
+        ft_opts = dft[col][~dft[col].isna()].tolist()[3:]
+        # get the default label
+        ft_def_opt_label = ("%s" % tmp[2]).strip()
+
+        # set the default option
+        ft_item = {
+            'display_name': display_name,
+            'type': ft_type,
+            'attr': ft_attr,
+            'value': 0,
+            'values': [{
+                "display_name": ft_def_opt_label,
+                "value": 0,
+                "sql_cond": "{$col} is not NULL",
+                "default": True
+            }]
+        }
+        # build ae_name dict
+        for i, ft_opt in enumerate(ft_opts):
+            ft_opt = str(ft_opt)
+            # remove the white space
+            ft_opt = ft_opt.strip()
+            ft_item['values'].append({
+                "display_name": ft_opt,
+                "value": i+1,
+                "sql_cond": "{$col} like '%%%s%%'" % ft_opt,
+                "default": False
+            })
+
+        ft_list.append(ft_item)
+            
+        print('* parsed ft_attr %s with %s options' % (ft_attr, len(ft_opts)))
+    print('* created ft_list %s filters' % (len(ft_list)))
+
+    return ft_list
 
 
 ###########################################################

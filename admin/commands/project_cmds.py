@@ -220,7 +220,7 @@ class Project:
             print('* import cancelled')
             return 
 
-        itable = bp_extractor.import_itable_from_xls(
+        itable = srv_extract.import_itable_from_xls(
             keystr, 
             cq_abbr, 
             full_fn_itable,

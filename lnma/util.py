@@ -65,6 +65,10 @@ def mk_oc_abbr():
     return ''.join(random.choice('ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789') for i in range(8))
 
 
+def mk_abbr_12():
+    return mk_abbr(12)
+
+
 def mk_number_str(length=6):
     '''
     Make a random str of numbers

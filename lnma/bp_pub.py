@@ -809,16 +809,16 @@ def graphdata_softable_pma_json(keystr):
     if v is None or v == '' or v == '1':
         if keystr == 'IO':
             fn = 'ALL_DATA.xlsx'
-            full_fn = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, fn)
+            full_fn = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, keystr, fn)
             ret = get_sof_pma_data_IO(full_fn, is_calc_pma=True)
         else:
             fn = 'SOFTABLE_PMA_DATA.xlsx'
-            full_fn = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, fn)
+            full_fn = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, keystr, fn)
             ret = get_ae_pma_data_simple(full_fn)
 
     elif v == '2':
         fn = 'SOFTABLE_PMA_DATA.xlsx'
-        full_fn = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, prj, fn)
+        full_fn = os.path.join(current_app.instance_path, settings.PUBLIC_PATH_PUBDATA, keystr, fn)
         ret = get_sof_pma_data(full_fn)
 
     # cache the data

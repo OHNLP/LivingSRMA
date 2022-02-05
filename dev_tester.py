@@ -1,4 +1,3 @@
-#%% load packages and env
 import os
 import json
 import random
@@ -44,16 +43,11 @@ def test_pred():
     
 
 def test():
-    srv_project.delete_all_extracts_by_keystr(
-        'RCC',
+    itable = srv_extract.import_itable_from_xls(
+        'RCC', 
         'default',
-        'nma'
-    )
-    srv_extract.import_extracts_from_xls(
-        '/tmp/mrcc-nma.xlsx',
-        'RCC',
-        'default',
-        'nma',
+        '/tmp/mrcc-itable.xlsx',
+        '/tmp/mrcc-filters.xlsx'
     )
 
 
