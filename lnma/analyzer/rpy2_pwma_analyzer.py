@@ -272,6 +272,61 @@ def analyze_pwma_cat_pre(rs, cfg):
     return ret
 
 
+def analyze_subg_cat_pre(rs, cfg):
+    '''
+    Analyze the subgroup of Categorical pre-calculated
+
+    The given rs should contains:
+
+    study, TE, upperci, lowerci, subgroup
+    '''
+    # create a dataframe first
+    df = pd.DataFrame(rs)
+
+    # convert the TE
+    df['TE'] = np.log(df['TE'])
+
+    # usually the SE is not in the data
+    if 'SE' not in df.columns:
+        # need to convert the SE
+        df['SE'] = (np.log(df['upperci']) - np.log(df['lowerci'])) / 3.92
+
+    # get the primary
+    r_prim = meta.metagen(
+        df.TE, 
+        df.SE,
+        studlab=df.study,
+        byvar=df.subgroup,
+        sm=cfg['measure_of_effect'],
+        comb_random=cfg['fixed_or_random']=='random',
+        method_tau=cfg['tau_estimation_method'],
+        hakn=True if cfg['hakn_adjustment'] == 'TRUE' else False
+    )
+
+    # convert to R json object
+    r_j_prim = jsonlite.toJSON(r_prim, force=True)
+    print(r_j_prim)
+
+    # convert to Python JSON object
+    j_prim = json.loads(r_j_prim[0])
+
+    # for compability
+    j = {
+        'primma': j_prim,
+    }
+
+    # build the return
+    ret = {
+        'submission_id': 'rpy2',
+        'params': cfg,
+        'success': True,
+        'data': {
+            'primma': _meta_trans_metagen(j, cfg)
+        }
+    }
+
+    return ret
+
 ###########################################################
 # Analyzer for the IO project API usage
 ###########################################################

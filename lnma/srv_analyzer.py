@@ -132,16 +132,31 @@ def get_pma(extract, paper_dict, is_skip_unselected=True):
     results = []
     if 'input_format' in rscfg['cfg']:
         if rscfg['cfg']['input_format'] == 'PRIM_CAT_PRE':
-            rc = copy.deepcopy(rscfg)
-            result = pwma_analyzer.analyze_pwma_cat_pre(
-                rc['rs'],
-                rc['cfg']
-            )
-            results.append({
-                'rs': rc['rs'],
-                'cfg': rc['cfg'],
-                'rst': result
-            })
+            if extract.meta['group'] == 'subgroup':
+                # which means this is a subg analysis
+                # the parsing is different
+                rc = copy.deepcopy(rscfg)
+                result = pwma_analyzer.analyze_subg_cat_pre(
+                    rc['rs'],
+                    rc['cfg']
+                )
+                results.append({
+                    'rs': rc['rs'],
+                    'cfg': rc['cfg'],
+                    'rst': result
+                })
+
+            else:
+                rc = copy.deepcopy(rscfg)
+                result = pwma_analyzer.analyze_pwma_cat_pre(
+                    rc['rs'],
+                    rc['cfg']
+                )
+                results.append({
+                    'rs': rc['rs'],
+                    'cfg': rc['cfg'],
+                    'rst': result
+                })
 
         elif rscfg['cfg']['input_format'] == 'PRIM_CAT_RAW':
             rc = copy.deepcopy(rscfg)

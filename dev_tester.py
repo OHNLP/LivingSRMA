@@ -5,6 +5,8 @@ import requests
 import argparse
 
 import logging
+
+from lnma.analyzer import rpy2_pwma_analyzer
 logger = logging.getLogger("watcher")
 logger.setLevel(logging.INFO)
 logging.basicConfig(level=logging.WARNING, format='%(asctime)s [%(name)s] [%(levelname)s] %(message)s')
@@ -19,6 +21,8 @@ from datetime import timedelta
 
 # for checking email updates
 from imbox import Imbox
+
+import pandas as pd
 
 # app settings
 from lnma import db, create_app, srv_extract, srv_paper, srv_project
@@ -41,8 +45,31 @@ def test_pred():
         pred = dora.update_paper_rct_result(project_id, pid)
         pprint(pred)
     
-
 def test():
+    rs = json.loads(pd.DataFrame([
+        ['A', 0.42, 0.23, 0.74, 'Sarc'],
+        ['A', 0.56, 0.45, 0.69, 'Non-Sarc'],
+        ['B', 0.46, 0.28, 0.78, 'Sarc'],
+        ['B', 0.87, 0.64, 1.17, 'Non-Sarc'],
+    ], columns=['study', 'TE', 'lowerci', 'upperci', 'subgroup']).to_json(orient='records'))
+    # print(rs)
+
+    cfg = {
+        'measure_of_effect': 'HR',
+        'fixed_or_random': 'random',
+        'tau_estimation_method': 'DL',
+        'hakn_adjustment': 'FALSE'
+    }
+
+    ret = rpy2_pwma_analyzer.analyze_subg_cat_pre(
+        rs,
+        cfg
+    )
+
+    # pprint(ret)
+
+
+def test4():
     itable = srv_extract.import_itable_from_xls(
         'RCC', 
         'default',

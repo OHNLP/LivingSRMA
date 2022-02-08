@@ -1400,7 +1400,11 @@ class Extract(db.Model):
             return None
 
         elif self.oc_type == 'pwma':
-            rs = self._get_rs_pwma(paper_dict, is_skip_unselected)
+            if self.meta['group'] == 'subgroup':
+                rs = self._get_rs_subg(paper_dict, is_skip_unselected)
+            else:
+                rs = self._get_rs_pwma(paper_dict, is_skip_unselected)
+                
             cfg = self._get_cfg_pwma()
             return {
                 'rs': rs,
@@ -1491,6 +1495,10 @@ class Extract(db.Model):
             # copy values of main arm to rs
             r = copy.deepcopy(ext['attrs']['main']['g0'])
 
+            # for subgroup analysis
+            # if self.meta['group'] == 'subgroup':
+                
+
             # convert the data type
             r = util.convert_extract_r_to_number(
                 r,
@@ -1531,6 +1539,62 @@ class Extract(db.Model):
         return rs
         
     
+    def _get_rs_subg(self, paper_dict, is_skip_unselected=True):
+        '''
+        Get the Subgroup rs for analyzer
+
+        The `paper_dict` is a pid-based dictionary of Paper objects
+        '''
+        # the value will for each record
+        r_treatment = self.meta['treatments'][0]
+        r_control = self.meta['treatments'][1]
+        subgroups = self.meta['sub_groups']
+
+        rs = []
+        for pid in self.data:
+            ext = self.data[pid]
+
+            if pid in paper_dict:
+                study = paper_dict[pid].get_short_name()
+                year = paper_dict[pid].get_year()
+            else:
+                study = '%s' % pid
+                year = 'NA'
+
+            if not ext['is_selected'] and is_skip_unselected:
+                continue
+            
+            for arm_idx, arm in enumerate([ext['attrs']['main']] + ext['attrs']['other']):
+                for subg_idx, subg in enumerate(subgroups):
+                    # copy values of main arm to rs
+                    r = copy.deepcopy(arm['g%s' % subg_idx])
+
+                    # convert the data type
+                    r = util.convert_extract_r_to_number(
+                        r,
+                        self.meta['input_format']
+                    )
+
+                    # add other information?
+                    r['pid'] = pid
+                    
+                    if arm_idx > 0:
+                        r['study'] = study + " (%s)" % (arm_idx+1)
+                    else:
+                        r['study'] = study
+
+                    r['year'] = year
+                    r['treatment'] = r_treatment
+                    r['control'] = r_control
+
+                    # the subg
+                    r['subgroup'] = subg
+
+                    # ok ...
+                    rs.append(r)
+        
+        return rs
+
     def _get_nma_treat_list(self, is_skip_unselected=True):
         '''
         Get the NMA treat list
