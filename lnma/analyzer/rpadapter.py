@@ -955,6 +955,87 @@ def _meta_trans_metagen(j, params):
     return ret
 
 
+def _meta_trans_metagen_subg(j, params):
+    '''
+    Convert the metagen result of PWMA for subgroup analysis
+    '''
+    data = j['primma']
+    fxrd = params['fixed_or_random']
+    sm = params['measure_of_effect']
+
+    # get the subgroups
+    subgs = data["bylevs"]
+    sg2ix = dict(zip(subgs, list(range(len(subgs)))))
+
+    ret = {
+        'stat': {
+            fxrd: {
+                'name': '%s effects model' % fxrd,
+                # Chi2 of test for subgroup diff
+                'Q_b': data['Q.b.%s'%fxrd][0],
+                # df of test for subgroup diff
+                'df_Q': data['df.Q.b'][0],
+                # p value of test for subgroup diff
+                'pval_Q_b': data['pval.Q.b.%s'%fxrd][0],
+
+                # the residual heterogeneity
+                "resid_i2": data["I2.resid"][0],
+                # the resid p
+                "resid_p": data['pval.Q.resid'][0]
+            }
+        },
+        'subgroups': {}
+    }
+
+    w_tt = sum(data['w.%s.w' % fxrd])
+
+    for i, d in enumerate(data['data']):
+        subg = d['.byvar']
+        TE = d['.TE']
+        seTE = d['.seTE']
+        name = d['.studlab']
+
+        # check this subgroup
+        if subg not in ret['subgroups']:
+            # create a new subgroup for this result
+            ret['subgroups'][subg] = {
+                'model': {
+                    fxrd: {
+                        'name': 'Random effects model',
+                        'TE': data['TE.%s.w' % fxrd][sg2ix[subg]],
+                        'seTE': data['seTE.%s.w' % fxrd][sg2ix[subg]],
+                        'sm': _round(backtransf(data['TE.%s.w' % fxrd][sg2ix[subg]], sm), 4),
+                        'lower': _round(data['lower.%s.w' % fxrd][sg2ix[subg]], 3),
+                        'upper': _round(data['upper.%s.w' % fxrd][sg2ix[subg]], 3),
+                        'bt_TE': _round(backtransf(data['TE.%s.w' % fxrd][sg2ix[subg]], sm), 4),
+                        'bt_lower': _round(backtransf(data['lower.%s.w' % fxrd][sg2ix[subg]], sm), 4),
+                        'bt_upper': _round(backtransf(data['upper.%s.w' % fxrd][sg2ix[subg]], sm), 4),
+                        'w': _round(data['w.%s.w' % fxrd][sg2ix[subg]] / w_tt, 4),
+                    }
+                },
+                'heterogeneity': {
+                    'i2': data['I2.w'][sg2ix[subg]],
+                    'tau2': data['tau2.1.w'][sg2ix[subg]],
+                    'p': data['pval.Q.w'][sg2ix[subg]]
+                },
+                'stus': []
+            }
+        
+        # now let's add this study to a subgroup
+        ret['subgroups'][subg]['stus'].append({
+            'name': name,
+            'TE': TE,
+            'seTE': seTE,
+            'lower': data['lower'][i],
+            'upper': data['upper'][i],
+            'bt_TE': _round(backtransf(data['TE'][i], sm), 4),
+            'bt_lower': _round(backtransf(data['lower'][i], sm), 4),
+            'bt_upper': _round(backtransf(data['upper'][i], sm), 4)
+        })
+
+    return ret
+
+
 def _meta_trans_metaprop(j, params):
     '''
     Convert the metaprop result of PWMA Incidence Analysis

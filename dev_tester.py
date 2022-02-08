@@ -47,10 +47,10 @@ def test_pred():
     
 def test():
     rs = json.loads(pd.DataFrame([
-        ['A', 0.42, 0.23, 0.74, 'Sarc'],
-        ['A', 0.56, 0.45, 0.69, 'Non-Sarc'],
-        ['B', 0.46, 0.28, 0.78, 'Sarc'],
-        ['B', 0.87, 0.64, 1.17, 'Non-Sarc'],
+        ['CHK 9ER', 0.42, 0.23, 0.74, 'Sarc'],
+        ['CHK 9ER', 0.56, 0.45, 0.69, 'Non-Sarc'],
+        ['IMM 151', 0.46, 0.28, 0.78, 'Sarc'],
+        ['IMM 151', 0.87, 0.64, 1.17, 'Non-Sarc'],
     ], columns=['study', 'TE', 'lowerci', 'upperci', 'subgroup']).to_json(orient='records'))
     # print(rs)
 
@@ -66,7 +66,7 @@ def test():
         cfg
     )
 
-    # pprint(ret)
+    pprint(ret)
 
 
 def test4():

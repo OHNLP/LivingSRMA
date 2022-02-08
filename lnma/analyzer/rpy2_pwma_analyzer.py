@@ -26,6 +26,8 @@ from lnma.analyzer.rpadapter import _meta_trans_metagen
 from lnma.analyzer.rpadapter import _meta_trans_metacum
 from lnma.analyzer.rpadapter import _meta_trans_metaprop
 
+from lnma.analyzer.rpadapter import _meta_trans_metagen_subg
+
 #%% load R packages
 meta = importr('meta')
 jsonlite = importr('jsonlite')
@@ -321,7 +323,8 @@ def analyze_subg_cat_pre(rs, cfg):
         'params': cfg,
         'success': True,
         'data': {
-            'primma': _meta_trans_metagen(j, cfg)
+            'primma': _meta_trans_metagen(j, cfg),
+            'subgps': _meta_trans_metagen_subg(j, cfg)
         }
     }
 
