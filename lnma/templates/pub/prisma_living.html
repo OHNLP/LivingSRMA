@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+<title>Living PRISMA</title>
+<link rel="icon" href="/static/img/favicon.png" type="image/png">
+<!-- font awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+<!-- jquery ui -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" />
+<!-- google font -->
+<link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+
+<link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+
+<link rel="stylesheet" href="/static/css/mybox-0.9.1.css">
+
+<style>
+{% include 'css/start_screen.css' %}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+}
+body {
+    font-size: 12px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+p {
+    margin: .1rem;
+}
+a {
+    color: #333333;
+    text-decoration: none;
+}
+.flex-container {
+    display: flex;
+    justify-content: flex-start;
+    width: 100%;
+    height: 100%;
+}
+/* element ui css */
+.text-start {
+    font-size: 10px;
+}
+.v-data-table td {
+    font-size: .8rem;
+}
+/* layouts */
+#wrapper {
+    flex-direction: row;
+}
+
+/* app */
+#app_prisma {
+    width: 100%;
+    height: 100%;
+}
+/* page */
+.ss-box {
+    position: absolute;
+    width: 150px;
+    /* height: 50px; */
+    border: 1px solid #666666;
+    padding: 5px;
+    text-align: center;
+    box-shadow: 3px 3px #cccccc;
+    cursor: pointer;
+    background-color: white;
+}
+.ss-box2 {
+    border: 1px solid #ab7e3b;
+    background-color: #fff9dc;
+}
+.ss-box2:hover {
+    background: #fff9dc;
+    box-shadow: 3px 3px #aaaaaa;
+}
+.ss-box3 {
+    border-radius: 10px;
+    border: 3px solid red;
+}
+.ss-info {
+    /* max-height: 32px; */
+    line-height: 15px;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    font-size: small;
+}
+.ss-box-stage {
+    font-weight: normal;
+}
+.ss-box-stage:hover {
+    font-weight: bold;
+}
+.ss-number {
+    font-size: .9rem;
+}
+.ss-arrow {
+    position: absolute;
+    text-align: center;
+    font-size: 2rem;
+}
+.ss-box-legend-text {
+    margin-left: 30px;
+    line-height: 10px;
+    font-size: 11px;
+    white-space: nowrap;
+}
+/* component */
+.result-list-item {
+    margin-bottom: 5px;
+}
+.result-list-item:hover,
+.result-list-item:active {
+    background-color: #eeeeee;
+}
+.study-badge {
+    color: white;
+    background: #6762df;
+    padding: 0px 3px;
+    border-radius: 5px;
+}
+.study-title {
+    font-size: 1.1em;
+    padding: 0 0 0 .2em;
+    color: mediumblue;
+}
+.study-title:hover {
+    color: blue;
+}
+.study-authors {
+    padding: 0 0 0 .2em;
+    font-size: .95em;
+}
+.study-pub {
+    padding: 0 0 0 .2em;
+    font-size: .9em;
+}
+.study-journal {
+    font-weight: bold;
+}
+.study-pmid {
+    color: gray;
+}
+.study-pmid:hover {
+    color: darkblue;
+    text-decoration: none;
+}
+.dialog p {
+    font-size: 14px;
+}
+
+#fg_prisma {
+    padding: 0 5px;
+}
+#fg_prisma svg {
+    width: 100%;
+}
+</style>
+</head>
+<body>
+
+<div id="start-screen">
+    <h1>
+        <i class="fa fa-table"></i>
+        PRISMA Flow Diagram
+    </h1>
+    <div id="ss-msg">Initializing data and plot ...</div>
+</div>
+
+<div id="wrapper" 
+    class="flex-container">
+
+<div id="app_prisma"
+    class="flex-container">
+
+
+<div id="fg_prisma" class="box" style="width: 500px; min-width: 500px;">
+
+    {% include 'svg/PRISMA_living.svg' %}
+
+</div><!-- /#fg_prisma -->
+
+
+<div id="tb_studylist" 
+    class="box" 
+    style="width: calc(100%-580px); min-width: 500px;">
+
+    <div class="box-header">
+        <h4>
+            <i class="fa fa-file"></i>
+            Study List | 
+        </h4>
+        <div>
+            <p>{{ vals[stage].text }}</p>
+        </div>
+    </div>
+
+    <div class="box-body" style="overflow-y: auto;"
+        v-if="vals[stage].paper_list.length > 0">
+        <p>
+            {{ vals[stage].n_ctids }} clinical trials, 
+            {{ vals[stage].n_pmids }} references
+        </p>
+
+        <div class="box-body-item result-list-item"
+            v-for="pid, idx in vals[stage].paper_list">
+
+            <div class="study-title" style="cursor: pointer;"
+                v-on:click="show_study_by_pmid(pid)">
+                <span class="study-badge">{{ idx + 1 }}</span>
+                {{ get_paper(pid).title }}
+            </div>
+
+            <div class="study-authors">
+                {{ get_paper(pid).authors }}
+            </div>
+
+            <div class="study-pub">
+                {{ get_paper(pid).date }} 
+                <span class="study-journal">
+                    {{ get_paper(pid).journal }}
+                </span>. 
+                <a class="study-pmid" 
+                    target="_blank" 
+                    title="Show in PubMed" 
+                    v-bind:href="url.pubmed.view_pmid + pid">
+                    {{ pid }}
+                </a>
+
+                <a class="study-pmid" 
+                    target="_blank" 
+                    title="Show clinical trial detail" 
+                    v-bind:href="url.ctgov.view_ct + get_paper(pid).ctid">
+                    {{ get_paper(pid).ctid }}
+                </a>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><!-- /#tbl_study -->
+
+<div id="dialog-message-e3" class="dialog" title="Excluded by full text review">
+    <p>
+    Full-text articles were excluded by the following reasons:
+    </p>
+    <div v-if="vals != null">
+        <ul>
+            <li v-for="val, reason in vals.e3_by_reason">
+                <b>{{ reason }}:</b> {{ val.n }}
+            </li>
+        </ul>
+    </div>
+</div>
+
+</div>
+<!-- /#app_prisma -->
+
+</div>
+<!-- /#wrapper -->
+
+<div style="display:none;" id="data_pub">
+[[j|safe]]
+</div>
+
+<!-- use third party libs -->
+<script src="/static/lib/jquery/jquery-3.4.1.min.js"></script>
+<script src="/static/lib/jquery-ui/jquery-ui.min.js"></script>
+<script src="/static/lib/vue.js/vue.min.js"></script>
+<!-- D3.js -->
+<script src="/static/lib/d3/d3.min.js"></script>
+<script src="/static/lib/d3/d3-sankey.js"></script>
+<!-- vuetify -->
+<script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+<!-- chance.js -->
+<script src="/static/lib/alasql/alasql.min.js"></script>
+<!-- for IE -->
+<script>
+var isIE = /*@cc_on!@*/false || !!document.documentMode;
+if (isIE) {
+    document.getElementById('ss-msg').innerHTML = 'The functions used in this website require advanced web technologies, which are <b>NOT</b> supported by Internet Explorer<br>Try using Google Chrome, Apple Safari, Mozilla Firefox or other modern browsers.';
+}
+</script>
+<script>
+
+var app_prisma = {
+    vpp: null,
+    vpp_id: '#app_prisma',
+
+    url: {
+        ctgov: {
+            view_ct: 'https://clinicaltrials.gov/ct2/show/'
+        },
+        pubmed: {
+            esearch: 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed',
+            esummary: 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=pubmed',
+            efetch: "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed",
+            view_pmid: 'https://www.ncbi.nlm.nih.gov/pubmed/?term='
+        },
+    },
+
+    init: function(data) {
+        this.data = data;
+        
+        // init the data
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: { 
+                // for prisma
+                vals: this.data.prisma,
+
+                // for paper
+                paper_dict: this.data.paper_dict,
+
+                // for study
+                study_dict: this.data.study_dict,
+
+                // for paging
+                pn: 0,
+                tp: 1,
+
+                // for study list label?
+                stage: 'f3',
+
+                // what?
+                url: this.url,
+            },
+            methods: {
+                fmt_num: function(x) {
+                    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                },
+
+                update_study_list: function(stage) {
+                    this.stage = stage;
+                },
+
+                show_excluded_studies: function(stage) {
+                    if (stage == 'e3') {
+                        $( "#dialog-message-e3" ).dialog( "open" );
+                    }
+                },
+
+                show_study_by_pmid: function(pmid) {
+
+                },
+                
+                prev_page: function() {
+                    if (this.pn > 0) {
+                        this.pn -= 1;
+                        tb_search.search(
+                            tb_search.vpp.keyword,
+                            tb_search.vpp.pn * tb_search.retmax
+                        );
+                    }
+                },
+
+                next_page: function() {
+                    if (this.pn < this.tp) {
+                        this.pn += 1;
+                        tb_search.search(
+                            tb_search.vpp.keyword,
+                            tb_search.vpp.pn * tb_search.retmax
+                        );
+                    }
+                },
+
+                show_study_by_pmid: function(pmid) {
+
+                },
+
+                get_paper: function(pid) {
+                    if (this.paper_dict.hasOwnProperty(pid)) {
+                        // good, just return this paper
+                        return this.paper_dict[pid];
+
+                    } else {
+                        // that's weird, just return an empty record
+                        return {
+                            authors: "" + pid,
+                            ctid: "" + pid,
+                            date: "NA",
+                            journal: "NA",
+                            pid: pid,
+                            pid_type: "NA",
+                            title: ''
+                        }
+                    }
+                }
+            }
+        });
+    
+        // update the svg
+        var refs = [
+            's0',
+            'a1',
+            'b2',
+            'b3',
+            'b5',
+            'e2',
+            'e22',
+            'e3',
+            'f1',
+            'f3'
+        ];
+
+        // replace the $$ with jquery findable tag
+        var svgtxt = document.getElementById('fg_prisma').innerHTML;
+
+        // local prisma
+        var prisma = JSON.parse(JSON.stringify(data.prisma));
+
+        for (let i = 0; i < refs.length; i++) {
+            const ref = refs[i];
+            // update the number
+            // replace the prisma title
+
+            if (prisma.hasOwnProperty(ref)) {
+                // ok, found the value, 
+                // the default value is from db
+                var tmp = prisma[ref].n_pmids;
+
+                // for f1 and f3, also need to show the nct
+                if (ref == 'f1' || ref == 'f3') {
+                    // also need to update the ct id
+                    svgtxt = svgtxt.replace(
+                        '$'+ref+'_ctids$', 
+                        '' + jarvis.add_commas_to_number(prisma[ref].n_ctids)
+                    );
+                }
+
+                // for others, need to update the number accordingly
+                if (ref == 'b5') {
+                    tmp = prisma.e3.n_pmids +
+                          prisma.f1.n_pmids;
+                } else if (ref == 'b3') {
+                    tmp = prisma.e3.n_pmids +
+                          prisma.f1.n_pmids +
+                          prisma.e2.n_pmids + 
+                          prisma.e22.n_pmids;
+                } else if (ref == 'b2') {
+                    tmp = prisma.a1.n_pmids +
+                          prisma.a2x.n_pmids;
+                }
+
+                // update the value 
+                svgtxt = svgtxt.replace(
+                    '$'+ref+'$', 
+                    '' + jarvis.add_commas_to_number(tmp)
+                );
+            } else {
+                // what??? why none?
+                svgtxt = svgtxt.replace(
+                    '$'+ref+'$', 
+                    'NA'
+                );
+            }
+        }
+
+        // write back to the svg
+        document.getElementById('fg_prisma').innerHTML = svgtxt;
+
+
+        // for the message boxes
+        $( ".dialog" ).dialog({
+            autoOpen: false
+        });
+
+
+        // bind the click event
+        this.bind_events();
+    },
+
+    bind_events: function() {
+        $('svg a').on('click', function(evt) {
+            var link = $(this).attr('xlink:href');
+            console.log("* clicked: " + link);
+            
+            // click the studylist link
+            var ps = link.split('_');
+            var stage = ps[1];
+
+            if (stage == 'f1' || stage == 'f3') {
+                app_prisma.set_stage(stage);
+            } else if (stage == 'e3') {
+                $( "#dialog-message-e3" ).dialog( "open" );
+            }
+
+            // decide what to do with op
+            // if (op == 'sch') {
+            //     // clicked the search item
+            //     // update the PRISMA plot
+            //     jarvis.update_prisma(sn);
+
+            // } else if (op == 'cnt') {
+            //     // clicked the number
+            //     // update the study list
+            //     if (sn == 'xx') {
+            //         // clicked the cell in the PRISMA plot
+            //         tb_studylist.update_study_list(jarvis.current.sn, stage);
+
+            //     } else {
+            //         // update plot
+            //         jarvis.update_prisma(sn);
+
+            //         // update list
+            //         tb_studylist.update_study_list(sn, stage);
+            //     }
+            // }
+            // return false;
+        });
+    },
+
+    unpack: function(rows, key) {
+        return rows.map(function(row) {
+            return row[key];
+        });
+    },
+
+    clear: function() {
+        this.vpp.n = 0;
+        this.vpp.headers = [];
+        this.vpp.studies = [];
+    },
+
+    set_stage: function(stage) {
+        // set the stage
+        this.vpp.stage = stage;
+
+        // put the papers in this stage
+        var studies = [];
+        for (var i = 0; i < this.data.prisma[stage].paper_list.length; i++) {
+            var pmid = this.data.prisma[stage].paper_list[i];
+            var paper = this.data.paper_dict[pmid];
+            var ctid = paper.ctid;
+
+            if (paper.hasOwnProperty('title')) {
+                // this paper is a real PMID data or we put data in xls
+                studies.push(paper);
+            } else {
+                studies.push(this.data.study_dict[ctid]);
+            }
+        }
+        this.vpp.studies = studies;
+        this.vpp.total = studies.length;
+        console.log('* set vpp studies', studies);
+    },
+
+    set_stage_to_nct_latest: function(stage) {
+        // set the stage
+        this.vpp.stage = stage;
+
+        // put the papers in this stage
+        var studies = [];
+        for (var i = 0; i < this.data.prisma[stage].study_list.length; i++) {
+            var ctid = this.data.prisma[stage].study_list[i];
+            var latest_pmid = this.data.study_dict[ctid].latest_pmid;
+            var paper = this.data.paper_dict[latest_pmid];
+
+            if (paper.hasOwnProperty('title')) {
+                // this paper is a real PMID data or we put data in xls
+                studies.push(paper);
+            } else {
+                studies.push(this.data.study_dict[ctid]);
+            }
+        }
+        this.vpp.studies = studies;
+        this.vpp.total = studies.length;
+        console.log('* set vpp studies', studies);
+    },
+
+    get_summary_of_search_results: function(ids, callback) {
+        $.get(
+            jarvis.url.pubmed.esummary,
+            {id: ids.join(',')},
+            callback, 'xml'
+        );
+    },
+
+    parse_summary_results: function(data) {
+        var xml = $(data);
+        var docsums = xml.find('DocSum');
+        
+        for (var i = 0; i < docsums.length; i++) {
+            var docsum_xml = $(docsums[i]);
+
+            // get PMID
+            var pmid = docsum_xml.find('Id')[0].textContent;
+
+            // get title
+            var title = docsum_xml.find('Item[Name="Title"]')[0].textContent;
+
+            // get authors
+            var authors = [];
+            var authors_elems = docsum_xml.find('Item[Name="Author"]');
+            for (var j = 0; j < authors_elems.length; j++) {
+                var elem = authors_elems[j];
+                authors.push(elem.textContent);
+            }
+
+            // get journal
+            var journal = docsum_xml.find('Item[Name="FullJournalName"]')[0].textContent;
+
+            // get date
+            var date = docsum_xml.find('Item[Name="PubDate"]')[0].textContent;
+
+            // update the record
+            this.data.paper_dict[pmid].title = title;
+            this.data.paper_dict[pmid].date = date;
+            this.data.paper_dict[pmid].journal = journal;
+            this.data.paper_dict[pmid].authors = authors.join(', ');
+        }
+    }
+};
+
+
+var jarvis = {
+    data: null,
+
+    init: function() {
+
+        // OK, let's get the project key first
+        var prj = jarvis.get_url_paramter('prj');
+        if (prj == null || prj == '') {
+            jarvis.ssmsg('Project information error.')
+            return;
+        }
+
+        // get the cq_abbr for this project
+        var cq = jarvis.get_url_paramter('cq');
+        if (cq == null || cq == '') {
+            cq = 'default';
+        }
+
+        $.get(
+            '/pub/graphdata/' + prj + '/PRISMA.json',
+            {
+                src: 'db',
+                cq: cq,
+                ver: Math.random()
+            },
+            function(data) {
+                app_prisma.init(data);
+                
+                // update the e2 detail
+                // var e2_details = data.prisma.e2.detail;
+                // e2_details = '<p>'+e2_details+'</p>';
+                // $('#dialog-message-e2').html(e2_details);
+
+                // OK!
+                jarvis.ssmsg('Data loaded!');
+                setTimeout('jarvis.ssclose();', 300);
+
+            }, 'json'
+        );
+
+    },
+
+    ssmsg: function(msg) {
+        $('#ss-msg').html(msg);
+    },
+
+    ssclose: function() {
+        $('#start-screen').hide();
+    }
+};
+{% include 'js/jarvis_ext_utils.js' %}
+
+$(document).ready(function() {
+    jarvis.init();
+})
+</script>
+</body>
+</html>

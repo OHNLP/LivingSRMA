@@ -338,8 +338,14 @@ def CAT_v1():
 ###########################################################
 
 @bp.route('/prisma.html')
+@bp.route('/prisma_hybrid.html')
 def prisma():
-    return render_template('pub/prisma.html')
+    return render_template('pub/prisma_hybrid.html')
+
+
+@bp.route('/prisma_living.html')
+def prisma_living():
+    return render_template('pub/prisma_living.html')
 
 
 @bp.route('/itable')

@@ -68,7 +68,7 @@ def get_pub_prisma_from_db(keystr, cq_abbr='default'):
     prisma = {}
 
     # first, the living
-    for s in ['a1', 'a2x', 'e2', 'e22', 'e3', 'f1', 'f3']:
+    for s in ['s0', 'a1', 'a2x', 'e2', 'e22', 'e3', 'f1', 'f3']:
         tmp = copy.deepcopy(living_prisma['stat'][s])
         tmp['paper_list'] = tmp['pids']
         tmp['study_list'] = tmp['rcts']
@@ -360,7 +360,8 @@ def get_prisma_by_cq(project_id, cq_abbr="default", do_include_papers=True):
     stat['s0'] = {
         'n': stat['a1']['n'] + stat['a2x']['n'],
         'text': 'Search',
-        'pids': []
+        'pids': [],
+        'rcts': []
     }
     # use the given s0 as the number
     if 'prisma' in project.settings and 's0' in project.settings['prisma']:
