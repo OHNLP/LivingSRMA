@@ -227,12 +227,19 @@ var app_graphpma = {
         var extracts = [];
         for (const oc_abbr in data.oc_dict) {
             if (Object.hasOwnProperty.call(data.oc_dict, oc_abbr)) {
-                const oc = data.oc_dict[oc_abbr];
-                extracts.push(oc.extract);
+                // skip those not be
+                if (this.data.oc_dict[oc_abbr].extract.meta.group == group ||
+                    group == 'all') {
+                    const oc = data.oc_dict[oc_abbr];
+                    extracts.push(oc.extract);
+                }
             }
         }
         var extract_tree = srv_shared.create_extract_tree(extracts);
-        var extract_tree_sorted = srv_shared.create_extract_tree_sorted(extract_tree);
+        var extract_tree_sorted = srv_shared.create_extract_tree_sorted(
+            extract_tree,
+            true
+        );
 
         // and we just need the only type pwma,
         // because this is the pwma graph plot

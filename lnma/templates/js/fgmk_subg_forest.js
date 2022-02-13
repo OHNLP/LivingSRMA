@@ -129,6 +129,10 @@ var fgmk_subg_forest = {
          * @param {Object} cfg contains the config for plot
          */
         draw: function(ext, data, cfg) {
+            // bind the ext data for further plot
+            this.ext = ext;
+
+            // show this figure
             $(this.box_id).show();
 
             // change some settings according to the raw data format
@@ -218,6 +222,9 @@ var fgmk_subg_forest = {
             // draw the test for subg diff
             // this._draw_subgdiff(this.data.primma.heterogeneity);
             this._draw_subgdiff(this.data.subgps.stat[this.cfg.params.fixed_or_random]);
+
+            // draw the favours for forest
+            this.__draw_favours();
 
             // // show the prediction interval
             // if (this.is_draw_prediction_interval) {
@@ -707,6 +714,33 @@ var fgmk_subg_forest = {
                 .attr('x2', x2)
                 .attr('y1', y1)
                 .attr('y2', y2);
+        },
+
+        __draw_favours: function() {
+            // create a region
+            var gx = this.cols[7].x + this.row_frstml;
+            // the gy is a little higher than other g to make it closer to forest
+            var gy = this.row_height * (this.row_idx);
+            var g = this.svg.append('g')
+                .attr('transform', 'translate('+gx+', '+gy+')');
+
+            // text treat name
+            g.append('text')
+                .attr('class', this.css.txt_nm)
+                .attr('x', 0)
+                .attr('y', -this.row_txtmb)
+                .attr('text-anchor', 'start')
+                .text('Favours ' + this.ext.meta.treatments[0]);
+
+            // text control name
+            g.append('text')
+                .attr('class', this.css.txt_nm)
+                .attr('x', this.cols[7].width)
+                .attr('y', -this.row_txtmb)
+                .attr('text-anchor', 'end')
+                .text('Favours ' + this.ext.meta.treatments[1]);
+
+            
         },
     
         __do_not_use_this_draw_forest: function() {
