@@ -1010,7 +1010,7 @@ def _meta_trans_metagen_subg(j, params):
                         'bt_TE': _round(backtransf(data['TE.%s.w' % fxrd][sg2ix[subg]], sm), 4),
                         'bt_lower': _round(backtransf(data['lower.%s.w' % fxrd][sg2ix[subg]], sm), 4),
                         'bt_upper': _round(backtransf(data['upper.%s.w' % fxrd][sg2ix[subg]], sm), 4),
-                        'w': _round(data['w.%s.w' % fxrd][sg2ix[subg]] / w_tt, 4),
+                        'w_%s'%fxrd: _round(data['w.%s.w' % fxrd][sg2ix[subg]] / w_tt, 4),
                     }
                 },
                 'heterogeneity': {
@@ -1030,7 +1030,8 @@ def _meta_trans_metagen_subg(j, params):
             'upper': data['upper'][i],
             'bt_TE': _round(backtransf(data['TE'][i], sm), 4),
             'bt_lower': _round(backtransf(data['lower'][i], sm), 4),
-            'bt_upper': _round(backtransf(data['upper'][i], sm), 4)
+            'bt_upper': _round(backtransf(data['upper'][i], sm), 4),
+            'w_%s' % fxrd: _round(data['w.%s'%fxrd][i] / np.sum(data['w.%s'%fxrd]), 4)
         })
 
     return ret

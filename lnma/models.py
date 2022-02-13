@@ -1566,8 +1566,14 @@ class Extract(db.Model):
             
             for arm_idx, arm in enumerate([ext['attrs']['main']] + ext['attrs']['other']):
                 for subg_idx, subg in enumerate(subgroups):
+                    subg_key = 'g%s' % subg_idx
+                    # 2022-02-11: fix for
+                    if subg_key not in arm:
+                        # that's also possible, some study have single subgroup
+                        continue
+
                     # copy values of main arm to rs
-                    r = copy.deepcopy(arm['g%s' % subg_idx])
+                    r = copy.deepcopy(arm[subg_key])
 
                     # convert the data type
                     r = util.convert_extract_r_to_number(

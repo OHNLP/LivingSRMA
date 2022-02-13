@@ -204,6 +204,7 @@ def get_pma(extract, paper_dict, is_skip_unselected=True):
             pid = r['pid']
             dict_stu2pid[study] = pid
 
+        # add patch to the prim analysis
         if 'primma' in result['rst']['data']:
             for i, _ in enumerate(result['rst']['data']['primma']['stus']):
                 # get the study name which is used for analysis
@@ -214,8 +215,22 @@ def get_pma(extract, paper_dict, is_skip_unselected=True):
 
                 # set the pid to this record
                 result['rst']['data']['primma']['stus'][i]['pid'] = pid
-        
 
+        # ok, add patch to the subg result
+        if 'subgps' in result['rst']['data']:
+            for subg_name in result['rst']['data']['subgps']['subgroups']:
+                for i, _ in enumerate(result['rst']['data']['subgps']['subgroups'][subg_name]['stus']):
+                    # get the study name which is used for analysis
+                    study_name = result['rst']['data']['subgps']['subgroups'][subg_name]['stus'][i]['name']
+
+                    # convert to the pid
+                    pid = dict_stu2pid[study_name]
+
+                    # set the pid to this record
+                    result['rst']['data']['subgps']['subgroups'][subg_name]['stus'][i]['pid'] = pid
+
+
+        # add patch to the incidence
         if 'incdma' in result['rst']['data']:
             for i, _ in enumerate(result['rst']['data']['incdma']['stus']):
                 # get the study name which is used for analysis
