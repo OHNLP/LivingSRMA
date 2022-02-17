@@ -192,6 +192,8 @@ var fgmk_subg_forest = {
             this._draw_header();
 
             // show subgroups
+            var subg_idx = 0;
+            var subg_colors = ['green', 'blue', 'yellow', 'pink', 'orange', 'cyan'];
             for (const subg_name in this.data.subgps.subgroups) {
                 if (Object.hasOwnProperty.call(this.data.subgps.subgroups, subg_name)) {
                     const subg = this.data.subgps.subgroups[subg_name];
@@ -200,13 +202,21 @@ var fgmk_subg_forest = {
                     this._draw_subg(subg_name, subg);
 
                     // draw the subg model
-                    this._draw_model(subg_name + ' model', subg);
+                    this._draw_model(
+                        subg_name + ' model', 
+                        subg,
+                        false,
+                        subg_colors[subg_idx]
+                    );
 
                     // draw the subg model heter
                     this._draw_heter(subg.heterogeneity);
 
                     // increase row between groups
                     this.row_incr();
+
+                    // increase the subg index
+                    subg_idx += 1;
                 }
             }
             
@@ -392,9 +402,12 @@ var fgmk_subg_forest = {
 
         },
 
-        _draw_model: function(model_name, obj, enable_refline) {
+        _draw_model: function(model_name, obj, enable_refline, diamond_color) {
             if (typeof(enable_refline)=='undefined') {
                 enable_refline = false;
+            }
+            if (typeof(diamond_color)=='undefined') {
+                diamond_color = 'red';
             }
 
             var g = this.svg.append('g')
@@ -425,7 +438,8 @@ var fgmk_subg_forest = {
             // this.__draw_tree(obj.model[this.cfg.params.fixed_or_random]);
             this.__draw_diamond(
                 obj.model[this.cfg.params.fixed_or_random],
-                enable_refline
+                enable_refline,
+                diamond_color
             );
 
             // increase to next line
@@ -644,9 +658,12 @@ var fgmk_subg_forest = {
                 .attr('y2', y);
         },
 
-        __draw_diamond: function(model, enable_refline) {
+        __draw_diamond: function(model, enable_refline, diamond_color) {
             if (typeof(enable_refline)=='undefined') {
                 enable_refline = false;
+            }
+            if (typeof(diamond_color)=='undefined') {
+                diamond_color = 'red';
             }
             // create a region
             var gx = this.cols[7].x + this.row_frstml;
@@ -671,7 +688,8 @@ var fgmk_subg_forest = {
             // draw it!
             g.append('path')
                 .attr('d', path_d)
-                .attr('class', 'prim-frst-stu-model');
+                .attr('class', 'prim-frst-stu-model')
+                .attr('fill', diamond_color);
 
             // draw the model ref line
             if (enable_refline) {

@@ -339,6 +339,9 @@ Object.assign(pan_ocpapers, {
 
         for (const pid in this.vpp.$data.working_oc.data) {
             const paper = this.vpp.$data.working_oc.data[pid];
+            if (!paper.is_selected) {
+                continue;
+            }
             // if (paper.is_selected) {
             //     // get the main values
             //     var val = paper.attrs.main[abbr];
@@ -360,17 +363,31 @@ Object.assign(pan_ocpapers, {
             // get the main values
 
             // 2021-08-08: updated with group information
+            // var val = paper.attrs.main['g'+g_idx][abbr];
+            var val = '';
 
-            var val = paper.attrs.main['g'+g_idx][abbr];
+            // 2022-02-16: fix the empty group bug
+            if (paper.attrs.main.hasOwnProperty('g'+g_idx)) {
+                val = paper.attrs.main['g'+g_idx][abbr];
+            } else {
+                continue
+            }
             v[val] = 1;
 
             // get the values from 
             for (let i = 0; i < paper.attrs.other.length; i++) {
-                const arm = paper.attrs.other[i]['g'+g_idx];
-                if (arm.hasOwnProperty(abbr)) {
-                    var arm_val = arm[abbr];
-                    v[arm_val] = 1;
+                if (paper.attrs.other[i].hasOwnProperty('g'+g_idx)) {
+                    // 2022-02-16: fix the empty group bug
+                    const arm = paper.attrs.other[i]['g'+g_idx];
+                    if (arm.hasOwnProperty(abbr)) {
+                        var arm_val = arm[abbr];
+                        v[arm_val] = 1;
+                    }
+                    
+                } else {
+                    continue
                 }
+                
             }
         }
 

@@ -411,7 +411,80 @@ var srv_extractor = {
         // fill the main track of the oc extraction.
         d.attrs.main['g0'] = this.mk_oc_data_attr(oc);
 
+        // 2022-02-16: fix the subgroup bug
+        if (oc.meta.group == 'subgroup') {
+            for (let i = 1; i < oc.meta.sub_groups.length; i++) {
+                d.attrs.main['g' + i] = this.mk_oc_data_attr(oc);
+            }
+        }
+
         return d;
+    },
+
+    fix_oc_data_attr: function(d, oc) {
+        for (let subg_idx = 0; subg_idx < oc.meta.sub_groups.length; subg_idx++) {
+            // check main
+            if (d.attrs.main.hasOwnProperty('g' + subg_idx)) {
+                // just fix
+                d.attrs.main['g' + subg_idx] = this.fix_arm_data_attr(
+                    d.attrs.main['g' + subg_idx],
+                    oc
+                );
+            } else {
+                // oh, it's missing, then add
+                d.attrs.main['g' + subg_idx] = this.mk_oc_data_attr(oc);
+            }
+
+            // check other arms
+            for (let arm_idx = 0; arm_idx < d.attrs.other.length; arm_idx++) {
+                if (d.attrs.other[arm_idx].hasOwnProperty('g' + subg_idx)) {
+                    // just fix
+                    d.attrs.other[arm_idx]['g' + subg_idx] = this.fix_arm_data_attr(
+                        d.attrs.other[arm_idx]['g' + subg_idx],
+                        oc
+                    );
+                } else {
+                    // oh, it's missing, then add
+                    d.attrs.other[arm_idx]['g' + subg_idx] = this.mk_oc_data_attr(oc);
+                }
+                
+            }
+            
+        }
+        return d;
+    },
+
+    fix_arm_data_attr: function(arm, oc) {
+        // check all cate_attr in this oc
+        for (let i = 0; i < oc.meta.cate_attrs.length; i++) {
+            // check each category
+            const cate = oc.meta.cate_attrs[i];
+            for (let j = 0; j < cate.attrs.length; j++) {
+                // check each attribute
+                const attr = cate.attrs[j];
+                
+                if (attr.subs == null) {
+                    if (arm.hasOwnProperty(attr.abbr)) {
+                        // ok, it has
+                    } else {
+                        arm[attr.abbr] = ''
+                    }
+
+                } else {
+                    // check each sub in the attribute
+                    for (let k = 0; k < attr.subs.length; k++) {
+                        const sub = attr.subs[k];
+                        if (arm.hasOwnProperty(sub.abbr)) {
+                            // ok, it has
+                        } else {
+                            arm[sub.abbr] = ''
+                        }
+                    }
+                }
+            }
+        }
+
+        return arm;
     },
 
     /**

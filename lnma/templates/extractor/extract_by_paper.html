@@ -518,7 +518,11 @@ var pan_ocpapers = {
 
             // add this working paper to the oc
             if (oc.data.hasOwnProperty(this.working_paper.pid)) {
-
+                // 2022-02-16: fix the subg bug
+                oc.data[this.working_paper.pid] = srv_extractor.fix_oc_data_attr(
+                    oc.data[this.working_paper.pid],
+                    oc
+                );
             } else {
                 oc.data[this.working_paper.pid] = srv_extractor.mk_oc_data(oc)
             }
