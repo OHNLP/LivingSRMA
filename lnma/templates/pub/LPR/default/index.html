@@ -3,7 +3,7 @@
 <head>
 <!-- Required meta tags -->
 
-<title>Prostate Cancer | Living Interactive Systematic Reviews</title>
+<title>mCSPC | Living Interactive Systematic Reviews</title>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
@@ -113,7 +113,9 @@
     </h3>
     <div class="row">
         <div class="col">
-            <p>The search strategy has been developed in consultation with an information specialist. The strategy is used to generate “auto” searches every month (from Medline, Embase and Cochrane Central Register of Controlled Trials [CENTRAL]). The numbers in the flowsheet are dynamically updated as new studies are considered for inclusion. The red limb on the right-hand side of the flowsheet represents real-time living updates. Users can click the colored boxes for additional details.</p>
+            <p>
+                The search strategy has been developed in consultation with an information specialist. The strategy is used to generate “auto” searches every month (from Medline, Embase and Cochrane Central Register of Controlled Trials [CENTRAL]). The numbers in the flowsheet are dynamically updated as new studies are considered for inclusion. The red limb on the right-hand side of the flowsheet represents real-time living updates. Users can click the colored boxes for additional details.
+            </p>
 
             <p>How to use this flowsheet? <a href="javascript:void(0);" data-toggle="modal" data-target="#exampleModalCenter">Video demonstration</a></p>
         </div>
@@ -341,18 +343,7 @@ var prj = '[[ keystr ]]';
 var cq = '[[ cq_abbr ]]';
 
 
-function resize_iframe( iFrame ) {
-    iFrame.height = iFrame.contentWindow.document.body.scrollHeight + "px";
-    console.log('* resize iframe#'+iFrame.id+' height to ' + iFrame.height);
-}
-
-function resize_iframes() {
-    $('iframe').each(function(idx) {
-        if ($(this).is('[resize_by_content]')) {
-            resize_iframe(this);
-        }
-    });
-}
+{% include 'js/resize_frames.js' %}
 
 var jarvis = {
     init: function() {

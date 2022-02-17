@@ -385,7 +385,7 @@
 <!-- FOOTER -->
 <footer class="container">
     <p class="float-right"><a href="#">Back to top</a></p>
-    <p>&copy; 2020-2022 &middot; <a href="#">Terms</a></p>
+    <p>&copy; 2020 &middot; <a href="#">Terms</a></p>
 </footer>
 
 <!-- Estimated HR(OR) reflect outcomes for treatment in columns compared to treatment in rows 
@@ -401,32 +401,37 @@ The HR for 1,2 , The OR for the last one!
 <script>
 
 var prj = 'CAT';
-var cq = '[[ cq_abbr ]]';
 
+function resizeIFrameToFitContent( id ) {
+    var iFrame = document.getElementById(id);
+    iFrame.height = iFrame.contentWindow.document.body.scrollHeight;
+    // console.log('* ' + id + ': ' + iFrame.height);
+}
 
-{% include 'js/resize_frames.js' %}
-
-
-
-var jarvis = {
-    init: function() {
-
-        $.get(
-            "[[ url_for('pub.graphdata_latest_json', prj=keystr) ]]",
-            {},
-            function(data) {
-                console.log(data);
-                // update the time
-                $('#latest_update_time').html(data.last_created);
-            }, 'json'
-        );
+function switch_dma_data(tag, slides, display_name) {
+    if (typeof(display_name) == 'undefined') {
+        display_name = '';
     }
+    var url = '[[ url_for("pub.slide") ]]';
+    url += '?prj=' + prj;
+    url += '&slides=' + slides;
+    $('#iframe-dma-' + tag).attr('src', url);
+    $('#optext-dma-' + tag).html(display_name);
+}
+
+function switch_nma_data(tag, trt, display_name) {
+    if (typeof(display_name) == 'undefined') {
+        display_name = trt;
+    }
+    var fn = 'GRAPH-' + tag + '-' + trt + '.json';
+    var url = '[[ url_for("pub.graph_v2_1") ]]?prj=' + prj + '&fn=' + fn;
+    $('#iframe-nma-' + tag).attr('src', url);
+    $('#refname-nma-' + tag).html(display_name);
 }
 
 $(document).ready(function() {
-    jarvis.init();
+    
 });
-
 </script>
 </body>
 </html>

@@ -1,4 +1,5 @@
 #%% define packages and methods
+import copy
 import os
 import re
 import json
@@ -632,6 +633,101 @@ def __get_node_text(old_text, node):
     # TODO should decide the value by node type
     c = node.attrib['C']
     return new_text
+
+
+def parse_exported_ris(full_fn):
+    '''
+    Parse the file from endnote export
+    '''
+    import rispy
+
+    f = open(full_fn)
+    ents = rispy.load(f)
+    f.close()
+
+    # let's check each paper
+    papers = []
+    cnt = {
+        'has_pid': 0,
+        'no_pid_has_doi': 0,
+        'no_id': 0
+    }
+
+    for ent in ents:
+        # create an empty paper object
+        paper = {
+            'pid': '',
+            'pid_type': [],
+            'doi': '',
+            'title': '',
+            'authors': [],
+            'abstract': '',
+            'pub_date': [],
+            'pub_type': '',
+            'journal': [],
+            'raw_type': 'ris',
+            'other': copy.deepcopy(ent)
+        }
+        # print(paper)
+        if 'authors' in ent:
+            paper['authors'] = ent['authors']
+
+        if 'primary_title' in ent:
+            paper['title'] = ent['primary_title']
+
+        if 'abstract' in ent:
+            paper['abstract'] = ent['abstract']
+
+        for key in ['date', 'publication_year', 'year']:
+            try:
+                paper['pub_date'] = ent[key]
+                break
+            except:
+                pass
+
+        for key in ['journal_name', 'secondary_title', 'alternate_title1', 'alternate_title2', 'alternate_title3']:
+            try:
+                paper['journal'] = ent[key]
+                break
+            except:
+                pass
+        
+        if 'doi' in ent:
+            paper['doi'] = ent['doi']
+
+        # update the authors
+        paper['authors'] = check_paper_authors('; '.join(paper['authors']))
+
+        # if the pid is empty, 
+        paper['pid'] = check_paper_pid(paper['pid'])
+        paper['doi'] = check_paper_doi(paper['doi'])
+        
+        if paper['pid'] == '':
+            # what a ... anyway, check doi
+            if paper['doi'] == '':
+                # I don't have anything to say, just make a fake pid for this
+                paper['pid'] = mk_md5_by_title(
+                    paper['title']
+                )
+                paper['pid_type'] = 'MD5'
+
+                cnt['no_id'] += 1
+            else:
+                paper['pid'] = paper['doi']
+                paper['pid_type'] = 'DOI'
+                cnt['no_pid_has_doi'] += 1
+                
+        else:
+            cnt['has_pid'] += 1
+        
+        papers.append(paper)
+
+    print('* found %s has pid, %s paper using doi, %s no id' % (
+        cnt['has_pid'], cnt['no_pid_has_doi'],
+        cnt['no_id'],
+    ))
+
+    return papers, cnt
 
 
 def parse_endnote_exported_xml(full_fn):
@@ -1355,7 +1451,7 @@ def create_ss_ex(reason, decision):
     '''
     d = create_pr_rs_details(reason, decision)
     return d
-    
+
 
 if __name__ == "__main__":
     fn = '/home/hehuan/Downloads/endnote_test.xml'
