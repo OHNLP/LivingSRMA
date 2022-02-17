@@ -63,7 +63,8 @@ var fgmk_subg_forest = {
             stu_bg: 'prim-frst-stu-bg',
             stu_rect: 'prim-frst-stu-rect'
         },
-        css_html: ["<style>",
+        css_html: [
+            "<style>",
             ".prim-frst-txt-bd{ font-weight: bold; }",
             ".prim-frst-txt-nm{ font-weight: normal; }",
             ".prim-frst-txt-mt{ font-family: Times; font-style: italic; }",
@@ -72,7 +73,7 @@ var fgmk_subg_forest = {
             ".prim-frst-stu-bg{ fill: white; }",
             ".prim-frst-stu-rect{ fill: black; }",
             ".prim-frst-stu-line{ stroke: black; stroke-width: 1; }",
-            ".prim-frst-stu-model{ fill: red; stroke: black; stroke-width: 1; }",
+            ".prim-frst-stu-model{ stroke: black; stroke-width: 1; }",
             ".prim-frst-stu-model-refline{ stroke: black; stroke-width: 1; }",
             ".prim-frst-stu-g:hover .prim-frst-stu-bg{ fill: whitesmoke; }",
             ".prim-frst-txt-clickable{ fill: #00397b; cursor: pointer !important; }",
