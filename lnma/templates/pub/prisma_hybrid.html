@@ -207,7 +207,9 @@ a {
             <div class="ss-info">({{ fmt_num(vals.b5.n_pmids) }} references)</div>
         </div>
 
-        <div class="ss-box ss-box2 ss-box-stage" style="left: 85px; top: 370px;" v-on:click="update_study_list('b6')">
+        <div class="ss-box ss-box2 ss-box-stage" 
+            style="left: 85px; top: 370px;" 
+            v-on:click="update_study_list('b6')">
             <div class="ss-info">{{ vals.b6.text }}</div>
             <div class="ss-number">(n = {{ fmt_num(vals.b6.n_ctids) }})</div>
             <div class="ss-info">({{ fmt_num(vals.b6.n_pmids) }} references)</div>
@@ -238,11 +240,9 @@ a {
         </div>
 
         <!-- LNMA Part -->
-        <div class="ss-box ss-box2 ss-box3 ss-box-stage" 
-            style="left: 370px; top: 10px; border: 3px solid red;" 
-            v-on:click="update_study_list('a1')">
+        <div class="ss-box" 
+            style="left: 370px; top: 10px; cursor: default;">
             <div class="ss-info">{{ vals.a1.text }}</div>
-            <!-- <div class="ss-number">(n = {{ fmt_num(vals.a1.n_pmids) }})</div> -->
             <div class="ss-info">({{ fmt_num(vals.a1.n_pmids) }} references)</div>
         </div>
 

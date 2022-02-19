@@ -135,7 +135,6 @@ def set_paper_label_rfc(paper_id, rfc, cq_abbr=''):
     '''
     Set the RFC label for 
     '''
-
     if cq_abbr is None or cq_abbr == '':
         # which means just set project level
         if rfc == 'yes':
@@ -155,6 +154,18 @@ def set_paper_label_rfc(paper_id, rfc, cq_abbr=''):
         db.session.commit()
 
         return True, paper
+
+
+def set_paper_ss_st(paper_id, ss_st):
+    '''
+    Set the paper ss_st to a given value
+    '''
+    paper = dora.get_paper_by_id(paper_id)
+    paper.ss_st = ss_st
+    db.session.add(paper)
+    db.session.commit()
+
+    return True, paper
 
 
 def set_paper_ss_cq(paper_id, cq_abbr, ss_cq, ss_cq_ex_reason=''):

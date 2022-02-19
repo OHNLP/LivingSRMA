@@ -184,3 +184,37 @@ class Paper:
         ])
 
         print(table)
+
+
+    @command
+    @argument("keystr", type=str, description="The keystr for a project")
+    @argument("seq_num", type=int, description="The paper sequence number in this project")
+    @argument("val", type=str, description="The ss_st val, a12 for auto, a24 for manual")
+    def set_ss_st(self, keystr:str, seq_num:int, val:str):
+        '''
+        Set the ss_st for a specific paper
+        '''
+        paper = dora.get_paper_by_keystr_and_seq(keystr, seq_num)
+
+        if paper is None:
+            cprint('* wrong keystr [%s] or wrong seq_num [%s]' % (
+                keystr, seq_num
+            ))
+            return
+
+        if val not in ['a12', 'a24']:
+            cprint('* wrong ss_st val [%s]' % (
+                val
+            ))
+            return
+
+        iss, _p = srv_paper.set_paper_ss_st(
+            paper.paper_id,
+            val
+        )
+        print('* set %s.%s.ss_st -> %s' % (
+            keystr, seq_num, _p.ss_st
+        ))
+
+        print('* done')
+            
