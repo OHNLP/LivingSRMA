@@ -37,15 +37,25 @@ db.init_app(app)
 app.app_context().push()
 
 
+def test():
+    itable = srv_extract.import_itable_from_xls(
+        'LPR', 
+        'default',
+        '/tmp/LPR/ITABLE_ATTR_DATA.xlsx',
+        '/tmp/LPR/ITABLE_FILTERS.xlsx'
+    )
+
+
 def test_pred():
     project_id = '119bdd6a-2ae9-11eb-8100-bf78cc92e08e'
     pids = ['32966830']
 
     for pid in pids:
         pred = dora.update_paper_rct_result(project_id, pid)
-        pprint(pred)
-    
-def test():
+        pprint(pred)    
+
+
+def test5():
     rs = json.loads(pd.DataFrame([
         ['CHK 9ER', 0.42, 0.23, 0.74, 'Sarc'],
         ['CHK 9ER', 0.56, 0.45, 0.69, 'Non-Sarc'],

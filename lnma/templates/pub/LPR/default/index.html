@@ -122,7 +122,7 @@
     </div>
     <div class="row">
         <iframe id="ifm_prisma"
-            src="[[ url_for('pub.prisma_living', prj='LPR', cq='default') ]]" frameborder="0" 
+            src="[[ url_for('pub.prisma_living', prj=keystr, cq=cq_abbr) ]]" frameborder="0" 
             style="width: 100%; min-height: 600px;">
         </iframe>
     </div>
@@ -161,9 +161,9 @@
 
     <div class="row">
         <iframe id="ifm_itable" 
-            src="[[ url_for('pub.itable', prj='RCC', cq='adjrcc', src='db') ]]" 
+            src="[[ url_for('pub.itable', prj=keystr, cq=cq_abbr, src='db') ]]" 
             frameborder="0" 
-            style="width: 100%; min-height: 700px;">
+            style="width: 100%; min-height: 820px;">
         </iframe>
     </div>
 </div>
@@ -201,12 +201,37 @@
     <p>
         Results are summarized as forest plots for primary analysis. Users can choose to view results for their outcome of interest.
     </p>
+
+
+    <br id="sec-pwma-Prim">
+    <h4 style="margin-bottom: 2rem;">
+        Primary Analysis
+    </h4>
+
     <div class="row">
         <div class="col">
             <iframe id="ifm_pwma_prim"
-                src="[[ url_for('pub.graph_pma', prj='RCC', cq='adjrcc', group='primary') ]]" 
+                src="[[ url_for('pub.graph_pma', prj=keystr, cq=cq_abbr, group='primary') ]]" 
                 frameborder="0" 
                 style="width: 100%; min-height: 500px;">
+            </iframe>
+        </div>
+    </div>
+
+
+
+    <br id="sec-pwma-Sens">
+    <h4 style="margin-bottom: 0;">
+        Sensitivity Analysis
+    </h4>
+
+    <div class="row">
+        <div class="col">
+            <iframe id="ifm_pwma_prim"
+                src="[[ url_for('pub.graph_pma', prj=keystr, cq=cq_abbr, gp='sensitivity', src='cache', od=';'.join(['Progression free survival', 'Overall survival'])) ]]" 
+                frameborder="0" 
+                style="width: 100%; min-height: 350px;"
+                resize_by_content>
             </iframe>
         </div>
     </div>

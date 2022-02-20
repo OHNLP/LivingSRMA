@@ -926,7 +926,21 @@ def _meta_trans_metagen(j, params):
                 'bt_upper': _round(np.e ** data['upper.random'][0], 3),
                 'w_random': 1,
                 'w_fixed': 1
-            }
+            },
+
+            'fixed': {
+                'name': 'Fixed effects model',
+                'TE': data['TE.fixed'][0],
+                'seTE': data['seTE.fixed'][0],
+                'sm': _round(np.e ** data['TE.fixed'][0], 3),
+                'lower': _round(np.e ** data['lower.fixed'][0], 3),
+                'upper': _round(np.e ** data['upper.fixed'][0], 3),
+                'bt_TE': _round(np.e ** data['TE.fixed'][0], 3),
+                'bt_lower': _round(np.e ** data['lower.fixed'][0], 3),
+                'bt_upper': _round(np.e ** data['upper.fixed'][0], 3),
+                'w_random': 1,
+                'w_fixed': 1
+            },
         },
         'heterogeneity': {
             'i2': data['I2'][0],
