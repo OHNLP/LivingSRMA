@@ -765,10 +765,22 @@ var app_softpma = {
                     'IMPORTANCE_2': 'Critical',
                     'IMPORTANCE_1': 'Important',
                     'IMPORTANCE_0': 'NA',
+                    'IMPORTANCE_Critical': 'Critical',
+                    'IMPORTANCE_Important': 'Important',
+                    'IMPORTANCE_NA': 'NA',
                 },
             },
 
             methods: this.vpp_methods,
+
+            mounted: function() {
+                // the last thing is to notify that the height may changed
+                if (parent.hasOwnProperty('resize_iframes')) {
+                    // which means this is iframed
+                    parent.resize_iframes();
+                    console.log('* softable pma sent resize request to parent window');
+                }
+            }
         });
     },
 

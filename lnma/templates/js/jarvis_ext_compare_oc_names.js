@@ -40,12 +40,13 @@ Object.assign(jarvis, {
             // just compare these two
             ret = a.oc_full_name.localeCompare(b.oc_full_name);
         }
-        console.log(
-            '* compare['+flag+']:',
-            ret, '=', 
-            fn_a, '<=>',
-            fn_b
-        );
+
+        // console.log(
+        //     '* compare['+flag+']:',
+        //     ret, '=', 
+        //     fn_a, '<=>',
+        //     fn_b
+        // );
 
         return ret;
     },

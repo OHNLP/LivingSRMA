@@ -627,7 +627,7 @@ def import_extracts_from_xls(full_path, keystr, cq_abbr, oc_type):
                 'indirectness': __get_val(__get_col(row, 'indirectness'), '0'),
                 'imprecision': __get_val(__get_col(row, 'imprecision'), '0'),
                 'publication_bias': __get_val(__get_col(row, 'publication_bias'), '0'),
-                'importance': __get_val(__get_col(row, 'importance'), '0'),
+                'importance': __cie_imp2val(__get_val(__get_col(row, 'importance'), '0')),
             }
 
             # the treatment and control
@@ -794,7 +794,6 @@ def import_itable_from_xls(
         project_id, 
         cq_abbr
     )
-    abbr = extract.abbr
 
     # if not exist, create a new one which is empty
     if extract is None:
@@ -806,6 +805,9 @@ def import_itable_from_xls(
             settings.OC_TYPE_TPL['itable']['default'],
             {}
         )
+
+    # 2022-02-19: fix the order
+    abbr = extract.abbr
 
     # get the itable data
     cad, cate_attrs, i2a, data, not_found_pids = get_itable_from_itable_data_xls(
@@ -1313,4 +1315,22 @@ def __get_pid(v):
         pid = str(int(float(v)))
         return pid
     except:
+        return v
+
+
+def __cie_imp2val(v):
+    '''
+    Helper function for the cie importance
+    '''
+    if v is None: return '0'
+    _v = '%s' % v
+    _v = _v.lower().strip()
+
+    if _v == 'critical': 
+        return '2'
+
+    elif _v == 'important':
+        return '1'
+
+    else:
         return v

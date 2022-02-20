@@ -92,12 +92,21 @@ def get_pma_by_cq(keystr, cq_abbr="default", included_in='sof'):
             paper_dict, 
             is_skip_unselected=True
         )
+
+        # 2022-02-19: fix the missing CIE
+        # update the extract cie
+        extract.meta['certainty']['cie'] = util.calc_pma_cie(
+            extract.meta['certainty'],
+            settings.CIE_PWMA_COLUMNS
+        )
+
+        # the return obj for this oc
         oc_dict[abbr] = {
             'extract': extract.as_very_simple_dict(),
             
             # use the sm as the key, since there may be more results
             # for example, HR, RR, OR, INCD
-            'results': results
+            'results': results,
         }
     
     ret = {

@@ -877,7 +877,7 @@ PRISMA_PAST_TEMPLATE = {
 }
 
 
-# Certainty in Evidence
+# Certainty in Evidence for NMA
 CIE_NMA_COLUMNS = [
     "risk_of_bias",
     "inconsistency",
@@ -886,6 +886,15 @@ CIE_NMA_COLUMNS = [
     "imprecision",
     "publication_bias",
     "intransitivity"
+]
+
+# Certainty in Evidence for PWMA
+CIE_PWMA_COLUMNS = [
+    'risk_of_bias',
+    "inconsistency",
+    "indirectness",
+    "imprecision",
+    "publication_bias"
 ]
 
 # the maximum length

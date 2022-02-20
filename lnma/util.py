@@ -1406,6 +1406,13 @@ def calc_nma_cie(r, cols):
     return cie
 
 
+def calc_pma_cie(r, cols):
+    '''
+    Calculate the CiE for PWMA
+    '''
+    return calc_nma_cie(r, cols)
+
+
 def convert_extract_r_to_number(r, input_format):
     '''
     A helper function to change the values

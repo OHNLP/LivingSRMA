@@ -20,7 +20,7 @@
 {% include 'css/start_screen.css' %}
 html, body {
     width: 100%;
-    height: 100%;
+    /* height: 100%; */
     padding: 0;
     margin: 0;
     overflow: hidden;
@@ -231,7 +231,8 @@ p {
 <div id="app_softnma" class="d-flex fx-row">
 
     <div id="tb_simple_sofnma">
-        <div class="box" style="height: 100%;">
+        <div class="box" 
+            style="">
             <div class="box-header">
                 
                 <div class="d-flex fx-row">
@@ -1178,7 +1179,12 @@ var app_softnma = {
             methods: this.vpp_methods,
 
             mounted: function() {
-                
+                // the last thing is to notify that the height may changed
+                if (parent.hasOwnProperty('resize_iframes')) {
+                    // which means this is iframed
+                    parent.resize_iframes();
+                    console.log('* softable nma sent resize request to parent window');
+                }
             },
 
             updated: function() {

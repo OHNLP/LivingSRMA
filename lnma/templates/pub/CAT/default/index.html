@@ -161,7 +161,10 @@
 
     <div class="row">
         <div class="col">
-            <iframe src="[[ url_for('pub.itable', prj='CAT', cq='default', src='db') ]]" frameborder="0" style="width: 100%; min-height: 700px;"></iframe>
+            <iframe src="[[ url_for('pub.itable', prj='CAT', cq='default', src='db') ]]" 
+                frameborder="0" 
+                style="width: 100%; min-height: 710px;">
+            </iframe>
     </div>
     </div>
 </div>
@@ -198,6 +201,57 @@
         Results are summarized as forest plots for primary analysis, sensitivity analysis and subgroup analysis.<br>
         Users can use dropdown (select outcome) to select the outcome of interest.
     </p>
+
+
+    <br id="sec-pwma-Prim">
+    <h4 style="margin-bottom: 2rem;">
+        Primary Analysis
+    </h4>
+
+    <div class="row">
+        <div class="col">
+            <iframe id="ifm_pwma_prim"
+                src="[[ url_for('pub.graph_pma', prj=keystr, cq=cq_abbr, gp='primary', src='cache', od=';'.join(['Progression free survival', 'Overall survival'])) ]]" 
+                frameborder="0" 
+                style="width: 100%; min-height: 350px;">
+            </iframe>
+        </div>
+    </div>
+
+    <br id="sec-pwma-Sens">
+    <h4 style="margin-bottom: 0;">
+        Sensitivity Analysis
+    </h4>
+
+    <div class="row">
+        <div class="col">
+            <iframe id="ifm_pwma_prim"
+                src="[[ url_for('pub.graph_pma', prj=keystr, cq=cq_abbr, gp='primary', src='cache', od=';'.join(['Progression free survival', 'Overall survival'])) ]]" 
+                frameborder="0" 
+                style="width: 100%; min-height: 350px;">
+            </iframe>
+        </div>
+    </div>
+
+
+
+    <br id="sec-pwma-Subg">
+    <h4 style="margin-bottom: 0;"
+         class="mt-4">
+        Subgroup Analysis
+    </h4>
+
+    <div class="row">
+        <div class="col">
+            <iframe id="ifm_pwma_prim"
+                src="[[ url_for('pub.graph_pma', prj=keystr, cq=cq_abbr, gp='primary', src='cache', od=';'.join(['Progression free survival', 'Overall survival'])) ]]" 
+                frameborder="0" 
+                style="width: 100%; min-height: 350px;">
+            </iframe>
+        </div>
+    </div>
+
+
 </div>
 
 
@@ -213,24 +267,20 @@
     </p>
 </div>
 
+<br id="sec-nma-Prim">
+<!-- <div class="container mt-0">
+    <h4 style="margin-bottom: 0;">Primary Analysis</h4>
+</div> -->
 
-<div class="modal fade" id="exampleModalCenter3" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenter3Title"
-    aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 995px;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLongTitle">How to use this figure?</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <iframe width="960" height="550" frameborder="0" allowtransparency="true" allowfullscreen="allowfullscreen" style="border: none;" src="https://share.getcloudapp.com/KouqEo4G?embed=true"></iframe>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            </div>
-        </div>
+<div class="container mt-2"
+    style="max-width: 1300px;">
+    <div class="row">
+        <iframe id="ifm_nma_prim"
+            src="[[ url_for('pub.graph_nma', prj=keystr, cq=cq_abbr, gp='primary', tr='LMWH', oc=project.settings['public_website'][cq_abbr]['graph_nma']['default_oc_abbr'], od=';'.join(['Progression free survival', 'Overall survival'])) ]]" 
+            frameborder="0" 
+            style="width: 100%; min-height: 800px;"
+            resize_by_content>
+        </iframe>
     </div>
 </div>
 
@@ -248,9 +298,14 @@
     <p>
         <b>Choose measure of effect and denominator for absolute effect.</b>
     </p>
+    
     <div class="row">
         <div class="col">
-            <iframe id="ifm-ocplots" src="[[ url_for('pub.softable_pma', prj='CAT') ]]" frameborder="0" style="width: 100%; min-height: 670px;"></iframe>
+            <iframe id="ifm_sofpma" 
+                src="[[ url_for('pub.softable_pma', prj=keystr, cq=cq_abbr, msrs='OR,RR,HR', od=';'.join(['Progression free survival', 'Overall survival'])) ]]" frameborder="0" 
+                style="width: 100%; min-height: 480px;"
+                resize_by_content>
+            </iframe>
         </div>
     </div>
 
@@ -271,7 +326,12 @@
     </p>
     <div class="row">
         <div class="col">
-            <iframe id="ifm-ocplots" src="[[ url_for('pub.softable_nma', prj='CAT', dc='LMWH') ]]" frameborder="0" style="width: 100%; min-height: 550px;"></iframe>
+            <iframe id="ifm_sofnma" 
+                src="[[ url_for('pub.softable_nma', prj=keystr, cq=cq_abbr, dc='LMWH', cp='yes', od=';'.join(['Progression free survival', 'Overall survival'])) ]]" 
+                frameborder="0" 
+                style="width: 100%; min-height: 300px;"
+                resize_by_content>
+            </iframe>
         </div>
     </div>
 </div>

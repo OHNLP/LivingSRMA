@@ -396,6 +396,15 @@ def _add_cie_patch(keystr, cq_abbr, oc_dict):
     # load csv
     import csv
 
+    def _int_cie(v):
+        '''
+        A helper for cie int value, default is 0
+        '''
+        try:
+            return int(v)
+        except:
+            return 0
+
     with open(full_fn) as csv_file:
         csv_reader = csv.DictReader(csv_file, delimiter=',')
         for row in csv_reader:
@@ -422,7 +431,7 @@ def _add_cie_patch(keystr, cq_abbr, oc_dict):
                 if k in ['category', 'name', 'comparator', 'treatment']:
                     continue
                 # make sure the value type is int
-                oc_dict[oc_abbr]['cetable'][c][t][k] = int('%s'%row[k])
+                oc_dict[oc_abbr]['cetable'][c][t][k] = _int_cie('%s'%row[k])
 
             # no matter cie is there or not
             # update cie

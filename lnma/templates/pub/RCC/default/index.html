@@ -243,7 +243,7 @@
     <div class="row">
         <div class="col">
             <iframe id="ifm_pwma_prim"
-                src="[[ url_for('pub.graph_pma', prj='RCC', cq='default', gp='primary', src='cache', od=';'.join(['Progression free survival', 'Overall survival'])) ]]" 
+                src="[[ url_for('pub.graph_pma', prj=keystr, cq=cq_abbr, gp='primary', src='cache', od=';'.join(['Progression free survival', 'Overall survival'])) ]]" 
                 frameborder="0" 
                 style="width: 100%; min-height: 350px;">
             </iframe>
@@ -257,7 +257,7 @@
     <div class="row">
         <div class="col">
             <iframe id="ifm_pwma_sens"
-                src="[[ url_for('pub.graph_pma', prj='RCC', cq='default', gp='sensitivity', src='cache', od=';'.join(['Progression free survival', 'Overall survival'])) ]]" 
+                src="[[ url_for('pub.graph_pma', prj=keystr, cq=cq_abbr, gp='sensitivity', src='cache', od=';'.join(['Progression free survival', 'Overall survival'])) ]]" 
                 frameborder="0" 
                 style="width: 100%; min-height: 450px;">
             </iframe>
@@ -273,7 +273,7 @@
     <div class="row">
         <div class="col">
             <iframe id="ifm_pwma_subg"
-                src="[[ url_for('pub.graph_pma', prj='RCC', cq='default', gp='subgroup', foc='Age', src='cache', od=';'.join(['Progression free survival', 'Overall survival'])) ]]" 
+                src="[[ url_for('pub.graph_pma', prj=keystr, cq=cq_abbr, gp='subgroup', foc='Age', src='cache', od=';'.join(['Progression free survival', 'Overall survival'])) ]]" 
                 frameborder="0" 
                 style="width: 100%; min-height: 450px;">
             </iframe>
@@ -309,7 +309,7 @@
     style="max-width: 1300px;">
     <div class="row">
         <iframe id="ifm_nma_prim"
-            src="[[ url_for('pub.graph_nma', prj='RCC', cq=cq_abbr, gp='primary', tr='Suni', oc=project.settings['public_website'][cq_abbr]['graph_nma']['default_oc_abbr'], od=';'.join(['Progression free survival', 'Overall survival'])) ]]" 
+            src="[[ url_for('pub.graph_nma', prj=keystr, cq=cq_abbr, gp='primary', tr='Suni', oc=project.settings['public_website'][cq_abbr]['graph_nma']['default_oc_abbr'], od=';'.join(['Progression free survival', 'Overall survival'])) ]]" 
             frameborder="0" 
             style="width: 100%; min-height: 800px;"
             resize_by_content>
@@ -328,7 +328,7 @@
     style="max-width: 1300px;">
     <div class="row">
         <iframe id="ifm_nma_sens"
-            src="[[ url_for('pub.graph_nma', prj='RCC', cq='default', gp='sensitivity', tr='Suni', oc=project.settings['public_website'][cq_abbr]['graph_nma']['default_oc_abbr_for_sensitivity'], od=';'.join(['Progression free survival', 'Overall survival'])) ]]" 
+            src="[[ url_for('pub.graph_nma', prj=keystr, cq=cq_abbr, gp='sensitivity', tr='Suni', oc=project.settings['public_website'][cq_abbr]['graph_nma']['default_oc_abbr_for_sensitivity'], od=';'.join(['Progression free survival', 'Overall survival'])) ]]" 
             frameborder="0" 
             style="width: 100%; min-height: 800px;"
             resize_by_content>
@@ -354,7 +354,7 @@
     <div class="row">
         <div class="col">
             <iframe id="ifm_sofpma" 
-                src="[[ url_for('pub.softable_pma', prj='RCC', cq='default', msrs='OR,RR,HR', od=';'.join(['Progression free survival', 'Overall survival'])) ]]" frameborder="0" 
+                src="[[ url_for('pub.softable_pma', prj=keystr, cq=cq_abbr, msrs='OR,RR,HR', od=';'.join(['Progression free survival', 'Overall survival'])) ]]" frameborder="0" 
                 style="width: 100%; min-height: 450px;">
             </iframe>
         </div>
@@ -379,7 +379,7 @@
     <div class="row">
         <div class="col">
             <iframe id="ifm_sofnma" 
-                src="[[ url_for('pub.softable_nma', prj='RCC', cq='default', dc='Suni', cp='yes', od=';'.join(['Progression free survival', 'Overall survival'])) ]]" 
+                src="[[ url_for('pub.softable_nma', prj=keystr, cq=cq_abbr, dc='Suni', cp='yes', od=';'.join(['Progression free survival', 'Overall survival'])) ]]" 
                 frameborder="0" 
                 style="width: 100%; min-height: 450px;">
             </iframe>
@@ -400,7 +400,7 @@
     <div class="row">
         <div class="col">
             <iframe id="ifm_evmap" 
-                src="[[ url_for('pub.evmap', prj='RCC', cq='default', tr='LenPem', fh='800') ]]" 
+                src="[[ url_for('pub.evmap', prj=keystr, cq=cq_abbr, tr='LenPem', fh='800') ]]" 
                 frameborder="0" 
                 style="width: 100%; min-height: 900px;">
             </iframe>
@@ -471,18 +471,7 @@ The HR for 1,2 , The OR for the last one!
 var prj = 'RCC';
 var default_treat = 'Suni';
 
-function resize_iframe( iFrame ) {
-    iFrame.height = iFrame.contentWindow.document.body.scrollHeight + "px";
-    console.log('* resize iframe#'+iFrame.id+' height to ' + iFrame.height);
-}
-
-function resize_iframes() {
-    $('iframe').each(function(idx) {
-        if ($(this).is('[resize_by_content]')) {
-            resize_iframe(this);
-        }
-    });
-}
+{% include 'js/resize_frames.js' %}
 
 var jarvis = {
     init: function() {
