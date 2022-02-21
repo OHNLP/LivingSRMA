@@ -11,6 +11,8 @@ from rpy2.robjects.packages import importr
 
 # remove the warnings for rpy2
 from rpy2.rinterface import RRuntimeWarning
+
+from lnma import settings
 warnings.filterwarnings("ignore", category=RRuntimeWarning)
 
 # remove the warnings for rpy2 version > 3
@@ -252,6 +254,21 @@ def analyze_nma_freq_raw(rs, cfg):
     return ret
 
 
+def analyze_nma_bayes_pre(rs, cfg):
+    '''
+    
+    '''
+
+    return None
+
+
+def analyze_nma_bayes_raw(rs, cfg):
+    '''
+    
+    '''
+    return None
+    
+
 ###########################################################
 # Analyzer for the IO project API usage
 ###########################################################
@@ -262,14 +279,22 @@ def analyze(rs, cfg):
     '''
     # for general analyze
     ret = None
-    if 'input_format' in cfg:
-        if cfg['input_format'] == 'NMA_PRE_SMLU':
-            if cfg['analysis_method'] == 'freq':
-                ret = analyze_nma_freq_pre(rs, cfg)
+    if 'input_format' not in cfg:
+        return None
+    
+    if cfg['input_format'] == settings.INPUT_FORMAT_NMA_PRE_SMLU:
+        if cfg['analysis_method'] == 'freq':
+            ret = analyze_nma_freq_pre(rs, cfg)
 
-        elif cfg['input_format'] == 'NMA_RAW_ET':
-            if cfg['analysis_method'] == 'freq':
-                ret = analyze_nma_freq_raw(rs, cfg)
+        elif cfg['analysis_method'] == 'bayes':
+            ret = analyze_nma_bayes_pre(rs, cfg)
+
+    elif cfg['input_format'] == settings.INPUT_FORMAT_NMA_RAW_ET:
+        if cfg['analysis_method'] == 'freq':
+            ret = analyze_nma_freq_raw(rs, cfg)
+
+        elif cfg['analysis_method'] == 'bayes':
+            ret = analyze_nma_bayes_raw(rs, cfg)
 
     return ret
 
