@@ -4,9 +4,23 @@ library(dmetar)
 library(jsonlite)
 data<-read.csv("{{ fn_csvfile }}")
 
-network<-mtc.network(data.re = data)
-model<-mtc.model(network, link="log", likelihood="poisson", linearModel="{{ fixed_or_random }}")
-mcmc1<-mtc.run(model, n.adapt = 50, n.iter = 1000, thin = 1)
+# generate a bayes network
+network <- mtc.network(data.re = data)
+model <- mtc.model(network, 
+    link="log", 
+    likelihood="poisson", 
+    linearModel="{{ fixed_or_random }}"
+)
+
+# get the result of main model
+mcmc1<-mtc.run(
+    model, 
+    n.adapt = 50, 
+    n.iter = 1000, 
+    thin = 1
+)
+
+# get the result just for output
 mtc.run(model) -> results
 summary(results)
 
@@ -18,7 +32,10 @@ rank.sucra<-sucra(rank.probability, lower.is.better = {{ sucra_lower_is_better }
 # plot(sucra)
 
 # FORET PLOT
-myforest <- forest(relative.effect(results, t1="{{ reference_treatment }}"), digits=2)
+myforest <- forest(
+    relative.effect(results, t1="{{ reference_treatment }}"), 
+    digits=2
+)
 
 # LEAGUE TABLE (for back transforming and exporting)
 league<-relative.effect.table(results)

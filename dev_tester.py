@@ -39,7 +39,7 @@ app.app_context().push()
 
 
 def test():
-    ret = rpy2_nma_analyzer.test_nma_bayes_raw()
+    ret = rpy2_nma_analyzer.test_nma_bayes_pre_2()
     json.dump(ret, open('/tmp/jrst.json', 'w'), indent=2)
 
 

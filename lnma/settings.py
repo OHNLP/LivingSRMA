@@ -14,10 +14,12 @@ RSCRIPT_TPL_FOLDER = os.path.join(
     'r_tpl'
 )
 
+# Legacy format ...
 INPUT_FORMATS_HRLU = 'HRLU'
 INPUT_FORMATS_FTET = 'FTET'
 INPUT_FORMATS_ET = 'ET'
 
+# should use these
 INPUT_FORMAT_NMA_RAW_ET = 'NMA_RAW_ET'
 INPUT_FORMAT_NMA_PRE_SMLU = 'NMA_PRE_SMLU'
 

@@ -8,7 +8,9 @@ from tqdm import tqdm
 from flask import current_app
 
 # from lnma.analyzer import rpy2_pwma_analyzer as pwma_analyzer
-from lnma.analyzer import nma_analyzer
+# from lnma.analyzer import nma_analyzer
+# use python analyzer instead of the R
+from lnma.analyzer import rpy2_nma_analyzer as nma_analyzer
 from lnma import dora, srv_analyzer
 from lnma import util
 from lnma import ss_state
@@ -77,9 +79,9 @@ def get_graph_nma_data_from_db(keystr, cq_abbr):
         treat_list = extract._get_nma_treat_list()
 
         # get the input format for selecting template
-        input_format = settings.INPUT_FORMATS_HRLU
+        oc_datatype = settings.INPUT_FORMATS_HRLU
         if extract.meta['input_format'] == 'NMA_RAW_ET':
-            input_format = settings.INPUT_FORMATS_ET
+            oc_datatype = settings.INPUT_FORMATS_ET
 
         oc = {
             "oc_method": extract.meta['analysis_method'],
@@ -87,7 +89,7 @@ def get_graph_nma_data_from_db(keystr, cq_abbr):
             "oc_name": extract.abbr,
             "oc_fullname": extract.meta['full_name'],
             "oc_measures": [extract.meta['measure_of_effect']],
-            "oc_datatype": input_format,
+            "oc_datatype": oc_datatype,
             "param": {
                 "analysis_method": extract.meta['analysis_method'],
                 "fixed_or_random": extract.meta['fixed_or_random'],
@@ -100,18 +102,18 @@ def get_graph_nma_data_from_db(keystr, cq_abbr):
         ret['oc_dict'][extract.abbr] = oc
 
         # build rs and cfg
-        cfg = {
-            # for init analyzer
-            "backend": extract.meta['analysis_method'],
-            "input_format": input_format,
-            "reference_treatment": treat_list[0],
-            "measure_of_effect": extract.meta['measure_of_effect'],
-            "fixed_or_random": extract.meta['fixed_or_random'],
-            "which_is_better": 'small' if extract.meta['which_is_better'] == 'lower' else 'big',
+        # cfg = {
+        #     # for init analyzer
+        #     "backend": extract.meta['analysis_method'],
+        #     "input_format": input_format,
+        #     "reference_treatment": treat_list[0],
+        #     "measure_of_effect": extract.meta['measure_of_effect'],
+        #     "fixed_or_random": extract.meta['fixed_or_random'],
+        #     "which_is_better": 'small' if extract.meta['which_is_better'] == 'lower' else 'big',
 
-            # a special rule for database format
-            'format_converted': 'yes'
-        }
+        #     # a special rule for database format
+        #     'format_converted': 'yes'
+        # }
     
         # get the rs for this oc
         rscfg = extract.get_raw_rs_cfg(
@@ -119,6 +121,20 @@ def get_graph_nma_data_from_db(keystr, cq_abbr):
             is_skip_unselected=True
         )
         rs = rscfg['rs']
+        cfg = rscfg['cfg']
+
+        # update the config for R script
+        cfg['backend'] = extract.meta['analysis_method']
+        cfg['reference_treatment'] = treat_list[0]
+        # cfg['input_format'] = input_format
+
+        # the R script use different param
+        cfg["which_is_better"] = 'small' if extract.meta['which_is_better'] == 'lower' else 'big',
+
+        # 2022-02-20: no need to change this,
+        # since all the format convert has been done in the model level.
+        # in the Extract._get_rs_nma(), the format will be changed automatically.
+        cfg['format_converted'] = 'yes'
 
         # calc!
         ret_nma = nma_analyzer.analyze(

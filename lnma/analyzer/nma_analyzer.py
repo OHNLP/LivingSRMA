@@ -71,7 +71,8 @@ def analyze(rs, cfg):
 
     # get result from other analyzer
     if cfg['backend'] == 'bayes':
-        if cfg['input_format'] == INPUT_FORMATS_ET:
+        if cfg['input_format'] == INPUT_FORMATS_ET or \
+           cfg['input_format'] == INPUT_FORMAT_NMA_RAW_ET:
             ret = analyze_raw_by_bugsnet(rs, params)
 
         elif cfg['input_format'] == INPUT_FORMATS_FTET:

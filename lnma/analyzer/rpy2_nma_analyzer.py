@@ -32,6 +32,12 @@ from lnma.analyzer.rpadapter import _bugsnet_trans_netcha
 from lnma.analyzer.rpadapter import _bugsnet_trans_netplt
 from lnma.analyzer.rpadapter import _bugsnet_trans_rksucra
 from lnma.analyzer.rpadapter import _bugsnet_trans_scrplt
+from lnma.analyzer.rpadapter import _gemtc_trans_netcha
+from lnma.analyzer.rpadapter import _gemtc_trans_netplt
+from lnma.analyzer.rpadapter import _gemtc_trans_forest
+from lnma.analyzer.rpadapter import _gemtc_trans_league
+from lnma.analyzer.rpadapter import _dmetar_trans_scrplt
+from lnma.analyzer.rpadapter import _dmetar_trans_rksucra
 from lnma.analyzer.rpadapter import _netmeta_trans_netcha
 from lnma.analyzer.rpadapter import _netmeta_trans_netplt
 from lnma.analyzer.rpadapter import _netmeta_trans_forest
@@ -355,39 +361,81 @@ def analyze_nma_bayes_pre(rs, cfg):
 
     # rankogram
     r_rank_probability = gemtc.rank_probability(r_mcmc)
+
+    # fix for python env to assign rownames to the r_rank_probability
+    r_rank_probability_df = base.data_frame(
+        r_rank_probability, 
+        row_names=base.rownames(r_network.rx2('treatments'))
+    )
+
     # r_rank_probsmat = base.as_matrix(r_rank_probability)
     # r_rank_rownames = base.rownames(r_rank_probsmat)
+    r_rank_rownames = base.rownames(r_network.rx2('treatments'))
+
     r_rank_sucra = dmetar.sucra(
-        r_rank_probability, 
+        r_rank_probability_df, 
         lower_is_better = sucra_lower_is_better
     )
-    
     
     # forest
     r_forest = gemtc.forest(
         gemtc.relative_effect(
-            r_results,
-            t1 = reference_treatment,
-            digits = 2
-        )
+            r_mcmc,
+            t1 = reference_treatment
+        ),
+        digits = 2
     )
 
     # league table
-    r_league = gemtc.relative_effect_table(r_results)
+    r_league = gemtc.relative_effect_table(r_mcmc)
     r_expleague = base.data_frame(
-        base.exp(r_league)
+        base.exp(r_league),
+        row_names=base.rownames(r_network.rx2('treatments'))
     )
 
-    # convert
+    # convert R to JSON
+    j_r_model = jsonlite.toJSON(r_model, force=True)
+    j_model = json.loads(j_r_model[0])
+
+    j_r_expleague = jsonlite.toJSON(r_expleague, force=True)
+    j_expleague = json.loads(j_r_expleague[0])
+
+    j_r_rank_sucra = jsonlite.toJSON(r_rank_sucra, force=True)
+    j_rank_sucra = json.loads(j_r_rank_sucra[0])
+
+    j_r_rank_probability = jsonlite.toJSON(r_rank_probability, force=True)
+    j_rank_probability = json.loads(j_r_rank_probability[0])
+
+    j_r_rank_rownames = jsonlite.toJSON(r_rank_rownames, force=True)
+    j_rank_rownames = json.loads(j_r_rank_rownames[0])
 
     # make a result
     jrst = {
-        'model': None
+        'model': j_model,
+        'expleague': j_expleague,
+        'sucraplot': {
+            'probs': j_rank_probability,
+            'rows': j_rank_rownames
+        },
+        'sucrarank': j_rank_sucra,
     }
 
     # convertion to output for analyzer
+    ret = {
+        'submission_id': 'rpy2',
+        'params': cfg,
+        'success': True,
+        'data': {
+            'netcha': _gemtc_trans_netcha(jrst['model'], cfg),
+            'netplt': _gemtc_trans_netplt(jrst['model'], cfg),
+            'forest': _gemtc_trans_forest(jrst['expleague'], cfg),
+            'league': _gemtc_trans_league(jrst['expleague'], cfg),
+            'scrplt': _dmetar_trans_scrplt(jrst, cfg),
+            'tmrank': _dmetar_trans_rksucra(jrst, cfg)
+        }
+    }
 
-    return None
+    return ret
 
 
 def analyze_nma_bayes_raw(rs, cfg):
@@ -611,7 +659,33 @@ def test_nma_bayes_pre():
             ['Pazo', 'Placebo', 0.84, 0.71, 0.99, 'S4', 2017],
             ['Axi', 'Placebo', 0.87, 0.66, 1.15, 'S5', 2018]
         ], 
-        columns=['t1', 't2', 'sm','lowerci', 'upperci','study','year']
+        columns=['t1', 't2', 'sm','lowerci', 'upperci', 'study', 'year']
+    ).to_dict(orient='records')
+
+    ret = analyze_nma_bayes_pre(rs, cfg)
+
+    pprint(ret)
+
+    return ret
+
+
+def test_nma_bayes_pre_2():
+    '''
+    Just for test nma bayes pre 2
+    '''
+    cfg = {
+        'which_is_better': 'lower',
+        'measure_of_effect': 'HR',
+        'fixed_or_random': 'fixed',
+    }
+    rs = pd.DataFrame(
+        [
+            ['E_ADT','ADT',0.72,0.47,1.09,'ENZAMET'],
+            ['APA_ADT','ADT',0.4,0.15,1.03,'TITAN'],
+            ['D_ADT','ADT',0.83,0.47,1.47,'GETUG-AFU15'],
+            ['DARO_D_ADT','D_ADT',0.605,0.348,1.052,'ARASENS'],
+        ], 
+        columns=['t1', 't2', 'sm','lowerci', 'upperci', 'study']
     ).to_dict(orient='records')
 
     ret = analyze_nma_bayes_pre(rs, cfg)

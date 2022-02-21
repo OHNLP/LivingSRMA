@@ -2,7 +2,8 @@ import copy
 from lnma import settings
 from lnma import util
 from lnma.analyzer import rpy2_pwma_analyzer as pwma_analyzer
-from lnma.analyzer import nma_analyzer
+from lnma.analyzer import rpy2_nma_analyzer as nma_analyzer
+# from lnma.analyzer import nma_analyzer
 
 
 def get_nma(extract, paper_dict, is_skip_unselected=True):
@@ -49,33 +50,45 @@ def get_nma(extract, paper_dict, is_skip_unselected=True):
     # may use it in future
     rscfg_hash = util.hash_json(rscfg)
     rs = rscfg['rs']
+    cfg = rscfg['cfg']
 
-    results = []
+    # update the config for R script
+    cfg['backend'] = extract.meta['analysis_method']
+    cfg['reference_treatment'] = treat_list[0]
 
-    # get the config
-    cfg = {
-        # for init analyzer
-        "backend": extract.meta['analysis_method'],
-        "input_format": input_format,
-        "reference_treatment": treat_list[0],
-        "measure_of_effect": extract.meta['measure_of_effect'],
-        "fixed_or_random": extract.meta['fixed_or_random'],
-        "which_is_better": 'small' if extract.meta['which_is_better'] == 'lower' else 'big',
+    # the R script use different param
+    cfg["which_is_better"] = 'small' if extract.meta['which_is_better'] == 'lower' else 'big',
 
-        # a special rule for database format
-        # 2022-02-20: no need to change this,
-        # since all the format convert has been done in the model level.
-        # in the Extract._get_rs_nma(), the format will be changed automatically.
-        'format_converted': 'yes'
-    }
+    # 2022-02-20: no need to change this,
+    # since all the format convert has been done in the model level.
+    # in the Extract._get_rs_nma(), the format will be changed automatically.
+    cfg['format_converted'] = 'yes'
+
+    # cfg = {
+    #     # for init analyzer
+    #     "backend": extract.meta['analysis_method'],
+    #     "analysis_method": extract.meta['analysis_method'],
+    #     "input_format": input_format,
+    #     "reference_treatment": treat_list[0],
+    #     "measure_of_effect": extract.meta['measure_of_effect'],
+    #     "fixed_or_random": extract.meta['fixed_or_random'],
+        
+    #     # a special rule for database format
+    #     # 2022-02-20: no need to change this,
+    #     # since all the format convert has been done in the model level.
+    #     # in the Extract._get_rs_nma(), the format will be changed automatically.
+    #     'format_converted': 'yes'
+    # }
     ret_nma = nma_analyzer.analyze(
         rs, 
         cfg
     )
 
+    # maybe more than one results?
+    results = []
     results.append({
         'rs': rs,
-        'cfg': rscfg['cfg'],
+        'cfg': cfg,
         'rst': ret_nma
     })
 
