@@ -63,6 +63,9 @@ def get_nma(extract, paper_dict, is_skip_unselected=True):
         "which_is_better": 'small' if extract.meta['which_is_better'] == 'lower' else 'big',
 
         # a special rule for database format
+        # 2022-02-20: no need to change this,
+        # since all the format convert has been done in the model level.
+        # in the Extract._get_rs_nma(), the format will be changed automatically.
         'format_converted': 'yes'
     }
     ret_nma = nma_analyzer.analyze(

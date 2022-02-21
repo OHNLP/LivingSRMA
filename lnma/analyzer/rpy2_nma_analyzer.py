@@ -32,6 +32,7 @@ meta = importr('meta')
 netmeta = importr('netmeta')
 jsonlite = importr('jsonlite')
 
+# remove the Rplots.pdf output
 ro.r('pdf(NULL)')
 
 
@@ -144,10 +145,111 @@ def analyze_nma_freq_pre(rs, cfg):
 
 def analyze_nma_freq_raw(rs, cfg):
     '''
-    
-    '''
+    Analyze raw data by freq method
 
-    return None
+    the input rs follows:
+
+    study, treat1, event1, n1, treat2, event2, n2
+
+    needed paramters:
+
+    measure_of_effect
+    fixed_or_random
+    which_is_better
+
+    '''
+    # create a dataframe first
+    df = pd.DataFrame(rs)
+
+    # convert the TE format
+    r_mydata = netmeta.pairwise(
+        [df.treat1, df.treat2],
+        [df.event1, df.event2],
+        [df.n1,     df.n2],
+        data = df,
+        sm = cfg['measure_of_effect']
+    )
+
+    # get ref
+    all_treats = list(set(df.treat1.to_list() + df.treat2.to_list()))
+    if 'reference_treatment' in cfg:
+        reference_treatment = cfg['reference_treatment']
+    else:
+        reference_treatment = all_treats[0]
+        cfg['reference_treatment'] = reference_treatment
+
+    # get the primary
+    r_nma = netmeta.netmeta(
+        TE = r_mydata.TE,
+        seTE = r_mydata.seTE,
+        treat1 = r_mydata.treat1,
+        treat2 = r_mydata.treat2,
+        studlab = r_mydata.study,
+        data = r_mydata,
+        sm = cfg['measure_of_effect'],
+        comb_fixed = cfg['fixed_or_random']=='fixed',
+        comb_random = cfg['fixed_or_random']=='random'
+    )
+
+    # get the network plot
+    r_netplt = netmeta.netgraph(r_nma)
+
+    # get the league table
+    r_lgtb = netmeta.netleague(r_nma, bracket="(", digits=2)
+
+    # get the forest
+    r_forest = netmeta.forest_netmeta(r_nma)
+
+    # get the ps rank
+    r_rank = netmeta.netrank(
+        r_nma, 
+        small_values = 'good' if cfg['which_is_better'] == 'lower' else 'bad'
+    )
+
+    # convert to json obj
+    r_j_nma = jsonlite.toJSON(r_nma, force=True)
+    j_nma = json.loads(r_j_nma[0])
+    
+    r_j_netplt = jsonlite.toJSON(r_netplt, force=True)
+    j_netplt = json.loads(r_j_netplt[0])
+
+    r_j_lgtb = jsonlite.toJSON(r_lgtb, force=True)
+    j_lgtb = json.loads(r_j_lgtb[0])
+
+    r_j_rank = jsonlite.toJSON(r_rank, force=True)
+    j_rank = json.loads(r_j_rank[0])
+
+    r_j_forest = jsonlite.toJSON(r_forest, force=True)
+    j_forest = json.loads(r_j_forest[0])
+
+    # for compability
+    jrst = {
+        'nma': j_nma,
+        'mynetplt': j_netplt,
+        'myleaguetb': j_lgtb,
+        'myforest': j_forest,
+        'myrank': {
+            'trts': j_nma['trts'],
+            'fixed': j_rank['Pscore.fixed'],
+            'random': j_rank['Pscore.random']
+        },
+    }
+
+    # build the return
+    ret = {
+        'submission_id': 'rpy2',
+        'params': cfg,
+        'success': True,
+        'data': {
+            'netcha': _netmeta_trans_netcha(jrst['nma'], cfg),
+            'netplt': _netmeta_trans_netplt(jrst['mynetplt'], cfg),
+            'league': _netmeta_trans_league_r(jrst['myleaguetb'], cfg),
+            'forest': _netmeta_trans_forest(jrst['myforest'], cfg),
+            'psrank': _netmeta_trans_pscore(jrst, cfg)
+        }
+    }
+
+    return ret
 
 
 ###########################################################
@@ -172,14 +274,42 @@ def analyze(rs, cfg):
     return ret
 
 
-def test():
+def test_nma_freq_raw():
     '''
-    Just for test function
+    Just for test nma freq raw
+    '''
+    cfg = {
+        'which_is_better': 'lower',
+        'measure_of_effect': 'RR',
+        'fixed_or_random': 'random'
+    }
+    rs = pd.DataFrame(
+        [
+            ['D+ADT', 'AAP-ADT', 86, 189, 180, 377, 'S1', 2021],
+            ['AAP-ADT', 'ADT', 443, 955, 315, 953, 'S2', 2016],
+            ['AAP-ADT', 'ADT', 411, 597, 309, 602, 'S3', 2016],
+            ['E+ADT', 'NSAA+ADT', 321, 563, 241, 558, 'S4', 2017],
+            ['APA+ADT', 'ADT', 221, 524, 215, 527, 'S5', 2018],
+            ['E+ADT', 'ADT', 139, 572, 147, 574, 'S6', 2018]
+        ], 
+        columns=['treat1', 'treat2', 'event1','n1', 'event2','n2', 'study', 'year']
+    ).to_dict(orient='records')
+
+    ret = analyze_nma_freq_raw(rs, cfg)
+
+    pprint(ret)
+
+    return ret
+
+
+def test_nma_freq_pre():
+    '''
+    Just for test nma freq pre
     '''
     cfg = {
         'which_is_better': 'lower',
         'measure_of_effect': 'HR',
-        'fixed_or_random': 'random'
+        'fixed_or_random': 'fixed',
     }
     rs = pd.DataFrame(
         [
@@ -195,6 +325,8 @@ def test():
     ret = analyze_nma_freq_pre(rs, cfg)
 
     pprint(ret)
+
+    return ret
 
 
 def demo():
