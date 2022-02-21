@@ -32,6 +32,8 @@ meta = importr('meta')
 netmeta = importr('netmeta')
 jsonlite = importr('jsonlite')
 
+ro.r('pdf(NULL)')
+
 
 def analyze_nma_freq_pre(rs, cfg):
     '''
