@@ -119,6 +119,12 @@ def analyze_nma_freq_pre(rs, cfg):
     The given rs should contains:
 
     study, t1, t2, sm, lowerci, upperci
+
+    measure_of_effect
+    fixed_or_random
+    reference_treatment
+    which_is_better
+
     '''
     # create a dataframe first
     df = pd.DataFrame(rs)
@@ -131,27 +137,69 @@ def analyze_nma_freq_pre(rs, cfg):
         # need to convert the SE
         df['seTE'] = (np.log(df['upperci']) - np.log(df['lowerci'])) / 3.92
 
+    all_treats = list(set(df.t1.to_list() + df.t2.to_list()))
+
+    if 'reference_treatment' in cfg:
+        reference_treatment = cfg['reference_treatment']
+    else:
+        reference_treatment = all_treats[0]
+        cfg['reference_treatment'] = reference_treatment
+
     # get the primary
-    r_nma = netmeta(
+    r_nma = netmeta.netmeta(
         TE = df.TE,
         seTE = df.seTE,
         treat1 = df.t1,
         treat2 = df.t2,
         studlab = df.study,
         sm = cfg['measure_of_effect'],
+        comb_fixed = cfg['fixed_or_random']=='fixed',
         comb_random = cfg['fixed_or_random']=='random',
-        reference_group = cfg['treatments'][0]
+        reference_group = reference_treatment
     )
 
-    # convert to R json object
-    r_j_prim = jsonlite.toJSON(r_nma, force=True)
+    # get the network plot
+    r_netplt = netmeta.netgraph(r_nma)
 
-    # convert to Python JSON object
-    j_prim = json.loads(r_j_prim[0])
+    # get the league table
+    r_lgtb = netmeta.netleague(r_nma, bracket="(", digits=2)
+
+    # get the ps rank
+    r_rank = netmeta.netrank(
+        r_nma, 
+        small_values = 'good' if cfg['which_is_better'] == 'lower' else 'bad'
+    )
+
+    # get the forest
+    r_forest = netmeta.forest_netmeta(r_nma)
+
+    # convert to json obj
+    r_j_nma = jsonlite.toJSON(r_nma, force=True)
+    j_nma = json.loads(r_j_nma[0])
+    
+    r_j_netplt = jsonlite.toJSON(r_netplt, force=True)
+    j_netplt = json.loads(r_j_netplt[0])
+
+    r_j_lgtb = jsonlite.toJSON(r_lgtb, force=True)
+    j_lgtb = json.loads(r_j_lgtb[0])
+
+    r_j_rank = jsonlite.toJSON(r_rank, force=True)
+    j_rank = json.loads(r_j_rank[0])
+
+    r_j_forest = jsonlite.toJSON(r_forest, force=True)
+    j_forest = json.loads(r_j_forest[0])
 
     # for compability
-    j = {
-        'primma': j_prim,
+    jrst = {
+        'nma': j_nma,
+        'mynetplt': j_netplt,
+        'myleaguetb': j_lgtb,
+        'myforest': j_forest,
+        'myrank': {
+            'trts': j_nma['trts'],
+            'fixed': j_rank['Pscore.fixed'],
+            'random': j_rank['Pscore.random']
+        },
     }
 
     # build the return
@@ -160,7 +208,11 @@ def analyze_nma_freq_pre(rs, cfg):
         'params': cfg,
         'success': True,
         'data': {
-            
+            'netcha': _netmeta_trans_netcha(jrst['nma'], cfg),
+            'netplt': _netmeta_trans_netplt(jrst['mynetplt'], cfg),
+            'league': _netmeta_trans_league_r(jrst['myleaguetb'], cfg),
+            'forest': _netmeta_trans_forest(jrst['myforest'], cfg),
+            'psrank': _netmeta_trans_pscore(jrst, cfg)
         }
     }
 

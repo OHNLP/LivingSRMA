@@ -6,7 +6,7 @@ import argparse
 
 import logging
 
-from lnma.analyzer import rpy2_pwma_analyzer
+from lnma.analyzer import rpy2_nma_analyzer, rpy2_pwma_analyzer
 logger = logging.getLogger("watcher")
 logger.setLevel(logging.INFO)
 logging.basicConfig(level=logging.WARNING, format='%(asctime)s [%(name)s] [%(levelname)s] %(message)s')
@@ -30,6 +30,7 @@ from lnma.models import *
 from lnma import dora
 from lnma import util
 from lnma import ss_state
+from lnma.analyzer import rpy2_nma_analyzer
 
 # app for using LNMA functions and tables
 app = create_app()
@@ -38,6 +39,31 @@ app.app_context().push()
 
 
 def test():
+    cfg = {
+        'which_is_better': 'lower',
+        'measure_of_effect': 'HR',
+        'fixed_or_random': 'random'
+    }
+    rs = pd.DataFrame(
+        [
+            ['Pembro', 'Placebo', 0.68, 0.53, 0.87, 'S1', 2021],
+            ['Suni', 'Placebo', 0.76, 0.59, 0.98, 'S2', 2016],
+            ['Sora', 'Placebo', 0.97, 0.80, 1.17, 'S3', 2016],
+            ['Pazo', 'Placebo', 0.84, 0.71, 0.99, 'S4', 2017],
+            ['Axi', 'Placebo', 0.87, 0.66, 1.15, 'S5', 2018]
+        ], 
+        columns=['t1', 't2', 'sm','lowerci', 'upperci','study','year']
+    ).to_dict(orient='records')
+
+    ret = rpy2_nma_analyzer.analyze_nma_freq_pre(
+        rs,
+        cfg
+    )
+    
+    json.dump(ret, open('/tmp/jrst.json', 'w'), indent=2)
+
+
+def test6():
     itable = srv_extract.import_itable_from_xls(
         'LPR', 
         'default',
