@@ -72,6 +72,7 @@ def php():
     keystr = request.args.get('k')
     cq_abbr = request.args.get('c')
 
+    # get this project
     project = dora.get_project_by_keystr(keystr)
 
     if project is None:
@@ -90,6 +91,35 @@ def php():
         project=project
     )
 
+
+@bp.route('/decision_aid.html')
+def decision_aid():
+    '''
+    The decision_aid page for a cq
+    '''
+    # first, check this prj and cq exist or not
+    keystr = request.args.get('k')
+    cq_abbr = request.args.get('c')
+    
+    # get this project
+    project = dora.get_project_by_keystr(keystr)
+
+    if project is None:
+        return 'No such project %s' % keystr
+
+    path_to_webpage = 'pub/%s/%s/decision_aid.html' % (
+        keystr, cq_abbr
+    )
+    # last, check this path exists or not
+    # if not os.path.exists(os.path.join(, path_to_webpage)):
+        # return 'No such webpage for %s.%s' % (keystr, cq_abbr)
+
+    return render_template(
+        path_to_webpage,
+        keystr=keystr,
+        cq_abbr=cq_abbr,
+        project=project
+    )
 
 ###############################################################################
 # For IO project

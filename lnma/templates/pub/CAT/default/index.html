@@ -100,7 +100,7 @@
 
     <div class="row">
         <div class="col">
-            <img src="[[ url_for('pub.graphdata', keystr='CAT', cq='default', fn='CONCEPT_IMAGE.svg') ]]" />
+            <img src="[[ url_for('pub.graphdata', keystr=keystr, cq=cq_abbr, fn='CONCEPT_IMAGE.svg') ]]" />
         </div>
         <div class="col">
             <p>
@@ -124,7 +124,7 @@
         </div>
     </div>
     <div class="row">
-        <iframe src="[[ url_for('pub.prisma', prj='CAT', cq='default') ]]" frameborder="0" style="width: 100%; min-height: 850px;"></iframe>
+        <iframe src="[[ url_for('pub.prisma', prj=keystr, cq=cq_abbr) ]]" frameborder="0" style="width: 100%; min-height: 850px;"></iframe>
     </div>
 </div>
 
@@ -161,7 +161,7 @@
 
     <div class="row">
         <div class="col">
-            <iframe src="[[ url_for('pub.itable', prj='CAT', cq='default', src='db') ]]" 
+            <iframe src="[[ url_for('pub.itable', prj=keystr, cq=cq_abbr, src='db') ]]" 
                 frameborder="0" 
                 style="width: 100%; min-height: 710px;">
             </iframe>
@@ -469,7 +469,7 @@ The HR for 1,2 , The OR for the last one!
 
 <script>
 
-var prj = 'CAT';
+var prj = keystr;
 var cq = '[[ cq_abbr ]]';
 
 
