@@ -154,33 +154,33 @@ var fgmk_subg_forest = {
             this.cfg = cfg;
     
             // update the height of svg according to number of studies
-            this.height = this.row_height * (
-                // the number of studies
-                this.data.primma.stus.length + 
-                // the number of subgroups
-                // 1. header
-                // 2. model
-                // 3. heterogeneity
-                // 4. blank margin
-                4 * Object.keys(this.data.subgps).length + 
-                // the number of model
-                // 1. header
-                // 2. blank
-                // 3. model
-                // 4. heterogeneity
-                // 5. test
-                // optional line
-                6
-            );
-            this.svg.attr('height', this.height);
+            // this.height = this.row_height * (
+            //     // the number of studies
+            //     this.data.primma.stus.length + 
+            //     // the number of subgroups
+            //     // 1. header
+            //     // 2. model
+            //     // 3. heterogeneity
+            //     // 4. blank margin
+            //     4 * Object.keys(this.data.subgps).length + 
+            //     // the number of model
+            //     // 1. header
+            //     // 2. blank
+            //     // 3. model
+            //     // 4. heterogeneity
+            //     // 5. test
+            //     // optional line
+            //     6
+            // );
+            // this.svg.attr('height', this.height);
             
             // if we draw the predict interval, add one more line
-            if (this.cfg.params.prediction_interval == 'TRUE') {
-                this.is_draw_prediction_interval = true;
-                this.height += this.row_height;
-            } else {
-                this.is_draw_prediction_interval = false;
-            }
+            // if (this.cfg.params.prediction_interval == 'TRUE') {
+            //     this.is_draw_prediction_interval = true;
+            //     this.height += this.row_height;
+            // } else {
+            //     this.is_draw_prediction_interval = false;
+            // }
 
             // get the range
             var range = this.get_range(this.data.primma);
@@ -248,6 +248,9 @@ var fgmk_subg_forest = {
             // // show the plot
             // this._draw_forest();
     
+            // finally, update the height of this svg
+            this.height = this.row_height * this.row_idx;
+            this.svg.attr('height', this.height);
         },
 
         _is_input_format: function(fmt) {
@@ -290,6 +293,9 @@ var fgmk_subg_forest = {
                     .attr('y', this.row_height * this.row_idx)
                     .attr('text-anchor', "end")
                     .text('Control');
+                // extra text for this 
+                this.row_incr(1);
+
             } else {
 
             }
