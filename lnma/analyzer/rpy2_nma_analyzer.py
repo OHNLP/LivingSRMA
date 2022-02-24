@@ -512,6 +512,7 @@ def analyze_nma_bayes_raw(rs, cfg):
     )
 
     # run model
+    base.set_seed(20190829)
     r_fr_effects_results = bugsnet.nma_run(
         r_fr_effects_model,
         n_iter = 10000, # original 10000
