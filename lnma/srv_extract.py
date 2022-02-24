@@ -239,6 +239,9 @@ def update_extract_pwma_pre_data(extract, df, papers, is_subg=False):
             extract.abbr,
             new_meta
         )
+        print("* updated subgroups: %s" % (
+            sub_groups
+        ))
 
     # update the extract
     ext = dora.update_extract_data(
@@ -271,6 +274,9 @@ def update_extract_pwma_raw_data(extract, df, papers, is_subg=False):
     for p in papers:
         pid2paper_id[p.pid] = p.paper_id
     missing_pids = []
+
+    # special for subg analysis
+    subgroup_dict = {}
 
     # check each row
     for idx, row in df.iterrows():
@@ -308,27 +314,85 @@ def update_extract_pwma_raw_data(extract, df, papers, is_subg=False):
             Nc = __get_val(row['Nc']),
         )
 
+        # now, need to check if this is a subg analysis
+        # by default, the subg_code is always g0
+        # which means there is only one group for this analysis
+        subg_code = 'g0'
+        if is_subg:
+            subg = row['subgroup']
+
+            # if this a new subgroup?
+            if subg not in subgroup_dict:
+                # this is a new subgroup, assign a group id for this
+                subgroup_dict[subg] = 'g%s' % (len(subgroup_dict))
+
+            # get the subg_code for this subgroup
+            subg_code = subgroup_dict[subg]
+
         # ok, let's add this record
         if pid not in data:
             # nice! first time add
             data[pid] = copy.deepcopy(settings.DEFAULT_EXTRACT_DATA_PID_TPL)
 
             # add this to the main arm
-            data[pid]['attrs']['main']['g0'] = arm
+            data[pid]['attrs']['main'][subg_code] = arm
 
             # update the status
             data[pid]['is_selected'] = True
             data[pid]['is_checked'] = True
 
         else:
-            # wow! it's multi arm study??
-            data[pid]['attrs']['other'].append(
-                {'g0': arm}
+            # then need to check subg
+            if is_subg:
+                # as long as this paper has been added
+                # we just need to add this subgroup
+                data[pid]['attrs']['main'][subg_code] = arm
+
+            else:
+                # so this is not for subgroup analysis
+                # the duplicated pid means 
+                # wow! it's multi arm study??
+                data[pid]['attrs']['other'].append(
+                    {subg_code: arm}
+                )
+
+                # and increase the n_arms
+                data[pid]['n_arms'] += 1
+
+    # update the subg settings if is subgroup analysis
+    if is_subg:
+        # need to update the extract meta
+        new_meta = copy.deepcopy(extract.meta)
+
+        # get the sub_groups
+        sub_groups = []
+
+        # create a dict for reverse search
+        g2subg_dict = {}
+        for k in subgroup_dict:
+            v = subgroup_dict[k]
+            g2subg_dict[v] = k
+
+        # loop on the values and convert to the ordered list
+        for i in range(len(g2subg_dict)):
+            sub_groups.append(
+                g2subg_dict['g%s'%i]
             )
 
-            # and increase the n_arms
-            data[pid]['n_arms'] += 1
+        # set the subgs
+        new_meta['sub_groups'] = sub_groups
 
+        # update meta
+        ext = dora.update_extract_meta(
+            extract.project_id,
+            extract.oc_type,
+            extract.abbr,
+            new_meta
+        )
+        print("* updated subgroups: %s" % (
+            sub_groups
+        ))
+        
     # update the extract
     ext = dora.update_extract_data(
         extract.project_id,
@@ -584,7 +648,8 @@ def import_extracts_from_xls(full_path, keystr, cq_abbr, oc_type):
     for idx, row in dft.iterrows():
         tab_name = row['name'].strip()
         data_type = row['data_type'].strip()
-        print('*'*40, keystr, cq_abbr, oc_type, '[%s]' % tab_name, '|', data_type)
+        analysis_group = row['analysis_title'].strip()
+        print('*'*40, keystr, cq_abbr, oc_type, analysis_group, '[%s]' % tab_name, '|', data_type)
         
         # the general meta information for an outcome
         meta = dict(
@@ -622,18 +687,20 @@ def import_extracts_from_xls(full_path, keystr, cq_abbr, oc_type):
             # the values could be NaN, so need to check
             meta['certainty'] = {
                 'cie': '0',
-                'risk_of_bias': __get_val(__get_col(row, 'risk_of_bias'), '0'),
-                'inconsistency': __get_val(__get_col(row, 'inconsistency'), '0'),
-                'indirectness': __get_val(__get_col(row, 'indirectness'), '0'),
-                'imprecision': __get_val(__get_col(row, 'imprecision'), '0'),
-                'publication_bias': __get_val(__get_col(row, 'publication_bias'), '0'),
+                'risk_of_bias': "%s"%__get_int_val(__get_col(row, 'risk_of_bias'), '0'),
+                'inconsistency': "%s"%__get_int_val(__get_col(row, 'inconsistency'), '0'),
+                'indirectness': "%s"%__get_int_val(__get_col(row, 'indirectness'), '0'),
+                'imprecision': "%s"%__get_int_val(__get_col(row, 'imprecision'), '0'),
+                'publication_bias': "%s"%__get_int_val(__get_col(row, 'publication_bias'), '0'),
                 'importance': __cie_imp2val(__get_val(__get_col(row, 'importance'), '0')),
             }
 
             # the treatment and control
+            val_t = __get_val(row['treatment'])
+            val_c = __get_val(row['control'])
             meta['treatments'] = [
-                row['treatment'],
-                row['control']
+                val_t,
+                val_c
             ]
 
             # the data type

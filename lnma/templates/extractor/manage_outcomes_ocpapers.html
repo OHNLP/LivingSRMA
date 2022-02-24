@@ -250,14 +250,14 @@
                         class="form-group col-md-12">
                         <label for="input_treatments">
                             Treatments
-                            <button class="btn btn-xs btn-primary"
+                            <!-- <button class="btn btn-xs btn-primary"
                                 title="Add a new treatment arm"
                                 v-on:click="on_click_add_treatment_arm">
                                 <i class="fa fa-plus"></i>
-                            </button>
+                            </button> -->
                         </label>
 
-                        <div class="row">
+                        <!-- <div class="row">
 
                             <div v-for="treatment, treat_idx in extract.meta.treatments"
                                 class="col-sm-2">
@@ -271,10 +271,10 @@
                                 </button>
                             </div>
 
-                        </div>
+                        </div> -->
 
                         <small id="input_treatments_help" class="form-text text-muted">
-                            The treatments in this outcome.
+                            The treatments in this outcome will be updated automatically according to the extracted data.
                         </small>
                     </div>
 
@@ -346,6 +346,7 @@
 
                         <select v-model="extract.meta.certainty.imprecision"
                             class="form-control">
+                            <option value="4">Extreme serious</option>
                             <option value="3">Very serious</option>
                             <option value="2">Serious</option>
                             <option value="1">No serious</option>

@@ -39,6 +39,21 @@ app.app_context().push()
 
 
 def test():
+    ret = rpy2_pwma_analyzer.test_subg_cat_raw()
+    json.dump(ret, open('/tmp/jrst.json', 'w'), indent=2)
+
+
+def test8():
+    srv_extract.import_extracts_from_xls(
+        '/tmp/CAT/SOFTABLE_PMA_DATA.xlsx',
+        'CAT',
+        'default',
+        'pwma'
+    )
+    print('* done')
+
+
+def test7():
     ret = rpy2_nma_analyzer.test_nma_bayes_pre_2()
     json.dump(ret, open('/tmp/jrst.json', 'w'), indent=2)
 

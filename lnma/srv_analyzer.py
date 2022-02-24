@@ -175,35 +175,50 @@ def get_pma(extract, paper_dict, is_skip_unselected=True):
                 })
 
         elif rscfg['cfg']['input_format'] == 'PRIM_CAT_RAW':
-            rc = copy.deepcopy(rscfg)
-            result = pwma_analyzer.analyze_pwma_cat_raw(
-                rc['rs'],
-                rc['cfg']
-            )
-            results.append({
-                'rs': rc['rs'],
-                'cfg': rc['cfg'],
-                'rst': result
-            })
+            if extract.meta['group'] == 'subgroup':
+                # which means this is a subg analysis
+                # the parsing is different
+                rc = copy.deepcopy(rscfg)
+                result = pwma_analyzer.analyze_subg_cat_raw(
+                    rc['rs'],
+                    rc['cfg']
+                )
+                results.append({
+                    'rs': rc['rs'],
+                    'cfg': rc['cfg'],
+                    'rst': result
+                })
 
-            # RAW format also could do incd analysis
-            # but by default this option may not be available.
-            # so, just put a default value there:
-            rc = copy.deepcopy(rscfg)
-            if 'incd_measure_of_effect' not in rc['cfg']:
-                # set these two to make sure the analysis could be correct
-                rc['cfg']['measure_of_effect'] = 'PLOGIT'
-                rc['cfg']['incd_measure_of_effect'] = 'PLOGIT'
+            else:
+                rc = copy.deepcopy(rscfg)
+                result = pwma_analyzer.analyze_pwma_cat_raw(
+                    rc['rs'],
+                    rc['cfg']
+                )
+                results.append({
+                    'rs': rc['rs'],
+                    'cfg': rc['cfg'],
+                    'rst': result
+                })
 
-            result = pwma_analyzer.analyze_pwma_cat_raw_incd(
-                rc['rs'],
-                rc['cfg']
-            )
-            results.append({
-                'rs': rc['rs'],
-                'cfg': rc['cfg'],
-                'rst': result
-            })
+                # RAW format also could do incd analysis
+                # but by default this option may not be available.
+                # so, just put a default value there:
+                rc = copy.deepcopy(rscfg)
+                if 'incd_measure_of_effect' not in rc['cfg']:
+                    # set these two to make sure the analysis could be correct
+                    rc['cfg']['measure_of_effect'] = 'PLOGIT'
+                    rc['cfg']['incd_measure_of_effect'] = 'PLOGIT'
+
+                result = pwma_analyzer.analyze_pwma_cat_raw_incd(
+                    rc['rs'],
+                    rc['cfg']
+                )
+                results.append({
+                    'rs': rc['rs'],
+                    'cfg': rc['cfg'],
+                    'rst': result
+                })
 
     else:
         # what??? something wrong!

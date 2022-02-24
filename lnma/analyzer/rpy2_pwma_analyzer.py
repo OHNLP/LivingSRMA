@@ -26,7 +26,9 @@ from lnma.analyzer.rpadapter import _meta_trans_metagen
 from lnma.analyzer.rpadapter import _meta_trans_metacum
 from lnma.analyzer.rpadapter import _meta_trans_metaprop
 
+from lnma.analyzer.rpadapter import _meta_trans_metabin_subg
 from lnma.analyzer.rpadapter import _meta_trans_metagen_subg
+
 
 #%% load R packages
 meta = importr('meta')
@@ -139,7 +141,10 @@ def analyze_pwma_cat_raw(rs, cfg):
 
     # get the primary
     r_prim = meta.metabin(
-        df.Et, df.Nt, df.Ec, df.Nc,
+        df.Et, 
+        df.Nt, 
+        df.Ec, 
+        df.Nc,
         studlab=df.study,
         comb_random=cfg['fixed_or_random']=='random',
         sm=cfg['measure_of_effect'],
@@ -329,6 +334,58 @@ def analyze_subg_cat_pre(rs, cfg):
     }
 
     return ret
+
+
+def analyze_subg_cat_raw(rs, cfg):
+    '''
+    Analyze the subgroup of Categorical Raw Data
+
+    The given rs should contains:
+
+    study, Et, Nt, Ec, Nc, subgroup
+    '''
+    # create a dataframe first
+    df = pd.DataFrame(rs)
+
+    # get the primary
+    r_subgrst = meta.metabin(
+        df.Et, 
+        df.Nt, 
+        df.Ec, 
+        df.Nc,
+        studlab=df.study,
+        byvar=df.subgroup,
+        comb_random=cfg['fixed_or_random']=='random',
+        sm=cfg['measure_of_effect'],
+        hakn=True if cfg['hakn_adjustment'] == 'TRUE' else False,
+        method=cfg['pooling_method'],
+        method_tau=cfg['tau_estimation_method']
+    )
+
+    # convert to R json object
+    r_j_subgrst = jsonlite.toJSON(r_subgrst, force=True)
+
+    # convert to Python JSON object
+    j_subgrst = json.loads(r_j_subgrst[0])
+
+    # for compability
+    j = {
+        'primma': j_subgrst
+    }
+
+    # build the return
+    ret = {
+        'submission_id': 'rpy2',
+        'params': cfg,
+        'success': True,
+        'data': {
+            'primma': _meta_trans_metabin(j, cfg),
+            'subgps': _meta_trans_metabin_subg(j, cfg)
+        }
+    }
+
+    return ret
+
 
 ###########################################################
 # Analyzer for the IO project API usage
@@ -533,6 +590,39 @@ def get_pma(dataset, datatype='CAT_RAW',
         # set to backtraced value
         ret['stus'][i]['lower'] = ret['stus'][i]['bt_lower']
         ret['stus'][i]['upper'] = ret['stus'][i]['bt_upper']
+
+    return ret
+
+
+###########################################################
+# Test function
+###########################################################
+
+def test_subg_cat_raw():
+    '''
+    Just for test pwma subg cat raw
+    '''
+    cfg = {
+        'which_is_better': 'lower',
+        'measure_of_effect': 'OR',
+        'fixed_or_random': 'fixed',
+        'hakn_adjustment': 'TRUE',
+        'pooling_method': 'Inverse',
+        'tau_estimation_method': 'DL'
+    }
+    rs = pd.DataFrame(
+        [
+            ['DOACs', 'LMWH', 20, 277, 10, 263, 'Male', 'S1'],
+            ['DOACs', 'LMWH', 16, 245, 11, 261, 'Female', 'S1'],
+            ['DOACs', 'LMWH', 12, 292, 13, 276, 'Male', 'S2'],
+            ['DOACs', 'LMWH', 10, 284, 10, 303, 'Female', 'S2'],
+        ], 
+        columns=['treatment', 'control', 'Et','Nt', 'Ec', 'Nc', 'subgroup', 'study']
+    ).to_dict(orient='records')
+
+    ret = analyze_subg_cat_raw(rs, cfg)
+
+    pprint(ret)
 
     return ret
 

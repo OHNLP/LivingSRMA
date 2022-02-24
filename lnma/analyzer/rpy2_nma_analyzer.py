@@ -514,9 +514,9 @@ def analyze_nma_bayes_raw(rs, cfg):
     # run model
     r_fr_effects_results = bugsnet.nma_run(
         r_fr_effects_model,
-        n_iter = 1000, # original 10000
-        n_adapt = 50,  # original 1000
-        n_burnin = 50  # original 1000
+        n_iter = 10000, # original 10000
+        n_adapt = 1000,  # original 1000
+        n_burnin = 1000  # original 1000
     )
 
     # get sucra
