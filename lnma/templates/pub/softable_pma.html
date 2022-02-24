@@ -780,6 +780,15 @@ var app_softpma = {
                     parent.resize_iframes();
                     console.log('* softable pma sent resize request to parent window');
                 }
+            },
+
+            updated: function() {
+                // the last thing is to notify that the height may changed
+                if (parent.hasOwnProperty('resize_iframes')) {
+                    // which means this is iframed
+                    parent.resize_iframes();
+                    console.log('* softable pma sent resize request to parent window');
+                }
             }
         });
     },
