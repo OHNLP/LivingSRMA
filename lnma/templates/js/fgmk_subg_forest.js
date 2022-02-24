@@ -232,7 +232,9 @@ var fgmk_subg_forest = {
 
             // draw the test for subg diff
             // this._draw_subgdiff(this.data.primma.heterogeneity);
-            this._draw_subgdiff(this.data.subgps.stat[this.cfg.params.fixed_or_random]);
+            this._draw_subgdiff(
+                this.data.subgps.stat[this.cfg.params.fixed_or_random]
+            );
 
             // draw the favours for forest
             this.__draw_favours();
@@ -631,6 +633,10 @@ var fgmk_subg_forest = {
         },
 
         __draw_tree: function(stu) {
+            if (stu.bt_TE == null) {
+                // which means this doesn't have any result 
+                return;
+            }
             // create a region for this tree
             var gx = this.cols[7].x + this.row_frstml;
             var gy = this.row_height * this.row_idx;
@@ -980,14 +986,24 @@ var fgmk_subg_forest = {
         },
     
         get_txt_by_col: function(obj, idx) {
+            var toFixed2 = function(v) {
+                if (v == null) {
+                    return 'NA';
+                } else {
+                    return v.toFixed(2);
+                }
+            }
             switch(idx) {
                 case 0: return obj.name;
                 case 1: return obj.Et;
                 case 2: return obj.Nt;
                 case 3: return obj.Ec;
                 case 4: return obj.Nc;
-                case 5: return obj.bt_TE.toFixed(2);
-                case 6: return '['+obj.bt_lower.toFixed(2)+'; '+obj.bt_upper.toFixed(2)+']';
+                case 5: return toFixed2(obj.bt_TE);
+                case 6: return '['+
+                    toFixed2(obj.bt_lower)+'; '+
+                    toFixed2(obj.bt_upper)+
+                    ']';
     
                 // case 7 is the figure, so no text
                 case 7: return ''; 

@@ -124,10 +124,21 @@ def update_extract_pwma_pre_data(extract, df, papers, is_subg=False):
     # special for subg analysis
     subgroup_dict = {}
 
+    # need to update the extract meta
+    new_meta = copy.deepcopy(extract.meta)
+
     # check each row
     for idx, row in df.iterrows():
         # no matter what, get the pid first
         pid = __get_pid(__get_val(row['pid']))
+
+        if idx == 0:
+            # use the first record to update the treatment
+            treatment = __get_val(row['treatment'])
+            control = __get_val(row['control'])
+            new_meta['treatments'] = [
+                treatment, control
+            ]
 
         # check this pid in pids or not
         if pid not in pids:
@@ -211,9 +222,6 @@ def update_extract_pwma_pre_data(extract, df, papers, is_subg=False):
 
     # update the subg settings if is subgroup analysis
     if is_subg:
-        # need to update the extract meta
-        new_meta = copy.deepcopy(extract.meta)
-
         # get the sub_groups
         sub_groups = []
 
@@ -231,23 +239,31 @@ def update_extract_pwma_pre_data(extract, df, papers, is_subg=False):
 
         # set the subgs
         new_meta['sub_groups'] = sub_groups
-
-        # update meta
-        ext = dora.update_extract_meta(
-            extract.project_id,
-            extract.oc_type,
-            extract.abbr,
-            new_meta
-        )
         print("* updated subgroups: %s" % (
             sub_groups
         ))
 
-    # update the extract
-    ext = dora.update_extract_data(
+    # # update meta
+    # ext = dora.update_extract_meta(
+    #     extract.project_id,
+    #     extract.oc_type,
+    #     extract.abbr,
+    #     new_meta
+    # )
+
+    # # update the extract
+    # ext = dora.update_extract_data(
+    #     extract.project_id,
+    #     extract.oc_type,
+    #     extract.abbr,
+    #     data
+    # )
+
+    ext = dora.update_extract_meta_and_data(
         extract.project_id,
         extract.oc_type,
         extract.abbr,
+        new_meta,
         data
     )
 
@@ -278,9 +294,20 @@ def update_extract_pwma_raw_data(extract, df, papers, is_subg=False):
     # special for subg analysis
     subgroup_dict = {}
 
+    # need to update the extract meta accordingly
+    new_meta = copy.deepcopy(extract.meta)
+
     # check each row
     for idx, row in df.iterrows():
         pid = __get_pid(__get_val(row['pid']))
+
+        if idx == 0:
+            # use the first record to update the treatment
+            treatment = __get_val(row['treatment'])
+            control = __get_val(row['control'])
+            new_meta['treatments'] = [
+                treatment, control
+            ]
 
         # check this pid in pids or not
         if pid not in pids:
@@ -361,9 +388,6 @@ def update_extract_pwma_raw_data(extract, df, papers, is_subg=False):
 
     # update the subg settings if is subgroup analysis
     if is_subg:
-        # need to update the extract meta
-        new_meta = copy.deepcopy(extract.meta)
-
         # get the sub_groups
         sub_groups = []
 
@@ -381,23 +405,31 @@ def update_extract_pwma_raw_data(extract, df, papers, is_subg=False):
 
         # set the subgs
         new_meta['sub_groups'] = sub_groups
-
-        # update meta
-        ext = dora.update_extract_meta(
-            extract.project_id,
-            extract.oc_type,
-            extract.abbr,
-            new_meta
-        )
         print("* updated subgroups: %s" % (
             sub_groups
         ))
-        
-    # update the extract
-    ext = dora.update_extract_data(
+
+    # # update meta
+    # ext = dora.update_extract_meta(
+    #     extract.project_id,
+    #     extract.oc_type,
+    #     extract.abbr,
+    #     new_meta
+    # )
+
+    # # update the extract
+    # ext = dora.update_extract_data(
+    #     extract.project_id,
+    #     extract.oc_type,
+    #     extract.abbr,
+    #     data
+    # )
+
+    ext = dora.update_extract_meta_and_data(
         extract.project_id,
         extract.oc_type,
         extract.abbr,
+        new_meta,
         data
     )
 
@@ -696,6 +728,8 @@ def import_extracts_from_xls(full_path, keystr, cq_abbr, oc_type):
             }
 
             # the treatment and control
+            # but the value can be empty
+            # need to double check in the data sheet
             val_t = __get_val(row['treatment'])
             val_c = __get_val(row['control'])
             meta['treatments'] = [

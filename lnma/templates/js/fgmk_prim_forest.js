@@ -414,6 +414,10 @@ return {
             })(this))
             .each((function(fig) {
                 return function(d, i) {
+                    if (d.bt_TE == null) {
+                        // which means this doesn't have any result 
+                        return;
+                    }
                     // console.log(i, d);
                     // add the rect
                     var s = fig.min_dot_size + 
@@ -479,14 +483,24 @@ return {
     },
 
     get_txt_by_col: function(obj, idx) {
+        var toFixed2 = function(v) {
+            if (v == null) {
+                return 'NA';
+            } else {
+                return v.toFixed(2);
+            }
+        }
         switch(idx) {
             case 0: return obj.name;
             case 1: return obj.Et;
             case 2: return obj.Nt;
             case 3: return obj.Ec;
             case 4: return obj.Nc;
-            case 5: return obj.bt_TE.toFixed(2);
-            case 6: return '['+obj.bt_lower.toFixed(2)+'; '+obj.bt_upper.toFixed(2)+']';
+            case 5: return toFixed2(obj.bt_TE);
+            case 6: return '['+
+                toFixed2(obj.bt_lower)+'; '+
+                toFixed2(obj.bt_upper)+
+                ']';
 
             // case 7 is the figure, so no text
             case 7: return ''; 
