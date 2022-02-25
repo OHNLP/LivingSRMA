@@ -73,7 +73,7 @@ def get_pma_by_cq(keystr, cq_abbr="default", included_in='sof'):
 
     # then create oc_dict
     oc_dict = {}
-    for extract in extracts:
+    for extract in tqdm(extracts):
         abbr = extract.abbr
 
         # skip not included in sof or plots
@@ -85,6 +85,10 @@ def get_pma_by_cq(keystr, cq_abbr="default", included_in='sof'):
                 continue
         else:
             continue
+
+        print('* analyzing %s' % (
+            extract.get_repr_str()
+        ))
 
         # put the oc into dict
         results = srv_analyzer.get_pma(

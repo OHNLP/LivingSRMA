@@ -676,6 +676,9 @@ def import_extracts_from_xls(full_path, keystr, cq_abbr, oc_type):
     )
 
     missing_pids = []
+    missing_tabs = []
+    pid2tabs = {}
+
     # columns we could use 
     for idx, row in dft.iterrows():
         tab_name = row['name'].strip()
@@ -683,6 +686,12 @@ def import_extracts_from_xls(full_path, keystr, cq_abbr, oc_type):
         analysis_group = row['analysis_title'].strip()
         print('*'*40, keystr, cq_abbr, oc_type, analysis_group, '[%s]' % tab_name, '|', data_type)
         
+        # search this tab first
+        if tab_name not in xls.sheet_names:
+            print('* NOT FOUND SHEET [%s]' % tab_name)
+            missing_tabs.append(tab_name)
+            continue
+
         # the general meta information for an outcome
         meta = dict(
             cq_abbr = cq_abbr,
@@ -786,6 +795,13 @@ def import_extracts_from_xls(full_path, keystr, cq_abbr, oc_type):
         print('* found %s records for this oc' % (
             len(df_oc)
         ))
+        
+        # update the pid used by oc
+        pids = list(set(df_oc[~df_oc['pid'].isna()]['pid'].tolist()))
+        for _pid in pids:
+            _pid = __get_pid(__get_val(_pid))
+            if _pid not in pid2tabs: pid2tabs[_pid] = []
+            pid2tabs[_pid].append(tab_name)
 
         if oc_type == 'nma':
             if data_type == 'pre':
@@ -814,7 +830,10 @@ def import_extracts_from_xls(full_path, keystr, cq_abbr, oc_type):
     
     print('\n\n\n* MISSING pids:')
     for pid in missing_pids:
-        print(pid)
+        print(pid, ':', pid2tabs[pid])
+    print('\n\n\n* MISSING tabs:')
+    for tab in missing_tabs:
+        print(tab)
 
     return dft
 
@@ -934,6 +953,9 @@ def import_itable_from_xls(
         project.keystr, 
         full_fn_filter
     )
+    if filters == []:
+        print('* not found filters')
+        
     meta['filters'] = filters
 
     # update the extract
@@ -1279,7 +1301,6 @@ def get_itable_filters_from_xls(keystr, full_fn):
     '''
     Get the filters from ITABLE_FILTER.xlsx
     '''
-
     # full_fn = os.path.join(
     #     current_app.instance_path, 
     #     settings.PATH_PUBDATA, 

@@ -76,9 +76,7 @@ def demo():
         'primma': j_prim,
         'cumuma': j_cumu,
     }
-    pprint(j)
-    print('primma: ', j['primma']['TE.random'])
-    print('cumuma: ', j['cumuma']['TE'][-1])
+    return j
 
 
 def demo2():
@@ -123,9 +121,7 @@ def demo2():
         'primma': j_prim,
         'cumuma': j_cumu,
     }
-    pprint(j)
-    print('primma: ', j['primma']['TE.random'])
-    print('cumuma: ', j['cumuma']['TE'][-1])
+    return j
 
 
 def analyze_pwma_cat_raw(rs, cfg):
@@ -312,7 +308,7 @@ def analyze_subg_cat_pre(rs, cfg):
 
     # convert to R json object
     r_j_prim = jsonlite.toJSON(r_prim, force=True)
-    print(r_j_prim)
+    # print(r_j_prim)
 
     # convert to Python JSON object
     j_prim = json.loads(r_j_prim[0])
@@ -622,7 +618,7 @@ def test_subg_cat_raw():
 
     ret = analyze_subg_cat_raw(rs, cfg)
 
-    pprint(ret)
+    # pprint(ret)
 
     return ret
 

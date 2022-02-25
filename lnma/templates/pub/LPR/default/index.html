@@ -100,7 +100,9 @@
 
         <div class="row">
             <div class="col">
-                <p class="mt-3">A Living Interactive Systematic Review and Network Meta-Analysis on First-Line Treatment Options in Metastatic Castration Sensitive Prostate Cancer</p>
+                <p class="mt-3">
+                    The search strategy has been developed in consultation with an information specialist. The strategy is used to generate “auto” searches every month (from Medline, Embase and Cochrane Central Register of Controlled Trials [CENTRAL]). The numbers in the flowsheet are dynamically updated as new studies are considered for inclusion. The red limb on the right-hand side of the flowsheet represents real-time living updates. Users can click the colored boxes for additional details.
+                </p>
             </div>
         </div>
     </div>
@@ -204,7 +206,7 @@
 
 
     <br id="sec-pwma-Prim">
-    <h4 style="margin-bottom: 2rem;">
+    <h4 class="mb-2">
         Primary Analysis
     </h4>
 
@@ -221,7 +223,7 @@
 
 
     <br id="sec-pwma-Sens">
-    <h4 style="margin-bottom: 0;">
+    <h4 class="mb-2">
         Sensitivity Analysis
     </h4>
 
@@ -232,6 +234,21 @@
                 frameborder="0" 
                 style="width: 100%; min-height: 350px;"
                 resize_by_content>
+            </iframe>
+        </div>
+    </div>
+
+    <br id="sec-pwma-Subg">
+    <h4 class="mb-2">
+        Subgroup Analysis
+    </h4>
+
+    <div class="row">
+        <div class="col">
+            <iframe id="ifm_pwma_subg"
+                src="[[ url_for('pub.graph_pma', prj=keystr, cq=cq_abbr, gp='subgroup', src='cache', od=';'.join(['Progression free survival', 'Overall survival'])) ]]" 
+                frameborder="0" 
+                style="width: 100%; min-height: 450px;">
             </iframe>
         </div>
     </div>

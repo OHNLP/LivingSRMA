@@ -39,8 +39,14 @@ app.app_context().push()
 
 
 def test():
-    test8()
-    
+    itable = srv_extract.import_itable_from_xls(
+        'LPR', 
+        'default',
+        '/tmp/LPR/ITABLE.xlsx',
+        '/tmp/LPR/ITABLE_FILTERS.xlsx'
+    )
+    print('* done')
+
 
 def test9():
     ret = rpy2_pwma_analyzer.test_subg_cat_raw()

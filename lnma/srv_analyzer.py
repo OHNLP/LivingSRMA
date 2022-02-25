@@ -47,6 +47,13 @@ def get_nma(extract, paper_dict, is_skip_unselected=True):
         is_skip_unselected=is_skip_unselected
     )
 
+    if len(rscfg['rs']) == 0:
+        # which means no records for this extract!!!
+        print("* no records found in this extract[%s]" % (
+            extract.get_repr_str()
+        ))
+        return None
+
     # may use it in future
     rscfg_hash = util.hash_json(rscfg)
     rs = rscfg['rs']
@@ -133,6 +140,13 @@ def get_pma(extract, paper_dict, is_skip_unselected=True):
         is_skip_unselected=is_skip_unselected
     )
 
+    if len(rscfg['rs']) == 0:
+        # which means no records for this extract!!!
+        print("* no records found in this extract[%s]" % (
+            extract.get_repr_str()
+        ))
+        return None
+
     # may use it in future
     rscfg_hash = util.hash_json(rscfg)
 
@@ -141,7 +155,6 @@ def get_pma(extract, paper_dict, is_skip_unselected=True):
     #     rscfg['rs'],
     #     rscfg['cfg']
     # )
-
 
     # the return object is a list, which may contains multiple
     # results, e.g., prim, cumu, 
