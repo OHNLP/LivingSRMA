@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS DEBUG</title>
+</head>
+<body>
+
+
+<script src="https://cdn.jsdelivr.net/gh/nicolaspanel/numjs@0.15.1/dist/numjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.1.1/math.min.js"></script>
+
+<script>
+
+var jsmeta = {
+
+    PWMA: {
+        
+    },
+
+    RR_by_hartung_knapp: function(rs) {
+
+    },
+
+    /**
+     * https://www.statsdirect.com/help/meta_analysis/mh.htm
+     * 
+     * X: Et, Nt, Ec, Nc
+     */
+
+    OR_by_mantel_haensze: function(
+        vs,
+        params
+    ) {
+        // get a shortcut
+        var A = vs.A;
+        var B = vs.B;
+        var C = vs.C;
+        var D = vs.D;
+        var N1 = vs.N1;
+        var N2 = vs.N2;
+        var M1 = vs.M1;
+        var M2 = vs.M2;
+        var T = vs.T;
+
+        // calculate vals
+        var R = A.multiply(D).divide(T);
+        var S = B.multiply(C).divide(T);
+        var P = (A.add(D)).divide(T);
+        var Q = (B.add(C)).divide(T);
+
+        // the base value of each
+        var sOR = A.multiply(D).divide(B.multiply(C));
+
+        // http://people.vcu.edu/~dbandyop/BIOS625/lecture_04_new.pdf
+        var ONE = nj.ones(A.size);
+        var sVAR = ONE.divide(A)
+            .add(ONE.divide(B))
+            .add(ONE.divide(C))
+            .add(ONE.divide(D));
+
+        // https://www.meta-analysis.com/downloads/M-a_f_e_v_r_e_sv.pdf
+        var sW = ONE.divide(sVAR);
+        var sWp = sW.divide(sW.sum());
+
+        var sOR_lower = nj.exp(nj.log(sOR).subtract(sVAR.pow(0.5).multiply(1.96)));
+        var sOR_upper = nj.exp(nj.log(sOR).add(sVAR.pow(0.5).multiply(1.96)));
+
+        // V_US
+        // https://cdn1.sph.harvard.edu/wp-content/uploads/sites/343/2013/03/a-general-estimator-for-the-varience-of-the-Mantel-Haenszel-odds-ratio.pdf
+        
+        var VAR = (P.multiply(R)).sum() / 2 / (R.sum()**2) +
+                   ((P.multiply(S).add(Q.multiply(R)))).sum() / 2 / (R.sum() * S.sum()) + 
+                   (Q.multiply(S)).sum() / 2 / (S.sum()**2);
+
+        // https://www.statsdirect.com/help/meta_analysis/mh.htm
+        var OR = R.sum() / S.sum();
+        var OR_lower = math.exp(math.log(OR) - 1.96 * math.sqrt(VAR));
+        var OR_upper = math.exp(math.log(OR) + 1.96 * math.sqrt(VAR));
+
+        return {
+            sOR: sOR.tolist(),
+            sOR_lower: sOR_lower.tolist(),
+            sOR_upper: sOR_upper.tolist(),
+            sVAR: sVAR.tolist(),
+            sW: sW.tolist(),
+            sWp: sWp.tolist(),
+
+            OR: OR,
+            OR_lower: OR_lower,
+            OR_upper: OR_upper,
+            VAR: VAR
+        }
+    },
+
+    RR_by_mantel_haenszel: function(
+        vs,
+        params,
+    ) {
+        // get a shortcut
+        var A = vs.A;
+        var B = vs.B;
+        var C = vs.C;
+        var D = vs.D;
+        var N1 = vs.N1;
+        var N2 = vs.N2;
+        var M1 = vs.M1;
+        var M2 = vs.M2;
+        var T = vs.T;
+
+        // calculate vals
+        // Statistics in Epidemiology Methods, Techniques, and Applications 
+        // P.69
+        var sRR = A.divide(N1).divide(B.divide(N2));
+        var sVAR = C.divide(A.multiply(N1)).add(
+            D.divide(B.multiply(N2))
+        );
+
+        // https://www.meta-analysis.com/downloads/M-a_f_e_v_r_e_sv.pdf
+        var ONE = nj.ones(A.size);
+        var sW = A.multiply(B).multiply(N1).multiply(N2).divide(
+            A.multiply(D).multiply(N1).add(
+                B.multiply(C).multiply(N2)
+            )
+        );
+        var sWp = sW.divide(sW.sum());
+
+        // get lower and upper 95% ci
+        var sRR_lower = nj.exp(nj.log(sRR).subtract(sVAR.pow(0.5).multiply(1.96)));
+        var sRR_upper = nj.exp(nj.log(sRR).add(sVAR.pow(0.5).multiply(1.96)));
+
+        // https://www.statsdirect.com/help/meta_analysis/relative_risk.htm
+        var RR = A.multiply(B.add(D).divide(T)).sum() / 
+                    B.multiply(A.add(C).divide(T)).sum();
+
+        // Greenland and Robins, 1985
+        var VAR = M1.multiply(N1).multiply(N2).subtract(
+                        A.multiply(B).multiply(T)
+                    ).divide(T.pow(2)).sum() / 
+                    A.multiply(N2.divide(T)).sum() /
+                    B.multiply(N1.divide(T)).sum();
+
+        var RR_lower = math.exp(math.log(RR) - 1.96 * math.sqrt(VAR));
+        var RR_upper = math.exp(math.log(RR) + 1.96 * math.sqrt(VAR));
+
+        return {
+            sRR: sRR.tolist(),
+            sRR_lower: sRR_lower.tolist(),
+            sRR_upper: sRR_upper.tolist(),
+            sVAR: sVAR.tolist(),
+            sW: sW.tolist(),
+            sWp: sWp.tolist(),
+
+            RR: RR,
+            RR_lower: RR_lower,
+            RR_upper: RR_upper,
+            VAR: VAR
+        }
+    },
+
+    rs2vectors: function(rs) {
+        var A = [];
+        var B = []; 
+        var C = [];
+        var D = [];
+        var N1 = [];
+        var N2 = [];
+        var M1 = [];
+        var M2 = [];
+        var T = [];
+        var R = [];
+        var S = [];
+
+        for (let i = 0; i < rs.length; i++) {
+            const r = rs[i];
+            var a = r[0];
+            var b = r[2];
+            var c = r[1] - a;
+            var d = r[3] - b;
+            var n1 = r[1];
+            var n2 = r[3];
+            var m1 = a + b;
+            var m2 = c + d;
+            var n = r[1] + r[3];
+
+            // put to array
+            A.push(a);
+            B.push(b);
+            C.push(c);
+            D.push(d);
+            N1.push(n1);
+            N2.push(n2);
+            M1.push(m1);
+            M2.push(m2);
+            T.push(n);
+        }
+        
+        // convert to array
+        A = nj.array(A);
+        B = nj.array(B);
+        C = nj.array(C);
+        D = nj.array(D);
+        N1 = nj.array(N1);
+        N2 = nj.array(N2);
+        M1 = nj.array(M1);
+        M2 = nj.array(M2);
+        T = nj.array(T);
+
+        return {
+            A: A,
+            B: B,
+            C: C,
+            D: D,
+            N1: N1,
+            N2: N2,
+            M1: M1,
+            M2: M2,
+            T: T
+        }
+    },
+
+    test: function(rs) {
+        var vs = this.rs2vectors(rs);
+        var RR = this.RR_by_mantel_haenszel(vs, null);
+        var OR = this.OR_by_mantel_haensze(vs, null);
+
+        return {
+            OR: OR,
+            RR: RR
+        };
+
+    }
+};
+
+var rs = [
+      [2, 393, 2, 396],
+      [24, 230, 24, 281]
+];
+
+var ret = jsmeta.test(rs);
+console.log(ret);
+
+</script>
+</body>
+</html>

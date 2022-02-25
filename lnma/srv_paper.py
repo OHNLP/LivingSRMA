@@ -630,6 +630,7 @@ def save_paper_by_jsonpapers(project_id, jsonpapers, stage=ss_state.SS_STAGE_UNS
                 ss_rs,
                 ss_ex,
                 None,
+                False
             )
         except Exception as err:
             # give some feedback to frontend

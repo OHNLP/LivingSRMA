@@ -52,6 +52,11 @@ def blankindex():
     return render_template('pub/blankindex.html')
 
 
+@bp.route('/jsdebug.html')
+def jsdebug():
+    return render_template('pub/jsdebug.html')
+
+
 @bp.route('/subindex/<prj>')
 def subindex(prj):
     prj_data = {

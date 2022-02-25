@@ -123,17 +123,27 @@ class Project:
     @argument("keystr", type=str, description="The keystr for a project")
     @argument("fn", type=str, description="The file name of the data file")
     @argument("data_format", type=str, description="The format, ris, endnote_xml or ovid_xml")
+    @argument("skip_check_title", type=str, description="Skip checking title? yes or no")
     @argument("are_you_sure", type=str, description="yes for final confirmation")
-    def import_studies(self, keystr:str, fn:str, data_format:str, are_you_sure:str):
+    def import_studies(self, keystr:str, fn:str, data_format:str, skip_check_title:str, are_you_sure:str):
         '''
         Import the studies from given file
         '''
         if are_you_sure != 'yes':
             print('* import cancelled')
             return 
+        
+        if skip_check_title not in ['yes', 'no']:
+            print('* must specify skip_check_title: yes or no')
+            return
+        
+        if skip_check_title == 'yes':
+            skip_check_title = True
+        else:
+            skip_check_title = False
 
         if data_format == 'endnote_xml':
-            is_success, papers = srv_import.import_endnote_xml(fn, keystr)
+            is_success, papers = srv_import.import_endnote_xml(fn, keystr, skip_check_title)
 
         elif data_format == 'ovid_xml':
             pass
@@ -142,7 +152,7 @@ class Project:
             pass
 
         elif data_format == 'ris':
-            is_success, papers = srv_import.import_ris(fn, keystr)
+            is_success, papers = srv_import.import_ris(fn, keystr, skip_check_title)
 
         else:
             print('* unknown data_format %s, import cancelled' % data_format)

@@ -305,10 +305,21 @@ def _update_papers_in_project(prj_update):
             'other': paper['other']
         }
         is_existed, paper_db = dora.create_paper_if_not_exist_and_predict_rct(
-            project_id, pid, paper['pid_type'],
-            paper['title'], paper['abstract'], paper['pub_date'], paper['authors'], 
-            paper['journal'], {'paper': paper},
-            ss_st, ss_pr, ss_rs, ss_ex, seq_num
+            project_id, 
+            pid, 
+            paper['pid_type'],
+            paper['title'], 
+            paper['abstract'], 
+            paper['pub_date'], 
+            paper['authors'], 
+            paper['journal'], 
+            {'paper': paper},
+            ss_st, 
+            ss_pr, 
+            ss_rs, 
+            ss_ex, 
+            seq_num,
+            False
         )
         if is_existed:
             prj_update['cnt']['existed'].append(pid)

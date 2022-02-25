@@ -10,7 +10,7 @@ from lnma import ss_state
 from lnma import db
 
 
-def import_ris(full_fn, keystr):
+def import_ris(full_fn, keystr, skip_check_title=False):
     '''
     Import the given RIS format record
     '''
@@ -57,6 +57,7 @@ def import_ris(full_fn, keystr):
             ss_state.SS_RS_NA,
             None,
             None,
+            skip_check_title
         )
         if is_exist:
             cnt['existed'] += 1
@@ -75,7 +76,7 @@ def import_ris(full_fn, keystr):
     return True, papers
 
 
-def import_endnote_xml(full_fn, keystr):
+def import_endnote_xml(full_fn, keystr, skip_check_title=False):
     '''
     Import the given Endnote exported XML file to a project
     '''
@@ -120,6 +121,7 @@ def import_endnote_xml(full_fn, keystr):
             ss_state.SS_RS_NA,
             None,
             None,
+            skip_check_title
         )
         if is_exist:
             cnt['existed'] += 1

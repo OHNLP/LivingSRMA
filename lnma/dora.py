@@ -658,7 +658,8 @@ def toggle_paper_tag(paper_id, tag):
 
 
 def is_existed_paper(project_id, pid, title=None):
-    '''Check if a pid exists
+    '''
+    Check if a pid exists and title (optional)
 
     By default check the pmid
     '''
@@ -921,10 +922,16 @@ def set_paper_is_deleted_by_keystr_and_seq_num(keystr, seq_num, is_deleted):
 def create_paper_if_not_exist(project_id, pid, 
     pid_type=None, title=None, abstract=None,
     pub_date=None, authors=None, journal=None, meta=None,
-    ss_st=None, ss_pr=None, ss_rs=None, ss_ex=None, seq_num=None):
-    '''A wrapper function for create_paper and is_existed_paper
+    ss_st=None, ss_pr=None, ss_rs=None, ss_ex=None, seq_num=None,
+    skip_check_title=False):
     '''
-    is_existed, paper = is_existed_paper(project_id, pid, title)
+    A wrapper function for create_paper and is_existed_paper
+    '''
+    is_existed, paper = is_existed_paper(
+        project_id, 
+        pid, 
+        None if skip_check_title else title
+    )
     if is_existed:
         return is_existed, paper
     else:
@@ -938,13 +945,17 @@ def create_paper_if_not_exist(project_id, pid,
 def create_paper_if_not_exist_and_predict_rct(project_id, pid, 
     pid_type=None, title=None, abstract=None,
     pub_date=None, authors=None, journal=None, meta=None,
-    ss_st=None, ss_pr=None, ss_rs=None, ss_ex=None, seq_num=None):
-    '''A wrapper function for create_paper and is_existed_paper
+    ss_st=None, ss_pr=None, ss_rs=None, ss_ex=None, seq_num=None,
+    skip_check_title=False):
+    '''
+    A wrapper function for create_paper and is_existed_paper
     '''
     is_existed, paper = create_paper_if_not_exist(project_id, pid,
             pid_type=pid_type, title=title, abstract=abstract,
             pub_date=pub_date, authors=authors, journal=journal, meta=meta,
-            ss_st=ss_st, ss_pr=ss_pr, ss_rs=ss_rs, ss_ex=ss_ex, seq_num=seq_num)
+            ss_st=ss_st, ss_pr=ss_pr, ss_rs=ss_rs, ss_ex=ss_ex, seq_num=seq_num,
+            skip_check_title=skip_check_title
+    )
 
     if is_existed:
         # nothing to do for a existing paper

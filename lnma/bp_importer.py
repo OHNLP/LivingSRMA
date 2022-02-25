@@ -299,13 +299,18 @@ def import_pmids():
             rct_id = pmid2rct_id[pmid]
 
             is_existed, paper = dora.create_paper_if_not_exist_and_predict_rct(
-                project_id, pmid, 'PMID', title, abstract, 
-                pub_date, authors, journal,
+                project_id, pmid, 'PMID', title, 
+                abstract,
+                pub_date, 
+                authors, 
+                journal,
                 {'rct_id': rct_id}, 
                 ss_state.SS_ST_IMPORT_SIMPLE_CSV, 
                 ss_pr,
                 ss_rs,
-                ss_ex
+                ss_ex,
+                None,
+                False
             )
 
             for idx in pmid2idx[pmid]:
@@ -628,6 +633,7 @@ def save_papers():
                 ss_rs,
                 ss_ex,
                 None,
+                False
             )
 
             # 2022-02-04: update the cq for this
@@ -729,6 +735,7 @@ def upload_endnote_xml_and_save_papers():
                 ss_state.SS_RS_NA,
                 None,
                 None,
+                False
             )
             if is_exist:
                 cnt['existed'] += 1
