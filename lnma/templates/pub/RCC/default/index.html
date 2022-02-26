@@ -101,7 +101,7 @@
         <div class="row">
 
             <div class="col">
-                <img width="100%" src="[[ url_for('pub.graphdata', keystr='RCC', cq='default', fn='CONCEPT_IMAGE.svg') ]]" />
+                <img width="100%" src="[[ url_for('pub.graphdata', keystr=keystr, cq=cq_abbr, fn='CONCEPT_IMAGE.svg') ]]" />
             </div>
         </div>
 
@@ -133,7 +133,7 @@
     </div>
     <div class="row">
         <iframe id="ifm_prisma"
-            src="[[ url_for('pub.prisma', prj='RCC', cq='default') ]]" 
+            src="[[ url_for('pub.prisma', prj=keystr, cq=cq_abbr) ]]" 
             frameborder="0" 
             style="width: 100%; min-height: 850px;">
         </iframe>
@@ -176,7 +176,7 @@
 
     <div class="row">
         <iframe id="ifm_itable"
-            src="[[ url_for('pub.itable', prj='RCC', cq='default', src='db') ]]" 
+            src="[[ url_for('pub.itable', prj=keystr, cq=cq_abbr, src='db') ]]" 
             frameborder="0" 
             style="width: 100%; min-height: 880px;">
         </iframe>
@@ -468,7 +468,7 @@ The HR for 1,2 , The OR for the last one!
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
 
 <script>
-var prj = 'RCC';
+var prj = "[[ keystr ]]";
 var default_treat = 'Suni';
 
 {% include 'js/resize_frames.js' %}
@@ -476,7 +476,7 @@ var default_treat = 'Suni';
 var jarvis = {
     init: function() {
         $.get(
-            "[[ url_for('pub.graphdata_latest_json', prj='RCC') ]]",
+            "[[ url_for('pub.graphdata_latest_json', prj=keystr) ]]",
             {},
             function(data) {
                 console.log(data);

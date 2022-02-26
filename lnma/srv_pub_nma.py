@@ -67,11 +67,10 @@ def get_graph_nma_data_from_db(keystr, cq_abbr):
             print('* skip extract %s due to NOT_INCLUDED_IN_SOF' % (oc_abbr))
             continue
 
-        print("* NMA %s|%s|%s" % (
-            extract.meta['group'],
-            extract.meta['category'],
-            extract.meta['full_name']
+        print('* analyzing %s' % (
+            extract.get_repr_str()
         ))
+
         # create an oc object for ... what?
         treat_list = extract.meta['treatments']
 
@@ -154,10 +153,10 @@ def get_sof_nma_data_from_db(keystr, cq_abbr):
     '''
 
     # for most cases:
-    return get_sof_nma_by_cq(keystr, cq_abbr)
+    return get_nma_by_cq(keystr, cq_abbr, 'sof')
 
 
-def get_sof_nma_by_cq(keystr, cq_abbr="default"):
+def get_nma_by_cq(keystr, cq_abbr="default", included_in='sof'):
     '''
     Get the NMA result for SoF table
     '''
@@ -209,13 +208,21 @@ def get_sof_nma_by_cq(keystr, cq_abbr="default"):
             extract.get_repr_str()
         ))
 
-        results = srv_analyzer.get_nma(
-            extract, paper_dict
-        )
+        try:
+            results = srv_analyzer.get_nma(
+                extract, paper_dict
+            )
+        except Exception as err:
+            results = None
+            rstmsg = str(err)
+            print('*'*60)
+            print('*'*20 + 'NMA RUNTIME EXCEPTION')
+            print('*'*60)
+            print(err)
 
         if results is None or len(results)<1:
-            print('* NO NMA results for %s' % (
-                extract.meta['full_name']
+            print('* NO NMA results for extract[%s]' % (
+                extract.get_repr_str()
             ))
             continue
 

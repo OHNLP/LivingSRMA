@@ -34,6 +34,24 @@ def get_itable_attr_rs_cfg_from_db(keystr, cq_abbr="default"):
     # this is for output as some papers are not selected for output
     selected_paper_dict = {}
 
+    # get the stat selected for itable
+    # stat = {
+    #     'f3': {
+    #         'pids': [],
+    #         'rcts': [],
+    #         'n': 0
+    #     }
+    # }
+    stat_f3 = srv_extract.get_studies_included_in_ma(
+        keystr, 
+        cq_abbr,
+        paper_dict
+    )
+    if stat_f3 is None:
+        stat_f3 = []
+    else:
+        stat_f3 = stat_f3['f3']['pids']
+
     # get the extract meta and data
     meta = extract.meta
     data = extract.data
@@ -79,11 +97,12 @@ def get_itable_attr_rs_cfg_from_db(keystr, cq_abbr="default"):
     # after the attributes in the `extract.meta`, which are customized for itable,
     # need to add those "basic" attributes, which just some information for paper.
     basic_attrs = [
-        { 'abbr': 'ba_ofu', 'name': 'Original/Follow Up', },
-        { 'abbr': 'ba_year', 'name': 'Year',              },
-        { 'abbr': 'ba_authors', 'name': 'Authors',        },
-        { 'abbr': 'ba_pmid', 'name': 'PMID',              },
-        { 'abbr': 'ba_nct', 'name': 'NCT',                },
+        { 'abbr': 'ba_included_in_ma', 'name': 'Included in MA', },
+        { 'abbr': 'ba_ofu', 'name': 'Original/Follow Up',        },
+        { 'abbr': 'ba_year', 'name': 'Year',                     },
+        { 'abbr': 'ba_authors', 'name': 'Authors',               },
+        { 'abbr': 'ba_pmid', 'name': 'PMID',                     },
+        { 'abbr': 'ba_nct', 'name': 'NCT',                       },
     ]
     first_cate = attrs[0]['cate']
     for attr in basic_attrs:
@@ -101,7 +120,6 @@ def get_itable_attr_rs_cfg_from_db(keystr, cq_abbr="default"):
     
     # 2021-08-08: to insert the data from other arms
     # we abstract the function for getting `r`
-
     def _make_r(paper_data, abbr_dict, other_arm=False):
         # `r` use name as key to retrive data, 
         # which is used in the itable.html.
@@ -159,13 +177,19 @@ def get_itable_attr_rs_cfg_from_db(keystr, cq_abbr="default"):
 
             elif attr['abbr'] == 'ba_ofu':
                 val = paper.get_study_type()
+
             elif attr['abbr'] == 'ba_pmid':
                 val = paper.pid
 
             elif attr['abbr'] == 'ba_nct':
                 val = paper.meta['rct_id']
+
+            elif attr['abbr'] == 'ba_included_in_ma':
+                val = 'yes' if paper.pid in stat_f3 else 'no'
+
             else:
                 val = 'NA'
+
             r[attr_name] = val
 
         return r

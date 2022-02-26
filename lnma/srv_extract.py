@@ -955,7 +955,7 @@ def import_itable_from_xls(
     )
     if filters == []:
         print('* not found filters')
-        
+
     meta['filters'] = filters
 
     # update the extract
@@ -1365,6 +1365,92 @@ def get_itable_filters_from_xls(keystr, full_fn):
     print('* created ft_list %s filters' % (len(ft_list)))
 
     return ft_list
+
+
+def get_studies_included_in_ma(keystr, cq_abbr, paper_dict=None):
+    '''
+    Get the studies which are included in MA
+    '''
+    project = dora.get_project_by_keystr(keystr)
+    if project is None:
+        return None
+
+    if paper_dict is None:
+        # create a paper_dict
+        papers = dora.get_papers_of_included_sr(project.project_id)
+        paper_dict = {}
+        for p in papers:
+            paper_dict[p.pid] = p
+
+    # get all oc of this project
+    ocs = dora.get_extracts_by_keystr_and_cq(
+        keystr,
+        cq_abbr
+    )
+
+    # check each outcome
+    # to fill this stat object
+    stat = {
+        'f3': {
+            'pids': [],
+            'rcts': [],
+            'n': 0
+        }
+    }
+    for oc in ocs:
+        # 2022-01-19: fix the number issue
+        # the itable should be excluded from the counting
+        if oc.oc_type == 'itable':
+            continue
+
+        # check papaer extracted in this outcome
+        for pid in oc.data:
+            # 2022-01-17 fix the MA>SR issue
+            # need to check whether this pid exists in papers
+            if pid not in paper_dict:
+                # which means this extraction is not linked with a paper,
+                # maybe due to import issue or pid update.
+                # so, just skip this
+                continue
+
+            # get the data
+            p = oc.data[pid]
+
+            if p['is_selected']:
+                if pid in stat['f3']['pids']:
+                    # this pid has been counted
+                    pass
+                else:
+                    stat['f3']['n'] += 1
+                    stat['f3']['pids'].append(pid)
+
+                    # check the ctid
+                    if pid in paper_dict:
+                        # rct_id = paper_dict[pid]['ctid']
+                        rct_id = paper_dict[pid].get_rct_id()
+                        if rct_id not in stat['f3']['rcts']:
+                            stat['f3']['rcts'].append(rct_id)
+                    else:
+                        # what???
+                        # if this pid not in paper_dict
+                        # which means the rct info is missing
+                        print('* ERROR missing %s in paper_dict' % (
+                            pid
+                        ))
+                        pass
+
+            else:
+                # this paper is extracted but not selected yet.
+                pass
+    try:
+        print("* generated stat_f3 %s/%s included in MA" % (
+            stat['f3']['n'],
+            len(paper_dict)
+        ))
+    except:
+        pass
+    
+    return stat
 
 
 ###########################################################
