@@ -422,12 +422,14 @@ a {
                             <span v-if="attrs[idx].attr_id=='_PUBMED ID|PUBMED ID' || attrs[idx].attr_id=='_PMID|PMID'">
                                 <a v-if="r[col] == 'NA'"
                                     v-bind:href="r[attr_id2col('_URL|URL')]"
-                                    class="url_pubmed" target="_blank">
+                                    class="url_pubmed" 
+                                    target="_blank">
                                     {{ r[attr_id2col('_URL|URL')] }}
                                 </a>
                                 <a v-else
-                                    v-bind:href="url.pubmed + r[col]"
-                                    class="url_pubmed" target="_blank">
+                                    v-bind:href="pid2url(r[col])"
+                                    class="url_pubmed" 
+                                    target="_blank">
                                     {{ r[col] }}
                                 </a>
                                 
@@ -695,7 +697,8 @@ var tb_schtab = {
             data: {
                 url: {
                     ctgov: 'https://clinicaltrials.gov/ct2/show/',
-                    pubmed: 'https://pubmed.ncbi.nlm.nih.gov/'
+                    pubmed: 'https://pubmed.ncbi.nlm.nih.gov/',
+                    doi: 'https://doi.org/'
                 },
                 attrs: dt_tbcore.attrs,
                 cols: dt_tbcore.cols,
@@ -709,6 +712,14 @@ var tb_schtab = {
                         return 'sct-col-hide';
                     } else {
                         return '';
+                    }
+                },
+
+                pid2url: function(pid) {
+                    if (pid.length < 9) {
+                        return this.url.pubmed + pid;
+                    } else {
+                        return this.url.doi + pid;
                     }
                 },
 
