@@ -932,6 +932,7 @@ def import_itable_from_xls(
     # get the itable data
     cad, cate_attrs, i2a, data, not_found_pids = get_itable_from_itable_data_xls(
         project.keystr, 
+        cq_abbr,
         full_fn_itable
     )
     if cate_attrs is None:
@@ -967,7 +968,11 @@ def import_itable_from_xls(
     return itable
 
 
-def get_itable_from_itable_data_xls(keystr, full_fn):
+def get_itable_from_itable_data_xls(
+    keystr, 
+    cq_abbr,
+    full_fn
+    ):
     '''
     Get the itable extract from ITABLE_ATTR_DATA.xlsx
     '''
@@ -1109,32 +1114,29 @@ def get_itable_from_itable_data_xls(keystr, full_fn):
             else:
                 # OK, we found this paper!
                 sss = p.get_ss_stages()
-                if ss_state.SS_STAGE_INCLUDED_SR in sss:
-                    # OK, this study is included in SR at least
-                    pass
-                else:
-                    # change stage!
-                    if included_in_ma == 'YES':
-                        _, p = srv_paper.set_paper_ss_decision(
-                            keystr, pmid, 
-                            ss_state.SS_PR_CHECKED_BY_ADMIN,
-                            ss_state.SS_RS_INCLUDED_SRMA,
-                            ss_state.SS_REASON_CHECKED_BY_ADMIN,
-                            ss_state.SS_STAGE_INCLUDED_SRMA
-                        )
-                    else:
-                        _, p = srv_paper.set_paper_ss_decision(
-                            keystr, pmid, 
-                            ss_state.SS_PR_CHECKED_BY_ADMIN,
-                            ss_state.SS_RS_INCLUDED_ONLY_SR,
-                            ss_state.SS_REASON_CHECKED_BY_ADMIN,
-                            ss_state.SS_STAGE_INCLUDED_ONLY_SR
-                        )
+                # if ss_state.SS_STAGE_INCLUDED_SR in sss:
+                #     # OK, this study is included in SR at least
+                #     pass
 
-                    # OK, updated
-                    print('* updated %s from %s to %s' % (
-                        pmid, sss, p.get_ss_stages()
-                    ))
+                # else:
+
+                # set the stage for this paper
+                # change stage!
+                _, p = srv_paper.set_paper_ss_decision(
+                    project, 
+                    cq_abbr,
+                    pmid, 
+                    ss_state.SS_PR_CHECKED_BY_ADMIN,
+                    ss_state.SS_RS_INCLUDED_ONLY_SR,
+                    ss_state.SS_REASON_CHECKED_BY_ADMIN,
+                    ss_state.SS_STAGE_INCLUDED_ONLY_SR
+                )
+
+                # OK, updated
+                print('* updated %s from %s to %s' % (
+                    pmid, sss, p.get_ss_stages()
+                ))
+                    
 
         # now check each column for this study
         for idx in range(n_cols):
@@ -1449,7 +1451,7 @@ def get_studies_included_in_ma(keystr, cq_abbr, paper_dict=None):
         ))
     except:
         pass
-    
+
     return stat
 
 

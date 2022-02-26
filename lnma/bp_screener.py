@@ -337,7 +337,7 @@ def set_ss_cq_exclude_reason():
     exclude_reason = request.form.get('reason')
 
     is_success, paper = srv_paper.set_paper_ss_cq(
-        paper_id, cq_abbr, settings.PAPER_SS_EX_SS_CQ_NO,
+        paper_id, cq_abbr, settings.PAPER_SS_EX_SS_CQ_DECISION_NO,
         exclude_reason
     )
 

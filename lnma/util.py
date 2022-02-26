@@ -1287,38 +1287,69 @@ def json_encoder(o):
     return str(o)
     
 
-def make_ss_cq_dict(project):
+def make_ss_cq_dict(project, cq_abbr=None):
     '''
     Make an initial ss_cq based on a project
     '''
     d = {}
-    if len(project.settings['clinical_questions']) == 1:
-        decision = make_ss_cq_decision(
-            settings.PAPER_SS_EX_SS_CQ_YES,
-            '',
-            'no'
-        )
-    else:
-        decision = make_ss_cq_decision(
-            settings.PAPER_SS_EX_SS_CQ_NO,
-            '',
-            'no'
-        )
 
     for cq in project.settings['clinical_questions']:
-        d[cq['abbr']] = decision
-
+        _cq_abbr = cq['abbr']
+        
+        if len(project.settings['clinical_questions']) == 1:
+            # if just one cq, then yes
+            d[_cq_abbr] = make_ss_cq_decision(
+                settings.PAPER_SS_EX_SS_CQ_DECISION_YES,
+                '',
+                settings.PAPER_SS_EX_SS_CQ_CONFIRMED_NO
+            )
+        
+        else:
+            # if not, just set the specified one as yes
+            if cq_abbr == _cq_abbr:
+                d[_cq_abbr] = make_ss_cq_decision(
+                    settings.PAPER_SS_EX_SS_CQ_DECISION_YES,
+                    '',
+                    settings.PAPER_SS_EX_SS_CQ_CONFIRMED_NO
+                )
+            else:
+                d[_cq_abbr] = make_ss_cq_decision(
+                    settings.PAPER_SS_EX_SS_CQ_DECISION_NO,
+                    '',
+                    settings.PAPER_SS_EX_SS_CQ_CONFIRMED_NO
+                )
+                
     return d
 
 
-def make_ss_cq_decision(d, r, c):
+def make_ss_cq_dict_by_cq_abbr(
+    cq_abbr, 
+    decision=settings.PAPER_SS_EX_SS_CQ_DECISION_YES,
+    reason='',
+    confirmed=settings.PAPER_SS_EX_SS_CQ_CONFIRMED_NO):
+    '''
+    '''
+    return {
+        cq_abbr: make_ss_cq_decision(
+            decision,
+            reason,
+            confirmed
+        )
+    }
+
+
+def make_ss_cq_decision(
+    decision,
+    reason,
+    confirmed
+):
     '''
     Decision, Reason, Confirmed
     '''
     return {
-        'd': d,
-        'r': r,
-        'c': c
+        'd': decision,
+        'r': reason,
+        'c': confirmed
     }
 
 

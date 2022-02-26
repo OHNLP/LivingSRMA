@@ -38,6 +38,16 @@ db.init_app(app)
 app.app_context().push()
 
 
+def test10():
+    srv_extract.import_extracts_from_xls(
+        '/tmp/LPR/PWMA.xlsx',
+        'LPR',
+        'default',
+        'pwma'
+    )
+    print('* done')
+
+
 def test():
     itable = srv_extract.import_itable_from_xls(
         'LPR', 

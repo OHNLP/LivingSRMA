@@ -179,7 +179,7 @@ def upgrade_paper_ss_ex_for_cq(keystr):
     '''
     srv_project.update_project_papers_ss_cq_by_keystr(
         keystr,
-        settings.PAPER_SS_EX_SS_CQ_YES
+        settings.PAPER_SS_EX_SS_CQ_DECISION_YES
     )
 
     print('* done upgrading papers')

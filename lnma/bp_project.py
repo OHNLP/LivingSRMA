@@ -402,7 +402,7 @@ def api_set_settings():
     # this is based on the decision of 
     srv_project.update_project_papers_ss_cq_by_keystr(
         project.keystr,
-        settings.PAPER_SS_EX_SS_CQ_NO
+        settings.PAPER_SS_EX_SS_CQ_DECISION_NO
     )
 
     # 2. I'm not sure yet.

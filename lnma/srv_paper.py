@@ -99,7 +99,7 @@ def get_included_papers_by_cq(project_id, cq_abbr):
             ss_state.SS_RS_INCLUDED_SRMA
         ]),
         Paper.is_deleted == settings.PAPER_IS_DELETED_NO,
-        Paper.ss_ex['ss_cq'][cq_abbr]['d'] == settings.PAPER_SS_EX_SS_CQ_YES
+        Paper.ss_ex['ss_cq'][cq_abbr]['d'] == settings.PAPER_SS_EX_SS_CQ_DECISION_YES
     )).order_by(Paper.date_updated.desc()).all()
 
     return papers
@@ -185,15 +185,15 @@ def set_paper_ss_cq(paper_id, cq_abbr, ss_cq, ss_cq_ex_reason=''):
     else:
         c = 'no'
 
-    if ss_cq == settings.PAPER_SS_EX_SS_CQ_YES:
+    if ss_cq == settings.PAPER_SS_EX_SS_CQ_DECISION_YES:
         paper.ss_ex['ss_cq'][cq_abbr] = util.make_ss_cq_decision(
-            settings.PAPER_SS_EX_SS_CQ_YES,
+            settings.PAPER_SS_EX_SS_CQ_DECISION_YES,
             ss_cq_ex_reason,
             c
         )
     else:
         paper.ss_ex['ss_cq'][cq_abbr] = util.make_ss_cq_decision(
-            settings.PAPER_SS_EX_SS_CQ_NO,
+            settings.PAPER_SS_EX_SS_CQ_DECISION_NO,
             ss_cq_ex_reason,
             c
         )
@@ -249,16 +249,24 @@ def set_paper_rct_id(keystr, pid, rct_id):
     )
 
     return is_success, paper
+    
 
-
-def set_paper_ss_decision(keystr, pid, ss_pr, ss_rs, reason, stage):
+def set_paper_ss_decision(
+    project, 
+    cq_abbr, 
+    pid, 
+    ss_pr, 
+    ss_rs, 
+    reason, 
+    stage
+):
     '''
     Set paper screening decision
 
     The input parameters must be decided in advance
     '''
     paper = dora.get_paper_by_keystr_and_pid(
-        keystr, pid
+        project.keystr, pid
     )
 
     # what??? 
@@ -267,15 +275,43 @@ def set_paper_ss_decision(keystr, pid, ss_pr, ss_rs, reason, stage):
 
     # create a dict for the details
     detail_dict = util.get_decision_detail_dict(
-        reason, stage
+        reason, 
+        stage
     )
+
+    if ss_rs == ss_state.SS_RS_INCLUDED_ONLY_SR:
+        # the situation is complex, need to check the cq
+        if 'ss_cq' in paper.ss_ex:
+            # may need to update a cq
+            paper.ss_ex['ss_cq'][cq_abbr] = util.make_ss_cq_decision(
+                settings.PAPER_SS_EX_SS_CQ_DECISION_YES,
+                reason,
+                settings.PAPER_SS_EX_SS_CQ_CONFIRMED_YES
+            )
+        
+        else:
+            # ok, it's a new one, create all 
+            paper.ss_ex['ss_cq'] = util.make_ss_cq_dict(
+                project
+            )
+
+            # and then update this cq
+            paper.ss_ex['ss_cq'][cq_abbr] = util.make_ss_cq_decision(
+                settings.PAPER_SS_EX_SS_CQ_DECISION_YES,
+                reason,
+                settings.PAPER_SS_EX_SS_CQ_CONFIRMED_YES
+        )
+
+        # append the detail_dict
+        for key in detail_dict:
+            paper.ss_ex[key] = detail_dict[key]
 
     # update the ss for this paper
     p = dora.set_paper_pr_rs_with_details(
         paper.paper_id, 
         pr=ss_pr,
         rs=ss_rs,
-        detail_dict=detail_dict
+        detail_dict=paper.ss_ex
     )
 
     return True, p
