@@ -161,12 +161,13 @@ var vw_idgpanel = {
                 },
                 evidence_types: [
                     {label: 'Direct treatment evidence', value: 'direct'},
-                    {label: 'Mixed treatment evidence', value: 'mixed'}
+                    // {label: 'Mixed treatment evidence', value: 'mixed'}
                 ],
                 comparisons_by_type: {
                     direct: [
-                        {label: 'Atezolizumab-Bevacizumab vs Suni', value: 'AteBev_Suni'},
-                        {label: 'Avelumab-Axitinib vs Suni', value: 'AveAxi_Suni'}
+                        {label: 'Pembrolizumab vs Sunitinib', value: 'Pembrolizumab_Sunitinib'},
+                        {label: 'Pembrolizumab vs Placebo', value: 'Pembrolizumab_Placebo'},
+                        {label: 'Sunitinib vs Placebo', value: 'Sunitinib_Placebo'},
                     ],
                     mixed: [
                         {label: 'Avelumab-Axitinib vs Atezolizumab-Bevacizumab', value: 'AveAxi_AteBev'},
@@ -186,6 +187,10 @@ var vw_idgpanel = {
                     'Len': 'Lenvatinib',
                     'Tivo': 'Tivozanib',
                     'Suni': 'Sunitinib',
+
+                    'Sunitinib': 'Sunitinib',
+                    'Placebo': 'Placebo',
+                    'Pembrolizumab': 'Pembrolizumab',
 
                     'AteBev': 'Atezolizumab-Bevacizumab',
                     'AveAxi': 'Avelumab-Axitinib',
