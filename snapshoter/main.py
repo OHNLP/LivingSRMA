@@ -42,14 +42,17 @@ def kacha(keystr, cq_abbr, output_path):
     prj_path = os.path.join(
         output_path, keystr, cq_abbr
     )
+
     if os.path.exists(prj_path):
+        print('* found existing output path: %s' % prj_path)
+
         # move to other place
         src_path = prj_path
-        dst_path = '/data/lnma/pub_backups/' + datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
+        dst_path = '/data/lnma/pub_backups/' + datetime.datetime.now().strftime('%Y-%m-%d')
         os.makedirs(os.path.dirname(dst_path), exist_ok=True)
         dst_file = os.path.join(
             dst_path,
-            '%s.%s.zip' % (keystr, cq_abbr)
+            '%s.%s.%s.zip' % (keystr, cq_abbr, datetime.datetime.now().strftime('%Y-%m-%d-%H%M%S'))
         )
         # shutil.move(src_path, dst_path)
         make_archive(src_path, dst_file)

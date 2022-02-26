@@ -33,14 +33,10 @@ def kacha(keystr, cq_abbr, output_path):
     )
 
     # second, copy static files
-    copy_static_files(
-        keystr, 
-        cq_abbr,
-        pcq_output_path, 
-        [
-            'lib/d3'
-        ]
-    )
+    copy_static_files(keystr, cq_abbr, pcq_output_path, [
+        'lib/d3',
+        'lib/file-saver'
+    ])
     
     # third, copy the graph data
     copy_graphdata_files(
@@ -57,7 +53,8 @@ def kacha(keystr, cq_abbr, output_path):
         ['HOMEPAGE [%s.%s]' % (keystr, cq_abbr), '/pub/php.html?k=%s&c=%s' % (keystr, cq_abbr), 'index.html'],
 
         # for the PRISMA
-        ['PRISMA PAGE', '/pub/prisma.html', 'pub/prisma.html'],
+        ['PRISMA PAGE', '/pub/prisma_hybrid.html?prj=%s&cq=%s' % (keystr, cq_abbr), 'pub/prisma_hybrid.html'],
+        ['PRISMA PAGE', '/pub/prisma_living.html?prj=%s&cq=%s' % (keystr, cq_abbr), 'pub/prisma_living.html'],
         ['PRISMA.json', '/pub/graphdata/%s/PRISMA.json?src=db&cq=%s' % (keystr, cq_abbr), 'pub/graphdata/%s/PRISMA.json' % (keystr)],
 
         # for the itable
@@ -77,7 +74,7 @@ def kacha(keystr, cq_abbr, output_path):
         ['NMA PLOTS DATA', '/pub/graphdata/%s/GRAPH_NMA.json?src=cache&cq=%s' % (keystr, cq_abbr), 'pub/graphdata/%s/GRAPH_NMA.json' % (keystr)],
 
         # for the nma softable
-        ['NMA SOFTABLE PAGE', '/pub/softable_nma.html?prj=%s&cq=%s' % (keystr, cq_abbr), 'pub/softable_pma.html'],
+        ['NMA SOFTABLE PAGE', '/pub/softable_nma.html?prj=%s&cq=%s' % (keystr, cq_abbr), 'pub/softable_nma.html'],
         ['NMA SOFTABLE DATA', '/pub/graphdata/%s/SOFTABLE_NMA.json?src=cache&cq=%s' % (keystr, cq_abbr), 'pub/graphdata/%s/SOFTABLE_NMA.json' % (keystr)],
 
         # for the evmap
