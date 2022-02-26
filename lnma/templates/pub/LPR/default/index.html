@@ -215,7 +215,7 @@
             <iframe id="ifm_pwma_prim"
                 src="[[ url_for('pub.graph_pma', prj=keystr, cq=cq_abbr, group='primary') ]]" 
                 frameborder="0" 
-                style="width: 100%; min-height: 500px;">
+                style="width: 100%; min-height: 260px;">
             </iframe>
         </div>
     </div>
@@ -232,8 +232,7 @@
             <iframe id="ifm_pwma_prim"
                 src="[[ url_for('pub.graph_pma', prj=keystr, cq=cq_abbr, gp='sensitivity', src='cache', od=';'.join(['Progression free survival', 'Overall survival'])) ]]" 
                 frameborder="0" 
-                style="width: 100%; min-height: 350px;"
-                resize_by_content>
+                style="width: 100%; min-height: 420px;">
             </iframe>
         </div>
     </div>
@@ -248,7 +247,7 @@
             <iframe id="ifm_pwma_subg"
                 src="[[ url_for('pub.graph_pma', prj=keystr, cq=cq_abbr, gp='subgroup', src='cache', od=';'.join(['Progression free survival', 'Overall survival'])) ]]" 
                 frameborder="0" 
-                style="width: 100%; min-height: 450px;">
+                style="width: 100%; min-height: 500px;">
             </iframe>
         </div>
     </div>
