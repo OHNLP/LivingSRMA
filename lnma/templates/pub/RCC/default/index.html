@@ -302,7 +302,9 @@
 
 <br id="sec-nma-Prim">
 <div class="container mt-0">
-    <h4 style="margin-bottom: 0;">Primary Analysis</h4>
+    <h4>
+        Primary Analysis
+    </h4>
 </div>
 
 <div class="container mt-2"
@@ -321,7 +323,9 @@
 
 <br id="sec-nma-Sens">
 <div class="container mt-1">
-    <h4 style="margin-bottom: 0;">Sensitivity Analysis</h4>
+    <h4>
+        Sensitivity Analysis
+    </h4>
 </div>
 
 <div class="container mt-2"
@@ -354,7 +358,9 @@
     <div class="row">
         <div class="col">
             <iframe id="ifm_sofpma" 
-                src="[[ url_for('pub.softable_pma', prj=keystr, cq=cq_abbr, msrs='OR,RR,HR', od=';'.join(['Progression free survival', 'Overall survival'])) ]]" frameborder="0" 
+                src="[[ url_for('pub.softable_pma', prj=keystr, cq=cq_abbr, msrs='OR,RR,HR', od=';'.join(['Progression free survival', 'Overall survival'])) ]]" 
+                frameborder="0" 
+                resize_by_content
                 style="width: 100%; min-height: 450px;">
             </iframe>
         </div>
@@ -381,6 +387,7 @@
             <iframe id="ifm_sofnma" 
                 src="[[ url_for('pub.softable_nma', prj=keystr, cq=cq_abbr, dc='Suni', cp='yes', od=';'.join(['Progression free survival', 'Overall survival'])) ]]" 
                 frameborder="0" 
+                resize_by_content
                 style="width: 100%; min-height: 450px;">
             </iframe>
         </div>

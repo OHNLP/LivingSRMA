@@ -834,6 +834,14 @@ def import_extracts_from_xls(full_path, keystr, cq_abbr, oc_type):
     print('\n\n\n* MISSING tabs:')
     for tab in missing_tabs:
         print(tab)
+    
+    if len(missing_pids) == 0 and \
+       len(missing_tabs) == 0:
+        print('\n\n\n* GREAT! It seems NO issue found!\n')
+
+    else:
+        print('\n\n\n* TOO BAD! Something is missing!\n')
+
 
     return dft
 

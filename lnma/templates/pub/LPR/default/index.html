@@ -264,14 +264,52 @@
     <p>
         Results are summarized as forest plots for primary analysis and sensitivity network meta-analysis. Users can choose to view results for their outcome of interest using the dropdown menu (“Select outcome”).
     </p>
+</div>
+
+
+
+<br id="sec-nma-Prim">
+<div class="container">
+    <h4>
+        Primary Analysis
+    </h4>
+</div>
+
+<div class="container mt-2"
+    style="max-width: 1300px;">
     <div class="row">
-        <iframe id="ifm_nma_prim" 
-            src="[[ url_for('pub.graph_nma', prj=keystr, cq=cq_abbr, gp='primary', tr='Placebo', oc='disease free survival') ]]" 
+        <iframe id="ifm_nma_prim"
+            src="[[ url_for('pub.graph_nma', prj=keystr, cq=cq_abbr, gp='primary', tr='ADT', od=';'.join(['Overall survival'])) ]]" 
             frameborder="0" 
-            style="width: 100%; min-height: 800px;">
+            style="width: 100%; min-height: 840px;"
+            resize_by_content>
         </iframe>
     </div>
 </div>
+
+
+
+
+<br id="sec-nma-Sens">
+<div class="container mt-1">
+    <h4>
+        Sensitivity Analysis
+    </h4>
+</div>
+
+<div class="container mt-2"
+    style="max-width: 1300px;">
+    <div class="row">
+        <iframe id="ifm_nma_sens"
+            src="[[ url_for('pub.graph_nma', prj=keystr, cq=cq_abbr, gp='sensitivity', tr='ADT', od=';'.join(['Overall survival'])) ]]" 
+            frameborder="0" 
+            style="width: 100%; min-height: 800px;"
+            resize_by_content>
+        </iframe>
+    </div>
+</div>
+
+
 
 
 <br id="sec-sof-pwma">
@@ -291,6 +329,7 @@
             <iframe id="ifm_sofpma" 
                 src="[[ url_for('pub.softable_pma', prj=keystr, cq=cq_abbr, msrs='OR,RR,HR', od=';'.join(['disease free survival','overall survival'])) ]]" 
                 frameborder="0" 
+                resize_by_content
                 style="width: 100%; min-height: 450px;">
             </iframe>
         </div>
@@ -315,8 +354,9 @@
     <div class="row">
         <div class="col">
             <iframe id="ifm_sofnma" 
-                src="[[ url_for('pub.softable_nma', prj=keystr, cq=cq_abbr, dc='Placebo', cp='yes', od=';'.join(['disease free survival','overall survival'])) ]]" 
+                src="[[ url_for('pub.softable_nma', prj=keystr, cq=cq_abbr, dc='ADT', cp='yes', od=';'.join(['disease free survival','overall survival'])) ]]" 
                 frameborder="0" 
+                resize_by_content
                 style="width: 100%; min-height: 450px;">
             </iframe>
         </div>
@@ -338,7 +378,7 @@
     <div class="row">
         <div class="col">
             <iframe id="ifm_evmap" 
-                src="[[ url_for('pub.evmap', prj=keystr, cq=cq_abbr, tr='Pembro') ]]" 
+                src="[[ url_for('pub.evmap', prj=keystr, cq=cq_abbr, tr='ADT') ]]" 
                 frameborder="0" 
                 style="width: 100%; min-height: 700px;">
             </iframe>

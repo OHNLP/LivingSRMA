@@ -54,17 +54,16 @@ def get_graph_nma_data_from_db(keystr, cq_abbr):
     ))
 
     # OK, let's check each outcome
-    ret = {
-        'oc_dict': {},
-        'graph_dict': {}
-    }
+    oc_dict = {}
+    graph_dict = {}
+    failed_extracts = []
+    
     for extract in tqdm(extracts):
-        oc_abbr = extract.abbr
 
         # check if included in sof
         if extract.meta['included_in_plots'] != 'yes':
             # this oc is NOT included
-            print('* skip extract %s due to NOT_INCLUDED_IN_SOF' % (oc_abbr))
+            print('* skip extract %s due to NOT_INCLUDED_IN_SOF' % (extract.abbr))
             continue
 
         print('* analyzing %s' % (
@@ -72,11 +71,82 @@ def get_graph_nma_data_from_db(keystr, cq_abbr):
         ))
 
         # create an oc object for ... what?
-        treat_list = extract.meta['treatments']
+        # treat_list = extract.meta['treatments']
 
         # but the treat_list may not be available
         treat_list = extract._get_nma_treat_list()
 
+        # build rs and cfg
+        # cfg = {
+        #     # for init analyzer
+        #     "backend": extract.meta['analysis_method'],
+        #     "input_format": input_format,
+        #     "reference_treatment": treat_list[0],
+        #     "measure_of_effect": extract.meta['measure_of_effect'],
+        #     "fixed_or_random": extract.meta['fixed_or_random'],
+        #     "which_is_better": 'small' if extract.meta['which_is_better'] == 'lower' else 'big',
+
+        #     # a special rule for database format
+        #     'format_converted': 'yes'
+        # }
+    
+        # get the rs for this oc
+        # rscfg = extract.get_raw_rs_cfg(
+        #     paper_dict, 
+        #     is_skip_unselected=True
+        # )
+        # rs = rscfg['rs']
+        # cfg = rscfg['cfg']
+
+        # update the config for R script
+        # cfg['backend'] = extract.meta['analysis_method']
+        # cfg['reference_treatment'] = treat_list[0]
+        # cfg['input_format'] = input_format
+
+        # the R script use different param
+        # cfg["which_is_better"] = 'small' if extract.meta['which_is_better'] == 'lower' else 'big',
+
+        # 2022-02-20: no need to change this,
+        # since all the format convert has been done in the model level.
+        # in the Extract._get_rs_nma(), the format will be changed automatically.
+        # cfg['format_converted'] = 'yes'
+
+        # calc!
+        # ret_nma = nma_analyzer.analyze(
+        #     rs, 
+        #     cfg
+        # )
+        try:
+            results = srv_analyzer.get_nma(
+                extract, 
+                paper_dict,
+                True
+            )
+        except Exception as err:
+            results = None
+            rstmsg = str(err)
+
+            failed_extracts.append([
+                extract,
+                rstmsg
+            ])
+
+            print('*'*60)
+            print('*'*20 + 'NMA RUNTIME EXCEPTION')
+            print('*'*60)
+            print(err)
+
+        if results is None:
+            continue
+        
+        else:
+            ret_nma = results[0]['rst']
+
+        # put in result
+        graph_dict[extract.abbr] = ret_nma
+
+
+        # put the oc_dict
         # get the input format for selecting template
         oc_datatype = settings.INPUT_FORMATS_HRLU
         if extract.meta['input_format'] == 'NMA_RAW_ET':
@@ -98,51 +168,28 @@ def get_graph_nma_data_from_db(keystr, cq_abbr):
             # just give all information to frontend
             "meta": extract.meta
         }
-        ret['oc_dict'][extract.abbr] = oc
+        oc_dict[extract.abbr] = oc
 
-        # build rs and cfg
-        # cfg = {
-        #     # for init analyzer
-        #     "backend": extract.meta['analysis_method'],
-        #     "input_format": input_format,
-        #     "reference_treatment": treat_list[0],
-        #     "measure_of_effect": extract.meta['measure_of_effect'],
-        #     "fixed_or_random": extract.meta['fixed_or_random'],
-        #     "which_is_better": 'small' if extract.meta['which_is_better'] == 'lower' else 'big',
+    ret = {
+        'oc_dict': oc_dict,
+        'graph_dict': graph_dict
+    }
 
-        #     # a special rule for database format
-        #     'format_converted': 'yes'
-        # }
-    
-        # get the rs for this oc
-        rscfg = extract.get_raw_rs_cfg(
-            paper_dict, 
-            is_skip_unselected=True
-        )
-        rs = rscfg['rs']
-        cfg = rscfg['cfg']
+    if len(failed_extracts) == 0:
+        print('\n\n\n* GREAT! NO issues during NMA calculation!')
 
-        # update the config for R script
-        cfg['backend'] = extract.meta['analysis_method']
-        cfg['reference_treatment'] = treat_list[0]
-        # cfg['input_format'] = input_format
+    else:
+        print('*'*60)
+        print('\n\n\n* TOO BAD! %s issues during NMA calculation!' % (
+            len(failed_extracts)
+        ))
+        for idx, err_ext in enumerate(failed_extracts):
+            ext = err_ext[0]
+            err = err_ext[1]
 
-        # the R script use different param
-        cfg["which_is_better"] = 'small' if extract.meta['which_is_better'] == 'lower' else 'big',
-
-        # 2022-02-20: no need to change this,
-        # since all the format convert has been done in the model level.
-        # in the Extract._get_rs_nma(), the format will be changed automatically.
-        cfg['format_converted'] = 'yes'
-
-        # calc!
-        ret_nma = nma_analyzer.analyze(
-            rs, 
-            cfg
-        )
-
-        # put in result
-        ret['graph_dict'][oc_abbr] = ret_nma
+            print('* %d Error when analyzing %s' % (idx, ext.get_repr_str()))
+            print('* %s' % err)
+            print('')
 
     return ret
 
@@ -193,6 +240,8 @@ def get_nma_by_cq(keystr, cq_abbr="default", included_in='sof'):
     # then create oc_dict
     oc_dict = {}
     treat_list = []
+    failed_extracts = []
+
     for extract in tqdm(extracts):
         abbr = extract.abbr
 
@@ -202,7 +251,7 @@ def get_nma_by_cq(keystr, cq_abbr="default", included_in='sof'):
             print('* skip extract %s due to NOT_INCLUDED_IN_SOF' % (abbr))
             continue
 
-        treatments = extract.get_treatments_in_data()
+        # treatments = extract.get_treatments_in_data()
 
         print('* analyzing %s' % (
             extract.get_repr_str()
@@ -210,11 +259,18 @@ def get_nma_by_cq(keystr, cq_abbr="default", included_in='sof'):
 
         try:
             results = srv_analyzer.get_nma(
-                extract, paper_dict
+                extract, 
+                paper_dict,
+                True
             )
         except Exception as err:
             results = None
             rstmsg = str(err)
+
+            failed_extracts.append([
+                extract,
+                rstmsg
+            ])
             print('*'*60)
             print('*'*20 + 'NMA RUNTIME EXCEPTION')
             print('*'*60)
@@ -281,6 +337,20 @@ def get_nma_by_cq(keystr, cq_abbr="default", included_in='sof'):
         'treat_list': treat_list,
         'oc_dict': oc_dict
     }
+
+    if len(failed_extracts) == 0:
+        print('\n\n\n* GREAT! NO issues during NMA calculation!')
+
+    else:
+        print('*'*60)
+        print('\n\n\n* TOO BAD! Some issues during NMA calculation!')
+        for err_ext in failed_extracts:
+            ext = err_ext[0]
+            err = err_ext[1]
+
+            print('* Error when analyzing %s' % ext.get_repr_str())
+            print('* %s' % err)
+            print('')
 
     return ret
 
