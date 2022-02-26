@@ -30,12 +30,12 @@ def kacha(output_path):
     )
 
     # second, copy static files
-    copy_static_files(keystr, pcq_output_path, [
+    copy_static_files(keystr, cq_abbr, pcq_output_path, [
         'lib/d3'
     ])
     
     # third, copy the graph data
-    copy_graphdata_files(keystr, pcq_output_path, [
+    copy_graphdata_files(keystr, cq_abbr, pcq_output_path, [
         'img',
         'CONCEPT_IMAGE.svg'
     ])

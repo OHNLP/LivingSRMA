@@ -54,7 +54,7 @@ def make_page(client, url, full_fn, param=None):
     return 1
 
 
-def copy_static_files(keystr, output_path, libs=None):
+def copy_static_files(keystr, cq_abbr, output_path, libs=None):
     '''
     Copy the static files
     '''
@@ -88,7 +88,7 @@ def copy_static_files(keystr, output_path, libs=None):
     return 1
 
 
-def copy_graphdata_files(keystr, output_path, paths):
+def copy_graphdata_files(keystr, cq_abbr, output_path, paths):
     '''
     Copy the graphdata files
     '''
@@ -97,7 +97,13 @@ def copy_graphdata_files(keystr, output_path, paths):
 
     # get the source graphdata path
     graphdata_path = os.path.join(
-        cur_path, '..', '..', 'instance', 'pubdata', keystr
+        cur_path, 
+        '..', 
+        '..', 
+        'instance', 
+        'pubdata', 
+        keystr,
+        cq_abbr
     )
     print('* got graphdata_path: %s' % graphdata_path)
 
