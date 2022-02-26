@@ -19,9 +19,8 @@
 
 <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
 
-<link rel="stylesheet" href="/static/css/mybox-0.9.1.css">
-
 <style>
+{% include 'css/box.css' %}
 {% include 'css/start_screen.css' %}
 
 html, body {
@@ -456,15 +455,12 @@ a {
 
 <!-- use third party libs -->
 <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-<script src="/static/lib/jquery-ui/jquery-ui.min.js"></script>
-<script src="/static/lib/vue.js/vue.min.js"></script>
-<!-- D3.js -->
-<script src="/static/lib/d3/d3.min.js"></script>
-<script src="/static/lib/d3/d3-sankey.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.min.js"></script>
 <!-- vuetify -->
 <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
 <!-- chance.js -->
-<script src="/static/lib/alasql/alasql.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/alasql/0.5.5/alasql.min.js"></script>
 <!-- for IE -->
 <script>
 var isIE = /*@cc_on!@*/false || !!document.documentMode;

@@ -226,7 +226,7 @@
     <div class="row">
         <div class="col">
             <iframe id="ifm_pwma_sens"
-                src="[[ url_for('pub.graph_pma', prj=keystr, cq=cq_abbr, gp='sensitivity', src='cache', od=';'.join(['Progression free survival', 'Overall survival'])) ]]" 
+                src="[[ url_for('pub.graph_pma', prj=keystr, cq=cq_abbr, gp='sensitivity', src='cache', od=';'.join(['Venous thromboembolism excluding ADAM VTE trial','Major bleeding excluding ADAM VTE trial','Clinically relevant non-major bleeding excluding ADAM VTE trial','Net clinical benefit excluding ADAM VTE trial','Mortality excluding ADAM VTE trial','Venous thromboembolism at 6 months','Major bleeding at 6 months','Clinically relevant non-major bleeding at 6 months','Net clinical benefit at 6 months','Mortality at 6 months'])) ]]" 
                 frameborder="0" 
                 style="width: 100%; min-height: 380px;">
             </iframe>
@@ -243,7 +243,7 @@
     <div class="row">
         <div class="col">
             <iframe id="ifm_pwma_subg"
-                src="[[ url_for('pub.graph_pma', prj=keystr, cq=cq_abbr, gp='subgroup', src='cache', od=';'.join(['Progression free survival', 'Overall survival'])) ]]" 
+                src="[[ url_for('pub.graph_pma', prj=keystr, cq=cq_abbr, gp='subgroup', src='cache', od=';'.join(['Venous thromboembolism by type of DOAC','Major bleeding by type of DOAC','Clinically relevant non-major bleeding by type of DOAC','Net clinical benefit by type of DOAC','Mortality by type of DOAC','Venous thromboembolism by age','Venous thromboembolism by gender','Venous thromboembolism by presentation of event','Venous thromboembolism by type of event','Venous thromboembolism by cancer status','Venous thromboembolism by cancer setting','Venous thromboembolism by tumor type','Venous thromboembolism by ECOG status','Venous thromboembolism by duration of stay in study','Major bleeding by age','Major bleeding by gender','Major bleeding by presentation of event','Major bleeding by type of event','Major bleeding by cancer status','Major bleeding by cancer setting','Major bleeding by tumor type','Major bleeding by ECOG status','Major bleeding by duration of stay in study'])) ]]" 
                 frameborder="0" 
                 style="width: 100%; min-height: 450px;">
             </iframe>

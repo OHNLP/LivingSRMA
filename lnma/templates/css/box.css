@@ -1,12 +1,35 @@
+/**
+ * My Box Style
+ * This style is for showing more items on one page.
+ */
+ .d-flex {
+    display: flex;
+}
+.fx-row {
+    flex-direction: row;
+}
+.fx-col {
+    flex-direction: column;
+}
+.fx-jc-space-between {
+    justify-content: space-between;
+}
+/* box */
 .box {
     display: flex;
     flex-direction: column;
+    width: 100%;
+    font-size: 12px;
+    font-family: Arial, Helvetica, sans-serif;
 }
 .box-header {
     width: 100%;
     padding: 3px 0;
     display: flex;
-    align-items: center;
+    flex-direction: row;
+}
+.box-header-grey {
+    background-color: #efefef;
 }
 .box-header a {
     font-size: .8em;
@@ -18,27 +41,80 @@
     height: 1.6em;
     line-height: 1.6em;
     margin: 3px 0;
-    font-weight: bold;
 }
 .box-header button, 
-.box-body button,
+.box-body button, 
 .box-footer button {
-    height: 1.7em;
+    height: 1.6em;
     line-height: 1em;
     font-size: .8em;
-    margin: 3px;
-    background: white;
-    border: 1px solid #333333;
-    border-radius: 3px;
+    margin: 4px;
+}
+.box-header input,
+.box-body input {
+    height: 1em;
+    line-height: 1em;
+    font-size: 1em;
+    margin: 4px 4px 0 4px;
+}
+.box-input {
+    border: 0;
+    padding: 2px 3px;
+    border-bottom: 1px solid #333333;
+}
+.box-menu-group {
+    margin: 0 10px;
+}
+.box-menu-group div {
+    height: 1.6em;
+    line-height: 2em;
+}
+.box-menu-link {
+    text-decoration: underline;
+    cursor: pointer !important;
+}
+.box-menu-link:hover {
+    font-weight: bold;
+}
+.box-radio-group {
+    margin: 0 10px;
+}
+.box-radio-item {
+    padding: 0 5px;
+    display: flex;
+    align-items: center;
+}
+.box-radio-item:hover {
+    background-color: whitesmoke;
+} 
+.box-radio-group div {
+    height: 1.6em;
+    line-height: 2em;
+}
+.box-radio-item label {
+    height: 1.6em;
 }
 .box-header select {
     height: 1.6em;
     line-height: 1.2em;
-    font-size: .8em;
-    margin: 3px;
+    font-size: 1em;
+    margin: 0 4px;
+}
+.box-header p {
+    height: 1.6em;
+    line-height: 1.2em;
+    font-size: 1em;
+    margin: 5px 0 0 2px;
 }
 .box-header span {
     font-size: .9em;
+}
+.box-header-right {
+    font-size: .95em;
+    height: 1.6em;
+    line-height: 1.6em;
+    margin: 3px 0;
+    text-align: right;
 }
 .box-header a {
     padding: 1px 3px;
@@ -48,38 +124,73 @@
 }
 .box-header a:hover {
     text-decoration: underline;
-
 }
 .box-body {
     width: 100%;
 }
-.box-bodyitem {
-    padding: 0 0 3px 0;
+.box-body-item {
+    padding: 5px 0 5px 0;
+    display: flex;
+    flex-direction: column;
+    border-bottom: 1px dotted #cccccc;
 }
-.box-bodyitem-hl {
+/* for left - right items */
+.box-body-item-left {
+    width: 73%;
+}
+.box-body-item-right {
+    width: 24%;
     display: flex;
     flex-direction: row;
 }
-.box-bodyitem-label {
+.box-body-item-label {
     width: 54%;
     font-size: .9em;
     line-height: 1.8em;
 }
-.box-bodyitem-value {
+.box-body-item-value {
     width: 45%;
 }
-.box-bodyitem select {
-    width: 100%;
+.box-body-item select {
+    width: calc(100% - 10px);
+    font-size: 1em;
+    padding: 2px 0;
 }
-.box img {
+/* the label values items */
+.bbi-label {
     width: 100%;
+    padding: 0 0 3px 0;
+    font-size: .8em;
+    color: #666666;
+    /* just for using the question marks */
+    justify-content: space-between;
+}
+.bbi-value {
+    width: calc(100% - 10px);
+    padding: 2px 0px 2px 10px;
+    font-size: .9em;
+    color: #000000;
+}
+.bbi-label-hint {
+    color: #999999;
+    cursor: help;
+}
+.bbi-label-hint:hover {
+    color: #333333;
+}
+.box-body h5 {
+    padding: 0;
+    margin: 0;
+    font-size: 1em;
+    height: 1.6em;
+    line-height: 1.6em;
+    margin: 3px 0;
 }
 .box-p {
     width: 100%;
     padding: 0;
     margin: 0;
     font-size: .9em;
-    line-height: 1.1em;
 }
 .box-p-fixlen {    
     white-space: nowrap;
@@ -90,20 +201,21 @@
     width: 100%;
     min-height: 20px;
     padding: 5px 0 5px 0;
-    border-bottom: 1px dotted #CCCCCC;
 }
-.box-smalltable th,
-.box-smalltable td {
-    border-bottom: 1px dotted #cccccc;
-    padding: 0 3px;
-    font-size: .9em;
+/* font sizes */
+.txt-sm {
+    font-size: 0.9em;
 }
-.box-chk-fix {
-    display: table-cell; 
-    vertical-align: middle;
-    padding: 2px 0 0 0;
-    line-height: 10px;
+.txt-nm {
+    font-size: 1em;
 }
-.box-smalltable td label{
-    font-weight: normal;
+.txt-lg {
+    font-size: 1.3em;
+}
+.txt-xl {
+    font-size: 1.6em;
+}
+/* font bold */
+.txt-fb {
+    font-weight: bold;
 }
