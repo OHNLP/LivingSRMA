@@ -528,11 +528,10 @@ def _dmetar_trans_rksucra(j, params):
     arr = np.array(j['sucraplot']['probs'])
     c = arr.cumsum(axis=1)
     # this how SUCRA is calculated
-    # if params['which_is_better'] == 'small' or params['which_is_better'] == 'lower':
-    #     sucra = 1 - c[:, :(a-1)].sum(axis=1) / (a-1)
-    # else:
-    # 2022-02-28: the 
-    sucra = c[:, :(a-1)].sum(axis=1) / (a-1)
+    if params['which_is_better'] == 'small' or params['which_is_better'] == 'lower':
+        sucra = 1 - c[:, :(a-1)].sum(axis=1) / (a-1)
+    else:
+        sucra = c[:, :(a-1)].sum(axis=1) / (a-1)
 
     sucra = sucra * 100
     sucra = sucra.tolist()
@@ -540,6 +539,10 @@ def _dmetar_trans_rksucra(j, params):
 
     treats = j['sucraplot']['rows']
     rs = [ { 'treat': treats[i], 'value': sucra[i] } for i in range(n) ]
+    
+    rs.sort(key=lambda r:r['value'], reverse=True)
+    for i, r in enumerate(rs):
+        rs[i]['value_rank'] = (i+1)
     
     # ok! done!
     ret = {
