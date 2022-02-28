@@ -61,6 +61,7 @@ a {
                 <v-select label="Type of Evidence"
                     v-model="type_of_evidence"
                     :items="evidence_types"
+                    v-on:change="change_type"
                     item-text="label">
                 </v-select>
 
@@ -214,6 +215,14 @@ var vw_idgpanel = {
             methods: {
                 get_url: function(folder, fn) {
                     return '/pub/graphdata/' + jarvis.prj + '/file/decision_aid/' + folder + '/' + fn + '.svg?cq='+jarvis.cq+'&rnd=' + Math.random();
+                },
+
+                change_type: function() {
+                    console.log('* type_of_evidence:', this.type_of_evidence);
+                    // set the default comparison
+                    this.comparison = this.comparisons_by_type[
+                        this.type_of_evidence
+                    ][0].value;
                 }
             }
         });
