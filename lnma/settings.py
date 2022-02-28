@@ -862,7 +862,7 @@ PRISMA_PAST_TEMPLATE = {
     },
     "e2": {
         "n_ctids": 0,
-        "n_pmids": 748,
+        "n_pmids": 0,
         "paper_list": [],
         "stage": "e1",
         "study_list": [],
@@ -870,7 +870,7 @@ PRISMA_PAST_TEMPLATE = {
     },
     "e3": {
         "n_ctids": 0,
-        "n_pmids": 30,
+        "n_pmids": 0,
         "paper_list": [],
         "stage": "e2",
         "study_list": [],
