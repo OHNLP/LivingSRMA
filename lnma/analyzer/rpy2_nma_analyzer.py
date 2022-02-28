@@ -115,9 +115,15 @@ def analyze_nma_freq_pre(rs, cfg):
     r_lgtb = netmeta.netleague(r_nma, bracket="(", digits=2)
 
     # get the ps rank
+    if cfg['which_is_better'] == 'lower' or \
+       cfg['which_is_better'] == 'small':
+        small_values = 'good'
+    else:
+        small_values = 'bad'
+
     r_rank = netmeta.netrank(
         r_nma, 
-        small_values = 'good' if cfg['which_is_better'] == 'lower' else 'bad'
+        small_values = small_values
     )
 
     # get the forest
@@ -227,9 +233,15 @@ def analyze_nma_freq_raw(rs, cfg):
     r_forest = netmeta.forest_netmeta(r_nma)
 
     # get the ps rank
+    if cfg['which_is_better'] == 'lower' or \
+       cfg['which_is_better'] == 'small':
+        small_values = 'good'
+    else:
+        small_values = 'bad'
+
     r_rank = netmeta.netrank(
         r_nma, 
-        small_values = 'good' if cfg['which_is_better'] == 'lower' else 'bad'
+        small_values = small_values
     )
 
     # convert to json obj
@@ -315,7 +327,11 @@ def analyze_nma_bayes_pre(rs, cfg):
         cfg['reference_treatment'] = reference_treatment
 
     # get sucra better
-    sucra_lower_is_better = cfg['which_is_better'] == 'big'
+    if cfg['which_is_better'] == 'lower' or \
+       cfg['which_is_better'] == 'small':
+        sucra_lower_is_better = True
+    else:
+        sucra_lower_is_better = False
 
     # transform the dataset
     rs2 = []
@@ -470,10 +486,13 @@ def analyze_nma_bayes_raw(rs, cfg):
     ]
 
     # the sucra_largerbetter
-    if cfg['which_is_better'] == 'big':
-        sucra_largerbetter = True
-    else:
+
+    # get sucra better
+    if cfg['which_is_better'] == 'lower' or \
+       cfg['which_is_better'] == 'small':
         sucra_largerbetter = False
+    else:
+        sucra_largerbetter = True
 
     # get ref
     all_treats = list(set(df.treat.to_list()))
@@ -807,9 +826,15 @@ def demo():
     j_forestplt = json.loads(r_j_forestplt[0])
 
     # the rank
+    if cfg['which_is_better'] == 'lower' or \
+       cfg['which_is_better'] == 'small':
+        small_values = 'good'
+    else:
+        small_values = 'bad'
+
     r_rank = netmeta.netrank(
         r_nma, 
-        small_values = 'good' if cfg['which_is_better'] == 'lower' else 'bad'
+        small_values = small_values
     )
     r_j_rank = jsonlite.toJSON(r_rank, force=True)
     j_rank = json.loads(r_j_rank[0])

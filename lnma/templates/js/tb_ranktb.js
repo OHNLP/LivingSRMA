@@ -52,24 +52,32 @@ var tb_ranktb = {
         }
         // show
         $(this.box_id).show();
-        this.data = newdata;
-        // sort the values to get rank
-        if (which_has_highrank == 'lower' ||
-            which_has_highrank == 'small' ) {
-            newdata.rs.sort(function(a, b) {
-                return a.value - b.value;
-            });
 
+        if (newdata.rs[0].hasOwnProperty('value_rank')) {
+            // which means backend has already sorted
         } else {
-            newdata.rs.sort(function(a, b) {
-                return b.value - a.value;
-            });
-        }
-        for (let i = 0; i < newdata.rs.length; i++) {
-            const r = newdata.rs[i];
-            newdata.rs[i]['value_rank'] = i + 1;
+
+            
+            // sort the values to get rank
+            if (which_has_highrank == 'lower' ||
+                which_has_highrank == 'small' ) {
+                newdata.rs.sort(function(a, b) {
+                    return a.value - b.value;
+                });
+
+            } else {
+                newdata.rs.sort(function(a, b) {
+                    return b.value - a.value;
+                });
+            }
+            for (let i = 0; i < newdata.rs.length; i++) {
+                const r = newdata.rs[i];
+                newdata.rs[i]['value_rank'] = i + 1;
+            }
         }
         this.vpp.header = this.col2header[newdata.col];
         this.vpp.tabledata = newdata.rs;
+
+        this.data = newdata;
     }
 }

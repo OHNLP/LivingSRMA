@@ -225,6 +225,10 @@ def _bugsnet_trans_rksucra(arr, params):
             'value': float(ranks[treat])
         })
 
+    rs.sort(key=lambda r:r['value'], reverse=True)
+    for i, r in enumerate(rs):
+        rs[i]['value_rank'] = (i+1)
+
     ret = {
         'col': 'sucra',
         'rs': rs,
@@ -466,9 +470,21 @@ def _netmeta_trans_pscore(j, params):
             'value': rnk
         })
 
+    # sort accordingly
+    # if params['which_is_better'] == 'lower' or \
+    #    params['which_is_better'] == 'small':
+    #     rs.sort(key=lambda r:r['value'])
+    # else:
+    # 2022-02-28: in fact the ranke table result is alwasy big pscore good
+    # so need to reverse always
+    rs.sort(key=lambda r:r['value'], reverse=True)
+    for i, r in enumerate(rs):
+        rs[i]['value_rank'] = (i+1)
+
     ret = {
         'col': 'pscore',
         'rs': rs,
+        # 'raw': j['myrank'][fixed_or_random],
         'backend': 'netmeta'
     }
     return ret
@@ -512,10 +528,11 @@ def _dmetar_trans_rksucra(j, params):
     arr = np.array(j['sucraplot']['probs'])
     c = arr.cumsum(axis=1)
     # this how SUCRA is calculated
-    if params['which_is_better'] == 'small':
-        sucra = 1 - c[:, :(a-1)].sum(axis=1) / (a-1)
-    else:
-        sucra = c[:, :(a-1)].sum(axis=1) / (a-1)
+    # if params['which_is_better'] == 'small' or params['which_is_better'] == 'lower':
+    #     sucra = 1 - c[:, :(a-1)].sum(axis=1) / (a-1)
+    # else:
+    # 2022-02-28: the 
+    sucra = c[:, :(a-1)].sum(axis=1) / (a-1)
 
     sucra = sucra * 100
     sucra = sucra.tolist()

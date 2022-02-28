@@ -570,6 +570,9 @@ var jarvis = {
         var data = this.all_data.graph_dict[oc_abbr].data;
         var params = this.all_data.graph_dict[oc_abbr].params;
         this.data = data;
+        
+        console.log('* drawing', oc_abbr);
+        console.log('* oc data', data);
 
         // show the name
         // var oc_fullname = this.all_data.oc_dict[oc_abbr].oc_fullname;

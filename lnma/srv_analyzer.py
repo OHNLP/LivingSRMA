@@ -64,7 +64,7 @@ def get_nma(extract, paper_dict, is_skip_unselected=True):
     cfg['reference_treatment'] = treat_list[0]
 
     # the R script use different param
-    cfg["which_is_better"] = 'small' if extract.meta['which_is_better'] == 'lower' else 'big',
+    cfg["which_is_better"] = 'small' if extract.meta['which_is_better'] == 'lower' else 'big'
 
     # 2022-02-20: no need to change this,
     # since all the format convert has been done in the model level.
