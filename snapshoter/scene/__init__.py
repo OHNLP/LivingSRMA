@@ -117,6 +117,9 @@ def copy_graphdata_files(keystr, cq_abbr, output_path, paths):
         src_path = os.path.join(graphdata_path, path)
         dst_path = os.path.join(_output_path, path)
 
+        if not os.path.exists(src_path):
+            print('* Skip NON-EXIST path %s' % src_path)
+
         if os.path.isdir(src_path):
             shutil.copytree(src_path, dst_path)
 

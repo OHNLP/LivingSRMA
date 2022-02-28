@@ -1285,6 +1285,58 @@ def json_encoder(o):
         return o.__str__()
 
     return str(o)
+
+
+def sort_rct_seq(papers):
+    '''
+    Sort the RCT sequence of the given papers
+
+    Return RCT dict
+    {
+        'NCT1234567': {
+            'rct_seq': {
+                '12345678': 0,
+                '23456789': 1,
+                '34567890': 2
+            },
+            'papers': [
+                {'pid':'12345678', 'pub_date': 2019},
+                {'pid':'23456789', 'pub_date': 2020},
+                {'pid':'34567890', 'pub_date': 2021}
+            ]
+        },
+        ...
+    }
+    '''
+    # all nct
+    rcts = {}
+
+    # check each paper
+    for paper in tqdm(papers):
+        if paper.meta['rct_id'] == '': continue
+
+        rct = paper.meta['rct_id']
+        if rct not in rcts:
+            rcts[rct] = {
+                'rct_seq': {},
+                'papers': []
+            }
+
+        rcts[rct]['papers'].append({
+            'pid': paper.pid,
+            'pub_date': get_year(paper.pub_date)
+        })
+
+    # sort the nct's paper
+    for rct in rcts:
+        rcts[rct]['papers'] = sorted(
+            rcts[rct]['papers'],
+            key=lambda p: p['pub_date']
+        )
+        for i, p in enumerate(rcts[rct]['papers']):
+            rcts[rct]['rct_seq'][p['pid']] = i
+
+    return rcts
     
 
 def make_ss_cq_dict(project, cq_abbr=None):
@@ -1318,7 +1370,7 @@ def make_ss_cq_dict(project, cq_abbr=None):
                     '',
                     settings.PAPER_SS_EX_SS_CQ_CONFIRMED_NO
                 )
-                
+
     return d
 
 
@@ -1491,6 +1543,13 @@ def create_ss_ex(reason, decision):
     return d
 
 
+def get_current_year_str():
+    '''
+    Get the current year string
+    '''
+    return datetime.datetime.now().strftime('%Y')
+
+    
 if __name__ == "__main__":
     fn = '/home/hehuan/Downloads/endnote_test.xml'
     fn = '/home/hehuan/Downloads/endnote_test_large.xml'

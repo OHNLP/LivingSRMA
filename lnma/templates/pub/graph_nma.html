@@ -449,6 +449,7 @@ if (isIE) {
 
 {% include "js/fig_saver.js" %}
 
+{% include 'js/srv_shared.js' %}
 
 var fm_oc_selector = {
     vpp: null,
@@ -471,11 +472,14 @@ var fm_oc_selector = {
         }
 
         // sort the ocs
-        ocs.sort(function(a, b) {
-            if(a.oc_fullname < b.oc_fullname) { return -1; }
-            if(a.oc_fullname > b.oc_fullname) { return 1; }
-            return 0;
-        });
+        // ocs.sort(function(a, b) {
+        //     if(a.oc_fullname < b.oc_fullname) { return -1; }
+        //     if(a.oc_fullname > b.oc_fullname) { return 1; }
+        //     return 0;
+        // });
+
+        // 2022-02-27: use jarvis to sort
+        ocs.sort(jarvis.compare_oc_names);
 
         if (typeof(selected_oc_abbr)=='undefined') {
             selected_oc_abbr = ocs[0].oc_abbr;
@@ -685,6 +689,15 @@ var jarvis = {
         var src = jarvis.get_url_paramter('src');
         if (src == '') {
             src = 'cache';
+        }
+        
+        // set the sorting
+        var od = jarvis.get_url_paramter('od');
+        if (od == '') {
+            jarvis.oc_orders = [];
+        } else {
+            od = od.toLocaleLowerCase();
+            jarvis.oc_orders = od.split(';');
         }
         
         // init the plots

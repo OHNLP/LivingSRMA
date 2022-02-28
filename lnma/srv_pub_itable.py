@@ -3,6 +3,7 @@ import pandas as pd
 from lnma import dora
 from lnma import srv_extract
 from lnma import util
+from lnma import settings
 
 
 def get_itable_attr_rs_cfg_from_db(keystr, cq_abbr="default"):
@@ -30,6 +31,14 @@ def get_itable_attr_rs_cfg_from_db(keystr, cq_abbr="default"):
     paper_dict = {}
     for p in papers:
         paper_dict[p.pid] = p
+
+    cq_papers = dora.get_papers_of_included_sr_and_cq(
+        project_id,
+        cq_abbr
+    )
+
+    # create a original/followup
+    cq_rcts = util.sort_rct_seq(cq_papers)
 
     # this is for output as some papers are not selected for output
     selected_paper_dict = {}
@@ -176,7 +185,14 @@ def get_itable_attr_rs_cfg_from_db(keystr, cq_abbr="default"):
                     val = auetal
 
             elif attr['abbr'] == 'ba_ofu':
-                val = paper.get_study_type()
+                # 2022-02-27: use the cq level pid and nct
+                # val = paper.get_study_type()
+                val = settings.PAPER_STUDY_TYPE_ORIGINAL
+                _rct = paper.meta['rct_id']
+                if _rct in cq_rcts:
+                    if paper.pid in cq_rcts[_rct]['rct_seq']:
+                        if cq_rcts[_rct]['rct_seq'][paper.pid] > 0:
+                            val = settings.PAPER_STUDY_TYPE_FOLLOWUP
 
             elif attr['abbr'] == 'ba_pmid':
                 val = paper.pid

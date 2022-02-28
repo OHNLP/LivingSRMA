@@ -121,7 +121,7 @@ a {
             <div v-show="is_shown_dfs" v-html='"<embed class=\"da-image\" src=\""+get_url(comparison, "DFS")+"\">"'>
             </div>
 
-            <div v-show="is_shown_strae" v-html='"<embed class=\"da-image\" src=\""+get_url(comparison, "S_TRAE")+"\">"'>
+            <div v-show="is_shown_strae" v-html='"<embed class=\"da-image\" src=\""+get_url(comparison, "TRAE_3+")+"\">"'>
             </div>
 
             <div v-show="is_shown_ftrae" v-html='"<embed class=\"da-image\" src=\""+get_url(comparison, "F_TRAE")+"\">"'>
@@ -144,8 +144,6 @@ a {
 
 <script>
 
-var prj = '[[ keystr ]]';
-
 var vw_idgpanel = {
     vpp: null,
     vpp_id: '#vw_idgpanel',
@@ -161,16 +159,15 @@ var vw_idgpanel = {
                 },
                 evidence_types: [
                     {label: 'Direct treatment evidence', value: 'direct'},
-                    // {label: 'Mixed treatment evidence', value: 'mixed'}
+                    {label: 'Mixed treatment evidence', value: 'mixed'}
                 ],
                 comparisons_by_type: {
                     direct: [
-                        {label: 'Pembrolizumab vs Sunitinib', value: 'Pembrolizumab_Sunitinib'},
                         {label: 'Pembrolizumab vs Placebo', value: 'Pembrolizumab_Placebo'},
                         {label: 'Sunitinib vs Placebo', value: 'Sunitinib_Placebo'},
                     ],
                     mixed: [
-                        {label: 'Avelumab-Axitinib vs Atezolizumab-Bevacizumab', value: 'AveAxi_AteBev'},
+                        {label: 'Pembrolizumab vs Sunitinib', value: 'Pembrolizumab_Sunitinib'},
                     ]
                 },
 
@@ -202,10 +199,13 @@ var vw_idgpanel = {
 
                 // the values for choosing plots
                 type_of_evidence: 'direct',
-                comparison: 'LenPem_Suni',
+                comparison: 'Pembrolizumab_Placebo',
                 is_shown_os: false,
                 is_shown_dfs: false,
+
+                // serious treatment AEs
                 is_shown_strae: false,
+
                 is_shown_ftrae: false,
                 is_shown_qol: false,
                 is_shown_pc: false
@@ -213,7 +213,7 @@ var vw_idgpanel = {
 
             methods: {
                 get_url: function(folder, fn) {
-                    return '/pub/graphdata/' + jarvis.prj + '/decision_aid/' + folder + '/' + fn + '.svg?rnd=' + Math.random();
+                    return '/pub/graphdata/' + jarvis.prj + '/file/decision_aid/' + folder + '/' + fn + '.svg?cq='+jarvis.cq+'&rnd=' + Math.random();
                 }
             }
         });
@@ -222,6 +222,7 @@ var vw_idgpanel = {
 
 var jarvis = {
     prj: '[[ keystr ]]',
+    cq: '[[ cq_abbr ]]',
 
     init: function() {
         var isIE = /*@cc_on!@*/false || !!document.documentMode;

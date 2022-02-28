@@ -104,13 +104,15 @@
         <div class="row">
 
             <div class="col">
-                <img width="100%" src="[[ url_for('pub.graphdata', keystr='RCC', fn='CONCEPT_IMAGE.svg', cq='adjrcc') ]]" />
+                <img width="100%" src="[[ url_for('pub.graphdata', keystr=keystr, fn='CONCEPT_IMAGE_UPDATED.svg', cq=cq_abbr) ]]" />
             </div>
         </div>
 
         <div class="row">
             <div class="col">
-                <p class="mt-3">The treatment landscape of adjuvant renal cell carcinoma (aRCC) is evolving which prompted us to create a living review to assess tyrosine kinase inhibitors (TKIs) in aRCC in 2018. The initial report included data from three trials (ASSURE, S-TRAC, and PROTECT). We have maintained the evidence current by adding new data from ATLAS and SORCE trials, and updated data from S-TRAC and PROTECT. The final update of this living review shows consistently high-certainty lack of benefit with TKIs in aRCC. Therefore, the living review has now been closed and the process is terminated with this final update owing to conclusive results which are unlikely to be changed significantly in the future.</p>
+                <p class="mt-3">
+                    The treatment landscape of adjuvant renal cell carcinoma (aRCC) is evolving which prompted us to create a living review to assess tyrosine kinase inhibitors (TKIs) in aRCC in 2018. The initial report included data from three trials (ASSURE, S-TRAC, and PROTECT). We have previously maintained the evidence by adding new data from ATLAS and SORCE trials, and updated data from S-TRAC and PROTECT. The current update includes data from KEYNOTE-564 in this living review and shows evolution of treatment network.
+                </p>
             </div>
         </div>
     </div>
@@ -130,7 +132,7 @@
     </div>
     <div class="row">
         <iframe id="ifm_prisma"
-            src="[[ url_for('pub.prisma', prj='RCC', cq='adjrcc') ]]" frameborder="0" 
+            src="[[ url_for('pub.prisma', prj=keystr, cq=cq_abbr) ]]" frameborder="0" 
             style="width: 100%; min-height: 850px;">
         </iframe>
     </div>
@@ -169,9 +171,9 @@
 
     <div class="row">
         <iframe id="ifm_itable" 
-            src="[[ url_for('pub.itable', prj='RCC', cq='adjrcc', src='db') ]]" 
+            src="[[ url_for('pub.itable', prj=keystr, cq=cq_abbr, src='db') ]]" 
             frameborder="0" 
-            style="width: 100%; min-height: 700px;">
+            style="width: 100%; min-height: 610px;">
         </iframe>
     </div>
 </div>
@@ -212,9 +214,9 @@
     <div class="row">
         <div class="col">
             <iframe id="ifm_pwma_prim"
-                src="[[ url_for('pub.graph_pma', prj='RCC', cq='adjrcc', group='primary') ]]" 
+                src="[[ url_for('pub.graph_pma', prj=keystr, cq=cq_abbr, group='primary', od=';'.join(['Overall survival', 'Disease free survival']) ) ]]" 
                 frameborder="0" 
-                style="width: 100%; min-height: 500px;">
+                style="width: 100%; min-height: 260px;">
             </iframe>
         </div>
     </div>
@@ -232,7 +234,7 @@
     </p>
     <div class="row">
         <iframe id="ifm_nma_prim" 
-            src="[[ url_for('pub.graph_nma', prj='RCC', cq='adjrcc', gp='primary', tr='Placebo', oc='disease free survival') ]]" 
+            src="[[ url_for('pub.graph_nma', prj=keystr, cq=cq_abbr, gp='primary', tr='Placebo', oc='disease free survival', od=';'.join(['overall survival','disease free survival']) ) ]]" 
             frameborder="0" 
             style="width: 100%; min-height: 800px;">
         </iframe>
@@ -255,7 +257,7 @@
     <div class="row">
         <div class="col">
             <iframe id="ifm_sofpma" 
-                src="[[ url_for('pub.softable_pma', prj='RCC', cq='adjrcc', msrs='OR,RR,HR', od=';'.join(['disease free survival','overall survival'])) ]]" 
+                src="[[ url_for('pub.softable_pma', prj=keystr, cq=cq_abbr, msrs='OR,RR,HR', od=';'.join(['overall survival', 'disease free survival'])) ]]" 
                 frameborder="0" 
                 style="width: 100%; min-height: 450px;">
             </iframe>
@@ -281,7 +283,7 @@
     <div class="row">
         <div class="col">
             <iframe id="ifm_sofnma" 
-                src="[[ url_for('pub.softable_nma', prj='RCC', cq='adjrcc', dc='Placebo', cp='yes', od=';'.join(['disease free survival','overall survival'])) ]]" 
+                src="[[ url_for('pub.softable_nma', prj=keystr, cq=cq_abbr, dc='Placebo', cp='yes', od=';'.join(['overall survival', 'disease free survival']) ) ]]" 
                 frameborder="0" 
                 style="width: 100%; min-height: 450px;">
             </iframe>
@@ -304,7 +306,7 @@
     <div class="row">
         <div class="col">
             <iframe id="ifm_evmap" 
-                src="[[ url_for('pub.evmap', prj='RCC', cq='adjrcc', tr='Pembro') ]]" 
+                src="[[ url_for('pub.evmap', prj=keystr, cq=cq_abbr, tr='Pembro') ]]" 
                 frameborder="0" 
                 style="width: 100%; min-height: 700px;">
             </iframe>
@@ -350,7 +352,7 @@
 <!-- FOOTER -->
 <footer class="container">
     <p class="float-right"><a href="#">Back to top</a></p>
-    <p>&copy; 2021 &middot; <a href="#">Terms</a></p>
+    <p>&copy; 2021-[[ year ]] &middot; <a href="#">Terms</a></p>
 </footer>
 
 <!-- jQuery first, then Popper.js, then Bootstrap JS -->
@@ -361,29 +363,17 @@
 
 
 <script>
-var prj = 'RCC';
-var cq = 'adjrcc';
+var prj = "[[ keystr ]]";
+var cq = "[[ cq_abbr ]]";
 var default_treat = 'Suni';
 
-
-function resize_iframe( iFrame ) {
-    iFrame.height = iFrame.contentWindow.document.body.scrollHeight + "px";
-    console.log('* resize iframe#'+iFrame.id+' height to ' + iFrame.height);
-}
-
-function resize_iframes() {
-    $('iframe').each(function(idx) {
-        if ($(this).is('[resize_by_content]')) {
-            resize_iframe(this);
-        }
-    });
-}
+{% include 'js/resize_frames.js' %}
 
 var jarvis = {
     init: function() {
 
         $.get(
-            "[[ url_for('pub.graphdata_latest_json', prj='RCC') ]]",
+            "[[ url_for('pub.graphdata_latest_json', prj=keystr) ]]",
             {},
             function(data) {
                 console.log(data);

@@ -44,7 +44,9 @@ def kacha(keystr, cq_abbr, output_path):
         cq_abbr,
         pcq_output_path, 
         [
-            'CONCEPT_IMAGE.svg'
+            'CONCEPT_IMAGE.svg',
+            'CONCEPT_IMAGE_UPDATED.svg',
+            'file', # a folder for other files
         ]
     )
 
@@ -82,8 +84,13 @@ def kacha(keystr, cq_abbr, output_path):
         ['EVMAP DATA', '/pub/graphdata/%s/EVMAP.json?src=cache&cq=%s' % (keystr, cq_abbr), 'pub/graphdata/%s/EVMAP.json' % (keystr)],
 
         # for the latest update
-        ['LATEST DATE', '/pub/graphdata/%s/LATEST.json' % (keystr), 'pub/graphdata/%s/LATEST.json' % (keystr)]
+        ['LATEST DATE', '/pub/graphdata/%s/LATEST.json' % (keystr), 'pub/graphdata/%s/LATEST.json' % (keystr)],
 
+        # for the decision aid
+        ['DECISION AID', '/pub/decision_aid.html?k=%s&c=%s' % (keystr, cq_abbr), 'decision_aid.html'],
+
+        # other static pages
+        ['METHODS', '/pub/methods.html', 'methods.html']
     ]
 
     # the root path for output

@@ -459,7 +459,7 @@ def set_project_settings(project_id, settings):
     db.session.commit()
 
     return True, project
-
+    
 
 def sort_paper_rct_seq_in_project(project_id):
     '''
@@ -467,7 +467,7 @@ def sort_paper_rct_seq_in_project(project_id):
 
     Based on 
     '''
-    papers = get_papers(project_id)
+    # papers = get_papers(project_id)
     papers = get_papers_by_stage(
         project_id, 
         ss_state.SS_STAGE_INCLUDED_SR
@@ -1095,6 +1095,29 @@ def get_papers_of_included_sr(project_id):
         ]),
         Paper.is_deleted == settings.PAPER_IS_DELETED_NO
     )).order_by(Paper.date_updated.desc()).all()
+
+    return papers
+
+
+def get_papers_of_included_sr_and_cq(project_id, cq_abbr):
+    '''
+    Get all papers of included sr stage and in a cq
+    '''
+    _papers = get_papers_of_included_sr(project_id)
+
+    # select those selected in this cq
+    papers = []
+    for p in _papers:
+        if 'ss_cq' in p.ss_ex:
+            if cq_abbr in p.ss_ex['ss_cq']:
+                if p.ss_ex['ss_cq'][cq_abbr]['d'] == settings.PAPER_SS_EX_SS_CQ_DECISION_YES:
+                    papers.append(p)
+                else:
+                    pass
+            else:
+                pass
+        else:
+            continue
 
     return papers
 

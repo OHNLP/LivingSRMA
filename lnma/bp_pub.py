@@ -9,6 +9,7 @@ from flask import request
 from flask import flash
 from flask import render_template
 from flask import Blueprint
+from flask import send_file
 from flask import send_from_directory
 from flask import current_app
 from flask import jsonify
@@ -88,12 +89,14 @@ def php():
     )
     # last, check this path exists or not
     # if not os.path.exists(os.path.join()):
+    year = util.get_current_year_str()
 
     return render_template(
         path_to_homepage,
         keystr=keystr,
         cq_abbr=cq_abbr,
-        project=project
+        project=project,
+        year=year
     )
 
 
@@ -119,12 +122,27 @@ def decision_aid():
     # if not os.path.exists(os.path.join(, path_to_webpage)):
         # return 'No such webpage for %s.%s' % (keystr, cq_abbr)
 
+    year = util.get_current_year_str()
+
     return render_template(
         path_to_webpage,
         keystr=keystr,
         cq_abbr=cq_abbr,
-        project=project
+        project=project,
+        year=year
     )
+
+
+@bp.route('/methods.html')
+def lnma_methods():
+
+    year = util.get_current_year_str()
+
+    return render_template(
+        'pub/methods.html',
+        year=year
+    )
+
 
 ###############################################################################
 # For IO project
@@ -168,6 +186,58 @@ def graph_pma_IO():
 @bp.route('/softable_pma_IO.html')
 def softable_pma_IO():
     return render_template('pub/IO/softable_pma_IO.html')
+
+
+###########################################################
+# Modules for public page
+###########################################################
+
+@bp.route('/prisma.html')
+@bp.route('/prisma_hybrid.html')
+def prisma():
+    return render_template('pub/prisma_hybrid.html')
+
+
+@bp.route('/prisma_living.html')
+def prisma_living():
+    return render_template('pub/prisma_living.html')
+
+
+@bp.route('/itable')
+@bp.route('/itable.html')
+def itable():
+    return render_template('pub/itable.html')
+
+
+@bp.route('/graph_nma.html')
+def graph_nma():
+    return render_template('pub/graph_nma.html')
+
+
+@bp.route('/graph_pma.html')
+def graph_pma():
+    return render_template('pub/graph_pma.html')
+
+
+@bp.route('/softable_nma.html')
+def softable_nma():
+    return render_template('pub/softable_nma.html')
+
+
+@bp.route('/softable_pma.html')
+def softable_pma():
+    fn = 'pub/softable_pma.html'
+    return render_template(fn)
+
+
+@bp.route('/evmap.html')
+def evmap():
+    return render_template('pub/evmap.html')
+
+
+###########################################################
+# Archived modules for public page
+###########################################################
 
 
 ###############################################################################
@@ -368,57 +438,6 @@ def CAT_v1():
     
     return render_template('pub/pub.CAT.html', dma=dma, nma=nma)
 
-###########################################################
-# Modules for public page
-###########################################################
-
-@bp.route('/prisma.html')
-@bp.route('/prisma_hybrid.html')
-def prisma():
-    return render_template('pub/prisma_hybrid.html')
-
-
-@bp.route('/prisma_living.html')
-def prisma_living():
-    return render_template('pub/prisma_living.html')
-
-
-@bp.route('/itable')
-@bp.route('/itable.html')
-def itable():
-    return render_template('pub/itable.html')
-
-
-@bp.route('/graph_nma.html')
-def graph_nma():
-    return render_template('pub/graph_nma.html')
-
-
-@bp.route('/graph_pma.html')
-def graph_pma():
-    return render_template('pub/graph_pma.html')
-
-
-@bp.route('/softable_nma.html')
-def softable_nma():
-    return render_template('pub/softable_nma.html')
-
-
-@bp.route('/softable_pma.html')
-def softable_pma():
-    fn = 'pub/softable_pma.html'
-    return render_template(fn)
-
-
-@bp.route('/evmap.html')
-def evmap():
-    return render_template('pub/evmap.html')
-
-
-###########################################################
-# Archived modules for public page
-###########################################################
-
 
 @bp.route('/ADJRCC.html')
 def ADJRCC():
@@ -509,6 +528,40 @@ def evmap_tr_v2():
 ###########################################################
 # Data services
 ###########################################################
+
+@bp.route('/graphdata/<keystr>/file/<path:rest>')
+def graphdata_file(keystr, rest):
+    '''
+    Special rule for other file in grpah data under file/
+
+    The cq is required to determine sub-folder
+    '''
+    # get the cq for sub folder
+    cq_abbr = request.args.get('cq')
+    if cq_abbr is None or cq_abbr == '':
+        cq_abbr = 'default'
+
+    # get the full path to the file
+    full_path = os.path.join(
+        current_app.instance_path, 
+        settings.PUBLIC_PATH_PUBDATA, 
+        keystr, 
+        cq_abbr,
+        'file',
+        rest
+    )
+
+    if os.path.exists(full_path):
+        print('* requesting project file: %s' % full_path)
+        return send_file(
+            full_path
+        )
+
+    else:
+        # this file not exists???
+        print('* not found project file: %s' % full_path)
+        return '', 404
+
 
 @bp.route('/graphdata/<keystr>/<fn>')
 def graphdata(keystr, fn):
