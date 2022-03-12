@@ -1457,7 +1457,7 @@ def calc_nma_cie(r, cols):
         val = r[col]
 
         # make sure the value type is int
-        val = int('%s'%val)
+        val = int(float('%s'%val))
 
         if val == 0:
             # not applicable
