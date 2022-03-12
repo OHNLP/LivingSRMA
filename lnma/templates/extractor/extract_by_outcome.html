@@ -43,6 +43,24 @@ html {
     overflow: hidden;
 }
 
+.cie-val-text {
+    font-weight: normal !important;
+}
+
+.cie-rob-val-l, 
+.cie-rob-val-1 {
+    background-color: #68f168;
+}
+
+.cie-rob-val-m, 
+.cie-rob-val-2 {
+    background-color: orange;
+}
+
+.cie-rob-val-h, 
+.cie-rob-val-3 {
+    background-color: red;
+}
 </style>
 
 
@@ -145,13 +163,23 @@ var pan_ocpapers = {
         papers: [],
 
         // search
-        keywords: ''
+        keywords: '',
+
+        // for cie
+        is_editing_cie: false,
+        
+        // for test
+        oc_paper_rob: {}
     },
 
     vpp_methods: {
         // label converting function from srv_shared
         _lbl: function(v) {
             return srv_shared._lbl(v);
+        },
+
+        on_change_cie: function() {
+            this.$forceUpdate();
         },
 
         ///////////////////////////////////////////////////
@@ -467,6 +495,13 @@ var pan_ocpapers = {
         // the data is a combo of extract and papers
         this.vpp.working_oc = data.extract;
         this.vpp.papers = data.papers;
+
+        // update the test rob
+        this.vpp.$data.oc_paper_rob = {};
+        for (let i = 0; i < data.papers.length; i++) {
+            const p = data.papers[i];
+            this.vpp.$data.oc_paper_rob[p.pid] = ['1', '1', '1', '1', '1'];
+        }
 
         // update the all_attrs and show_attrs variables for display
         this.hide_working_paper_pan();
