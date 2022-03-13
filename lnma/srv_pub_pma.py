@@ -20,6 +20,10 @@ def get_graph_pma_data_from_db(keystr, cq_abbr):
     '''
     Get the graph data for PWMA
     '''
+    if keystr == 'IO' and cq_abbr == 'default': 
+        # for the IO project, the calculation is different
+        return get_sof_pma_data_from_db_IO(cq_abbr, False)
+
     return get_pma_by_cq(keystr, cq_abbr, 'plots')
 
 
@@ -97,8 +101,25 @@ def get_pma_by_cq(keystr, cq_abbr="default", included_in='sof'):
             is_skip_unselected=True
         )
 
-        # 2022-02-19: fix the missing CIE
+        # 2022-03-12: update the extract
         # update the extract cie
+        if 'certainty' not in extract.meta:
+            # need to fix this for this outcome
+            extract.meta['certainty'] = extract.get_certainty()
+
+            # update this extract with n
+            extract = dora.update_extract_meta(
+                extract.project_id,
+                extract.oc_type,
+                extract.abbr,
+                extract.meta
+            )
+            
+            print('* fixed missing certainty in extract: %s' % (
+                extract.get_repr_str()
+            ))
+
+        # 2022-02-19: fix the missing CIE
         extract.meta['certainty']['cie'] = util.calc_pma_cie(
             extract.meta['certainty'],
             settings.CIE_PWMA_COLUMNS

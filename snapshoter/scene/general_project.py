@@ -87,10 +87,10 @@ def kacha(keystr, cq_abbr, output_path):
         ['LATEST DATE', '/pub/graphdata/%s/LATEST.json' % (keystr), 'pub/graphdata/%s/LATEST.json' % (keystr)],
 
         # for the decision aid
-        ['DECISION AID', '/pub/decision_aid.html?k=%s&c=%s' % (keystr, cq_abbr), 'decision_aid.html'],
+        ['DECISION AID', '/pub/decision_aid.html?k=%s&c=%s' % (keystr, cq_abbr), 'pub/decision_aid.html'],
 
         # other static pages
-        ['METHODS', '/pub/methods.html', 'methods.html']
+        ['METHODS', '/pub/methods.html', 'pub/methods.html']
     ]
 
     # the root path for output
