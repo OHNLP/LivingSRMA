@@ -190,6 +190,14 @@ html {
 <div id="pan_itbuilder" class="panel-container panel-f">
     <div class="panel-info">
         <div class="oc-attr">
+            <label for="">
+                Table Design: 
+            </label>
+            <select v-model="edit_mode">
+                <option value="visual">Visual Editor</option>
+                <option value="code">Code Editor</option>
+            </select>
+            |
             <button class="btn btn-default btn-xs" v-on:click="save_itable();">
                 <i class="fa fa-save"></i>
                 Save Interactive Table Design
@@ -215,7 +223,7 @@ html {
 
     <div class="d-flex flex-row">
 
-        <div v-if="itable != null" class="panel-m">
+        <div v-if="itable != null && edit_mode == 'visual' " class="panel-m">
 
             <div class="panel-info">
                 <div class="oc-attr">
@@ -314,6 +322,31 @@ html {
                     </div>
                 </div>
 
+            </div>
+        </div>
+
+        <div v-if="itable != null && edit_mode == 'code'" class="panel-m">
+            <div class="panel-info">
+                <div class="oc-attr">
+                    <span style="font-size: 1.2em;">
+                        <i class="fa fa-table"></i>
+                        Table Structure
+                        <span class="txt-sm">
+                            <b>DO NOT</b> edit anything below if you are not sure what would be affected.
+                        </span>
+                    </span>
+                </div>
+                <!-- <div class="oc-attr">
+                    <button class="btn btn-default btn-xs"
+                        v-on:click="create_filter();">
+                        <i class="fa fa-bars"></i>
+                        Add Filter
+                    </button>
+                </div> -->
+            </div>
+
+            <div>
+                <v-jsoneditor ref="editor" v-model="itable.meta.cate_attrs" @error="onError"></v-jsoneditor>
             </div>
         </div>
 
@@ -806,6 +839,8 @@ var pan_itbuilder = {
             el: this.vpp_id,
             data: {
                 itable: null,
+
+                edit_mode: 'visual'
             },
 
             updated: function() {
@@ -1281,7 +1316,6 @@ var pan_itable_previewer = {
         $('#ifr_itable_previewer').height(h - 110);
     }
 };
-
 
 
 var jarvis = {
