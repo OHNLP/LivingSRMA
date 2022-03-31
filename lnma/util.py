@@ -1224,8 +1224,21 @@ def check_paper_doi(doi):
 
     if len(doi) == 0:
         return ''
+
+    lower_doi = doi.lower()
+    _doi = lower_doi
+
+    # 2022-03-30: fix the URL as DOI
+    if lower_doi.startswith('http://dx.doi.org/'):
+        _doi = lower_doi.replace('http://dx.doi.org/', '')
+    
+    elif lower_doi.startswith('https://dx.doi.org/'):
+        _doi = lower_doi.replace('https://dx.doi.org/', '')
+    
     else:
-        return doi[0:settings.PAPER_PID_MAX_LENGTH]
+        _doi = lower_doi
+
+    return _doi[0:settings.PAPER_PID_MAX_LENGTH]
     
 
 def check_paper_pub_date(pub_date):

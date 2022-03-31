@@ -199,10 +199,15 @@ def delete_all_extracts_by_keystr(keystr, cq_abbr='default', oc_type='all'):
 
     # first, delete those extracts under this project
     if oc_type == 'all':
-        Extract.query.filter(and_(
+        # Extract.query.filter(and_(
+        #     Extract.project_id == project_id,
+        #     Extract.meta['cq_abbr'] == cq_abbr
+        # )).delete()
+
+        Extract.query.filter(
             Extract.project_id == project_id,
             Extract.meta['cq_abbr'] == cq_abbr
-        )).delete()
+        ).delete(synchronize_session=False)
 
     else:
         # Extract.query.filter(and_(

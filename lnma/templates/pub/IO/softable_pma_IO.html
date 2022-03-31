@@ -35,7 +35,7 @@ a {
 }
 #wrapper {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     width: 100%;
     height: 100%;
 }
@@ -210,6 +210,18 @@ a {
 .cie-nner-3 { background: rgb(128, 128, 128); color: rgb(255, 255, 255); }
 .cie-nner-2 { background: rgb(191, 191, 191); color: black; }
 .cie-nner-1 { background: rgb(255, 242, 204); color: black; }
+
+
+.sfilter {
+    margin-right: 15px;
+}
+.sfilter-name {
+    font-size: 1.1em;
+    padding: 2px 0;
+}
+.sfilter-select {
+    width: 100%;
+}
 </style>
 </head>
 <body>
@@ -222,6 +234,35 @@ a {
 </div>
 
 <div id="wrapper">
+
+<div id="vw_studyfilter" class="d-flex fx-row">
+    <div v-for="dropdown, dpd_idx in dropdowns"
+        class="sfilter d-flex fx-col mr-3">
+        <div class="sfilter-name">
+            {{ dropdown.display_name }}
+        </div>
+        <div>
+            <select class="sfilter-select"
+                v-bind:value="dropdown.value"
+                v-bind:disabled="is_filter_disabled(dpd_idx)"
+                v-on:change="on_filter_value_change($event, dpd_idx)">
+                <option v-for="opt in dropdown.options" 
+                    v-bind:value="opt.value">
+                    {{ opt.name }}
+                </option>
+            </select>
+        </div>
+    </div>
+
+    <div class="d-flex fx-col mr-3">
+        <div class="sfilter-name">
+            Number of studies
+        </div>
+        <div style="height: 20px; line-height: 20px;">
+            {{ n_papers }}
+        </div>
+    </div>
+</div>
 
 <div id="app_softpma" class="d-flex fx-row">
 
@@ -376,7 +417,7 @@ a {
                     <button class="btn"
                         v-on:click="remove_all_ocs();">
                         <i class="far fa-trash-alt"></i>
-                        Remove All
+                        Remove
                     </button>
                 </div>
                 <div class="d-flex fx-row">
@@ -410,16 +451,16 @@ a {
                     
                     <div class="box-menu-group d-flex fx-row">
                         <div style="margin-right: 15px;">
-                            <span class="cie-harm-3">
+                            <span class="cie-bene-2">
                                 &nbsp;&nbsp;&nbsp;&nbsp;
                             </span>&nbsp;
-                            High Certainty
+                            Benefit
                         </div>
                         <div style="margin-right: 15px;">
                             <span class="cie-harm-2">
                                 &nbsp;&nbsp;&nbsp;&nbsp;
                             </span>&nbsp;
-                            Low Certainty
+                            Harm
                         </div>
                     </div>
 
@@ -531,6 +572,9 @@ if (isIE) {
 
 <script>
 
+{% include 'js/vw_studyfilter.js' %}
+
+
 var app_softpma = {
     vpp: null,
     vpp_id: '#app_softpma',
@@ -542,8 +586,8 @@ var app_softpma = {
         this.data = data;
 
         // init local db
-        alasql('create table aes');
-        alasql('select * into aes from ?', [this.data.rs])
+        // alasql('create table aes');
+        // alasql('select * into aes from ?', [this.data.rs])
 
         this.rs = {},
         this.rs_stat = {
@@ -936,45 +980,60 @@ var jarvis = {
             cq = 'default';
         }
 
-        $.get(
-            '/pub/graphdata/'+prj+'/SOFTABLE_PMA.json',
-            {rnd: Math.random(), src: src, cq: cq},
-            function(data) {
-                app_softpma.init(data);
+        // $.get(
+        //     '/pub/graphdata/'+prj+'/SOFTABLE_PMA.json',
+        //     {rnd: Math.random(), src: src, cq: cq},
+        //     function(data) {
+        //         app_softpma.init(data);
 
-                jarvis.ssmsg('Almost initialized.');
-                setTimeout('jarvis.ssclose();', 400);
-            }
-        );
+        //         jarvis.ssmsg('Almost initialized.');
+        //         setTimeout('jarvis.ssclose();', 400);
+        //     }
+        // );
 
-        // $.when(
-        //     $.get(
-        //         '/pub/graphdata/' + prj + '/ITABLE.json',
-        //         {rnd: Math.random(), src: src, cq: cq}
-        //     ),
-        //     $.get(
-        //         '/pub/graphdata/'+prj+'/SOFTABLE_PMA.json',
-        //         {rnd: Math.random(), src: src, cq: cq},
-        //     )
-        // ).done(function(r1, r2) {
-        //     var data1 = r1[0];
-        //     var data2 = r2[0];
-        //     jarvis.data1 = data1;
-        //     jarvis.data2 = data2;
+        $.when(
+            $.get(
+                '/pub/graphdata/' + prj + '/ITABLE.json',
+                {rnd: Math.random(), src: src, cq: cq}
+            ),
+            $.get(
+                '/pub/graphdata/'+prj+'/SOFTABLE_PMA.json',
+                {rnd: Math.random(), src: src, cq: cq},
+            )
+        ).done(function(r1, r2) {
+            var data1 = r1[0];
+            var data2 = r2[0];
 
-        //     // init the table
-        //     console.log(data1);
-        //     console.log(data2);
+            jarvis.data1 = data1;
+            jarvis.data2 = data2;
 
-        //     vw_oclist.init(data2);
-        //     tb_sofpma.init(data2);
+            // init the table
+            console.log(data1);
+            console.log(data2);
 
-        //     // ok, remove the 
-        //     jarvis.ssmsg('Almost initialized.');
-        //     setTimeout('jarvis.ssclose();', 400);
-        // });
+            // init the local db for the papers
+            alasql('create table papers');
+            alasql('select * into papers from ?', [data1.rs]);
+            
+            // init the local db for the outcome / AE records
+            alasql('create table aes');
+            alasql('select * into aes from ?', [data2.rs])
+
+            // init the filter with ITABLE data
+            vw_studyfilter.init(data1);
+
+            app_softpma.init(data2);
+
+            // ok, remove the 
+            jarvis.ssmsg('Almost initialized.');
+            setTimeout('jarvis.ssclose();', 400);
+        });
 
         
+    },
+
+    update_plots_by_pmids: function(pmids) {
+        //vw_oclist.update(pmids);
     },
 
     get_url_paramter: function(name) {
