@@ -36,6 +36,9 @@ Object.assign(pan_ocpapers.vpp_data, {
     // 2. switch to a different arm
     is_wp_ac_inited: true,
 
+    // is saving something?
+    is_saving: false,
+
     // working paper filter for the outcome name
     working_paper_oc_fileter: ''
 });
@@ -57,9 +60,19 @@ Object.assign(pan_ocpapers.vpp_methods, {
         }
     },
 
+    saving_start: function() {
+        this.is_saving = true;
+    },
+
+    saving_end: function() {
+        this.is_saving = false;
+    },
+
     save_working_paper_extraction: function() {
         var pid = this.working_paper.pid;
         var oc = this.working_oc;
+
+        this.saving_start();
 
         pan_ocpapers.save_working_paper_extraction(
             pid, oc

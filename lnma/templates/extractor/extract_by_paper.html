@@ -396,6 +396,9 @@ var pan_ocpapers = {
         // 2. switch to a different arm
         is_wp_ac_inited: true,
 
+        // is saving something?
+        is_saving: false,
+
         // the attrs for extraction
         all_attrs: [],
 
@@ -572,9 +575,19 @@ var pan_ocpapers = {
         save_working_paper_selections: function() {
             var pid = this.working_paper.pid;
 
+            this.saving_start();
+
             pan_ocpapers.save_working_paper_selections(
                 pid, this.working_paper_oc_selections
             );
+        },
+
+        saving_start: function() {
+            this.is_saving = true;
+        },
+
+        saving_end: function() {
+            this.is_saving = false;
         },
 
     },
@@ -624,8 +637,8 @@ var pan_ocpapers = {
         this.vpp.papers = data.papers;
 
         // update the extract dict for display
-        this.vpp.$data.extract_dict = this.update_extract_dict(data);
-        this.vpp.$data.extract_tree = this.update_extract_tree(data);
+        this.vpp.$data.extract_dict = srv_shared.create_extract_dict(data.extracts);
+        this.vpp.$data.extract_tree = srv_shared.create_extract_tree(data.extracts);
         this.vpp.$data.extract_tree_sorted = srv_shared.create_extract_tree_sorted(
             this.vpp.$data.extract_tree
         );
@@ -636,12 +649,39 @@ var pan_ocpapers = {
         pan_ocpapers.resize();
     },
 
-    update_extract_dict: function(data) {
-        return srv_shared.create_extract_dict(data.extracts);
-    },
+    // update_extract_dict: function(data) {
+    //     return srv_shared.create_extract_dict(data.extracts);
+    // },
 
-    update_extract_tree: function(data) {
-        return srv_shared.create_extract_tree(data.extracts);
+    update_extract_tree: function(extract_tree, extract) {
+        // return srv_shared.create_extract_tree(data.extracts);
+        var oc_type = extract.oc_type;
+        var group = extract.meta.group;
+        var cate = extract.meta.category;
+
+        if (!extract_tree.hasOwnProperty(oc_type)) {
+            // ??? why no such extract?
+            return extract_tree;
+        }
+
+        if (oc_type == 'itable') {
+            extract_tree.itable = extract;
+        }
+
+        if (!extract_tree[oc_type].groups.hasOwnProperty(group)) {
+            // ??? why no such group??
+            return extract_tree;
+        }
+
+        if (!extract_tree[oc_type].groups[group].cates.hasOwnProperty(cate)) {
+            // ??? why no such cate??
+            return extract_tree;
+        }
+
+        // put this outcome to the cate
+        extract_tree[oc_type].groups[group].cates[cate].ocs[extract.abbr] = extract;
+
+        return extract_tree;
     },
 
     save_working_paper_selections: function(pid, oc_selections) {
@@ -701,6 +741,7 @@ var pan_ocpapers = {
                 console.log(data);
 
                 jarvis.toast('Updated [' + data.extract.meta.full_name + '] with current extraction');
+                pan_ocpapers.vpp.saving_end();
 
                 // reload the page
                 // pan_ocpapers.re_load(data.extract);
@@ -750,16 +791,16 @@ var pan_ocpapers = {
         // update the given extract
         for (let i = 0; i < this.vpp.$data.extracts.length; i++) {
             if (extract.abbr == this.vpp.$data.extracts[i].abbr) {
+                // update the extract itself
                 this.vpp.$data.extracts[i] = extract;
 
                 // then update the dict and tree
-                this.vpp.$data.extract_dict = this.update_extract_dict(
-                    this.vpp.$data
-                );
+                this.vpp.$data.extract_dict[extract.abbr] = extract;
 
                 // then update the tree
                 this.vpp.$data.extract_tree = this.update_extract_tree(
-                    this.vpp.$data
+                    this.vpp.$data.extract_tree,
+                    extract
                 );
 
                 // then update the sorted tree
