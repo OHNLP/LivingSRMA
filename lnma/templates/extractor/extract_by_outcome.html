@@ -702,7 +702,8 @@ var pan_ocpapers = {
                 console.log(data);
 
                 jarvis.toast('Update [' + data.extract.meta.full_name + '] with current extraction');
-
+                pan_ocpapers.vpp.saving_end();
+                
                 // 2021-05-17: in fact, no need to reload
                 // update
                 // pan_ocpapers.show_extract_and_papers(

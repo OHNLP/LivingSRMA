@@ -513,6 +513,19 @@ var pan_ocpapers = {
         },
 
         on_click_oc: function(oc) {
+            // need to check status first
+            if (this.has_saved) {
+                // ok, it means no issue with previous
+            } else {
+                var ret = window.confirm('The extraction for ['+ this.working_oc.meta.category+'|'+ this.working_oc.meta.full_name +'] may be changed and the changes are not saved yet. Are you sure to ignore the unsaved changes on ['+this.working_oc.meta.category+'|'+this.working_oc.meta.full_name+'] and work on other extraction?');
+
+                if (ret) {
+                    // ok just ignore
+                    this.has_change_saved();
+                } else {
+                    return;
+                }
+            }
             // show the panel
             this.show_working_paper_collector = true;
 
@@ -815,6 +828,7 @@ var pan_ocpapers = {
     },
 
     hide_working_paper: function() {
+        // also need to check 
         this.vpp.show_working_paper_pan = false;
     },
 

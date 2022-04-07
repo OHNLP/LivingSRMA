@@ -39,6 +39,9 @@ Object.assign(pan_ocpapers.vpp_data, {
     // is saving something?
     is_saving: false,
 
+    // detect changes
+    has_saved: true,
+
     // working paper filter for the outcome name
     working_paper_oc_fileter: ''
 });
@@ -66,6 +69,24 @@ Object.assign(pan_ocpapers.vpp_methods, {
 
     saving_end: function() {
         this.is_saving = false;
+        this.has_saved = true;
+    },
+
+    has_change_unsaved: function() {
+        this.has_saved = false;
+    },
+
+    has_change_saved: function() {
+        this.has_saved = true;
+    },
+
+    confirm_close_wpc: function() {
+
+    },
+
+    on_change_input_value: function(event) {
+        // no matter what happens, trigger this event
+        this.has_change_unsaved();
     },
 
     save_working_paper_extraction: function() {
@@ -104,7 +125,12 @@ Object.assign(pan_ocpapers.vpp_methods, {
     },
 
     set_n_arms: function() {
-        var n_arms = parseInt(this.working_oc.data[this.working_paper.pid].n_arms);
+        // notify unsaved changes first
+        this.has_change_unsaved();
+
+        var n_arms = parseInt(
+            this.working_oc.data[this.working_paper.pid].n_arms
+        );
         console.log('* set n_arms to', n_arms);
 
         // update the other to match the number
@@ -147,6 +173,9 @@ Object.assign(pan_ocpapers.vpp_methods, {
         this.get_working_arm_attrs()['g'+g_idx][abbr] = value;
         console.log('* set value ' + old_val + ' -> ' + this.get_working_arm_attrs()['g'+g_idx][abbr]);
         
+        // notify changed
+        this.has_change_unsaved();
+
         this.$forceUpdate();
     },
 
@@ -154,12 +183,22 @@ Object.assign(pan_ocpapers.vpp_methods, {
         var old_val = this.get_working_arm_attrs()['g'+this.working_paper_subg][abbr];
         this.get_working_arm_attrs()['g'+this.working_paper_subg][abbr] = value;
         console.log('* set wk_pp_arm_group value ' + old_val + ' -> ' + value);
+        // notify changed
+        this.has_change_unsaved();
     },
 
     set_working_paper_arm_allgroups_by_attr_value: function(abbr, value) {
         for (let i = 0; i < this.working_oc.meta.sub_groups.length; i++) {        
             this.get_working_arm_attrs()['g'+i][abbr] = value;
         }
+        // notify changed
+        this.has_change_unsaved();
+    },
+
+
+    clear_working_arm_attr: function(g_idx, abbr) {
+        this.get_working_arm_attrs()['g'+g_idx][abbr] = '';
+        this.has_change_unsaved();
     },
 
     /**
@@ -311,6 +350,9 @@ Object.assign(pan_ocpapers, {
                     // set the value
                     // pan_ocpapers.vpp.$data.working_oc.data[pid].attrs.main[abbr] = val;
                     console.log('* selected [', val, '] for g', g_idx, 'abbr', abbr, 'of', pid);
+
+                    // notify the changes
+                    pan_ocpapers.vpp.has_change_unsaved();
 
                     // 2021-04-24: finally fixed this issue!!!
                     // the working arm may be main or other,

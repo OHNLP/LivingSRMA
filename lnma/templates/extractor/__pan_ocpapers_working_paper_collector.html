@@ -1,7 +1,8 @@
 <div id="pan_ocpapers_working_paper_collector"
     v-if="show_working_paper_collector">
     <div v-if="working_paper != null && working_oc != null">
-        <div class="working_title">
+        <div class="working_title"
+            v-bind:class="{'wpc-data-has-not-saved':!has_saved}">
             {{ working_oc.meta.group }}<br>
             {{ working_oc.meta.category }} | {{ working_oc.meta.full_name }}
         </div>
@@ -10,11 +11,13 @@
             <button class="btn btn-sm btn-default mr-1"
                 v-bind:disabled="is_saving"
                 v-on:click="save_working_paper_extraction">
-                <span v-if="is_saving">
+                <span v-if="is_saving"
+                    v-bind:class="{'wpc-data-has-not-saved':!has_saved}">
                     <i class="fas fa-spinner fa-spin"></i>
                     Saving
                 </span>
-                <span v-else>
+                <span v-else
+                    v-bind:class="{'wpc-data-has-not-saved':!has_saved}">
                     <i class="fa fa-save"></i>
                     Save
                 </span>
@@ -112,6 +115,7 @@
                                     v-bind:g_idx="g_idx"
                                     v-bind:abbr="attr.abbr"
                                     v-on:click="switch_working_subg(g_idx)"
+                                    @input="on_change_input_value"
                                     v-model="get_working_arm_attrs()['g'+g_idx][attr.abbr]"> 
                                 <span class="w-remove-content"
                                     v-on:click="set_working_paper_arm_by_group_attr_value(g_idx, attr.abbr, '')">
@@ -141,9 +145,10 @@
                                             v-bind:oc_abbr="working_oc.abbr"
                                             v-bind:g_idx="g_idx"
                                             v-bind:abbr="sub.abbr"
+                                            @input="on_change_input_value"
                                             v-model="get_working_arm_attrs()['g'+g_idx][sub.abbr]"> 
                                         <span class="w-remove-content"
-                                            v-on:click="get_working_arm_attrs()['g'+g_idx][sub.abbr] = ''">
+                                            v-on:click="clear_working_arm_attr(g_idx, sub.abbr)">
                                             <i class="fa fa-close"></i>
                                         </span>
                                     </div>
