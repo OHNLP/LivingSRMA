@@ -327,6 +327,11 @@ html {
     {% include 'extractor/_pan_collector.html' %}
 </div>
 
+<div id="dialog_confirm_unsaved" 
+    style="display: none;"
+    title="Leave before saving?">
+    <p><span class="ui-icon ui-icon-alert" style="float:left; margin:12px 12px 20px 0;"></span>These items will be permanently deleted and cannot be recovered. Are you sure?</p>
+</div>
     
 </div>
 <!-- /#main -->
@@ -525,6 +530,24 @@ var pan_ocpapers = {
                 } else {
                     return;
                 }
+
+                $( "#dialog-confirm" ).dialog({
+                    resizable: false,
+                    height: "auto",
+                    width: 400,
+                    modal: true,
+                    butons: {
+                        "Save before ": function() {
+
+                        },
+                        "Delete all items": function() {
+                            $( this ).dialog( "close" );
+                        },
+                        "Cancel": function() {
+                        $( this ).dialog( "close" ) 
+                        }
+                    }
+                });
             }
             // show the panel
             this.show_working_paper_collector = true;

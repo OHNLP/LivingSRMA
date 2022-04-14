@@ -185,7 +185,8 @@ def graph_pma_IO():
 
 @bp.route('/softable_pma_IO.html')
 def softable_pma_IO():
-    return render_template('pub/IO/softable_pma_IO.html')
+    return render_template('pub/IO/softable_pma_IO_by_metajs.html')
+    # return render_template('pub/IO/softable_pma_IO.html')
 
 
 ###########################################################

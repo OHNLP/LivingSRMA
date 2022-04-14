@@ -513,7 +513,8 @@ a {
                             <td v-if="r.is_show['sm']" class="col-flipable"
                                 v-bind:class="get_bg_color_class(r)"
                                 v-on:click="flip_cell(grade, r, 'sm')">
-                                {{ measure }} {{ _round2(r.ae.result[measure].random.model.sm) }}<br>
+                                {{ _round2(r.ae.result[measure].random.model.sm) }}<br>
+                                {{ get_mj_rst(r.abbr, r.ae_grade).OR.random.SM }}
                                 ({{ _round2(r.ae.result[measure].random.model.lower) }} to {{ _round2(r.ae.result[measure].random.model.upper) }})
                             </td>
                             <td v-else class="col-ta-left col-flipable"
@@ -583,6 +584,12 @@ var app_softpma = {
     vpp_id: '#app_softpma',
     select_mode: 'checkbox', // radio, checkbox
     pids: [],
+
+    // the data from server
+    data: null,
+
+    // meta.js results
+    mj_rst: {},
 
     init: function(data) {
         // bind local data
@@ -676,6 +683,19 @@ var app_softpma = {
                     this.clear();
                 },
 
+                get_mj_rst: function(abbr, ae_grade) {
+                    if (app_softpma.mj_rst.hasOwnProperty(abbr)) {
+                        if (app_softpma.mj_rst[abbr].hasOwnProperty(ae_grade)) {
+                            return app_softpma.mj_rst[abbr][ae_grade];
+
+                        } else {
+                            return null;
+                        }
+                    } else {
+                        return null;
+                    }
+                },
+
                 // for table
                 get_ACR: function(r) {
                     if (this.use_internal_baseline) {
@@ -764,7 +784,7 @@ var app_softpma = {
                     var lower = r.ae.result[this.measure][fixed_or_random].model['lower'];
                     var upper = r.ae.result[this.measure][fixed_or_random].model['upper'];
                     var cls =  this.calc_bg_color_class(sm, lower, upper);
-                    console.log('* ae class:', cls);
+                    // console.log('* ae class:', cls);
 
                     return cls;
                 },
@@ -856,6 +876,12 @@ var app_softpma = {
             cnt_aes: 0,
         };
 
+        // empty the rst dict
+        this.mj_rst = {};
+
+        // count how many calculation did
+        var cnt_calc = 0;
+
         // create the rs for display
         for (var i = 0; i < raw_rs.length; i++) {
             var r = raw_rs[i];
@@ -878,12 +904,51 @@ var app_softpma = {
                 cnt_g3h: r.cnt_g3h,
                 cnt_g5n: r.cnt_g5n
             });
+
+            for (var j = 0; j < 3; j++) {
+                var ae_grade = {0:'GA', 1:'G3H', 2:'G5N'}[j];
+                // get those records
+                var sql_rs = 'select author as study, year, pid, ' + '\n' +
+                    ae_grade + '_Et as Et, ' + '\n' +
+                    ae_grade + '_Ec as Ec, ' + '\n' +
+                    'GA_Nt as Nt, GA_Nc as Nc ' + '\n' +
+                    'from aes ' + '\n' +
+                    'where ' + this.get_pid_condition() + ' ' + '\n' +
+                    "  and oc_cate='" + r.oc_cate + "' " + '\n' +
+                    "  and oc_name='" + r.oc_name + "' " + '\n' +
+                    "  and has_" + ae_grade + "_prim = true";
+
+                // console.log(sql_rs);
+                var ae_rs = alasql(sql_rs);
+                // console.log(rs);
+
+                // convert format
+                var ae_vs = dl2vl_PRIM_CAT_RAW(ae_rs);
+                
+                // calc
+                var ae_res_OR = metajs.metabin(ae_vs);
+                cnt_calc += 1;
+
+                if (!this.mj_rst.hasOwnProperty(r.oc_abbr)) {
+                    this.mj_rst[r.oc_abbr] = {};
+                }
+                
+                this.mj_rst[r.oc_abbr][ae_grade] = {
+                    OR: ae_res_OR
+                }
+            }
+            var ae_grade_rs = [];
+
+            // we can also calcuate here?
             rs_stat.cnt_aes += 1;
         }
         // bind results 
         this.raw_rs = raw_rs;
         this.rs = rs;
         this.rs_stat = rs_stat;
+
+        // output something for debugging
+        console.log('* calculation (SQL + Meta): ' + cnt_calc);
 
         // update vpp data
         this.vpp.rs = this.rs;
@@ -912,6 +977,8 @@ var app_softpma = {
                 // this means no studies in this ae + grade 
                 return;
             }
+
+            console.log('* toggle ae: ', ae);
             
             // build the r for display
             var r = {
@@ -920,6 +987,8 @@ var app_softpma = {
                 group: group,
                 oc_cate: oc_cate,
                 name: oc_name,
+                ae_grade: ae_grade,
+
                 // bind the original AE
                 ae: ae,
                 // for display setting
@@ -933,7 +1002,11 @@ var app_softpma = {
 
             // add this to list
             this.vpp.tbrs[ae_grade][abbr] = r;
+            
+            var mj_res = this.vpp.get_mj_rst(abbr, ae_grade);
+            console.log("* mj_res", mj_res);
         }
+
 
         // have to force update the view
         this.vpp.$forceUpdate();
@@ -1037,6 +1110,7 @@ var jarvis = {
 
     update_plots_by_pmids: function(pmids) {
         //vw_oclist.update(pmids);
+        app_softpma.update(pmids);
     },
 
     get_url_paramter: function(name) {
@@ -1063,6 +1137,23 @@ var jarvis = {
         $('#start-screen').hide();
     }
 };
+
+function dl2vl_PRIM_CAT_RAW(dl) {
+    var vs = [];
+    for (let i = 0; i < dl.length; i++) {
+        const d = dl[i];
+        vs.push([
+            d.Et,
+            d.Nt,
+            d.Ec,
+            d.Nc,
+            d.study,
+            'Treat',
+            'Placebo'
+        ])
+    }
+    return vs;
+}
 
 $(document).ready(function() {
     jarvis.init();
