@@ -183,10 +183,15 @@ def graph_pma_IO():
     return render_template('pub/IO/graph_pma_IO.html')
 
 
+@bp.route('/va_pma_IO.html')
+def va_pma_IO():
+    return render_template('pub/IO/va_pma_IO.html')
+
+
 @bp.route('/softable_pma_IO.html')
 def softable_pma_IO():
-    return render_template('pub/IO/softable_pma_IO_by_metajs.html')
-    # return render_template('pub/IO/softable_pma_IO.html')
+    # return render_template('pub/IO/softable_pma_IO_by_metajs.html')
+    return render_template('pub/IO/softable_pma_IO.html')
 
 
 ###########################################################
