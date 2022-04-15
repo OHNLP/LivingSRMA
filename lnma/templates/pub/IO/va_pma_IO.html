@@ -8,7 +8,7 @@
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
 
-<title>Pairwise Meta-Analysis Plots for IO</title>
+<title>Pairwise Meta-Analysis Plots</title>
 
 <link rel="icon" href="/static/img/favicon.png" type="image/png">
 <!-- <script src="https://kit.fontawesome.com/cb45cc91b0.js" crossorigin="anonymous"></script> -->
@@ -181,6 +181,19 @@ a {
 }
 .sfilter-select {
     width: 100%;
+}
+#vw_studyfilter {
+    padding: 5px 0 0 5px;
+}
+#fig_scatter {
+    width: 500px; 
+    height: 500px;
+}
+.fig-tooltip-header {
+    border-bottom: 1px solid rgba(255,255,255,.3); 
+    font-size: 1.2em;
+    padding-bottom: 7px;
+    margin-bottom: 7px;
 }
 </style>
 </head>
@@ -421,64 +434,9 @@ a {
             </div>
 
             <div class="box-body" style="height: 100%;">
-
-                <div id="vw_ocplots_plotpanel"
-                    v-if="current.has_img">
-                    <h5>The forest plots of {{ current.cnt_studies }} studies of {{ current.oc_cate }} - {{ current.oc_name }}, {{ get_grade_label(current.ae_grade) }}</h5>
-                    <div class="d-flex fx-row">
-                        <div class="oc-plot-tab"
-                            v-show="is_prcm_analysis()"
-                            v-bind:class="{'oc-plot-tab-selected': current.is_prim_plot}"
-                            v-on:click="switch_plot('is_prim_plot')">
-                            <i class="fa fa-chart-bar"></i>
-                            Primary Meta-Analysis with {{ params.sm }}
-                        </div>
-                        <div class="oc-plot-tab"
-                            v-show="is_incd_analysis()"
-                            v-bind:class="{'oc-plot-tab-selected': current.is_incd_plot}"
-                            v-on:click="switch_plot('is_incd_plot')">
-                            <i class="fa fa-chart-bar"></i>
-                            Incidence Analysis
-                        </div>
-                        <div class="oc-plot-tab"
-                            v-bind:class="{'oc-plot-tab-selected': current.is_cumu_plot}"
-                            v-on:click="switch_plot('is_cumu_plot')">
-                            <i class="fa fa-chart-bar"></i>
-                            Cumulative Meta-Analysis
-                        </div>
-                    </div>
-
-                    <div class="oc-plot-tab-page"
-                        v-bind:class="{'oc-plot-tab-page-selected': current.is_prim_plot}">
-                        <div id="fg_pwma_prim_forest" style="width: 100%; height: 100%;">
-                            <svg id="fg_pwma_prim_forest_svg"></svg>
-                        </div>
-                    </div>
-
-                    <div class="oc-plot-tab-page"
-                        v-bind:class="{'oc-plot-tab-page-selected': current.is_incd_plot}">
-                        <div id="fg_incd_incd_forest" style="width: 100%; height: 100%;">
-                            <svg id="fg_incd_incd_forest_svg"></svg>
-                        </div>
-                    </div>
-
-                    <div class="oc-plot-tab-page"
-                        v-bind:class="{'oc-plot-tab-page-selected': current.is_cumu_plot}">
-                        <div id="fg_cumu_forest" style="width: 100%; height: 100%;">
-                            <svg id="fg_cumu_forest_svg"></svg>
-                        </div>
-                    </div>
+                <div id="fig_scatter">
 
                 </div>
-                <div v-else>
-                    <h5>{{ current.title }}</h5>
-                    <p v-if="current.is_analyzing"
-                        style="font-size: 1.5em; padding-left: 1em;">
-                        Running meta-analysis ... 
-                        <i class="fas fa-spinner fa-spin"></i>
-                    </p>
-                </div>
-
             </div>
 
         </div>
@@ -496,6 +454,16 @@ a {
 <!-- D3.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.15.1/d3.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-tip/0.9.1/d3-tip.min.js"></script>
+
+<!-- load the scripts for meta analysis -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.1.1/math.min.js"></script>
+<script src="https://ohnlp.github.io/Meta.js/dist/metajs-0.0.3.js"></script>
+
+<!-- for data exploration -->
+<script src="https://cdn.jsdelivr.net/npm/danfojs@1.1.0/lib/bundle.js"></script>
+
+<!-- for visualization -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.3.2/echarts.min.js"></script>
 
 <script>
 var isIE = /*@cc_on!@*/false || !!document.documentMode;
@@ -541,20 +509,23 @@ var vw_oclist = {
     init: function(data) {
         // bind local data
         this.data = data;
-        
-        this.rs = {},
-        this.rs_stat = {
-            cnt_cates: 0,
-            cnt_aes: 0,
-        };
+
+        // update the ocd
+        var ocds = this.update_oc_dicts(data);
+        this.oc_dict = ocds.oc_dict;
+        this.oc_dict3 = ocds.oc_dict3;
         
         this.vpp = new Vue({
             el: this.vpp_id,
             data: {
                 group: 'treatment',
-                rs: this.rs,
                 select_mode: this.select_mode,
-                rs_stat: this.rs_stat
+                rs: {},
+                rs_stat: {
+                    cnt_cates: 0,
+                    cnt_aes: 0,
+                },
+                ma_dict: {}
             },
             methods: {
                 toggle_oc: function(event) {
@@ -599,7 +570,7 @@ var vw_oclist = {
                     vw_oclist.update();
 
                     // when update the oclist, should hide the current img
-                    vw_ocplot.hide_plot();
+                    // vw_ocplot.hide_plot();
 
                     this.clear();
                 }
@@ -609,25 +580,24 @@ var vw_oclist = {
         this.update([]);
     },
 
-    get_pid_condition: function() {
+    get_pid_condition: function(pids, group) {
         var conditions = '';
         // so first condition is the pid
-        if (this.pids.length == 0) {
+        if (pids.length == 0) {
             conditions += 'pid is not null ';
         } else {
-            var cond = this.pids.map(function(v) { return '"' + v + '"'}).join(',');
+            var cond = pids.map(function(v) { return '"' + v + '"'}).join(',');
             conditions += 'pid in (' + cond + ') ';
         }
 
         // second condition is the group
-        var group = this.vpp.$data.group;
+        // var group = this.vpp.$data.group;
         conditions += '\n';
         conditions += 'and oc_group = "'+group+'" ';
 
         return conditions;
     },
     
-
     update: function(pids) {
         if (typeof(pids) == 'undefined') {
 
@@ -636,21 +606,146 @@ var vw_oclist = {
             this.pids = pids;
         }
 
-        // create a SQL for 
+        // get updated rs for oc list
+        var oc_list = this.update_ocs(
+            pids,
+            this.vpp.$data.group
+        );
+        
+        // bind results 
+        // this.raw_rs = raw_rs;
+        this.oc_list = oc_list.rs;
+        this.rs_stat = oc_list.rs_stat;
+
+
+        // update vpp data
+        this.vpp.rs = oc_list.rs;
+        this.vpp.rs_stat = oc_list.rs_stat;
+
+        // get updated MAs
+        var ma_dict = this.update_ma_dict(
+            pids,
+            this.vpp.$data.group
+        );
+
+        // update the MA results
+        this.update_ma_rsts(
+            ma_dict
+        );
+        this.ma_dict = ma_dict;
+        this.vpp.ma_dict = ma_dict;
+
+        // convert to dataframe for display
+        var ma_df = this.update_ma_df(
+            ma_dict,
+            this.oc_dict
+        );
+        this.ma_df = ma_df;
+
+        // update the vis
+        var vis_data = this.update_vis_data(
+            ma_df,
+            this.oc_dict
+        );
+        vis_ocmas.draw(
+            vis_data
+        );
+
+        // update tips
+        $(document).tooltip({
+            position: {
+                my: "left top",
+                at: "right+5 top-5",
+                collision: "none"
+            }
+        });
+    },
+
+    update_oc_dicts: function() {
+        var sql = 'select oc_group, oc_cate, oc_abbr, first(oc_name) as oc_name, ' + '\n' +
+            '  count(case when has_GA = true then pid else null end) as cnt_ga, ' + '\n' +
+            '  count(case when has_G3H = true then pid else null end) as cnt_g3h, ' + '\n' +
+            '  count(case when has_G5N = true then pid else null end) as cnt_g5n ' + '\n' +
+            'from aes ' + '\n' +
+            'group by oc_group, oc_cate, oc_abbr ' + '\n' +
+            'order by oc_group asc, oc_cate asc, oc_name asc';
+
+        var raw_rs = alasql(sql);
+
+        // oc_dict3 is a three level dict
+        // {
+        //      group: { cate: { abbr: {}}}
+        // }
+        // oc_dict2 is a one level dict
+        // {
+        //      abbr: {}
+        // }
+        
+        var oc_dict = {};
+        var oc_dict3 = {};
+
+        for (var i = 0; i < raw_rs.length; i++) {
+            var r = raw_rs[i];
+
+            if (typeof(r.oc_cate) == 'undefined' ||
+                r.oc_cate == null) {
+                continue;
+            }
+
+            if (!oc_dict.hasOwnProperty(r.oc_abbr)) {
+                oc_dict[r.oc_abbr] = {
+                    oc_group: r.oc_group,
+                    oc_cate: r.oc_cate,
+                    oc_abbr: r.oc_abbr,
+                    oc_name: r.oc_name,
+                    cnt_ga: r.cnt_ga,
+                    cnt_g3h: r.cnt_g3h,
+                    cnt_g5n: r.cnt_g5n
+                }
+            }
+
+            if (!oc_dict3.hasOwnProperty(r.oc_group)) {
+                oc_dict3[r.oc_group] = {}
+            }
+
+            if (!oc_dict3[r.oc_group].hasOwnProperty(r.oc_cate)) {
+                oc_dict3[r.oc_group][r.oc_cate] = {}
+            }
+
+            if (!oc_dict3[r.oc_group][r.oc_cate].hasOwnProperty(r.oc_abbr)) {
+                oc_dict3[r.oc_group][r.oc_cate][r.oc_abbr] = {
+                    oc_group: r.oc_group,
+                    oc_cate: r.oc_cate,
+                    oc_abbr: r.oc_abbr,
+                    oc_name: r.oc_name,
+                    cnt_ga: r.cnt_ga,
+                    cnt_g3h: r.cnt_g3h,
+                    cnt_g5n: r.cnt_g5n
+                }
+            }
+        }
+
+        return {
+            oc_dict: oc_dict,
+            oc_dict3: oc_dict3
+        };
+    },
+
+    update_ocs: function(pids, group) {
         var sql = 'select oc_cate, oc_name, ' + '\n' +
             '  count(case when has_GA = true then pid else null end) as cnt_ga, ' + '\n' +
             '  count(case when has_G3H = true then pid else null end) as cnt_g3h, ' + '\n' +
             '  count(case when has_G5N = true then pid else null end) as cnt_g5n ' + '\n' +
             'from aes ' + '\n' +
             'where ' + '\n' +
-            this.get_pid_condition() + ' ' + '\n' +
+            this.get_pid_condition(pids, group) + ' ' + '\n' +
             'group by oc_cate, oc_name ' + '\n' +
             'order by oc_cate asc, oc_name asc';
 
-        console.log(sql);
+        // console.log(sql);
         // init the result
         var raw_rs = alasql(sql);
-        console.log("* raw_rs", raw_rs);
+        // console.log("* raw_rs", raw_rs);
 
         var rs = {};
         var rs_stat = {
@@ -684,281 +779,346 @@ var vw_oclist = {
             });
             rs_stat.cnt_aes += 1;
         }
-        // bind results 
-        this.raw_rs = raw_rs;
-        this.rs = rs;
-        this.rs_stat = rs_stat;
 
-        // update vpp data
-        this.vpp.rs = this.rs;
-        this.vpp.rs_stat = this.rs_stat;
+        return {
+            rs: rs,
+            rs_stat: rs_stat
+        };
+    },
 
-        // update tips
-        $(document).tooltip({
-            position: {
-                my: "left top",
-                at: "right+5 top-5",
-                collision: "none"
+    update_ma_dict: function(pids, group) {
+        var sql = 'select * ' + '\n' +
+            'from aes ' + '\n' +
+            'where ' + '\n' +
+            this.get_pid_condition(pids, group);
+
+        var rs = alasql(sql);
+        console.log('* rs for mas:', rs);
+
+        // the dict for final records and MA results
+        var ma_dict = {};
+
+        for (let i = 0; i < rs.length; i++) {
+            const r = rs[i];
+            
+            if (!ma_dict.hasOwnProperty(r.oc_abbr)) {
+                // Oh, no such record yet, save it
+                ma_dict[r.oc_abbr] = {
+                    GA: { PRIM: { stus: [], rsts: {} }, INCD: { stus: [], rsts: {} } },
+                    G3H: { PRIM: { stus: [], rsts: {} }, INCD: { stus: [], rsts: {} } },
+                    G5N: { PRIM: { stus: [], rsts: {} }, INCD: { stus: [], rsts: {} } },
+                }
             }
-        });
+
+            // now check each grade
+            for (let j = 0; j < 3; j++) {
+                var grade = {0: 'GA', 1: 'G3H', 2: 'G5N'}[j];
+                
+                if (r['has_'+grade+'_prim']) {
+                    // ok, this has grade prim data
+                    ma_dict[r.oc_abbr][grade].PRIM.stus.push([
+                        r[grade+'_Et'],
+                        r['GA_Nt'],
+                        r[grade+'_Ec'],
+                        r['GA_Nc'],
+                        r['pid'],
+                        'T',
+                        'C'
+                    ]);
+                }
+                
+                // add incidence analysis
+                if (r['has_'+grade+'_incd']) {
+                    // ok, this has grade prim data
+                    ma_dict[r.oc_abbr][grade].INCD.stus.push([
+                        r[grade+'_Et'],
+                        r['GA_Nt'],
+                        r[grade+'_Ec'],
+                        r['GA_Nc'],
+                        r['pid'],
+                        'T',
+                        'C'
+                    ]);
+                }
+            }
+        }
+
+        return ma_dict;
+    },
+
+    update_ma_rsts: function(ma_dict) {
+        // mark start time
+        const t0 = performance.now();
+        var cnt_mas = 0;
+
+        // let's check 
+        for (const abbr in ma_dict) {
+            for (const grade in ma_dict[abbr]) {
+                // get prim data
+                var ma_prim = ma_dict[abbr][grade].PRIM;
+                var ma_incd = ma_dict[abbr][grade].INCD;
+
+                if (ma_prim.stus.length != 0) {
+                    // OK, let's do INCD ANA
+                    var rst_OR = metajs.metabin(
+                        ma_prim.stus, {
+                            sm: 'OR'
+                        }
+                    );
+
+                    var rst_RR = metajs.metabin(
+                        ma_prim.stus, {
+                            sm: 'RR'
+                        }
+                    );
+
+                    // update the data
+                    ma_dict[abbr][grade].PRIM.rsts = {
+                        OR: rst_OR,
+                        RR: rst_RR
+                    };
+
+                    // update count
+                    cnt_mas += 2;
+                }
+
+                if (ma_incd.stus.length != 0) {
+                    // OK, let's do INCD ANA
+                    var rst_INCD = metajs.metaprop(
+                        ma_incd.stus, {}
+                    );
+
+                    // update the data
+                    ma_dict[abbr][grade].INCD.rsts = {
+                        INCD: rst_INCD
+                    };
+
+                    // update the total count
+                    cnt_mas += 1;
+                }
+            }
+        }
+
+        // get the total time
+        const t1 = performance.now();
+        const dur = (t1 - t0) / 1000;
+
+        console.log('* finished calculation of ' + cnt_mas + ' MAs in ' + dur.toFixed(4) + ' seconds');
+
+        return ma_dict;
+    },
+
+    update_ma_df: function(ma_dict, oc_dict) {
+        const t0 = performance.now();
+        // I guess we need 
+        var rs = [];
+        for (const abbr in ma_dict) {
+            for (const grade in ma_dict[abbr]) {
+                // get prim data
+                var ma_prim = ma_dict[abbr][grade].PRIM;
+                var ma_incd = ma_dict[abbr][grade].INCD;
+
+                // put primary
+                var r = {
+                    abbr: abbr,
+                    name: oc_dict[abbr].oc_name,
+                    grade: grade
+                };
+                if (ma_prim.stus.length == 0) {
+                    Object.assign(r, {
+                        // values
+                        OR_n_stus: 0,
+                        OR_sm: NaN,
+                        OR_lower: NaN,
+                        OR_upper: NaN,
+                    });
+                } else {
+                    Object.assign(r, {
+                        // values
+                        OR_n_stus: ma_prim.stus.length,
+                        OR_sm: ma_prim.rsts.OR.random.SM,
+                        OR_lower: ma_prim.rsts.OR.random.SM_lower,
+                        OR_upper: ma_prim.rsts.OR.random.SM_upper,
+                    });
+                }
+
+                // put incidence
+                if (ma_incd.stus.length == 0) {
+                    Object.assign(r, {
+                        // values
+                        INCD_n_stus: 0,
+                        INCD_sm: NaN,
+                        INCD_lower: NaN,
+                        INCD_upper: NaN,
+                    });
+                } else {
+                    Object.assign(r, {
+                        // values
+                        INCD_n_stus: ma_incd.stus.length,
+                        INCD_sm: ma_incd.rsts.INCD.random.SM,
+                        INCD_lower: ma_incd.rsts.INCD.random.SM_lower,
+                        INCD_upper: ma_incd.rsts.INCD.random.SM_upper,
+                    });
+                }
+
+                rs.push(r);
+            }
+        }
+
+        var df = new dfd.DataFrame(rs);
+
+        // get the total time
+        const t1 = performance.now();
+        const dur = (t1 - t0) / 1000;
+
+        console.log('* finished converting ' + rs.length + ' MAs to in ' + dur.toFixed(4) + ' seconds');
+
+        return df;
+    },
+
+    update_vis_data: function(df) {
+        var cols = [
+            'INCD_sm',
+            'OR_sm', 
+            'name',
+            'grade',
+            'OR_n_stus',
+            'OR_lower',
+            'OR_upper',
+            'INCD_lower',
+            'INCD_upper',
+        ];
+        var data_ga = df.loc({
+            rows: df['OR_n_stus'].gt(0).and(
+                df['grade'].eq('GA')
+            ),
+            columns: cols
+        }).values;
+
+        var data_g3h = df.loc({
+            rows: df['OR_n_stus'].gt(0).and(
+                df['grade'].eq('G3H')
+            ),
+            columns: cols
+        }).values;
+
+        var data_g5n = df.loc({
+            rows: df['OR_n_stus'].gt(0).and(
+                df['grade'].eq('G5N')
+            ),
+            columns: cols
+        }).values;
+
+        return {
+            data_ga: data_ga,
+            data_g3h: data_g3h,
+            data_g5n: data_g5n
+        };
     }
 };
 
 
-var vw_ocplot = {
-    vpp: null,
-    vpp_id: '#vw_ocplot',
+var vis_ocmas = {
+    fig_scatter: null,
+    fig_scatter_id: 'fig_scatter',
+    fig_scatter_options: null,
+    fig_scatter_schema: [
+        { attr: 'INCD', text: 'Incidence', index: 0 },
+        { attr: 'OR', text: 'Odds Ratio', index: 1 },
+        { attr: 'name', text: 'Outcome Name', index: 2 },
+        { attr: 'grade', text: 'AE Grade', index: 3 },
+        { attr: 'OR_n_stus', text: '# of Studies', index: 4 },
+        { attr: 'OR_lower', text: 'OR lower', index: 5 },
+        { attr: 'OR_upper', text: 'OR upper', index: 6 },
+        { attr: 'INCD_lower', text: 'INCD lower', index: 7 },
+        { attr: 'INCD_upper', text: 'INCD upper', index: 8 },
+    ],
 
-    apikey: '7323590e-577b-4f46-b19f-3ec402829bd6',
-    pids: [],
+    init: function() {
+        this.fig_scatter = echarts.init(
+            document.getElementById(this.fig_scatter_id)
+        );
+        this.fig_scatter_options = {
+            tooltip: {
+                backgroundColor: 'rgba(255,255,255,0.7)',
+                formatter: function (param) {
+                    var value = param.value;
+                    // prettier-ignore
+                    return '<div class="fig-tooltip-header">' +
+                        // param.seriesName + ' ' + value[2] + '日：' +
+                        value[2] + ': ' +
+                        '</div>' +
+                        vis_ocmas.fig_scatter_schema[3].text + ': ' + value[3] + '<br>' +
+                        vis_ocmas.fig_scatter_schema[4].text + ': ' + value[4] + '<br>' +
+                        vis_ocmas.fig_scatter_schema[1].text + ': ' + jarvis.tf2(value[1]) + '<br>' +
+                        vis_ocmas.fig_scatter_schema[1].text + ': ' + jarvis.tf2(value[1]) + '<br>';
+                }
+            },
+            legend: {},
+            toolbox: {
+                show: true,
+                feature: {
+                    dataZoom: {
+                    },
+                    dataView: { readOnly: false },
+                    saveAsImage: {}
+                }
+            },
+            xAxis: {
+                type: 'value',
+                name: 'Incidence',
+                // max: 0.5
+            },
+            yAxis: {
+                type: 'value',
+                name: 'Odds Ratio',
+                max: 10
+            },
+            series: [
+                {
+                    name: 'PMA GA',
+                    type: 'scatter',
+                    data: [],
+                    symbolSize: vis_ocmas.to_symbol_size
+                },
 
-    sms: {
-        'OR': { sm: 'OR', name: 'Odds Ratio'},
-        'RR': { sm: 'RR', name: 'Risk Ratio'},
-        'HR': { sm: 'HR', name: 'Hazard Ratio'},
-        'RD': { sm: 'RD', name: 'Risk Difference'},
-        'PLOGIT': { sm: 'PLOGIT', name: 'Logit Trans.'},
+                {
+                    name: 'PMA G3H',
+                    type: 'scatter',
+                    data: [],
+                    symbolSize: vis_ocmas.to_symbol_size
+                },
+
+                {
+                    name: 'PMA G5N',
+                    type: 'scatter',
+                    data: [],
+                    symbolSize: vis_ocmas.to_symbol_size
+                }
+            ]
+        };
+
+        // Display the chart using the configuration items and data just specified.
+        this.fig_scatter.setOption(
+            this.fig_scatter_options
+        );
     },
 
-    init: function(data) {
-        // bind local data
-        this.data = data;
-
-        this.vpp = new Vue({
-            el: this.vpp_id,
-            data: {
-                params: {
-                    sm: 'OR',
-                    hk: 'FALSE'
-                },
-
-                current: {
-                    oc_group: 'treatment',
-                    oc_cate: '',
-                    oc_name: '',
-                    ae_grade: '',
-                    cnt_studies: 0, 
-                    has_img: false,
-                    is_analyzing: false,
-                    img: {
-                        cumuplt: {},
-                        outplt1: {}
-                    },
-                    title: '',
-                    is_prim_plot: true,
-                    is_incd_plot: false,
-                    is_cumu_plot: false
-                }
-            },
-            methods: {
-
-                is_prcm_analysis: function() {
-                    return this.params.sm == 'OR' ||
-                           this.params.sm == 'RR';
-                },
-
-                is_incd_analysis: function() {
-                    return this.params.sm == 'PLOGIT';
-                },
-
-                get_grade_label: function(g) {
-                    return jarvis.texts[g];
-                },
-
-                switch_plot: function(plot) {
-                    // set all to false
-                    this.current.is_cumu_plot = false;
-                    this.current.is_prim_plot = false;
-                    this.current.is_incd_plot = false;
-
-                    // set the selected as true
-                    this.current[plot] = true;
-                },
-
-                update_plot: function() {
-                    if (this.current.oc_cate == '') {
-                        // nothing to update
-                        return;
-                    }
-                    // update 
-                    vw_ocplot.show_plot(
-                        this.current.oc_group,
-                        this.current.oc_cate,
-                        this.current.oc_name,
-                        this.current.ae_grade
-                    );
-                }
-            },
-            updated: function() {
-                if (this.current.has_img) {
-                    vw_ocplot.draw_plots();
-                }
-            }
+    draw: function(ds) {
+        this.fig_scatter.setOption({
+            series: [{
+                data: ds.data_ga
+            }, {
+                data: ds.data_g3h
+            }, {
+                data: ds.data_g5n
+            }]
         });
     },
 
-    update: function(pids) {
-        this.pids = pids;
-    },
-
-    get_pid_condition: function() {
-        var conditions = '';
-        if (this.pids.length == 0) {
-            conditions += 'pid is not null ';
-        } else {
-            var cond = this.pids.map(function(v) { return '"' + v + '"'}).join(',');
-            conditions += 'pid in (' + cond + ') ';
-        }
-
-        // second condition is the group
-        var oc_group = this.vpp.$data.current.oc_group;
-        conditions += '\n';
-        conditions += 'and oc_group = "'+oc_group+'" ';
-
-        return conditions;
-    },
-
-    hide_plot: function() {
-        // set no img 
-        this.vpp.current.has_img = false;
-        this.vpp.current.is_analyzing = false;
-    },
-
-    show_plot: function(oc_group, oc_cate, oc_name, ae_grade, pids) {
-        if (typeof(pids) == 'undefined') {
-            // which means no pids update, just use current
-        } else {
-            // update the current pids
-            this.pids = pids;
-        }
-
-        // set no img and try to load
-        this.vpp.current.has_img = false;
-        this.vpp.current.is_analyzing = true;
-
-        // update the data in vpp
-        this.vpp.current.oc_group = oc_group;
-        this.vpp.current.oc_cate = oc_cate;
-        this.vpp.current.oc_name = oc_name;
-        this.vpp.current.ae_grade = ae_grade;
-        this.vpp.current.cnt_studies = '-';
-
-        // here, we need to decide which analysis API to use
-        // and generate the records for analysis
-        var url = '';
-        var sql = '';
-        if (this.vpp.params.sm == 'PLOGIT') {
-            // this is incidence analysis
-            url = srv_rpltapi.url.pwma_incd;
-            sql = 'select author as study, year, pid, ' + '\n' +
-                ae_grade + '_Et as E, ' + '\n' +
-                'GA_Nt as N' + '\n' +
-                'from aes ' + '\n' +
-                'where ' + this.get_pid_condition() + ' ' + '\n' +
-                "  and oc_cate='" + oc_cate + "' " + '\n' +
-                "  and oc_name='" + oc_name + "' " + '\n' +
-                "  and has_" + ae_grade + "_incd = true";
-
-        } else {
-            // this is primary analysis
-            url = srv_rpltapi.url.pwma_prcm;
-            sql = 'select author as study, year, pid, ' + '\n' +
-                ae_grade + '_Et as Et, ' + '\n' +
-                ae_grade + '_Ec as Ec, ' + '\n' +
-                'GA_Nt as Nt, GA_Nc as Nc ' + '\n' +
-                'from aes ' + '\n' +
-                'where ' + this.get_pid_condition() + ' ' + '\n' +
-                "  and oc_cate='" + oc_cate + "' " + '\n' +
-                "  and oc_name='" + oc_name + "' " + '\n' +
-                "  and has_" + ae_grade + "_prim = true";
-        }
-
-        console.log(sql);
-        var rs = alasql(sql);
-        console.log(rs);
-
-        // send ajax to server
-        var params = {
-            am: 'FORESTDATA',
-            sm: this.vpp.params.sm,
-            rs: JSON.stringify(rs),
-            cf: 'NO',
-            hk: this.vpp.params.hk,
-            apikey: this.apikey
-        };
-
-        $.post(
-            url,
-            params,
-            function(data) {
-                console.log('* get return', data);
-                vw_ocplot._show_plot(data);
-            }, 'json'
-        );
-        
-    },
-
-    _show_plot: function(data) {
-        if (data.success) {
-             // great! show images
-             this.data = data;
-
-             // due to the lazy update, draw plots will be 
-             // triggered when Vue DOM is updated.
-             if (this.data.analysis_method == 'pwma_prcm') {
-                 this.vpp.current.is_prim_plot = true;
-                 this.vpp.current.is_incd_plot = false;
-                 this.vpp.current.is_cumu_plot = false;
-             } else if (this.data.analysis_method == 'pwma_incd'){
-                 this.vpp.current.is_prim_plot = false;
-                 this.vpp.current.is_incd_plot = true;
-                 this.vpp.current.is_cumu_plot = false;
-             }
-
-             // finally, set has_img to true
-             this.vpp.current.has_img = true;
-             this.vpp.current.is_analyzing = false;
-
-             // then the `updated` in vpp will be called
-         } else {
-             // update message to show the error
-         }
-
-         // resize the panel
-         vw_ocplot.resize_panels();
-    },
-
-    draw_plots: function() {
-        
-        var cfg = {
-            sm: vw_ocplot.sms[vw_ocplot.data.params.sm],
-            mode: 'pwma_prcm',
-            params: this.data.params
-        };
-
-        if (this.data.analysis_method == 'pwma_prcm') {
-            fg_pwma_prim_forest.draw(vw_ocplot.data.data.primma, cfg);
-            fg_cumu_forest.draw(vw_ocplot.data.data.cumuma, cfg);
-        } else {
-            cfg.sm = {
-                name: 'Event Rate',
-                sm: 'Incidence (%)'
-            };
-            cfg.mode = 'pwma_incd';
-            fg_incd_incd_forest.draw(vw_ocplot.data.data.incdma, cfg);
-            fg_cumu_forest.draw(vw_ocplot.data.data.cumuma, cfg);
-        }
-
-        // resize?
-        vw_ocplot.resize_panels();
-    },
-
-    resize_panels: function() {
-        // set the height for the window
-        var h = $(window).height() - 130;
-        $('.oc-plot-tab-page').css("height", h);
+    to_symbol_size: function(vals) {
+        return math.sqrt(vals[4]) * 2 + 1;
     }
-
 };
 
 
@@ -1002,6 +1162,9 @@ var jarvis = {
             cq = 'default';
         }
 
+        // just init the plots
+        vis_ocmas.init();
+
         $.when(
             $.get(
                 '/pub/graphdata/' + prj + '/ITABLE.json',
@@ -1032,12 +1195,15 @@ var jarvis = {
             alasql('create table aes');
             alasql('select * into aes from ?', [data2.rs])
 
+            // init a dict for searching
+
+
             // init the filter with ITABLE data
             vw_studyfilter.init(data1);
 
             // init the list and plots with outcome data
             vw_oclist.init(data2);
-            vw_ocplot.init(data2);
+            // vw_ocplot.init(data2);
 
             // ok, remove the 
             jarvis.ssmsg('Almost initialized.');
@@ -1060,7 +1226,7 @@ var jarvis = {
 
     toggle_oc: function(group, oc_cate, oc_name, ae_grade, pids) {
         console.log('* toggle_oc ' + group + ' | ' + oc_cate + ', ' + oc_name + ', ' + ae_grade, pids);
-        vw_ocplot.show_plot(group, oc_cate, oc_name, ae_grade, pids);
+        // vw_ocplot.show_plot(group, oc_cate, oc_name, ae_grade, pids);
     },
 
     clear_all_ae: function() {
@@ -1073,6 +1239,13 @@ var jarvis = {
 
     ssclose: function() {
         $('#start-screen').hide();
+    },
+
+    tf2: function(v) {
+        if (isNaN(v)) {
+            return 'NA';
+        } 
+        return v.toFixed(2);
     }
 };
 
