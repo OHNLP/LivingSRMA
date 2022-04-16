@@ -195,6 +195,40 @@ a {
     padding-bottom: 7px;
     margin-bottom: 7px;
 }
+.flex-wrap {
+    flex-wrap: wrap;
+}
+.fh-g {
+
+}
+.fh-g-name {
+    
+}
+.fh-c {
+    padding: 2px;
+    margin: 1px;
+    border-right: 1px dotted #efefef;
+    border-bottom: 1px dotted #efefef;
+}
+.fh-c:hover {
+    background-color: #f5f5f5;
+}
+.fh-c-name {
+    font-size: 0.85em;
+}
+.fh-o {
+    width: 20px;
+    height: 20px;
+    padding: 2px;
+    margin: 1px;
+    white-space: nowrap;
+    text-overflow: clip;
+    overflow: hidden;
+    border: 1px solid #efefef;
+}
+.fh-o:hover {
+    border-color: #777777;
+}
 </style>
 </head>
 <body>
@@ -383,59 +417,37 @@ a {
                     Plots 
                 </h4>
                 <div class="d-flex fx-row">
-                    <!-- <div class="box-radio-group d-flex fx-row">
-                        <div>
-                            <i class="fa fa-cog"></i>
-                            Measure of effect: 
-                        </div>
-                        <div class="box-radio-item">
-                            <input type="radio" checked name="vw_ocplots_input_sm"
-                                value="OR" id="vw_ocplots_input_sm_or"
-                                v-on:change="update_plot"
-                                v-model="params.sm">
-                            <label for="vw_ocplots_input_sm_or">OR</label>
-                        </div>
-                        <div class="box-radio-item">
-                            <input type="radio" name="vw_ocplots_input_sm"
-                                value="RR" id="vw_ocplots_input_sm_rr"
-                                v-on:change="update_plot"
-                                v-model="params.sm">
-                            <label for="vw_ocplots_input_sm_rr">RR</label>
-                        </div>
-                        <div class="box-radio-item">
-                            <input type="radio" name="vw_ocplots_input_sm"
-                                value="PLOGIT" id="vw_ocplots_input_sm_plogit"
-                                v-on:change="update_plot"
-                                v-model="params.sm">
-                            <label for="vw_ocplots_input_sm_plogit">Incidence</label>
-                        </div>
-                    </div> -->
-                    <!-- <div class="box-radio-group d-flex fx-row">
-                        <div>
-                            <i class="fa fa-cog"></i>
-                            Hartung-Knapp: 
-                        </div>
-                        <div class="box-radio-item">
-                            <input type="radio" checked name="vw_ocplots_input_hk" 
-                                value="TRUE" id="vw_ocplots_input_hk_t"
-                                v-on:change="update_plot"
-                                v-model="params.hk">
-                            <label for="vw_ocplots_input_hk_t">True</label>
-                        </div>
-                        <div class="box-radio-item">
-                            <input type="radio" name="vw_ocplots_input_hk"
-                                value="FALSE" id="vw_ocplots_input_hk_f"
-                                v-on:change="update_plot"
-                                v-model="params.hk">
-                            <label for="vw_ocplots_input_hk_f">False</label>
-                        </div>
-                    </div> -->
+
                 </div>
             </div>
 
-            <div class="box-body" style="height: 100%;">
+            <div class="box-body" style="height: 100%; overflow-y: auto;">
                 <div id="fig_scatter">
 
+                </div>
+
+                <div id="fig_heatmap"
+                    class="d-flex fx-column">
+                    <div v-for="group, group_name in oc_dict3"
+                        class="fh-g">
+                        <div class="fh-g-name">
+                            {{ group_name }}
+                        </div>
+                        <div class="fh-g-box d-flex flex-row flex-wrap">
+                            <div v-for="cate, cate_name in group"
+                                class="fh-c">
+                                <div class="fh-c-name">
+                                    {{ cate_name }}
+                                </div>
+                                <div class="fh-c-box d-flex flex-row flex-wrap">
+                                    <div v-for="oc, oc_abbr in cate"
+                                        class="fh-o">
+                                        {{ oc.oc_name }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -647,8 +659,11 @@ var vw_oclist = {
             ma_df,
             this.oc_dict
         );
-        vis_ocmas.draw(
+        vis_ocmas.draw_fig_scatter(
             vis_data
+        );
+        vis_ocmas.draw_fig_heatmap(
+            this.oc_dict3
         );
 
         // update tips
@@ -692,6 +707,7 @@ var vw_oclist = {
                 continue;
             }
 
+            // first, update this abbr in one-level dict
             if (!oc_dict.hasOwnProperty(r.oc_abbr)) {
                 oc_dict[r.oc_abbr] = {
                     oc_group: r.oc_group,
@@ -704,6 +720,7 @@ var vw_oclist = {
                 }
             }
 
+            // second, update this abbr in three-level dict
             if (!oc_dict3.hasOwnProperty(r.oc_group)) {
                 oc_dict3[r.oc_group] = {}
             }
@@ -713,6 +730,7 @@ var vw_oclist = {
             }
 
             if (!oc_dict3[r.oc_group][r.oc_cate].hasOwnProperty(r.oc_abbr)) {
+                
                 oc_dict3[r.oc_group][r.oc_cate][r.oc_abbr] = {
                     oc_group: r.oc_group,
                     oc_cate: r.oc_cate,
@@ -720,7 +738,9 @@ var vw_oclist = {
                     oc_name: r.oc_name,
                     cnt_ga: r.cnt_ga,
                     cnt_g3h: r.cnt_g3h,
-                    cnt_g5n: r.cnt_g5n
+                    cnt_g5n: r.cnt_g5n,
+                    // this is for In-Cate-IndeX
+                    icix: Object.values(oc_dict3[r.oc_group][r.oc_cate]).length
                 }
             }
         }
@@ -1034,7 +1054,27 @@ var vis_ocmas = {
         { attr: 'INCD_upper', text: 'INCD upper', index: 8 },
     ],
 
+    fig_heatmap: null,
+    fig_heatmap_id: '#fig_heatmap',
+    
     init: function() {
+        this.init_fig_scatter();
+        this.init_fig_heatmap();
+    },
+
+    init_fig_heatmap: function() {
+        this.fig_heatmap = new Vue({
+            el: this.fig_heatmap_id,
+            data: {
+                oc_dict3: {}
+            },
+            methods: {
+
+            }
+        });
+    },
+
+    init_fig_scatter: function() {
         this.fig_scatter = echarts.init(
             document.getElementById(this.fig_scatter_id)
         );
@@ -1104,7 +1144,7 @@ var vis_ocmas = {
         );
     },
 
-    draw: function(ds) {
+    draw_fig_scatter: function(ds) {
         this.fig_scatter.setOption({
             series: [{
                 data: ds.data_ga
@@ -1114,6 +1154,10 @@ var vis_ocmas = {
                 data: ds.data_g5n
             }]
         });
+    },
+
+    draw_fig_heatmap: function(oc_dict3) {
+        this.fig_heatmap.$data.oc_dict3 = oc_dict3;
     },
 
     to_symbol_size: function(vals) {
@@ -1151,7 +1195,7 @@ var jarvis = {
 
         var src = jarvis.get_url_paramter('src');
         if (src == null || src == '') {
-            src = 'db';
+            src = 'cache';
         }
 
         // set the vw_oclist to radio button model
