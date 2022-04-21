@@ -189,6 +189,10 @@ a {
     width: 500px; 
     height: 500px;
 }
+#fig_sunburst {
+    width: 820px; 
+    height: 820px;
+}
 .fig-tooltip-header {
     border-bottom: 1px solid rgba(255,255,255,.3); 
     font-size: 1.2em;
@@ -202,28 +206,42 @@ a {
 
 }
 .fh-g-name {
-    
+
 }
 .fh-c {
     padding: 2px;
-    margin: 1px;
-    border-right: 1px dotted #efefef;
-    border-bottom: 1px dotted #efefef;
+    margin: 2px;
+    /* border-right: 1px dotted #efefef; */
+    /* border-bottom: 1px dotted #efefef; */
+    border: 1px dotted #efefef;
+}
+.fh-c-5 {
+    width: 90px;
+}
+.fh-c-8 {
+    width: 145px;
+}
+.fh-c-10 {
+    width: 190px;
 }
 .fh-c:hover {
-    background-color: #f5f5f5;
+    border-color: #777777;
 }
 .fh-c-name {
     font-size: 0.85em;
+    padding: 1px 0;
+    margin: 0 0 2px 0;
 }
 .fh-o {
-    width: 20px;
-    height: 20px;
+    width: 10px;
+    height: 10px;
     padding: 2px;
     margin: 1px;
     white-space: nowrap;
     text-overflow: clip;
     overflow: hidden;
+    font-size: 0.7em;
+    color: #999999;
     border: 1px solid #efefef;
 }
 .fh-o:hover {
@@ -422,6 +440,11 @@ a {
             </div>
 
             <div class="box-body" style="height: 100%; overflow-y: auto;">
+
+                <div id="fig_sunburst">
+                    
+                </div>
+
                 <div id="fig_scatter">
 
                 </div>
@@ -435,14 +458,16 @@ a {
                         </div>
                         <div class="fh-g-box d-flex flex-row flex-wrap">
                             <div v-for="cate, cate_name in group"
+                                v-bind:class="get_fh_c_cls(cate)"
                                 class="fh-c">
                                 <div class="fh-c-name">
                                     {{ cate_name }}
                                 </div>
                                 <div class="fh-c-box d-flex flex-row flex-wrap">
                                     <div v-for="oc, oc_abbr in cate"
+                                        v-bind:title="oc.oc_name"
                                         class="fh-o">
-                                        {{ oc.oc_name }}
+                                        {{ get_oc_short_name(oc.oc_name) }}
                                     </div>
                                 </div>
                             </div>
@@ -604,8 +629,12 @@ var vw_oclist = {
 
         // second condition is the group
         // var group = this.vpp.$data.group;
-        conditions += '\n';
-        conditions += 'and oc_group = "'+group+'" ';
+        if (typeof(group) == 'undefined') {
+
+        } else {
+            conditions += '\n';
+            conditions += 'and oc_group = "'+group+'" ';
+        }
 
         return conditions;
     },
@@ -664,6 +693,10 @@ var vw_oclist = {
         );
         vis_ocmas.draw_fig_heatmap(
             this.oc_dict3
+        );
+        vis_ocmas.draw_fig_sunburst(
+            this.oc_dict3,
+            this.ma_dict
         );
 
         // update tips
@@ -810,7 +843,7 @@ var vw_oclist = {
         var sql = 'select * ' + '\n' +
             'from aes ' + '\n' +
             'where ' + '\n' +
-            this.get_pid_condition(pids, group);
+            this.get_pid_condition(pids);
 
         var rs = alasql(sql);
         console.log('* rs for mas:', rs);
@@ -1054,12 +1087,100 @@ var vis_ocmas = {
         { attr: 'INCD_upper', text: 'INCD upper', index: 8 },
     ],
 
+    fig_sunburst: null,
+    fig_sunburst_id: 'fig_sunburst',
+    fig_sunburst_options: null,
+
     fig_heatmap: null,
     fig_heatmap_id: '#fig_heatmap',
     
     init: function() {
         this.init_fig_scatter();
+        this.init_fig_sunburst();
         this.init_fig_heatmap();
+    },
+
+    init_fig_sunburst: function() {
+        this.fig_sunburst = echarts.init(
+            document.getElementById(this.fig_sunburst_id)
+        );
+        this.fig_sunburst_options = {
+            series: {
+                radius: ['15%', '80%'],
+                type: 'sunburst',
+                sort: undefined,
+                emphasis: {
+                    focus: 'descendant',
+                    label: {
+                        show: true,
+                        formatter: '{b}'
+                    }
+                },
+                data: [],
+                label: {
+                    rotate: 'radial',
+                    fontSize: 8,
+                    show: false
+                },
+                levels: [
+                    {},
+                    // group level
+                    {
+                        r0: 50,
+                        r:  100, 
+                        label: {
+                            fontSize: 12,
+                            rotate: 0,
+                            show: true
+                        }
+                    },
+                    // cate level
+                    {
+                        r0: 110,
+                        r:  200,
+                        label: {
+                            fontSize: 12,
+                            show: true
+                        }
+                    },
+                    // oc level
+                    {
+                        r0: 210,
+                        r:  250
+                    },
+                    // GA level
+                    {
+                        r0: 260,
+                        r:  300,
+
+                        emphasis: {
+                            label: {
+                                show: true
+                            }
+                        }
+                    },
+                    // G3H level
+                    {
+                        r0: 310,
+                        r:  350
+                    },
+                    // G5 level
+                    {
+                        r0: 360,
+                        r:  400
+                    }
+                ],
+                itemStyle: {
+                    color: '#ddd',
+                    borderWidth: 1
+                }
+            }
+        };
+
+        // Display the chart using the configuration items and data just specified.
+        this.fig_sunburst.setOption(
+            this.fig_sunburst_options
+        );
     },
 
     init_fig_heatmap: function() {
@@ -1069,7 +1190,30 @@ var vis_ocmas = {
                 oc_dict3: {}
             },
             methods: {
+                get_fh_c_cls: function(cate) {
+                    var n_ocs = Object.values(cate).length;
 
+                    if (n_ocs <= 25) {
+                        return 'fh-c-5';
+
+                    } else if (n_ocs <= 64) {
+                        return 'fh-c-8';
+
+                    } else {
+                        return 'fh-c-10';
+                    }
+                },
+
+                get_oc_short_name: function(oc_name) {
+                    var vs = oc_name.split(' ');
+                    if (vs.length == 1) {
+                        // Hmmm just one word
+                        return vs[0].substring(0, 2);
+
+                    } else {
+                        return vs[0][0] + vs[1][0];
+                    }
+                }
             }
         });
     },
@@ -1090,7 +1234,7 @@ var vis_ocmas = {
                         '</div>' +
                         vis_ocmas.fig_scatter_schema[3].text + ': ' + value[3] + '<br>' +
                         vis_ocmas.fig_scatter_schema[4].text + ': ' + value[4] + '<br>' +
-                        vis_ocmas.fig_scatter_schema[1].text + ': ' + jarvis.tf2(value[1]) + '<br>' +
+                        vis_ocmas.fig_scatter_schema[0].text + ': ' + jarvis.tf2(value[0]) + '<br>' +
                         vis_ocmas.fig_scatter_schema[1].text + ': ' + jarvis.tf2(value[1]) + '<br>';
                 }
             },
@@ -1158,6 +1302,107 @@ var vis_ocmas = {
 
     draw_fig_heatmap: function(oc_dict3) {
         this.fig_heatmap.$data.oc_dict3 = oc_dict3;
+    },
+
+    draw_fig_sunburst: function(oc_dict3, ma_dict) {
+        var data = [];
+        const itemStyle_NA = { color: '#fefefe' };
+        const itemStyle_harm = { color: '#F54F4A' };
+        const itemStyle_bene = { color: 'green' };
+
+        for (const group_name in oc_dict3) {
+            var group = oc_dict3[group_name];
+            
+            // object for this group
+            var d_g = {
+                name: group_name,
+                value: 0,
+                itemStyle: {
+                    color: '#da0d68'
+                },
+                children: []
+            };
+
+            for (const cate_name in group) {
+                var cate = group[cate_name];
+
+                // object for this cate
+                var d_c = {
+                    name: cate_name,
+                    value: 0,
+
+                    children: []
+                };
+
+                for (const oc_abbr in cate) {
+                    var oc = cate[oc_abbr];
+
+                    // object for this oc
+                    var itemStyle_g = {
+                        GA: itemStyle_NA,
+                        G3H: itemStyle_NA,
+                        G5N: itemStyle_NA
+                    }
+
+                    if (ma_dict.hasOwnProperty(oc_abbr)) {
+                        for (let i = 0; i < 3; i++) {
+                            var grade = {0: 'GA', 1: 'G3H', 2: 'G5N'}[i];
+                            
+                            if (ma_dict[oc_abbr][grade].PRIM.stus.length > 0) {
+                                if (ma_dict[oc_abbr][grade].PRIM.rsts.OR.random.SM < 1) {
+                                    itemStyle_g[grade] = itemStyle_bene;
+                                } else {
+                                    itemStyle_g[grade] = itemStyle_harm;
+                                }
+                            }
+                        }
+                    } else {
+                        
+                    }
+
+                    var d_o = {
+                        name: oc.oc_name,
+                        value: 1,
+                        children: [{
+                            name: oc.oc_name + ' - GA',
+                            value: 1,
+                            itemStyle: itemStyle_g.GA,
+                            children: [{
+                                name: oc.oc_name + ' - G3H',
+                                itemStyle: itemStyle_g.G3H,
+                                value: 1,
+                                children: [{
+                                    name: oc.oc_name + ' - G5N',
+                                    itemStyle: itemStyle_g.G5N,
+                                    value: 1
+                                }]
+                            }]
+                        }]
+                    }
+
+                    // increase the count of this cate
+                    d_c.value += 1;
+
+                    // increase the count of this group
+                    d_g.value += 1;
+
+                    // append this oc to current cate
+                    d_c.children.push(d_o);
+                }
+
+                // append this cate to current group
+                d_g.children.push(d_c);
+            }
+
+            // append this group to data
+            data.push(d_g);
+        }
+
+        this.fig_sunburst.setOption({
+            series: [{
+                data: data
+            }]
+        });
     },
 
     to_symbol_size: function(vals) {
