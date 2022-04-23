@@ -1435,6 +1435,11 @@ def val2int(v):
     ret = v
     if type(v) == str:
         ret = float(v)
+        try:
+            ret = int(ret)
+        except:
+            pass
+        
     elif type(v) == int:
         ret = v
     elif type(v) == float:

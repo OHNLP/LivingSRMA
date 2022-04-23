@@ -279,6 +279,63 @@ def get_included_papers_and_selections():
     return jsonify(ret)
 
 
+@bp.route('/download_extract_rs_csv')
+@login_required
+def download_extract_rs_csv():
+    '''
+    Get the extracted records 
+    '''
+    extract_id = request.args.get('extract_id')
+
+    if extract_id is None:
+        return 'extract_id is required'
+
+    # get the extract by its id
+    extract = dora.get_extract(extract_id)
+
+    if extract is None:
+        return 'no such extract'
+
+    papers = srv_paper.get_included_papers_by_cq(
+        extract.project_id, 
+        extract.meta['cq_abbr']
+    )
+
+    # make a dictionary for lookup
+    paper_dict = {}
+    for paper in papers:
+        paper_dict[paper.pid] = paper
+
+    # get raw rs
+    rscfg = extract.get_raw_rs_cfg(
+        paper_dict,
+        True
+    )
+
+    # just need the rs
+    rs = rscfg['rs']
+
+    if len(rs) == 0:
+        return ''
+
+    # get the columns
+    columns = rs[0].keys()
+
+    print("* download_extract_rs_csv rscfg: %s" % (rs))
+
+    # build df
+    import io
+    import csv
+    output = io.StringIO()
+
+    writer = csv.DictWriter(output, fieldnames=columns, delimiter='\t')
+    writer.writeheader()
+    writer.writerows(rs)
+    txt = output.getvalue()
+
+    return txt
+
+
 @bp.route('/update_paper_one_selection', methods=['POST'])
 @login_required
 def update_paper_one_selection():

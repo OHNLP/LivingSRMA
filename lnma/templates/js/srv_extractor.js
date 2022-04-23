@@ -34,6 +34,8 @@ var srv_extractor = {
 
         sort_rct_seq: "[[ url_for('extractor.sort_rct_seq') ]]",
         manage_outcomes: "[[ url_for('extractor.manage_outcomes') ]]",
+
+        download_extract_rs_csv: "[[ url_for('extractor.download_extract_rs_csv') ]]",
     },
 
     // the project is binded when running extracting
@@ -52,6 +54,19 @@ var srv_extractor = {
             min: [[ config['settings']['EXTRACTOR_INPUT_BOX_MIN_SIZE'] ]],
             max: [[ config['settings']['EXTRACTOR_INPUT_BOX_MAX_SIZE'] ]]
         }
+    },
+
+    download_extract_rs_csv: function(extract_id, callback) {
+        $.ajax({
+            url: this.url.download_extract_rs_csv,
+            type: 'get',
+            dataType: 'text',
+            data: { extract_id: extract_id, rnd: Math.random() },
+            success: callback,
+            error: function(data) {
+                toast('System error when downloading csv, please try later.', 'error');
+            }
+        });
     },
 
     sort_rct_seq: function(callback) {

@@ -1492,49 +1492,68 @@ class Extract(db.Model):
             if not ext['is_selected'] and is_skip_unselected:
                 continue
             
-            # copy values of main arm to rs
-            r = copy.deepcopy(ext['attrs']['main']['g0'])
+            for arm_idx, arm in enumerate([ext['attrs']['main']] + ext['attrs']['other']):
+                r = copy.deepcopy(arm['g0'])
+                
+                # convert the data type
+                r = util.convert_extract_r_to_number(
+                    r,
+                    self.meta['input_format']
+                )
 
-            # for subgroup analysis
-            # if self.meta['group'] == 'subgroup':
+                # add other information?
+                r['pid'] = pid
+                r['study'] = study
+                r['year'] = year
+                r['treatment'] = r_treatment
+                r['control'] = r_control
+
+                # ok ...
+                rs.append(r)
+
+            # # copy values of main arm to rs
+            # r = copy.deepcopy(ext['attrs']['main']['g0'])
+
+            # # for subgroup analysis
+            # # if self.meta['group'] == 'subgroup':
                 
 
-            # convert the data type
-            r = util.convert_extract_r_to_number(
-                r,
-                self.meta['input_format']
-            )
+            # # convert the data type
+            # r = util.convert_extract_r_to_number(
+            #     r,
+            #     self.meta['input_format']
+            # )
 
-            # add other information?
-            r['pid'] = pid
-            r['study'] = study
-            r['year'] = year
-            r['treatment'] = r_treatment
-            r['control'] = r_control
+            # # add other information?
+            # r['pid'] = pid
+            # r['study'] = study
+            # r['year'] = year
+            # r['treatment'] = r_treatment
+            # r['control'] = r_control
 
-            # ok ...
-            rs.append(r)
+            # # ok ...
+            # rs.append(r)
 
-            # copy other arms if exists
-            if len(ext['attrs']['other']) > 0:
-                for arm_idx, arm in enumerate(ext['attrs']['other']):
-                    r = copy.deepcopy(arm['g0'])
+            # # copy other arms if exists
+            # if len(ext['attrs']['other']) > 0:
+            #     for arm_idx, arm in enumerate(ext['attrs']['other']):
+            #         r = copy.deepcopy(arm['g0'])
 
-                    # convert the data type
-                    r = util.convert_extract_r_to_number(
-                        r,
-                        self.meta['input_format']
-                    )
+            #         # convert the data type
+            #         r = util.convert_extract_r_to_number(
+            #             r,
+            #             self.meta['input_format']
+            #         )
 
-                    # add other information?
-                    r['pid'] = pid
-                    r['study'] = study + " (%s)" % (arm_idx+1)
-                    r['year'] = year
-                    r['treatment'] = r_treatment
-                    r['control'] = r_control
+            #         # add other information?
+            #         r['pid'] = pid
+            #         r['study'] = study + " (%s)" % (arm_idx+1)
+            #         r['year'] = year
+            #         r['treatment'] = r_treatment
+            #         r['control'] = r_control
 
-                    # ok, finally
-                    rs.append(r)
+            #         # ok, finally
+            #         rs.append(r)
         
         return rs
         
