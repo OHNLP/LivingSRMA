@@ -327,7 +327,8 @@ def allowed_file_format(fn):
 
 
 def _read_file(full_fn):
-    '''Read data file
+    '''
+    Read data file
     '''
     fmt = full_fn.split('.')[-1].lower()
     fn = full_fn.split('/')[-1]
@@ -341,17 +342,23 @@ def _read_file(full_fn):
     # 6/22/2020: column names need to be 100% match case sensitive
     df_columns = [ c.strip() for c in df.columns.tolist() ]
     df_coltype = None
-    for coltype in STANDARD_DATA_COLS:
+    mapped_cols = []
+    for sd_cols in STANDARD_DATA_COLS:
+        coltype = sd_cols[0]
+        st_cols = sd_cols[1]
+
         is_this_coltype = True
-        st_cols = STANDARD_DATA_COLS[coltype]
         for col in st_cols:
             if col in df_columns:
+                # ok, found one column
                 pass
             else:
+                # nope, this doesn't match!
                 is_this_coltype = False
 
         if is_this_coltype:
             df_coltype = coltype
+            mapped_cols = st_cols
             break
     
     # get all treat for nma
@@ -380,7 +387,7 @@ def _read_file(full_fn):
         'raw': json.loads(df.to_json(orient='records')),
         'filename': fn,
         'coltype': df_coltype,
-        'cols': ', '.join(STANDARD_DATA_COLS[coltype]),
+        'cols': ', '.join(mapped_cols),
         'treats': treats,
         'treatment': treatment,
         'control': control,

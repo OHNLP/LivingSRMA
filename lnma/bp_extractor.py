@@ -328,7 +328,11 @@ def download_extract_rs_csv():
     import csv
     output = io.StringIO()
 
-    writer = csv.DictWriter(output, fieldnames=columns, delimiter='\t')
+    writer = csv.DictWriter(
+        output, 
+        fieldnames=columns, 
+        delimiter=','
+    )
     writer.writeheader()
     writer.writerows(rs)
     txt = output.getvalue()

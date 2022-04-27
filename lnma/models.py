@@ -1494,7 +1494,7 @@ class Extract(db.Model):
             
             for arm_idx, arm in enumerate([ext['attrs']['main']] + ext['attrs']['other']):
                 r = copy.deepcopy(arm['g0'])
-                
+
                 # convert the data type
                 r = util.convert_extract_r_to_number(
                     r,
@@ -1595,10 +1595,15 @@ class Extract(db.Model):
                     r = copy.deepcopy(arm[subg_key])
 
                     # convert the data type
-                    r = util.convert_extract_r_to_number(
-                        r,
-                        self.meta['input_format']
-                    )
+                    try:
+                        r = util.convert_extract_r_to_number(
+                            r,
+                            self.meta['input_format']
+                        )
+                    except Exception as err:
+                        # something wrong with the this record
+                        print("* cannot convert this record", err)
+                        continue
 
                     # add other information?
                     r['pid'] = pid
@@ -1682,10 +1687,15 @@ class Extract(db.Model):
                 r = copy.deepcopy(record['g0'])
 
                 # convert the data type
-                r = util.convert_extract_r_to_number(
-                    r,
-                    self.meta['input_format']
-                )
+                try:
+                    r = util.convert_extract_r_to_number(
+                        r,
+                        self.meta['input_format']
+                    )
+                except Exception as err:
+                    # something wrong?
+                    print("* cannot convert this record", err)
+                    continue
 
                 # add other information?
                 r['pid'] = pid
