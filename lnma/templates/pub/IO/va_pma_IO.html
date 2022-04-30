@@ -63,14 +63,14 @@ a {
     width: 100%;
     height: calc(100% - 42px);
 }
-#vw_oclist {
+#app_oclist {
     width: 300px;
     padding: 0 5px;
     /* height: 100%; */
-    height: 750px;
+    height: 810px;
     /* background-color: whitesmoke; */
 }
-#vw_oclist_aespanel {
+#app_oclist_aespanel {
     width: 100%;
     height: 100%;
     overflow-x: hidden;
@@ -186,7 +186,7 @@ a {
 .sfilter-select {
     width: 100%;
 }
-#vw_studyfilter {
+#app_filter {
     padding: 5px 0 0 5px;
 }
 #fig_scatter {
@@ -218,6 +218,9 @@ a {
 .flex-align-items-baseline {
     align-items: baseline;
 }
+.flex-align-items-center {
+    align-items: center;
+}
 #plot_nav {
     /* margin-top: -15px; */
     display: flex;
@@ -241,6 +244,22 @@ a {
 #fig_sunburst {
 
 }
+#fig_sunburst_legend {
+    position: relative;
+}
+#fig_sunburst_legend img {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    width: 160px;
+}
+.fig-legend {
+    opacity: 0.5;
+}
+.fig-legend:hover {
+    opacity: 1;
+}
+
 .fh-g {
 
 }
@@ -325,6 +344,9 @@ a {
     width: 160px !important;
     min-width: 160px !important;
 }
+.cmp-tb-cell-ocname-item {
+    cursor: pointer;
+}
 .cmp-tb-cell-sep {
     width: 40px !important;
     min-width: 40px !important;
@@ -382,13 +404,60 @@ a {
 
 .btn {
     padding: 3px 5px;
+    text-decoration: none !important;
+}
+.btn:hover {
+    background-color: #cacaca;
 }
 .btn-remove {
-    color: lightcoral;
+    color: #ffdcdc;
 }
 .btn-remove:hover {
     color: white;
     background-color: rgb(255, 70, 70);
+}
+#app_sclist {
+    width: 600px;
+}
+.sc-item-panel {
+    margin-top: 5px;
+    height: 150px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+.sc-item-box {
+    position: relative;
+}
+.sc-item {
+    margin: 5px 5px 0 0;
+    padding: 1px;
+    height: 130px;
+    border-bottom: 1px solid #efefef;
+}
+.sc-item:hover {
+    cursor: pointer;
+    background-color: whitesmoke;
+}
+.sc-img {
+    height: 110px;
+}
+.sc-close {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+.sc-info {
+    width: 100%;
+    text-align: center;
+    font-size: .8em;
+    font-style: italic;
+    white-space: nowrap;
+    text-overflow: clip;
+    overflow: hidden;
+}
+.forest-plot-panel {
+    height: 100%;
+    overflow-y: auto;
 }
 </style>
 </head>
@@ -396,14 +465,29 @@ a {
 <div id="start-screen">
     <h1>
         <i class="fa fa-chart-bar"></i>
-        Pairwise Meta-Analysis Plots
+        Visual Analysis of Pairwise Meta-Analysis Results
     </h1>
     <div id="ss-msg">Loading data and initializing ...</div>
 </div>
 
 <div id="wrapper">
 
-<div id="vw_studyfilter" class="d-flex flex-row">
+<div id="app_filter" class="d-flex flex-row">
+
+
+    <!-- <div class="sfilter d-flex fx-col mr-3">
+        <div class="sfilter-name">
+            &nbsp;
+        </div>
+        <div>
+
+            <a class="btn"
+                href="javascript:void(0);">
+                Reset Filters
+            </a>
+        </div>
+    </div> -->
+
     <div v-for="dropdown, dpd_idx in dropdowns"
         class="sfilter d-flex fx-col mr-3">
         <div class="sfilter-name">
@@ -430,23 +514,11 @@ a {
             {{ n_papers }}
         </div>
     </div>
-
-    <div class="sfilter d-flex fx-col mr-3">
-        <div class="sfilter-name">
-            &nbsp;
-        </div>
-        <div>
-
-            <button>
-                Reset Filters
-            </button>
-        </div>
-    </div>
 </div>
 
 <div id="app" class="d-flex flex-row">
 
-    <div id="vw_oclist">
+    <div id="app_oclist">
         <div class="box" style="height: 100%;">
             <div class="box-header">
                 <h4>
@@ -456,15 +528,19 @@ a {
                 <!-- <div>
                     <input type="text" class="box-input" style="background-color: transparent;">
                 </div> -->
-                <div>
-                    <button v-on:click="toggle_all_cates(false)">
+                <div class="d-flex flex-align-items-center">
+                    <a class="btn" 
+                        href="javascript:void(0);"
+                        v-on:click="toggle_all_cates(false)">
                         <i class="fa fa-expand-alt"></i>
                         Expand
-                    </button>
-                    <button v-on:click="toggle_all_cates(true)">
+                    </a>
+                    <a class="btn" 
+                        href="javascript:void(0);"
+                        v-on:click="toggle_all_cates(true)">
                         <i class="fa fa-compress-alt"></i>
                         Collapse
-                    </button>
+                    </a>
                 </div>
             </div>
             <div class="box-body" style="height: calc(100% - 70px);">
@@ -474,8 +550,8 @@ a {
                         <div class="oc-name" style="font-weight: bold;">
                             <select v-model="group"
                                 v-on:change="update_oclist()">
-                                <option value="treatment">Treatment Related AEs</option>
-                                <option value="immune">Immune Related AEs</option>
+                                <option value="treatment">Treatment Related</option>
+                                <option value="immune">Immune Related</option>
                             </select>
                         </div>
                         <div style="font-weight: bold; width: 90px; text-align: center; border-bottom: 1px solid #555555;">
@@ -501,7 +577,7 @@ a {
                     </div>
                 </div>
     
-                <div id="vw_oclist_aespanel">
+                <div id="app_oclist_aespanel">
                     <div class="oc-cate d-flex fx-col"
                         v-for="r in rs">
                         <div class="oc-cate-info d-flex flex-row"
@@ -526,7 +602,7 @@ a {
                                     <div class="oc-type"
                                         v-if="ae.cnt_ga<1"
                                         title="Not enough records">
-                                        -
+                                        &nbsp;
                                     </div>
                                     <div class="oc-type"
                                         v-else
@@ -535,6 +611,7 @@ a {
                                         v-bind:oc_cate="r.oc_cate"
                                         v-bind:oc_name="ae.oc_name"
                                         v-bind:ae_grade="'GA'"
+                                        v-bind:style="{ backgroundColor: get_eft_color(ma_dict[ae.oc_abbr].GA.PRIM.rsts.OR) }"
                                         v-on:click="toggle_oc">
                                         {{ ae.cnt_ga }}
                                     </div>
@@ -542,7 +619,7 @@ a {
                                     <div class="oc-type"
                                         v-if="ae.cnt_g3h<1"
                                         title="Not enough records">
-                                        -
+                                        &nbsp;
                                     </div>
                                     <div class="oc-type"
                                         v-else
@@ -551,6 +628,7 @@ a {
                                         v-bind:oc_cate="r.oc_cate"
                                         v-bind:oc_name="ae.oc_name"
                                         v-bind:ae_grade="'G3H'"
+                                        v-bind:style="{ backgroundColor: get_eft_color(ma_dict[ae.oc_abbr].G3H.PRIM.rsts.OR) }"
                                         v-on:click="toggle_oc">
                                         {{ ae.cnt_g3h }}
                                     </div>
@@ -558,7 +636,7 @@ a {
                                     <div class="oc-type"
                                         v-if="ae.cnt_g5n<1"
                                         title="Not enough records">
-                                        -
+                                        &nbsp;
                                     </div>
                                     <div class="oc-type"
                                         v-else
@@ -567,6 +645,7 @@ a {
                                         v-bind:oc_cate="r.oc_cate"
                                         v-bind:oc_name="ae.oc_name"
                                         v-bind:ae_grade="'G5N'"
+                                        v-bind:style="{ backgroundColor: get_eft_color(ma_dict[ae.oc_abbr].G5N.PRIM.rsts.OR) }"
                                         v-on:click="toggle_oc">
                                         {{ ae.cnt_g5n }}
                                     </div>
@@ -597,7 +676,7 @@ a {
                 </div>
             </div>
 
-            <div class="box-body" style="height: 100%; overflow-y: auto;">
+            <div class="box-body" style="height: 100%;">
                 <div id="plot_nav">
                     <div class="plot-nav plot-nav-active">
                         <i class="fas fa-chart-pie"></i>
@@ -613,6 +692,10 @@ a {
                     </div>
                 </div>
                 <div id="plot_main">
+                    <div id="fig_sunburst_legend">
+                        <img class="fig-legend" 
+                            src="/static/img/sunburst-legend.png" alt="">
+                    </div>
                     <div id="fig_sunburst">
                     
                     </div>
@@ -650,6 +733,54 @@ a {
                     </div>
 
                 </div>
+
+                <div id="app_sclist"
+                    class="d-flex flex-col">
+                    <div class="box-header d-flex flex-row"
+                        style="padding: 2px 0 3px 0;">
+                        
+                        <h4>
+                            <i class="fas fa-book"></i>
+                            Scenarios |
+                        </h4>
+                        <div class="d-flex flex-align-items-center">
+                            <a v-on:click="add"
+                                class="btn"
+                                href="javascript:void(0);">
+                                <i class="fa fa-plus"></i>
+                                Add Above Scenario
+                            </a>
+                            <a v-on:click="rm_all"
+                                class="btn btn-remove"
+                                href="javascript:void(0);">
+                                <i class="fa fa-minus"></i>
+                            </a>
+                            
+                        </div>
+                    </div>
+                    <div class="d-flex flex-row flex-wrap sc-item-panel">
+                        <div v-for="sc, sc_idx in scs"
+                            class="sc-item">
+                            <div class="sc-item-box">
+                                <img :src="sc.img_src" 
+                                    alt=""
+                                    class="sc-img">
+                                <div class="sc-close">
+                                    <a v-on:click="rm(sc_idx)"
+                                        class="btn btn-remove" 
+                                        href="javascript:void(0);">
+                                        <i class="fa fa-minus"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="sc-info">
+                                {{ sc.filter_vals[0] }}:
+                                {{ sc.filter_vals[1] }} - 
+                                {{ sc.filter_vals[4] }} 
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
         </div>
@@ -663,7 +794,8 @@ a {
                     <i class="fas fa-table"></i>
                     Comparison |
                 </h4>
-                <div class="d-flex flex-row flex-align-items-baseline">
+                <div class="d-flex flex-row flex-align-items-baseline"
+                    style="font-size: 0.8em;">
                     <input type="radio"
                         id="input_show_effect_model_random"
                         value="random"
@@ -740,7 +872,6 @@ a {
                                 href="javascript:void(0);"
                                 class="btn btn-remove">
                                 <i class="fa fa-minus"></i>
-                                All
                             </a>
                         </div>
                     </div>
@@ -748,7 +879,8 @@ a {
                     <div v-for="f_oc, f_oc_idx in f_ocs"
                         class="cmp-tb-row">
 
-                        <div class="cmp-tb-cell cmp-tb-cell-ocname flex-col">
+                        <div v-on:click="show_detail(f_oc)"
+                            class="cmp-tb-cell cmp-tb-cell-ocname cmp-tb-cell-ocname-item flex-col">
                             <div class="cmp-filters">
                                 {{ f_oc.f_vals[0] }}: 
                                 {{ f_oc.f_vals[1] }} - 
@@ -782,10 +914,10 @@ a {
 
                                 <div v-if="show_effect_label" 
                                     class="cmp-eft-value">
-                                    {{ tf2(f_oc.ma.PRIM.rsts.OR.random.SM ) }}
+                                    {{ tf2(f_oc.ma.PRIM.rsts.OR[show_effect_model].SM ) }}
                                     (
-                                    {{ tf2(f_oc.ma.PRIM.rsts.OR.random.SM_lower ) }},
-                                    {{ tf2(f_oc.ma.PRIM.rsts.OR.random.SM_upper ) }}
+                                    {{ tf2(f_oc.ma.PRIM.rsts.OR[show_effect_model].SM_lower ) }},
+                                    {{ tf2(f_oc.ma.PRIM.rsts.OR[show_effect_model].SM_upper ) }}
                                     )
                                 </div>
                             </div>
@@ -813,10 +945,10 @@ a {
                                 v-bind:style="{left: get_eft_left_by_rst(f_oc.ma.PRIM.rsts.RR) + 'px', backgroundColor: get_eft_color(f_oc.ma.PRIM.rsts.RR)}">
                                 <div v-if="show_effect_label" 
                                     class="cmp-eft-value">
-                                    {{ tf2(f_oc.ma.PRIM.rsts.RR.random.SM ) }}
+                                    {{ tf2(f_oc.ma.PRIM.rsts.RR[show_effect_model].SM ) }}
                                     (
-                                    {{ tf2(f_oc.ma.PRIM.rsts.RR.random.SM_lower ) }},
-                                    {{ tf2(f_oc.ma.PRIM.rsts.RR.random.SM_upper ) }}
+                                    {{ tf2(f_oc.ma.PRIM.rsts.RR[show_effect_model].SM_lower ) }},
+                                    {{ tf2(f_oc.ma.PRIM.rsts.RR[show_effect_model].SM_upper ) }}
                                     )
                                 </div>
                             </div>
@@ -845,10 +977,10 @@ a {
                                 v-bind:style="{left: get_eft_left_by_rst(f_oc.ma.INCD.rsts.INCD) + 'px', backgroundColor: get_eft_color(f_oc.ma.INCD.rsts.INCD)}">
                                 <div v-if="show_effect_label" 
                                     class="cmp-eft-value">
-                                    {{ tf2(f_oc.ma.INCD.rsts.INCD.random.SM ) }}
+                                    {{ tf2(f_oc.ma.INCD.rsts.INCD[show_effect_model].SM ) }}
                                     (
-                                    {{ tf2(f_oc.ma.INCD.rsts.INCD.random.SM_lower ) }},
-                                    {{ tf2(f_oc.ma.INCD.rsts.INCD.random.SM_upper ) }}
+                                    {{ tf2(f_oc.ma.INCD.rsts.INCD[show_effect_model].SM_lower ) }},
+                                    {{ tf2(f_oc.ma.INCD.rsts.INCD[show_effect_model].SM_upper ) }}
                                     )
                                 </div>
                             </div>
@@ -933,12 +1065,29 @@ a {
             <div class="box-header">
                 <h4>
                     <i class="fa fa-chart-bar"></i>
-                    Detail
+                    Outcome Detail | 
                 </h4>
+
+                <div class="d-flex flex-align-items-center">
+                    <a onclick="app_comptb.vpp.export_f_oc();"
+                        class="btn"
+                        style="margin-right: 2em;"
+                        href="javascript:void(0);">
+                        <i class="fas fa-file-export"></i>
+                        Export CSV
+                    </a>
+
+                    <a onclick="fg_pwma_forest.hide();"
+                        class="btn btn-remove"
+                        href="javascript:void(0);">
+                        <i class="fa fa-minus"></i>
+                    </a>
+
+                </div>
                 
             </div>
 
-            <div class="box-body">
+            <div class="box-body" style="height: 100%;">
                 <div class="plot-nav-tab d-flex flex-row">
                     <div class="plot-nav plot-nav-active">
                         <i class="fas fa-chart-line"></i>
@@ -947,6 +1096,13 @@ a {
                     <div class="plot-nav">
                         <i class="fas fa-chart-line"></i>
                         Cumulative Plot
+                    </div>
+                </div>
+
+                <div class="forest-plot-panel">
+
+                    <div id="fg_pwma_forest" style="width: 100%; height: 100%;">
+                        <svg id="fg_pwma_forest_svg"></svg>
                     </div>
                 </div>
             </div>
@@ -977,6 +1133,13 @@ a {
 <!-- for visualization -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.3.2/echarts.min.js"></script>
 
+<!-- PapaParse for export -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.1/papaparse.min.js"></script>
+
+<!-- filesaver -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js"></script>
+
+
 <script>
 var isIE = /*@cc_on!@*/false || !!document.documentMode;
 if (isIE) {
@@ -992,13 +1155,13 @@ if (isIE) {
 ///////////////////////////////////////////////////////////
 // The plots for PWMA
 ///////////////////////////////////////////////////////////
+{% include 'js/fgmk_pwma_forest_for_metajs.js' %}
 {% include 'js/fgmk_incd_forest.js' %}
-{% include 'js/fgmk_prim_forest.js' %}
 {% include 'js/fgmk_cumu_forest.js' %}
 
 // Alias for the pwma plots
-var fg_pwma_prim_forest = fgmk_prim_forest.make_fig(
-    'fg_pwma_prim_forest'
+var fg_pwma_forest = fgmk_pwma_forest.make_fig(
+    'fg_pwma_forest'
 );
 // alias for the incidence plots
 var fg_incd_incd_forest = fgmk_incd_forest.make_fig(
@@ -1010,9 +1173,9 @@ var fg_cumu_forest = fgmk_cumu_forest.make_fig(
 );
 
 
-var vw_studyfilter = {
+var app_filter = {
     vpp: null,
-    vpp_id: "#vw_studyfilter",
+    vpp_id: "#app_filter",
     blank_val: '%',
 
     // attrs
@@ -1194,7 +1357,7 @@ var vw_studyfilter = {
                             // reset the value
                             this.dropdowns[i].value = '%';
                             // reset the options
-                            this.dropdowns[i].options = vw_studyfilter._get_options(i, true);
+                            this.dropdowns[i].options = app_filter._get_options(i, true);
                         }
                         
                         if (new_val != '%') {
@@ -1209,7 +1372,7 @@ var vw_studyfilter = {
                                 next = 2;
                             }
                             
-                            var next_options = vw_studyfilter._get_options(idx + next);
+                            var next_options = app_filter._get_options(idx + next);
                             // console.log(next_options);
                             this.dropdowns[idx + next].options = next_options;
                         }
@@ -1235,7 +1398,7 @@ var vw_studyfilter = {
                         }
                     }
                     // second, use the conditions to search for the 
-                    var pmids = vw_studyfilter._get_pmids_by_conditions(conditions);
+                    var pmids = app_filter._get_pmids_by_conditions(conditions);
                     this.n_papers = pmids.length;
                     // finally, update the filter UI
                     this.$forceUpdate();
@@ -1254,7 +1417,7 @@ var vw_studyfilter = {
                         const val = vals[i];
                         
                         // set all values
-                        if (i == vals.length - 1) {
+                        if (i == (vals.length - 1)) {
                             // update the last one
                             this.set_value_at(val, i, true);
                         } else {
@@ -1390,9 +1553,9 @@ var vw_studyfilter = {
 };
 
 
-var vw_oclist = {
+var app_oclist = {
     vpp: null,
-    vpp_id: '#vw_oclist',
+    vpp_id: '#app_oclist',
     select_mode: 'checkbox', // radio, checkbox
     pids: [],
 
@@ -1435,7 +1598,7 @@ var vw_oclist = {
 
                     // call the worker to update everything related
                     // jarvis will do this task accordingly
-                    jarvis.toggle_oc(group, oc_cate, oc_name, oc_abbr, ae_grade, vw_oclist.pids);
+                    jarvis.toggle_oc(group, oc_cate, oc_name, oc_abbr, ae_grade, app_oclist.pids);
                 },
 
                 get_grade_label: function(g) {
@@ -1452,13 +1615,21 @@ var vw_oclist = {
                     }
                 },
 
+                get_eft_color: function(d) {
+                    return jarvis.get_color(
+                        d.random.SM,
+                        d.random.SM_lower,
+                        d.random.SM_upper,
+                    )
+                },
+
                 clear: function() {
                     $('.oc-type').removeClass('oc-type-selected');
                     jarvis.clear_all_ae();
                 },
 
                 update_oclist: function() {
-                    vw_oclist.update();
+                    app_oclist.update();
 
                     // when update the oclist, should hide the current img
                     // vw_ocplot.hide_plot();
@@ -1729,9 +1900,12 @@ var vw_oclist = {
                         r['GA_Nt'],
                         r[grade+'_Ec'],
                         r['GA_Nc'],
-                        r['pid'],
+                        r['author'],
                         'T',
-                        'C'
+                        'C',
+                        // add more infor vis
+                        r['pid'],
+                        r['year'],
                     ]);
                     ma_dict[r.oc_abbr][grade].PRIM.total = math.add(
                         ma_dict[r.oc_abbr][grade].PRIM.total,
@@ -1752,9 +1926,12 @@ var vw_oclist = {
                         r['GA_Nt'],
                         r[grade+'_Ec'],
                         r['GA_Nc'],
-                        r['pid'],
+                        r['author'],
                         'T',
-                        'C'
+                        'C',
+                        // add more infor vis
+                        r['pid'],
+                        r['year'],
                     ]);
                     ma_dict[r.oc_abbr][grade].INCD.total = math.add(
                         ma_dict[r.oc_abbr][grade].INCD.total,
@@ -1770,6 +1947,70 @@ var vw_oclist = {
         }
 
         return ma_dict;
+    },
+
+
+    mk_data_cfg_by_ma: function(ma_prim, sm, fixed_or_random) {
+        if (typeof(fixed_or_random) == 'undefined') {
+            fixed_or_random = 'random';
+        }
+        var stus = [];
+        var model = {};
+        var cfg = {
+            sm: {
+                'OR': { sm: 'OR', name: 'Odds Ratio' },
+                'RR': { sm: 'RR', name: 'Risk Ratio' },
+            }[sm],
+            mode: 'pwma_prcm',
+            params: {
+                input_format: 'PRIM_CAT_RAW',  // or PRIM_CAT_PRE
+                fixed_or_random: fixed_or_random,     // or fixed
+                prediction_interval: false,    // or true
+            }
+        };
+
+        // update stus
+        for (let i = 0; i < ma_prim.stus.length; i++) {
+            const _stu = ma_prim.stus[i];
+            stus.push({
+                Et: _stu[0],
+                Nt: _stu[1],
+                Ec: _stu[2],
+                Nc: _stu[3],
+                study: _stu[4],
+                treatment: _stu[5],
+                control: _stu[6],
+                pid: _stu[7],
+                year: _stu[8],
+
+                // MA information
+                SM: ma_prim.rsts[sm].SM[i],
+                SM_lower: ma_prim.rsts[sm].SM_lower[i],
+                SM_upper: ma_prim.rsts[sm].SM_upper[i],
+                w: ma_prim.rsts[sm][fixed_or_random].wp[i]
+            });
+        }
+
+        // update the model
+        model = JSON.parse(JSON.stringify(ma_prim.rsts[sm]));
+
+        // just for display in forest plot
+        model[fixed_or_random].study = jarvis.capitalize(fixed_or_random) + ' effects model';
+        model[fixed_or_random].Et = ma_prim.total[0];
+        model[fixed_or_random].Nt = ma_prim.total[1];
+        model[fixed_or_random].Ec = ma_prim.total[2];
+        model[fixed_or_random].Nc = ma_prim.total[3];
+        model[fixed_or_random].w = 1;
+
+        var ret = {
+            data: {
+                stus: stus,
+                model: model
+            },
+            cfg: cfg
+        };
+
+        return ret;
     },
 
     update_ma_rsts: function(ma_dict) {
@@ -1962,7 +2203,10 @@ var app_comptb = {
                 show_effect_model: 'random',
 
                 // show label
-                show_effect_label: true
+                show_effect_label: true,
+
+                // checking detail
+                detail_f_oc: null
             },
             methods: {
                 add_comma: function(x) {
@@ -1987,26 +2231,84 @@ var app_comptb = {
                     this.f_ocs = [];
                 },
 
+                show_detail: function(f_oc) {
+                    this.detail_f_oc = f_oc;
+
+                    // ok, first, prepare the data
+                    var dc = app_oclist.mk_data_cfg_by_ma(
+                        f_oc.ma.PRIM,
+                        'OR',
+                        this.show_effect_model
+                    );
+
+                    var data = dc.data;
+                    var cfg = dc.cfg;
+
+                    // then, draw it?
+                    fg_pwma_forest.draw(data, cfg);
+                },
+
+                export_f_oc: function(f_oc) {
+                    if (typeof(f_oc) == 'undefined') {
+                        f_oc = this.detail_f_oc;
+                    }
+
+                    if (f_oc == null) {
+                        return;
+                    }
+
+                    // get all studies
+                    var stus = f_oc.ma.PRIM.stus;
+                    var stus_wh = [
+                        [
+                            'Et',
+                            'Nt',
+                            'Ec',
+                            'Nc',
+                            'study',
+                            'treatment',
+                            'control',
+                            'pid',
+                            'year'
+                        ]
+                    ];
+                    for (let i = 0; i < stus.length; i++) {
+                        const stu = stus[i];
+                        stus_wh.push(stu);
+                    }
+
+                    // first, convert
+                    var csv = Papa.unparse(stus_wh, {
+                        quoteChar: true
+                    });
+
+                    // then download this csv
+                    var blob = new Blob([csv], {type: "text/tsv;charset=utf-8"});
+                    var fn = f_oc.oc_cate + '-' + f_oc.oc_name + '.csv';
+                    saveAs(blob, fn);
+                    
+                },
+
                 tf2: function(v) {
                     return jarvis.tf2(v);
                 },
 
                 get_ci_width_by_rst: function(d) {
                     return this.get_ci_width(
-                        d.random.SM_lower,
-                        d.random.SM_upper
+                        d[this.show_effect_model].SM_lower,
+                        d[this.show_effect_model].SM_upper
                     );
                 },
 
                 get_eft_left_by_rst: function(d) {
                     return app_comptb.x_scale(
-                        d.random.SM
+                        d[this.show_effect_model].SM
                     ) - 3;
                 },
 
                 get_ci_left_by_rst: function(d) {
                     return app_comptb.x_scale(
-                        d.random.SM_lower
+                        d[this.show_effect_model].SM_lower
                     );
                 },
 
@@ -2016,20 +2318,25 @@ var app_comptb = {
                 },
                 
                 get_eft_color: function(d) {
-                    if (d.random.SM < 1) {
-                        if (d.random.SM_upper < 1) {
-                            return jarvis.color.bene.sig;
-                        } else {
-                            return jarvis.color.bene.not;
-                        }
-                    } else{
+                    return jarvis.get_color(
+                        d[this.show_effect_model].SM,
+                        d[this.show_effect_model].SM_lower,
+                        d[this.show_effect_model].SM_upper,
+                    )
+                    // if (d.random.SM < 1) {
+                    //     if (d.random.SM_upper < 1) {
+                    //         return jarvis.color.bene.sig;
+                    //     } else {
+                    //         return jarvis.color.bene.not;
+                    //     }
+                    // } else{
 
-                        if (d.random.SM_lower > 1) {
-                            return jarvis.color.harm.sig;
-                        } else {
-                            return jarvis.color.harm.not;
-                        }
-                    }
+                    //     if (d.random.SM_lower > 1) {
+                    //         return jarvis.color.harm.sig;
+                    //     } else {
+                    //         return jarvis.color.harm.not;
+                    //     }
+                    // }
                 }
             },
             mounted: function() {
@@ -2039,6 +2346,52 @@ var app_comptb = {
             }
         });
     }
+};
+
+
+var app_sclist = {
+    vpp: null,
+    vpp_id: '#app_sclist',
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: {
+                // the full ocs for comparison
+                scs: [],
+            },
+            methods: {
+                add: function() {
+                    // first, get the image
+                    var img_src = vis_ocmas.fig_sunburst.getDataURL({
+                        pixelRatio: 0.5,
+                        backgroundColor: '#fff'
+                    });
+
+                    // then, get all values
+                    var filter_vals = app_filter.vpp.get_current_values();
+
+                    // save this scenario
+                    this.scs.push({
+                        img_src: img_src,
+                        filter_vals: filter_vals
+                    });
+                },
+
+                rm: function(sc_idx) {
+                    this.scs.splice(sc_idx, 1);
+                },
+
+                rm_all: function() {
+                    this.scs = [];
+                }
+            }
+        });
+    }
+}
+
+
+var app_detail = {
 };
 
 
@@ -2158,6 +2511,13 @@ var vis_ocmas = {
         this.fig_sunburst.setOption(
             this.fig_sunburst_options
         );
+
+        // bind event
+        this.fig_sunburst.on('click', function(params) {
+            console.log('* clicked on sunburst', params);
+
+            // add this 
+        });
     },
 
     init_fig_heatmap: function() {
@@ -2284,8 +2644,10 @@ var vis_ocmas = {
     draw_fig_sunburst: function(oc_dict3, ma_dict) {
         var data = [];
         const itemStyle_NA = { color: '#fefefe' };
-        const itemStyle_harm = { color: '#F54F4A' };
-        const itemStyle_bene = { color: 'green' };
+        const itemStyle_harm_sig = { color: jarvis.color.harm.sig };
+        const itemStyle_harm_not = { color: jarvis.color.harm.not };
+        const itemStyle_bene_sig = { color: jarvis.color.bene.sig };
+        const itemStyle_bene_not = { color: jarvis.color.bene.not };
 
         for (const group_name in oc_dict3) {
             var group = oc_dict3[group_name];
@@ -2295,7 +2657,10 @@ var vis_ocmas = {
                 name: group_name,
                 value: 0,
                 itemStyle: {
-                    color: '#da0d68'
+                    color: {
+                        'treatment': '#5CC8FF',
+                        'immune': '#DEC1FF'
+                    }[group_name]
                 },
                 children: []
             };
@@ -2307,6 +2672,12 @@ var vis_ocmas = {
                 var d_c = {
                     name: cate_name,
                     value: 0,
+                    itemStyle: {
+                        color: {
+                            'treatment': '#EBF8FF',
+                            'immune': '#F4EBFF'
+                        }[group_name]
+                    },
 
                     children: []
                 };
@@ -2321,16 +2692,37 @@ var vis_ocmas = {
                         G5N: itemStyle_NA
                     }
 
+                    var child_name = {
+                        GA: oc.oc_name,
+                        G3H: oc.oc_name,
+                        G5N: oc.oc_name,
+                    }
+
                     if (ma_dict.hasOwnProperty(oc_abbr)) {
                         for (let i = 0; i < 3; i++) {
                             var grade = {0: 'GA', 1: 'G3H', 2: 'G5N'}[i];
                             
                             if (ma_dict[oc_abbr][grade].PRIM.stus.length > 0) {
-                                if (ma_dict[oc_abbr][grade].PRIM.rsts.OR.random.SM < 1) {
-                                    itemStyle_g[grade] = itemStyle_bene;
-                                } else {
-                                    itemStyle_g[grade] = itemStyle_harm;
+                                // if (ma_dict[oc_abbr][grade].PRIM.rsts.OR.random.SM < 1) {
+                                //     itemStyle_g[grade] = {
+                                //         color
+                                //     };
+                                // } else {
+                                //      = itemStyle_harm;
+                                // }
+                                itemStyle_g[grade] = {
+                                    color: jarvis.get_color(
+                                        ma_dict[oc_abbr][grade].PRIM.rsts.OR.random.SM,
+                                        ma_dict[oc_abbr][grade].PRIM.rsts.OR.random.SM_lower,
+                                        ma_dict[oc_abbr][grade].PRIM.rsts.OR.random.SM_upper
+                                    )
                                 }
+
+                                // update name
+                                child_name[grade] = 
+                                    child_name[grade] + 
+                                    ': ' +
+                                    jarvis.tf2(ma_dict[oc_abbr][grade].PRIM.rsts.OR.random.SM);
                             }
                         }
                     } else {
@@ -2340,16 +2732,19 @@ var vis_ocmas = {
                     var d_o = {
                         name: oc.oc_name,
                         value: 1,
+                        itemStyle: {
+                            color: '#FFFFFF'
+                        },
                         children: [{
-                            name: oc.oc_name + ' - GA',
+                            name: child_name.GA,
                             value: 1,
                             itemStyle: itemStyle_g.GA,
                             children: [{
-                                name: oc.oc_name + ' - G3H',
+                                name: child_name.G3H,
                                 itemStyle: itemStyle_g.G3H,
                                 value: 1,
                                 children: [{
-                                    name: oc.oc_name + ' - G5N',
+                                    name: child_name.G5N,
                                     itemStyle: itemStyle_g.G5N,
                                     value: 1
                                 }]
@@ -2391,12 +2786,29 @@ var vis_ocmas = {
 var jarvis = {
     color: {
         bene: {
-            sig: 'green',
-            not: 'lightgreen'
+            sig: '#0cab0c',
+            not: '#c7ffc7'
         },
         harm: {
-            sig: 'red',
-            not: 'lightpink'
+            sig: '#ff3a3a',
+            not: '#ffe0e5'
+        }
+    },
+
+    get_color: function(SM, SM_lower, SM_upper) {
+        if (SM < 1) {
+            if (SM_upper < 1) {
+                return this.color.bene.sig;
+            } else {
+                return this.color.bene.not;
+            }
+        } else{
+
+            if (SM_lower > 1) {
+                return this.color.harm.sig;
+            } else {
+                return this.color.harm.not;
+            }
         }
     },
 
@@ -2405,6 +2817,10 @@ var jarvis = {
         "G34": "Grade 3/4",
         "G3H": "Grade 3 or higher",
         "G5N": "Grade 5 only"
+    },
+
+    capitalize: function(s) {
+        return s.charAt(0).toUpperCase() + s.slice(1);
     },
     
     init: function() {
@@ -2430,8 +2846,8 @@ var jarvis = {
             src = 'cache';
         }
 
-        // set the vw_oclist to radio button model
-        vw_oclist.select_mode = 'radio';
+        // set the app_oclist to radio button model
+        app_oclist.select_mode = 'radio';
 
         var cq = jarvis.get_url_paramter('cq');
         if (cq == '') {
@@ -2444,6 +2860,9 @@ var jarvis = {
         // just init the app_comptb
         app_comptb.init();
 
+        // just init the app_sclist
+        app_sclist.init();
+
         // load all data
         $.when(
             $.get(
@@ -2452,7 +2871,7 @@ var jarvis = {
                 {src: src, cq: cq},
             ),
             $.get(
-                '/pub/graphdata/'+prj+'/GRAPH_PMA.json',
+                '/pub/graphdata/' + prj + '/GRAPH_PMA.json',
                 // {ver: Math.random(), src: src, cq: cq},
                 {src: src, cq: cq},
             )
@@ -2479,17 +2898,17 @@ var jarvis = {
 
 
             // init the filter with ITABLE data
-            vw_studyfilter.init(data1);
+            app_filter.init(data1);
 
             // init the list and plots with outcome data
-            vw_oclist.init(data2);
+            app_oclist.init(data2);
             // vw_ocplot.init(data2);
 
             // ok, remove the 
             jarvis.ssmsg('Almost initialized.');
             setTimeout('jarvis.ssclose();', 400);
 
-            vw_studyfilter.vpp.set_values(
+            app_filter.vpp.set_values(
                 ['PD1', 'all', 'Monotherapy', '%', 'Chemo', 'all']
             );
         });
@@ -2498,7 +2917,7 @@ var jarvis = {
     },
 
     update_plots_by_pmids: function(pmids) {
-        vw_oclist.update(pmids);
+        app_oclist.update(pmids);
     },
 
     get_url_paramter: function(name) {
@@ -2513,10 +2932,10 @@ var jarvis = {
         // vw_ocplot.show_plot(group, oc_cate, oc_name, ae_grade, pids);
 
         // first, get the filter values
-        var f_vals = vw_studyfilter.vpp.get_current_values();
+        var f_vals = app_filter.vpp.get_current_values();
 
         // second, get the raw data and the ma rst
-        var ma = vw_oclist.ma_dict[oc_abbr][ae_grade];
+        var ma = app_oclist.ma_dict[oc_abbr][ae_grade];
 
         // then, create a f_oc and push to cmp
         var f_oc = {
