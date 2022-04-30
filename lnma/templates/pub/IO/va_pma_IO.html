@@ -340,6 +340,10 @@ a {
     /* border-top: 1px solid #777777; */
     padding: 4px 0;
 }
+.cmp-tb-cell-sm {
+    width: 50px !important;
+    min-width: 50px !important;
+}
 .cmp-tb-cell-ocname {
     width: 160px !important;
     min-width: 160px !important;
@@ -397,6 +401,13 @@ a {
 .cmp-ref-one {
     position: absolute;
     left: 59px;
+    top: 0;
+    height: 100%;
+    border-right: 1px dotted #aaaaaa;
+}
+.cmp-ref-50 {
+    position: absolute;
+    left: 60px;
     top: 0;
     height: 100%;
     border-right: 1px dotted #aaaaaa;
@@ -833,6 +844,9 @@ a {
                         <div class="cmp-tb-cell cmp-tb-cell-ocname cmp-tb-cell-header">
                             Outcome
                         </div>
+                        <div class="cmp-tb-cell cmp-tb-cell-sm cmp-tb-cell-header">
+                            Studies
+                        </div>
                         <div class="cmp-tb-cell cmp-tb-cell-header">
                             Et
                         </div>
@@ -894,6 +908,9 @@ a {
                                 |
                                 {{ f_oc.oc_name }}
                             </div>
+                        </div>
+                        <div class="cmp-tb-cell cmp-tb-cell-sm">
+                            {{ f_oc.ma.PRIM.stus.length }}
                         </div>
                         <div class="cmp-tb-cell">
                             {{ add_comma(f_oc.ma.PRIM.total[0]) }}
@@ -975,7 +992,7 @@ a {
                         <div class="cmp-tb-cell cmp-tb-cell-effect">
 
                             <div class="cmp-eft-dot"
-                                v-bind:style="{left: get_eft_left_by_rst(f_oc.ma.INCD.rsts.INCD) + 'px', backgroundColor: get_eft_color(f_oc.ma.INCD.rsts.INCD)}">
+                                v-bind:style="{left: get_eft_left_by_rst(f_oc.ma.INCD.rsts.INCD, 'linear') + 'px', backgroundColor: get_eft_color(f_oc.ma.INCD.rsts.INCD)}">
                                 <div v-if="show_effect_label" 
                                     class="cmp-eft-value">
                                     {{ tf2(f_oc.ma.INCD.rsts.INCD[show_effect_model].SM ) }}
@@ -987,10 +1004,10 @@ a {
                             </div>
 
                             <div class="cmp-eft-ci-line"
-                                v-bind:style="{width: get_ci_width_by_rst(f_oc.ma.INCD.rsts.INCD) + 'px', left: get_ci_left_by_rst(f_oc.ma.INCD.rsts.INCD) + 'px'}">
+                                v-bind:style="{width: get_ci_width_by_rst(f_oc.ma.INCD.rsts.INCD, 'linear') + 'px', left: get_ci_left_by_rst(f_oc.ma.INCD.rsts.INCD, 'linear') + 'px'}">
                             </div>
 
-                            <div class="cmp-ref-one"></div>
+                            <div class="cmp-ref-50"></div>
                         </div>
                         <div class="cmp-tb-cell cmp-tb-cell-sep">
                             &nbsp;
@@ -1015,6 +1032,9 @@ a {
                         <div class="cmp-tb-cell cmp-tb-cell-ocname cmp-tb-cell-footer">
                             &nbsp;
                         </div>
+                        <div class="cmp-tb-cell cmp-tb-cell-sm cmp-tb-cell-footer">
+                            
+                        </div>
                         <div class="cmp-tb-cell cmp-tb-cell-footer">
                             
                         </div>
@@ -1043,7 +1063,7 @@ a {
                         </div>
 
                         <div class="cmp-tb-cell cmp-tb-cell-effect cmp-tb-cell-footer">
-                            <img style="width: 100%;" src="/static/img/log-axis.png">
+                            <img style="width: 100%;" src="/static/img/x-axis-0-1.png">
                         </div>
                         <div class="cmp-tb-cell cmp-tb-cell-sep cmp-tb-cell-footer">
                             &nbsp;
@@ -2190,9 +2210,14 @@ var app_comptb = {
     vpp: null,
     vpp_id: '#app_comptb',
 
-    x_scale: x_scale = d3.scaleLog()
+    x_scale: {
+        log: d3.scaleLog()
             .domain([1e-2, 1e2])
             .range([0, 120]),
+        linear: d3.scaleLinear()
+            .domain([0, 1])
+            .range([0, 120]),
+    },
     
     init: function() {
         this.vpp = new Vue({
@@ -2294,28 +2319,41 @@ var app_comptb = {
                     return jarvis.tf2(v);
                 },
 
-                get_ci_width_by_rst: function(d) {
+                get_ci_width_by_rst: function(d, scale) {
+                    if (typeof(scale) == 'undefined') {
+                        scale = 'log';
+                    }
                     return this.get_ci_width(
                         d[this.show_effect_model].SM_lower,
-                        d[this.show_effect_model].SM_upper
+                        d[this.show_effect_model].SM_upper,
+                        scale
                     );
                 },
 
-                get_eft_left_by_rst: function(d) {
-                    return app_comptb.x_scale(
+                get_eft_left_by_rst: function(d, scale) {
+                    if (typeof(scale) == 'undefined') {
+                        scale = 'log'
+                    }
+                    return app_comptb.x_scale[scale](
                         d[this.show_effect_model].SM
                     ) - 3;
                 },
 
-                get_ci_left_by_rst: function(d) {
-                    return app_comptb.x_scale(
+                get_ci_left_by_rst: function(d, scale) {
+                    if (typeof(scale) == 'undefined') {
+                        scale = 'log'
+                    }
+                    return app_comptb.x_scale[scale](
                         d[this.show_effect_model].SM_lower
                     );
                 },
 
-                get_ci_width: function(lower, upper) {
-                    return app_comptb.x_scale(upper) - 
-                           app_comptb.x_scale(lower);
+                get_ci_width: function(lower, upper, scale) {
+                    if (typeof(scale) == 'undefined') {
+                        scale = 'log'
+                    }
+                    return app_comptb.x_scale[scale](upper) - 
+                           app_comptb.x_scale[scale](lower);
                 },
                 
                 get_eft_color: function(d) {
