@@ -760,6 +760,8 @@ a {
                     </div>
                     <div class="d-flex flex-row flex-wrap sc-item-panel">
                         <div v-for="sc, sc_idx in scs"
+                            v-on:click="load(sc)"
+                            title="Load this scenario"
                             class="sc-item">
                             <div class="sc-item-box">
                                 <img :src="sc.img_src" 
@@ -2384,6 +2386,12 @@ var app_sclist = {
 
                 rm_all: function() {
                     this.scs = [];
+                },
+
+                load: function(sc) {
+                    app_filter.vpp.set_values(
+                        sc.filter_vals
+                    );
                 }
             }
         });
