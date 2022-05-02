@@ -21,6 +21,9 @@
 .box-header h4 {
     margin: 2px 0;
 }
+.select-sm {
+    width: 80px;
+}
 html, body {
     width: 100%;
     height: 100%;
@@ -66,8 +69,8 @@ a {
 #app_oclist {
     width: 300px;
     padding: 0 5px;
-    /* height: 100%; */
-    height: 810px;
+    height: 100%;
+    /* height: 810px; */
     /* background-color: whitesmoke; */
 }
 #app_oclist_aespanel {
@@ -84,6 +87,14 @@ a {
 #vw_ocplots_plotpanel {
     height: 100%;
     overflow-y: hidden;
+}
+.oc-group {
+    cursor: pointer;
+    padding: 3px 0;
+    text-align: center;
+    text-transform: uppercase;
+    background-color: #f3f3f3;
+    border-top: 1px solid #cccccc;
 }
 .oc-name {
     width:     180px;
@@ -112,6 +123,8 @@ a {
 }
 .oc-cate-info {
     width: 100%;
+    /* border-top: 1px solid #dddddd; */
+    padding: 2px 0;
     border-bottom: 1px solid transparent;
 }
 .oc-cate-info:hover {
@@ -307,8 +320,9 @@ a {
     border-color: #777777;
 }
 #app_comptb {
-    height: 750px;
-    width: 980px;
+    min-height: 800px;
+    height: 99%;
+    min-width: 1000px;
     padding: 0 5px;
 }
 .cmp-tb {
@@ -322,8 +336,11 @@ a {
     background-color: whitesmoke;
 }
 .cmp-tb-cell {
-    width: 70px;
-    min-width: 70px;
+    width: 50px;
+    min-width: 50px;
+
+    height: 30px;
+    min-height: 30px;
     display: flex;
     justify-content: center;
     /* align-self: center;    <---- REMOVE */
@@ -335,6 +352,9 @@ a {
     font-weight: bold;
     border-bottom: 1px solid #777777;
     padding: 4px 0;
+}
+.cmp-tb-cell-header-sortable {
+    cursor: pointer;
 }
 .cmp-tb-cell-footer {
     font-weight: bold;
@@ -352,6 +372,10 @@ a {
 .cmp-tb-cell-ocname-item {
     cursor: pointer;
 }
+.cmp-tb-cell-smtxt {
+    font-size: 0.95em;
+    list-style: 0.8em;
+}
 .cmp-tb-cell-sep {
     width: 40px !important;
     min-width: 40px !important;
@@ -359,7 +383,7 @@ a {
 .cmp-tb-cell-effect {
     min-width: 120px !important;
     width: 120px !important;
-    display: block !important;
+    /* display: block !important; */
     position: relative;
     text-align: center;
 }
@@ -379,8 +403,9 @@ a {
     overflow: hidden;
 }
 .cmp-eft-ci-line {
-    height: 12px;
+    height: 1px;
     position: absolute;
+    top: 14px;
     border-bottom: 1px solid #333333;
 }
 .cmp-eft-dot {
@@ -397,7 +422,7 @@ a {
     /* margin-left: 1em; */
     /* position: absolute; */
     /* left: 0; */
-    width: 100px;
+    width: 88px;
 }
 .cmp-ref-one {
     position: absolute;
@@ -427,6 +452,12 @@ a {
 .btn-remove:hover {
     color: white;
     background-color: rgb(255, 70, 70);
+}
+.btn-add-ocs {
+    color: #888888;
+}
+.btn-add-ocs:hover {
+    color: #333333;
 }
 #app_sclist {
     width: 600px;
@@ -470,6 +501,22 @@ a {
 .forest-plot-panel {
     height: 100%;
     overflow-y: auto;
+}
+.hide {
+    display: none;
+}
+.badge {
+    padding: 1px 4px;
+    background-color: #eeeeee;
+    border-radius: 4px;
+}
+.badge-t, 
+.badge-treatment {
+    background-color: #EBF8FF;
+}
+.badge-i,
+.badge-immune {
+    background-color: #F4EBFF;
 }
 </style>
 </head>
@@ -541,7 +588,7 @@ a {
                     <input type="text" class="box-input" style="background-color: transparent;">
                 </div> -->
                 <div class="d-flex flex-align-items-center">
-                    <a class="btn" 
+                    <!-- <a class="btn" 
                         href="javascript:void(0);"
                         v-on:click="toggle_all_cates(false)">
                         <i class="fa fa-expand-alt"></i>
@@ -552,7 +599,12 @@ a {
                         v-on:click="toggle_all_cates(true)">
                         <i class="fa fa-compress-alt"></i>
                         Collapse
-                    </a>
+                    </a> -->
+                    <select v-model="color_mode_by_sm"
+                        class="select-sm">
+                        <option value="RR">RR: Color by Risk Ratio</option>
+                        <option value="OR">OR: Color by Odds Ratio</option>
+                    </select>
                 </div>
             </div>
             <div class="box-body" style="height: calc(100% - 70px);">
@@ -560,11 +612,19 @@ a {
                 <div class="d-flex fx-col">
                     <div class="d-flex flex-row ">
                         <div class="oc-name" style="font-weight: bold;">
-                            <select v-model="group"
-                                v-on:change="update_oclist()">
-                                <option value="treatment">Treatment Related</option>
-                                <option value="immune">Immune Related</option>
-                            </select>
+                            <div class="d-flex flex-row flex-align-items-baseline">
+                                <span>
+                                    Search: 
+                                </span>
+                                <input type="text" v-model="keyword"
+                                    style="width: 80px;">
+                                <a v-on:click="keyword = ''"
+                                    class="btn btn-remove"
+                                    style="margin: 3px 0 0 -24px;"
+                                    href="javascript:void(0);">
+                                    <i class="fa fa-times"></i>
+                                </a>
+                            </div>
                         </div>
                         <div style="font-weight: bold; width: 90px; text-align: center; border-bottom: 1px solid #555555;">
                             Grade
@@ -575,7 +635,8 @@ a {
                 <div class="oc-cate d-flex fx-col">
                     <div class="oc-cate-info d-flex flex-row">
                         <div class="oc-name" style="font-weight: bold;">
-                            {{ rs_stat.cnt_aes }} Outcomes
+                            {{ rs_stat.cnt_aes }}
+                            Outcomes
                         </div>
                         <div class="oc-type" title="All Grades">
                             ALL
@@ -591,75 +652,129 @@ a {
     
                 <div id="app_oclist_aespanel">
                     <div class="oc-cate d-flex fx-col"
-                        v-for="r in rs">
-                        <div class="oc-cate-info d-flex flex-row"
-                            v-on:click="toggle_cate(r.oc_cate)">
-                            <div class="oc-name">
-                                <i class="far fa-folder" v-if="r.is_close"></i>
+                        v-for="group in rs">
+                        <div class="oc-group d-flex flex-row">
+                            <div class="oc-name" 
+                                v-on:click="toggle_group(group.oc_group)">
+                                <i class="far fa-folder" v-if="group.is_close"></i>
                                 <i class="far fa-folder-open" v-else></i>
-                                {{ r.oc_cate }}
+                                {{ group.oc_group }}
+                            </div>
+                            <div class="oc-type">
+                                <a v-on:click="add_group(group, 'GA')"
+                                    :title="'Add [' + group.oc_group + '] GA outcomes'"
+                                    class="btn-add-ocs"
+                                    href="javascript:void(0);">
+                                    <i class="fa fa-plus"></i>
+                                </a>
+                            </div>
+                            <div class="oc-type">
+                                <a v-on:click="add_group(group, 'G3H')"
+                                    :title="'Add [' + group.oc_group + '] G3+ outcomes'"
+                                    class="btn-add-ocs"
+                                    href="javascript:void(0);">
+                                    <i class="fa fa-plus"></i>
+                                </a>
+                            </div>
+                            <div class="oc-type">
+                                <a v-on:click="add_group(group, 'G5N')"
+                                    :title="'Add [' + group.oc_group + '] G5 outcomes'"
+                                    class="btn-add-ocs"
+                                    href="javascript:void(0);">
+                                    <i class="fa fa-plus"></i>
+                                </a>
                             </div>
                         </div>
-                        <div class="oc-items d-flex fx-col"
-                            v-bind:class="{'oc-items-hide': r.is_close}">
-                            <div class="oc-item"
-                                v-for="ae in r.aes">
-                                <div class="oc-item-info d-flex flex-row"
-                                    v-show="ae.cnt_ga>=1 || ae.cnt_g3h >=1 || ae.cnt_g5n>=1">
-                                    <div class="oc-name">
-                                        <i class="far fa-clipboard"></i>
-                                        {{ ae.oc_name }}
-                                    </div>
+                        <div v-for="r in group.cates"
+                            v-bind:class="{hide: group.is_close}"
+                            v-show="match_keyword_in_cate(r)">
+                            <div class="oc-cate-info d-flex flex-row">
+                                <div v-on:click="toggle_cate(group.oc_group, r.oc_cate)"
+                                    class="oc-name">
+                                    <i class="far fa-folder" v-if="r.is_close"></i>
+                                    <i class="far fa-folder-open" v-else></i>
+                                    
+                                    <span class="badge"
+                                        :class="'badge-' + group.oc_group">
+                                        {{ group.oc_group[0] }}
+                                    </span>
+                                    {{ r.oc_cate }}
+                                </div>
+                                <div class="oc-type">
+                                    <a v-on:click="add_cate(r, 'GA')"
+                                        :title="'Add [' + r.oc_cate + '] GA outcomes'"
+                                        class="btn-add-ocs"
+                                        href="javascript:void(0);">
+                                        <i class="fa fa-plus"></i>
+                                    </a>
+                                </div>
+                                <div class="oc-type">
+                                    <a v-on:click="add_cate(r, 'G3H')"
+                                        :title="'Add [' + r.oc_cate + '] G3+ outcomes'"
+                                        class="btn-add-ocs"
+                                        href="javascript:void(0);">
+                                        <i class="fa fa-plus"></i>
+                                    </a>
+                                </div>
+                                <div class="oc-type">
+                                    <a v-on:click="add_cate(r, 'G5N')"
+                                        :title="'Add [' + r.oc_cate + '] G5 outcomes'"
+                                        class="btn-add-ocs"
+                                        href="javascript:void(0);">
+                                        <i class="fa fa-plus"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="oc-items d-flex fx-col"
+                                v-bind:class="{hide: r.is_close}">
+                                <div class="oc-item"
+                                    v-for="ae in r.aes">
+                                    <div class="oc-item-info d-flex flex-row"
+                                        v-show="show_oc(ae) && match_keyword(ae.oc_name)">
+                                        <div class="oc-name">
+                                            <i class="far fa-clipboard"></i>
+                                            {{ ae.oc_name }}
+                                        </div>
 
-                                    <div class="oc-type"
-                                        v-if="ae.cnt_ga<1"
-                                        title="Not enough records">
-                                        &nbsp;
-                                    </div>
-                                    <div class="oc-type"
-                                        v-else
-                                        v-bind:title="ae.cnt_ga + ' records'"
-                                        v-bind:oc_abbr="ae.oc_abbr"
-                                        v-bind:oc_cate="r.oc_cate"
-                                        v-bind:oc_name="ae.oc_name"
-                                        v-bind:ae_grade="'GA'"
-                                        v-bind:style="{ backgroundColor: get_eft_color(ma_dict[ae.oc_abbr].GA.PRIM.rsts.OR) }"
-                                        v-on:click="toggle_oc">
-                                        {{ ae.cnt_ga }}
-                                    </div>
+                                        
+                                        <div class="oc-type"
+                                            v-if="show_oc_grade(ae, 'GA')"
+                                            v-bind:style="{ backgroundColor: get_eft_color(ma_dict[ae.oc_abbr].GA.PRIM.rsts[color_mode_by_sm]) }"
+                                            v-on:click="add_oc(ae, 'GA')">
+                                            {{ ae.cnt_ga }}
+                                        </div>
+                                        <div class="oc-type"
+                                            v-else
+                                            title="Not enough records">
+                                            &nbsp;
+                                        </div>
 
-                                    <div class="oc-type"
-                                        v-if="ae.cnt_g3h<1"
-                                        title="Not enough records">
-                                        &nbsp;
-                                    </div>
-                                    <div class="oc-type"
-                                        v-else
-                                        v-bind:title="ae.cnt_g3h + ' records'"
-                                        v-bind:oc_abbr="ae.oc_abbr"
-                                        v-bind:oc_cate="r.oc_cate"
-                                        v-bind:oc_name="ae.oc_name"
-                                        v-bind:ae_grade="'G3H'"
-                                        v-bind:style="{ backgroundColor: get_eft_color(ma_dict[ae.oc_abbr].G3H.PRIM.rsts.OR) }"
-                                        v-on:click="toggle_oc">
-                                        {{ ae.cnt_g3h }}
-                                    </div>
 
-                                    <div class="oc-type"
-                                        v-if="ae.cnt_g5n<1"
-                                        title="Not enough records">
-                                        &nbsp;
-                                    </div>
-                                    <div class="oc-type"
-                                        v-else
-                                        v-bind:title="ae.cnt_g5n + ' records'"
-                                        v-bind:oc_abbr="ae.oc_abbr"
-                                        v-bind:oc_cate="r.oc_cate"
-                                        v-bind:oc_name="ae.oc_name"
-                                        v-bind:ae_grade="'G5N'"
-                                        v-bind:style="{ backgroundColor: get_eft_color(ma_dict[ae.oc_abbr].G5N.PRIM.rsts.OR) }"
-                                        v-on:click="toggle_oc">
-                                        {{ ae.cnt_g5n }}
+                                        <div class="oc-type"
+                                            v-if="show_oc_grade(ae, 'G3H')"
+                                            v-bind:style="{ backgroundColor: get_eft_color(ma_dict[ae.oc_abbr].G3H.PRIM.rsts[color_mode_by_sm]) }"
+                                            v-on:click="add_oc">
+                                            {{ ae.cnt_g3h }}
+                                        </div>
+                                        <div class="oc-type"
+                                            v-else
+                                            title="Not enough records">
+                                            &nbsp;
+                                        </div>
+
+
+                                        <div class="oc-type"
+                                            v-if="show_oc_grade(ae, 'G5N')"
+                                            v-bind:style="{ backgroundColor: get_eft_color(ma_dict[ae.oc_abbr].G5N.PRIM.rsts[color_mode_by_sm]) }"
+                                            v-on:click="add_oc">
+                                            {{ ae.cnt_g5n }}
+                                        </div>
+                                        <div class="oc-type"
+                                            v-else
+                                            title="Not enough records">
+                                            &nbsp;
+                                        </div>
+
                                     </div>
                                 </div>
                             </div>
@@ -801,14 +916,18 @@ a {
 
 
     <div id="app_comptb">
-        <div class="box" style="height: 50%;">
+        <div id="app_comptb_box" class="box" style="height: calc(50% - 20px);">
             <div class="box-header">
                 <h4>
                     <i class="fas fa-table"></i>
-                    Comparison |
+                    Comparison 
+                    <span v-if="f_ocs.length > 0"
+                        style="padding: 0 3px; font-weight: normal;">
+                        {{ f_ocs.length }} outcomes
+                    </span>
+                    |
                 </h4>
-                <div class="d-flex flex-row flex-align-items-baseline"
-                    style="font-size: 0.8em;">
+                <div class="d-flex flex-row flex-align-items-baseline">
                     <input type="radio"
                         id="input_show_effect_model_random"
                         value="random"
@@ -830,6 +949,21 @@ a {
                         id="input_show_effect_label"
                         v-model="show_effect_label">
                     <label for="input_show_effect_label">Effect Size Label</label> 
+
+                    <div style="margin-right: 2em;">
+                        <a href="javascript:void(0);" 
+                            onclick="jarvis.set_mode(1)"
+                            class="btn">
+                            <i class="fas fa-th-large"></i>
+                        </a>
+                        <a href="javascript:void(0);" 
+                            onclick="jarvis.set_mode(2)"
+                            class="btn">
+                            <i class="far fa-square"></i>
+                        </a>
+                    </div>
+                    
+
                 </div>
             </div>
 
@@ -842,41 +976,101 @@ a {
                 class="box-body" style="height: 100%; overflow-y: auto; overflow-x: hidden;">
                 <div class="cmp-tb">
                     <div class="cmp-tb-row">
-                        <div class="cmp-tb-cell cmp-tb-cell-ocname cmp-tb-cell-header">
+                        <div v-on:click="toggle_sort_by('default')"
+                            class="cmp-tb-cell cmp-tb-cell-ocname cmp-tb-cell-header cmp-tb-cell-header-sortable">
                             Outcome
                         </div>
-                        <div class="cmp-tb-cell cmp-tb-cell-sm cmp-tb-cell-header">
+                        <div v-on:click=""
+                            class="cmp-tb-cell cmp-tb-cell-header">
+                            Grade
+                        </div>
+
+
+                        <div v-on:click="toggle_sort_by('NS')"
+                            class="cmp-tb-cell cmp-tb-cell-sm cmp-tb-cell-header cmp-tb-cell-header-sortable">
                             Studies
+                            <br>
+                            <i v-if="sort_ocs_by == 'NS_desc'"
+                                class="fas fa-sort-numeric-down-alt"></i>
+                            <i v-else-if="sort_ocs_by == 'NS_asc'"
+                                class="fas fa-sort-numeric-down"></i>
                         </div>
-                        <div class="cmp-tb-cell cmp-tb-cell-header">
+
+
+                        <div v-on:click=""
+                            class="cmp-tb-cell cmp-tb-cell-header">
+                            Control
+                        </div>
+
+
+                        <div v-on:click="toggle_sort_by('NPEt')"
+                            class="cmp-tb-cell cmp-tb-cell-header cmp-tb-cell-header-sortable">
                             Et
+                            <i v-if="sort_ocs_by == 'NPEt_desc'"
+                                class="fas fa-sort-numeric-down-alt"></i>
+                            <i v-else-if="sort_ocs_by == 'NPEt_asc'"
+                                class="fas fa-sort-numeric-down"></i>
                         </div>
-                        <div class="cmp-tb-cell cmp-tb-cell-header">
+                        <div v-on:click="toggle_sort_by('NPNt')"
+                            class="cmp-tb-cell cmp-tb-cell-header cmp-tb-cell-header-sortable">
                             Nt
+                            <i v-if="sort_ocs_by == 'NPNt_desc'"
+                                class="fas fa-sort-numeric-down-alt"></i>
+                            <i v-else-if="sort_ocs_by == 'NPNt_asc'"
+                                class="fas fa-sort-numeric-down"></i>
                         </div>
-                        <div class="cmp-tb-cell cmp-tb-cell-header">
+                        <div v-on:click="toggle_sort_by('NPEc')"
+                            class="cmp-tb-cell cmp-tb-cell-header cmp-tb-cell-header-sortable">
                             Ec
+                            <i v-if="sort_ocs_by == 'NPEc_desc'"
+                                class="fas fa-sort-numeric-down-alt"></i>
+                            <i v-else-if="sort_ocs_by == 'NPEc_asc'"
+                                class="fas fa-sort-numeric-down"></i>
                         </div>
-                        <div class="cmp-tb-cell cmp-tb-cell-header">
+                        <div v-on:click="toggle_sort_by('NPNc')"
+                            class="cmp-tb-cell cmp-tb-cell-header cmp-tb-cell-header-sortable">
                             Nc
+                            <i v-if="sort_ocs_by == 'NPNc_desc'"
+                                class="fas fa-sort-numeric-down-alt"></i>
+                            <i v-else-if="sort_ocs_by == 'NPNc_asc'"
+                                class="fas fa-sort-numeric-down"></i>
                         </div>
 
-                        <div class="cmp-tb-cell cmp-tb-cell-effect cmp-tb-cell-header">
+                        <div v-on:click="toggle_sort_by('OR')"
+                            class="cmp-tb-cell cmp-tb-cell-effect cmp-tb-cell-header
+                            cmp-tb-cell-header-sortable">
                             Odds Ratio
+                            &nbsp;
+                            <i v-if="sort_ocs_by == 'OR_desc'"
+                                class="fas fa-sort-numeric-down-alt"></i>
+                            <i v-else-if="sort_ocs_by == 'OR_asc'"
+                                class="fas fa-sort-numeric-down"></i>
                         </div>
                         <div class="cmp-tb-cell cmp-tb-cell-sep cmp-tb-cell-header">
                             &nbsp;
                         </div>
 
-                        <div class="cmp-tb-cell cmp-tb-cell-effect cmp-tb-cell-header">
+                        <div v-on:click="toggle_sort_by('RR')"
+                            class="cmp-tb-cell cmp-tb-cell-effect cmp-tb-cell-header cmp-tb-cell-header-sortable">
                             Risk Ratio
+                            &nbsp;
+                            <i v-if="sort_ocs_by == 'RR_desc'"
+                                class="fas fa-sort-numeric-down-alt"></i>
+                            <i v-else-if="sort_ocs_by == 'RR_asc'"
+                                class="fas fa-sort-numeric-down"></i>
                         </div>
                         <div class="cmp-tb-cell cmp-tb-cell-sep cmp-tb-cell-header">
                             &nbsp;
                         </div>
 
-                        <div class="cmp-tb-cell cmp-tb-cell-effect cmp-tb-cell-header">
+                        <div v-on:click="toggle_sort_by('INCD')" 
+                            class="cmp-tb-cell cmp-tb-cell-effect cmp-tb-cell-header cmp-tb-cell-header-sortable">
                             Incidence
+                            &nbsp;
+                            <i v-if="sort_ocs_by == 'INCD_desc'"
+                                class="fas fa-sort-numeric-down-alt"></i>
+                            <i v-else-if="sort_ocs_by == 'INCD_asc'"
+                                class="fas fa-sort-numeric-down"></i>
                         </div>
 
                         <div class="cmp-tb-cell cmp-tb-cell-header">
@@ -889,57 +1083,68 @@ a {
                         </div>
                     </div>
 
-                    <div v-for="f_oc, f_oc_idx in f_ocs"
+                    <div v-for="v in v_sort_ocs(f_ocs)"
                         class="cmp-tb-row">
 
-                        <div v-on:click="show_detail(f_oc)"
+                        <div v-on:click="show_detail(f_ocs[v.idx])"
                             class="cmp-tb-cell cmp-tb-cell-ocname cmp-tb-cell-ocname-item flex-col">
                             <div class="cmp-filters">
-                                {{ f_oc.f_vals[0] }}: 
-                                {{ f_oc.f_vals[1] }} - 
-                                {{ f_oc.f_vals[4] }}
-                                @{{ f_oc.ae_grade }}
+                                {{ _txt_treat(f_ocs[v.idx].f_vals) }}
                             </div>
 
                             <div class="cmp-ocname">
-                                {{ f_oc.oc_cate }}
+                                <span class="badge"
+                                    :class="'badge-' + f_ocs[v.idx].oc_group">
+                                    {{ f_ocs[v.idx].oc_group[0] }}
+                                </span>
+                                {{ f_ocs[v.idx].oc_cate }}
                                 |
-                                {{ f_oc.oc_name }}
+                                {{ f_ocs[v.idx].oc_name }}
                             </div>
                         </div>
+
+                        <div class="cmp-tb-cell cmp-tb-cell-smtxt">
+                            {{ _txt(f_ocs[v.idx].ae_grade, 'grade') }}
+                        </div>
+
+                        
                         <div class="cmp-tb-cell cmp-tb-cell-sm">
-                            {{ f_oc.ma.PRIM.stus.length }}
+                            {{ f_ocs[v.idx].ma.PRIM.stus.length }}
+                        </div>
+
+
+                        <div class="cmp-tb-cell cmp-tb-cell-smtxt">
+                            {{ _txt(f_ocs[v.idx].f_vals[4], 'filter') }}
+                        </div>
+
+
+                        <div class="cmp-tb-cell">
+                            {{ add_comma(f_ocs[v.idx].ma.PRIM.total[0]) }}
                         </div>
                         <div class="cmp-tb-cell">
-                            {{ add_comma(f_oc.ma.PRIM.total[0]) }}
+                            {{ add_comma(f_ocs[v.idx].ma.PRIM.total[1]) }}
                         </div>
                         <div class="cmp-tb-cell">
-                            {{ add_comma(f_oc.ma.PRIM.total[1]) }}
+                            {{ add_comma(f_ocs[v.idx].ma.PRIM.total[2]) }}
                         </div>
                         <div class="cmp-tb-cell">
-                            {{ add_comma(f_oc.ma.PRIM.total[2]) }}
-                        </div>
-                        <div class="cmp-tb-cell">
-                            {{ add_comma(f_oc.ma.PRIM.total[3]) }}
+                            {{ add_comma(f_ocs[v.idx].ma.PRIM.total[3]) }}
                         </div>
 
                         <div class="cmp-tb-cell cmp-tb-cell-effect">
 
                             <div class="cmp-eft-dot"
-                                v-bind:style="{left: get_eft_left_by_rst(f_oc.ma.PRIM.rsts.OR) + 'px', backgroundColor: get_eft_color(f_oc.ma.PRIM.rsts.OR)}">
+                                v-bind:style="{left: get_eft_left_by_rst(f_ocs[v.idx].ma.PRIM.rsts.OR) + 'px', backgroundColor: get_eft_color(f_ocs[v.idx].ma.PRIM.rsts.OR)}">
 
                                 <div v-if="show_effect_label" 
                                     class="cmp-eft-value">
-                                    {{ tf2(f_oc.ma.PRIM.rsts.OR[show_effect_model].SM ) }}
-                                    (
-                                    {{ tf2(f_oc.ma.PRIM.rsts.OR[show_effect_model].SM_lower ) }},
-                                    {{ tf2(f_oc.ma.PRIM.rsts.OR[show_effect_model].SM_upper ) }}
-                                    )
+                                    {{ tf2(f_ocs[v.idx].ma.PRIM.rsts.OR[show_effect_model].SM ) }}
+                                    ({{ tf2(f_ocs[v.idx].ma.PRIM.rsts.OR[show_effect_model].SM_lower ) }}; {{ tf2(f_ocs[v.idx].ma.PRIM.rsts.OR[show_effect_model].SM_upper ) }})
                                 </div>
                             </div>
 
                             <div class="cmp-eft-ci-line"
-                                v-bind:style="{width: get_ci_width_by_rst(f_oc.ma.PRIM.rsts.OR) + 'px', left: get_ci_left_by_rst(f_oc.ma.PRIM.rsts.OR) + 'px'}">
+                                v-bind:style="{width: get_ci_width_by_rst(f_ocs[v.idx].ma.PRIM.rsts.OR) + 'px', left: get_ci_left_by_rst(f_ocs[v.idx].ma.PRIM.rsts.OR) + 'px'}">
                             </div>
 
                             <div class="cmp-ref-one"></div>
@@ -948,29 +1153,26 @@ a {
                             &nbsp;
                         </div>
                         <!-- <div class="cmp-tb-cell cmp-tb-cell-eft">
-                            OR={{ tf2(f_oc.ma.PRIM.rsts.OR.random.SM ) }}
+                            OR={{ tf2(f_ocs[v.idx].ma.PRIM.rsts.OR.random.SM ) }}
                             <br>
-                            {{ tf2(f_oc.ma.PRIM.rsts.OR.random.SM_lower ) }},
-                            {{ tf2(f_oc.ma.PRIM.rsts.OR.random.SM_upper ) }}
+                            {{ tf2(f_ocs[v.idx].ma.PRIM.rsts.OR.random.SM_lower ) }},
+                            {{ tf2(f_ocs[v.idx].ma.PRIM.rsts.OR.random.SM_upper ) }}
                         </div> -->
 
 
                         <div class="cmp-tb-cell cmp-tb-cell-effect">
 
                             <div class="cmp-eft-dot"
-                                v-bind:style="{left: get_eft_left_by_rst(f_oc.ma.PRIM.rsts.RR) + 'px', backgroundColor: get_eft_color(f_oc.ma.PRIM.rsts.RR)}">
+                                v-bind:style="{left: get_eft_left_by_rst(f_ocs[v.idx].ma.PRIM.rsts.RR) + 'px', backgroundColor: get_eft_color(f_ocs[v.idx].ma.PRIM.rsts.RR)}">
                                 <div v-if="show_effect_label" 
                                     class="cmp-eft-value">
-                                    {{ tf2(f_oc.ma.PRIM.rsts.RR[show_effect_model].SM ) }}
-                                    (
-                                    {{ tf2(f_oc.ma.PRIM.rsts.RR[show_effect_model].SM_lower ) }},
-                                    {{ tf2(f_oc.ma.PRIM.rsts.RR[show_effect_model].SM_upper ) }}
-                                    )
+                                    {{ tf2(f_ocs[v.idx].ma.PRIM.rsts.RR[show_effect_model].SM ) }}
+                                    ({{ tf2(f_ocs[v.idx].ma.PRIM.rsts.RR[show_effect_model].SM_lower ) }}; {{ tf2(f_ocs[v.idx].ma.PRIM.rsts.RR[show_effect_model].SM_upper ) }})
                                 </div>
                             </div>
 
                             <div class="cmp-eft-ci-line"
-                                v-bind:style="{width: get_ci_width_by_rst(f_oc.ma.PRIM.rsts.RR) + 'px', left: get_ci_left_by_rst(f_oc.ma.PRIM.rsts.RR) + 'px'}">
+                                v-bind:style="{width: get_ci_width_by_rst(f_ocs[v.idx].ma.PRIM.rsts.RR) + 'px', left: get_ci_left_by_rst(f_ocs[v.idx].ma.PRIM.rsts.RR) + 'px'}">
                             </div>
 
                             <div class="cmp-ref-one"></div>
@@ -979,10 +1181,10 @@ a {
                             &nbsp;
                         </div>
                         <!-- <div class="cmp-tb-cell cmp-tb-cell-eft">
-                            RR={{ tf2(f_oc.ma.PRIM.rsts.RR.random.SM ) }}
+                            RR={{ tf2(f_ocs[v.idx].ma.PRIM.rsts.RR.random.SM ) }}
                             <br>
-                            {{ tf2(f_oc.ma.PRIM.rsts.RR.random.SM_lower ) }},
-                            {{ tf2(f_oc.ma.PRIM.rsts.RR.random.SM_upper ) }}
+                            {{ tf2(f_ocs[v.idx].ma.PRIM.rsts.RR.random.SM_lower ) }},
+                            {{ tf2(f_ocs[v.idx].ma.PRIM.rsts.RR.random.SM_upper ) }}
                         </div> -->
 
 
@@ -990,32 +1192,29 @@ a {
                         <div class="cmp-tb-cell cmp-tb-cell-effect">
 
                             <div class="cmp-eft-dot"
-                                v-bind:style="{left: get_eft_left_by_rst(f_oc.ma.INCD.rsts.INCD, 'linear') + 'px', backgroundColor: get_eft_color(f_oc.ma.INCD.rsts.INCD)}">
+                                v-bind:style="{left: get_eft_left_by_rst(f_ocs[v.idx].ma.INCD.rsts.INCD, 'linear') + 'px', backgroundColor: get_eft_color(f_ocs[v.idx].ma.INCD.rsts.INCD)}">
                                 <div v-if="show_effect_label" 
                                     class="cmp-eft-value">
-                                    {{ tf2(f_oc.ma.INCD.rsts.INCD[show_effect_model].SM ) }}
-                                    (
-                                    {{ tf2(f_oc.ma.INCD.rsts.INCD[show_effect_model].SM_lower ) }},
-                                    {{ tf2(f_oc.ma.INCD.rsts.INCD[show_effect_model].SM_upper ) }}
-                                    )
+                                    {{ tf2(f_ocs[v.idx].ma.INCD.rsts.INCD[show_effect_model].SM ) }}
+                                    ({{ tf2(f_ocs[v.idx].ma.INCD.rsts.INCD[show_effect_model].SM_lower ) }}; {{ tf2(f_ocs[v.idx].ma.INCD.rsts.INCD[show_effect_model].SM_upper ) }})
                                 </div>
                             </div>
 
                             <div class="cmp-eft-ci-line"
-                                v-bind:style="{width: get_ci_width_by_rst(f_oc.ma.INCD.rsts.INCD, 'linear') + 'px', left: get_ci_left_by_rst(f_oc.ma.INCD.rsts.INCD, 'linear') + 'px'}">
+                                v-bind:style="{width: get_ci_width_by_rst(f_ocs[v.idx].ma.INCD.rsts.INCD, 'linear') + 'px', left: get_ci_left_by_rst(f_ocs[v.idx].ma.INCD.rsts.INCD, 'linear') + 'px'}">
                             </div>
 
                             <div class="cmp-ref-50"></div>
                         </div>
                         <!-- <div class="cmp-tb-cell cmp-tb-cell-eft">
-                            IN={{ tf2(f_oc.ma.INCD.rsts.INCD.random.SM ) }}
+                            IN={{ tf2(f_ocs[v.idx].ma.INCD.rsts.INCD.random.SM ) }}
                             <br>
-                            {{ tf2(f_oc.ma.INCD.rsts.INCD.random.SM_lower ) }},
-                            {{ tf2(f_oc.ma.INCD.rsts.INCD.random.SM_upper ) }}
+                            {{ tf2(f_ocs[v.idx].ma.INCD.rsts.INCD.random.SM_lower ) }},
+                            {{ tf2(f_ocs[v.idx].ma.INCD.rsts.INCD.random.SM_upper ) }}
                         </div> -->
 
                         <div class="cmp-tb-cell">
-                            <a v-on:click="rm_f_oc(f_oc_idx)"
+                            <a v-on:click="rm_f_oc(v.idx)"
                                 href="javascript:void(0);"
                                 class="btn btn-remove">
                                 <i class="fa fa-minus"></i>
@@ -1025,44 +1224,59 @@ a {
 
                     <div class="cmp-tb-row">
                         <div class="cmp-tb-cell cmp-tb-cell-ocname cmp-tb-cell-footer">
-                            &nbsp;
+                            <!-- outcome name -->
                         </div>
+                        <div class="cmp-tb-cell cmp-tb-cell-footer">
+                            <!-- grade -->
+                        </div>
+
                         <div class="cmp-tb-cell cmp-tb-cell-sm cmp-tb-cell-footer">
-                            
+                            <!-- n_stus -->
+                        </div>
+
+                        <div class="cmp-tb-cell cmp-tb-cell-footer">
+                            <!-- control -->
+                        </div>
+                        
+
+                        <div class="cmp-tb-cell cmp-tb-cell-footer">
+                            <!-- Et -->
                         </div>
                         <div class="cmp-tb-cell cmp-tb-cell-footer">
-                            
+                            <!-- Nt -->
                         </div>
                         <div class="cmp-tb-cell cmp-tb-cell-footer">
-                            
+                            <!-- Ec -->
                         </div>
                         <div class="cmp-tb-cell cmp-tb-cell-footer">
-                            
-                        </div>
-                        <div class="cmp-tb-cell cmp-tb-cell-footer">
-                            
+                            <!-- Nc -->
                         </div>
 
                         <div class="cmp-tb-cell cmp-tb-cell-effect cmp-tb-cell-footer">
+                            <!-- x-axis for OR -->
                             <img style="width: 100%;" src="/static/img/log-axis.png">
                         </div>
                         <div class="cmp-tb-cell cmp-tb-cell-sep cmp-tb-cell-footer">
+                            <!-- just for white space -->
                             &nbsp;
                         </div>
 
                         <div class="cmp-tb-cell cmp-tb-cell-effect cmp-tb-cell-footer">
+                            <!-- x-axis for RR -->
                             <img style="width: 100%;" src="/static/img/log-axis.png">
                         </div>
                         <div class="cmp-tb-cell cmp-tb-cell-sep cmp-tb-cell-footer">
+                            <!-- just for white space -->
                             &nbsp;
                         </div>
 
                         <div class="cmp-tb-cell cmp-tb-cell-effect cmp-tb-cell-footer">
+                            <!-- x-axis for INCD -->
                             <img style="width: 100%;" src="/static/img/x-axis-0-1.png">
                         </div>
 
                         <div class="cmp-tb-cell cmp-tb-cell-footer">
-                            
+                            <!-- operations -->
                         </div>
 
                     </div>
@@ -1074,7 +1288,7 @@ a {
 
         </div>
 
-        <div class="box" style="height: 50%;">
+        <div id="app_detail_box" class="box" style="height: calc(50% - 20px);">
             <div class="box-header">
                 <h4>
                     <i class="fa fa-chart-bar"></i>
@@ -1113,7 +1327,9 @@ a {
                 </div>
 
                 <div class="forest-plot-panel">
-
+                    <h5>
+                        
+                    </h5>
                     <div id="fg_pwma_forest" style="width: 100%; height: 100%;">
                         <svg id="fg_pwma_forest_svg"></svg>
                     </div>
@@ -1585,21 +1801,143 @@ var app_oclist = {
             el: this.vpp_id,
             data: {
                 group: 'treatment',
+                
                 select_mode: this.select_mode,
+
+                color_mode_by_sm: 'RR',
+
+                // rs is a three level dict
+                // {
+                //     group: {
+                //         oc_group,
+                //         is_close,
+                //         cates: {
+                //             cate_name: {
+                //                 oc_cate,
+                //                 aes: []
+                //             }
+                //         }
+                //     }
+                // },
                 rs: {},
                 rs_stat: {
                     cnt_cates: 0,
                     cnt_aes: 0,
                 },
-                ma_dict: {}
+                ma_dict: {},
+
+                keyword: '',
             },
             methods: {
-                toggle_oc: function(event) {
-                    var group = this.group;
-                    var oc_abbr = event.target.getAttribute('oc_abbr');
-                    var oc_cate = event.target.getAttribute('oc_cate');
-                    var oc_name = event.target.getAttribute('oc_name');
-                    var ae_grade = event.target.getAttribute('ae_grade');
+                match_keyword: function(s) {
+                    if (this.keyword.length < 3) {
+                        return true;
+                    }
+
+                    if (s.toUpperCase().indexOf(this.keyword.toUpperCase())>=0) {
+                        return true;
+                    }
+
+                    return false;
+                },
+
+                match_keyword_in_cate(cate) {
+                    for (let i = 0; i < cate.aes.length; i++) {
+                        const ae = cate.aes[i];
+                        
+                        if (this.match_keyword(ae.oc_name)) {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                },
+
+                is_cnt_ok: function(cnt) {
+                    if (cnt >= 1) {
+                        return true;
+                    }
+
+                    return false;
+                },
+                
+                show_oc: function(ae) {
+                    var gs = ['ga', 'g3h', 'g5n'];
+                    for (let i = 0; i < gs.length; i++) {
+                        if (this.show_oc_grade(ae, gs[i])) {
+                            return true;
+                        }
+                    }
+                    return false;
+                },
+
+                show_oc_grade: function(ae, grade) {
+                    if (typeof(grade) == 'undefined') {
+                        grade = 'GA';
+                    }
+                    var _g = grade.toLocaleLowerCase();
+
+                    if (this.is_cnt_ok(ae['cnt_'+ _g])) {
+                        return true;
+                    }
+                    return false;
+                },
+
+                add_group: function(group, ae_grade) {
+                    var cnt = 0;
+                    var ret = window.confirm(
+                        'Adding ALL '+ae_grade+' outcomes in current ['+group.oc_group+'] group may take a while, are sure to continue?'
+                    );
+                    if (ret) {
+
+                    } else {
+                        return;
+                    }
+                    for (const cate_name in group.cates) {
+                        if (Object.hasOwnProperty.call(group.cates, cate_name)) {
+                            const cate = group.cates[cate_name];
+                            this.add_cate(cate, ae_grade);
+                        }
+                    }
+                },
+
+                add_cate: function(cate, ae_grade) {
+                    // the cate contains all AE
+                    var cnt = 0;
+                    for (let i = 0; i < cate.aes.length; i++) {
+                        const ae = cate.aes[i];
+                        
+                        if (this.match_keyword(ae.oc_name)) {
+                            cnt += this.add_oc(
+                                ae,
+                                ae_grade
+                            );
+                        }
+                    }
+
+                    return cnt;
+                },
+
+                add_oc: function(ae, ae_grade, count) {
+                    if (this.show_oc_grade(ae, ae_grade)) {
+
+                    } else {
+                        // this oc can NOT be displayed for some reason
+                        // so won't be added for comparison
+                        return 0;
+                    }
+
+                    if (typeof(count) == 'undefined') {
+
+                    } else {
+                        // just for counting
+                        return 1;
+                    }
+                    // var group = this.group;
+                    // var oc_abbr = event.target.getAttribute('oc_abbr');
+                    // var oc_cate = event.target.getAttribute('oc_cate');
+                    // var oc_name = event.target.getAttribute('oc_name');
+                    // var ae_grade = event.target.getAttribute('ae_grade');
 
                     // add effect
                     // if (this.select_mode == 'checkbox') {
@@ -1611,15 +1949,27 @@ var app_oclist = {
 
                     // call the worker to update everything related
                     // jarvis will do this task accordingly
-                    jarvis.toggle_oc(group, oc_cate, oc_name, oc_abbr, ae_grade, app_oclist.pids);
+                    jarvis.add_oc(
+                        ae.oc_group, 
+                        ae.oc_cate, 
+                        ae.oc_name, 
+                        ae.oc_abbr, 
+
+                        ae_grade, 
+                        app_oclist.pids
+                    );
                 },
 
                 get_grade_label: function(g) {
                     return jarvis.texts[g];
                 },
 
-                toggle_cate: function(cate) {
-                    this.rs[cate].is_close = !this.rs[cate].is_close;
+                toggle_group: function(group) {
+                    this.rs[group].is_close = !this.rs[group].is_close;
+                },
+
+                toggle_cate: function(group, cate) {
+                    this.rs[group].cates[cate].is_close = !this.rs[group].cates[cate].is_close;
                 },
 
                 toggle_all_cates: function(flag) {
@@ -1670,8 +2020,8 @@ var app_oclist = {
         if (typeof(group) == 'undefined') {
 
         } else {
-            conditions += '\n';
-            conditions += 'and oc_group = "'+group+'" ';
+            // conditions += '\n';
+            // conditions += 'and oc_group = "'+group+'" ';
         }
 
         return conditions;
@@ -1823,15 +2173,15 @@ var app_oclist = {
     },
 
     update_ocs: function(pids, group) {
-        var sql = 'select oc_cate, oc_abbr, first(oc_name) as oc_name, ' + '\n' +
+        var sql = 'select oc_group, oc_cate, oc_abbr, first(oc_name) as oc_name, ' + '\n' +
             '  count(case when has_GA = true then pid else null end) as cnt_ga, ' + '\n' +
             '  count(case when has_G3H = true then pid else null end) as cnt_g3h, ' + '\n' +
             '  count(case when has_G5N = true then pid else null end) as cnt_g5n ' + '\n' +
             'from aes ' + '\n' +
             'where ' + '\n' +
             this.get_pid_condition(pids, group) + ' ' + '\n' +
-            'group by oc_cate, oc_abbr ' + '\n' +
-            'order by oc_cate asc, oc_name asc';
+            'group by oc_group, oc_cate, oc_abbr ' + '\n' +
+            'order by oc_group desc, oc_cate asc, oc_name asc';
 
         // console.log(sql);
         // init the result
@@ -1846,15 +2196,32 @@ var app_oclist = {
         for (var i = 0; i < raw_rs.length; i++) {
             var r = raw_rs[i];
 
+            if (typeof(r.oc_group) == 'undefined' ||
+                r.oc_group == null) {
+                continue;
+            }
+
             if (typeof(r.oc_cate) == 'undefined' ||
                 r.oc_cate == null) {
                 continue;
             }
             
-            if (rs.hasOwnProperty(r.oc_cate)) {
+            // add group first
+            if (rs.hasOwnProperty(r.oc_group)) {
                 //
             } else {
-                rs[r.oc_cate] = {
+                rs[r.oc_group] = {
+                    oc_group: r.oc_group,
+                    is_close: false,
+                    cates: {}
+                }
+                rs_stat.cnt_cates += 1;
+            }
+            
+            if (rs[r.oc_group].cates.hasOwnProperty(r.oc_cate)) {
+                //
+            } else {
+                rs[r.oc_group].cates[r.oc_cate] = {
                     oc_cate: r.oc_cate,
                     is_close: false,
                     aes: []
@@ -1862,9 +2229,12 @@ var app_oclist = {
                 rs_stat.cnt_cates += 1;
             }
             // put this ae into cate
-            rs[r.oc_cate]['aes'].push({
+            rs[r.oc_group].cates[r.oc_cate]['aes'].push({
+                oc_group: r.oc_group,
+                oc_cate: r.oc_cate,
                 oc_name: r.oc_name,
                 oc_abbr: r.oc_abbr,
+
                 cnt_ga: r.cnt_ga,
                 cnt_g3h: r.cnt_g3h,
                 cnt_g5n: r.cnt_g5n
@@ -2224,9 +2594,189 @@ var app_comptb = {
                 show_effect_label: true,
 
                 // checking detail
-                detail_f_oc: null
+                detail_f_oc: null,
+
+                // sort
+                sort_ocs_by: 'default',
+
+                // order
+                default_sort_ocs_order: 'asc'
             },
             methods: {
+                _txt: function(s, type) {
+                    if (typeof(type) == 'undefined') {
+                        return s;
+                    }
+                    // for grade
+                    if (type == 'grade') {
+                        return {
+                            'GA': 'ALL',
+                            'G3H': '3+',
+                            'G5N': '5'
+                        }[s];
+
+                    } else if (type == 'filter') {
+                        if (s == '%' || s == 'all') {
+                            return 'ALL'
+                        } else {
+                            return s;
+                        }
+
+                    } else {
+                        return s;
+                    }
+                },
+
+                _txt_cancer: function(f_vals) {
+                    if (f_vals[5] == '%' || f_vals[5] == 'all') {
+                        return 'ALL CANCERS';
+                    } else {
+                        return f_vals[5];
+                    }
+                },
+
+                _txt_treat: function(f_vals) {
+                    var txt = this._txt(f_vals[0], 'filter') + 
+                               '.' +
+                               this._txt(f_vals[1], 'filter');
+
+                    if (f_vals[2] == '%' || f_vals[2] == 'all') {
+                        
+                        if (f_vals[1] == '%' || f_vals[1] == 'all') {
+                            return txt;
+                        } else {
+                            
+                            return txt + ' - ALL';
+                        }
+                        
+                    } else if (f_vals[2] == 'Monotherapy') {
+                        // mono
+                        return txt + ' - MONO';
+
+                    } else {
+                        // comb
+                        if (f_vals[3] == '%' || f_vals[3] == 'all') {
+                            // all comb
+                            return txt + ' - COMB';
+                        } else {
+                            // specific comb
+                            return txt + ' - ' + this._txt(f_vals[3], 'filter');
+                        }
+                    }
+                },
+
+                set_sort_ocs_by: function(sort_by) {
+                    this.sort_ocs_by = sort_by;
+                },
+                
+                get_sort_ocs_by: function() {
+                    if (this.hasOwnProperty('sort_ocs_by')) {
+                        return this.sort_ocs_by;
+                    } else {
+                        return 'default';
+                    }
+                },
+
+                toggle_sort_by: function(key) {
+                    if (key == 'default') {
+                        // just set default
+                        this.sort_ocs_by = key;
+                    } else {
+
+                        if (this.sort_ocs_by.indexOf(key)>=0) {
+                            // just need to swap
+                            
+                            if (this.sort_ocs_by.indexOf('desc')>=0) {
+                                this.sort_ocs_by = this.sort_ocs_by.replace('desc', 'asc');
+                            } else {
+                                this.sort_ocs_by = this.sort_ocs_by.replace('asc', 'desc');
+                            }
+
+                        } else {
+                            // change to other sorting
+                            this.sort_ocs_by = key + '_' + this.default_sort_ocs_order;
+                        }
+                    }
+
+                },
+
+                v_sort_ocs: function(f_ocs) {
+                    var sort_by = this.get_sort_ocs_by();
+                    var sort_key = sort_by.split('_')[0];
+
+                    // a virtual list
+                    var v_ocs = [];
+
+                    for (let i = 0; i < f_ocs.length; i++) {
+                        const f_oc = f_ocs[i];
+                        v_ocs.push({
+                            idx: i,
+                            NPEt: f_oc.ma.PRIM.total[0],
+                            NPNt: f_oc.ma.PRIM.total[1],
+                            NPEc: f_oc.ma.PRIM.total[2],
+                            NPNc: f_oc.ma.PRIM.total[3],
+                            NS: f_oc.ma.PRIM.stus.length,
+                            OR: f_oc.ma.PRIM.rsts.OR.random.SM,
+                            RR: f_oc.ma.PRIM.rsts.RR.random.SM,
+                            INCD: f_oc.ma.INCD.rsts.INCD.random.SM,
+                        });
+                    }
+
+                    // now, sort
+                    if (sort_by == 'default') {
+                        console.log('* reset sorting ' + sort_by);
+                        return v_ocs;
+
+                    } else if (sort_by.indexOf('INCD')>=0) {
+                        console.log('* sorting ' + sort_by + '|' + sort_key);
+
+                        if (sort_by.indexOf('asc')>=0) {
+                            v_ocs.sort(function(a, b) {
+                                var v = 
+                                    a.INCD -
+                                    b.INCD
+                                return v;
+                            });
+                        } else {
+                            v_ocs.sort(function(a, b) {
+                                var v = 
+                                    b.INCD -
+                                    a.INCD
+                                return v;
+                            });
+                        }
+
+                        return v_ocs;
+
+                    } else {
+                        // all other values
+                        console.log('* sorting ' + sort_by + '|' + sort_key);
+
+                        if (sort_by.indexOf('asc')>=0) {
+                            v_ocs.sort((function(sort_key) {
+                                return function(a, b) {
+                                    var v = 
+                                        a[sort_key] - 
+                                        b[sort_key];
+                                    return v;
+                                }
+                            })(sort_key));
+
+                        } else {
+                            v_ocs.sort((function(sort_key) {
+                                return function(a, b) {
+                                    var v = 
+                                        b[sort_key] - 
+                                        a[sort_key];
+                                    return v;
+                                }
+                            })(sort_key));
+                        }
+
+                        return v_ocs;
+                    } 
+                },
+
                 add_comma: function(x) {
                     x = x.toString();
                     var pattern = /(-?\d+)(\d{3})/;
@@ -2694,10 +3244,7 @@ var vis_ocmas = {
                 name: group_name,
                 value: 0,
                 itemStyle: {
-                    color: {
-                        'treatment': '#5CC8FF',
-                        'immune': '#DEC1FF'
-                    }[group_name]
+                    color: jarvis.color.group[group_name]
                 },
                 children: []
             };
@@ -2710,10 +3257,7 @@ var vis_ocmas = {
                     name: cate_name,
                     value: 0,
                     itemStyle: {
-                        color: {
-                            'treatment': '#EBF8FF',
-                            'immune': '#F4EBFF'
-                        }[group_name]
+                        color: jarvis.color.cate_by_group[group_name]
                     },
 
                     children: []
@@ -2822,6 +3366,14 @@ var vis_ocmas = {
 
 var jarvis = {
     color: {
+        group: {
+            treatment: '#5CC8FF',
+            immune: '#DEC1FF'
+        },
+        cate_by_group: {
+            treatment: '#EBF8FF',
+            immune: '#F4EBFF'
+        },
         bene: {
             sig: '#0cab0c',
             not: '#c7ffc7'
@@ -2945,9 +3497,9 @@ var jarvis = {
             jarvis.ssmsg('Almost initialized.');
             setTimeout('jarvis.ssclose();', 400);
 
-            app_filter.vpp.set_values(
-                ['PD1', 'all', 'Monotherapy', '%', 'Chemo', 'all']
-            );
+            // app_filter.vpp.set_values(
+            //     ['PD1', 'all', 'Monotherapy', '%', 'Chemo', 'all']
+            // );
         });
 
         
@@ -2964,8 +3516,8 @@ var jarvis = {
         return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
     },
 
-    toggle_oc: function(group, oc_cate, oc_name, oc_abbr, ae_grade, pids) {
-        console.log('* toggle_oc ' + group + ' | ' + oc_cate + ' | ' +oc_abbr+' , ' + oc_name + ', ' + ae_grade, pids);
+    add_oc: function(oc_group, oc_cate, oc_name, oc_abbr, ae_grade, pids) {
+        console.log('* add_oc ' + oc_group + ' | ' + oc_cate + ' | ' +oc_abbr+' , ' + oc_name + ', ' + ae_grade, pids);
         // vw_ocplot.show_plot(group, oc_cate, oc_name, ae_grade, pids);
 
         // first, get the filter values
@@ -2977,7 +3529,7 @@ var jarvis = {
         // then, create a f_oc and push to cmp
         var f_oc = {
             // basic info
-            group: group,
+            oc_group: oc_group,
             oc_abbr: oc_abbr,
             oc_cate: oc_cate,
             oc_name: oc_name,
@@ -3015,6 +3567,23 @@ var jarvis = {
             return 'NA';
         } 
         return v.toFixed(2);
+    },
+
+    set_mode: function(mode) {
+        if (typeof(mode) == 'undefined') {
+            mode = 0;
+        }
+        if (mode == 0) {
+            this.set_mode(1);
+        }
+        if (mode == 1) {
+            $('#app_comptb_box').height('calc(50% - 20px)');
+            $('#app_detail_box').height('calc(50% - 20px)');
+        }
+        if (mode == 2) {
+            $('#app_comptb_box').height('calc(100% - 150px)');
+            $('#app_detail_box').height('20px');
+        }
     }
 };
 
