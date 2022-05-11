@@ -413,7 +413,7 @@ a {
     height: 7px;
     top: 12px;
     position: absolute;
-    opacity: 0.8;
+    /* opacity: 0.8; */
 }
 .cmp-eft-value {
     font-size: .8em;
@@ -518,6 +518,9 @@ a {
 .badge-immune {
     background-color: #F4EBFF;
 }
+.mr-2 {
+    margin-right: 2em;
+}
 </style>
 </head>
 <body>
@@ -604,6 +607,23 @@ a {
                         class="select-sm">
                         <option value="RR">RR: Color by Risk Ratio</option>
                         <option value="OR">OR: Color by Odds Ratio</option>
+                    </select>
+
+                    <select v-model="cnt_rule"
+                        class="select-sm">
+
+                        <optgroup label="Simple Threshold">
+                            <option value="ge1">All outcomes with at lease 1 study</option>
+                            <option value="ge5">Equal or greater than 5 studies</option>
+                            <option value="ge10">Equal or greater than 10 studies</option>
+                            <option value="ge20">Equal or greater than 20 studies</option>
+                        </optgroup>
+
+                        <optgroup label="Complex Rules">
+                            <option value="ge1s5">At lease 1 study but less than 5</option>
+                            <option value="ge5ls10">Equal or greater than 5 but less than 10</option>
+                            <option value="ge10ls20">Equal or greater than 10 but less than 20</option>
+                        </optgroup>
                     </select>
                 </div>
             </div>
@@ -928,38 +948,43 @@ a {
                     |
                 </h4>
                 <div class="d-flex flex-row flex-align-items-baseline">
-                    <input type="radio"
-                        id="input_show_effect_model_random"
-                        value="random"
-                        v-model="show_effect_model">
-                    <label for="input_show_effect_model_random">Random Effect Model</label> 
-                
-                    <input type="radio"
-                        id="input_show_effect_model_fixed"
-                        value="fixed"
-                        v-model="show_effect_model">
-                    <label for="input_show_effect_model_fixed">
-                        Fixed Effect Model
-                    </label> 
+                    <div class="mr-2">
+                        <input type="radio"
+                            id="input_show_effect_model_random"
+                            value="random"
+                            v-model="show_effect_model">
+                        <label for="input_show_effect_model_random">Random Effect Model</label> 
+                    
+                        <input type="radio"
+                            id="input_show_effect_model_fixed"
+                            value="fixed"
+                            v-model="show_effect_model">
+                        <label for="input_show_effect_model_fixed">
+                            Fixed Effect Model
+                        </label> 
+                    </div>
+                    
                     <div style="margin-right: 2em;">
+                        <input type="checkbox"
+                            id="input_show_effect_label"
+                            v-model="show_effect_label">
+                        <label for="input_show_effect_label">Effect Size Label</label> 
 
                     </div>
 
-                    <input type="checkbox"
-                        id="input_show_effect_label"
-                        v-model="show_effect_label">
-                    <label for="input_show_effect_label">Effect Size Label</label> 
-
+                    
                     <div style="margin-right: 2em;">
                         <a href="javascript:void(0);" 
                             onclick="jarvis.set_mode(1)"
                             class="btn">
                             <i class="fas fa-th-large"></i>
+                            Half Half
                         </a>
                         <a href="javascript:void(0);" 
                             onclick="jarvis.set_mode(2)"
                             class="btn">
-                            <i class="far fa-square"></i>
+                            <i class="fas fa-expand"></i>
+                            Maximum
                         </a>
                     </div>
                     
@@ -1333,6 +1358,8 @@ a {
                     <div id="fg_pwma_forest" style="width: 100%; height: 100%;">
                         <svg id="fg_pwma_forest_svg"></svg>
                     </div>
+
+                    
                 </div>
             </div>
             
@@ -1827,6 +1854,9 @@ var app_oclist = {
                 ma_dict: {},
 
                 keyword: '',
+
+                // for filter number of outcomes
+                cnt_rule: 'ge1'
             },
             methods: {
                 match_keyword: function(s) {
@@ -1854,8 +1884,34 @@ var app_oclist = {
                 },
 
                 is_cnt_ok: function(cnt) {
-                    if (cnt >= 1) {
-                        return true;
+                    if (this.cnt_rule == 'ge1') {
+                        if (cnt >= 1) {
+                            return true;
+                        }
+                    } else if (this.cnt_rule == 'ge5') {
+                        if (cnt >= 5) {
+                            return true;
+                        }
+                    } else if (this.cnt_rule == 'ge10') {
+                        if (cnt >= 10) {
+                            return true;
+                        }
+                    } else if (this.cnt_rule == 'ge20') {
+                        if (cnt >= 20) {
+                            return true;
+                        }
+                    } else if (this.cnt_rule == 'ge1ls5') {
+                        if (cnt >= 1 && cnt < 5) {
+                            return true;
+                        }
+                    } else if (this.cnt_rule == 'ge5ls10') {
+                        if (cnt >= 5 && cnt < 10) {
+                            return true;
+                        }
+                    } else if (this.cnt_rule == 'ge10ls20') {
+                        if (cnt >= 10 && cnt < 20) {
+                            return true;
+                        }
                     }
 
                     return false;
