@@ -230,8 +230,14 @@ def _check_update_by_project_in_emails(project, emails):
                 logger.debug('!!! unknown email type: %s' % mail['email_type'])
                 papers = []
 
+            # it's possible that this project doesn't have any paper
+            if papers is None:
+                n_papers = 0
+            else:
+                n_papers = len(papers)
+
             logger.debug('found and %s papers for prject [%s] in %s|%s|%s' % \
-                (len(papers), project.keystr, 
+                (n_papers, project.keystr, 
                 mail['date'], mail['email_type'], mail['subject']))
 
             # put these papers in update list
