@@ -167,8 +167,16 @@ html {
             <div class="mt-1 mb-1">
                 <button class="btn btn-sm btn-default mr-1"
                     v-on:click="save_working_paper_selections">
-                    <i class="fa fa-save"></i>
-                    Save 
+                    <span v-if="is_saving"
+                        v-bind:class="{'wpc-data-has-not-saved':!has_saved}">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        Saving
+                    </span>
+                    <span v-else
+                        v-bind:class="{'wpc-data-has-not-saved':!has_saved}">
+                        <i class="fa fa-save"></i>
+                        Save
+                    </span> 
                 </button>
                 <button class="btn btn-sm btn-default mr-1"
                     title="Toggle display selected only"
@@ -744,6 +752,7 @@ var pan_ocpapers = {
                 console.log(data);
 
                 jarvis.toast('Updated #' + data.paper.seq_num + ' selection of ' + data.paper.meta.outcome_selections.length + ' outcomes.');
+                pan_ocpapers.vpp.saving_end();
 
                 // update everything!
                 // pan_ocpapers.load();
