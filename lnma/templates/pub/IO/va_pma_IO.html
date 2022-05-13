@@ -67,9 +67,9 @@ a {
     height: calc(100% - 42px);
 }
 #app_oclist {
-    width: 300px;
+    width: 320px;
     padding: 0 5px;
-    height: 100%;
+    height: calc(100% - 15px);
     /* height: 810px; */
     /* background-color: whitesmoke; */
 }
@@ -80,7 +80,7 @@ a {
     overflow-y: auto;
 }
 #vw_ocplots_mainpanel {
-    width: calc(100% - 300px);
+    width: calc(100% - 320px);
     padding: 0 5px;
     height: 100%;
 }
@@ -91,14 +91,14 @@ a {
 .oc-group {
     cursor: pointer;
     padding: 3px 0;
-    text-align: center;
-    text-transform: uppercase;
+    text-align: left;
+    /* text-transform: uppercase; */
     background-color: #f3f3f3;
     border-top: 1px solid #cccccc;
 }
 .oc-name {
-    width:     180px;
-    min-width: 180px;
+    width:     200px;
+    min-width: 200px;
     cursor: pointer;
     padding: 2px 0;
 }
@@ -156,8 +156,8 @@ a {
     border-bottom: 1px solid #cccccc;
 }
 .oc-item-info .oc-name {
-    width:       150px;
-    min-width:   150px;
+    width:       170px;
+    min-width:   170px;
     padding-left: 10px;
 }
 .oc-plot-img {
@@ -335,12 +335,18 @@ a {
 .cmp-tb-row:hover{
     background-color: whitesmoke;
 }
+.cmp-tb-row-header {
+    position: sticky;
+    top: 0;
+    background-color: white;
+    z-index: 99;
+}
 .cmp-tb-cell {
     width: 50px;
     min-width: 50px;
 
-    height: 30px;
-    min-height: 30px;
+    height: 24px;
+    min-height: 24px;
     display: flex;
     justify-content: center;
     /* align-self: center;    <---- REMOVE */
@@ -361,6 +367,10 @@ a {
     /* border-top: 1px solid #777777; */
     padding: 4px 0;
 }
+.cmp-tb-cell-xs {
+    width: 20px !important;
+    min-width: 20px !important;
+}
 .cmp-tb-cell-sm {
     width: 50px !important;
     min-width: 50px !important;
@@ -377,8 +387,16 @@ a {
     list-style: 0.8em;
 }
 .cmp-tb-cell-sep {
-    width: 40px !important;
-    min-width: 40px !important;
+    width: 45px !important;
+    min-width: 45px !important;
+}
+.cmp-tb-cell-category {
+    width: 120px !important;
+    min-width: 120px !important;
+}
+.cmp-tb-cell-treatment {
+    width: 140px !important;
+    min-width: 140px !important;
 }
 .cmp-tb-cell-effect {
     min-width: 120px !important;
@@ -395,6 +413,12 @@ a {
     width: 100%;
     font-style: italic;
     font-size: .85em;
+}
+.cmp-occate {
+    width: 100%;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
 }
 .cmp-ocname {
     width: 100%;
@@ -458,6 +482,7 @@ a {
 }
 .btn-add-ocs:hover {
     color: #333333;
+    background-color: #cccccc;
 }
 #app_sclist {
     width: 600px;
@@ -655,7 +680,7 @@ a {
                 <div class="oc-cate d-flex fx-col">
                     <div class="oc-cate-info d-flex flex-row">
                         <div class="oc-name" style="font-weight: bold;">
-                            {{ rs_stat.cnt_aes }}
+                            {{ n_all() }}
                             Outcomes
                         </div>
                         <div class="oc-type" title="All Grades">
@@ -678,27 +703,28 @@ a {
                                 v-on:click="toggle_group(group.oc_group)">
                                 <i class="far fa-folder" v-if="group.is_close"></i>
                                 <i class="far fa-folder-open" v-else></i>
-                                {{ group.oc_group }}
+                                {{ group.oc_group }} related AEs
+                                ({{ n_group(group) }})
                             </div>
-                            <div class="oc-type">
-                                <a v-on:click="add_group(group, 'GA')"
-                                    :title="'Add [' + group.oc_group + '] GA outcomes'"
+                            <div v-on:click="add_group(group, 'GA')"
+                                class="oc-type">
+                                <a :title="'Add [' + group.oc_group + '] GA outcomes'"
                                     class="btn-add-ocs"
                                     href="javascript:void(0);">
                                     <i class="fa fa-plus"></i>
                                 </a>
                             </div>
-                            <div class="oc-type">
-                                <a v-on:click="add_group(group, 'G3H')"
-                                    :title="'Add [' + group.oc_group + '] G3+ outcomes'"
+                            <div v-on:click="add_group(group, 'G3H')"
+                                class="oc-type">
+                                <a :title="'Add [' + group.oc_group + '] G3+ outcomes'"
                                     class="btn-add-ocs"
                                     href="javascript:void(0);">
                                     <i class="fa fa-plus"></i>
                                 </a>
                             </div>
-                            <div class="oc-type">
-                                <a v-on:click="add_group(group, 'G5N')"
-                                    :title="'Add [' + group.oc_group + '] G5 outcomes'"
+                            <div v-on:click="add_group(group, 'G5N')"
+                                class="oc-type">
+                                <a :title="'Add [' + group.oc_group + '] G5 outcomes'"
                                     class="btn-add-ocs"
                                     href="javascript:void(0);">
                                     <i class="fa fa-plus"></i>
@@ -719,26 +745,27 @@ a {
                                         {{ group.oc_group[0] }}
                                     </span>
                                     {{ r.oc_cate }}
+                                    ({{ n_cate(r) }})
                                 </div>
-                                <div class="oc-type">
-                                    <a v-on:click="add_cate(r, 'GA')"
-                                        :title="'Add [' + r.oc_cate + '] GA outcomes'"
+                                <div v-on:click="add_cate(r, 'GA')"
+                                    class="oc-type">
+                                    <a :title="'Add [' + r.oc_cate + '] GA outcomes'"
                                         class="btn-add-ocs"
                                         href="javascript:void(0);">
                                         <i class="fa fa-plus"></i>
                                     </a>
                                 </div>
-                                <div class="oc-type">
-                                    <a v-on:click="add_cate(r, 'G3H')"
-                                        :title="'Add [' + r.oc_cate + '] G3+ outcomes'"
+                                <div v-on:click="add_cate(r, 'G3H')"
+                                    class="oc-type">
+                                    <a :title="'Add [' + r.oc_cate + '] G3+ outcomes'"
                                         class="btn-add-ocs"
                                         href="javascript:void(0);">
                                         <i class="fa fa-plus"></i>
                                     </a>
                                 </div>
-                                <div class="oc-type">
-                                    <a v-on:click="add_cate(r, 'G5N')"
-                                        :title="'Add [' + r.oc_cate + '] G5 outcomes'"
+                                <div v-on:click="add_cate(r, 'G5N')"
+                                    class="oc-type">
+                                    <a :title="'Add [' + r.oc_cate + '] G5 outcomes'"
                                         class="btn-add-ocs"
                                         href="javascript:void(0);">
                                         <i class="fa fa-plus"></i>
@@ -773,7 +800,7 @@ a {
                                         <div class="oc-type"
                                             v-if="show_oc_grade(ae, 'G3H')"
                                             v-bind:style="{ backgroundColor: get_eft_color(ma_dict[ae.oc_abbr].G3H.PRIM.rsts[color_mode_by_sm]) }"
-                                            v-on:click="add_oc">
+                                            v-on:click="add_oc(ae, 'G3H')">
                                             {{ ae.cnt_g3h }}
                                         </div>
                                         <div class="oc-type"
@@ -786,7 +813,7 @@ a {
                                         <div class="oc-type"
                                             v-if="show_oc_grade(ae, 'G5N')"
                                             v-bind:style="{ backgroundColor: get_eft_color(ma_dict[ae.oc_abbr].G5N.PRIM.rsts[color_mode_by_sm]) }"
-                                            v-on:click="add_oc">
+                                            v-on:click="add_oc(ae, 'G5N')">
                                             {{ ae.cnt_g5n }}
                                         </div>
                                         <div class="oc-type"
@@ -818,8 +845,15 @@ a {
                     <i class="fa fa-chart-bar"></i>
                     Overview 
                 </h4>
-                <div class="d-flex flex-row">
-
+                <div class="d-flex flex-row flex-align-items-center">
+                    <div style="margin-right: 2em;">
+                        <a href="javascript:void(0);" 
+                            onclick="jarvis.set_mode(4)"
+                            class="btn">
+                            <i class="far fa-minus-square"></i>
+                            Hide
+                        </a>
+                    </div>
                 </div>
             </div>
 
@@ -972,6 +1006,15 @@ a {
 
                     </div>
 
+
+                    <div style="margin-right: 2em;">
+                        <a href="javascript:void(0);" 
+                            v-on:click="rm_all_f_ocs"
+                            class="btn">
+                            <i class="far fa-trash-alt"></i>
+                            Remove All
+                        </a>
+                    </div>
                     
                     <div style="margin-right: 2em;">
                         <a href="javascript:void(0);" 
@@ -1000,14 +1043,41 @@ a {
             <div v-else
                 class="box-body" style="height: 100%; overflow-y: auto; overflow-x: hidden;">
                 <div class="cmp-tb">
-                    <div class="cmp-tb-row">
+                    <div class="cmp-tb-row cmp-tb-row-header">
+                        <div v-on:click=""
+                            class="cmp-tb-cell cmp-tb-cell-xs cmp-tb-cell-header">
+                            G
+                        </div>
+
+                        <div v-on:click=""
+                            class="cmp-tb-cell cmp-tb-cell-category cmp-tb-cell-header">
+                            Category
+                        </div>
+
                         <div v-on:click="toggle_sort_by('default')"
                             class="cmp-tb-cell cmp-tb-cell-ocname cmp-tb-cell-header cmp-tb-cell-header-sortable">
                             Outcome
                         </div>
+
                         <div v-on:click=""
                             class="cmp-tb-cell cmp-tb-cell-header">
                             Grade
+                        </div>
+
+
+                        <div v-on:click=""
+                            class="cmp-tb-cell cmp-tb-cell-treatment cmp-tb-cell-header">
+                            Treatment
+                        </div>
+
+                        <div v-on:click=""
+                            class="cmp-tb-cell cmp-tb-cell-header">
+                            Control
+                        </div>
+
+                        <div v-on:click=""
+                            class="cmp-tb-cell cmp-tb-cell-header">
+                            Cancer
                         </div>
 
 
@@ -1019,12 +1089,6 @@ a {
                                 class="fas fa-sort-numeric-down-alt"></i>
                             <i v-else-if="sort_ocs_by == 'NS_asc'"
                                 class="fas fa-sort-numeric-down"></i>
-                        </div>
-
-
-                        <div v-on:click=""
-                            class="cmp-tb-cell cmp-tb-cell-header">
-                            Control
                         </div>
 
 
@@ -1090,7 +1154,7 @@ a {
 
                         <div v-on:click="toggle_sort_by('INCD')" 
                             class="cmp-tb-cell cmp-tb-cell-effect cmp-tb-cell-header cmp-tb-cell-header-sortable">
-                            Incidence
+                            Incidence %
                             &nbsp;
                             <i v-if="sort_ocs_by == 'INCD_desc'"
                                 class="fas fa-sort-numeric-down-alt"></i>
@@ -1110,39 +1174,48 @@ a {
 
                     <div v-for="v in v_sort_ocs(f_ocs)"
                         class="cmp-tb-row">
+                        <div class="cmp-tb-cell cmp-tb-cell-xs">
+                            <span class="badge"
+                                :class="'badge-' + f_ocs[v.idx].oc_group">
+                                {{ f_ocs[v.idx].oc_group[0] }}
+                            </span>
+                        </div>
+
+                        <div class="cmp-tb-cell cmp-tb-cell-category cmp-tb-cell-smtxt">
+                            <div class="cmp-occate">
+                                {{ f_ocs[v.idx].oc_cate }}
+                            </div>
+                        </div>
 
                         <div v-on:click="show_detail(f_ocs[v.idx])"
                             class="cmp-tb-cell cmp-tb-cell-ocname cmp-tb-cell-ocname-item flex-col">
-                            <div class="cmp-filters">
-                                {{ _txt_treat(f_ocs[v.idx].f_vals) }}
-                            </div>
-
                             <div class="cmp-ocname">
-                                <span class="badge"
-                                    :class="'badge-' + f_ocs[v.idx].oc_group">
-                                    {{ f_ocs[v.idx].oc_group[0] }}
-                                </span>
-                                {{ f_ocs[v.idx].oc_cate }}
-                                |
                                 {{ f_ocs[v.idx].oc_name }}
                             </div>
                         </div>
 
+
                         <div class="cmp-tb-cell cmp-tb-cell-smtxt">
                             {{ _txt(f_ocs[v.idx].ae_grade, 'grade') }}
+                        </div>
+
+
+                        <div class="cmp-tb-cell cmp-tb-cell-treatment cmp-tb-cell-smtxt">
+                            {{ _txt_treat(f_ocs[v.idx].f_vals) }}
+                        </div>
+
+                        <div class="cmp-tb-cell cmp-tb-cell-smtxt">
+                            {{ _txt(f_ocs[v.idx].f_vals[4], 'filter') }}
+                        </div>
+
+                        <div class="cmp-tb-cell cmp-tb-cell-smtxt">
+                            {{ _txt(f_ocs[v.idx].f_vals[5], 'filter') }}
                         </div>
 
                         
                         <div class="cmp-tb-cell cmp-tb-cell-sm">
                             {{ f_ocs[v.idx].ma.PRIM.stus.length }}
                         </div>
-
-
-                        <div class="cmp-tb-cell cmp-tb-cell-smtxt">
-                            {{ _txt(f_ocs[v.idx].f_vals[4], 'filter') }}
-                        </div>
-
-
                         <div class="cmp-tb-cell">
                             {{ add_comma(f_ocs[v.idx].ma.PRIM.total[0]) }}
                         </div>
@@ -1220,8 +1293,8 @@ a {
                                 v-bind:style="{left: get_eft_left_by_rst(f_ocs[v.idx].ma.INCD.rsts.INCD, 'linear') + 'px', backgroundColor: get_eft_color(f_ocs[v.idx].ma.INCD.rsts.INCD)}">
                                 <div v-if="show_effect_label" 
                                     class="cmp-eft-value">
-                                    {{ tf2(f_ocs[v.idx].ma.INCD.rsts.INCD[show_effect_model].SM ) }}
-                                    ({{ tf2(f_ocs[v.idx].ma.INCD.rsts.INCD[show_effect_model].SM_lower ) }}; {{ tf2(f_ocs[v.idx].ma.INCD.rsts.INCD[show_effect_model].SM_upper ) }})
+                                    {{ tf2(100*f_ocs[v.idx].ma.INCD.rsts.INCD[show_effect_model].SM ) }}
+                                    ({{ tf2(100*f_ocs[v.idx].ma.INCD.rsts.INCD[show_effect_model].SM_lower ) }}; {{ tf2(100*f_ocs[v.idx].ma.INCD.rsts.INCD[show_effect_model].SM_upper ) }})
                                 </div>
                             </div>
 
@@ -1248,22 +1321,40 @@ a {
                     </div>
 
                     <div class="cmp-tb-row">
+
+                        <div class="cmp-tb-cell cmp-tb-cell-xs cmp-tb-cell-footer">
+                            <!-- group -->
+                        </div>
+                        <div class="cmp-tb-cell cmp-tb-cell-category cmp-tb-cell-footer">
+                            <!-- category -->
+                        </div>
                         <div class="cmp-tb-cell cmp-tb-cell-ocname cmp-tb-cell-footer">
                             <!-- outcome name -->
                         </div>
+
+                        
+
                         <div class="cmp-tb-cell cmp-tb-cell-footer">
                             <!-- grade -->
                         </div>
 
-                        <div class="cmp-tb-cell cmp-tb-cell-sm cmp-tb-cell-footer">
-                            <!-- n_stus -->
+                        <div class="cmp-tb-cell cmp-tb-cell-treatment cmp-tb-cell-footer">
+                            <!-- treatment -->
                         </div>
 
                         <div class="cmp-tb-cell cmp-tb-cell-footer">
                             <!-- control -->
                         </div>
+
+                        <div class="cmp-tb-cell cmp-tb-cell-footer">
+                            <!-- cancer -->
+                        </div>
                         
 
+
+                        <div class="cmp-tb-cell cmp-tb-cell-sm cmp-tb-cell-footer">
+                            <!-- n_stus -->
+                        </div>
                         <div class="cmp-tb-cell cmp-tb-cell-footer">
                             <!-- Et -->
                         </div>
@@ -1297,7 +1388,7 @@ a {
 
                         <div class="cmp-tb-cell cmp-tb-cell-effect cmp-tb-cell-footer">
                             <!-- x-axis for INCD -->
-                            <img style="width: 100%;" src="/static/img/x-axis-0-1.png">
+                            <img style="width: 100%;" src="/static/img/x-axis-0-100.png">
                         </div>
 
                         <div class="cmp-tb-cell cmp-tb-cell-footer">
@@ -1805,6 +1896,36 @@ var app_filter = {
         }
 
         return options;
+    },
+
+    cmp_val: function(a, b) {
+        if (a == b) {
+            return true;
+
+        } else if (a == '%') {
+            if (b == 'all') {
+                return true;
+            }
+        } else if (a == 'all') {
+            if (b == '%') {
+                return true;
+            }
+        }
+
+        return false;
+    },
+
+    cmp_vals: function(va, vb) {
+        for (let i = 0; i < va.length; i++) {
+            const a = va[i];
+            const b = vb[i];
+            if (this.cmp_val(a, b)) {
+                // ok
+            } else {
+                return false;
+            }
+        }
+        return true;
     }
 };
 
@@ -1859,6 +1980,38 @@ var app_oclist = {
                 cnt_rule: 'ge1'
             },
             methods: {
+                n_all: function() {
+                    var n = 0;
+                    for (const key in this.rs) {
+                        if (Object.hasOwnProperty.call(this.rs, key)) {
+                            const group = this.rs[key];
+                            n += this.n_group(group);
+                        }
+                    }
+                    return n;
+                },
+
+                n_group: function(group) {
+                    var n = 0;
+                    for (const key in group.cates) {
+                        const cate = group.cates[key];
+                        n += this.n_cate(cate);
+                    }
+
+                    return n;
+                },
+
+                n_cate: function(cate) {
+                    var n = 0;
+                    for (let i = 0; i < cate.aes.length; i++) {
+                        const ae = cate.aes[i];
+                        if (this.show_oc(ae) && this.match_keyword(ae.oc_name)) {
+                            n += 1;
+                        }
+                    }
+                    return n;
+                },
+
                 match_keyword: function(s) {
                     if (this.keyword.length < 3) {
                         return true;
@@ -1947,14 +2100,18 @@ var app_oclist = {
                     if (ret) {
 
                     } else {
-                        return;
+                        return cnt;
                     }
+
                     for (const cate_name in group.cates) {
                         if (Object.hasOwnProperty.call(group.cates, cate_name)) {
                             const cate = group.cates[cate_name];
-                            this.add_cate(cate, ae_grade);
+                            cnt += this.add_cate(cate, ae_grade);
                         }
                     }
+
+                    console.log('* finished add group of ' + cnt);
+                    return cnt;
                 },
 
                 add_cate: function(cate, ae_grade) {
@@ -1980,6 +2137,7 @@ var app_oclist = {
                     } else {
                         // this oc can NOT be displayed for some reason
                         // so won't be added for comparison
+                        console.log('* failed to add_oc by show_oc_grade', ae);
                         return 0;
                     }
 
@@ -2005,7 +2163,7 @@ var app_oclist = {
 
                     // call the worker to update everything related
                     // jarvis will do this task accordingly
-                    jarvis.add_oc(
+                    return jarvis.add_oc(
                         ae.oc_group, 
                         ae.oc_cate, 
                         ae.oc_name, 
@@ -2841,10 +2999,50 @@ var app_comptb = {
                     return x;
                 },
 
+                index_of_f_oc: function(f_oc) {
+                    for (let i = 0; i < this.f_ocs.length; i++) {
+                        const x = this.f_ocs[i];
+                        if (x.oc_abbr == f_oc.oc_abbr &&
+                            app_filter.cmp_vals(
+                                x.f_vals,
+                                f_oc.f_vals
+                            )) {
+                                // oh, this abbr has been added
+                                return i;
+                            }
+                        }
+                
+                    return -1;
+                },
+
                 add_f_oc: function(f_oc) {
+                    // var f_oc = {
+                    //     // basic info
+                    //     oc_group: oc_group,
+                    //     oc_abbr: oc_abbr,
+                    //     oc_cate: oc_cate,
+                    //     oc_name: oc_name,
+                    //     ae_grade: ae_grade,
+
+                    //     // filters
+                    //     f_vals: f_vals,
+                        
+                    //     // pids
+                    //     pids: pids,
+
+                    //     // PWMA
+                    //     ma: ma
+                    // };
+                    // check 
+                    var ret = this.index_of_f_oc(f_oc);
+                    if (ret>=0) {
+                        return false;
+                    }
+
                     this.f_ocs.push(
                         f_oc
                     );
+                    return true;
                 },
 
                 rm_f_oc: function(f_oc_idx) {
@@ -3556,6 +3754,7 @@ var jarvis = {
             // app_filter.vpp.set_values(
             //     ['PD1', 'all', 'Monotherapy', '%', 'Chemo', 'all']
             // );
+            jarvis.set_mode(4);
         });
 
         
@@ -3573,7 +3772,7 @@ var jarvis = {
     },
 
     add_oc: function(oc_group, oc_cate, oc_name, oc_abbr, ae_grade, pids) {
-        console.log('* add_oc ' + oc_group + ' | ' + oc_cate + ' | ' +oc_abbr+' , ' + oc_name + ', ' + ae_grade, pids);
+        // console.log('* add_oc ' + oc_group + ' | ' + oc_cate + ' | ' +oc_abbr+' , ' + oc_name + ', ' + ae_grade, pids);
         // vw_ocplot.show_plot(group, oc_cate, oc_name, ae_grade, pids);
 
         // first, get the filter values
@@ -3601,9 +3800,16 @@ var jarvis = {
             ma: ma
         };
 
-        console.log('* add f_oc: ', f_oc);
-
-        app_comptb.vpp.add_f_oc(f_oc);
+        var ret = app_comptb.vpp.add_f_oc(f_oc);
+        if (ret) {
+            // ok, added
+            console.log('* added f_oc: ', f_oc);
+            return 1;
+        } else {
+            // no this is a duplicated
+            console.log('* skipped adding f_oc:', f_oc);
+            return 0;
+        }
     },
 
     clear_all_ae: function() {
@@ -3631,6 +3837,7 @@ var jarvis = {
         }
         if (mode == 0) {
             this.set_mode(1);
+            this.set_mode(3);
         }
         if (mode == 1) {
             $('#app_comptb_box').height('calc(50% - 20px)');
@@ -3639,6 +3846,14 @@ var jarvis = {
         if (mode == 2) {
             $('#app_comptb_box').height('calc(100% - 150px)');
             $('#app_detail_box').height('20px');
+        }
+        if (mode == 3) {
+            $('#vw_ocplot').show();
+            $('#app_comptb').width('auto');
+        }
+        if (mode == 4) {
+            $('#vw_ocplot').hide();
+            $('#app_comptb').width('calc(100% - 300px)');
         }
     }
 };
