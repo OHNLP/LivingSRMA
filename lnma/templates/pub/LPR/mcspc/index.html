@@ -280,7 +280,7 @@
     style="max-width: 1200px;">
     <div class="row">
         <iframe id="ifm_nma_prim"
-            src="[[ url_for('pub.graph_nma', prj=keystr, cq=cq_abbr, gp='primary', tr='ADT', od=';'.join(['Overall survival'])) ]]" 
+            src="[[ url_for('pub.graph_nma', prj=keystr, cq=cq_abbr, gp='primary', tr='ADT', od=';'.join(['Overall survival in overall patient population','Progression free survival','Adverse events (grade ≥ 3)',])) ]]" 
             frameborder="0" 
             style="width: 100%; min-height: 840px;"
             resize_by_content>
@@ -302,7 +302,7 @@
     style="max-width: 1200px;">
     <div class="row">
         <iframe id="ifm_nma_sens"
-            src="[[ url_for('pub.graph_nma', prj=keystr, cq=cq_abbr, gp='sensitivity', tr='ADT', od=';'.join(['Overall survival'])) ]]" 
+            src="[[ url_for('pub.graph_nma', prj=keystr, cq=cq_abbr, gp='sensitivity', tr='ADT', od=';'.join(['Overall survival in overall patient population (excluding subset of patients who received docetaxel in NHT trials)','Progression free survival in overall patient population (excluding subset of patients who received docetaxel in NHT trials)','Overall survival in high volume disease','Overall survival in low volume disease','Progression free survival in high volume disease','Progression free survival in low volume disease','Overall survival in synchronous disease','Overall survival in M0 metachronous disease','Progression-free survival in synchronous disease','Progression-free survival in metachronous disease','Overall survival in young','Overall survival in old','Progression free survival in young','Progression free survival in old','Overall survival in Gleason score ≥8','Overall survival in Gleason score ≤ 8','Progression free survival in Gleason score ≥8','Progression free survival in Gleason score ≤ 8','Overall survival in perfomance status score 0','Overall survival in perfomance status score 1/2','Progression free survival in performance status score 0','Progression free survival in performance status score 1/2',])) ]]" 
             frameborder="0" 
             style="width: 100%; min-height: 800px;"
             resize_by_content>
