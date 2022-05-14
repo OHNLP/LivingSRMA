@@ -498,7 +498,7 @@ def _add_cie_patch(keystr, cq_abbr, oc_dict):
         except:
             return 0
 
-    with open(full_fn) as csv_file:
+    with open(full_fn, 'r', encoding='utf-8-sig') as csv_file:
         csv_reader = csv.DictReader(csv_file, delimiter=',')
         for row in csv_reader:
             c = row['comparator']

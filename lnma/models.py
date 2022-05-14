@@ -1171,7 +1171,7 @@ class Extract(db.Model):
                     # check all arms
                     for arm in [ext['attrs']['main']] + ext['attrs']['other']:
                         try:
-                            Ec += int(arm['g0']['Ec']) * 1000 / int(arm['g0']['Et'])
+                            Ec += util.val2int(arm['g0']['Ec']) * 1000 / util.val2int(arm['g0']['Et'])
                             Et += 1000
                         except:
                             pass
@@ -1194,7 +1194,7 @@ class Extract(db.Model):
                     # check all arms
                     for arm in [ext['attrs']['main']] + ext['attrs']['other']:
                         try:
-                            Ec += int(arm['g0']['Ec']) * 1000 / int(arm['g0']['Et'])
+                            Ec += util.val2int(arm['g0']['Ec']) * 1000 / util.val2int(arm['g0']['Et'])
                             Et += 1000
                         except:
                             pass

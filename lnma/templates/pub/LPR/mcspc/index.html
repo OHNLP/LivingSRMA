@@ -152,7 +152,7 @@
 
 
 <br id="sec-intertable">
-<div class="container" style="margin-top: 3rem; margin-bottom: 3rem;">
+<div class="container" style="margin-top: 3rem; margin-bottom: 0;">
 
     <h3 style="margin-bottom: 2rem;">
         INTERACTIVE TABLE
@@ -161,6 +161,9 @@
 
     <p>How to use this table? <a href="javascript:void(0);" data-toggle="modal" data-target="#exampleModalCenter2">Video demonstration</a></p>
 
+</div>
+
+<div style="width: 1300px; margin: 0 auto; margin-bottom: 3rem;">
     <div class="row">
         <iframe id="ifm_itable" 
             src="[[ url_for('pub.itable', prj=keystr, cq=cq_abbr, src='db') ]]" 
@@ -169,7 +172,6 @@
         </iframe>
     </div>
 </div>
-
 
 <div class="modal fade" id="exampleModalCenter2" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenter2Title"
     aria-hidden="true">
@@ -213,9 +215,9 @@
     <div class="row">
         <div class="col">
             <iframe id="ifm_pwma_prim"
-                src="[[ url_for('pub.graph_pma', prj=keystr, cq=cq_abbr, group='primary') ]]" 
+                src="[[ url_for('pub.graph_pma', prj=keystr, cq=cq_abbr, group='primary', od=';'.join(['Overall survival','Progression free survival','Adverse events (grade ≥ 3)',])) ]]" 
                 frameborder="0" 
-                style="width: 100%; min-height: 260px;">
+                style="width: 100%; min-height: 300px;">
             </iframe>
         </div>
     </div>
@@ -229,8 +231,8 @@
 
     <div class="row">
         <div class="col">
-            <iframe id="ifm_pwma_prim"
-                src="[[ url_for('pub.graph_pma', prj=keystr, cq=cq_abbr, gp='sensitivity', src='cache', od=';'.join(['Progression free survival', 'Overall survival'])) ]]" 
+            <iframe id="ifm_pwma_sens"
+                src="[[ url_for('pub.graph_pma', prj=keystr, cq=cq_abbr, gp='sensitivity', src='cache', od=';'.join(['Overall survival in overall patient population (excluding subset of patients who received docetaxel in NHT trials)','Progression free survival in overall patient population (excluding subset of patients who received docetaxel in NHT trials)','Overall survival in high volume disease','Overall survival in low volume disease','Progression free survival in high volume disease','Progression free survival in low volume disease','Overall survival in synchronous disease','Overall survival in metachronous disease','Progression-free survival in synchronous disease','Progression-free survival in metachronous disease','Overall survival in young','Overall survival in old','Progression free survival in young','Progression free survival in old','Overall survival in Gleason score ≥8','Overall survival in Gleason score ≤ 8','Progression free survival in Gleason score ≥8','Progression free survival in Gleason score ≤ 8','Overall survival in performance status score 0','Overall survival in performance status score 1/2','Progression free survival in performance status score 0','Progression free survival in performance status score 1/2',])) ]]" 
                 frameborder="0" 
                 style="width: 100%; min-height: 420px;">
             </iframe>
@@ -245,7 +247,7 @@
     <div class="row">
         <div class="col">
             <iframe id="ifm_pwma_subg"
-                src="[[ url_for('pub.graph_pma', prj=keystr, cq=cq_abbr, gp='subgroup', src='cache', od=';'.join(['Progression free survival', 'Overall survival'])) ]]" 
+                src="[[ url_for('pub.graph_pma', prj=keystr, cq=cq_abbr, gp='subgroup', src='cache', od=';'.join(['Overall survival by choice of doublet therapy','Progression free survival by choice of doublet therapy','Overall survival by volume of disease','Overall survival in high volume by choice of doublet therapy','Overall survival in low volume by choice of doublet therapy','Progression free survival by volume of disease','Progression free survival in high volume by choice of doublet therapy','Progression free survival in low volume by choice of doublet therapy','Overall survival by mode of metastatic presentation','Overall survival in synchronous metastases by choice of doublet therapy','Overall survival in metachronous metastases by choice of doublet therapy','Progression-free survival by mode of metastatic presentation','Overall survival by Gleason score','Progression free survival by Gleason score','Overall survival by performance status score','Progression free survival by performance status score',])) ]]" 
                 frameborder="0" 
                 style="width: 100%; min-height: 500px;">
             </iframe>
@@ -326,7 +328,7 @@
     <div class="row">
         <div class="col">
             <iframe id="ifm_sofpma" 
-                src="[[ url_for('pub.softable_pma', prj=keystr, cq=cq_abbr, msrs='OR,RR,HR', od=';'.join(['disease free survival','overall survival'])) ]]" 
+                src="[[ url_for('pub.softable_pma', prj=keystr, cq=cq_abbr, msrs='OR,RR,HR', od=';'.join(['Progression free survival','Overall survival','Adverse events (grade ≥ 3)','Overall survival in overall patient population (excluding subset of patients who received docetaxel in NHT trials)','Progression free survival in overall patient population (excluding subset of patients who received docetaxel in NHT trials)','Overall survival in high volume disease','Overall survival in low volume disease','Progression free survival in high volume disease','Progression free survival in low volume disease','Overall survival in synchronous disease','Overall survival in metachronous disease','Progression-free survival in synchronous disease','Progression-free survival in metachronous disease'])) ]]" 
                 frameborder="0" 
                 resize_by_content
                 style="width: 100%; min-height: 450px;">
@@ -350,17 +352,20 @@
     <p>
         <b>Choose reference treatment, measure of effect, and denominator for absolute effect.        </b>
     </p>
+
+</div>
+
+<div style="width: 1200px; margin: 0 auto;">
     <div class="row">
         <div class="col">
             <iframe id="ifm_sofnma" 
-                src="[[ url_for('pub.softable_nma', prj=keystr, cq=cq_abbr, dc='ADT', cp='yes', od=';'.join(['disease free survival','overall survival'])) ]]" 
+                src="[[ url_for('pub.softable_nma', prj=keystr, cq=cq_abbr, dc='ADT', cp='yes', od=';'.join(['Overall survival in overall patient population','Progression free survival','Adverse events (grade ≥ 3)','Overall survival in overall patient population (excluding subset of patients who received docetaxel in NHT trials)','Progression free survival in overall patient population (excluding subset of patients who received docetaxel in NHT trials)','Overall survival in high volume disease','Overall survival in low volume disease','Progression free survival in high volume disease','Progression free survival in low volume disease','Overall survival in synchronous disease','Overall survival in M0 metachronous disease','Progression-free survival in synchronous disease','Progression-free survival in metachronous disease'])) ]]" 
                 frameborder="0" 
                 resize_by_content
                 style="width: 100%; min-height: 450px;">
             </iframe>
         </div>
     </div>
-
 </div>
 <!-- /#sec-sof-nma -->
 
@@ -377,9 +382,9 @@
     <div class="row">
         <div class="col">
             <iframe id="ifm_evmap" 
-                src="[[ url_for('pub.evmap', prj=keystr, cq=cq_abbr, tr='ADT') ]]" 
+                src="[[ url_for('pub.evmap', prj=keystr, cq=cq_abbr, tr='ADT', fh=700, od=';'.join(['Overall survival in overall patient population','Progression free survival','Adverse events (grade ≥ 3)','Overall survival in overall patient population (excluding subset of patients who received docetaxel in NHT trials)','Progression free survival in overall patient population (excluding subset of patients who received docetaxel in NHT trials)','Overall survival in high volume disease','Overall survival in low volume disease','Progression free survival in high volume disease','Progression free survival in low volume disease','Overall survival in synchronous disease','Overall survival in M0 metachronous disease','Progression-free survival in synchronous disease','Progression-free survival in metachronous disease'])) ]]" 
                 frameborder="0" 
-                style="width: 100%; min-height: 700px;">
+                style="width: 100%; min-height: 800px;">
             </iframe>
         </div>
     </div>

@@ -227,6 +227,10 @@ var fg_evmap = {
             }
         }
 
+        // 2022-05-13: sort the oc_list
+        oc_list.sort(jarvis.compare_oc_names);
+        console.log('* sorted oc_list', oc_list);
+
         // treat list for y axis
         var treat_list = [];
         for (var i = 0; i < this.data.treat_list.length; i++) {
@@ -504,6 +508,16 @@ var jarvis = {
         if (fh == '') {
             fh = '600';
         }
+
+        // set the sorting
+        var od = jarvis.get_url_paramter('od');
+        if (od == '') {
+            jarvis.oc_orders = [];
+        } else {
+            od = od.toLocaleLowerCase();
+            jarvis.oc_orders = od.split(';');
+        }
+
         // set the height
         $('#fg_evmap').css('height', fh+'px');
         // set the plotly figure

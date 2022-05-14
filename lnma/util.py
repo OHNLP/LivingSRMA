@@ -1230,13 +1230,16 @@ def check_paper_doi(doi):
 
     # 2022-03-30: fix the URL as DOI
     if lower_doi.startswith('http://dx.doi.org/'):
-        _doi = lower_doi.replace('http://dx.doi.org/', '')
+        # 2022-05-13: fix the lower case bug
+        _doi = doi[18:]
     
     elif lower_doi.startswith('https://dx.doi.org/'):
-        _doi = lower_doi.replace('https://dx.doi.org/', '')
+        # 2022-05-13: fix the lower case bug
+        _doi = doi[19:]
     
     else:
-        _doi = lower_doi
+        # 2022-05-13: fix the lower case bug
+        _doi = doi
 
     return _doi[0:settings.PAPER_PID_MAX_LENGTH]
     
@@ -1434,7 +1437,11 @@ def hash_json(j):
 def val2int(v):
     ret = v
     if type(v) == str:
-        ret = float(v)
+        try:
+            ret = float(v)
+        except:
+            pass
+        
         try:
             ret = int(ret)
         except:
@@ -1536,6 +1543,13 @@ def convert_extract_r_to_number(r, input_format):
 
     else:
         pass
+
+    # special rules for fixing
+    if 'Et' in r:
+        r['Et'] = val2int(r['Et'])
+    
+    if 'Ec' in r:
+        r['Ec'] = val2int(r['Ec'])
 
     return r
 

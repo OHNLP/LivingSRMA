@@ -16,12 +16,29 @@ Object.assign(jarvis, {
      * @returns value
      */
     compare_oc_names: function(a, b) {
-        var fn_attr = 'oc_full_name';
+        var fn_attr = '';
+        var fn_a = null;
+        var fn_b = null;
         if (a.hasOwnProperty('oc_fullname')) {
             fn_attr = 'oc_fullname';
+            fn_a = a[fn_attr].toLocaleLowerCase();
+            fn_b = b[fn_attr].toLocaleLowerCase();
+
+        } else if (a.hasOwnProperty('oc_full_name')) {
+            fn_attr = 'oc_full_name';
+            fn_a = a[fn_attr].toLocaleLowerCase();
+            fn_b = b[fn_attr].toLocaleLowerCase();
+
+        } else if (typeof(a) == 'string'){
+            // for simple case, just sort the name
+            fn_a = a.toLocaleLowerCase();;
+            fn_b = b.toLocaleLowerCase();;
+
+        } else {
+            fn_a = '';
+            fn_b = '';
         }
-        var fn_a = a[fn_attr].toLocaleLowerCase();
-        var fn_b = b[fn_attr].toLocaleLowerCase();
+
         var loc_a = jarvis.oc_orders.indexOf(fn_a);
         var loc_b = jarvis.oc_orders.indexOf(fn_b);
         var ret = 0;
@@ -42,7 +59,7 @@ Object.assign(jarvis, {
 
         } else {
             // just compare these two
-            ret = a[fn_attr].localeCompare(b[fn_attr]);
+            ret = fn_a.localeCompare(fn_b);
         }
 
         // console.log(

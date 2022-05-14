@@ -40,10 +40,20 @@ app.app_context().push()
 
 def test():
     srv_extract.import_extracts_from_xls(
-        '/tmp/LPR/NMA.xlsx',
+        '/tmp/LPR/nma.xlsx',
         'LPR',
-        'default',
+        'mcspc',
         'nma'
+    )
+    print('* done')
+
+
+def test12():
+    srv_extract.import_extracts_from_xls(
+        '/tmp/LPR/pma.xlsx',
+        'LPR',
+        'mcspc',
+        'pwma'
     )
     print('* done')
 
