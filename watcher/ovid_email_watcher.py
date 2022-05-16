@@ -241,7 +241,10 @@ def _check_update_by_project_in_emails(project, emails):
                 mail['date'], mail['email_type'], mail['subject']))
 
             # put these papers in update list
-            prj_update['papers'] += papers
+            if papers is None:
+                pass
+            else:
+                prj_update['papers'] += papers
             
         else:
             cnt['other'] += 1
