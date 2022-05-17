@@ -246,7 +246,7 @@ p {
                             <select v-model='comparator'>
                                 <option v-for="treat in treat_list"
                                     v-bind:value="treat">
-                                    {{ treat }}
+                                    {{  to_fullname(treat) }}
                                 </option>
                             </select>
                         </div>
@@ -298,12 +298,14 @@ p {
                         <th class="col-ae-name">Outcome</th>
                         <th class="col-treat">
                             Comparator: <br>
-                            <b class="red">{{ comparator }}</b>
+                            <b class="red">
+                                {{  to_fullname(comparator) }}
+                            </b>
                         </th>
                         <th class="col-treat" 
                             v-for="treat in treat_list" 
                             v-if="treat != comparator">
-                            {{ treat }}
+                            {{  to_fullname(treat) }}
                         </th>
                     </tr>
                     <tr v-for="r, r_idx in rs">
@@ -366,8 +368,8 @@ p {
 
             <div class="d-flex fx-row">
                 <p>
-                    Treatment: <b class="txt-lg">{{ detail.treat_name }}</b>, 
-                    Comparator: <b class="txt-lg">{{ comparator }}</b>
+                    Treatment: <b class="txt-lg">{{ to_fullname(detail.treat_name) }}</b>, 
+                    Comparator: <b class="txt-lg">{{  to_fullname(comparator) }}</b>
                 </p>
             </div>
             <div class="d-flex fx-row">
@@ -1106,6 +1108,14 @@ var app_softnma = {
             } else {
                 return 'cie-' + i + '-' + cie;
             }
+        },
+
+        to_fullname: function(s) {
+            if (jarvis.hasOwnProperty('to_fullname')) {
+                return jarvis.to_fullname(s);
+            } else {
+                return s;
+            }
         }
     },
 
@@ -1132,6 +1142,12 @@ var app_softnma = {
             this.default_comparator = data.treat_list[0];
         }
 
+        var treat_list = data.treat_list;
+        treat_list = jarvis.sort_by_list(
+            treat_list,
+            jarvis.treat_orders
+        );
+
         // init the vpp
         this.vpp = new Vue({
             el: this.vpp_id,
@@ -1147,7 +1163,7 @@ var app_softnma = {
                 comparator: this.default_comparator,
                 
                 oc_dict: data.oc_dict,
-                treat_list: data.treat_list,
+                treat_list: treat_list,
                 rs: rs,
 
                 // for display
@@ -1323,6 +1339,15 @@ var jarvis = {
         } else {
             od = od.toLocaleLowerCase();
             jarvis.oc_orders = od.split(';');
+        }
+
+        // set the sorting for treat
+        var trod = jarvis.get_url_paramter('trod');
+        if (trod == '') {
+            jarvis.treat_orders = [];
+        } else {
+            od = od.toLocaleLowerCase();
+            jarvis.treat_orders = trod.split(';');
         }
 
         jarvis.ssmsg('Loading data ...');
@@ -1578,6 +1603,9 @@ var jarvis = {
 
 // include the jarvis extensions
 {% include 'js/jarvis_ext_compare_oc_names.js' %}
+
+// include the jarvis extension for full name
+{% include 'js/jarvis_ext_fullnames.js' %}
 
 $(document).ready(function() {
     jarvis.init();

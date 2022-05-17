@@ -80,7 +80,7 @@ a {
                 v-on:change="on_change_treat">
                 <option v-for="t in treat_list"
                     v-bind:value="t">
-                    {{ t }}
+                    {{ to_fullname(t) }}
                 </option>
             </select>
         </div>
@@ -138,17 +138,32 @@ var app_evmap = {
     
     init: function(data, treat) {
         this.data = data;
+        
+        var treat_list = data.treat_list;
+        treat_list = jarvis.sort_by_list(
+            treat_list,
+            jarvis.treat_orders
+        );
+
         this.vpp = new Vue({
             el: this.vpp_id,
 
             data: {
                 treatment: treat,
-                treat_list: data.treat_list
+                treat_list: treat_list
             },
 
             methods: {
                 on_change_treat: function() {
                     fg_evmap.draw(this.treatment);
+                },
+
+                to_fullname: function(s) {
+                    if (jarvis.hasOwnProperty('to_fullname')) {
+                        return jarvis.to_fullname(s);
+                    } else {
+                        return s;
+                    }
                 }
             }
         });
@@ -242,7 +257,17 @@ var fg_evmap = {
             }
             treat_list.push(t);
         }
-        treat_list.sort();
+        treat_list = jarvis.sort_by_list(
+            treat_list,
+            jarvis.treat_orders,
+            true
+        );
+        // then translate
+        for (let i = 0; i < treat_list.length; i++) {
+            treat_list[i] = jarvis.to_fullname(
+                treat_list[i]
+            );
+        }
 
         // to hold all the traces of all combinations.
         var trace_dict = {};
@@ -280,8 +305,8 @@ var fg_evmap = {
 
             // get the detail
             var text = 'Outcome: <b>' + oc_full_name + '</b><br>' +
-                'Comparator: <b>' + comparator + '</b><br>' + 
-                'Treatment: <b>' + treatment + '</b><br>' + 
+                'Comparator: <b>' + jarvis.to_fullname(comparator) + '</b><br>' + 
+                'Treatment: <b>' + jarvis.to_fullname(treatment) + '</b><br>' + 
                 'Certainty: <b>' + cie_text + '</b><br>' + 
                 'Effect: <b>' + effect_text  + '</b>';
 
@@ -337,7 +362,7 @@ var fg_evmap = {
             }
             // append to list
             trace_dict[trace_group_id].x.push(oc_full_name);
-            trace_dict[trace_group_id].y.push(comparator);
+            trace_dict[trace_group_id].y.push(jarvis.to_fullname(comparator));
             trace_dict[trace_group_id].text.push(text);
             trace_dict[trace_group_id].marker.size.push(size);
             trace_dict[trace_group_id].marker.color.push(color);
@@ -394,6 +419,7 @@ var fg_evmap = {
                 // https://plotly.com/javascript/reference/layout/xaxis/
                 automargin: true,
                 tickvals: oc_list,
+                categoryarray: oc_list,
                 tickangle: -45
             },
             yaxis: {
@@ -405,9 +431,9 @@ var fg_evmap = {
                     standoff: 10
                 },
                 autorange: true,
-                // tickvals: treat_list,
-                categoryorder: 'category ascending',
-                // categoryarray: treat_list
+                tickvals: treat_list,
+                // categoryorder: 'category ascending',
+                categoryarray: treat_list
             },
             legend: {
                 y: 1.0,
@@ -518,6 +544,15 @@ var jarvis = {
             jarvis.oc_orders = od.split(';');
         }
 
+        // set the sorting for treat
+        var trod = jarvis.get_url_paramter('trod');
+        if (trod == '') {
+            jarvis.treat_orders = [];
+        } else {
+            od = od.toLocaleLowerCase();
+            jarvis.treat_orders = trod.split(';');
+        }
+
         // set the height
         $('#fg_evmap').css('height', fh+'px');
         // set the plotly figure
@@ -551,6 +586,9 @@ var jarvis = {
 
 // include the jarvis extensions
 {% include 'js/jarvis_ext_compare_oc_names.js' %}
+
+// include the jarvis extension for full name
+{% include 'js/jarvis_ext_fullnames.js' %}
 
 $(document).ready(function() {
     jarvis.init();
