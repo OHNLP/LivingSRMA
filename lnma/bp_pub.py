@@ -91,12 +91,30 @@ def php():
     # if not os.path.exists(os.path.join()):
     year = util.get_current_year_str()
 
+    # for the sorting 
+    full_fn_sorted_texts = os.path.join(
+        current_app.instance_path, 
+        settings.PUBLIC_PATH_PUBDATA, 
+        keystr, 
+        cq_abbr,
+        'SORTED_TEXTS.json'
+    )
+    
+    if os.path.exists(full_fn_sorted_texts):
+        pass
+        sorted_texts = json.load(
+            open(full_fn_sorted_texts, encoding='utf8')
+        )
+    else:
+        sorted_texts = {}
+
     return render_template(
         path_to_homepage,
         keystr=keystr,
         cq_abbr=cq_abbr,
         project=project,
-        year=year
+        year=year,
+        sorted_texts=sorted_texts
     )
 
 

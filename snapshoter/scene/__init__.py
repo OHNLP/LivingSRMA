@@ -42,7 +42,12 @@ def make_page(client, url, full_fn, param=None):
     '''
     Make static page from url
     '''
-    rv = client.get(url)
+    try:
+        rv = client.get(url)
+    except Exception as err:
+        print('* ERROR', err)
+        print('* error when getting %s' % url)
+        return -1
 
     with open(full_fn, 'w') as f:
         f.write(rv.data.decode('utf8'))

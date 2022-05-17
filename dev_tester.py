@@ -39,8 +39,18 @@ app.app_context().push()
 
 
 def test():
+    srv_extract.import_itable_from_xls(
+        'LPR',
+        'mcspc',
+        '/tmp/LPR/itable.xlsx',
+        '/tmp/LPR/filters.xlsx'
+    )
+    print('* done')
+
+
+def test12():
     srv_extract.import_extracts_from_xls(
-        '/tmp/LPR/nma.xlsx',
+        '/tmp/LPR/SOFTABLE_NMA_DATA_FINALIZED.xlsx',
         'LPR',
         'mcspc',
         'nma'
@@ -48,9 +58,9 @@ def test():
     print('* done')
 
 
-def test12():
+def test13():
     srv_extract.import_extracts_from_xls(
-        '/tmp/LPR/pma.xlsx',
+        '/tmp/LPR/SOFTABLE_PMA_DATA_FINALIZED.xlsx',
         'LPR',
         'mcspc',
         'pwma'
