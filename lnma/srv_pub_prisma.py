@@ -12,6 +12,7 @@ from lnma import dora
 from lnma import util
 from lnma import ss_state
 from lnma import settings
+from lnma import srv_extract
 from lnma import db
 
 
@@ -54,6 +55,13 @@ def get_pub_prisma_from_db(keystr, cq_abbr='default'):
             project.settings['prisma'][cq_abbr]
         )
 
+    # 2022-05-16: check the itable extraction
+    itable = srv_extract.get_itable_by_project_id_and_cq_abbr(
+        project_id, cq_abbr
+    )
+    if itable is None:
+        return None
+
     # start to merge?
     # we just need the following from living
     # a1: the records in living
@@ -76,6 +84,36 @@ def get_pub_prisma_from_db(keystr, cq_abbr='default'):
         tmp['n_ctids'] = len(tmp['rcts'])
 
         prisma[s] = tmp
+
+    # 2022-05-16: fix f1 by itable
+    tmp = {
+        'paper_list': [],
+        'study_list': [],
+        'n_pmids': 0,
+        'n_ctids': 0
+    }
+    for pid in itable.data:
+        if pid not in living_prisma['paper_dict']:
+            # what????
+            continue
+
+        # get the nct from paper_dict
+        ctid = living_prisma['paper_dict'][pid]['ctid']
+
+        d = itable.data[pid]
+        if d['is_selected']:
+            # which means this paper is selected in SR
+            tmp['paper_list'].append(pid)
+
+            if ctid not in tmp['study_list']:
+                tmp['study_list'].append(ctid)
+
+    # update the number
+    tmp['n_pmids'] = len(tmp['paper_list'])
+    tmp['n_ctids'] = len(tmp['study_list'])
+
+    # update the prisma
+    prisma['f1'] = tmp
 
     # then, the living details for the e3 reasons
     prisma['e3_by_reason'] = copy.deepcopy(

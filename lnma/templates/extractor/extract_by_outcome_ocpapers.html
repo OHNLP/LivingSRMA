@@ -202,7 +202,7 @@
                 <thead class="paper-table-header">
                     <tr>
                         <th v-if="working_oc.meta.is_subg_analysis" class="paper-table-header-th" colspan="7"></th>
-                        <th v-else class="paper-table-header-th" colspan="6"></th>
+                        <th v-else class="paper-table-header-th" colspan="7"></th>
 
                         <th v-for="thr1 in thr1s"
                             v-bind:colspan="thr1.cols"
@@ -226,6 +226,9 @@
                         </th>
                         <th class="paper-table-header-th" style="width: 40px;">
                             #
+                        </th>
+                        <th class="paper-table-header-th" style="width: 90px;">
+                            NCT
                         </th>
                         <th class="paper-table-header-th" style="width: 90px;">
                             PID
@@ -279,6 +282,11 @@
                         <td class="paper-table-body-td cursor-pointer"
                             v-on:click="on_click_paper(paper)">
                             {{ paper.seq_num }}
+                        </td>
+
+                        <td class="paper-table-body-td cursor-pointer"
+                            v-on:click="on_click_paper(paper)">
+                            {{ paper.meta.rct_id }}
                         </td>
 
                         <td class="paper-table-body-td cursor-pointer"

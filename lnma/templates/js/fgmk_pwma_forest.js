@@ -113,7 +113,7 @@ var fgmk_pwma_forest = {
                 .attr('height', this.height);
         },
     
-        draw: function(data, cfg) {
+        draw: function(ext, data, cfg) {
             $(this.box_id).show();
 
             // change some settings according to the raw data format
@@ -130,12 +130,17 @@ var fgmk_pwma_forest = {
             this.clear();
     
             // bind new data
+            this.ext = ext;
             this.data = data;
             this.cfg = cfg;
     
             // update the height of svg according to number of studies
             // 8 is the number of lines of header and footers
-            this.height = this.row_height * (this.data.stus.length + 8);
+            this.height = this.row_height * (
+                this.data.stus.length + 
+                8 +  // header, blanks, model, heter, axis, favours
+                0.1  // offset of last
+            );
             this.svg.attr('height', this.height);
             
             // if we draw the predict interval, add one more line
@@ -162,6 +167,9 @@ var fgmk_pwma_forest = {
     
             // show the plot
             this._draw_forest();
+
+            // show the treatment
+            this._draw_favours();
     
         },
 
@@ -532,6 +540,36 @@ var fgmk_pwma_forest = {
                 .append('path')
                 .attr('d', path_d)
                 .attr('class', 'prim-frst-stu-model');
+        },
+
+        _draw_favours: function() {
+            // the n is the number of studies and offset
+            var loc = this.data.stus.length + 
+                      this.loc.prediction_interval +
+                      3 + // the model, heter, and axis
+                      0.1; // the offset
+            // create a region
+            var gx = this.cols[7].x + this.row_frstml;
+            // the gy is a little higher than other g to make it closer to forest
+            var gy = this.row_height * loc;
+            var g = this.svg.append('g')
+                .attr('transform', 'translate('+gx+', '+gy+')');
+
+            // text treat name
+            g.append('text')
+                .attr('class', this.css.txt_nm)
+                .attr('x', 0)
+                .attr('y', -this.row_txtmb)
+                .attr('text-anchor', 'start')
+                .text('Favours ' + this.ext.meta.treatments[0]);
+
+            // text control name
+            g.append('text')
+                .attr('class', this.css.txt_nm)
+                .attr('x', this.cols[7].width)
+                .attr('y', -this.row_txtmb)
+                .attr('text-anchor', 'end')
+                .text('Favours ' + this.ext.meta.treatments[1]);
         },
     
         get_txt_by_col: function(obj, idx) {
