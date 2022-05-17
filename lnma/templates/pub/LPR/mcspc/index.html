@@ -216,26 +216,49 @@
     </h4>
 
     <p>
-        Proportions of different prognostic subgroups across the included trials
+        <select name="" id="sps_v" onchange="$('.spst-div').hide();$('#spst_' + $('#sps_v').val()).show();">
+            <option value="1">
+                Proportions of different prognostic subgroups across the included trials
+            </option>
+            <option value="2">
+                Percent of patients surviving in prognostic subgroups across the included trials
+
+            </option>
+            <option value="3">
+                Overall survival (hazard ratios) in prognostic subgroups across the included trials
+
+            </option>
+        </select>
     </p>
-    <div>
-        {% include 'pub/LPR/mcspc/sps_t1.htm' %}
+
+    <div id="spst_1" class="spst-div">
+
+        <p class="mt-5">
+            
+        </p>
+        <div>
+            {% include 'pub/LPR/mcspc/sps_t1.htm' %}
+        </div>
     </div>
 
 
-    <p class="mt-5">
-        Percent of patients surviving in prognostic subgroups across the included trials
-    </p>
-    <div>
-        {% include 'pub/LPR/mcspc/sps_t2.htm' %}
+    <div id="spst_2" class="spst-div" style="display: none;">
+        
+        <p class="mt-5">
+        </p>
+        <div>
+            {% include 'pub/LPR/mcspc/sps_t2.htm' %}
+        </div>
     </div>
 
 
-    <p class="mt-5">
-        Overall survival (hazard ratios) in prognostic subgroups across the included trials
-    </p>
-    <div>
-        {% include 'pub/LPR/mcspc/sps_t2.htm' %}
+    <div id="spst_3" class="spst-div" style="display: none;">
+        
+        <p class="mt-5">
+        </p>
+        <div style="margin-left: -40px;">
+            {% include 'pub/LPR/mcspc/sps_t3.htm' %}
+        </div>
     </div>
 
 
@@ -340,7 +363,7 @@
 <br id="sec-nma-Sens">
 <div class="container mt-1">
     <h4>
-        Sensitivity Analysis
+        Secondary Analyses
     </h4>
 </div>
 
