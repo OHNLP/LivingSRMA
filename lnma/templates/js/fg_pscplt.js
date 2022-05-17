@@ -70,7 +70,7 @@ var fg_pscplt = {
         this.option = {
             grid: {
                 top: 15,
-                bottom: 85,
+                bottom: 95,
                 right: 15
             },
             title: {
