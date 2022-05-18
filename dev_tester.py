@@ -42,7 +42,7 @@ def test():
     srv_extract.import_itable_from_xls(
         'LPR',
         'mcspc',
-        '/tmp/LPR/itable.xlsx',
+        '/tmp/LPR/ITABLE_ATTR_DATA_FINALIZED.xlsx',
         '/tmp/LPR/filters.xlsx'
     )
     print('* done')
