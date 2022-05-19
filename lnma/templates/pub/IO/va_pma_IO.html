@@ -398,6 +398,13 @@ a {
     width: 140px !important;
     min-width: 140px !important;
 }
+.cmp-tb-cell-effect-lg {
+    min-width: 360px !important;
+    width: 360px !important;
+    /* display: block !important; */
+    position: relative;
+    text-align: center;
+}
 .cmp-tb-cell-effect {
     min-width: 120px !important;
     width: 120px !important;
@@ -448,13 +455,21 @@ a {
     /* left: 0; */
     width: 88px;
 }
-.cmp-ref-one {
+.cmp-tb-cell-effect .cmp-ref-one {
     position: absolute;
     left: 59px;
     top: 0;
     height: 100%;
     border-right: 1px dotted #aaaaaa;
 }
+.cmp-tb-cell-effect-lg .cmp-ref-one {
+    position: absolute;
+    left: 179px;
+    top: 0;
+    height: 100%;
+    border-right: 1px dotted #aaaaaa;
+}
+
 .cmp-ref-50 {
     position: absolute;
     left: 60px;
@@ -543,8 +558,24 @@ a {
 .badge-immune {
     background-color: #F4EBFF;
 }
+
+.ml-1 {
+    margin-left: 1em;
+}
+.ml-2 {
+    margin-left: 2em;
+}
+.ml-3 {
+    margin-left: 3em;
+}
+.mr-1 {
+    margin-right: 1em;
+}
 .mr-2 {
     margin-right: 2em;
+}
+.mr-3 {
+    margin-right: 3em;
 }
 </style>
 </head>
@@ -982,8 +1013,8 @@ a {
                     |
                 </h4>
                 <div class="d-flex flex-row flex-align-items-baseline">
-                    <div class="mr-2">
-                        <input type="radio"
+                    <div class="ml-1 mr-1">
+                        <!-- <input type="radio"
                             id="input_show_effect_model_random"
                             value="random"
                             v-model="show_effect_model">
@@ -995,7 +1026,29 @@ a {
                             v-model="show_effect_model">
                         <label for="input_show_effect_model_fixed">
                             Fixed Effect Model
-                        </label> 
+                        </label>  -->
+                        Model:
+                        <select v-model="show_effect_model">
+                            <option value="random">Random Effect Model</option>
+                            <option value="Fixed">Fixed Effect Model</option>
+                        </select>
+                    </div>
+
+                    <div style="margin-right: 2em;">
+                        Measure: 
+                        <select v-model="show_measure">
+                            <option value="all">OR, RR, Incidence</option>
+                            <option value="one">Single Measure</option>
+                        </select>
+
+                        <span v-if="show_measure == 'one'">
+                            Measure of effect: 
+                            <select v-model="measure_of_effect">
+                                <option value="OR">Odds Ratio (OR)</option>
+                                <option value="RR">Risk Ratio (RR)</option>
+                                <option value="INCD">Incidence</option>
+                            </select>
+                        </span>
                     </div>
                     
                     <div style="margin-right: 2em;">
@@ -1005,7 +1058,6 @@ a {
                         <label for="input_show_effect_label">Effect Size Label</label> 
 
                     </div>
-
 
                     <div style="margin-right: 2em;">
                         <a href="javascript:void(0);" 
@@ -1125,9 +1177,10 @@ a {
                                 class="fas fa-sort-numeric-down"></i>
                         </div>
 
-                        <div v-on:click="toggle_sort_by('OR')"
-                            class="cmp-tb-cell cmp-tb-cell-effect cmp-tb-cell-header
-                            cmp-tb-cell-header-sortable">
+                        <div v-if="show_measure == 'all' || measure_of_effect == 'OR'"
+                            v-on:click="toggle_sort_by('OR')"
+                            :class="{'cmp-tb-cell-effect': show_measure == 'all', 'cmp-tb-cell-effect-lg': show_measure == 'one'}"
+                            class="cmp-tb-cell cmp-tb-cell-header                            cmp-tb-cell-header-sortable">
                             Odds Ratio
                             &nbsp;
                             <i v-if="sort_ocs_by == 'OR_desc'"
@@ -1135,12 +1188,15 @@ a {
                             <i v-else-if="sort_ocs_by == 'OR_asc'"
                                 class="fas fa-sort-numeric-down"></i>
                         </div>
-                        <div class="cmp-tb-cell cmp-tb-cell-sep cmp-tb-cell-header">
+                        <div v-if="show_measure == 'all' || measure_of_effect == 'OR'"
+                            class="cmp-tb-cell cmp-tb-cell-sep cmp-tb-cell-header">
                             &nbsp;
                         </div>
 
-                        <div v-on:click="toggle_sort_by('RR')"
-                            class="cmp-tb-cell cmp-tb-cell-effect cmp-tb-cell-header cmp-tb-cell-header-sortable">
+                        <div v-if="show_measure == 'all' || measure_of_effect == 'RR'"
+                            v-on:click="toggle_sort_by('RR')"
+                            :class="{'cmp-tb-cell-effect': show_measure == 'all', 'cmp-tb-cell-effect-lg': show_measure == 'one'}"
+                            class="cmp-tb-cell cmp-tb-cell-header cmp-tb-cell-header-sortable">
                             Risk Ratio
                             &nbsp;
                             <i v-if="sort_ocs_by == 'RR_desc'"
@@ -1148,12 +1204,15 @@ a {
                             <i v-else-if="sort_ocs_by == 'RR_asc'"
                                 class="fas fa-sort-numeric-down"></i>
                         </div>
-                        <div class="cmp-tb-cell cmp-tb-cell-sep cmp-tb-cell-header">
+                        <div v-if="show_measure == 'all' || measure_of_effect == 'RR'"
+                            class="cmp-tb-cell cmp-tb-cell-sep cmp-tb-cell-header">
                             &nbsp;
                         </div>
 
-                        <div v-on:click="toggle_sort_by('INCD')" 
-                            class="cmp-tb-cell cmp-tb-cell-effect cmp-tb-cell-header cmp-tb-cell-header-sortable">
+                        <div v-if="show_measure == 'all' || measure_of_effect == 'INCD'"
+                            v-on:click="toggle_sort_by('INCD')" 
+                            :class="{'cmp-tb-cell-effect': show_measure == 'all', 'cmp-tb-cell-effect-lg': show_measure == 'one'}"
+                            class="cmp-tb-cell cmp-tb-cell-header cmp-tb-cell-header-sortable">
                             Incidence %
                             &nbsp;
                             <i v-if="sort_ocs_by == 'INCD_desc'"
@@ -1176,6 +1235,7 @@ a {
                         class="cmp-tb-row">
                         <div class="cmp-tb-cell cmp-tb-cell-xs">
                             <span class="badge"
+                                :title="f_ocs[v.idx].oc_group + ' related AE'"
                                 :class="'badge-' + f_ocs[v.idx].oc_group">
                                 {{ f_ocs[v.idx].oc_group[0] }}
                             </span>
@@ -1229,7 +1289,9 @@ a {
                             {{ add_comma(f_ocs[v.idx].ma.PRIM.total[3]) }}
                         </div>
 
-                        <div class="cmp-tb-cell cmp-tb-cell-effect">
+                        <div v-if="show_measure == 'all' || measure_of_effect == 'OR'"
+                            :class="{'cmp-tb-cell-effect': show_measure == 'all', 'cmp-tb-cell-effect-lg': show_measure == 'one'}"
+                            class="cmp-tb-cell">
 
                             <div class="cmp-eft-dot"
                                 v-bind:style="{left: get_eft_left_by_rst(f_ocs[v.idx].ma.PRIM.rsts.OR) + 'px', backgroundColor: get_eft_color(f_ocs[v.idx].ma.PRIM.rsts.OR)}">
@@ -1247,7 +1309,8 @@ a {
 
                             <div class="cmp-ref-one"></div>
                         </div>
-                        <div class="cmp-tb-cell cmp-tb-cell-sep">
+                        <div v-if="show_measure == 'all' || measure_of_effect == 'OR'"
+                            class="cmp-tb-cell cmp-tb-cell-sep">
                             &nbsp;
                         </div>
                         <!-- <div class="cmp-tb-cell cmp-tb-cell-eft">
@@ -1258,7 +1321,9 @@ a {
                         </div> -->
 
 
-                        <div class="cmp-tb-cell cmp-tb-cell-effect">
+                        <div v-if="show_measure == 'all' || measure_of_effect == 'RR'"
+                            :class="{'cmp-tb-cell-effect': show_measure == 'all', 'cmp-tb-cell-effect-lg': show_measure == 'one'}"
+                            class="cmp-tb-cell">
 
                             <div class="cmp-eft-dot"
                                 v-bind:style="{left: get_eft_left_by_rst(f_ocs[v.idx].ma.PRIM.rsts.RR) + 'px', backgroundColor: get_eft_color(f_ocs[v.idx].ma.PRIM.rsts.RR)}">
@@ -1275,7 +1340,8 @@ a {
 
                             <div class="cmp-ref-one"></div>
                         </div>
-                        <div class="cmp-tb-cell cmp-tb-cell-sep">
+                        <div v-if="show_measure == 'all' || measure_of_effect == 'RR'"
+                            class="cmp-tb-cell cmp-tb-cell-sep">
                             &nbsp;
                         </div>
                         <!-- <div class="cmp-tb-cell cmp-tb-cell-eft">
@@ -1286,8 +1352,9 @@ a {
                         </div> -->
 
 
-
-                        <div class="cmp-tb-cell cmp-tb-cell-effect">
+                        <div v-if="show_measure == 'all' || measure_of_effect == 'INCD'"
+                            :class="{'cmp-tb-cell-effect': show_measure == 'all', 'cmp-tb-cell-effect-lg': show_measure == 'one'}"
+                            class="cmp-tb-cell">
 
                             <div class="cmp-eft-dot"
                                 v-bind:style="{left: get_eft_left_by_rst(f_ocs[v.idx].ma.INCD.rsts.INCD, 'linear') + 'px', backgroundColor: get_eft_color(f_ocs[v.idx].ma.INCD.rsts.INCD)}">
@@ -1302,7 +1369,7 @@ a {
                                 v-bind:style="{width: get_ci_width_by_rst(f_ocs[v.idx].ma.INCD.rsts.INCD, 'linear') + 'px', left: get_ci_left_by_rst(f_ocs[v.idx].ma.INCD.rsts.INCD, 'linear') + 'px'}">
                             </div>
 
-                            <div class="cmp-ref-50"></div>
+                            <!-- <div class="cmp-ref-50"></div> -->
                         </div>
                         <!-- <div class="cmp-tb-cell cmp-tb-cell-eft">
                             IN={{ tf2(f_ocs[v.idx].ma.INCD.rsts.INCD.random.SM ) }}
@@ -1368,7 +1435,9 @@ a {
                             <!-- Nc -->
                         </div>
 
-                        <div class="cmp-tb-cell cmp-tb-cell-effect cmp-tb-cell-footer">
+                        <div v-if="show_measure == 'all' || measure_of_effect == 'OR'"
+                            :class="{'cmp-tb-cell-effect': show_measure == 'all', 'cmp-tb-cell-effect-lg': show_measure == 'one'}"
+                            class="cmp-tb-cell cmp-tb-cell-footer">
                             <!-- x-axis for OR -->
                             <img style="width: 100%;" src="/static/img/log-axis.png">
                         </div>
@@ -1377,7 +1446,9 @@ a {
                             &nbsp;
                         </div>
 
-                        <div class="cmp-tb-cell cmp-tb-cell-effect cmp-tb-cell-footer">
+                        <div v-if="show_measure == 'all' || measure_of_effect == 'RR'"
+                            :class="{'cmp-tb-cell-effect': show_measure == 'all', 'cmp-tb-cell-effect-lg': show_measure == 'one'}"
+                            class="cmp-tb-cell cmp-tb-cell-footer">
                             <!-- x-axis for RR -->
                             <img style="width: 100%;" src="/static/img/log-axis.png">
                         </div>
@@ -1386,7 +1457,9 @@ a {
                             &nbsp;
                         </div>
 
-                        <div class="cmp-tb-cell cmp-tb-cell-effect cmp-tb-cell-footer">
+                        <div v-if="show_measure == 'all' || measure_of_effect == 'INCD'"
+                            :class="{'cmp-tb-cell-effect': show_measure == 'all', 'cmp-tb-cell-effect-lg': show_measure == 'one'}"
+                            class="cmp-tb-cell cmp-tb-cell-footer">
                             <!-- x-axis for INCD -->
                             <img style="width: 100%;" src="/static/img/x-axis-0-100.png">
                         </div>
@@ -2785,12 +2858,23 @@ var app_comptb = {
     vpp_id: '#app_comptb',
 
     x_scale: {
-        log: d3.scaleLog()
-            .domain([1e-2, 1e2])
-            .range([0, 120]),
-        linear: d3.scaleLinear()
-            .domain([0, 1])
-            .range([0, 120]),
+        sm: {
+            log: d3.scaleLog()
+                .domain([1e-2, 1e2])
+                .range([0, 120]),
+            linear: d3.scaleLinear()
+                .domain([0, 1])
+                .range([0, 120]),
+        },
+        
+        lg: {
+            log: d3.scaleLog()
+                .domain([1e-2, 1e2])
+                .range([0, 360]),
+            linear: d3.scaleLinear()
+                .domain([0, 1])
+                .range([0, 360]),
+        },
     },
     
     init: function() {
@@ -2800,7 +2884,14 @@ var app_comptb = {
                 // the full ocs for comparison
                 f_ocs: [],
 
+                // show which result
                 show_effect_model: 'random',
+
+                // show how many measures
+                show_measure: 'all',
+
+                // show which one?
+                measure_of_effect: 'OR',
 
                 // show label
                 show_effect_label: true,
@@ -2858,21 +2949,21 @@ var app_comptb = {
                             return txt;
                         } else {
                             
-                            return txt + ' - ALL';
+                            return txt + ' (ALL)';
                         }
                         
                     } else if (f_vals[2] == 'Monotherapy') {
                         // mono
-                        return txt + ' - MONO';
+                        return txt + ' (MONO)';
 
                     } else {
                         // comb
                         if (f_vals[3] == '%' || f_vals[3] == 'all') {
                             // all comb
-                            return txt + ' - COMB';
+                            return txt + ' (COMB)';
                         } else {
                             // specific comb
-                            return txt + ' - ' + this._txt(f_vals[3], 'filter');
+                            return txt + ' (' + this._txt(f_vals[3], 'filter') + ')';
                         }
                     }
                 },
@@ -3128,7 +3219,12 @@ var app_comptb = {
                     if (typeof(scale) == 'undefined') {
                         scale = 'log'
                     }
-                    return app_comptb.x_scale[scale](
+                    var width = {
+                        'one': 'lg',
+                        'all': 'sm',
+                    }[this.show_measure];
+
+                    return app_comptb.x_scale[width][scale](
                         d[this.show_effect_model].SM
                     ) - 3;
                 },
@@ -3137,7 +3233,12 @@ var app_comptb = {
                     if (typeof(scale) == 'undefined') {
                         scale = 'log'
                     }
-                    return app_comptb.x_scale[scale](
+                    var width = {
+                        'one': 'lg',
+                        'all': 'sm',
+                    }[this.show_measure];
+
+                    return app_comptb.x_scale[width][scale](
                         d[this.show_effect_model].SM_lower
                     );
                 },
@@ -3146,8 +3247,13 @@ var app_comptb = {
                     if (typeof(scale) == 'undefined') {
                         scale = 'log'
                     }
-                    return app_comptb.x_scale[scale](upper) - 
-                           app_comptb.x_scale[scale](lower);
+                    var width = {
+                        'one': 'lg',
+                        'all': 'sm',
+                    }[this.show_measure];
+
+                    return app_comptb.x_scale[width][scale](upper) - 
+                           app_comptb.x_scale[width][scale](lower);
                 },
                 
                 get_eft_color: function(d) {
