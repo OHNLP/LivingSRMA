@@ -302,7 +302,7 @@ var pan_ocpapers = {
 
             // highlight this line
             $('.paper-table-row').removeClass('paper-table-row-clicked');
-            $('#paper-table-row-' + pmid).addClass('paper-table-row-clicked');
+            $('#paper-table-row-' + paper.paper_id).addClass('paper-table-row-clicked');
 
             // call collector to do something
             pan_collector.show_paper(

@@ -69,96 +69,164 @@
         <div id="pan_ocpapers_working_paper_collector_attr_list">
             <div class="w-cate-item mb-1"
                 v-for="cate in working_oc.meta.cate_attrs">
-                <div class="w-cate-item-name">
-                    {{ cate.name }}
+
+                <div v-if="cate.abbr=='COE_RCT_ROB'">
+                    <!-- special extraction task for ROB -->
+                    <div class="w-cate-item-name">
+                        <i class="fas fa-balance-scale"></i>
+                        Risk of Bias
+                    </div>
+
+                    <div class="w-cate-attrs">
+                        <div class="d-flex flex-row mt-1">
+                            <div v-for="d_idx in 5"
+                                class="rob-rst-box"
+                                :class="{'rob-rst-box-active':coe_rob_d_active==d_idx}"
+                                v-on:click="show_coe_rob_d(d_idx)">
+                                <div >
+                                    <div v-if="get_working_arm_attrs()['g0']['COE_RCT_ROB_D'+d_idx+'_AR'] == 'L'"
+                                        class="rob-rst-icon rob-rst-icon-L">
+                                        +
+                                    </div>
+                                    <div v-else-if="get_working_arm_attrs()['g0']['COE_RCT_ROB_D'+d_idx+'_AR'] == 'M'"
+                                        class="rob-rst-icon rob-rst-icon-M">
+                                        !
+                                    </div>
+                                    <div v-else-if="get_working_arm_attrs()['g0']['COE_RCT_ROB_D'+d_idx+'_AR'] == 'H'"
+                                        class="rob-rst-icon rob-rst-icon-H">
+                                        !
+                                    </div>
+                                    <div v-else
+                                        class="rob-rst-icon rob-rst-icon-N">
+                                        ?
+                                    </div>
+                                </div>
+                                <div class="rob-rst-text">
+                                    D{{ d_idx }}
+                                </div>
+                            </div>
+                        </div>
+                        <div v-for="d_idx in 5"
+                            v-if="coe_rob_d_active == d_idx">
+                            <div v-for="q_idx in {1:3, 2:7, 3:4, 4:5, 5:3}[d_idx]"
+                                class="rob-dx-q">
+                                <div>
+                                    {{ coe_rob_qs[d_idx][q_idx] }}
+                                </div>
+                                <div class="d-flex flex-row">
+                                    <select class="rob-select"
+                                        v-model="get_working_arm_attrs()['g0']['COE_RCT_ROB_D'+d_idx+'_Q'+q_idx]">
+                                        <option value="Y"><b>Y</option>
+                                        <option value="PY">PY</option>
+                                        <option value="PN">PN</option>
+                                        <option value="N">N</option>
+                                        <option value="NI">NI</option>
+                                    </select>
+                                    <input type="text" 
+                                        class="rob-comment"
+                                        v-model="get_working_arm_attrs()['g0']['COE_RCT_ROB_C'+d_idx+'_Q'+q_idx]">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="w-cate-attrs">
-                    <div class="w-attr-item"
-                        v-for="attr in cate.attrs"
-                        v-bind:id="'wpc-input-'+attr.abbr"
-                        v-show="is_show_attr(attr.abbr)">
-                        <div class="w-attr-item-name"
-                            v-bind:title="attr.name">
-                            {{ attr.name }}
-                        </div>
+                <div v-else>
+                    <!-- just for general extraction task -->
+                    
+                    <div class="w-cate-item-name">
+                        {{ cate.name }}
+                    </div>
 
-                        <div v-if="attr.subs == null"
-                            class="w-attr-item-value d-flex flex-row">
-                            <div v-for="g, g_idx in working_oc.meta.sub_groups"
-                                v-bind:class="{'w-subg-item-value':working_paper_subg == g_idx, 'w-100': working_paper_subg==0}">
-                                <!-- v-bind:size="get_input_size(get_working_arm_extracted_value(g_idx, attr.abbr))" -->
-                                <!-- <span v-if="working_paper_arm == null">
-                                    <input class="paper-extract-input-auto input-auto-complete" type="text" 
+                    <div class="w-cate-attrs">
+                        <div class="w-attr-item"
+                            v-for="attr in cate.attrs"
+                            v-bind:id="'wpc-input-'+attr.abbr"
+                            v-show="is_show_attr(attr.abbr)">
+                            <div class="w-attr-item-name"
+                                v-bind:title="attr.name">
+                                {{ attr.name }}
+                            </div>
+
+                            <div v-if="attr.subs == null"
+                                class="w-attr-item-value d-flex flex-row">
+                                <div v-for="g, g_idx in working_oc.meta.sub_groups"
+                                    v-bind:class="{'w-subg-item-value':working_paper_subg == g_idx, 'w-100': working_paper_subg==0}">
+                                    <!-- v-bind:size="get_input_size(get_working_arm_extracted_value(g_idx, attr.abbr))" -->
+                                    <!-- <span v-if="working_paper_arm == null">
+                                        <input class="paper-extract-input-auto input-auto-complete" type="text" 
+                                            v-bind:g_idx="g_idx"
+                                            v-bind:abbr="attr.abbr"
+                                            v-on:click="switch_working_subg(g_idx)"
+                                            v-model="working_oc.data[working_paper.pid].attrs.main['g'+g_idx][attr.abbr]"> 
+                                        <span class="w-remove-content"
+                                            v-on:click="set_working_paper_arm_by_group_attr_value(g_idx, attr.abbr, '')">
+                                            <i class="fa fa-close"></i>
+                                        </span>
+                                    </span>
+                                    <span v-else>
+                                        <input class="paper-extract-input-auto input-auto-complete" type="text" 
+                                            v-bind:g_idx="g_idx"
+                                            v-bind:abbr="attr.abbr"
+                                            v-on:click="switch_working_subg(g_idx)"
+                                            v-model="working_oc.data[working_paper.pid].attrs.other[working_paper_arm]['g'+g_idx][attr.abbr]"> 
+                                        <span class="w-remove-content"
+                                            v-on:click="set_working_paper_arm_by_group_attr_value(g_idx, attr.abbr, '')">
+                                            <i class="fa fa-close"></i>
+                                        </span>
+                                    </span> -->
+                                    <input class="paper-extract-input paper-extract-input-auto input-auto-complete" type="text" 
+                                        v-bind:oc_abbr="working_oc.abbr"
                                         v-bind:g_idx="g_idx"
                                         v-bind:abbr="attr.abbr"
                                         v-on:click="switch_working_subg(g_idx)"
-                                        v-model="working_oc.data[working_paper.pid].attrs.main['g'+g_idx][attr.abbr]"> 
+                                        @input="on_change_input_value"
+                                        v-model="get_working_arm_attrs()['g'+g_idx][attr.abbr]"> 
                                     <span class="w-remove-content"
                                         v-on:click="set_working_paper_arm_by_group_attr_value(g_idx, attr.abbr, '')">
                                         <i class="fa fa-close"></i>
                                     </span>
-                                </span>
-                                <span v-else>
-                                    <input class="paper-extract-input-auto input-auto-complete" type="text" 
-                                        v-bind:g_idx="g_idx"
-                                        v-bind:abbr="attr.abbr"
-                                        v-on:click="switch_working_subg(g_idx)"
-                                        v-model="working_oc.data[working_paper.pid].attrs.other[working_paper_arm]['g'+g_idx][attr.abbr]"> 
-                                    <span class="w-remove-content"
-                                        v-on:click="set_working_paper_arm_by_group_attr_value(g_idx, attr.abbr, '')">
-                                        <i class="fa fa-close"></i>
-                                    </span>
-                                </span> -->
-                                <input class="paper-extract-input paper-extract-input-auto input-auto-complete" type="text" 
-                                    v-bind:oc_abbr="working_oc.abbr"
-                                    v-bind:g_idx="g_idx"
-                                    v-bind:abbr="attr.abbr"
-                                    v-on:click="switch_working_subg(g_idx)"
-                                    @input="on_change_input_value"
-                                    v-model="get_working_arm_attrs()['g'+g_idx][attr.abbr]"> 
-                                <span class="w-remove-content"
-                                    v-on:click="set_working_paper_arm_by_group_attr_value(g_idx, attr.abbr, '')">
-                                    <i class="fa fa-close"></i>
-                                </span>
+                                </div>
+                                
+                            </div>
+                            
+                            <div class="w-attr-subs"
+                                v-else>
+
+                                <div class="w-sub-item-value"
+                                    v-for="sub, sub_idx in attr.subs">
+
+
+                                    <div class="w-sub-item-name">
+                                        - {{ sub.name }}
+                                    </div>
+
+                                    <div v-for="g, g_idx in working_oc.meta.sub_groups"
+                                    v-bind:class="{'w-subg-item-value':working_paper_subg == g_idx, 'w-100': working_paper_subg==0}">
+                                        <!-- v-bind:size="get_input_size(get_working_arm_extracted_value(g_idx, attr.abbr))" -->
+                                        <div class="w-sub-item-value">
+                                            <input class="paper-extract-input paper-extract-input-auto input-auto-complete"     
+                                                type="text" 
+                                                v-bind:oc_abbr="working_oc.abbr"
+                                                v-bind:g_idx="g_idx"
+                                                v-bind:abbr="sub.abbr"
+                                                @input="on_change_input_value"
+                                                v-model="get_working_arm_attrs()['g'+g_idx][sub.abbr]"> 
+                                            <span class="w-remove-content"
+                                                v-on:click="clear_working_arm_attr(g_idx, sub.abbr)">
+                                                <i class="fa fa-close"></i>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
                             </div>
                             
                         </div>
-                        
-                        <div class="w-attr-subs"
-                            v-else>
 
-                            <div class="w-sub-item-value"
-                                v-for="sub, sub_idx in attr.subs">
-
-
-                                <div class="w-sub-item-name">
-                                    - {{ sub.name }}
-                                </div>
-
-                                <div v-for="g, g_idx in working_oc.meta.sub_groups"
-                                v-bind:class="{'w-subg-item-value':working_paper_subg == g_idx, 'w-100': working_paper_subg==0}">
-                                    <!-- v-bind:size="get_input_size(get_working_arm_extracted_value(g_idx, attr.abbr))" -->
-                                    <div class="w-sub-item-value">
-                                        <input class="paper-extract-input paper-extract-input-auto input-auto-complete"     
-                                            type="text" 
-                                            v-bind:oc_abbr="working_oc.abbr"
-                                            v-bind:g_idx="g_idx"
-                                            v-bind:abbr="sub.abbr"
-                                            @input="on_change_input_value"
-                                            v-model="get_working_arm_attrs()['g'+g_idx][sub.abbr]"> 
-                                        <span class="w-remove-content"
-                                            v-on:click="clear_working_arm_attr(g_idx, sub.abbr)">
-                                            <i class="fa fa-close"></i>
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-                        
                     </div>
 
+                
                 </div>
             </div>
         </div>

@@ -331,3 +331,60 @@ input[type=text].paper-extract-input:focus {
 .wpc-data-has-not-saved {
     color: red !important;
 }
+
+
+/**********************************************************
+ * For the Risk of Bias extraction
+*********************************************************/
+.rob-rst-box {
+    width: 60px;
+    border-bottom: 1px solid #cccccc;
+    cursor: pointer;
+}
+.rob-rst-box-active {
+    border: 1px solid #cccccc;
+    font-weight: bold;
+    border-bottom: 0;
+}
+.rob-rst-icon {
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    border-radius: 25px;
+    margin: 2px auto;
+    border: 1px solid transparent;
+}
+.rob-rst-icon-L {
+    border-color: green;
+    background-color: green;
+}
+.rob-rst-icon-M {
+    border-color: yellow;
+    background-color: yellow;
+}
+.rob-rst-icon-H {
+    border-color: red;
+    background-color: red;
+}
+.rob-rst-icon-N {
+    border-color: lightgray;
+    background-color: lightgray;
+}
+.rob-rst-text {
+    text-align: center;
+}
+.rob-dx-q {
+    margin: 0 0 5px 0;
+    padding: 0 0 5px 0;
+    border-bottom: 1px dotted #aaaaaa;
+}
+.rob-select {
+    width: 50px;
+    height: 30px;
+    margin: 0 5px 0 0;
+    font-weight: bold;
+}
+.rob-comment {
+    width: calc(100% - 60px);
+}

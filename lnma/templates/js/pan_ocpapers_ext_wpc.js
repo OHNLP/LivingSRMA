@@ -43,11 +43,65 @@ Object.assign(pan_ocpapers.vpp_data, {
     has_saved: true,
 
     // working paper filter for the outcome name
-    working_paper_oc_fileter: ''
+    working_paper_oc_fileter: '',
+
+    // for coe's rob
+    coe_rob_d_active: 1,
+    coe_rob_qs: {
+        1: {
+            1: "1.1 Was the allocation sequence random?",
+            2: "1.2 Was the allocation sequence concealed until participants were enrolled and assigned to interventions?",
+            3: "1.3 Did baseline differences between intervention groups suggest a problem with the randomization process?"
+        },
+        2: {
+            1: "2.1 Were participants aware of their assigned intervention during the trial?",
+            2: "2.2 Were carers and people delivering the interventions aware of participants' assigned intervention during the trial?",
+            3: "2.3 If Y/PY/NI to 2.1 or 2.2: Were there deviations from the intended intervention that arose because of the trial context?",
+            4: "2.4 If Y/PY to 2.3: Were these deviations likely to have affected the outcome?",
+            5: "2.5. If Y/PY/NI to 2.4: Were these deviations from intended intervention balanced between groups?",
+            6: "2.6 Was an appropriate analysis used to estimate the effect of assignment to intervention?",
+            7: "2.7 If N/PN/NI to 2.6: Was there potential for a substantial impact (on the result) of the failure to analyse participants in the group to which they were randomized?"
+        },
+        3: {
+            1: "3.1 Were data for this outcome available for all, or nearly all, participants randomized?",
+            2: "3.2 If N/PN/NI to 3.1: Is there evidence that the result was not biased by missing outcome data?",
+            3: "3.3 If N/PN to 3.2: Could missingness in the outcome depend on its true value?",
+            4: "3.4 If Y/PY/NI to 3.3: Is it likely that missingness in the outcome depended on its true value?"
+        },
+        4: {
+            1: "4.1 Was the method of measuring the outcome inappropriate?",
+            2: "4.2 Could measurement or ascertainment of the outcome have differed between intervention groups?",
+            3: "4.3 If N/PN/NI to 4.1 and 4.2: Were outcome assessors aware of the intervention received by study participants?",
+            4: "4.4 If Y/PY/NI to 4.3: Could assessment of the outcome have been influenced by knowledge of intervention received?",
+            5: "4.5 If Y/PY/NI to 4.4: Is it likely that assessment of the outcome was influenced by knowledge of intervention received?"
+        },
+        5: {
+            1: "5.1 Were the data that produced this result analysed in accordance with a pre-specified analysis plan that was finalized before unblinded outcome data were available for analysis?",
+            2: "5.2 ... multiple eligible outcome measurements (e.g. scales, definitions, time points) within the outcome domain?",
+            3: "5.3 ... multiple eligible analyses of the data?"
+        }
+    }
 });
 
 // Extend the vpp methods
 Object.assign(pan_ocpapers.vpp_methods, {
+    /////////////////////////////////////////////////////
+    // For the working paper rob extraction
+    /////////////////////////////////////////////////////
+    show_coe_rob_d: function(d_idx) {
+        this.coe_rob_d_active = d_idx;
+    },
+
+    /**
+     * Show a question or not based on existing answers
+     * @param {Object} ext data extraction
+     * @param {int} d_idx index of D
+     * @param {int} q_idx index of Question in given D
+     */
+    show_coe_rob_d_q: function(ext, d_idx, q_idx) {
+
+    },
+
     /////////////////////////////////////////////////////
     // For the working paper extraction
     /////////////////////////////////////////////////////

@@ -275,6 +275,8 @@ OC_TYPE_TPL = {
     }
 }
 
+
+
 INPUT_FORMAT_TPL = {
     "nma": {
         'NMA_RAW_ET': [{
@@ -747,7 +749,7 @@ PROJECT_DEFAULT_SETTINGS = {
             "follow-up"
         ]
     },
-    # defines the clinical question used in this project
+    # defines the clinical Qused in this project
     "clinical_questions": [
         {
             "abbr": "default",
@@ -899,6 +901,260 @@ CIE_PWMA_COLUMNS = [
     "imprecision",
     "publication_bias"
 ]
+
+# Certainty in Evidence for data extraction
+CIE_PWMA_COE_RCT_ROB = {
+    "abbr": "COE_RCT_ROB",
+    "name": "_COE_RCT_ROB",
+    "attrs": [
+      {
+        "abbr": "COE_RCT_ROB_D1",
+        "name": "D1",
+        "subs": [
+          {
+            "abbr": "COE_RCT_ROB_D1_AJ",
+            "name": "Assessor Judgement"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D1_AR",
+            "name": "Algorithm Result"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D1_Q1",
+            "name": "Q1"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D1_Q2",
+            "name": "Q2"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D1_Q3",
+            "name": "Q3"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D1_C1",
+            "name": "C1"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D1_C2",
+            "name": "C2"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D1_C3",
+            "name": "C3"
+          }
+        ]
+      },
+      {
+        "abbr": "COE_RCT_ROB_D2",
+        "name": "D2",
+        "subs": [
+          {
+            "abbr": "COE_RCT_ROB_D2_AJ",
+            "name": "Assessor Judgement"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D2_AR",
+            "name": "Algorithm Result"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D2_Q1",
+            "name": "Q1"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D2_Q2",
+            "name": "Q2"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D2_Q3",
+            "name": "Q3"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D2_Q4",
+            "name": "Q4"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D2_Q5",
+            "name": "Q5"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D2_Q6",
+            "name": "Q6"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D2_Q7",
+            "name": "Q7"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D2_C1",
+            "name": "C1"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D2_C2",
+            "name": "C2"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D2_C3",
+            "name": "C3"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D2_C4",
+            "name": "C4"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D2_C5",
+            "name": "C5"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D2_C6",
+            "name": "C6"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D2_C7",
+            "name": "C7"
+          }
+        ]
+      },
+      {
+        "abbr": "COE_RCT_ROB_D3",
+        "name": "D3",
+        "subs": [
+          {
+            "abbr": "COE_RCT_ROB_D3_AJ",
+            "name": "Assessor Judgement"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D3_AR",
+            "name": "Algorithm Result"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D3_Q1",
+            "name": "Q1"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D3_Q2",
+            "name": "Q2"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D3_Q3",
+            "name": "Q3"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D3_Q4",
+            "name": "Q4"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D3_C1",
+            "name": "C1"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D3_C2",
+            "name": "C2"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D3_C3",
+            "name": "C3"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D3_C4",
+            "name": "C4"
+          }
+        ]
+      },
+      {
+        "abbr": "COE_RCT_ROB_D4",
+        "name": "D4",
+        "subs": [
+          {
+            "abbr": "COE_RCT_ROB_D4_AJ",
+            "name": "Assessor Judgement"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D4_AR",
+            "name": "Algorithm Result"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D4_Q1",
+            "name": "Q1"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D4_Q2",
+            "name": "Q2"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D4_Q3",
+            "name": "Q3"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D4_Q4",
+            "name": "Q4"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D4_Q5",
+            "name": "Q5"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D4_C1",
+            "name": "C1"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D4_C2",
+            "name": "C2"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D4_C3",
+            "name": "C3"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D4_C4",
+            "name": "C4"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D4_C5",
+            "name": "C5"
+          }
+        ]
+      },
+      {
+        "abbr": "COE_RCT_ROB_D5",
+        "name": "D5",
+        "subs": [
+          {
+            "abbr": "COE_RCT_ROB_D5_AJ",
+            "name": "Assessor Judgement"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D5_AR",
+            "name": "Algorithm Result"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D5_Q1",
+            "name": "Q1"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D5_Q2",
+            "name": "Q2"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D5_Q3",
+            "name": "Q3"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D5_C1",
+            "name": "C1"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D5_C2",
+            "name": "C2"
+          },
+          {
+            "abbr": "COE_RCT_ROB_D5_C3",
+            "name": "C3"
+          }
+        ]
+      }
+    ]
+  }
 
 # the maximum length
 PID_TYPE_MAX_LENGTH = 32
