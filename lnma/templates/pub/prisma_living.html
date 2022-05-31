@@ -186,7 +186,7 @@ a {
 
 <div id="fg_prisma" class="box" style="width: 500px; min-width: 500px;">
 
-    {% include 'svg/PRISMA_living.svg' %}
+    {% include 'svg/PRISMA_living_v2.svg' %}
 
 </div><!-- /#fg_prisma -->
 
@@ -402,6 +402,7 @@ var app_prisma = {
             's0',
             'a1',
             'b2',
+            'w1',
             'b3',
             'b5',
             'e21',
@@ -452,6 +453,25 @@ var app_prisma = {
                 }
 
                 // update the value 
+                svgtxt = svgtxt.replace(
+                    '$'+ref+'$', 
+                    '' + jarvis.add_commas_to_number(tmp)
+                );
+            } else if (ref == 'w1') {
+                // special rule for screening studies
+                // it is b2 - b3
+                tmp = (
+                    prisma.a1.n_pmids +
+                    prisma.a2x.n_pmids
+                    ) 
+                    - 
+                    (
+                    prisma.e3.n_pmids +
+                    prisma.f1.n_pmids +
+                    prisma.e21.n_pmids + 
+                    prisma.e22.n_pmids
+                    );
+
                 svgtxt = svgtxt.replace(
                     '$'+ref+'$', 
                     '' + jarvis.add_commas_to_number(tmp)
