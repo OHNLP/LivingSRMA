@@ -47,6 +47,13 @@ Object.assign(pan_ocpapers.vpp_data, {
 
     // for coe's rob
     coe_rob_d_active: 1,
+    coe_rob_d_name: {
+        1: 'Domain 1: Risk of bias arising from the randomization process',
+        2: "Domain 2: Risk of bias due to deviations from the intended interventions",
+        3: "Domain 3: Risk of bias due to missing outcome data",
+        4: "Domain 4: Risk of bias in measurement of the outcome",
+        5: "Domain 5: Risk of bias in selection of the reported result",
+    },
     coe_rob_qs: {
         1: {
             1: "1.1 Was the allocation sequence random?",
@@ -110,6 +117,10 @@ Object.assign(pan_ocpapers.vpp_methods, {
      */
     show_coe_rob_d_q: function(ext, d_idx, q_idx) {
 
+    },
+
+    on_change_rob_q_coment: function() {
+        this.has_change_unsaved();
     },
 
     on_change_rob_overall: function() {
