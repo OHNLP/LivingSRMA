@@ -54,13 +54,23 @@ Object.assign(pan_ocpapers.vpp_data, {
             3: "1.3 Did baseline differences between intervention groups suggest a problem with the randomization process?"
         },
         2: {
-            1: "2.1 Were participants aware of their assigned intervention during the trial?",
-            2: "2.2 Were carers and people delivering the interventions aware of participants' assigned intervention during the trial?",
-            3: "2.3 If Y/PY/NI to 2.1 or 2.2: Were there deviations from the intended intervention that arose because of the trial context?",
-            4: "2.4 If Y/PY to 2.3: Were these deviations likely to have affected the outcome?",
-            5: "2.5. If Y/PY/NI to 2.4: Were these deviations from intended intervention balanced between groups?",
-            6: "2.6 Was an appropriate analysis used to estimate the effect of assignment to intervention?",
-            7: "2.7 If N/PN/NI to 2.6: Was there potential for a substantial impact (on the result) of the failure to analyse participants in the group to which they were randomized?"
+            a: {
+                1: "2.1 Were participants aware of their assigned intervention during the trial?",
+                2: "2.2 Were carers and people delivering the interventions aware of participants' assigned intervention during the trial?",
+                3: "2.3 If Y/PY/NI to 2.1 or 2.2: Were there deviations from the intended intervention that arose because of the trial context?",
+                4: "2.4 If Y/PY to 2.3: Were these deviations likely to have affected the outcome?",
+                5: "2.5. If Y/PY/NI to 2.4: Were these deviations from intended intervention balanced between groups?",
+                6: "2.6 Was an appropriate analysis used to estimate the effect of assignment to intervention?",
+                7: "2.7 If N/PN/NI to 2.6: Was there potential for a substantial impact (on the result) of the failure to analyse participants in the group to which they were randomized?"
+            },
+            b: {
+                1: "2.1 Were participants aware of their assigned intervention during the trial?",
+                2: "2.2 Were carers and people delivering the interventions aware of participants' assigned intervention during the trial?",
+                3: "2.3 [If applicable:] If Y/PY/NI to 2.1 or 2.2: Were important nonprotocol interventions balanced across intervention groups?",
+                4: "2.4 [If applicable:] Were there failures in implementing the intervention that could have affected the outcome?",
+                5: "2.5 [If applicable:] Was there non-adherence to the assigned intervention regimen that could have affected participants' outcomes?",
+                6: "2.6 If N/PN/NI to 2.3, or Y/PY/NI to 2.4 or 2.5: Was an appropriate analysis used to estimate the effect of adhering to the intervention?"
+            }
         },
         3: {
             1: "3.1 Were data for this outcome available for all, or nearly all, participants randomized?",
@@ -100,6 +110,113 @@ Object.assign(pan_ocpapers.vpp_methods, {
      */
     show_coe_rob_d_q: function(ext, d_idx, q_idx) {
 
+    },
+
+    on_change_rob_qs: function() {
+        this.update_rob_ds();
+    },
+
+    update_rob_overall: function() {
+        
+    },
+
+    update_rob_ds: function() {
+        for (let i = 1; i <=5 ; i++) {
+            this.update_rob_d(i);
+        }
+        this.$forceUpdate();
+    },
+
+    update_rob_d: function(d_idx) {
+        if (d_idx == 1) {
+            var d1 = coe_helper.judge_rob_d1(
+                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D1_Q1'],
+                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D1_Q2'],
+                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D1_Q3']
+            );
+            this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D1_AR'] = d1;
+
+        } else if (d_idx == 2) {
+            var d2 = coe_helper.judge_rob_d2(
+                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D2_AIM'],
+
+                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D2_Q1'],
+                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D2_Q2'],
+                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D2_Q3'],
+                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D2_Q4'],
+                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D2_Q5'],
+                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D2_Q6'],
+                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D2_Q7']
+            );
+            this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D2_AR'] = d2;
+
+        } else if (d_idx == 3) {
+            var d3 = coe_helper.judge_rob_d3(
+                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D3_Q1'],
+                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D3_Q2'],
+                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D3_Q3'],
+                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D3_Q4'],
+            );
+            this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D3_AR'] = d3;
+
+        } else if (d_idx == 4) {
+            var d4 = coe_helper.judge_rob_d4(
+                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D4_Q1'],
+                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D4_Q2'],
+                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D4_Q3'],
+                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D4_Q4'],
+                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D4_Q5'],
+            );
+            this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D4_AR'] = d4;
+
+        } else if (d_idx == 5) {
+            var d5 = coe_helper.judge_rob_d5(
+                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D5_Q1'],
+                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D5_Q2'],
+                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D5_Q3'],
+            );
+            this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D5_AR'] = d5;
+
+        }
+
+    },
+
+    get_qs: function(d_idx) {
+        if (d_idx == 2) {
+            var aim = this.get_coe_rob_d2_aim();
+            if (aim == 'NA') {
+                return {};
+            } else {
+                return this.coe_rob_qs[2][aim];
+            }
+        } else {
+            return this.coe_rob_qs[d_idx]
+        }
+    },
+
+    get_coe_rob_d2_aim: function() {
+        var aim = this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D2_AIM'];
+        if (aim == null || aim == '') {
+            return 'NA';
+        }
+        return aim;
+    },
+
+    to_rob_symbol: function(v) {
+        if (typeof(v) == 'undefined' || v == '' || v == null) {
+            v = 'NA';
+        }
+        // console.log('* rob symbol:', v);
+        var html = '<div class="rob-rst-icon rob-rst-icon-'+v+'">';
+        html += {
+            L: '+',
+            M: '!',
+            H: '-',
+            NA: '?'
+        }[v];
+        html += '</div>';
+
+        return html;
     },
 
     /////////////////////////////////////////////////////

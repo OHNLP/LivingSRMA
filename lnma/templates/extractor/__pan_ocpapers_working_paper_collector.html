@@ -71,64 +71,7 @@
                 v-for="cate in working_oc.meta.cate_attrs">
 
                 <div v-if="cate.abbr=='COE_RCT_ROB'">
-                    <!-- special extraction task for ROB -->
-                    <div class="w-cate-item-name">
-                        <i class="fas fa-balance-scale"></i>
-                        Risk of Bias
-                    </div>
-
-                    <div class="w-cate-attrs">
-                        <div class="d-flex flex-row mt-1">
-                            <div v-for="d_idx in 5"
-                                class="rob-rst-box"
-                                :class="{'rob-rst-box-active':coe_rob_d_active==d_idx}"
-                                v-on:click="show_coe_rob_d(d_idx)">
-                                <div >
-                                    <div v-if="get_working_arm_attrs()['g0']['COE_RCT_ROB_D'+d_idx+'_AR'] == 'L'"
-                                        class="rob-rst-icon rob-rst-icon-L">
-                                        +
-                                    </div>
-                                    <div v-else-if="get_working_arm_attrs()['g0']['COE_RCT_ROB_D'+d_idx+'_AR'] == 'M'"
-                                        class="rob-rst-icon rob-rst-icon-M">
-                                        !
-                                    </div>
-                                    <div v-else-if="get_working_arm_attrs()['g0']['COE_RCT_ROB_D'+d_idx+'_AR'] == 'H'"
-                                        class="rob-rst-icon rob-rst-icon-H">
-                                        !
-                                    </div>
-                                    <div v-else
-                                        class="rob-rst-icon rob-rst-icon-N">
-                                        ?
-                                    </div>
-                                </div>
-                                <div class="rob-rst-text">
-                                    D{{ d_idx }}
-                                </div>
-                            </div>
-                        </div>
-                        <div v-for="d_idx in 5"
-                            v-if="coe_rob_d_active == d_idx">
-                            <div v-for="q_idx in {1:3, 2:7, 3:4, 4:5, 5:3}[d_idx]"
-                                class="rob-dx-q">
-                                <div>
-                                    {{ coe_rob_qs[d_idx][q_idx] }}
-                                </div>
-                                <div class="d-flex flex-row">
-                                    <select class="rob-select"
-                                        v-model="get_working_arm_attrs()['g0']['COE_RCT_ROB_D'+d_idx+'_Q'+q_idx]">
-                                        <option value="Y"><b>Y</option>
-                                        <option value="PY">PY</option>
-                                        <option value="PN">PN</option>
-                                        <option value="N">N</option>
-                                        <option value="NI">NI</option>
-                                    </select>
-                                    <input type="text" 
-                                        class="rob-comment"
-                                        v-model="get_working_arm_attrs()['g0']['COE_RCT_ROB_C'+d_idx+'_Q'+q_idx]">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    {% include 'extractor/__pan_ocpapers_working_paper_collector_rob.html' %}
                 </div>
 
                 <div v-else>

@@ -132,3 +132,6 @@ settings.json
 
 # db flask migrations
 migrations/*
+
+# VIM temp file
+.swp
