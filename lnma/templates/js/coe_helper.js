@@ -54,6 +54,25 @@ var coe_helper = {
     },
 
     /**
+     * Get a domain value based on aj and ar
+     * 
+     * @param {string} aj Assessor judgement
+     * @param {string} ar Algorithm result
+     * @returns string
+     */
+    get_domain: function(aj, ar) {
+        aj = this.fmt_domain(aj);
+        ar = this.fmt_domain(ar);
+
+        // Assessor Judgement has higher priority
+        if (aj == this.NA) {
+            return ar;
+        } else {
+            return aj;
+        }
+    },
+
+    /**
      * Overall risk-of-bias judgement
      * 
      * @param {string} d1 judgement on domain 1
@@ -109,8 +128,6 @@ var coe_helper = {
                 }
                 
             }
-
-            ret = this.NA;
         }
 
         console.log('* judge_rob_overall:', ret, '<-', d1, d2, d3, d4, d5);

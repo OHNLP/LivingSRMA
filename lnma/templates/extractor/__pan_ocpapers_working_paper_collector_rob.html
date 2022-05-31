@@ -20,12 +20,13 @@
                         
                         <select v-model="get_working_arm_attrs()['g0']['COE_RCT_ROB_OVERALL_AJ']"
                             :class="'rob-rst-icon-' + get_working_arm_attrs()['g0']['COE_RCT_ROB_OVERALL_AJ']"
+                            @change="on_change_rob_overall"
                             style="width: 88px;">
                             <optgroup label="Assessor Judgement">
-                                <option value="L">Low</option>
-                                <option value="M">Some Concerns</option>
-                                <option value="H">High Risk</option>
-                                <option value="NA">Not Decided</option>
+                                <option value="L">+ Low</option>
+                                <option value="M">! Some Concerns</option>
+                                <option value="H">- High Risk</option>
+                                <option value="NA">? Not Decided</option>
                             </optgroup>
                         </select>
                     </div>
@@ -52,6 +53,7 @@
             v-on:click="show_coe_rob_d(d_idx)">
             <div class="w-100 text-center">
                 <select v-model="get_working_arm_attrs()['g0']['COE_RCT_ROB_D'+d_idx+'_AJ']"
+                    @change="on_change_rob_ds"
                     :class="'rob-rst-icon-' + get_working_arm_attrs()['g0']['COE_RCT_ROB_D'+d_idx+'_AJ']"
                     class="rob-rst-aj-d">
                     <optgroup label="Assessor Judgement">
