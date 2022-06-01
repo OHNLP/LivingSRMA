@@ -1,0 +1,32 @@
+<h3 style="margin-bottom: 2rem;">
+    SYSTEM ARCHITECTURE
+</h3>
+<div class="row">
+    <div class="col-lg-5">
+        <p>
+        To implement our proposed LIvE framework, we built the LIvE platform in a five-layer architecture, which includes: application layer, shared module layer, core service layer, middleware layer, and storage layer respectively. The modules in each layer decomposes the requests from upper layer and aggregates the responses from lower layer to complete specific tasks. 
+
+        In the application layer, there are 6 applications to provide the graphical user interface (GUI) to different users.  Each application is designed for a specific task, such as monitoring the latest updates in studies (the watcher), screening studies for inclusion or exclusion and extracting data on or further analysis using web-assisted rule-based annotations implement through interactive graphical user interface (the scanner and the extractor), conducting the meta-analysis (pairwise or network meta-analysis) on selected studies (the analyzer). To support these functions, applications are built upon customized GUI modules and third-party frontend packages, which are listed in the shared module layer;
+
+        In the core service layer, the meta-analysis application programming interface (API) receives the user operations from the modules in each application. Those user operations are forwarded to specific service modules, which are used to execute commands or packages in the middleware layer.
+        For example, the outcome analysis service in the project management converts the requests from the modules in data analyzer to R script by Python network packages, then this service gets the results of the R script and sends the results back to users;
+
+        In the storage layer, all the data used in the system, including the structured meta data of projects and studies, semi-structured user annotation data, and free-text data of study PDF files, are formatted as defined in our meta-analysis data standard and saved in different place according to its characteristics.
+
+        </p>
+        
+    </div><!-- /.col-3 -->
+
+    <style>
+        #sec_live_architecture svg {
+            width: 100% !important;
+            height: auto !important;
+        }
+        </style>
+    <div id="sec_live_architecture" class="col-lg-7">
+        <!-- <img style="width:100%;" src="/static/img/lisr-architecture.png"> -->
+        <!-- <img src="./static/img/arch.png" style="width:100%;" alt="The system architecture"> -->
+        {% include 'svg/live_architecture_v2.svg' %}
+
+    </div>
+</div><!-- /.row -->
