@@ -394,3 +394,6 @@ input[type=text].paper-extract-input:focus {
 .rob-comment {
     width: calc(100% - 60px);
 }
+.rob-q-text {
+    line-height: 1.25em;
+}

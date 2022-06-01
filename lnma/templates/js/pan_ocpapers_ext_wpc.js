@@ -47,6 +47,13 @@ Object.assign(pan_ocpapers.vpp_data, {
 
     // for coe's rob
     coe_rob_d_active: 1,
+    coe_rob_d_name: {
+        1: 'Domain 1: Risk of bias arising from the randomization process',
+        2: "Domain 2: Risk of bias due to deviations from the intended interventions",
+        3: "Domain 3: Risk of bias due to missing outcome data",
+        4: "Domain 4: Risk of bias in measurement of the outcome",
+        5: "Domain 5: Risk of bias in selection of the reported result",
+    },
     coe_rob_qs: {
         1: {
             1: "1.1 Was the allocation sequence random?",
@@ -112,12 +119,46 @@ Object.assign(pan_ocpapers.vpp_methods, {
 
     },
 
-    on_change_rob_qs: function() {
-        this.update_rob_ds();
+    on_change_rob_q_coment: function() {
+        this.has_change_unsaved();
     },
 
-    update_rob_overall: function() {
-        
+    on_change_rob_overall: function() {
+        this.has_change_unsaved();
+    },
+
+    on_change_rob_qs: function() {
+        this.update_rob_ds();
+        this.update_rob_overall_ar();
+        // no matter what happens, trigger this event
+        this.has_change_unsaved();
+    },
+
+    on_change_rob_ds: function() {
+        this.update_rob_overall_ar();
+        // no matter what happens, trigger this event
+        this.has_change_unsaved();
+    },
+
+    update_rob_overall_ar: function() {
+        var ds = ['NA', 'NA', 'NA', "NA", "NA"];
+        for (let i = 0; i < ds.length; i++) {
+            var d_idx = i+1;
+            ds[i] = coe_helper.get_domain(
+                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D'+d_idx+'_AJ'],
+                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D'+d_idx+'_AR']
+            );
+        }
+        var overall = coe_helper.judge_rob_overall(
+            ds[0],
+            ds[1],
+            ds[2],
+            ds[3],
+            ds[4],
+        );
+
+        this.get_working_arm_attrs()['g0']['COE_RCT_ROB_OVERALL_AR'] = overall;
+        this.$forceUpdate();
     },
 
     update_rob_ds: function() {

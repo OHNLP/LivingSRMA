@@ -12,29 +12,36 @@
         </div>
         <div>
             <div class="d-flex flex-row">
-                <div style="width: 90px;">
-                    <span class="txt-xs">Assessor Judgement</span>
+                <div style="width: 90px; line-height: 8px; text-align: center;">
+                    <span class="txt-xs">
+                        Assessor
+                        <br>
+                        Judgement
+                    </span>
                 </div>
                 <div style="width: 100px;">
                     <div>
                         
                         <select v-model="get_working_arm_attrs()['g0']['COE_RCT_ROB_OVERALL_AJ']"
                             :class="'rob-rst-icon-' + get_working_arm_attrs()['g0']['COE_RCT_ROB_OVERALL_AJ']"
+                            @change="on_change_rob_overall"
                             style="width: 88px;">
                             <optgroup label="Assessor Judgement">
-                                <option value="L">Low</option>
-                                <option value="M">Some Concerns</option>
-                                <option value="H">High Risk</option>
-                                <option value="NA">Not Decided</option>
+                                <option value="L">+ Low</option>
+                                <option value="M">! Some Concerns</option>
+                                <option value="H">- High Risk</option>
+                                <option value="NA">? Not Decided</option>
                             </optgroup>
                         </select>
                     </div>
                 </div>
             </div>
-            <div class="d-flex flex-row">
-                <div style="width: 100px;">
+            <div class="d-flex flex-row mt-1">
+                <div style="width: 90px; line-height: 8px; text-align: center;">
                     <span class="txt-xs">
-                        Algorithm Result
+                        Algorithm 
+                        <br>
+                        Result
                     </span>
                 </div>
                 <div style="width: 30px;">
@@ -49,9 +56,11 @@
         <div v-for="d_idx in 5"
             class="rob-rst-box"
             :class="{'rob-rst-box-active':coe_rob_d_active==d_idx}"
+            :title="coe_rob_d_name[d_idx]"
             v-on:click="show_coe_rob_d(d_idx)">
             <div class="w-100 text-center">
                 <select v-model="get_working_arm_attrs()['g0']['COE_RCT_ROB_D'+d_idx+'_AJ']"
+                    @change="on_change_rob_ds"
                     :class="'rob-rst-icon-' + get_working_arm_attrs()['g0']['COE_RCT_ROB_D'+d_idx+'_AJ']"
                     class="rob-rst-aj-d">
                     <optgroup label="Assessor Judgement">
@@ -84,7 +93,7 @@
         
         <div v-for="q, q_idx in get_qs(d_idx)"
             class="rob-dx-q">
-            <div>
+            <div class="rob-q-text">
                 <span>
                     {{ q }}
                 </span>
@@ -101,6 +110,7 @@
                 </select>
                 <input type="text" 
                     class="rob-comment"
+                    @input="on_change_rob_q_coment"
                     v-model="get_working_arm_attrs()['g0']['COE_RCT_ROB_C'+d_idx+'_Q'+q_idx]">
             </div>
         </div>
