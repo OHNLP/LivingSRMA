@@ -116,7 +116,23 @@ Object.assign(pan_ocpapers.vpp_methods, {
      * @param {int} q_idx index of Question in given D
      */
     show_coe_rob_d_q: function(ext, d_idx, q_idx) {
+        
+    },
 
+    show_coe_rob_option_NA: function(d_idx, q_idx) {
+        if (d_idx != 2) {
+            return false;
+        }
+        if (q_idx == 1 || q_idx == 2 || q_idx == 6 || q_idx == 7) {
+            return false;
+        }
+        // only when 3,4,5 when aim is b
+        if (this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D2_AIM'] == 'b') {
+            return true;
+
+        } else {
+            return false;
+        }
     },
 
     on_change_rob_q_coment: function() {
