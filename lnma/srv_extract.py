@@ -20,6 +20,93 @@ from lnma.models import *
 from lnma import db
 
 
+def copy_extracts(
+    keystr_a,
+    cq_abbr_a,
+    group_a,
+
+    keystr_b,
+    cq_abbr_b,
+    group_b,
+
+    oc_type,
+    skip_exists=True,
+    skip_data=True
+):
+    '''
+    Copy extracts from one group to another of same oc_type
+
+    Please make sure the data
+    '''
+    project_a = dora.get_project_by_keystr(keystr_a)
+    project_b = dora.get_project_by_keystr(keystr_b)
+
+    if project_a is None:
+        return None
+
+    if project_b is None:
+        return None
+
+    # TODO, check the groups
+
+    # Get all the extracts
+    extracts_a = dora.get_extracts_by_keystr_and_cq_and_oc_type_and_group(
+        keystr_a,
+        cq_abbr_a,
+        oc_type,
+        group_a
+    )
+
+    # Copy to new projects
+    extracts_b = []
+    for ext_a in tqdm(extracts_a):
+        # check if the abbr exists
+        _ext_b = dora.get_extract_by_keystr_and_cq_and_abbr(
+            keystr_b, 
+            cq_abbr_b,
+            ext_a.abbr
+        )
+
+        # update the meta
+        new_meta = copy.deepcopy(ext_a.meta)
+        new_meta['cq_abbr'] = cq_abbr_b
+        new_meta['group'] = group_b
+
+        if _ext_b is None:
+            # great, there is no ext in this cq yet
+
+            ext_b = dora.create_extract(
+                project_b.project_id,
+                oc_type,
+                ext_a.abbr,
+                new_meta,
+                {} if skip_data else ext_a.data
+            )
+            extracts_b.append(ext_b)
+            print('* copied extract %s' % ext_b.get_repr_str())
+
+        else:
+            # what??? this exists??
+            if skip_exists:
+                print('* skip duplicated extract %s' % ext_a.get_repr_str())
+
+            else:
+                # create a new abbr for this 
+                new_abbr = util.mk_oc_abbr()
+                new_meta['abbr'] = new_abbr
+                ext_b = dora.create_extract(
+                    project_b.project_id,
+                    oc_type,
+                    new_abbr,
+                    new_meta,
+                    {} if skip_data else ext_a.data
+                )
+                extracts_b.append(ext_b)
+                print('* copied extract %s' % ext_b.get_repr_str())
+
+    return extracts_b
+
+
 def get_extracts_by_cate_and_name(keystr, cq_abbr, oc_type, group, category, full_name):
     '''
     Get extract by cate and name for detect duplicate purpose

@@ -39,6 +39,22 @@ app.app_context().push()
 
 
 def test():
+    exts = srv_extract.copy_extracts(
+        'IO', 
+        'default',
+        'treatment',
+
+        'LPR',
+        'tox_pca',
+        'treatment',
+
+        'pwma'
+    )
+
+    print('* done')
+
+
+def test13():
     srv_extract.import_itable_from_xls(
         'LPR',
         'mcspc',

@@ -2078,6 +2078,27 @@ def get_extracts_by_keystr_and_cq_and_oc_type(keystr:str, cq_abbr:str, oc_type:s
     return extracts
 
 
+def get_extracts_by_keystr_and_cq_and_oc_type_and_group(
+    keystr:str, cq_abbr:str, oc_type:str, group:str):
+    '''
+    Get all of the extract detail of a project
+    '''
+    project = get_project_by_keystr(keystr)
+
+    if project is None:
+        # what???
+        return None
+
+    extracts = Extract.query.filter(
+        Extract.project_id == project.project_id,
+        Extract.oc_type == oc_type,
+        Extract.meta['cq_abbr'] == cq_abbr,
+        Extract.meta['group'] == group
+    ).all()
+
+    return extracts
+
+
 def get_itable_by_project_id_and_cq(project_id, cq_abbr):
     '''
     Get the itable of a specific cq in a project
@@ -2121,13 +2142,26 @@ def get_extract_by_keystr_and_cq_and_abbr(keystr, cq_abbr, abbr):
     '''
     Get an extract by keystr, cq, and abbr
     '''
-    extract = get_extract_by_keystr_and_abbr(keystr, abbr)
+    # extract = get_extract_by_keystr_and_abbr(keystr, abbr)
 
-    if extract is None:
+    # if extract is None:
+    #     return None
+
+    # if extract.meta['cq_abbr'] != cq_abbr:
+    #     return None
+
+    # return extract
+    project = get_project_by_keystr(keystr)
+
+    if project is None:
+        # what???
         return None
 
-    if extract.meta['cq_abbr'] != cq_abbr:
-        return None
+    extract = Extract.query.filter(
+        Extract.project_id == project.project_id,
+        Extract.abbr == abbr,
+        Extract.meta['cq_abbr'] == cq_abbr
+    ).first()
 
     return extract
 
