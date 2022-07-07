@@ -206,6 +206,12 @@ def va_pma_IO():
     return render_template('pub/IO/va_pma_IO.html')
 
 
+# a demo page for poster
+@bp.route('/pwma_va_demo.html')
+def pwma_va_demo():
+    return render_template('pub/IO/pwma_va_demo.html')
+
+
 @bp.route('/softable_pma_IO.html')
 def softable_pma_IO():
     # return render_template('pub/IO/softable_pma_IO_by_metajs.html')
