@@ -107,6 +107,7 @@
                     <option value="PN">PN</option>
                     <option value="N">N</option>
                     <option value="NI">NI</option>
+                    <option v-if="show_coe_rob_option_NA(d_idx, q_idx)" value="NA">NA (Not Applicable)</option>
                 </select>
                 <input type="text" 
                     class="rob-comment"
