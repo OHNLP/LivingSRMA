@@ -6,7 +6,7 @@ ALLOWED_PDF_UPLOAD_EXTENSIONS = {'pdf'}
 
 TMP_FOLDER = '/dev/shm/lnma'
 PATH_PUBDATA = 'pubdata'
-PATH_PDF_FILES = '/data/lnma/pdfs'
+PATH_PDF_FILES = '/lnma/pdfs'
 PATH_PDF_FOLDER_FORMAT = '%Y%m%d'
 
 RSCRIPT_TPL_FOLDER = os.path.join(
@@ -29,7 +29,7 @@ STANDARD_DATA_COLS = [
     ['HRLU', ['study', 't1', 't2', 'sm', 'upperci', 'lowerci']],
     ['FTET', ['study', 'treat', 'event', 'total', 'time']],
     ['ET', ['study', 'treat', 'event', 'total']],
-    
+
     # for PWMA - SUBGROUP
     ['SUBG_CAT_RAW', ['study', 'year', 'Et', 'Nt', 'Ec', 'Nc', 'treatment', 'control', 'subgroup']],
     ['SUBG_CAT_PRE', ['study', 'year', 'TE', 'lowerci', 'upperci', 'treatment', 'control', 'subgroup']],
@@ -46,10 +46,10 @@ STANDARD_DATA_COLS = [
 
     # for PWMA - Special for IO project
     ['PRIM_CAT_RAW_G5', ['study', 'year',
-                        'GA_Et', 'GA_Nt', 'GA_Ec', 'GA_Nc', 
-                        'G34_Et', 'G34_Ec', 
-                        'G3H_Et', 'G3H_Ec', 
-                        'G5N_Et', 'G5N_Ec', 
+                        'GA_Et', 'GA_Nt', 'GA_Ec', 'GA_Nc',
+                        'G34_Et', 'G34_Ec',
+                        'G3H_Et', 'G3H_Ec',
+                        'G5N_Et', 'G5N_Ec',
                         'treatment', 'control']],
 
     # for INCD - Incidence analysis
@@ -76,8 +76,8 @@ INPUT_FORMAT_NAMES = {
 
 SOFTABLE_NMA_COLS = {
     'raw': ['A:D', ['study', 'treat', 'event', 'total' ]],
-    'pre': ['A:L', ['t1', 't2', 'sm', 'lowerci', 'upperci', 
-                    'study', 
+    'pre': ['A:L', ['t1', 't2', 'sm', 'lowerci', 'upperci',
+                    'study',
                     'survival in t1', 'survival in t2',
                     'Ec_t1', 'Et_t1', 'Ec_t2', 'Et_t2']]
 }
@@ -407,105 +407,105 @@ INPUT_FORMAT_TPL = {
         }],
 
         "PRIM_CAT_PRE": [{
-            'abbr': 'PRIM_CAT_PRE_default', 
-            'name': 'Result', 
+            'abbr': 'PRIM_CAT_PRE_default',
+            'name': 'Result',
             'attrs': [{
-                'abbr': 'TE', 
+                'abbr': 'TE',
                 'name': 'TE',
                 'subs': None,
             }, {
-                'abbr': 'lowerci', 
-                'name': 'Lower CI', 
+                'abbr': 'lowerci',
+                'name': 'Lower CI',
                 'subs': None,
             }, {
-                'abbr': 'upperci', 
-                'name': 'Upper CI', 
+                'abbr': 'upperci',
+                'name': 'Upper CI',
                 'subs': None,
             }]
         }, {
-            'abbr': 'PRIM_CAT_PRE_detail', 
-            'name': 'Detail', 
+            'abbr': 'PRIM_CAT_PRE_detail',
+            'name': 'Detail',
             'attrs': [{
-                'abbr': 'survival_in_control', 
+                'abbr': 'survival_in_control',
                 'name': 'Survival in Control',
                 'subs': None,
             }, {
-                'abbr': 'Ec', 
-                'name': 'Ec', 
+                'abbr': 'Ec',
+                'name': 'Ec',
                 'subs': None,
             }, {
                 'abbr': 'Et',
-                'name': 'Et', 
+                'name': 'Et',
                 'subs': None,
             }]
         }],
 
         "PRIM_CONTD_RAW": [{
-            'abbr': 'PRIM_CONTD_RAW_treat', 
-            'name': 'Treatment Arm', 
+            'abbr': 'PRIM_CONTD_RAW_treat',
+            'name': 'Treatment Arm',
             'attrs': [{
-                'abbr': 'Nt', 
+                'abbr': 'Nt',
                 'name': 'Nt',
                 'subs': None,
             }, {
-                'abbr': 'Mt', 
-                'name': 'Mt', 
+                'abbr': 'Mt',
+                'name': 'Mt',
                 'subs': None,
             }, {
-                'abbr': 'SDt', 
-                'name': 'SDt', 
+                'abbr': 'SDt',
+                'name': 'SDt',
                 'subs': None,
             }]
         }, {
-            'abbr': 'PRIM_CONTD_RAW_control', 
-            'name': 'Control Arm', 
+            'abbr': 'PRIM_CONTD_RAW_control',
+            'name': 'Control Arm',
             'attrs': [{
-                'abbr': 'Nc', 
+                'abbr': 'Nc',
                 'name': 'Nc',
                 'subs': None,
             }, {
-                'abbr': 'Mc', 
-                'name': 'Mc', 
+                'abbr': 'Mc',
+                'name': 'Mc',
                 'subs': None,
             }, {
-                'abbr': 'SDc', 
-                'name': 'SDc', 
+                'abbr': 'SDc',
+                'name': 'SDc',
                 'subs': None,
             }]
         }],
 
         "PRIM_CONTD_PRE": [{
-            'abbr': 'PRIM_CONTD_PRE_default', 
-            'name': 'Result', 
+            'abbr': 'PRIM_CONTD_PRE_default',
+            'name': 'Result',
             'attrs': [{
-                'abbr': 'TE', 
+                'abbr': 'TE',
                 'name': 'TE',
                 'subs': None,
             }, {
                 'abbr': 'SE',
-                'name': 'SE', 
+                'name': 'SE',
                 'subs': None,
             }]
         }],
 
         "PRIM_CATIRR_RAW": [{
-            'abbr': 'PRIM_CATIRR_RAW_default', 
-            'name': 'Result', 
+            'abbr': 'PRIM_CATIRR_RAW_default',
+            'name': 'Result',
             'attrs': [{
-                'abbr': 'Et', 
+                'abbr': 'Et',
                 'name': 'Et',
                 'subs': None,
             }, {
                 'abbr': 'Tt',
-                'name': 'Tt', 
+                'name': 'Tt',
                 'subs': None,
             }, {
-                'abbr': 'Ec', 
+                'abbr': 'Ec',
                 'name': 'Ec',
                 'subs': None,
             }, {
                 'abbr': 'Tc',
-                'name': 'Tc', 
+                'name': 'Tc',
                 'subs': None,
             }]
         }],
@@ -734,10 +734,10 @@ PROJECT_DEFAULT_SETTINGS = {
     "highlight_keywords": {         # the keywords for highlight title or abs
         "inclusion": [              # the inclusion keywords
             'phase 3'
-        ],             
+        ],
         "exclusion": [              # the exclusion keywords
             'meta-analysis'
-        ]              
+        ]
     },
     "tags": [                       # a list of strings for the tags
         "Other MA"
@@ -793,7 +793,7 @@ PROJECT_DEFAULT_SETTINGS = {
         }
     },
     "outcomes_enabled": [
-        'pwma', 
+        'pwma',
         'nma'
     ]
 }
