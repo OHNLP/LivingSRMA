@@ -6,7 +6,7 @@ ALLOWED_PDF_UPLOAD_EXTENSIONS = {'pdf'}
 
 TMP_FOLDER = '/dev/shm/lnma'
 PATH_PUBDATA = 'pubdata'
-PATH_PDF_FILES = '/lnma/pdfs'
+PATH_PDF_FILES = '/data/lnma/pdfs'
 PATH_PDF_FOLDER_FORMAT = '%Y%m%d'
 
 RSCRIPT_TPL_FOLDER = os.path.join(
