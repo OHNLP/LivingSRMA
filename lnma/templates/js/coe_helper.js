@@ -536,5 +536,153 @@ var coe_helper = {
 
         console.log('* judge_rob_d5:', ret, '<-', q1, q2, q3);
         return ret;
+    },
+
+    get_overall_coe: function(decision) {
+        var risk_of_bias = parseInt(''+decision.risk_of_bias);
+        var inconsistency = parseInt(''+decision.inconsistency);
+        var indirectness = parseInt(''+decision.indirectness);
+        var imprecision = parseInt(''+decision.imprecision);
+        var publication_bias = parseInt(''+decision.publication_bias);
+
+        var sum = 
+            risk_of_bias +
+            inconsistency +
+            indirectness +
+            imprecision +
+            publication_bias;
+
+        var ret = 0;
+        if (sum < 5) {
+            // which means one of the values is not available
+            ret = 0;
+        } else if (sum == 5) {
+            // 1 in all factors
+            ret = 1;
+        } else if (sum == 6) {
+            // 2 in any one factor
+            ret = 2;
+        } else if (sum == 7) {
+            // 3 in any one factor or 2 in two factors
+            ret = 3;
+        } else if (sum >= 8) {
+            // 4 in any one factor, or 3 in two factors, or 2 in three
+            ret = 4;
+        } else {
+            // what???
+        }
+
+        // convert to string
+        return '' + ret;
+    },
+
+    /**
+     * Get the value of a specific domain in coe
+     * 
+     * @param {Object} coe Certainty of Evidence object
+     */
+    get_val_from_coe: function(coe, type, domain) {
+        // the CoE may be not available
+        if (typeof(coe) == 'undefined' ||
+            coe == null) {
+            return 'NA';
+        }
+
+        // may not source type? aj or 
+        if (!coe.hasOwnProperty(type)) {
+            return 'NA';
+        }
+
+        // may not have decision?
+        if (!coe[type].hasOwnProperty('decision')) {
+            return 'NA';
+        }
+
+        // no such domain???
+        if (!coe[type].decision.hasOwnProperty(domain)) {
+            if (domain == 'overall') {
+                // need to convert the 
+                return this.get_overall_coe(coe[type].decision);
+            } else {
+                return 'NA';
+            }
+        }
+
+        var val = coe[type].decision[domain];
+
+        return val;
+    },
+
+    val_to_label: function(val, domain) {
+        // convert to string
+        var v = "" + val;
+        var ret = "NA";
+
+        // check if the followings
+        if (['risk_of_bias', 'imprecision', 'inconsistency', 'indirectness'].includes(domain)) {
+            if (['0', '1', '2', '3', '4'].includes(v)) {
+                ret = {
+                    '0': 'Not specified',
+                    '1': 'No serious',
+                    '2': 'Serious',
+                    '3': 'Very serious',
+                    '4': 'Very serious'
+                }[v];
+            } else {
+                ret = 'NA';
+            }
+
+        } else if (['incoherence', 'intransitivity'].includes(domain)) {
+            if (['0', '1', '2', '3'].includes(v)) {
+                ret = {
+                    '0': 'Not applicable',
+                    '1': 'No serious',
+                    '2': 'Serious',
+                    '3': 'Very serious'
+                }[v];
+            } else {
+                ret = 'NA';
+            }
+
+        } else if (domain == 'publication_bias') {
+            if (['0', '1', '2'].includes(v)) {
+                ret = {
+                    '0': 'Not applicable',
+                    '1': 'Undetected',
+                    '2': 'Strongly suspected'
+                }[v];
+            } else {
+                ret = 'NA'
+            }
+
+        } else if (domain == 'importance') {
+            if (['0', '1', '2']) {
+                ret = {
+                    '0': 'Not applicable',
+                    '1': 'Important',
+                    '2': 'Critical'
+                }[v];
+            } else {
+                ret = 'NA';
+            }
+
+        } else if (domain == 'overall') {
+            if (['0', '1', '2', '3', '4'].includes(v)) {
+                ret = {
+                    '0': 'NA',
+                    '1': 'Very Low',
+                    '2': 'Low',
+                    '3': 'Moderate',
+                    '4': 'High'
+                }[v];
+            } else {
+                ret = 'NA'
+            }
+
+        } else {
+            ret = v;
+        }
+
+        return ret;
     }
 };

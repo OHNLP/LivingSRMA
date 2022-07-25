@@ -357,6 +357,17 @@ var srv_extractor = {
     ///////////////////////////////////////////////////////////////////////////
     // Utils for extractor
     ///////////////////////////////////////////////////////////////////////////
+    has_coe_rob_in_itable: function(itable) {
+        for (let i = 0; i < itable.meta.cate_attrs.length; i++) {
+            const cate = itable.meta.cate_attrs[i];
+            if (cate.abbr == 'COE_RCT_ROB') {
+                // ok, this itable has Risk of Bias defined
+                return true;
+            }
+        }
+
+        return false;
+    },
 
     get_input_size: function(str) {
         // convert null to empty

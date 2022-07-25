@@ -111,6 +111,12 @@ html {
                     <th>#</th>
                     <th>NCT</th>
                     <th>PID</th>
+                    <th v-if="has_coe_rob()"
+                        title="Certainty of Evidence Status"
+                        width="120px">
+                        <i class="fas fa-book"></i>
+                        CoE (iTable)
+                    </th>
                     <th>{{ papers.length }} studies</th>
                     <th>Outcomes</th>
                     <th>&nbsp;</th>
@@ -130,6 +136,21 @@ html {
                     </td>
                     <td v-on:click="on_click_paper(paper)">
                         {{ paper.pid }}
+                    </td>
+                    <td v-if="has_coe_rob()">
+                        <span class="mr-2"
+                            :class="'rob-rst-icon-' + get_coe_rob_value(paper.pid, 'COE_RCT_ROB_OVERALL_AJ')">
+                            <i class="far fa-user"></i>
+                            <span>
+                                {{ get_coe_rob_value(paper.pid, 'COE_RCT_ROB_OVERALL_AJ') }}
+                            </span>
+                        </span>
+                        <span :class="'rob-rst-icon-' + get_coe_rob_value(paper.pid, 'COE_RCT_ROB_OVERALL_AR')">
+                            <i class="fas fa-code-branch"></i>
+                            <span>
+                                {{ get_coe_rob_value(paper.pid, 'COE_RCT_ROB_OVERALL_AR') }}
+                            </span>
+                        </span>
                     </td>
                     <td class="paper-table-body-td-author"
                         v-on:click="on_click_paper(paper)">
@@ -392,6 +413,9 @@ var pan_ocpapers = {
         extract_tree: null,
         extract_tree_sorted: null,
 
+        // itable
+        itable: null,
+
         // working paper
         working_paper: null,
         working_paper_init: false,
@@ -636,6 +660,35 @@ var pan_ocpapers = {
             this.is_saving = false;
         },
 
+        has_coe_rob: function() {
+            if (this.itable == null) {
+                return false;
+            }
+            return srv_extractor.has_coe_rob_in_itable(
+                this.itable
+            );
+        },
+
+        get_coe_rob_value: function(pid, item) {
+            if (this.itable == null) {
+                return 'NA';
+            }
+            if (!this.itable.data.hasOwnProperty(pid)) {
+                return 'NA';
+            }
+            
+            // OK, let's get the value now
+            if (this.itable.data[pid].attrs.main.g0.hasOwnProperty(item)) {
+                if (this.itable.data[pid].attrs.main.g0[item] == null ||
+                    this.itable.data[pid].attrs.main.g0[item] == '') {
+                        return 'NA';
+                }
+                return this.itable.data[pid].attrs.main.g0[item];
+            } else {
+                return 'NA';
+            }
+        }
+
     },
 
     init: function() {
@@ -671,10 +724,12 @@ var pan_ocpapers = {
             project_id,
             cq_abbr,
             function(data) {
-                console.log(data)
+                console.log('* got papers and selection', data)
                 pan_ocpapers.on_load(data);
             }
-        )
+        );
+
+        this.update_itable_data();
     },
 
     on_load: function(data) {
@@ -695,6 +750,29 @@ var pan_ocpapers = {
         pan_ocpapers.resize();
     },
 
+    update_itable_data: function() {
+        // get itable
+        var project_id = Cookies.get('project_id');
+        var cq_abbr = Cookies.get('cq_abbr');
+
+        srv_extractor.get_itable(
+            project_id,
+            cq_abbr,
+            function(data) {
+                console.log('* get itable data', data);
+                if (data.success) {
+                    pan_ocpapers.on_load_itable(data.extract);
+                } else {
+                    console.error('* cannot get itable data??? ' + data.mesg);
+                }
+            }
+        );
+    },
+
+    on_load_itable: function(data) {
+        this.vpp.$data.itable = data;
+    },
+
     // update_extract_dict: function(data) {
     //     return srv_shared.create_extract_dict(data.extracts);
     // },
@@ -711,7 +789,9 @@ var pan_ocpapers = {
         }
 
         if (oc_type == 'itable') {
+            // for itable, just update the item
             extract_tree.itable = extract;
+            return extract_tree;
         }
 
         if (!extract_tree[oc_type].groups.hasOwnProperty(group)) {
@@ -797,6 +877,10 @@ var pan_ocpapers = {
                 pan_ocpapers.update_vpp_extracts(data.extract);
             }
         );
+
+        if (oc_type == 'itable') {
+            pan_ocpapers.update_itable_data();
+        }
     },
 
     show_working_paper: function() {

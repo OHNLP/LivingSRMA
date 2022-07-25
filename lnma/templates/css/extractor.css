@@ -133,6 +133,7 @@
 }
 #pan_ocpapers_working_paper_collector_attr_list {
     overflow-y: auto;
+    overflow-x: hidden;
 }
 div.w-attr-item:nth-child(even) {background: white; }
 div.w-attr-item:nth-child(odd) {background: whitesmoke; }

@@ -1,0 +1,492 @@
+{% extends '_layout_adminlte.html' %}
+
+{% block title %}
+Evaluate Certainty of Evidence
+{% endblock %}
+
+{% block section_cq %}
+{% include 'shared_module/_cq_selector_toolbar.html' %}
+{% endblock %}
+
+{% block page_name %}
+<i class="fas fa-balance-scale nav-icon"></i>
+Evaluate Certainty of Evidence
+<!-- of 
+<a href="javascript:void(0);" onclick="alert('test')">
+    []
+</a> -->
+{% endblock %}
+
+{% block active_nav_link %}extractor-extract-data{% endblock %}
+
+{% block style %}
+<!-- jQuery UI Theme -->
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css">
+
+<style>
+    
+{% include 'css/basic.css' %}
+{% include 'css/extractor.css' %}
+{% include 'css/util.css' %}
+
+html {
+    overflow-x: hidden;
+    overflow-y: hidden;
+}
+
+#main {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: 100%;
+    margin: 0 0 0 10px;
+    overflow: hidden;
+}
+.coe-table {
+    width: auto;
+}
+.coe-table th {
+    padding: 0 1em;
+    background-color: aliceblue;
+    text-align: center;
+    border-left: 1px solid #cccccc;
+    border-right: 1px solid #cccccc;
+}
+.coe-table tr {
+    border-bottom: 1px solid #bebebe;
+}
+.coe-table tr:hover {
+    background-color: rgb(238, 238, 238);
+}
+
+.coe-val-text {
+    font-weight: normal !important;
+}
+
+.coe-val-0, 
+.coe-val-NA {
+    background-color: #bebebe;
+}
+
+.coe-val-l, 
+.coe-val-1 {
+    background-color: #68f168;
+}
+
+.coe-val-m, 
+.coe-val-2 {
+    background-color: orange;
+}
+
+.coe-val-h, 
+.coe-val-3 {
+    color: white;
+    background-color: rgb(252, 94, 94);
+}
+
+.coe-val-h, 
+.coe-val-4 {
+    color: white;
+    background-color: red;
+}
+
+#coe_panel {
+    width: calc(100% - 500px);
+    min-width: 800px;
+    height: calc(100% - 20px);
+
+    position: absolute;
+    right: 0;
+    top: 10px;
+
+    background-color: white;
+    border: 1px solid #eaeaea;
+    box-shadow: 5p 5px #cccccc;
+}
+
+#coe_panel_close {
+    position: absolute;
+    top: 5px;
+    left: -40px;
+    line-height: 40px;
+    width: 40px;
+    background: white;
+    height: 40px;
+    text-align: center;
+    border: 1px solid #eaeaea;
+    border-right: 0;
+}
+#coe_panel_close:hover {
+    color: red;
+    background-color: pink;
+}
+</style>
+
+
+{% endblock %}
+
+{% block content %}
+
+<div id="main">
+
+
+<div id="app_coemgr">
+    <div class="d-flex">
+        <div class="mr-4">
+            <h4>
+                PWMA Outcomes
+            </h4>
+        </div>
+        <div class="d-flex flex-row mr-3">
+            <div class="mr-2">
+                Sort by:
+            </div>
+            <div class="">
+               <select name="" id="">
+                    <option value="name">Outcome Name</option>
+               </select>
+            </div>
+        </div>
+        <div class="d-flex flex-row">
+            <div class="mr-2">
+                Filters:
+            </div>
+            <div class="mr-2">
+                <input type="checkbox" id="ckb_inc_sof">
+                <label for="ckb_inc_sof">
+                    Only Those Included in SoF Table
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <table v-if="Object.keys(oc_dict).length > 0"
+        id="pwma_datatable"
+        class="coe-table display compact hover">
+        <tr>
+            <th colspan="4">
+                Outcome Information
+            </th>
+            <th colspan="7">
+                Certainty of Evidence
+            </th>
+        </tr>
+        <tr>
+            <th>
+                Group
+            </th>
+            <th>
+                Category
+            </th>
+            <th>
+                Name
+            </th>
+            <th>
+                Studies
+            </th>
+
+            <!-- CoE -->
+            <th>
+                Overall CoE
+            </th>
+            <th>
+                Risk of Bias
+            </th>
+            <th>
+                Inconsistency
+            </th>
+            <th>
+                Indirectness
+            </th>
+            <th>
+                Imprecision
+            </th>
+            <th>
+                Publication Bias
+            </th>
+            <th>
+                Importance
+            </th>
+        </tr>
+
+        <tr v-for="ext in oc_dict">
+            <td v-on:click="show_coe_panel(ext.abbr)"
+                class="cursor-pointer">
+                {{ ext.meta.group }}
+            </td>
+            <td v-on:click="show_coe_panel(ext.abbr)"
+                class="cursor-pointer">
+                {{ ext.meta.category }}
+            </td>
+            <td v-on:click="show_coe_panel(ext.abbr)"
+                class="cursor-pointer">
+                {{ ext.meta.full_name }}
+            </td>
+            <td class="text-center">
+                {{ ext.n_selected }}
+            </td>
+
+            <!-- coe -->
+            <td class="text-center">
+                <span v-bind:class="'coe-val-' + get_val_from_coe(ext.meta.coe, 'rj', 'overall')"
+                    class="pl-2 pr-2">
+                    {{ val_to_label(get_val_from_coe(ext.meta.coe, 'rj', 'overall'), 'overall') }}
+                </span>
+            </td>
+            <td class="text-center">
+                <span v-bind:class="'coe-val-' + get_val_from_coe(ext.meta.coe, 'rj', 'risk_of_bias')"
+                    class="pl-2 pr-2">
+                    {{ val_to_label(get_val_from_coe(ext.meta.coe, 'rj', 'risk_of_bias'), 'risk_of_bias') }}
+                </span>
+            </td>
+            <td class="text-center">
+                <span v-bind:class="'coe-val-' + get_val_from_coe(ext.meta.coe, 'rj', 'inconsistency')"
+                    class="pl-2 pr-2">
+                    {{ val_to_label(get_val_from_coe(ext.meta.coe, 'rj', 'inconsistency'), 'inconsistency') }}
+                </span>
+            </td>
+            <td class="text-center">
+                <span v-bind:class="'coe-val-' + get_val_from_coe(ext.meta.coe, 'rj', 'indirectness')"
+                    class="pl-2 pr-2">
+                    {{ val_to_label(get_val_from_coe(ext.meta.coe, 'rj', 'indirectness'), 'indirectness') }}
+                </span>
+            </td>
+            <td class="text-center">
+                <span v-bind:class="'coe-val-' + get_val_from_coe(ext.meta.coe, 'rj', 'imprecision')"
+                    class="pl-2 pr-2">
+                    {{ val_to_label(get_val_from_coe(ext.meta.coe, 'rj', 'imprecision'), 'imprecision') }}
+                </span>
+            </td>
+            <td class="text-center">
+                <span v-bind:class="'coe-val-' + get_val_from_coe(ext.meta.coe, 'rj', 'publication_bias')"
+                    class="pl-2 pr-2">
+                    {{ val_to_label(get_val_from_coe(ext.meta.coe, 'rj', 'publication_bias'), 'publication_bias') }}
+                </span>
+            </td>
+            <td class="text-center">
+                <span v-bind:class="'coe-val-' + get_val_from_coe(ext.meta.coe, 'rj', 'importance')"
+                    class="pl-2 pr-2">
+                    {{ val_to_label(get_val_from_coe(ext.meta.coe, 'rj', 'importance'), 'importance') }}
+                </span>
+            </td>
+        </tr>
+        </tr>
+    </table>
+
+
+
+
+
+    <div id="coe_panel"
+        class="cursor-pointer"
+        v-if="display_coe_panel">
+        <div id="coe_panel_close"
+            v-on:click="display_coe_panel = false">
+            <i class="fa fa-times"></i>
+        </div>
+
+        <div>
+            {{ oc_dict[working_oc_abbr].meta.full_name }}
+        </div>
+
+
+    </div>
+
+
+
+
+
+</div>
+
+
+</div>
+<!-- /#main -->
+
+
+{% endblock %}
+
+
+{% block script %}
+<!-- mark.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js"></script>
+
+<script>
+
+{% include 'js/coe_helper.js' %}
+{% include 'js/srv_shared.js' %}
+{% include 'js/srv_analyzer.js' %}
+{% include "js/srv_extractor.js" %}
+
+///////////////////////////////////////////////////////////
+// bind the project information to srv_extractor.js
+///////////////////////////////////////////////////////////
+
+srv_extractor.project = [[ project_json_str|safe ]];
+
+
+var app_coemgr = {
+    vpp: null,
+    vpp_id: '#app_coemgr',
+    vpp_data: {
+        pwma_table: null,
+
+        pwma_table_columns: [
+            // column 0
+            {
+                title: 'Group',
+                className: 'col-group',
+                orderable: true
+            }
+        ],
+
+        display_coe_panel: false,
+
+        oc_dict: {},
+        working_oc_abbr: null,
+    },
+    vpp_methods: {
+        set_extracts: function(extracts) {
+
+            // update the oc_dict
+            this.oc_dict = {};
+            for (let i = 0; i < extracts.length; i++) {
+                this.oc_dict[extracts[i].abbr] = extracts[i];
+            }
+            console.log('* set extracts', extracts);
+        },
+
+        get_n_selected_studies: function(extract) {
+            var n = 0;
+            for (const pid in extract.data) {
+                if (Object.hasOwnProperty.call(extract.data, pid)) {
+                    const ext = extract.data[pid];
+                    
+                }
+            }
+        },
+
+        get_val_from_coe: function(coe, type, domain) {
+            return coe_helper.get_val_from_coe(coe, type, domain);
+        },
+
+        val_to_label: function(val, domain) {
+            return coe_helper.val_to_label(val, domain);
+        },
+
+        show_coe_panel: function(oc_abbr) {
+            this.display_coe_panel = true;
+            this.working_oc_abbr = oc_abbr;
+        }
+    },
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: this.vpp_data,
+            methods: this.vpp_methods,
+            updated: function() {
+
+            },
+            mounted: function() {
+            }
+        });
+
+        console.log('* inited app_coemgr');
+    },
+
+    load: function() {
+        var project_id = Cookies.get('project_id');
+        var cq_abbr = Cookies.get('cq_abbr');
+
+        srv_extractor.get_extracts(
+            project_id, 
+            cq_abbr,
+            function(data) {
+                console.log(data);
+                app_coemgr.vpp.set_extracts(data.extracts);
+            }
+        );
+    }
+};
+
+var jarvis = {
+
+    init: function() {
+        // set cq_abbr if not 
+        this.set_default_cq();
+        
+        // get the outcome abbr from url
+        var oc_abbr = jarvis.get_url_paramter('abbr');
+
+        // init the shared service
+        srv_shared.update_labels_by_project_settings(
+            srv_extractor.project.settings
+        );
+
+        // init the UI
+        app_coemgr.init();
+
+        // load data
+        app_coemgr.load();
+
+        // bind resize event
+        this.bind_resize_event();
+    },
+
+    prompt: function(text, value) {
+        return window.prompt(text, value);
+    },
+
+    confirm: function(text) {
+        return window.confirm(text);
+    },
+
+    toast: function(s, s_type) {
+        if (typeof(s_type) == 'undefined') {
+            s_type = 'info';
+        }
+        toast(s, s_type);
+    },
+
+    get_year: function(s) {
+        const regex = /\d{4}/gm;
+        let m;
+        if ((m = regex.exec(s)) !== null) {
+            return m[0];
+        }
+        return '';
+    },
+
+    get_first_author: function(s) {
+        var aus = s.split(';');
+        if (aus.length == 1) {
+            aus = s.split(',');
+        }
+        return aus[0];
+    },
+
+    download_file: function(fn) {
+        // fixed image download bug
+        // Thanks to https://stackoverflow.com/questions/17311645/download-image-with-javascript
+        var a = $('<a>').attr('href', '/f/' + fn)
+            .attr('download', fn)
+            .appendTo("body");
+        a[0].click()
+        a.remove();
+    },
+
+    bind_resize_event: function() {
+        $(window).on('resize', function(){
+            pan_ocpapers.resize();
+            pan_collector.resize();
+        });
+    }
+};
+
+{% include 'js/jarvis_ext_utils.js' %}
+
+$(document).ready(function() {
+    jarvis.init();
+});
+</script>
+{% endblock %}
