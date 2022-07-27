@@ -144,14 +144,17 @@ def is_same_extraction(ea, eb):
     '''
     Compare two extractions attr by attr
     '''
-    if ea['is_selected'] != eb['is_selected']:
-        return False
+    if 'is_selected' in ea and 'is_selected' in eb:
+        if ea['is_selected'] != eb['is_selected']:
+            return False
+
+    if 'is_checked' in ea and 'is_checked' in eb:
+        if ea['is_checked'] != eb['is_checked']:
+            return False
     
-    if ea['is_checked'] != eb['is_checked']:
-        return False
-    
-    if ea['n_arms'] != eb['n_arms']:
-        return False
+    if 'n_arms' in ea and 'n_arms' in eb:
+        if ea['n_arms'] != eb['n_arms']:
+            return False
 
     # check the main arm from ea side
     # 2021-07-12: add subgroup in the comparison

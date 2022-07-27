@@ -1056,7 +1056,7 @@ class Extract(db.Model):
 
     def as_dict(self):
         '''
-        Return the dict format of this object
+        Return the dict format of this extract
         '''
         ret = {c.name: getattr(self, c.name) for c in self.__table__.columns}
 

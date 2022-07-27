@@ -161,7 +161,7 @@ Object.assign(pan_ocpapers.vpp_methods, {
         for (let i = 0; i < ds.length; i++) {
             var d_idx = i+1;
             ds[i] = coe_helper.get_domain(
-                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D'+d_idx+'_AJ'],
+                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D'+d_idx+'_RJ'],
                 this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D'+d_idx+'_AR']
             );
         }

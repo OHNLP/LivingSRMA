@@ -30,6 +30,32 @@ class Project:
 
     @command
     @argument("keystr", type=str, description="The keystr for a project")
+    @argument("cq", type=str, description="The cq for a question")
+    def list_ocs(self, keystr:str, cq:str):
+        '''
+        List outcomes of a clinical question
+        '''
+        ocs = dora.get_extracts_by_keystr_and_cq(
+            keystr, cq
+        )
+
+        table = PrettyTable([
+            'Type', 'Group', 'Cate', 'Full Name', 'abbr', 'N'
+        ])
+        for oc in ocs:
+            table.add_row([
+                oc.oc_type,
+                oc.meta['group'],
+                oc.meta['category'],
+                oc.meta['full_name'],
+                oc.meta['abbr'],
+                len(oc.data.keys())
+            ])
+        print(table)
+
+
+    @command
+    @argument("keystr", type=str, description="The keystr for a project")
     @argument("new_keystr", type=str, description="The title for a project")
     def set_keystr(self, keystr:str, new_keystr:str):
         '''
@@ -44,6 +70,7 @@ class Project:
         print('* Set the new_keystr to %s -> %s' % (
             keystr, new_keystr
         ))
+
 
 
     @command

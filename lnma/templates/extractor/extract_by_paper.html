@@ -147,10 +147,10 @@ html {
                     <td v-if="has_coe_rob()"
                         class="text-center">
                         <span class="mr-2"
-                            :class="'rob-rst-icon-' + get_coe_rob_value(paper.pid, 'COE_RCT_ROB_OVERALL_AJ')">
+                            :class="'rob-rst-icon-' + get_coe_rob_value(paper.pid, 'COE_RCT_ROB_OVERALL_RJ')">
                             <i class="far fa-user"></i>
                             <span>
-                                {{ get_coe_rob_value(paper.pid, 'COE_RCT_ROB_OVERALL_AJ') }}
+                                {{ get_coe_rob_value(paper.pid, 'COE_RCT_ROB_OVERALL_RJ') }}
                             </span>
                         </span>
                         <span :class="'rob-rst-icon-' + get_coe_rob_value(paper.pid, 'COE_RCT_ROB_OVERALL_AR')">
@@ -854,7 +854,12 @@ var pan_ocpapers = {
 
         // prepare the incremental data for update
         var data = {};
-        data[pid] = oc.data[pid];
+        data[pid] = JSON.parse(JSON.stringify(oc.data[pid]));
+
+        // 2022-07-27: fix overwrite selection bug
+        // for this function, just save the extraction
+        // please ignore the selection status
+        // delete data[pid]['is_selected'];
 
         // and since we add this extraction
         // this paper is also selected?
@@ -913,11 +918,10 @@ var pan_ocpapers = {
             const p = this.vpp.papers[i];
             if (p.pid == paper.pid) {
                 this.vpp.papers[i] = paper;
-                this.vpp.$forceUpdate();
                 break;
             }
-
         }
+        this.vpp.$forceUpdate();
     },
 
     update_vpp_extracts: function(extract) {

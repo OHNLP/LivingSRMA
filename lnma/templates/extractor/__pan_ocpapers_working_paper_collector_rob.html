@@ -14,7 +14,7 @@
             <div class="d-flex flex-row">
                 <div style="width: 90px; line-height: 8px; text-align: center;">
                     <span class="txt-xs">
-                        Assessor
+                        Reviewer
                         <br>
                         Judgement
                     </span>
@@ -22,11 +22,11 @@
                 <div style="width: 100px;">
                     <div>
                         
-                        <select v-model="get_working_arm_attrs()['g0']['COE_RCT_ROB_OVERALL_AJ']"
-                            :class="'rob-rst-icon-' + get_working_arm_attrs()['g0']['COE_RCT_ROB_OVERALL_AJ']"
+                        <select v-model="get_working_arm_attrs()['g0']['COE_RCT_ROB_OVERALL_RJ']"
+                            :class="'rob-rst-icon-' + get_working_arm_attrs()['g0']['COE_RCT_ROB_OVERALL_RJ']"
                             @change="on_change_rob_overall"
                             style="width: 88px;">
-                            <optgroup label="Assessor Judgement">
+                            <optgroup label="Reviewer Judgement">
                                 <option value="L">+ Low</option>
                                 <option value="M">! Some Concerns</option>
                                 <option value="H">- High Risk</option>
@@ -61,11 +61,11 @@
             :title="coe_rob_d_name[d_idx]"
             v-on:click="show_coe_rob_d(d_idx)">
             <div class="w-100 text-center">
-                <select v-model="get_working_arm_attrs()['g0']['COE_RCT_ROB_D'+d_idx+'_AJ']"
+                <select v-model="get_working_arm_attrs()['g0']['COE_RCT_ROB_D'+d_idx+'_RJ']"
                     @change="on_change_rob_ds"
-                    :class="'rob-rst-icon-' + get_working_arm_attrs()['g0']['COE_RCT_ROB_D'+d_idx+'_AJ']"
-                    class="rob-rst-aj-d">
-                    <optgroup label="Assessor Judgement">
+                    :class="'rob-rst-icon-' + get_working_arm_attrs()['g0']['COE_RCT_ROB_D'+d_idx+'_RJ']"
+                    class="rob-rst-rj-d">
+                    <optgroup label="Reviewer Judgement">
                         <option value="L">+  Low</option>
                         <option value="M">!  Some Concerns</option>
                         <option value="H">-  High Risk</option>

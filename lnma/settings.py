@@ -991,7 +991,7 @@ COE_RCT_ROB = \
             "name": "Overall",
             "subs": [
                 {
-                    "abbr": "COE_RCT_ROB_OVERALL_AJ",
+                    "abbr": "COE_RCT_ROB_OVERALL_RJ",
                     "name": "Assessor Judgement"
                 },
                 {
@@ -1005,7 +1005,7 @@ COE_RCT_ROB = \
             "name": "D1",
             "subs": [
                 {
-                    "abbr": "COE_RCT_ROB_D1_AJ",
+                    "abbr": "COE_RCT_ROB_D1_RJ",
                     "name": "Assessor Judgement"
                 },
                 {
@@ -1047,7 +1047,7 @@ COE_RCT_ROB = \
                     "name": "Assess Aim"
                 },
                 {
-                    "abbr": "COE_RCT_ROB_D2_AJ",
+                    "abbr": "COE_RCT_ROB_D2_RJ",
                     "name": "Assessor Judgement"
                 },
                 {
@@ -1117,7 +1117,7 @@ COE_RCT_ROB = \
             "name": "D3",
             "subs": [
                 {
-                    "abbr": "COE_RCT_ROB_D3_AJ",
+                    "abbr": "COE_RCT_ROB_D3_RJ",
                     "name": "Assessor Judgement"
                 },
                 {
@@ -1163,7 +1163,7 @@ COE_RCT_ROB = \
             "name": "D4",
             "subs": [
                 {
-                    "abbr": "COE_RCT_ROB_D4_AJ",
+                    "abbr": "COE_RCT_ROB_D4_RJ",
                     "name": "Assessor Judgement"
                 },
                 {
@@ -1217,7 +1217,7 @@ COE_RCT_ROB = \
             "name": "D5",
             "subs": [
                 {
-                    "abbr": "COE_RCT_ROB_D5_AJ",
+                    "abbr": "COE_RCT_ROB_D5_RJ",
                     "name": "Assessor Judgement"
                 },
                 {

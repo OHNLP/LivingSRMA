@@ -23,6 +23,7 @@ var srv_extractor = {
         get_pdata_in_itable: "[[ url_for('extractor.get_pdata_in_itable') ]]",
         get_itable: "[[ url_for('extractor.get_itable') ]]",
         get_extract: "[[ url_for('extractor.get_extract') ]]",
+        get_extract_by_id: "[[ url_for('extractor.get_extract_by_id') ]]",
         get_extracts: "[[ url_for('extractor.get_extracts') ]]",
         get_extract_and_papers: "[[ url_for('extractor.get_extract_and_papers') ]]",
 
@@ -262,6 +263,18 @@ var srv_extractor = {
             {
                 project_id: project_id,
                 cq_abbr: cq_abbr,
+                rnd: Math.random()
+            },
+            callback,
+            'json'
+        );
+    },
+
+    get_extract_by_id: function(extract_id, callback) {
+        $.get(
+            this.url.get_extract_by_id,
+            {
+                extract_id: extract_id,
                 rnd: Math.random()
             },
             callback,

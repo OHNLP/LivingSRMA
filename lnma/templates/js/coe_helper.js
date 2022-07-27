@@ -54,21 +54,21 @@ var coe_helper = {
     },
 
     /**
-     * Get a domain value based on aj and ar
+     * Get a domain value based on rj and ar
      * 
-     * @param {string} aj Assessor judgement
+     * @param {string} rj Assessor judgement
      * @param {string} ar Algorithm result
      * @returns string
      */
-    get_domain: function(aj, ar) {
-        aj = this.fmt_domain(aj);
+    get_domain: function(rj, ar) {
+        rj = this.fmt_domain(rj);
         ar = this.fmt_domain(ar);
 
         // Assessor Judgement has higher priority
-        if (aj == this.NA) {
+        if (rj == this.NA) {
             return ar;
         } else {
-            return aj;
+            return rj;
         }
     },
 
@@ -538,6 +538,68 @@ var coe_helper = {
         return ret;
     },
 
+    /**
+     * Get the final decision on risk of bias
+     * 
+     * @param {Object} ext the extracted data object from itable or oc,
+     *                     and the content is the attr-value, not main/other/g0
+     */
+    get_rob_decision: function(ext) {
+        // ext is needs to be a key-value dict
+        if (!ext.hasOwnProperty('COE_RCT_ROB_OVERALL_RJ')) {
+            // not having RJ???
+            return 'NA';
+        }
+        
+        if (ext.COE_RCT_ROB_OVERALL_RJ == null ||
+            ext.COE_RCT_ROB_OVERALL_RJ == '' || 
+            ext.COE_RCT_ROB_OVERALL_RJ == 'NA') {
+            // which means it's empty
+        } else {
+            return ext.COE_RCT_ROB_OVERALL_RJ;
+        }
+
+        if (!ext.hasOwnProperty('COE_RCT_ROB_OVERALL_AR')) {
+            // not having AR??
+            return 'NA';
+        }
+        
+        if (ext.COE_RCT_ROB_OVERALL_AR == null ||
+            ext.COE_RCT_ROB_OVERALL_AR == 'NA') {
+            return 'NA';
+        } else {
+            return ext.COE_RCT_ROB_OVERALL_AR;
+        }
+
+    },
+
+    /**
+     * Get the rob distribution
+     * 
+     * @param {Object} exts the paper with extracted data
+     */
+    get_oc_rob_dist: function(exts) {
+        // the distribution follows the same codes
+        var dist = {
+            'L': [],
+            'M': [],
+            'H': [],
+            'NA': [],
+        };
+
+        for (let i = 0; i < exts.length; i++) {
+            const ext = exts[i];
+            var decision = this.get_rob_decision(ext);
+            dist[decision].push(ext);
+        }
+
+        return dist;
+    },
+
+    ///////////////////////////////////////////////////////////////////////////
+    // General CoE functions
+    ///////////////////////////////////////////////////////////////////////////
+
     get_overall_coe: function(decision) {
         var risk_of_bias = parseInt(''+decision.risk_of_bias);
         var inconsistency = parseInt(''+decision.inconsistency);
@@ -603,7 +665,7 @@ var coe_helper = {
             return 'NA';
         }
 
-        // may not source type? aj or 
+        // may not source type? rj or 
         if (!coe.hasOwnProperty(type)) {
             return 'NA';
         }
@@ -635,13 +697,17 @@ var coe_helper = {
 
         // check if the followings
         if (['risk_of_bias', 'imprecision', 'inconsistency', 'indirectness'].includes(domain)) {
-            if (['0', '1', '2', '3', '4'].includes(v)) {
+            if (['0', '1', '2', '3', '4', 'L', 'M', 'H', 'NA'].includes(v)) {
                 ret = {
                     '0': 'Not specified',
                     '1': 'No serious',
                     '2': 'Serious',
                     '3': 'Very serious',
-                    '4': 'Very serious'
+                    '4': 'Very serious',
+                    'L': 'Low risk',
+                    'M': 'Some concerns',
+                    'H': 'High risk',
+                    'NA': 'Not decided'
                 }[v];
             } else {
                 ret = 'NA';

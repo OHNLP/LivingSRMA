@@ -17,7 +17,7 @@ Evaluate Certainty of Evidence
 </a> -->
 {% endblock %}
 
-{% block active_nav_link %}extractor-extract-data{% endblock %}
+{% block active_nav_link %}extractor-extract-coe{% endblock %}
 
 {% block style %}
 <!-- jQuery UI Theme -->
@@ -80,22 +80,24 @@ html {
 }
 
 .coe-val-l, 
+.coe-val-L, 
 .coe-val-1 {
     background-color: #68f168;
 }
 
 .coe-val-m, 
+.coe-val-M, 
 .coe-val-2 {
     background-color: orange;
 }
 
-.coe-val-h, 
 .coe-val-3 {
     color: white;
     background-color: rgb(252, 94, 94);
 }
 
 .coe-val-h, 
+.coe-val-H, 
 .coe-val-4 {
     color: white;
     background-color: red;
@@ -137,6 +139,17 @@ html {
 }
 .coe-item-select {
     width: 130px;
+}
+
+.rob-item-label {
+    position: relative;
+    top: -5px;
+    font-size: 0.9em;
+}
+.rob-item-cell {
+    width: 25px;
+    margin-right: 2px;
+    text-align: center;
 }
 </style>
 
@@ -193,7 +206,7 @@ html {
         id="pwma_datatable"
         class="coe-table display compact hover">
         <tr>
-            <th colspan="4">
+            <th colspan="5">
                 Outcome Information
             </th>
             <th colspan="7">
@@ -212,6 +225,9 @@ html {
             </th>
             <th>
                 Studies
+            </th>
+            <th>
+                Last Updated
             </th>
 
             <!-- CoE -->
@@ -255,6 +271,9 @@ html {
             </td>
             <td class="text-center">
                 {{ ext.n_selected }}
+            </td>
+            <td class="text-center">
+                {{ ext.meta.coe.date_updated }}
             </td>
 
             <!-- coe -->
@@ -309,9 +328,9 @@ html {
 
 
     <div id="coe_panel"
-        class="cursor-pointer"
         v-if="display_coe_panel">
         <div id="coe_panel_close"
+            class="cursor-pointer"
             v-on:click="hide_coe_panel">
             <i class="fa fa-times"></i>
         </div>
@@ -330,7 +349,7 @@ html {
 
         <div class="mt-1 mb-1">
 
-            <button class="btn btn-sm btn-default mr-1"
+            <button class="btn btn-sm btn-default mr-3"
                 v-bind:disabled="is_saving_working_oc_coe"
                 v-on:click="save_working_oc_coe">
                 <span v-if="is_saving_working_oc_coe">
@@ -342,6 +361,11 @@ html {
                     <i class="fa fa-save"></i>
                     Save the Current Assessment
                 </span>
+            </button>
+
+
+            <button class="btn btn-sm btn-default mr-1">
+                Use Algorithm Results as Judgement
             </button>
 
         </div>
@@ -517,6 +541,101 @@ html {
         </table>
 
 
+        <div class="nav nav-tabs mt-2 mb-2">
+            <div class="nav-item">
+                <a class="nav-link" 
+                    :class="{active: working_coe_domain=='risk_of_bias'}"
+                    @click="working_coe_domain='risk_of_bias'"
+                    href="javascript:void(0);">
+                    Risk of Bias
+                </a>
+            </div>
+            <div class="nav-item">
+                <a class="nav-link" 
+                    :class="{active: working_coe_domain=='inconsistency'}"
+                    @click="working_coe_domain='inconsistency'"
+                    href="javascript:void(0);">
+                    Inconsistency
+                </a>
+            </div>
+            <div class="nav-item">
+                <a class="nav-link" 
+                    :class="{active: working_coe_domain=='indirectness'}"
+                    @click="working_coe_domain='indirectness'"
+                    href="javascript:void(0);">
+                    Indirectness
+                </a>
+            </div>
+            <div class="nav-item">
+                <a class="nav-link" 
+                    :class="{active: working_coe_domain=='imprecision'}"
+                    @click="working_coe_domain='imprecision'"
+                    href="javascript:void(0);">
+                    Imprecision
+                </a>
+            </div>
+            <div class="nav-item">
+                <a class="nav-link" 
+                    :class="{active: working_coe_domain=='publication_bias'}"
+                    @click="working_coe_domain='publication_bias'"
+                    href="javascript:void(0);">
+                    Publication Bias
+                </a>
+            </div>
+        </div>
+
+
+        <div style="width: 100%; height: calc(100% - 150px); overflow-y: auto; overflow-x: hidden;">
+
+            <div v-if="working_coe_domain == 'risk_of_bias'">
+
+                <div class="mb-1 d-flex flex-row">
+                    <div class="custom-control custom-switch mr-2">
+                        <input type="checkbox" 
+                            class="custom-control-input" 
+                            id="customSwitch1"
+                            v-model="use_itable_rob_data">
+                        <label class="custom-control-label" for="customSwitch1">Use iTable's Risk of Bias Data</label>
+                    </div>
+
+                    <button class="btn btn-sm btn-default mr-3"
+                        @click="assess_coe_by_algorithm('rob')">
+                        <i class="fas fa-sync"></i>
+                        Assess Risk of Bias by Algorithm
+                    </button>
+                </div>
+
+                <!-- show the list of studies -->
+                <div v-if="working_oc_extract == null">
+                    Loading outcome details or no details found.
+                </div>
+                <div v-else>
+                    <div class="d-flex flex-row">
+                        <div v-for="exts, paper_rob in get_rob_dist()"
+                            class="d-flex flex-column border mr-3 pl-3 pr-3 pt-2 pb-2">
+                            <div class="rob-item-label">
+                                {{ val_to_label(paper_rob, 'risk_of_bias') }} |
+                                N=<b>{{ exts.length }}</b>
+                            </div>
+                            <div class="d-flex flex-row">
+                                <div v-for="ext in exts"
+                                    :title="ext.pid"
+                                    :class="'coe-val-' + get_rob_decision(ext)"
+                                    class="rob-item-cell">
+                                    <span class="text-sm"
+                                        >
+                                        {{ get_rob_decision(ext) }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
     </div>
 
 
@@ -566,19 +685,22 @@ var app_coemgr = {
             }
         ],
 
-        display_coe_panel: false,
-
-        oc_dict: {},
-        working_oc_abbr: null,
-        has_working_oc_coe_changed: false,
-
         filter_keyword: '',
-
+        
+        oc_dict: {},
+        itable: {},
+        
+        // related to working on
+        display_coe_panel: false,
+        working_oc_abbr: null,
+        working_oc_extract: null,
+        working_coe_domain: null,
+        has_working_oc_coe_changed: false,
         is_saving_working_oc_coe: false,
+        use_itable_rob_data: false,
     },
     vpp_methods: {
         set_extracts: function(extracts) {
-
             // update the oc_dict
             this.oc_dict = {};
             for (let i = 0; i < extracts.length; i++) {
@@ -587,18 +709,17 @@ var app_coemgr = {
             console.log('* set extracts', extracts);
         },
 
-        get_n_selected_studies: function(extract) {
-            var n = 0;
-            for (const pid in extract.data) {
-                if (Object.hasOwnProperty.call(extract.data, pid)) {
-                    const ext = extract.data[pid];
-                    
-                }
-            }
+        set_itable: function(itable) {
+            this.itable = itable;
+            console.log('* set itable', itable);
         },
 
         get_val_from_coe: function(coe, type, domain) {
             return coe_helper.get_val_from_coe(coe, type, domain);
+        },
+
+        get_rob_decision: function(ext) {
+            return coe_helper.get_rob_decision(ext);
         },
 
         val_to_label: function(val, domain) {
@@ -608,6 +729,20 @@ var app_coemgr = {
         show_coe_panel: function(oc_abbr) {
             this.display_coe_panel = true;
             this.working_oc_abbr = oc_abbr;
+
+            // load data for this oc
+            srv_extractor.get_extract_by_id(
+                this.oc_dict[this.working_oc_abbr].extract_id,
+                function(data) {
+                    app_coemgr.vpp.$data.working_oc_extract = data.extract;
+                    console.log('* set working oc', data.extract);
+                    jarvis.toast(
+                        'Loaded outcome [' + 
+                        data.extract.meta.full_name + '] ' + 
+                        'full dataset.'
+                    );
+                }
+            );
         },
 
         hide_coe_panel: function() {
@@ -619,8 +754,12 @@ var app_coemgr = {
                     return;
                 }
             }
+
+            // clear status
             this.display_coe_panel = false;
             this.working_oc_abbr = null;
+            this.working_oc_extract = null;
+            this.working_coe_domain = null;
         },
 
         on_change_coe: function(event) {
@@ -665,6 +804,62 @@ var app_coemgr = {
                 }
             );
         },
+
+        get_exts: function(oc, itable, use_itable_rob_data) {
+            if (typeof(use_itable_rob_data) == 'undefined') {
+                use_itable_rob_data = false;
+            }
+
+            var exts = [];
+            for (const pid in oc.data) {
+                if (!oc.data[pid].is_selected) {
+                    continue;
+                }
+                // copy this extract
+                var ext = JSON.parse(JSON.stringify(oc.data[pid].attrs.main.g0));
+
+                // extend the pid
+                ext.pid = pid;
+
+                // extend the information from italbe if needed
+                if (use_itable_rob_data) {
+                    if (itable.data.hasOwnProperty(pid)) {
+                        // extend! on
+                        Object.assign(
+                            ext,
+                            itable.data[pid].attrs.main.g0
+                        )
+                    }
+                }
+
+                exts.push(ext);
+            }
+
+            console.log('* got ' + exts.length + ' exts', exts);
+            return exts;
+        },
+
+        get_rob_dist: function() {
+            // first, get exts
+            var exts = this.get_exts(
+                this.working_oc_extract,
+                this.itable,
+                this.use_itable_rob_data
+            );
+
+            // second, get dist
+            var dist = coe_helper.get_oc_rob_dist(exts);
+            console.log("* got the distribution of rob", dist);
+
+            return dist;
+        },
+
+        assess_coe_by_algorithm: function(domain) {
+
+        }
+
+        
+
     },
 
     init: function() {
@@ -692,6 +887,15 @@ var app_coemgr = {
             function(data) {
                 console.log(data);
                 app_coemgr.vpp.set_extracts(data.extracts);
+            }
+        );
+
+        srv_extractor.get_itable(
+            project_id, 
+            cq_abbr,
+            function(data) {
+                console.log(data);
+                app_coemgr.vpp.set_itable(data.extract);
             }
         );
     }
@@ -765,8 +969,6 @@ var jarvis = {
 
     bind_resize_event: function() {
         $(window).on('resize', function(){
-            pan_ocpapers.resize();
-            pan_collector.resize();
         });
     }
 };

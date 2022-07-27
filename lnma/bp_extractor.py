@@ -788,6 +788,35 @@ def get_itable():
     return jsonify(ret)
 
 
+@bp.route('/get_extract_by_id')
+@login_required
+def get_extract_by_id():
+    '''
+    Get one extract by the extract_id
+    '''
+    extract_id = request.args.get('extract_id')
+    
+    # get the exisiting extracts
+    extract = dora.get_extract(
+        extract_id
+    )
+
+    if extract is None:
+        # this is a new extract
+        ret = {
+            'success': False,
+            'msg': 'not exist extract %s' % extract_id
+        }
+        return jsonify(ret)
+
+    ret = {
+        'success': True,
+        'msg': '',
+        'extract': extract.as_dict()
+    }
+    return jsonify(ret)
+
+
 @bp.route('/get_extract')
 @login_required
 def get_extract():
