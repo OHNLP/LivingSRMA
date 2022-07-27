@@ -43,6 +43,7 @@ html {
     overflow: hidden;
 }
 .coe-table {
+    border-top: 1px solid #cccccc;
     width: auto;
 }
 .coe-table th {
@@ -58,9 +59,19 @@ html {
 .coe-table tr:hover {
     background-color: rgb(238, 238, 238);
 }
+.coe-working-oc-tr {
+    background-color: aqua;
+}
+.coe-table td {
+    padding: 3px 0 1px 0;
+}
 
 .coe-val-text {
     font-weight: normal !important;
+}
+.coe-val-changed {
+    color: red;
+    font-style: italic;
 }
 
 .coe-val-0, 
@@ -94,6 +105,7 @@ html {
     width: calc(100% - 500px);
     min-width: 800px;
     height: calc(100% - 20px);
+    padding: 5px;
 
     position: absolute;
     right: 0;
@@ -119,6 +131,12 @@ html {
 #coe_panel_close:hover {
     color: red;
     background-color: pink;
+}
+.coe-item-column {
+    width: 150px;
+}
+.coe-item-select {
+    width: 130px;
 }
 </style>
 
@@ -150,6 +168,17 @@ html {
         <div class="d-flex flex-row">
             <div class="mr-2">
                 Filters:
+            </div>
+            <div class="mr-4 pr-4">
+                <input type="text" 
+                    placeholder="Outcome Name"
+                    v-model="filter_keyword"
+                    style="height: 1.5em; font-size: 1em;">
+                <button class="btn btn-xs"
+                    v-on:click="filter_keyword = ''">
+                    <i class="fa fa-times"></i>
+                </button>
+                |
             </div>
             <div class="mr-2">
                 <input type="checkbox" id="ckb_inc_sof">
@@ -209,7 +238,9 @@ html {
             </th>
         </tr>
 
-        <tr v-for="ext in oc_dict">
+        <tr v-for="ext in oc_dict"
+            v-if="ext.oc_type == 'pwma'"
+            v-bind:class="{'coe-working-oc-tr': working_oc_abbr == ext.abbr}">
             <td v-on:click="show_coe_panel(ext.abbr)"
                 class="cursor-pointer">
                 {{ ext.meta.group }}
@@ -281,13 +312,209 @@ html {
         class="cursor-pointer"
         v-if="display_coe_panel">
         <div id="coe_panel_close"
-            v-on:click="display_coe_panel = false">
+            v-on:click="hide_coe_panel">
             <i class="fa fa-times"></i>
         </div>
 
-        <div>
-            {{ oc_dict[working_oc_abbr].meta.full_name }}
+        <div class="d-flex flex-row">
+            <div class="pl-3 pr-3 border-right">
+                {{ oc_dict[working_oc_abbr].meta.group }}
+            </div>
+            <div class="pl-3 pr-3 border-right">
+                {{ oc_dict[working_oc_abbr].meta.category }}
+            </div>
+            <h4 class="pl-2 pr-2">
+                {{ oc_dict[working_oc_abbr].meta.full_name }}
+            </h4>
         </div>
+
+        <div class="mt-1 mb-1">
+
+            <button class="btn btn-sm btn-default mr-1"
+                v-bind:disabled="is_saving_working_oc_coe"
+                v-on:click="save_working_oc_coe">
+                <span v-if="is_saving_working_oc_coe">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    Saving ...
+                </span>
+                <span v-else
+                    v-bind:class="{'coe-val-changed': has_working_oc_coe_changed}">
+                    <i class="fa fa-save"></i>
+                    Save the Current Assessment
+                </span>
+            </button>
+
+        </div>
+
+        <table class="coe-table">
+
+            <tr>
+                <th>
+                    &nbsp;
+                </th>
+                <th class="coe-item-column">
+                    Overall CoE
+                </th>
+                <th class="coe-item-column">
+                    Risk of Bias
+                </th>
+                <th class="coe-item-column">
+                    Inconsistency
+                </th>
+                <th class="coe-item-column">
+                    Indirectness
+                </th>
+                <th class="coe-item-column">
+                    Imprecision
+                </th>
+                <th class="coe-item-column">
+                    Publication Bias
+                </th>
+                <th class="coe-item-column">
+                    Importance
+                </th>
+            </tr>
+            
+
+            <tr>
+                <td class="">
+                    <i class="far fa-user"></i>
+                    Reviwer Judgement
+                </td>
+                <td class="text-center">
+                    <!-- the overall is automatically calced -->
+                    <span v-bind:class="'coe-val-' + get_val_from_coe(oc_dict[working_oc_abbr].meta.coe, 'rj', 'overall')"
+                        class="pl-2 pr-2">
+                        {{ val_to_label(get_val_from_coe(oc_dict[working_oc_abbr].meta.coe, 'rj', 'overall'), 'overall') }}
+                    </span>
+                </td>
+                <td class="text-center">
+                    <select v-bind:class="'coe-val-' + get_val_from_coe(oc_dict[working_oc_abbr].meta.coe, 'rj', 'risk_of_bias')"
+                        v-model="oc_dict[working_oc_abbr].meta.coe.rj.decision.risk_of_bias"
+                        v-on:change="on_change_coe"
+                        class="coe-item-select pl-2 pr-2">
+                        <option value="4">Extremely serious</option>
+                        <option value="3">Very serious</option>
+                        <option value="2">Serious</option>
+                        <option value="1">No serious</option>
+                        <option value="0">Not specified</option>
+                    </span>
+                </td>
+                <td class="text-center">
+                    <select v-bind:class="'coe-val-' + get_val_from_coe(oc_dict[working_oc_abbr].meta.coe, 'rj', 'inconsistency')"
+                        v-model="oc_dict[working_oc_abbr].meta.coe.rj.decision.inconsistency"
+                        v-on:change="on_change_coe"
+                        class="coe-item-select pl-2 pr-2">
+                        <option value="4">Extremely serious</option>
+                        <option value="3">Very serious</option>
+                        <option value="2">Serious</option>
+                        <option value="1">No serious</option>
+                        <option value="0">Not specified</option>
+                    </select>
+                </td>
+                <td class="text-center">
+                    <select v-bind:class="'coe-val-' + get_val_from_coe(oc_dict[working_oc_abbr].meta.coe, 'rj', 'indirectness')"
+                        v-model="oc_dict[working_oc_abbr].meta.coe.rj.decision.indirectness"
+                        v-on:change="on_change_coe"
+                        class="coe-item-select pl-2 pr-2">
+                        <option value="4">Extremely serious</option>
+                        <option value="3">Very serious</option>
+                        <option value="2">Serious</option>
+                        <option value="1">No serious</option>
+                        <option value="0">Not specified</option>
+                    </select>
+                </td>
+                <td class="text-center">
+                    <select v-bind:class="'coe-val-' + get_val_from_coe(oc_dict[working_oc_abbr].meta.coe, 'rj', 'imprecision')"
+                        v-model="oc_dict[working_oc_abbr].meta.coe.rj.decision.imprecision"
+                        v-on:change="on_change_coe"
+                        class="coe-item-select pl-2 pr-2">
+                        <option value="4">Extremely serious</option>
+                        <option value="3">Very serious</option>
+                        <option value="2">Serious</option>
+                        <option value="1">No serious</option>
+                        <option value="0">Not specified</option>
+                    </select>
+                </td>
+                <td class="text-center">
+                    <select v-bind:class="'coe-val-' + get_val_from_coe(oc_dict[working_oc_abbr].meta.coe, 'rj', 'publication_bias')"
+                        v-model="oc_dict[working_oc_abbr].meta.coe.rj.decision.publication_bias"
+                        v-on:change="on_change_coe"
+                        class="coe-item-select pl-2 pr-2">
+                        <option value="2">Strongly suspected</option>
+                        <option value="1">Undetected</option>
+                        <option value="0">Not applicable</option>
+                    </select>
+                </td>
+                <td class="text-center">
+                    <select v-bind:class="'coe-val-' + get_val_from_coe(oc_dict[working_oc_abbr].meta.coe, 'rj', 'importance')"
+                        v-model="oc_dict[working_oc_abbr].meta.coe.rj.decision.importance"
+                        v-on:change="on_change_coe"
+                        class="coe-item-select pl-2 pr-2">
+                        <option value="2">Critical</option>
+                        <option value="1">Important</option>
+                        <option value="0">Not applicable</option>
+                    </select>
+                </td>
+            </tr>
+
+
+            <tr>
+                <td>
+                    <i class="fas fa-code-branch"></i>
+                    Algorithm Result
+                </td>
+                <td class="text-center">
+                    <!-- the overall is automatically calced -->
+                    <span v-bind:class="'coe-val-' + get_val_from_coe(oc_dict[working_oc_abbr].meta.coe, 'ar', 'overall')"
+                        class="pl-2 pr-2">
+                        {{ val_to_label(get_val_from_coe(oc_dict[working_oc_abbr].meta.coe, 'ar', 'overall'), 'overall') }}
+                    </span>
+                </td>
+                <td class="text-center">
+                    <!-- this is automatically calculated by algorithm -->
+                    <span v-bind:class="'coe-val-' + get_val_from_coe(oc_dict[working_oc_abbr].meta.coe, 'ar', 'risk_of_bias')"
+                        class="pl-2 pr-2">
+                        {{ val_to_label(get_val_from_coe(oc_dict[working_oc_abbr].meta.coe, 'ar', 'risk_of_bias'), 'risk_of_bias') }}
+                    </span>
+                </td>
+                <td class="text-center">
+                    <!-- this is automatically calculated by algorithm -->
+                    <span v-bind:class="'coe-val-' + get_val_from_coe(oc_dict[working_oc_abbr].meta.coe, 'ar', 'inconsistency')"
+                        class="pl-2 pr-2">
+                        {{ val_to_label(get_val_from_coe(oc_dict[working_oc_abbr].meta.coe, 'ar', 'inconsistency'), 'inconsistency') }}
+                    </span>
+                </td>
+                <td class="text-center">
+                    <!-- this is automatically calculated by algorithm -->
+                    <span v-bind:class="'coe-val-' + get_val_from_coe(oc_dict[working_oc_abbr].meta.coe, 'ar', 'indirectness')"
+                        class="pl-2 pr-2">
+                        {{ val_to_label(get_val_from_coe(oc_dict[working_oc_abbr].meta.coe, 'ar', 'indirectness'), 'indirectness') }}
+                    </span>
+                </td>
+                <td class="text-center">
+                    <!-- this is automatically calculated by algorithm -->
+                    <span v-bind:class="'coe-val-' + get_val_from_coe(oc_dict[working_oc_abbr].meta.coe, 'ar', 'imprecision')"
+                        class="pl-2 pr-2">
+                        {{ val_to_label(get_val_from_coe(oc_dict[working_oc_abbr].meta.coe, 'ar', 'imprecision'), 'imprecision') }}
+                    </span>
+                </td>
+                <td class="text-center">
+                    <!-- this is automatically calculated by algorithm -->
+                    <span v-bind:class="'coe-val-' + get_val_from_coe(oc_dict[working_oc_abbr].meta.coe, 'ar', 'publication_bias')"
+                        class="pl-2 pr-2">
+                        {{ val_to_label(get_val_from_coe(oc_dict[working_oc_abbr].meta.coe, 'ar', 'publication_bias'), 'publication_bias') }}
+                    </span>
+                </td>
+                <td class="text-center">
+                    <!-- this is automatically calculated by algorithm -->
+                    <span v-bind:class="'coe-val-' + get_val_from_coe(oc_dict[working_oc_abbr].meta.coe, 'ar', 'importance')"
+                        class="pl-2 pr-2">
+                        {{ val_to_label(get_val_from_coe(oc_dict[working_oc_abbr].meta.coe, 'ar', 'importance'), 'importance') }}
+                    </span>
+                </td>
+            </tr>
+        </table>
 
 
     </div>
@@ -343,6 +570,11 @@ var app_coemgr = {
 
         oc_dict: {},
         working_oc_abbr: null,
+        has_working_oc_coe_changed: false,
+
+        filter_keyword: '',
+
+        is_saving_working_oc_coe: false,
     },
     vpp_methods: {
         set_extracts: function(extracts) {
@@ -376,7 +608,63 @@ var app_coemgr = {
         show_coe_panel: function(oc_abbr) {
             this.display_coe_panel = true;
             this.working_oc_abbr = oc_abbr;
-        }
+        },
+
+        hide_coe_panel: function() {
+            if (this.is_saving_working_oc_coe ||
+                this.has_working_oc_coe_changed) {
+                if (jarvis.confirm('Assessments are not saved, are you sure to leave it unsaved?')) {
+                    this.has_working_oc_coe_changed = false;
+                } else {
+                    return;
+                }
+            }
+            this.display_coe_panel = false;
+            this.working_oc_abbr = null;
+        },
+
+        on_change_coe: function(event) {
+            this.has_working_oc_coe_changed = true;
+            this.$forceUpdate();
+        },
+
+        update_oc_dict_by_extract: function(extract) {
+            this.oc_dict[extract.abbr] = extract;
+            this.$forceUpdate();
+
+            // update status?
+            this.has_working_oc_coe_changed = false;
+
+            // show something?
+            jarvis.toast(
+                'Updated CoE for ' + 
+                extract.meta.group + ' | ' + 
+                extract.meta.category + ' | [' + 
+                extract.meta.full_name + ']'
+            );
+        },
+
+        save_working_oc_coe: function() {
+            // ok, save the current working coe
+            var extract_id = this.oc_dict[this.working_oc_abbr].extract_id;
+            var coe = this.oc_dict[this.working_oc_abbr].meta.coe;
+
+            // update saving
+            this.is_saving_working_oc_coe = true;
+
+            // save it
+            srv_extractor.update_extract_coe_meta(
+                extract_id,
+                coe,
+                function(data) {
+                    app_coemgr.vpp.$data.is_saving_working_oc_coe = false;
+                    // update extract
+                    app_coemgr.vpp.update_oc_dict_by_extract(
+                        data.extract
+                    );
+                }
+            );
+        },
     },
 
     init: function() {

@@ -248,67 +248,6 @@ def get_papers_by_stage():
     return jsonify(ret)
 
 
-@bp.route('/get_included_papers_and_selections')
-@login_required
-def get_included_papers_and_selections():
-    '''
-    Get the included papers and the decisions of selection for outcomes
-    '''
-    project_id = request.args.get('project_id')
-    cq_abbr = request.args.get('cq_abbr')
-
-    if cq_abbr is None:
-        cq_abbr = 'default'
-
-    # get all papers
-    papers = srv_paper.get_included_papers_by_cq(
-        project_id, 
-        cq_abbr
-    )
-
-    # extend the paper meta with a new attribute
-    # outcome_selections
-    # and make a pid -> sequence mapping
-    pid2seq = {}
-    for i, paper in enumerate(papers):
-        papers[i].meta['outcome_selections'] = []
-        pid2seq[paper.pid] = i
-    
-    # get all extracts
-    # itable, pwma, subg, nma
-    extracts = dora.get_extracts_by_project_id_and_cq(
-        project_id,
-        cq_abbr
-    )
-
-    # check each extract
-    for extract in extracts:
-        for pid in extract.data:
-            if pid in pid2seq:
-                seq = pid2seq[pid]
-                if extract.data[pid]['is_selected']:
-                    # this paper is selected for this outcome
-                    papers[seq].meta['outcome_selections'].append(
-                        extract.abbr
-                    )
-            else:
-                # something wrong, this study should be there
-                # but also maybe excluded
-                # so, just ignore
-                pass
-    
-    json_papers = [ p.as_very_simple_dict() for p in papers ]
-    json_extracts = [ extr.as_dict() for extr in extracts ]
-    # json_extracts = [ extr.as_simple_dict() for extr in extracts ]
-
-    ret = {
-        'success': True,
-        'msg': '',
-        'papers': json_papers,
-        'extracts': json_extracts
-    }
-    return jsonify(ret)
-
 
 @bp.route('/download_extract_rs_csv')
 @login_required
@@ -622,7 +561,36 @@ def update_extract_incr_data():
     
     # update the extract with given info
     extract = dora.update_extract_incr_data(
-        project_id, oc_type, abbr, data
+        project_id, 
+        oc_type, 
+        abbr, 
+        data
+    )
+
+    # build the return obj
+    ret = {
+        'success': True,
+        'msg': '',
+        'extract': extract.as_dict()
+    }
+    return jsonify(ret)
+
+
+@bp.route('/update_extract_coe_meta', methods=['POST'])
+@login_required
+def update_extract_coe_meta():
+    '''
+    Update the extract coe data
+    '''
+    extract_id = request.form.get('extract_id')
+    
+    # the meta of the extract settings
+    coe = json.loads(request.form.get('coe'))
+    
+    # update the extract with given info
+    extract = dora.update_extract_coe_meta(
+        extract_id,
+        coe
     )
 
     # build the return obj
@@ -1161,3 +1129,65 @@ def import_softable_pma_from_xls_for_IO(fn, group='primary'):
 
     # return!
     return extracts
+
+
+@bp.route('/get_included_papers_and_selections')
+@login_required
+def get_included_papers_and_selections():
+    '''
+    Get the included papers and the decisions of selection for outcomes
+    '''
+    project_id = request.args.get('project_id')
+    cq_abbr = request.args.get('cq_abbr')
+
+    if cq_abbr is None:
+        cq_abbr = 'default'
+
+    # get all papers
+    papers = srv_paper.get_included_papers_by_cq(
+        project_id, 
+        cq_abbr
+    )
+        
+    # get all extracts
+    # itable, pwma, subg, nma
+    extracts = dora.get_extracts_by_project_id_and_cq(
+        project_id,
+        cq_abbr
+    )
+
+    # extend the paper meta with a new attribute
+    # outcome_selections
+    # and make a pid -> sequence mapping
+    pid2seq = {}
+    for i, paper in enumerate(papers):
+        pid2seq[paper.pid] = i
+        papers[i].meta['outcome_selections'] = []
+
+    # check each extract
+    for extract in extracts:
+        for pid in extract.data:
+            if pid in pid2seq:
+                seq = pid2seq[pid]
+                if extract.data[pid]['is_selected']:
+                    # this paper is selected for this outcome
+                    papers[seq].meta['outcome_selections'].append(
+                        extract.abbr
+                    )
+            else:
+                # something wrong, this study should be there
+                # but also maybe excluded
+                # so, just ignore
+                pass
+    
+    json_papers = [ p.as_very_simple_dict() for p in papers ]
+    json_extracts = [ extr.as_dict() for extr in extracts ]
+    # json_extracts = [ extr.as_simple_dict() for extr in extracts ]
+
+    ret = {
+        'success': True,
+        'msg': '',
+        'papers': json_papers,
+        'extracts': json_extracts
+    }
+    return jsonify(ret)

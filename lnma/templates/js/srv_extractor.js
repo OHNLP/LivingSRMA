@@ -13,6 +13,7 @@ var srv_extractor = {
         update_extract_meta: "[[ url_for('extractor.update_extract_meta') ]]",
         update_extract_data: "[[ url_for('extractor.update_extract_data') ]]",
         update_extract_incr_data: "[[ url_for('extractor.update_extract_incr_data') ]]",
+        update_extract_coe_meta: "[[ url_for('extractor.update_extract_coe_meta') ]]",
 
         copy_extract: "[[ url_for('extractor.copy_extract') ]]",
         delete_extract: "[[ url_for('extractor.delete_extract') ]]",
@@ -182,6 +183,28 @@ var srv_extractor = {
             success: callback,
             error: function(jqXHR, textStatus, errorThrown) {
                 jarvis.toast('Something wrong when saving the updated data.', 'alert');
+                console.error(textStatus, errorThrown);
+            }
+        });
+    },
+
+    update_extract_coe_meta: function(
+        extract_id,
+        coe,
+        callback
+    ) {
+        $.ajax({
+            type: 'POST',
+            dataType: 'json',
+            url: this.url.update_extract_coe_meta,
+            data: {
+                extract_id:extract_id, 
+                coe:JSON.stringify(coe)
+            },
+            cache: false,
+            success: callback,
+            error: function(jqXHR, textStatus, errorThrown) {
+                jarvis.toast('Something wrong when saving the updated CoE information.', 'alert');
                 console.error(textStatus, errorThrown);
             }
         });

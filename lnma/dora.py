@@ -1726,6 +1726,33 @@ def update_extract_data(project_id, oc_type, abbr, data):
     return extract
 
 
+def update_extract_coe_meta(extract_id, coe):
+    '''
+    Update the CoE meta data of an existing extract
+    '''
+    extract = Extract.query.filter(
+        Extract.extract_id == extract_id
+    ).first()
+
+    # TODO check if not exists
+
+    # update
+    extract.meta['coe'] = coe
+
+    # update the coe detail
+    extract.meta['coe']['date_updated'] = util.get_today_date_str()
+    extract.meta['coe']['pids'] = extract.get_pids_selected()
+
+    # flag update
+    flag_modified(extract, "meta")
+
+    # commit this
+    db.session.add(extract)
+    db.session.commit()
+
+    return extract
+
+
 def update_extract_incr_data(project_id, oc_type, abbr, data):
     '''
     Update the existing extract data by the increamental data

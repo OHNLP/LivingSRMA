@@ -111,13 +111,14 @@ html {
                     <th>#</th>
                     <th>NCT</th>
                     <th>PID</th>
+                    <th>{{ papers.length }} studies</th>
                     <th v-if="has_coe_rob()"
-                        title="Certainty of Evidence Status"
+                        title="Risk of Bias in iTable"
+                        class="text-center"
                         width="120px">
                         <i class="fas fa-book"></i>
-                        CoE (iTable)
+                        Risk of Bias
                     </th>
-                    <th>{{ papers.length }} studies</th>
                     <th>Outcomes</th>
                     <th>&nbsp;</th>
                 </tr>
@@ -137,7 +138,14 @@ html {
                     <td v-on:click="on_click_paper(paper)">
                         {{ paper.pid }}
                     </td>
-                    <td v-if="has_coe_rob()">
+                    <td class="paper-table-body-td-author"
+                        v-on:click="on_click_paper(paper)">
+                        <div class="paper-table-body-td-author">
+                            {{ paper.short_name }}
+                        </div>
+                    </td>
+                    <td v-if="has_coe_rob()"
+                        class="text-center">
                         <span class="mr-2"
                             :class="'rob-rst-icon-' + get_coe_rob_value(paper.pid, 'COE_RCT_ROB_OVERALL_AJ')">
                             <i class="far fa-user"></i>
@@ -151,12 +159,6 @@ html {
                                 {{ get_coe_rob_value(paper.pid, 'COE_RCT_ROB_OVERALL_AR') }}
                             </span>
                         </span>
-                    </td>
-                    <td class="paper-table-body-td-author"
-                        v-on:click="on_click_paper(paper)">
-                        <div class="paper-table-body-td-author">
-                            {{ paper.short_name }}
-                        </div>
                     </td>
                     <td>
                         {{ paper.meta.outcome_selections.length }}

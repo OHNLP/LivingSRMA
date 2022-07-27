@@ -1035,6 +1035,18 @@ class Extract(db.Model):
         return n
 
     
+    def get_pids_selected(self):
+        '''
+        Get the pids of the selected papers
+        '''
+        pids = []
+        for pid in self.data:
+            if self.data[pid]['is_selected']:
+                pids.append(pid)
+
+        return pids
+
+    
     def get_short_title(self):
         '''
         Get a short title for this extract
@@ -1069,6 +1081,9 @@ class Extract(db.Model):
         if 'certainty' not in self.meta:
             self.meta['certainty'] = self.get_certainty()
 
+        if 'coe' not in self.meta:
+            self.meta['coe'] = self.get_coe()
+
         return ret
 
 
@@ -1080,7 +1095,7 @@ class Extract(db.Model):
         '''
         full_dict = self.as_dict()
 
-        for attr in ['data', 'project_id', 'extract_id']:
+        for attr in ['data', 'project_id']:
             if attr in full_dict:
                 del full_dict[attr]
 
@@ -1244,6 +1259,27 @@ class Extract(db.Model):
             ret = copy.deepcopy(settings.OC_TYPE_TPL['pwma']['default']['certainty'])
             
         return ret
+
+
+    def get_coe(self):
+        '''
+        Get certainty of evidence for evaluation
+        '''
+        if 'coe' in self.meta:
+            return self.meta['coe']
+
+        if self.oc_type == 'pwma':
+            ret = copy.deepcopy(settings.OC_TYPE_TPL['pwma']['default']['coe'])
+
+        elif self.oc_type == 'nma':
+            ret = copy.deepcopy(settings.OC_TYPE_TPL['nma']['default']['coe'])
+
+        else:
+            # not need for itable in fact
+            ret = copy.deepcopy(settings.OC_TYPE_TPL['pwma']['default']['coe'])
+            
+        return ret
+        
 
 
     def get_treatments_in_data(self):

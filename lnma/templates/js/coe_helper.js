@@ -545,29 +545,44 @@ var coe_helper = {
         var imprecision = parseInt(''+decision.imprecision);
         var publication_bias = parseInt(''+decision.publication_bias);
 
-        var sum = 
-            risk_of_bias +
-            inconsistency +
-            indirectness +
-            imprecision +
-            publication_bias;
+        var vals = [
+            risk_of_bias,
+            inconsistency,
+            indirectness,
+            imprecision,
+            publication_bias
+        ];
+        var cnt = {
+            0: 0,
+            1: 0,
+            2: 0,
+            3: 0,
+            4: 0
+        };
+        for (let i = 0; i < vals.length; i++) {
+            const val = vals[i];
+            cnt[val] += 1;
+        }
 
         var ret = 0;
-        if (sum < 5) {
-            // which means one of the values is not available
-            ret = 0;
-        } else if (sum == 5) {
+        if (cnt[1] == 5) {
             // 1 in all factors
             ret = 1;
-        } else if (sum == 6) {
+            
+        } else if (cnt[1] == 4 && cnt[2] == 1) {
             // 2 in any one factor
             ret = 2;
-        } else if (sum == 7) {
+
+        } else if ((cnt[1] == 4 && cnt[3] == 1) || 
+                   (cnt[1] == 3 && cnt[2] == 2) ||
+                   (cnt[1] == 3 && cnt[2] == 1 && cnt[3] == 1)) {
             // 3 in any one factor or 2 in two factors
             ret = 3;
-        } else if (sum >= 8) {
+
+        } else if (cnt[4] >= 1 || cnt[3] >= 2 || cnt[2] >= 3) {
             // 4 in any one factor, or 3 in two factors, or 2 in three
             ret = 4;
+
         } else {
             // what???
         }
