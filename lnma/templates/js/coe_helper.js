@@ -597,6 +597,38 @@ var coe_helper = {
     },
 
     ///////////////////////////////////////////////////////////////////////////
+    // Inconsistency
+    ///////////////////////////////////////////////////////////////////////////
+
+    judge_inconsistency: function(i2) {
+        if (i2 < 0.5) {
+            return '0'; // No inconsistency
+        } else if (i2 <= 0.75) {
+            return '1'; // Serious inconsistency
+        } else {
+            return '2'; // Very serious
+        }
+    },
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Publication Bias
+    ///////////////////////////////////////////////////////////////////////////
+
+    judge_publication_bias: function(n_stus, eggers_test_p_value) {
+        if (n_stus < 10) {
+            return '0'; // Not applicable
+        } 
+
+        // ok now > 10
+        if (eggers_test_p_value < 0.05) {
+            return '2'; // Serious publication bias
+        }
+
+        return '1'; // No serious publication bias
+    },
+
+
+    ///////////////////////////////////////////////////////////////////////////
     // General CoE functions
     ///////////////////////////////////////////////////////////////////////////
 
@@ -696,7 +728,7 @@ var coe_helper = {
         var ret = "NA";
 
         // check if the followings
-        if (['risk_of_bias', 'imprecision', 'inconsistency', 'indirectness'].includes(domain)) {
+        if (['risk_of_bias', 'imprecision', 'indirectness'].includes(domain)) {
             if (['0', '1', '2', '3', '4', 'L', 'M', 'H', 'NA'].includes(v)) {
                 ret = {
                     '0': 'Not specified',
@@ -708,6 +740,18 @@ var coe_helper = {
                     'M': 'Some concerns',
                     'H': 'High risk',
                     'NA': 'Not decided'
+                }[v];
+            } else {
+                ret = 'NA';
+            }
+
+        } else if (['inconsistency'].includes(domain)) {
+            if (['0', '1', '2', '3'].includes(v)) {
+                ret = {
+                    '0': 'Not inconsistency',
+                    '1': 'Serious inconsistency',
+                    '2': 'Very serious inconsistency',
+                    '3': 'Very serious inconsistency',
                 }[v];
             } else {
                 ret = 'NA';

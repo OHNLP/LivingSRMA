@@ -279,4 +279,116 @@ def pwma_prcm():
     # print(ret)
 
     return jsonify(ret)
+
+
+@bp.route('/PWMA_PRCM_COE', methods=['GET', 'POST'])
+@apikey_required
+def pwma_prcm_coe():
+    '''
+    Pairwise Meta-Analysis for primary and cumulative with CoE
+    '''
+    if request.method=='GET':
+        return render_template('rplt/PWMA_PRCM_COE.html')
+
+    # prepare the return object
+    ret = {
+        'success': False,
+        'msg': '',
+        'analysis_method': 'pwma_prcm',
+        'img': {
+            'outplt1': { 'url': '' },
+            'cumuplt': { 'url': '' }
+        }
+    }
+
+    # analyzer model
+    am = request.form.get('am', '').strip()
+    # measure_of_effect
+    sm = request.form.get('sm', '').strip()
+    # is_hakn
+    hk = request.form.get('hk', '').strip()
+
+    # check am
+    if am not in set(['FOREST', 'FORESTDATA']):
+        ret['msg'] = 'Unsupported analyzer'
+        return jsonify(ret)
+    
+    # check rs
+    if sm not in set(['OR', 'RR', 'RD']):
+        ret['msg'] = 'Unsupported measure of effect'
+        return jsonify(ret)
+    
+    # check hk
+    if hk not in set(['TRUE', 'FALSE']):
+        ret['msg'] = 'Unsupported value for Hartung-Knapp adjustment'
+        return jsonify(ret)
+
+    # extract data
+    try:
+        rs = request.form.get('rs')
+        rs = json.loads(rs)
+    except Exception as err:
+        print('wrong rs:', err)
+        ret['msg'] = 'Input data is missing or not valid JSON format.'
+        return jsonify(ret) 
+
+    # create a config
+    cfg = {
+        'analyzer_model': 'PWMA_PRCM',
+        'measure_of_effect': sm,
+        'is_hakn': hk,
+        'fixed_or_random': 'random',
+        'input_format': 'CAT_RAW',
+        'sort_by': 'year',
+        'pooling_method': 'MH',
+        'tau_estimation_method': 'DL',
+        'assumed_baseline': 100
+    }
+
+    # set the params for callback usage
+    ret['params'] = {
+        'am': am,
+        'sm': sm,
+        'hk': hk
+    }
+    ret['params'].update(cfg)
+
+    try:
+        result = rplt_analyzer.analyze_pwma_prcm(rs, cfg, has_cumu=True)
+        # TODO the return should be checked here
+        # but most of time, the figure will be generated.
+        if result['success']:
+            ret['success'] = True
+            if am == 'FOREST':
+                ret['img']['outplt1']['url'] = url_for('index.f', fn=result['params']['fn_outplt1'])
+                ret['img']['cumuplt']['url'] = url_for('index.f', fn=result['params']['fn_cumuplt'])
+            elif am == 'FORESTDATA': 
+                ret['data'] = result['data']
+
+            # merge the rs value
+            # in this proecess, add the pid and other information to results
+            for i, r in enumerate(rs):
+                for k in r:
+                    ret['data']['primma']['stus'][i][k] = r[k]
+
+            # the cumulative may NOT be in the results if there is only one record
+            if 'cumuma' in ret['data'] and ret['data']['cumuma'] is not None:
+                for i, r in enumerate(rs):
+                    for k in r:
+                        ret['data']['cumuma']['stus'][i][k] = r[k]
+                        
+        else:
+            ret['msg'] = result['msg']
+
+    except Exception as err:
+        print('Handling run-time error:', err)
+
+        if current_app.config['DEBUG']:
+            raise err
+
+        ret['msg'] = 'System error, please check input data.'
+
+    # print(ret)
+
+    return jsonify(ret)
     

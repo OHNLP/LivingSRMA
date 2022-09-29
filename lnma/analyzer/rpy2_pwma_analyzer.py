@@ -435,11 +435,19 @@ def analyze_pwma_prcm(rs, cfg, has_cumu=True):
         method_tau=cfg['tau_estimation_method']
     )
 
+    # get the bias
+    r_bias = meta.metabias(
+        r_prim,
+        method = 'linreg'
+    )
+
     # convert to R json object
     r_j_prim = jsonlite.toJSON(r_prim, force=True)
+    r_j_bias = jsonlite.toJSON(r_bias, force=True)
 
     # convert to Python JSON object
     j_prim = json.loads(r_j_prim[0])
+    j_bias = json.loads(r_j_bias[0])
 
     # for compability
     j = {
@@ -463,11 +471,16 @@ def analyze_pwma_prcm(rs, cfg, has_cumu=True):
         'params': cfg,
         'success': True,
         'data': {
-            'primma': _meta_trans_metabin(j, cfg)
+            'primma': _meta_trans_metabin(j, cfg),
+            'raw': {
+                'prim': j_prim,
+                'bias': j_bias
+            }
         }
     }
     if has_cumu:
         ret['data']['cumuma'] = _meta_trans_metacum(j, cfg)
+        ret['data']['raw']['cumu'] = j_cumu
 
     return ret
 
