@@ -13,29 +13,16 @@ var coe_helper = {
     HIGH: 'H',
     SOME: 'M',
 
-    isNA: function(v) {
-        if (v == null || v == 'NA' || v == '') {
-            return true;
-        }
-        return false;
-    },
+    // level
+    L0: '0',
+    L1: '1',
+    L2: '2',
+    L3: '3',
+    L4: '4',
 
-    fmt_value: function(v) {
-        if (this.isNA(v)) {
-            return 'NA';
-        }
-
-        // convert to upper case 
-        var _v = v.toLocaleUpperCase();
-
-        if (['Y', 'PY', 'PN', 'N', 'NI'].indexOf(_v)>=0) {
-            return _v;
-
-        } else {
-            // what???
-            return 'NA';
-        }
-    },
+    ///////////////////////////////////////////////////////////////////////////
+    // Risk of bias
+    ///////////////////////////////////////////////////////////////////////////
 
     fmt_domain: function(v) {
         if (this.isNA(v)) {
@@ -601,12 +588,14 @@ var coe_helper = {
     ///////////////////////////////////////////////////////////////////////////
 
     judge_inconsistency: function(i2) {
-        if (i2 < 0.5) {
-            return '0'; // No inconsistency
-        } else if (i2 <= 0.75) {
-            return '1'; // Serious inconsistency
-        } else {
-            return '2'; // Very serious
+        with(this) {
+            if (i2 < 0.5) {
+                return L0; // No inconsistency
+            } else if (i2 <= 0.75) {
+                return L1; // Serious inconsistency
+            } else {
+                return L2; // Very serious
+            }
         }
     },
 
@@ -621,10 +610,31 @@ var coe_helper = {
 
         // ok now > 10
         if (eggers_test_p_value < 0.05) {
-            return '2'; // Serious publication bias
+            return '2'; // Strongly suspected
         }
 
-        return '1'; // No serious publication bias
+        return '1'; // Undetected
+    },
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Imprecision
+    ///////////////////////////////////////////////////////////////////////////
+
+    judge_imprecision: function(n_stus, eggers_test_p_value) {
+        with(this) {
+            return L0;
+        }
+        
+    },
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Indirectness
+    ///////////////////////////////////////////////////////////////////////////
+
+    judge_indirectness: function(n_stus, eggers_test_p_value) {
+        with(this) {
+            return L0;
+        }
     },
 
 
@@ -687,6 +697,27 @@ var coe_helper = {
 
     /**
      * Get the value of a specific domain in coe
+     * 
+     * {
+     *     rj: {
+     *         decision: {
+     *             risk_of_bias: VALUE,
+     *             inconsistency: VALUE,
+     *             imprecision: VALUE,
+     *             publication_bias: VALUE,
+     *             indirectness: VALUE,
+     *         }
+     *     },
+     *     ar:  {
+     *         decision: {
+     *             risk_of_bias: VALUE,
+     *             inconsistency: VALUE,
+     *             imprecision: VALUE,
+     *             publication_bias: VALUE,
+     *             indirectness: VALUE,
+     *         }
+     *     }
+     * }
      * 
      * @param {Object} coe Certainty of Evidence object
      */
@@ -809,5 +840,35 @@ var coe_helper = {
         }
 
         return ret;
-    }
+    },
+
+
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Helpers for CoE
+    ///////////////////////////////////////////////////////////////////////////
+
+    isNA: function(v) {
+        if (v == null || v == 'NA' || v == '') {
+            return true;
+        }
+        return false;
+    },
+
+    fmt_value: function(v) {
+        if (this.isNA(v)) {
+            return 'NA';
+        }
+
+        // convert to upper case 
+        var _v = v.toLocaleUpperCase();
+
+        if (['Y', 'PY', 'PN', 'N', 'NI'].indexOf(_v)>=0) {
+            return _v;
+
+        } else {
+            // what???
+            return 'NA';
+        }
+    },
 };

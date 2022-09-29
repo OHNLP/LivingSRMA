@@ -6,19 +6,36 @@ PWMA Primary + Cumulative Analysis API Demo
 
 {% block style %}
 <style>
-.code {
-    font-family: 'Courier New', Courier, monospace;
-    background-color: #eeeeee;
-    font-size: 13px;
-}
-.fact {
-    font-style: italic;
-    padding: 0 0 0 1em;
-}
-.result {
-    font-weight: bold;
-    padding: 0 0 0 1em;
-}
+    .code {
+        font-family: 'Courier New', Courier, monospace;
+        background-color: #eeeeee;
+        font-size: 13px;
+    }
+
+    .fact {
+        font-style: italic;
+        padding: 0 0 0 1em;
+    }
+
+    .result {
+        font-weight: bold;
+        padding: 0 0 0 1em;
+    }
+
+    .box {
+        position: relative;
+    }
+
+    .defs {
+        width: 220px;
+        border: 1px solid #DADADA;
+        padding: 10px;
+        margin: 5px;
+        position: absolute;
+        top: 0;
+        right: 0;
+        line-height: 1em;
+    }
 </style>
 {% endblock %}
 
@@ -29,8 +46,11 @@ PWMA Primary + Cumulative Analysis API Demo
             <h2>RPLT PWMA + CoE API Demo</h2>
             <p>
                 RPLT PWMA + CoE API Test for <span class="code">/rplt/PWMA_PRCM_COE</span>. <br>
-                The return URL is the relative path to root, please add to absolute path in your own code. The server supports cross-domain access and HTTP header "Access-Control-Allow-Origin" has been added, so this service can be accessed from any server.
-                The usage of this web API in JavaScript is also available in the source code of this page for reference. <br>
+                The return URL is the relative path to root, please add to absolute path in your own code. The server
+                supports cross-domain access and HTTP header "Access-Control-Allow-Origin" has been added, so this
+                service can be accessed from any server.
+                The usage of this web API in JavaScript is also available in the source code of this page for reference.
+                <br>
                 There are 4 parameters:
             </p>
             <div>
@@ -40,19 +60,21 @@ PWMA Primary + Cumulative Analysis API Demo
                     <div class="col-sm-9">
                         <input type="text" class="form-control" id="am" value="FORESTDATA">
                         <small id="amHelp" class="form-text text-muted">
-                            Analyzer Model: The R script token name for generating this figure. Available values include: <br>
+                            Analyzer Model: The R script token name for generating this figure. Available values
+                            include: <br>
                             FORESTDATA: get the forest plot results only <br>
                             FOREST: get the forest plot image only<br>
                         </small>
                     </div>
- 
+
                 </div>
 
                 <div class="form-group row">
                     <label for="sm" class="col-sm-3 col-form-label">sm</label>
                     <div class="col-sm-9">
                         <input type="text" class="form-control" id="sm" value="OR">
-                        <small id="smHelp" class="form-text text-muted">The measure of effect. Available values include: <br>
+                        <small id="smHelp" class="form-text text-muted">The measure of effect. Available values include:
+                            <br>
                             OR, RR, or RD.</small>
                     </div>
                 </div>
@@ -61,7 +83,9 @@ PWMA Primary + Cumulative Analysis API Demo
                     <label for="rs" class="col-sm-3 col-form-label">rs</label>
                     <div class="col-sm-9">
                         <textarea class="form-control code" id="rs" rows="20" style="font-size: 9px;"></textarea>
-                        <small id="rsHelp" class="form-text text-muted">The JSON data for generating plots. Each study is an object, with 6 attributes (case sensitive). The value of this parameter is a stringified JSON object.</small>
+                        <small id="rsHelp" class="form-text text-muted">The JSON data for generating plots. Each study
+                            is an object, with 6 attributes (case sensitive). The value of this parameter is a
+                            stringified JSON object.</small>
                     </div>
                 </div>
 
@@ -69,7 +93,8 @@ PWMA Primary + Cumulative Analysis API Demo
                     <label for="hk" class="col-sm-3 col-form-label">hk</label>
                     <div class="col-sm-9">
                         <input type="text" class="form-control" id="hk" value="FALSE">
-                        <small id="hkHelp" class="form-text text-muted">The Hartung-Knapp adjustment setting, TRUE or FALSE</small>
+                        <small id="hkHelp" class="form-text text-muted">The Hartung-Knapp adjustment setting, TRUE or
+                            FALSE</small>
                     </div>
                 </div>
 
@@ -77,14 +102,15 @@ PWMA Primary + Cumulative Analysis API Demo
                     <label for="apikey" class="col-sm-3 col-form-label">apikey
                     </label>
                     <div class="col-sm-9">
-                        <input type="text" class="form-control" id="apikey" value="[[ config['settings'].API_SYSTEM_APIKEYS[0]|show_if_local ]]">
+                        <input type="text" class="form-control" id="apikey"
+                            value="[[ config['settings'].API_SYSTEM_APIKEYS[0]|show_if_local ]]">
                         <small id="apikeyHelp" class="form-text text-muted">
                             For the security of this service, API Key is required for authentication.
                         </small>
                     </div>
- 
+
                 </div>
-                
+
                 <div class="form-group row">
                     <div class="col-sm-10">
                         <button onclick="get_data();" class="btn btn-primary">
@@ -97,89 +123,141 @@ PWMA Primary + Cumulative Analysis API Demo
 
 
         <div class="col-md-7" style="padding-top: 20px;">
-            
+
             <h4>Server Response: </h4>
             <pre id="resp" style="width: 100%; max-height: 200px;" class="code">
             </pre>
 
             <div id="app_coe">
-                <div v-if="pma != null">                        
+                <div v-if="pma != null">
                     <h4>Certainty of Evidence</h4>
 
-                    <h5>Risk of Bias</h5>
 
-                    <p class="fact">
+                    <div class="box">
+                        <h5>Risk of Bias</h5>
+                        <p class="fact">
+                            All Low risk =  <br>
+                            All high risk / some concerns = <br>
+                        </p>
 
-                    </p>
+                        <p class="result">
+                            Result =
+                        </p>
 
-                    <p class="result">
-                        Result = 
-                    </p>
+                        <p class="defs">
+                            0: Not applicable <br>
+                            1: No serious <br>
+                            2: Serious <br>
+                            3: Very serious <br>
+                        </p>
 
-                    <hr>
-
-
-                    
-                    <h5>Inconsistency</h5>
-
-                    <p class="fact">
-                        I<sup>2</sup> = {{ pma.data.primma.heterogeneity.i2 }}
-                    </p>
-
-                    <p class="result">
-                        Result = {{ coe_helper.judge_inconsistency(pma.data.primma.heterogeneity.i2) }}
-                        ({{ coe_helper.val_to_label(coe_helper.judge_inconsistency(pma.data.primma.heterogeneity.i2), 'inconsistency') }})
-                    </p>
-                    <hr>
+                        <hr>
+                    </div>
 
 
+                    <div class="box">
 
-                    <h5>Publication Bias</h5>
-                    <p class="fact">
-                        N = {{ pma.data.raw.bias.x.k[0] }} <br>
-                        Egger's Test p = {{ pma.data.raw.bias['p.value'][0] }}
-                    </p>
+                        <h5>Inconsistency</h5>
 
-                    <p class="result">
-                        Result = {{ coe_helper.judge_publication_bias(pma.data.raw.bias.x.k[0], pma.data.raw.bias['p.value'][0]) }}
-                        ({{ coe_helper.val_to_label(coe_helper.judge_publication_bias(pma.data.raw.bias.x.k[0], pma.data.raw.bias['p.value'][0]), 'publication_bias') }})
-                    </p>
+                        <p class="fact">
+                            I<sup>2</sup> = {{ pma.data.primma.heterogeneity.i2 }}
+                        </p>
 
-                    <hr>
+                        <p class="result">
+                            Result = {{ coe_helper.judge_inconsistency(pma.data.primma.heterogeneity.i2) }}
+                            ({{
+                            coe_helper.val_to_label(coe_helper.judge_inconsistency(pma.data.primma.heterogeneity.i2),
+                            'inconsistency') }})
+                        </p>
 
-
-
-                    <h5>Imprecision</h5>
-                    <p class="fact">
-                        Sample Size N = {{ get_sample_size() }} <br>
-                        Lower CI = {{ pma.data.primma.model.random.bt_lower }} <br>
-                        Upper CI = {{ pma.data.primma.model.random.bt_upper }} <br>
-                        Upper - Lower = {{ pma.data.primma.model.random.bt_upper - pma.data.primma.model.random.bt_lower }} <br>
-                        OIS = ?
-                    </p>
-
-
-                    <p class="result">
-                        Result = 
-                    </p>
-                
-                    <hr>
+                        <p class="defs">
+                            0: Not applicable <br>
+                            1: No serious <br>
+                            2: Serious <br>
+                            3: Very serious <br>
+                        </p>
+                        <hr>
+                    </div>
 
 
 
+                    <div class="box">
+
+                        <h5>Publication Bias</h5>
+                        <p class="fact">
+                            N = {{ pma.data.raw.bias.x.k[0] }} <br>
+                            Egger's Test p = {{ pma.data.raw.bias['p.value'][0] }}
+                        </p>
+
+                        <p class="result">
+                            Result = {{ coe_helper.judge_publication_bias(pma.data.raw.bias.x.k[0],
+                            pma.data.raw.bias['p.value'][0]) }}
+                            ({{ coe_helper.val_to_label(coe_helper.judge_publication_bias(pma.data.raw.bias.x.k[0],
+                            pma.data.raw.bias['p.value'][0]), 'publication_bias') }})
+                        </p>
+
+                        <p class="defs">
+                            0: Not applicable <br>
+                            1: Undeteced   <br>
+                            2: Strongly suspected    <br>
+                        </p>
+
+                        <hr>
+                    </div>
 
 
-                    <h5>Indirectness</h5>
-                    <p class="fact">
-                        
-                    </p>
+
+                    <div class="box">
+                        <h5>Imprecision</h5>
+                        <p class="fact">
+                            Sample Size N = {{ get_sample_size() }} <br>
+                            Lower CI = {{ pma.data.primma.model.random.bt_lower }} <br>
+                            Upper CI = {{ pma.data.primma.model.random.bt_upper }} <br>
+                            Upper - Lower = {{ pma.data.primma.model.random.bt_upper -
+                            pma.data.primma.model.random.bt_lower }} <br>
+                            OIS = ?
+                        </p>
 
 
-                    <p class="result">
-                        Result = 
-                    </p>
+                        <p class="result">
+                            Result =
+                        </p>
 
-                    <hr>
+                        <p class="defs">
+                            0: Not applicable <br>
+                            1: No serious <br>
+                            2: Serious <br>
+                            3: Very serious <br>
+                        </p>
+
+                        <hr>
+                    </div>
+
+
+
+
+
+                    <div class="box">
+                        <h5>Indirectness</h5>
+                        <p class="fact">
+                            ? <br>
+                        </p>
+
+
+                        <p class="result">
+                            Result =
+                        </p>
+
+                        <p class="defs">
+                            0: Not applicable <br>
+                            1: No serious <br>
+                            2: Serious <br>
+                            3: Very serious <br>
+                        </p>
+
+                        <hr>
+
+                    </div>
 
                 </div>
                 <div v-else>
@@ -200,85 +278,85 @@ PWMA Primary + Cumulative Analysis API Demo
 <script src="https://cdn.jsdelivr.net/npm/vue@2.6.11"></script>
 
 <script>
-{% include 'js/coe_helper.js' %}
+    {% include 'js/coe_helper.js' %}
 
-var rs_sample = [
-    { study: 'Raskob et al', year: 2017, Et: 41, Nt: 522, Ec: 59, Nc: 524, pid: '1234' }, 
-    { study: 'Young et al', year: 2018, Et: 8, Nt: 203, Ec: 18, Nc: 203, pid: '2345' }, 
-    { study: 'McBane et al', year: 2019, Et: 1, Nt: 145, Ec: 9, Nc: 142, pid: '3456' }, 
-    { study: 'Don et al', year: 2020, Et:32, Nt: 576, Ec: 46, Nc: 579, pid: '4567' }, 
-    { study: 'Kim et al', year: 2021, Et:18, Nt: 276, Ec: 26, Nc: 279, pid: '45678' },
-    { study: 'Aaskob et al', year: 2017, Et: 45, Nt: 512, Ec: 55, Nc: 524, pid: '1234' }, 
-    { study: 'Boung et al', year: 2018, Et: 18, Nt: 213, Ec: 18, Nc: 202, pid: '2341' }, 
-    { study: 'DcBane et al', year: 2019, Et: 2, Nt: 125, Ec: 9, Nc: 141, pid: '3451' }, 
-    { study: 'Eon et al', year: 2020, Et:30, Nt: 546, Ec: 43, Nc: 573, pid: '4561' }, 
-    { study: 'Fim et al', year: 2021, Et:15, Nt: 306, Ec: 25, Nc: 272, pid: '45671' },
-];
+    var rs_sample = [
+        { study: 'Raskob et al', year: 2017, Et: 41, Nt: 522, Ec: 59, Nc: 524, pid: '1234' },
+        { study: 'Young et al', year: 2018, Et: 8, Nt: 203, Ec: 18, Nc: 203, pid: '2345' },
+        { study: 'McBane et al', year: 2019, Et: 1, Nt: 145, Ec: 9, Nc: 142, pid: '3456' },
+        { study: 'Don et al', year: 2020, Et: 32, Nt: 576, Ec: 46, Nc: 579, pid: '4567' },
+        { study: 'Kim et al', year: 2021, Et: 18, Nt: 276, Ec: 26, Nc: 279, pid: '45678' },
+        { study: 'Aaskob et al', year: 2017, Et: 45, Nt: 512, Ec: 55, Nc: 524, pid: '1234' },
+        { study: 'Boung et al', year: 2018, Et: 18, Nt: 213, Ec: 18, Nc: 202, pid: '2341' },
+        { study: 'DcBane et al', year: 2019, Et: 2, Nt: 125, Ec: 9, Nc: 141, pid: '3451' },
+        { study: 'Eon et al', year: 2020, Et: 30, Nt: 546, Ec: 43, Nc: 573, pid: '4561' },
+        { study: 'Fim et al', year: 2021, Et: 15, Nt: 306, Ec: 25, Nc: 272, pid: '45671' },
+    ];
 
-var app_coe = {
-    vpp: null,
+    var app_coe = {
+        vpp: null,
 
-    init: function() {
-        this.vpp = new Vue({
-            el: '#app_coe',
-            data: {
-                rs: null,
-                pma: null,
-                coe_helper: coe_helper
-            },
-
-            methods: {
-                get_sample_size: function() {
-                    var n = 0;
-                    for (let i = 0; i < this.rs.length; i++) {
-                        const r = this.rs[i];
-                        n += r.Nt;
-                        n += r.Nc;
-                    }
-                    return n;
+        init: function () {
+            this.vpp = new Vue({
+                el: '#app_coe',
+                data: {
+                    rs: null,
+                    pma: null,
+                    coe_helper: coe_helper
                 },
 
-            }
-        });
+                methods: {
+                    get_sample_size: function () {
+                        var n = 0;
+                        for (let i = 0; i < this.rs.length; i++) {
+                            const r = this.rs[i];
+                            n += r.Nt;
+                            n += r.Nc;
+                        }
+                        return n;
+                    },
+
+                }
+            });
+        }
     }
-}
 
-app_coe.init();
+    app_coe.init();
 
-function get_data() {
-    var params = {
-        am: $('#am').val(),
-        sm: $('#sm').val(),
-        rs: $('#rs').val(),
-        hk: $('#hk').val(),
-        apikey: $('#apikey').val()
-    };
-    console.log(params);
+    function get_data() {
+        var params = {
+            am: $('#am').val(),
+            sm: $('#sm').val(),
+            rs: $('#rs').val(),
+            hk: $('#hk').val(),
+            apikey: $('#apikey').val()
+        };
+        console.log(params);
 
-    app_coe.vpp.$data.rs = JSON.parse(params.rs);
+        app_coe.vpp.$data.rs = JSON.parse(params.rs);
 
-    // clear the response area
-    $('#resp').html('Waiting for response ....');
-    $('#img-1').attr('src', '');
-    $('#img-2').attr('src', '');
+        // clear the response area
+        $('#resp').html('Waiting for response ....');
+        $('#img-1').attr('src', '');
+        $('#img-2').attr('src', '');
 
-    var base = '';
-    // var base = 'https://workspace.network-meta-analysis.com/';
-    $.post(
-        base + '/rplt/PWMA_PRCM_COE',
-        params,
-        function(data) {
-            console.log('* get return', data);
+        var base = '';
+        // var base = 'https://workspace.network-meta-analysis.com/';
+        $.post(
+            base + '/rplt/PWMA_PRCM_COE',
+            params,
+            function (data) {
+                console.log('* get return', data);
 
-            app_coe.vpp.$data.pma = data;
+                app_coe.vpp.$data.pma = data;
 
-            $('#resp').html(JSON.stringify(data, null, 2));
-            // $('#img-1').attr('src', base + data.img['outplt1'].url);
-            // $('#img-2').attr('src', base + data.img['cumuplt'].url);
-        }, 'json'
-    )
-}
-// show the JSON content of rs in textarea
-$('#rs').val(JSON.stringify(rs_sample, null, 2));
+                $('#resp').html(JSON.stringify(data, null, 2));
+                // $('#img-1').attr('src', base + data.img['outplt1'].url);
+                // $('#img-2').attr('src', base + data.img['cumuplt'].url);
+            }, 'json'
+        )
+    }
+    // show the JSON content of rs in textarea
+    $('#rs').val(JSON.stringify(rs_sample, null, 2));
 </script>
 {% endblock %}

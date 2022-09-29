@@ -13,6 +13,7 @@ __all__ = [
     # helpers
     'data_helper',
     'rpadapter',
+    'coe_helper',
 
     # special for pub?
     'pwma_analyzer_v2',
