@@ -354,7 +354,7 @@ def pwma_prcm_coe():
     ret['params'].update(cfg)
 
     try:
-        result = rplt_analyzer.analyze_pwma_prcm(rs, cfg, has_cumu=True)
+        result = rplt_analyzer.analyze_pwma_prcm_coe(rs, cfg, has_cumu=True)
         # TODO the return should be checked here
         # but most of time, the figure will be generated.
         if result['success']:

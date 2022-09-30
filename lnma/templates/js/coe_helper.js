@@ -583,6 +583,43 @@ var coe_helper = {
         return dist;
     },
 
+    is_oc_rob_all_low_risk: function(robs) {
+        for (let i = 0; i < robs.length; i++) {
+            const rob = robs[i];
+            if (rob != 'L') {
+                return false;
+            }
+        }
+        return true;
+    },
+
+    is_oc_rob_all_high_risk_or_some_concern: function(robs) {
+        for (let i = 0; i < robs.length; i++) {
+            const rob = robs[i];
+            if (rob == 'L') {
+                return false;
+            }
+        }
+        return true;
+    },
+
+    judge_risk_of_bias: function(is_all_low, is_all_high, subg_pval, user_judgement) {
+        if (typeof(user_judgement) != 'undefined') {
+            return this.L3;
+        }
+        if (is_all_low) {
+            return this.L1;
+        }
+        if (is_all_high) {
+            return this.L2;
+        }
+        if (subg_pval < 0.05) {
+            return this.L2;
+        } else {
+            return this.L1;
+        }
+    },
+
     ///////////////////////////////////////////////////////////////////////////
     // Inconsistency
     ///////////////////////////////////////////////////////////////////////////

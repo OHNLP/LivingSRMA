@@ -28,6 +28,7 @@ from lnma.analyzer.rpadapter import _meta_trans_metaprop
 
 from lnma.analyzer.rpadapter import _meta_trans_metabin_subg
 from lnma.analyzer.rpadapter import _meta_trans_metagen_subg
+from lnma.analyzer import coe_helper
 
 
 #%% load R packages
@@ -417,6 +418,144 @@ def analyze(rs, cfg):
     return ret
 
 
+def analyze_pwma_prcm_coe(rs, cfg, has_cumu=True):
+    '''
+    Analyze the primary and cumulative and CoE
+
+    Make sure the rs is like:
+      {
+        "study": "Raskob et al",
+        "year": 2017,
+        "Et": 41,
+        "Nt": 522,
+        "Ec": 59,
+        "Nc": 524,
+        "pid": "1234",
+        "rob": "L"
+    },
+    '''
+    # create a dataframe first
+    df = pd.DataFrame(rs)
+
+    # get the primary
+    r_prim = meta.metabin(
+        df.Et, df.Nt, df.Ec, df.Nc,
+        studlab=df.study,
+        comb_random=cfg['fixed_or_random']=='random',
+        sm=cfg['measure_of_effect'],
+        hakn=True if cfg['is_hakn'] == 'TRUE' else False,
+        method=cfg['pooling_method'],
+        method_tau=cfg['tau_estimation_method']
+    )
+
+    # get the bias
+    r_bias = meta.metabias(
+        r_prim,
+        method = 'linreg'
+    )
+
+    # get the subg if needed
+    robs = df.rob.to_list()
+
+    # check all low or all high
+    is_all_low = True
+    is_all_high = True
+    j_subg = None
+    subg_pval = None
+    for r in robs:
+        if r != 'L':
+            is_all_low = False
+            break
+    
+    for r in robs:
+        if r == 'L':
+            is_all_high = False
+            break
+
+    if is_all_low:
+        risk_of_bias = coe_helper.L1
+    elif is_all_high:
+        risk_of_bias = coe_helper.L2
+    else:
+        # add a subgroup column for df
+        df['subgroup'] = df['rob'].apply(lambda v: 'L' if v == 'L' else 'H')
+        r_subg =  meta.metabin(
+            df.Et, df.Nt, df.Ec, df.Nc,
+            studlab=df.study,
+            comb_random=cfg['fixed_or_random']=='random',
+            sm=cfg['measure_of_effect'],
+            hakn=True if cfg['is_hakn'] == 'TRUE' else False,
+            method=cfg['pooling_method'],
+            method_tau=cfg['tau_estimation_method'],
+            byvar=df.subgroup
+        )
+        r_j_subg = jsonlite.toJSON(r_subg, force=True)
+        j_subg = json.loads(r_j_subg[0])
+        subg_pval = j_subg['pval.Q.b.random'][0]
+
+    risk_of_bias = coe_helper.judge_risk_of_bias(
+        is_all_low,
+        is_all_high,
+        subg_pval
+    )
+
+
+    # convert to R json object
+    r_j_prim = jsonlite.toJSON(r_prim, force=True)
+    r_j_bias = jsonlite.toJSON(r_bias, force=True)
+
+    # convert to Python JSON object
+    j_prim = json.loads(r_j_prim[0])
+    j_bias = json.loads(r_j_bias[0])
+
+    # for compability
+    j = {
+        'primma': j_prim,
+    }
+    
+    # get the cumulative
+    if has_cumu:
+        r_cumu = meta.metacum(
+            r_prim,
+            pooled=cfg['fixed_or_random'],
+            sortvar=df[cfg['sort_by']]
+        )
+        r_j_cumu = jsonlite.toJSON(r_cumu, force=True)
+        j_cumu = json.loads(r_j_cumu[0])
+        j['cumuma'] = j_cumu
+
+    # build the return
+    ret = {
+        'submission_id': 'rpy2',
+        'params': cfg,
+        'success': True,
+        'data': {
+            'primma': _meta_trans_metabin(j, cfg),
+            'raw': {
+                'prim': j_prim,
+                'bias': j_bias,
+                'subg_by_rob': j_subg
+            },
+            'coe': {
+                'risk_of_bias': risk_of_bias,
+
+                'info': {
+                    'risk_of_bias': {
+                        'is_all_low': is_all_low,
+                        'is_all_high': is_all_high,
+                        'subg_pval': subg_pval
+                    }
+                }
+            }
+        }
+    }
+    if has_cumu:
+        ret['data']['cumuma'] = _meta_trans_metacum(j, cfg)
+        ret['data']['raw']['cumu'] = j_cumu
+
+    return ret
+
+
 def analyze_pwma_prcm(rs, cfg, has_cumu=True):
     '''
     Analyze the primary and cumulative
@@ -475,7 +614,8 @@ def analyze_pwma_prcm(rs, cfg, has_cumu=True):
             'raw': {
                 'prim': j_prim,
                 'bias': j_bias
-            }
+            },
+            'coe': {}
         }
     }
     if has_cumu:

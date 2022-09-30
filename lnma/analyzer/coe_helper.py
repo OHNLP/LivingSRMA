@@ -5,8 +5,25 @@ L2 = '2' # Serious
 L3 = '3' # Very serious
 L4 = '4' # ?
 
-def judge_risk_of_bias():
-    return L0
+def judge_risk_of_bias(
+    is_all_low, 
+    is_all_high, 
+    subg_pval, 
+    user_judgement=None
+):
+    if user_judgement is not None:
+        return user_judgement
+
+    if is_all_low:
+        return L1
+    
+    if is_all_high:
+        return L2
+    
+    if subg_pval < 0.05:
+        return L2
+    else:
+        return L1
 
 
 def judge_inconsistency(i2):

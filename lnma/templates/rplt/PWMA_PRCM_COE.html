@@ -136,12 +136,14 @@ PWMA Primary + Cumulative Analysis API Demo
                     <div class="box">
                         <h5>Risk of Bias</h5>
                         <p class="fact">
-                            All Low risk =  <br>
-                            All high risk / some concerns = <br>
+                            All Low risk = {{ pma.data.coe.info.risk_of_bias.is_all_low }} <br>
+                            All high risk / some concerns = {{ pma.data.coe.info.risk_of_bias.is_all_high }} <br>
+                            Subgroup Analysis (Low vs. High/Some) P-value = {{ pma.data.coe.info.risk_of_bias.subg_pval }}
                         </p>
 
                         <p class="result">
-                            Result =
+                            Result = {{ pma.data.coe.risk_of_bias }}
+                            ({{ coe_helper.val_to_label(pma.data.coe.risk_of_bias, 'risk_of_bias') }})
                         </p>
 
                         <p class="defs">
@@ -281,16 +283,16 @@ PWMA Primary + Cumulative Analysis API Demo
     {% include 'js/coe_helper.js' %}
 
     var rs_sample = [
-        { study: 'Raskob et al', year: 2017, Et: 41, Nt: 522, Ec: 59, Nc: 524, pid: '1234' },
-        { study: 'Young et al', year: 2018, Et: 8, Nt: 203, Ec: 18, Nc: 203, pid: '2345' },
-        { study: 'McBane et al', year: 2019, Et: 1, Nt: 145, Ec: 9, Nc: 142, pid: '3456' },
-        { study: 'Don et al', year: 2020, Et: 32, Nt: 576, Ec: 46, Nc: 579, pid: '4567' },
-        { study: 'Kim et al', year: 2021, Et: 18, Nt: 276, Ec: 26, Nc: 279, pid: '45678' },
-        { study: 'Aaskob et al', year: 2017, Et: 45, Nt: 512, Ec: 55, Nc: 524, pid: '1234' },
-        { study: 'Boung et al', year: 2018, Et: 18, Nt: 213, Ec: 18, Nc: 202, pid: '2341' },
-        { study: 'DcBane et al', year: 2019, Et: 2, Nt: 125, Ec: 9, Nc: 141, pid: '3451' },
-        { study: 'Eon et al', year: 2020, Et: 30, Nt: 546, Ec: 43, Nc: 573, pid: '4561' },
-        { study: 'Fim et al', year: 2021, Et: 15, Nt: 306, Ec: 25, Nc: 272, pid: '45671' },
+        { study: 'Raskob et al', year: 2017, Et: 41, Nt: 522, Ec: 59, Nc: 524, pid: '1234', rob: 'L' },
+        { study: 'Young et al', year: 2018, Et: 8, Nt: 203, Ec: 18, Nc: 203, pid: '2345', rob: 'L' },
+        { study: 'McBane et al', year: 2019, Et: 1, Nt: 145, Ec: 9, Nc: 142, pid: '3456', rob: 'L' },
+        { study: 'Don et al', year: 2020, Et: 32, Nt: 576, Ec: 46, Nc: 579, pid: '4567', rob: 'M' },
+        { study: 'Kim et al', year: 2021, Et: 18, Nt: 276, Ec: 26, Nc: 279, pid: '45678', rob: 'L' },
+        { study: 'Aaskob et al', year: 2017, Et: 45, Nt: 512, Ec: 55, Nc: 524, pid: '1234', rob: 'L' },
+        { study: 'Boung et al', year: 2018, Et: 18, Nt: 213, Ec: 18, Nc: 202, pid: '2341', rob: 'L' },
+        { study: 'DcBane et al', year: 2019, Et: 2, Nt: 125, Ec: 9, Nc: 141, pid: '3451', rob: 'L' },
+        { study: 'Eon et al', year: 2020, Et: 30, Nt: 546, Ec: 43, Nc: 573, pid: '4561', rob: 'L' },
+        { study: 'Fim et al', year: 2021, Et: 15, Nt: 306, Ec: 25, Nc: 272, pid: '45671', rob: 'L' },
     ];
 
     var app_coe = {
