@@ -162,6 +162,17 @@ def lnma_methods():
     )
 
 
+@bp.route('/hub.html')
+def lnma_hub():
+
+    year = util.get_current_year_str()
+
+    return render_template(
+        'pub/hub.html',
+        year=year
+    )
+
+
 ###############################################################################
 # For IO project
 # Every thing is special designed
