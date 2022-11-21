@@ -812,8 +812,13 @@ Screener Overview
 
                             <button class="btn btn-default btn-sm"
                                 onclick="tbjs_paperlist.sort_by_decision_reason();">
-                                <i class="fa fa-sort-alpha-down"></i>
                                 Decision Reason
+                            </button>
+                            &nbsp;
+                            <button class="btn btn-default btn-sm"
+                                onclick="tbjs_paperlist.sort_by_decision_date();">
+                                <!-- <i class="fa fa-sort-alpha-down"></i> -->
+                                Decision Date
                             </button>
                             
                         </div>
@@ -1065,7 +1070,11 @@ var tbjs_paperlist = {
     papers: {},
 
     cfg: {
-        number_of_rows: 10
+        number_of_rows: 10,
+
+        sort_by_idx: 0,
+
+        sort_by_order: 'desc'
     },
 
     // by default, show unscreened stage
@@ -1173,6 +1182,15 @@ var tbjs_paperlist = {
             data: 'rfc_agreement',
             visible: false,
             searchable: true
+        },
+
+        // hidden columns for sorting
+        // hidden column 11
+        {
+            title: '',
+            data: 'decision_date',
+            visible: false,
+            searchable: false
         },
 
     ],
@@ -1518,18 +1536,22 @@ var tbjs_paperlist = {
         // add the basic buttons column
         d['basic_actions'] = this._get_basic_actions_by_stage(d);
 
-        // add the decision reason column for sort
+        // 6. add the decision reason column for sort
         d['decision_reason'] = this._update_attr_decision_reason(d);
 
-        // add the tags column for filter
+        // 7. add the tags column for filter
         d['tags'] = this._update_attr_tags(d);
 
-        // add the rct_id column for search
+        // 8. pid column is already there, no need to add
+
+        // 9. add the rct_id column for search
         d['paper_rct_id'] = this._update_attr_paper_rct_id(d);
 
-        // add the rfc column for search
+        // 10. add the rfc column for search
         d['rfc_agreement'] = this._update_attr_rfc_agreement(d);
 
+        // 11. add the rfc column for search
+        d['decision_date'] = this._update_attr_decision_date(d);
 
         return d;
     },
@@ -1703,6 +1725,15 @@ var tbjs_paperlist = {
         var ret = '';
         if (d.ss_ex.hasOwnProperty('reason')) {
             ret = d.ss_ex.reason;
+        }
+        return ret;
+    },
+
+    _update_attr_decision_date: function(d) {
+        var ret = '';
+        if (d.ss_ex.hasOwnProperty('date_decided')) {
+            ret = d.ss_ex.date_decided;
+            // dayjs(d.pub_date).format('YYYY-MM-DD');
         }
         return ret;
     },
@@ -3174,11 +3205,28 @@ var tbjs_paperlist = {
     },
 
     sort_by: function(col_idx, order) {
+        this.cfg.sort_by_idx = col_idx;
+        this.cfg.sort_by_order = order;
+
         this.table.order([col_idx, order]).draw()
     },
 
     sort_by_decision_reason: function() {
-        this.sort_by(6, 'asc');
+        if (this.cfg.sort_by_order == 'asc') {
+            this.cfg.sort_by_order = 'desc';
+        } else {
+            this.cfg.sort_by_order = 'asc';
+        }
+        this.sort_by(6, this.cfg.sort_by_order);
+    },
+
+    sort_by_decision_date: function() {
+        if (this.cfg.sort_by_order == 'asc') {
+            this.cfg.sort_by_order = 'desc';
+        } else {
+            this.cfg.sort_by_order = 'asc';
+        }
+        this.sort_by(11, this.cfg.sort_by_order);
     },
 
     ///////////////////////////////////////////////////////////////////////////
