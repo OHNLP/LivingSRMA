@@ -1463,7 +1463,10 @@ var tbjs_paperlist = {
             cq_abbr, 
             cq_dval,
             function(data) {
+                // first update data
                 tbjs_paperlist.update(data.papers);
+                // second, update stat
+                ui_category_stat.update();
             }
         );
     },
