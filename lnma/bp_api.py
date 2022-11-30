@@ -108,9 +108,9 @@ def get_papers():
 
     # project keystr
     keystr = request.form.get('ks')
-    if keystr not in set(['IO', 'RCC', 'LBR', 'CAT', 'TEST']):
-        ret['msg'] = 'Unsupported ks value'
-        return jsonify(ret)
+    # if keystr not in set(['IO', 'RCC', 'LBR', 'CAT', 'TEST']):
+    #     ret['msg'] = 'Unsupported ks value'
+    #     return jsonify(ret)
 
     try:
         papers = dora.get_papers_by_keystr(keystr)
