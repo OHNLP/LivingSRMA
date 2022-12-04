@@ -1736,12 +1736,13 @@ def update_extract_coe_meta(extract_id, coe):
 
     # TODO check if not exists
 
+    # update the coe detail
+    for ma in coe.keys():
+        coe[ma]['date_updated'] = util.get_today_date_str()
+
     # update
     extract.meta['coe'] = coe
-
-    # update the coe detail
-    extract.meta['coe']['date_updated'] = util.get_today_date_str()
-    extract.meta['coe']['pids'] = extract.get_pids_selected()
+        # extract.meta['coe']['pids'] = extract.get_pids_selected()
 
     # flag update
     flag_modified(extract, "meta")

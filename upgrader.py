@@ -1,3 +1,9 @@
+# Upgrader for LNMA system
+#
+# Please use this script very carefully!
+# For most of time, just run once.
+# Author: Huan He
+
 from tqdm import tqdm 
 
 from sqlalchemy import and_, or_, not_
@@ -171,6 +177,7 @@ def upgrade_paper_ss_ex_label_for_user(keystr):
     print('* done upgrading papers')
     
 
+
 def upgrade_paper_ss_ex_for_cq(keystr):
     '''
     Upgrade the paper data model `ss_ex` to support cq-based data.
@@ -183,6 +190,57 @@ def upgrade_paper_ss_ex_for_cq(keystr):
     )
 
     print('* done upgrading papers')
+
+
+
+def upgrade_extract_coe_ds(keystr):
+    '''
+    Upgrade the data structure of the CoE for all extracts in a project
+
+    It will add one 'main' layer to the CoE to support multi-ma in single outcome,
+    which means that under a single outcome, there can be multiple CoE for multiple MAs.
+    This is designed for IO project and other similar needs.
+    '''
+    import copy
+
+    # get all extracts of this project
+    extracts = dora.get_extracts_by_keystr(keystr)
+    print('* found %s extracts in [%s]' % (
+        len(extracts), keystr
+    ))
+
+    # now, check each extract
+    updated_exts = []
+    
+    for extract in tqdm(extracts):
+        # first, check the coe
+        if 'coe' not in extract.meta:
+            # it's ok, dont modify as this outcome is not affected.
+            print('* skip non-coe extract', extract.get_repr_str())
+            continue
+
+        # second, check if it's the new data structure
+        if 'main' in extract.meta['coe']:
+            print('* skip new-ds extract', extract.get_repr_str())
+
+        # OK, need to update
+        main_coe = copy.deepcopy(extract.meta['coe'])
+
+        # update the structure
+        extract.meta['coe'] = {
+            'main': main_coe
+        }
+
+        # no matter what we do, update this extract here
+        updated_ext = dora.update_extract(extract)
+        updated_exts.append(updated_ext)
+        print('* updated extract', extract.get_repr_str())
+
+    print('*' * 80)
+    print('* updated %s extracts' % (
+        len(updated_exts)
+    ))
+    print('* done upgrading extracts')
 
 
 def upgrade_extract_data_model_for_subg_and_cq(keystr):
@@ -263,5 +321,8 @@ if __name__ == '__main__':
     db.init_app(app)
     app.app_context().push()
 
-    # 
+    # upgrade something?
+    upgrade_extract_coe_ds('IO')
+
+
     print('* done upgrader')
