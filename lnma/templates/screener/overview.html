@@ -1557,8 +1557,13 @@ var tbjs_paperlist = {
     },
 
     update_data_by_paper: function(paper) {
-        // find the paper in the data 
-        for (var i = 0; i < this.table.data().length; i++) {
+        // find the paper in the data
+        // 2022-12-07: get the length of this list in advance
+        // to avoid redandant calculation 
+        var len = this.table.data().length;
+
+        // find this paper and update
+        for (var i = 0; i < len; i++) {
             if (this.table.row(i).data().paper_id == paper.paper_id) {
                 this.table.row(i).data(
                     this.update_datum_attrs(paper)

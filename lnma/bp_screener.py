@@ -727,6 +727,8 @@ def sspr_set_rct_feedback():
     feedback = request.form.get('feedback')
     papers = []
 
+    # need to measure the time
+    start_time = time.perf_counter()
     for paper_id in paper_ids:
         paper = dora.set_rct_user_feedback(paper_id, feedback)
         papers.append(paper.as_simple_dict())
@@ -735,6 +737,16 @@ def sspr_set_rct_feedback():
         'success': True,
         'papers': papers
     }
+
+    # Stop the timer
+    end_time = time.perf_counter()
+
+    # Calculate the time difference
+    elapsed_time = end_time - start_time
+
+    # Print the elapsed time
+    print("* time elapsed /sspr/set_rct_feedback:", elapsed_time)
+
     return jsonify(ret)
 
 
