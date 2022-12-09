@@ -547,10 +547,10 @@ var srv_screener = {
         );
     },
     
-    set_rct_feedback: function(paper_id, feedback, callback) {
+    set_rct_feedback: function(paper_id_list, feedback, callback) {
         // send request
         var project_id = Cookies.get('project_id');
-        var paper_ids = [paper_id].join(',');
+        var paper_ids = paper_id_list.join(',');
         
         var url = this.api_url.set_rct_feedback;
         // $.post(

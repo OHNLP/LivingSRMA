@@ -747,7 +747,19 @@ Screener Overview
                             </label>
 
                             <div class="form-check form-check-inline">
+                                <input class="form-check-input" 
+                                    type="checkbox" 
+                                    name="checkbox_lbl_unkrct" 
+                                    id="checkbox_lbl_unkrct"
+                                    v-model="show_unkrct_label"
+                                    v-on:change="on_change_unkrct_label">
+                                <label class="form-check-label"
+                                    for="checkbox_lbl_unkrct">
+                                        RCT UNKNOWN
+                                </label>
+                            </div>
 
+                            <div class="form-check form-check-inline">
                                 <input class="form-check-input" 
                                     type="checkbox" 
                                     name="checkbox_lbl_rct" 
@@ -756,11 +768,9 @@ Screener Overview
                                     v-on:change="on_change_rct_label">
                                 <label class="form-check-label"
                                     for="checkbox_lbl_rct">
-                                    Show 
                                     <span class="badge badge-pill badge-info">
                                         <i class="fa fa-robot"></i> RCT
                                     </span>
-                                    Only
                                 </label>
                             </div>
     
@@ -773,11 +783,9 @@ Screener Overview
                                     v-on:change="on_change_ckl_label">
                                 <label class="form-check-label"
                                     for="checkbox_lbl_ckl">
-                                    Show 
                                     <span class="badge badge-pill badge-ckl">
                                         <i class="far fa-clock"></i> Check Later
                                     </span> 
-                                    Only
                                 </label>
                             </div>
 
@@ -1047,7 +1055,13 @@ var tbjs_paperlist_topbar = {
 
         stage: null,
 
+        // for show RCT
         show_rct_label: '',
+
+        // for showing the unknown (to be decided)
+        show_unkrct_label: false,
+
+        // show check later
         show_ckl_label: '',
 
         show_rfc_label: 'all',
@@ -1062,25 +1076,14 @@ var tbjs_paperlist_topbar = {
             this.topbar_title = title;
         },
 
+        on_change_unkrct_label: function(event) {
+            console.log('* unkrct label:', event.target.checked);
+            tbjs_paperlist.toggle_label_rct();
+        },
+
         on_change_rct_label: function(event) {
             console.log('* rct label:', event.target.checked);
             tbjs_paperlist.toggle_label_rct();
-
-
-            // // the filter event for RCT
-            // $('#checkbox_lbl_rct').change(function() {
-            //     tbjs_paperlist.toggle_label_rct();
-            // });
-
-            // // the filter event for check later
-            // $('#checkbox_lbl_ckl').change(function() {
-            //     tbjs_paperlist.toggle_label_ckl();
-            // });
-
-            // // the filter event for tags
-            // $('.tag-filter').change(function() {
-            //     tbjs_paperlist.toggle_tag_filter();
-            // });
         },
 
         on_change_ckl_label: function(event) {
@@ -1252,6 +1255,23 @@ var tbjs_paperlist = {
     ],
 
     init: function() {
+        // the search filter for RCT
+        $.fn.dataTable.ext.search.push(
+            function( settings, data, dataIndex ) {
+                // var chk = $('input#checkbox_lbl_unkrct').prop('checked');
+                var chk = tbjs_paperlist_topbar.vpp.$data.show_unkrct_label;
+
+                if (chk) {
+                    if (data[3].indexOf('NOT RCT')>=0) {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+                return true;
+            }
+        );
+
         // the search filter for RCT
         $.fn.dataTable.ext.search.push(
             function( settings, data, dataIndex ) {
@@ -3253,7 +3273,7 @@ var tbjs_paperlist = {
     },
 
     set_rct_feedback: function(paper_id, feedback) {
-        srv_screener.set_rct_feedback(paper_id, feedback, function(data) {
+        srv_screener.set_rct_feedback([paper_id], feedback, function(data) {
             // update the UI
             for (var i = 0; i < data.papers.length; i++) {
                 // get the value
@@ -3267,7 +3287,7 @@ var tbjs_paperlist = {
                 // update the tb data list first to redraw the icon column
                 tbjs_paperlist.update_data_by_paper(d);
 
-                // update the UI
+                // update the UI if using expand mode
                 $('#tb-row-rct-feedback-' + d.paper_id).html(usr_fb);
             }
         });
