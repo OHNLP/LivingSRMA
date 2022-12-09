@@ -322,7 +322,7 @@ if __name__ == '__main__':
     app.app_context().push()
 
     # upgrade something?
-    upgrade_extract_coe_ds('IO')
+    # upgrade_extract_coe_ds('IO')
 
 
     print('* done upgrader')

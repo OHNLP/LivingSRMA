@@ -86,7 +86,7 @@ var srv_screener = {
     // attribute name for the user feedback
     ATTR_PRED_RCT_USR_FB: 'usr_fb',
     RCT_USER_FEEDBACK: {
-        '0': '<b class="text-rct-no">NOT RCT</b>',
+        '0': '<b class="text-rct-no">NOT-RCT</b>',
         '1': '<b class="text-rct-yes"><i class="fa fa-bong"></i> RCT</b>',
         '': '<b><i class="far fa-question-circle"></i></b>'
     },
@@ -151,7 +151,7 @@ var srv_screener = {
             cache: false,
             success: callback,
             error: function(jqXHR, textStatus, errorThrown) {
-                jarvis.toast('Something wrong when getting paper data. Refresh page and try later.', 'alert');
+                jarvis.toast('Something wrong when getting paper data. Refresh page and try later.', 'error');
                 console.error(textStatus, errorThrown);
             }
         });
@@ -202,7 +202,7 @@ var srv_screener = {
             cache: false,
             success: callback,
             error: function(jqXHR, textStatus, errorThrown) {
-                jarvis.toast('Something wrong when getting paper data. Refresh page and try later.', 'alert');
+                jarvis.toast('Something wrong when getting paper data. Refresh page and try later.', 'error');
                 console.error(textStatus, errorThrown);
             }
         });
@@ -223,7 +223,7 @@ var srv_screener = {
             cache: false,
             success: callback,
             error: function(jqXHR, textStatus, errorThrown) {
-                jarvis.toast('Something wrong when getting paper data. Refresh page and try later.', 'alert');
+                jarvis.toast('Something wrong when getting paper data. Refresh page and try later.', 'error');
                 console.error(textStatus, errorThrown);
             }
         });
@@ -246,7 +246,7 @@ var srv_screener = {
             cache: false,
             success: callback,
             error: function(jqXHR, textStatus, errorThrown) {
-                jarvis.toast('Something wrong when getting paper data. Refresh page and try later.', 'alert');
+                jarvis.toast('Something wrong when loading paper data. Refresh page and try later.', 'error');
                 console.error(textStatus, errorThrown);
             }
         });
@@ -490,7 +490,7 @@ var srv_screener = {
             cache: false,
             success: callback,
             error: function(jqXHR, textStatus, errorThrown) {
-                jarvis.toast('Something wrong when setting label for paper. Refresh page and try later.', 'alert');
+                jarvis.toast('Something wrong when setting label for paper. Refresh page and try later.', 'error');
                 console.error(textStatus, errorThrown);
             }
         });
@@ -513,7 +513,7 @@ var srv_screener = {
             cache: false,
             success: callback,
             error: function(jqXHR, textStatus, errorThrown) {
-                jarvis.toast('Something wrong when setting label for paper. Refresh page and try later.', 'alert');
+                jarvis.toast('Something wrong when setting label for paper. Refresh page and try later.', 'error');
                 console.error(textStatus, errorThrown);
             }
         });
@@ -553,12 +553,30 @@ var srv_screener = {
         var paper_ids = [paper_id].join(',');
         
         var url = this.api_url.set_rct_feedback;
-        $.post(
-            url,
-            {paper_ids: paper_ids, project_id: project_id, feedback: feedback},
-            callback,
-            'json'
-        );
+        // $.post(
+        //     url,
+        //     {paper_ids: paper_ids, project_id: project_id, feedback: feedback},
+        //     callback,
+        //     'json'
+        // );
+        // 2022-12-08: fix the no error error
+        // use ajax() for request
+        $.ajax({
+            type: 'POST',
+            dataType: "json",
+            url: this.api_url.set_rct_feedback,
+            data: {
+                project_id: project_id,
+                paper_ids: paper_ids,
+                feedback: feedback,
+            },
+            cache: false,
+            success: callback,
+            error: function(jqXHR, textStatus, errorThrown) {
+                jarvis.toast('Something wrong when setting label for paper. Refresh page and try later.', 'error');
+                console.error(textStatus, errorThrown);
+            }
+        });
     },
 
     has_label_ckl: function(d) {

@@ -725,6 +725,9 @@ def sspr_set_rct_feedback():
     paper_ids = paper_ids.split(',')
     
     feedback = request.form.get('feedback')
+    if feedback not in ['0', '1']:
+        # reset feedback to empty if not 0 or 1
+        feedback = ''
     papers = []
 
     # need to measure the time

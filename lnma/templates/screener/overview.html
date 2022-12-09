@@ -12,6 +12,16 @@ Screener Overview
 #ui_category_stat {
     width: 240px;
 }
+#loading_stage_box {
+    position: absolute;
+    left: 330px;
+    top: 0;
+    width: calc(100% - 340px);
+    height: 100%;
+    background-color: white;
+    z-index: 99;
+    padding: 1em 0 0 1em;
+}
 #tbjs_paperlist {
     width: 100%;
 }
@@ -169,6 +179,15 @@ tr.shown td.details-control {
     background-color: #dddddd;
     border: 1px dotted #cccccc;
     font-weight: normal;
+}
+.badge-btn {
+    color: #adadad;
+    background-color: #f1f1f1;
+    cursor: pointer;
+}
+.badge-btn:hover {
+    color:rgb(250, 89, 89);
+    background-color: #fefefe;
 }
 .badge-ckl {
     color: #fff;
@@ -493,7 +512,20 @@ Screener Overview
 <div class="content">
     <div class="container-fluid">
         <div class="row">
+
             <div id="ui_category_stat">
+                <div v-if="flag_is_loading_stage"
+                    id="loading_stage_box">
+                    <p style="font-size: 1.2em;">
+                        Loading papers ... <i class="fas fa-spinner fa-spin"></i>
+                    </p>
+                    <p>
+                        The loading may take a little while, please wait. <br>
+                        If it takes too long (more than 1 min) or show any error message, please try later or contact system administrator.
+                    </p>
+
+                </div>
+
                 <h5>
                     <i class="far fa-file-alt"></i>
                     All References
@@ -663,6 +695,8 @@ Screener Overview
                 </div>
             </div>
             <!-- / left pane -->
+
+
 
             <div style="width: calc(100% - 250px); margin-left: 10px;">
                 
@@ -950,6 +984,8 @@ var ui_category_stat = {
                 active_cq_abbr: null,
                 active_cq_type: null,
 
+                flag_is_loading_stage: false,
+
                 stages: [
                     'unscreened',
                     'decided',
@@ -978,6 +1014,8 @@ var ui_category_stat = {
                     this.active_cq_abbr = cq_abbr;
                     this.active_cq_dval = cq_dval;
 
+                    this.flag_is_loading_stage = true;
+
                     // update paper list
                     tbjs_paperlist.load_by_stage(
                         stage,
@@ -991,6 +1029,7 @@ var ui_category_stat = {
 
     update: function() {
         srv_screener.get_stat(function(data){
+
             ui_category_stat.vpp.stat = data.stat;
         });
     }
@@ -1219,7 +1258,7 @@ var tbjs_paperlist = {
                 var chk = $('input#checkbox_lbl_rct').prop('checked');
 
                 if (chk) {
-                    if (data[3].indexOf('RCT')>=0) {
+                    if (data[3].indexOf('RCT')>=0 && data[3].indexOf('NOT')==-1) {
                         return true;
                     } else {
                         return false;
@@ -1308,8 +1347,8 @@ var tbjs_paperlist = {
                 [0, 'desc']
             ],
 
-            // pagingType: "input",
-            "sPaginationType": "listbox",
+            pagingType: "input",
+            // "sPaginationType": "listbox",
 
             // bind the row attributes
             createdRow: function(row, data, dataIndex) {
@@ -1497,6 +1536,10 @@ var tbjs_paperlist = {
             function(data) {
                 // first update data
                 tbjs_paperlist.update(data.papers);
+
+                // then update the flag
+                ui_category_stat.vpp.$data.flag_is_loading_stage = false;
+
                 // second, update stat
                 ui_category_stat.update();
             }
@@ -1659,6 +1702,8 @@ var tbjs_paperlist = {
 
         var label_ckl = '<span class="badge badge-pill badge-ckl"><i class="far fa-clock"></i> Check Later</span>';
 
+        var btn_not_rct = '<span class="badge badge-pill badge-btn" title="Click to indicate this study is not a RCT" onclick="tbjs_paperlist.set_rct_feedback(\''+d.paper_id+'\', 0)">NOT RCT</span>';
+
         // create the return string
         var ret = '';
         
@@ -1678,6 +1723,7 @@ var tbjs_paperlist = {
         // the human input RCT result
         if (d.meta.pred[0].hasOwnProperty(srv_screener.ATTR_PRED_RCT_USR_FB)) {
             if (d.meta.pred[0][srv_screener.ATTR_PRED_RCT_USR_FB] == '') {
+                ret += btn_not_rct;
 
             } else {
                 var usr_fb = srv_screener.RCT_USER_FEEDBACK[d.meta.pred[0][srv_screener.ATTR_PRED_RCT_USR_FB]];
@@ -2336,8 +2382,9 @@ var tbjs_paperlist = {
         }
         var html = [
             '<label class="mr-2">This study is <span id="tb-row-rct-feedback-'+d.paper_id+'">'+usr_fb+'</span></label>', 
-            '<button class="btn btn-default btn-sm" onclick="tbjs_paperlist.set_rct_feedback(\''+d.paper_id+'\', 1)">It\'s a RCT</button> ',
-            '<button class="btn btn-default btn-sm" onclick="tbjs_paperlist.set_rct_feedback(\''+d.paper_id+'\', 0)">It\'s not a RCT</button>',
+            '<button class="btn btn-default btn-sm" onclick="tbjs_paperlist.set_rct_feedback(\''+d.paper_id+'\', 1)">It\'s a <span class="text-rct-yes">RCT</span></button> ',
+            '<button class="btn btn-default btn-sm" onclick="tbjs_paperlist.set_rct_feedback(\''+d.paper_id+'\', 0)">It\'s <span class="text-rct-no">NOT</span> RCT</button> ',
+            '&nbsp;&nbsp;<button class="btn btn-default btn-sm" onclick="tbjs_paperlist.set_rct_feedback(\''+d.paper_id+'\', -1)">RESET</button>',
         ].join('');
 
         return html;
@@ -3211,14 +3258,17 @@ var tbjs_paperlist = {
             for (var i = 0; i < data.papers.length; i++) {
                 // get the value
                 var d = data.papers[i];
-                var usr_fb_val = d.meta.pred[0][srv_screener.ATTR_PRED_RCT_USR_FB]
-                
-                // update the UI
+                var usr_fb_val = d.meta.pred[0][srv_screener.ATTR_PRED_RCT_USR_FB];
                 var usr_fb = srv_screener.RCT_USER_FEEDBACK[usr_fb_val];
-                $('#tb-row-rct-feedback-' + d.paper_id).html(usr_fb);
 
-                // update the tb data list
+                // show notification
+                jarvis.toast('Updated RCT feedback on [' + d.title + '] to [' + usr_fb_val + ':' + usr_fb + ']');
+
+                // update the tb data list first to redraw the icon column
                 tbjs_paperlist.update_data_by_paper(d);
+
+                // update the UI
+                $('#tb-row-rct-feedback-' + d.paper_id).html(usr_fb);
             }
         });
     },
