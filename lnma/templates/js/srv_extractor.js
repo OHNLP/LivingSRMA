@@ -168,6 +168,7 @@ var srv_extractor = {
         oc_type,
         abbr,
         data,
+        flag_skip_is_selected,
         callback
     ) {
         $.ajax({
@@ -178,7 +179,8 @@ var srv_extractor = {
                 project_id:project_id, 
                 oc_type:oc_type, 
                 abbr:abbr,
-                data:JSON.stringify(data)
+                data:JSON.stringify(data),
+                flag_sis: flag_skip_is_selected?'yes':'no'
             },
             cache: false,
             success: callback,

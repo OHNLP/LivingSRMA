@@ -1754,7 +1754,7 @@ def update_extract_coe_meta(extract_id, coe):
     return extract
 
 
-def update_extract_incr_data(project_id, oc_type, abbr, data):
+def update_extract_incr_data(project_id, oc_type, abbr, data, flag_skip_is_selected=False):
     '''
     Update the existing extract data by the increamental data
 
@@ -1786,7 +1786,8 @@ def update_extract_incr_data(project_id, oc_type, abbr, data):
             # let's check each attribute
             is_same = util.is_same_extraction(
                 extract.data[pid],
-                pid_ext
+                pid_ext,
+                flag_skip_is_selected
             )
 
             if is_same:
@@ -1795,7 +1796,17 @@ def update_extract_incr_data(project_id, oc_type, abbr, data):
             
             else:
                 # hmmm, this paper is updated
-                extract.data[pid] = pid_ext
+                # extract.data[pid] = pid_ext
+
+                # 2022-12-12: fix the overwrite selection bug
+                # copy the pid_ext data to extract.data
+                for key in pid_ext:
+                    if key == 'is_selected' and flag_skip_is_selected:
+                        # skip the is_selected when flags
+                        pass
+                    else:
+                        extract.data[pid][key] = pid_ext[key]
+
                 flag_changed = True
                 n_changed += 1
                 pid_changed['upd'].append(pid)

@@ -140,13 +140,16 @@ def fill_extract_data_arm(arm, cate_attrs, g_idx=0):
     return arm
 
 
-def is_same_extraction(ea, eb):
+def is_same_extraction(ea, eb, flag_skip_is_selected=False):
     '''
     Compare two extractions attr by attr
     '''
-    if 'is_selected' in ea and 'is_selected' in eb:
-        if ea['is_selected'] != eb['is_selected']:
-            return False
+    if flag_skip_is_selected:
+        pass
+    else:
+        if 'is_selected' in ea and 'is_selected' in eb:
+            if ea['is_selected'] != eb['is_selected']:
+                return False
 
     if 'is_checked' in ea and 'is_checked' in eb:
         if ea['is_checked'] != eb['is_checked']:

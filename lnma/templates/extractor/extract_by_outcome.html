@@ -698,6 +698,7 @@ var pan_ocpapers = {
             oc_type,
             abbr,
             data,
+            false, // flag_skip_is_selected, 2022-12-12: for fixing the overwrite bug
             function(data) {
                 // the data contain a paer
                 console.log(data);
@@ -728,6 +729,7 @@ var pan_ocpapers = {
             oc_type,
             abbr,
             data,
+            false, // flag_skip_is_selected, 2022-12-12: for fixing the overwrite bug
             function(data) {
                 // show result
                 jarvis.toast('Saved the outcome [' + data.extract.meta.full_name + ']');

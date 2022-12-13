@@ -865,11 +865,15 @@ var pan_ocpapers = {
         // this paper is also selected?
         // no, the selected is for public site
 
+        // 2022-12-12: fix overwrite selection bug again
+        // the oc data is not directly shared between two vpps
+        // so need to manually specify thtat `is_selected` should be skipped
         srv_extractor.update_extract_incr_data(
             project_id,
             oc_type,
             abbr,
             data,
+            true, // flag_skip_is_selected
             function(data) {
                 // the data contain a paer
                 console.log(data);

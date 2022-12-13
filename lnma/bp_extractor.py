@@ -555,6 +555,7 @@ def update_extract_incr_data():
     project_id = request.form.get('project_id')
     oc_type = request.form.get('oc_type')
     abbr = request.form.get('abbr')
+    flag_skip_is_selected = request.form.get('flag_sis') == 'yes'
     
     # the meta of the extract settings
     data = json.loads(request.form.get('data'))
@@ -564,7 +565,8 @@ def update_extract_incr_data():
         project_id, 
         oc_type, 
         abbr, 
-        data
+        data,
+        flag_skip_is_selected
     )
 
     # build the return obj
