@@ -42,7 +42,15 @@ html {
     margin: 0 0 0 10px;
     overflow: hidden;
 }
+.coe-cate-box {
+    padding: 2em 5px;
+    border-bottom: 1px dashed #bebebe;
+}
+.coe-cate-box:hover {
+    background-color: whitesmoke;
+}
 .coe-table {
+    margin: 1em 0;
     border-top: 1px solid #cccccc;
     width: auto;
 }
@@ -379,12 +387,25 @@ html {
             </button>
 
 
-            <button class="btn btn-sm btn-default mr-1">
+            <!-- <button class="btn btn-sm btn-default mr-1">
                 Use Algorithm Results as Judgement
-            </button>
+            </button> -->
 
         </div>
 
+
+    <div style="width: 100%; height: calc(100% - 150px); overflow-y: auto; overflow-x: hidden;">
+
+    <!-- loop on different cates of CoE -->
+    <!-- <div v-if="working_oc_extract == null">
+        Loading outcome details or no details found.
+    </div> -->
+
+    <div v-for="coe_cate in get_coe_cates(working_oc_extract.meta.input_format)"
+        class="coe-cate-box">
+        <h4>{{ coe_cate.title }} Certainty of Evidence</h4>
+
+        <!-- first, the summary of all measurements -->
         <table class="coe-table">
             <tr>
                 <th>
@@ -554,90 +575,85 @@ html {
             </tr>
         </table>
 
+        <!-- second, for each indicator -->
 
-        <div style="width: 100%; height: calc(100% - 150px); overflow-y: auto; overflow-x: hidden;">
+        <h5>
+            Risk of Bias
+        </h5>
 
-            <!-- risk of bias -->
+        <!-- risk of bias -->
 
-            <div class="mb-1 d-flex flex-row">
-                <div class="custom-control custom-switch mr-2">
-                    <input type="checkbox" 
-                        class="custom-control-input" 
-                        id="customSwitch1"
-                        v-model="use_itable_rob_data">
-                    <label class="custom-control-label" for="customSwitch1">Use iTable's Risk of Bias Data</label>
+        <div class="mb-1 d-flex flex-row">
+            <div class="custom-control custom-switch mr-2">
+                <input type="checkbox" 
+                    class="custom-control-input" 
+                    id="customSwitch1"
+                    v-model="use_itable_rob_data">
+                <label class="custom-control-label" for="customSwitch1">Use iTable's Risk of Bias Data</label>
+            </div>
+
+            <button class="btn btn-sm btn-default mr-3"
+                @click="assess_coe_by_algorithm('rob')">
+                <i class="fas fa-sync"></i>
+                Assess Risk of Bias by Algorithm
+            </button>
+        </div>
+
+        <!-- first, show the basic summary -->
+        <div class="d-flex flex-row">
+            <div v-for="exts, paper_rob in get_rob_dist()"
+                class="d-flex flex-column border mr-3 pl-3 pr-3 pt-2 pb-2">
+                <div class="rob-item-label">
+                    {{ val_to_label(paper_rob, 'risk_of_bias') }} |
+                    N=<b>{{ exts.length }}</b>
                 </div>
-
-                <button class="btn btn-sm btn-default mr-3"
-                    @click="assess_coe_by_algorithm('rob')">
-                    <i class="fas fa-sync"></i>
-                    Assess Risk of Bias by Algorithm
-                </button>
-            </div>
-
-            <!-- show the list of studies -->
-            <div v-if="working_oc_extract == null">
-                Loading outcome details or no details found.
-            </div>
-
-            <div v-else-if="working_oc_extract.meta.input_format == 'PRIM_CAT_RAW_G5'">
-
-                <h4>All Grade</h4>
-                <h4>Grade 3/4</h4>
-                <h4>Grade 3 or Higher</h4>
-                <h4>Grade 5 Only</h4>
-
-            </div>
-            <div v-else>
-
-                <!-- first, show the basic summary -->
                 <div class="d-flex flex-row">
-                    <div v-for="exts, paper_rob in get_rob_dist()"
-                        class="d-flex flex-column border mr-3 pl-3 pr-3 pt-2 pb-2">
-                        <div class="rob-item-label">
-                            {{ val_to_label(paper_rob, 'risk_of_bias') }} |
-                            N=<b>{{ exts.length }}</b>
-                        </div>
-                        <div class="d-flex flex-row">
-                            <div v-for="ext in exts"
-                                :title="ext.pid"
-                                :class="'coe-val-' + get_rob_decision(ext)"
-                                class="rob-item-cell">
-                                <span class="text-sm"
-                                    >
-                                    {{ get_rob_decision(ext) }}
-                                </span>
-                            </div>
-                        </div>
+                    <div v-for="ext in exts"
+                        :title="ext.pid"
+                        :class="'coe-val-' + get_rob_decision(ext)"
+                        class="rob-item-cell">
+                        <span class="text-sm"
+                            >
+                            {{ get_rob_decision(ext) }}
+                        </span>
                     </div>
                 </div>
-
-
             </div>
-
-
-
-            <!-- Inconsistency -->
-
-
-            <!-- Indirectness -->
-
-
-            <!-- Imprecision -->
-
-
-            <!-- Publication Bias -->
-
-
         </div>
+
+
+
+
+
+        <!-- Inconsistency -->
+
+
+        <!-- Indirectness -->
+
+
+        <!-- Imprecision -->
+
+
+        <!-- Publication Bias -->
+
+    
+    
+    </div>
+
+            
+
+
+
+                
+
 
     </div>
 
 
-
-
+    </div>
 
 </div>
+<!-- /#app_coemgr -->
 
 
 </div>
@@ -708,6 +724,21 @@ var app_coemgr = {
         use_itable_rob_data: false,
     },
     vpp_methods: {
+        get_coe_cates: function(input_format) {
+            if (input_format == 'PRIM_CAT_RAW_G5') {
+                return [
+                    {key: 'main', title: 'All Grade'},
+                    {key: 'g34',  title: 'Grade 3/4'},
+                    {key: 'g3h',  title: 'Grade 3 or Higher'},
+                    {key: 'g5n',  title: 'Grade 5 Only'},
+                ]
+            } else {
+                return [
+                    {key: 'main', title: ''}
+                ]
+            }
+        },
+
         set_extracts: function(extracts) {
             // update the oc_dict
             this.oc_dict = {};
