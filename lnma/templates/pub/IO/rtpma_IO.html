@@ -136,20 +136,23 @@ a {
 }
 
 /* for this page */
-#app {
+#app_pma {
     width: 100%;
-    height: calc(100% - 42px);
+    /* height: calc(100% - 42px); */
+    height: 100%;
+}
+#app_ocrst {
+    height: calc(100% - 50px);
 }
 #app_oclist {
     width: 320px;
     padding: 0 5px;
-    height: calc(100% - 15px);
+    height: 100%;
     /* height: 810px; */
     /* background-color: whitesmoke; */
 }
 #app_oclist_aespanel {
     width: 100%;
-    height: 100%;
     overflow-x: hidden;
     overflow-y: auto;
 }
@@ -274,7 +277,9 @@ a {
     width: 100%;
 }
 #app_filter {
-    padding: 5px 0 0 5px;
+    padding: 5px 0 5px 5px;
+    margin: 0 0 5px;
+    border-bottom: 1px solid #efefef;
 }
 #fig_scatter {
     width: 500px; 
@@ -664,7 +669,8 @@ a {
     <div id="ss-msg">Loading data and initializing ...</div>
 </div>
 
-
+<div id="wrapper">
+    
 <div id="app_pma">
 
     <div id="app_filter" class="d-flex flex-row">
@@ -702,6 +708,242 @@ a {
             </div>
         </div>
     </div>
+
+    <div id="app_ocrst">
+
+        <div id="app_oclist">
+            <div class="box" style="height: 100%;">
+                <div class="box-header">
+                    <h4>
+                        <i class="fa fa-search"></i>
+                        Outcome List | 
+                    </h4>
+                    <div class="d-flex flex-align-items-center">
+                        <select v-model="color_mode_by_sm"
+                            class="select-sm">
+                            <option value="RR">RR: Color by Risk Ratio</option>
+                            <option value="OR">OR: Color by Odds Ratio</option>
+                        </select>
+    
+                        <select v-model="cnt_rule"
+                            class="select-sm">
+    
+                            <optgroup label="Simple Threshold">
+                                <option value="ge1">All outcomes with at lease 1 study</option>
+                                <option value="ge5">Equal or greater than 5 studies</option>
+                                <option value="ge10">Equal or greater than 10 studies</option>
+                                <option value="ge20">Equal or greater than 20 studies</option>
+                            </optgroup>
+    
+                            <optgroup label="Complex Rules">
+                                <option value="ge1s5">At lease 1 study but less than 5</option>
+                                <option value="ge5ls10">Equal or greater than 5 but less than 10</option>
+                                <option value="ge10ls20">Equal or greater than 10 but less than 20</option>
+                            </optgroup>
+                        </select>
+    
+                    </div>
+                </div>
+                <div class="box-body" style="height: calc(100% - 40px);">
+                    
+                    <div class="d-flex fx-col">
+                        <div class="d-flex flex-row ">
+                            <div class="oc-name" style="font-weight: bold;">
+                                <div class="d-flex flex-row flex-align-items-baseline">
+                                    <span>
+                                        Search: 
+                                    </span>
+                                    <input type="text" v-model="keyword"
+                                        style="width: 80px;">
+                                    <a v-on:click="keyword = ''"
+                                        class="btn btn-remove"
+                                        style="margin: 3px 0 0 -24px;"
+                                        href="javascript:void(0);">
+                                        <i class="fa fa-times"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="d-flex"
+                                style="width: 90px; text-align: center; border-bottom: 1px solid #555555; justify-content: center; align-items: flex-end;">
+                                <span style="font-weight: bold; padding: 3px 0;">
+                                    Grade
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+        
+                    <div class="oc-cate d-flex fx-col">
+                        <div class="oc-cate-info d-flex flex-row">
+                            <div class="oc-name" style="font-weight: bold;">
+                                {{ n_all() }}
+                                Outcomes
+                            </div>
+                            <div class="oc-type" title="All Grades">
+                                ALL
+                            </div>
+                            <div class="oc-type" title="Grade 3 or Higher">
+                                3+
+                            </div>
+                            <div class="oc-type" title="Grade 5 Only">
+                                5
+                            </div>
+                        </div>
+                    </div>
+        
+                    <div id="app_oclist_aespanel" style="height: calc(100% - 50px);">
+                        <div class="oc-cate d-flex fx-col"
+                            v-for="group in rs">
+                            <div class="oc-group d-flex flex-row">
+                                <div class="oc-name" 
+                                    v-on:click="toggle_group(group.oc_group)">
+                                    <i class="far fa-folder" v-if="group.is_close"></i>
+                                    <i class="far fa-folder-open" v-else></i>
+                                    {{ group.oc_group }} related AEs
+                                    ({{ n_group(group) }})
+                                </div>
+                                <div class="oc-type">
+                                    <a v-if="flag_is_work_mode_sof"
+                                        v-on:click="add_group(group, 'GA')"
+                                        :title="'Add [' + group.oc_group + '] GA outcomes'"
+                                        class="btn-add-ocs"
+                                        href="javascript:void(0);">
+                                        <i class="fa fa-plus"></i>
+                                    </a>
+                                </div>
+                                <div class="oc-type">
+                                    <a v-if="flag_is_work_mode_sof"
+                                        :title="'Add [' + group.oc_group + '] G3+ outcomes'"
+                                        class="btn-add-ocs"
+                                        v-on:click="add_group(group, 'G3H')"
+                                        href="javascript:void(0);">
+                                        <i class="fa fa-plus"></i>
+                                    </a>
+                                </div>
+                                <div class="oc-type">
+                                    <a v-if="flag_is_work_mode_sof"
+                                        v-on:click="add_group(group, 'G5N')"
+                                        :title="'Add [' + group.oc_group + '] G5 outcomes'"
+                                        class="btn-add-ocs"
+                                        href="javascript:void(0);">
+                                        <i class="fa fa-plus"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            <div v-for="r in group.cates"
+                                v-bind:class="{hide: group.is_close}"
+                                v-show="match_keyword_in_cate(r)">
+                                <div class="oc-cate-info d-flex flex-row">
+                                    <div v-on:click="toggle_cate(group.oc_group, r.oc_cate)"
+                                        class="oc-name">
+                                        <i class="far fa-folder" v-if="r.is_close"></i>
+                                        <i class="far fa-folder-open" v-else></i>
+                                        
+                                        <span class="badge"
+                                            :class="'badge-' + group.oc_group">
+                                            {{ group.oc_group[0] }}
+                                        </span>
+                                        {{ r.oc_cate }}
+                                        ({{ n_cate(r) }})
+                                    </div>
+                                    <div class="oc-type">
+                                        <a v-if="flag_is_work_mode_sof"
+                                            v-on:click="add_cate(r, 'GA')"
+                                            :title="'Add [' + r.oc_cate + '] GA outcomes'"
+                                            class="btn-add-ocs"
+                                            href="javascript:void(0);">
+                                            <i class="fa fa-plus"></i>
+                                        </a>
+                                    </div>
+                                    <div class="oc-type">
+                                        <a v-if="flag_is_work_mode_sof"
+                                            v-on:click="add_cate(r, 'G3H')"
+                                            :title="'Add [' + r.oc_cate + '] G3+ outcomes'"
+                                            class="btn-add-ocs"
+                                            href="javascript:void(0);">
+                                            <i class="fa fa-plus"></i>
+                                        </a>
+                                    </div>
+                                    <div class="oc-type">
+                                        <a v-if="flag_is_work_mode_sof"
+                                            v-on:click="add_cate(r, 'G5N')"
+                                            :title="'Add [' + r.oc_cate + '] G5 outcomes'"
+                                            class="btn-add-ocs"
+                                            href="javascript:void(0);">
+                                            <i class="fa fa-plus"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="oc-items d-flex fx-col"
+                                    v-bind:class="{hide: r.is_close}">
+                                    <div class="oc-item"
+                                        v-for="ae in r.aes">
+                                        <div class="oc-item-info d-flex flex-row"
+                                            v-show="show_oc(ae) && match_keyword(ae.oc_name)">
+                                            <div class="oc-name">
+                                                <i class="far fa-clipboard"></i>
+                                                {{ ae.oc_name }}
+                                            </div>
+    
+                                            
+                                            <div class="oc-type"
+                                                v-if="show_oc_grade(ae, 'GA')"
+                                                v-bind:style="{ backgroundColor: get_eft_color(ma_dict[ae.oc_abbr].GA.PRIM.rsts[color_mode_by_sm]) }"
+                                                v-on:click="add_oc(ae, 'GA')">
+                                                {{ ae.cnt_ga }}
+                                            </div>
+                                            <div class="oc-type"
+                                                v-else
+                                                title="Not enough records">
+                                                &nbsp;
+                                            </div>
+    
+    
+                                            <div class="oc-type"
+                                                v-if="show_oc_grade(ae, 'G3H')"
+                                                v-bind:style="{ backgroundColor: get_eft_color(ma_dict[ae.oc_abbr].G3H.PRIM.rsts[color_mode_by_sm]) }"
+                                                v-on:click="add_oc(ae, 'G3H')">
+                                                {{ ae.cnt_g3h }}
+                                            </div>
+                                            <div class="oc-type"
+                                                v-else
+                                                title="Not enough records">
+                                                &nbsp;
+                                            </div>
+    
+    
+                                            <div class="oc-type"
+                                                v-if="show_oc_grade(ae, 'G5N')"
+                                                v-bind:style="{ backgroundColor: get_eft_color(ma_dict[ae.oc_abbr].G5N.PRIM.rsts[color_mode_by_sm]) }"
+                                                v-on:click="add_oc(ae, 'G5N')">
+                                                {{ ae.cnt_g5n }}
+                                            </div>
+                                            <div class="oc-type"
+                                                v-else
+                                                title="Not enough records">
+                                                &nbsp;
+                                            </div>
+    
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+        
+                    </div>
+                    
+                </div>
+        
+                <div class="box-footer">
+        
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <!-- /#app_ocrst -->
+
+</div>
+<!-- /#app_pma -->
 
 </div>
 <!-- /#wrapper -->
@@ -844,11 +1086,51 @@ var app_pma = {
         ]
     }],
 
+    // for searching oc
+    oc_dict: {},
+    oc_dict3: {},
 
+    // vpp data object
     vpp_data: {
+        // vpp level parameter
+        // work mode includes:
+        // 1: plot: just show the selected single outcome
+        // 2: sof: show 
+        work_mode: 'plot',
 
+        // for filters
         dropdowns: [],
-        n_papers: 0
+        n_papers: 0,
+
+        // for oc list
+        group: 'treatment',
+        select_mode: this.select_mode,
+        color_mode_by_sm: 'RR',
+
+        // rs is a three level dict
+        // {
+        //     group: {
+        //         oc_group,
+        //         is_close,
+        //         cates: {
+        //             cate_name: {
+        //                 oc_cate,
+        //                 aes: []
+        //             }
+        //         }
+        //     }
+        // },
+        rs: {},
+        rs_stat: {
+            cnt_cates: 0,
+            cnt_aes: 0,
+        },
+        ma_dict: {},
+
+        keyword: '',
+
+        // for filter number of outcomes
+        cnt_rule: 'ge1'
     },
 
     vpp_methods: {
@@ -902,6 +1184,13 @@ var app_pma = {
         on_filter_value_change: function(event, idx) {
             var new_val = event.target.value;
             this.set_filter_value_at(new_val, idx, true);
+
+            // update other views
+            let pids = this.get_pids_by_filter();
+            this.n_papers = pids.length;
+
+            // update oc_list
+            this.update_oclist(pids);
         },
 
         get_current_filter_values: function() {
@@ -947,7 +1236,27 @@ var app_pma = {
                     this.dropdowns[idx + next].options = next_options;
                 }
             }
+            // finally, update the filter UI
 
+            this.$forceUpdate();
+
+        },
+
+        set_filter_values: function(vals) {
+            for (let i = 0; i < vals.length; i++) {
+                const val = vals[i];
+                
+                // set all values
+                if (i == (vals.length - 1)) {
+                    // update the last one
+                    this.set_filter_value_at(val, i, true);
+                } else {
+                    this.set_filter_value_at(val, i, false);
+                }
+            }
+        },
+
+        get_pids_by_filter: function() {
             // now need to get the pmids
             // so, first, get the current values of all dropdowns
             var conditions = [];
@@ -968,35 +1277,11 @@ var app_pma = {
                 }
             }
             // second, use the conditions to search for the 
-            var pmids = this.get_pmids_by_filter_conditions(conditions);
-            this.n_papers = pmids.length;
-            // finally, update the filter UI
-            this.$forceUpdate();
-
-            if (update_related_views) {
-                // console.log('* filtered studies:', pmids);
-
-                // send these pmids to the oclist
-                // jarvis.update_plots_by_pmids(pmids);
-
-            }
+            var pids = this.get_pids_by_filter_conditions(conditions);
+            return pids;
         },
 
-        set_filter_values: function(vals) {
-            for (let i = 0; i < vals.length; i++) {
-                const val = vals[i];
-                
-                // set all values
-                if (i == (vals.length - 1)) {
-                    // update the last one
-                    this.set_filter_value_at(val, i, true);
-                } else {
-                    this.set_filter_value_at(val, i, false);
-                }
-            }
-        },
-
-        get_pmids_by_filter_conditions: function(conditions) {
+        get_pids_by_filter_conditions: function(conditions) {
             var sql_conds = conditions.join(' and \n');
             var sql = "select PMID from papers " + '\n' +
                 "where " + sql_conds + '\n';
@@ -1144,6 +1429,255 @@ var app_pma = {
             return true;
         },
 
+        ///////////////////////////////////////////////////////////
+        // for oc list
+        ///////////////////////////////////////////////////////////
+        
+        n_all: function() {
+            var n = 0;
+            for (const key in this.rs) {
+                if (Object.hasOwnProperty.call(this.rs, key)) {
+                    const group = this.rs[key];
+                    n += this.n_group(group);
+                }
+            }
+            return n;
+        },
+
+        n_group: function(group) {
+            var n = 0;
+            for (const key in group.cates) {
+                const cate = group.cates[key];
+                n += this.n_cate(cate);
+            }
+
+            return n;
+        },
+
+        n_cate: function(cate) {
+            var n = 0;
+            for (let i = 0; i < cate.aes.length; i++) {
+                const ae = cate.aes[i];
+                if (this.show_oc(ae) && this.match_keyword(ae.oc_name)) {
+                    n += 1;
+                }
+            }
+            return n;
+        },
+
+        match_keyword: function(s) {
+            if (this.keyword.length < 3) {
+                return true;
+            }
+
+            if (s.toUpperCase().indexOf(this.keyword.toUpperCase())>=0) {
+                return true;
+            }
+
+            return false;
+        },
+
+        match_keyword_in_cate(cate) {
+            for (let i = 0; i < cate.aes.length; i++) {
+                const ae = cate.aes[i];
+                
+                if (this.match_keyword(ae.oc_name)) {
+                    return true;
+                }
+            }
+
+            return false;
+        },
+
+        is_cnt_ok: function(cnt) {
+            if (this.cnt_rule == 'ge1') {
+                if (cnt >= 1) {
+                    return true;
+                }
+            } else if (this.cnt_rule == 'ge5') {
+                if (cnt >= 5) {
+                    return true;
+                }
+            } else if (this.cnt_rule == 'ge10') {
+                if (cnt >= 10) {
+                    return true;
+                }
+            } else if (this.cnt_rule == 'ge20') {
+                if (cnt >= 20) {
+                    return true;
+                }
+            } else if (this.cnt_rule == 'ge1ls5') {
+                if (cnt >= 1 && cnt < 5) {
+                    return true;
+                }
+            } else if (this.cnt_rule == 'ge5ls10') {
+                if (cnt >= 5 && cnt < 10) {
+                    return true;
+                }
+            } else if (this.cnt_rule == 'ge10ls20') {
+                if (cnt >= 10 && cnt < 20) {
+                    return true;
+                }
+            }
+
+            return false;
+        },
+        
+        show_oc: function(ae) {
+            var gs = ['ga', 'g3h', 'g5n'];
+            for (let i = 0; i < gs.length; i++) {
+                if (this.show_oc_grade(ae, gs[i])) {
+                    return true;
+                }
+            }
+            return false;
+        },
+
+        show_oc_grade: function(ae, grade) {
+            if (typeof(grade) == 'undefined') {
+                grade = 'GA';
+            }
+            var _g = grade.toLocaleLowerCase();
+
+            if (this.is_cnt_ok(ae['cnt_'+ _g])) {
+                return true;
+            }
+            return false;
+        },
+
+        add_group: function(group, ae_grade) {
+            var cnt = 0;
+            var ret = window.confirm(
+                'Adding ALL '+ae_grade+' outcomes in current ['+group.oc_group+'] group may take a while, are sure to continue?'
+            );
+            if (ret) {
+
+            } else {
+                return cnt;
+            }
+
+            for (const cate_name in group.cates) {
+                if (Object.hasOwnProperty.call(group.cates, cate_name)) {
+                    const cate = group.cates[cate_name];
+                    cnt += this.add_cate(cate, ae_grade);
+                }
+            }
+
+            console.log('* finished add group of ' + cnt);
+            return cnt;
+        },
+
+        add_cate: function(cate, ae_grade) {
+            // the cate contains all AE
+            var cnt = 0;
+            for (let i = 0; i < cate.aes.length; i++) {
+                const ae = cate.aes[i];
+                
+                if (this.match_keyword(ae.oc_name)) {
+                    cnt += this.add_oc(
+                        ae,
+                        ae_grade
+                    );
+                }
+            }
+
+            return cnt;
+        },
+
+        add_oc: function(ae, ae_grade, count) {
+            if (this.show_oc_grade(ae, ae_grade)) {
+
+            } else {
+                // this oc can NOT be displayed for some reason
+                // so won't be added for comparison
+                console.log('* failed to add_oc by show_oc_grade', ae);
+                return 0;
+            }
+
+            if (typeof(count) == 'undefined') {
+
+            } else {
+                // just for counting
+                return 1;
+            }
+            // var group = this.group;
+            // var oc_abbr = event.target.getAttribute('oc_abbr');
+            // var oc_cate = event.target.getAttribute('oc_cate');
+            // var oc_name = event.target.getAttribute('oc_name');
+            // var ae_grade = event.target.getAttribute('ae_grade');
+
+            // add effect
+            // if (this.select_mode == 'checkbox') {
+            //     $(event.target).toggleClass('oc-type-selected');
+            // } else {
+            //     $('.oc-type').removeClass('oc-type-selected');
+            //     $(event.target).addClass('oc-type-selected');
+            // }
+
+            // call the worker to update everything related
+            // jarvis will do this task accordingly
+            return jarvis.add_oc(
+                ae.oc_group, 
+                ae.oc_cate, 
+                ae.oc_name, 
+                ae.oc_abbr, 
+
+                ae_grade, 
+                app_oclist.pids
+            );
+        },
+
+        get_grade_label: function(g) {
+            return jarvis.texts[g];
+        },
+
+        toggle_group: function(group) {
+            this.rs[group].is_close = !this.rs[group].is_close;
+        },
+
+        toggle_cate: function(group, cate) {
+            this.rs[group].cates[cate].is_close = !this.rs[group].cates[cate].is_close;
+        },
+
+        toggle_all_cates: function(flag) {
+            for (var key in this.rs) {
+                this.rs[key].is_close = flag;
+            }
+        },
+
+        get_eft_color: function(d) {
+            if (typeof(d) == 'undefined') {
+                // which means it is empty now
+                return 'transparent';
+            }
+            return jarvis.get_color(
+                d.random.SM,
+                d.random.SM_lower,
+                d.random.SM_upper,
+            )
+        },
+
+        clear: function() {
+            $('.oc-type').removeClass('oc-type-selected');
+            jarvis.clear_all_ae();
+        },
+
+        update_oclist: function(pids) {
+            var updated_data = app_pma.get_oclist_data(
+                pids,
+                this.group
+            );
+
+            this.rs = updated_data.rs;
+            this.rs_stat = updated_data.rs_stat;
+            this.ma_dict = updated_data.ma_dict;
+
+            // when update the oclist, should hide the current img
+            // vw_ocplot.hide_plot();
+
+            this.clear();
+        },
+
 
         ///////////////////////////////////////////////////////////
         // app-level functions
@@ -1188,21 +1722,39 @@ var app_pma = {
                 return 0;
             }
         },
+
+    },
+
+    vpp_computed: {
+        flag_is_work_mode_sof: function() {
+            return this.work_mode == 'sof';
+        }
     },
 
     init: function(data_itable, data_pma) {
-        // just init the dropdown
-        this.vpp_data.dropdowns = this.init_filter_dropdowns();
+        // just init the dropdown for filters
+        this.init_filter(data_itable);
+
+        // init the oclist
+        this.init_oclist(data_pma);
 
         // init the app
         this.vpp = new Vue({
             el: this.vpp_id,
             data: this.vpp_data,
-            methods: this.vpp_methods
+            methods: this.vpp_methods,
+            computed: this.vpp_computed
         });
+
+        // update the oc_list
+        // this.update_oclist([]);
     },
 
-    init_filter_dropdowns: function() {
+    init_filter: function(data) {
+        // update the number of papers/records
+        this.vpp_data.n_papers = data.rs.length;
+
+        // update the dropdown of filters
         var dropdowns = [];
         for (let i = 0; i < app_pma.attrs.length; i++) {
             const attr = app_pma.attrs[i];
@@ -1213,9 +1765,597 @@ var app_pma = {
                 options: this.vpp_methods.get_filter_options(i, true)
             });
         }
-        return dropdowns;
-    }
+        this.vpp_data.dropdowns = dropdowns;
+    },
 
+    init_oclist: function(data) {
+        var ocds = this.get_oc_dicts(data);
+        this.oc_dict = ocds.oc_dict;
+        this.oc_dict3 = ocds.oc_dict3;
+    },
+
+    get_condition_by_pids_and_group: function(pids, group) {
+        var conditions = '';
+        // so first condition is the pid
+        if (pids.length == 0) {
+            conditions += 'pid is not null ';
+        } else {
+            var cond = pids.map(function(v) { return '"' + v + '"'}).join(',');
+            conditions += 'pid in (' + cond + ') ';
+        }
+
+        // second condition is the group
+        // var group = this.vpp.$data.group;
+        if (typeof(group) == 'undefined') {
+
+        } else {
+            // conditions += '\n';
+            // conditions += 'and oc_group = "'+group+'" ';
+        }
+
+        return conditions;
+    },
+
+    get_oclist_data: function(pids, group) {
+        if (typeof(pids) == 'undefined') {
+            pids = [];
+        }
+
+        // get updated rs for oc list
+        var oc_list = this.get_oc_list(
+            pids,
+            group
+        );
+        
+        // bind results 
+        // this.raw_rs = raw_rs;
+        // this.oc_list = oc_list.rs;
+        // this.rs_stat = oc_list.rs_stat;
+
+        // update vpp data
+        // this.vpp.rs = oc_list.rs;
+        // this.vpp.rs_stat = oc_list.rs_stat;
+
+        // get updated MAs
+        var ma_dict = this.get_ma_dict(
+            pids,
+            group
+        );
+
+        // update the MA results in real-time!
+        // this.update_ma_rsts(
+        //     ma_dict
+        // );
+
+        // this.ma_dict = ma_dict;
+
+        // update the vpp data
+        // this.vpp.ma_dict = ma_dict;
+
+        return {
+            rs: oc_list.rs,
+            rs_stat: oc_list.rs_stat,
+            ma_dict: ma_dict
+        };
+
+        // convert to dataframe for display
+        // var ma_df = this.get_ma_df(
+        //     ma_dict,
+        //     this.oc_dict
+        // );
+        // this.ma_df = ma_df;
+
+        // update the vis
+        // var vis_data = this.update_vis_data(
+        //     ma_df,
+        //     this.oc_dict
+        // );
+        // vis_ocmas.draw_fig_scatter(
+        //     vis_data
+        // );
+        // vis_ocmas.draw_fig_heatmap(
+        //     this.oc_dict3
+        // );
+        // vis_ocmas.draw_fig_sunburst(
+        //     this.oc_dict3,
+        //     this.ma_dict
+        // );
+
+        // update tips
+        // $(document).tooltip({
+        //     position: {
+        //         my: "left top",
+        //         at: "right+5 top-5",
+        //         collision: "none"
+        //     }
+        // });
+    },
+
+    
+
+    /**
+     * Get the init default oc dictionaries for searching oc
+     * 
+     * @returns the oc_dict and oc_dict3
+     */
+    get_oc_dicts: function() {
+        var sql = 'select oc_group, oc_cate, oc_abbr, first(oc_name) as oc_name, ' + '\n' +
+            '  count(case when has_GA = true then pid else null end) as cnt_ga, ' + '\n' +
+            '  count(case when has_G3H = true then pid else null end) as cnt_g3h, ' + '\n' +
+            '  count(case when has_G5N = true then pid else null end) as cnt_g5n ' + '\n' +
+            'from aes ' + '\n' +
+            'group by oc_group, oc_cate, oc_abbr ' + '\n' +
+            'order by oc_group asc, oc_cate asc, oc_name asc';
+
+        var raw_rs = alasql(sql);
+
+        // oc_dict3 is a three level dict
+        // {
+        //      group: { cate: { abbr: {}}}
+        // }
+        // oc_dict2 is a one level dict
+        // {
+        //      abbr: {}
+        // }
+        
+        var oc_dict = {};
+        var oc_dict3 = {};
+
+        for (var i = 0; i < raw_rs.length; i++) {
+            var r = raw_rs[i];
+
+            if (typeof(r.oc_cate) == 'undefined' ||
+                r.oc_cate == null) {
+                continue;
+            }
+
+            // first, update this abbr in one-level dict
+            if (!oc_dict.hasOwnProperty(r.oc_abbr)) {
+                oc_dict[r.oc_abbr] = {
+                    oc_group: r.oc_group,
+                    oc_cate: r.oc_cate,
+                    oc_abbr: r.oc_abbr,
+                    oc_name: r.oc_name,
+                    cnt_ga: r.cnt_ga,
+                    cnt_g3h: r.cnt_g3h,
+                    cnt_g5n: r.cnt_g5n
+                }
+            }
+
+            // second, update this abbr in three-level dict
+            if (!oc_dict3.hasOwnProperty(r.oc_group)) {
+                oc_dict3[r.oc_group] = {}
+            }
+
+            if (!oc_dict3[r.oc_group].hasOwnProperty(r.oc_cate)) {
+                oc_dict3[r.oc_group][r.oc_cate] = {}
+            }
+
+            if (!oc_dict3[r.oc_group][r.oc_cate].hasOwnProperty(r.oc_abbr)) {
+                
+                oc_dict3[r.oc_group][r.oc_cate][r.oc_abbr] = {
+                    oc_group: r.oc_group,
+                    oc_cate: r.oc_cate,
+                    oc_abbr: r.oc_abbr,
+                    oc_name: r.oc_name,
+                    cnt_ga: r.cnt_ga,
+                    cnt_g3h: r.cnt_g3h,
+                    cnt_g5n: r.cnt_g5n,
+                    // this is for In-Cate-IndeX
+                    icix: Object.values(oc_dict3[r.oc_group][r.oc_cate]).length
+                }
+            }
+        }
+
+        return {
+            oc_dict: oc_dict,
+            oc_dict3: oc_dict3
+        };
+    },
+    
+    get_oc_list: function(pids, group) {
+        var sql = 'select oc_group, oc_cate, oc_abbr, first(oc_name) as oc_name, ' + '\n' +
+            '  count(case when has_GA = true then pid else null end) as cnt_ga, ' + '\n' +
+            '  count(case when has_G3H = true then pid else null end) as cnt_g3h, ' + '\n' +
+            '  count(case when has_G5N = true then pid else null end) as cnt_g5n ' + '\n' +
+            'from aes ' + '\n' +
+            'where ' + '\n' +
+            this.get_condition_by_pids_and_group(pids, group) + ' ' + '\n' +
+            'group by oc_group, oc_cate, oc_abbr ' + '\n' +
+            'order by oc_group desc, oc_cate asc, oc_name asc';
+
+        // console.log(sql);
+        // init the result
+        var raw_rs = alasql(sql);
+        // console.log("* raw_rs", raw_rs);
+
+        var rs = {};
+        var rs_stat = {
+            cnt_cates: 0,
+            cnt_aes: 0,
+        };
+        for (var i = 0; i < raw_rs.length; i++) {
+            var r = raw_rs[i];
+
+            if (typeof(r.oc_group) == 'undefined' ||
+                r.oc_group == null) {
+                continue;
+            }
+
+            if (typeof(r.oc_cate) == 'undefined' ||
+                r.oc_cate == null) {
+                continue;
+            }
+            
+            // add group first
+            if (rs.hasOwnProperty(r.oc_group)) {
+                //
+            } else {
+                rs[r.oc_group] = {
+                    oc_group: r.oc_group,
+                    is_close: false,
+                    cates: {}
+                }
+                rs_stat.cnt_cates += 1;
+            }
+            
+            if (rs[r.oc_group].cates.hasOwnProperty(r.oc_cate)) {
+                //
+            } else {
+                rs[r.oc_group].cates[r.oc_cate] = {
+                    oc_cate: r.oc_cate,
+                    is_close: false,
+                    aes: []
+                }
+                rs_stat.cnt_cates += 1;
+            }
+            // put this ae into cate
+            rs[r.oc_group].cates[r.oc_cate]['aes'].push({
+                oc_group: r.oc_group,
+                oc_cate: r.oc_cate,
+                oc_name: r.oc_name,
+                oc_abbr: r.oc_abbr,
+
+                cnt_ga: r.cnt_ga,
+                cnt_g3h: r.cnt_g3h,
+                cnt_g5n: r.cnt_g5n
+            });
+            rs_stat.cnt_aes += 1;
+        }
+
+        return {
+            rs: rs,
+            rs_stat: rs_stat
+        };
+    },
+
+    get_ma_dict: function(pids, group) {
+        var sql = 'select * ' + '\n' +
+            'from aes ' + '\n' +
+            'where ' + '\n' +
+            this.get_condition_by_pids_and_group(pids);
+
+        var rs = alasql(sql);
+        console.log('* rs for mas:', rs);
+
+        // the dict for final records and MA results
+        var ma_dict = {};
+
+        for (let i = 0; i < rs.length; i++) {
+            const r = rs[i];
+            
+            if (!ma_dict.hasOwnProperty(r.oc_abbr)) {
+                // Oh, no such record yet, save it
+                ma_dict[r.oc_abbr] = {
+                    GA: { 
+                        PRIM: { total: [0,0,0,0], stus: [], rsts: {} }, 
+                        INCD: { total: [0,0,0,0], stus: [], rsts: {} } 
+                    },
+                    G3H: { 
+                        PRIM: { total: [0,0,0,0], stus: [], rsts: {} }, 
+                        INCD: { total: [0,0,0,0], stus: [], rsts: {} } 
+                    },
+                    G5N: { 
+                        PRIM: { total: [0,0,0,0], stus: [], rsts: {} }, 
+                        INCD: { total: [0,0,0,0], stus: [], rsts: {} } 
+                    },
+                }
+            }
+
+            // now check each grade
+            for (let j = 0; j < 3; j++) {
+                var grade = {0: 'GA', 1: 'G3H', 2: 'G5N'}[j];
+                
+                if (r['has_'+grade+'_prim']) {
+                    // ok, this has grade prim data
+                    ma_dict[r.oc_abbr][grade].PRIM.stus.push([
+                        r[grade+'_Et'],
+                        r['GA_Nt'],
+                        r[grade+'_Ec'],
+                        r['GA_Nc'],
+                        r['author'],
+                        'T',
+                        'C',
+                        // add more infor vis
+                        r['pid'],
+                        r['year'],
+                    ]);
+                    ma_dict[r.oc_abbr][grade].PRIM.total = math.add(
+                        ma_dict[r.oc_abbr][grade].PRIM.total,
+                        [
+                            r[grade+'_Et'],
+                            r['GA_Nt'],
+                            r[grade+'_Ec'],
+                            r['GA_Nc'],
+                        ]
+                    );
+                }
+                
+                // add incidence analysis
+                if (r['has_'+grade+'_incd']) {
+                    // ok, this has grade prim data
+                    ma_dict[r.oc_abbr][grade].INCD.stus.push([
+                        r[grade+'_Et'],
+                        r['GA_Nt'],
+                        r[grade+'_Ec'],
+                        r['GA_Nc'],
+                        r['author'],
+                        'T',
+                        'C',
+                        // add more infor vis
+                        r['pid'],
+                        r['year'],
+                    ]);
+                    ma_dict[r.oc_abbr][grade].INCD.total = math.add(
+                        ma_dict[r.oc_abbr][grade].INCD.total,
+                        [
+                            r[grade+'_Et'],
+                            r['GA_Nt'],
+                            0,
+                            0,
+                        ]
+                    );
+                }
+            }
+        }
+
+        return ma_dict;
+    },
+
+
+    mk_data_cfg_by_ma: function(ma_prim, sm, fixed_or_random) {
+        if (typeof(fixed_or_random) == 'undefined') {
+            fixed_or_random = 'random';
+        }
+        var stus = [];
+        var model = {};
+        var cfg = {
+            sm: {
+                'OR': { sm: 'OR', name: 'Odds Ratio' },
+                'RR': { sm: 'RR', name: 'Risk Ratio' },
+            }[sm],
+            mode: 'pwma_prcm',
+            params: {
+                input_format: 'PRIM_CAT_RAW',  // or PRIM_CAT_PRE
+                fixed_or_random: fixed_or_random,     // or fixed
+                prediction_interval: false,    // or true
+            }
+        };
+
+        // update stus
+        for (let i = 0; i < ma_prim.stus.length; i++) {
+            const _stu = ma_prim.stus[i];
+            stus.push({
+                Et: _stu[0],
+                Nt: _stu[1],
+                Ec: _stu[2],
+                Nc: _stu[3],
+                study: _stu[4],
+                treatment: _stu[5],
+                control: _stu[6],
+                pid: _stu[7],
+                year: _stu[8],
+
+                // MA information
+                SM: ma_prim.rsts[sm].SM[i],
+                SM_lower: ma_prim.rsts[sm].SM_lower[i],
+                SM_upper: ma_prim.rsts[sm].SM_upper[i],
+                w: ma_prim.rsts[sm][fixed_or_random].wp[i]
+            });
+        }
+
+        // update the model
+        model = JSON.parse(JSON.stringify(ma_prim.rsts[sm]));
+
+        // just for display in forest plot
+        model[fixed_or_random].study = jarvis.capitalize(fixed_or_random) + ' effects model';
+        model[fixed_or_random].Et = ma_prim.total[0];
+        model[fixed_or_random].Nt = ma_prim.total[1];
+        model[fixed_or_random].Ec = ma_prim.total[2];
+        model[fixed_or_random].Nc = ma_prim.total[3];
+        model[fixed_or_random].w = 1;
+
+        var ret = {
+            data: {
+                stus: stus,
+                model: model
+            },
+            cfg: cfg
+        };
+
+        return ret;
+    },
+
+    update_ma_rsts: function(ma_dict) {
+        // mark start time
+        const t0 = performance.now();
+        var cnt_mas = 0;
+
+        // let's check 
+        for (const abbr in ma_dict) {
+            for (const grade in ma_dict[abbr]) {
+                // get prim data
+                var ma_prim = ma_dict[abbr][grade].PRIM;
+                var ma_incd = ma_dict[abbr][grade].INCD;
+
+                if (ma_prim.stus.length != 0) {
+                    // OK, let's do INCD ANA
+                    var rst_OR = metajs.metabin(
+                        ma_prim.stus, {
+                            sm: 'OR'
+                        }
+                    );
+
+                    var rst_RR = metajs.metabin(
+                        ma_prim.stus, {
+                            sm: 'RR'
+                        }
+                    );
+
+                    // update the data
+                    ma_dict[abbr][grade].PRIM.rsts = {
+                        OR: rst_OR,
+                        RR: rst_RR
+                    };
+
+                    // update count
+                    cnt_mas += 2;
+                }
+
+                if (ma_incd.stus.length != 0) {
+                    // OK, let's do INCD ANA
+                    var rst_INCD = metajs.metaprop(
+                        ma_incd.stus, {}
+                    );
+
+                    // update the data
+                    ma_dict[abbr][grade].INCD.rsts = {
+                        INCD: rst_INCD
+                    };
+
+                    // update the total count
+                    cnt_mas += 1;
+                }
+            }
+        }
+
+        // get the total time
+        const t1 = performance.now();
+        const dur = (t1 - t0) / 1000;
+
+        console.log('* finished calculation of ' + cnt_mas + ' MAs in ' + dur.toFixed(4) + ' seconds');
+
+        return ma_dict;
+    },
+
+    get_ma_df: function(ma_dict, oc_dict) {
+        const t0 = performance.now();
+        // I guess we need 
+        var rs = [];
+        for (const abbr in ma_dict) {
+            for (const grade in ma_dict[abbr]) {
+                // get prim data
+                var ma_prim = ma_dict[abbr][grade].PRIM;
+                var ma_incd = ma_dict[abbr][grade].INCD;
+
+                // put primary
+                var r = {
+                    abbr: abbr,
+                    name: oc_dict[abbr].oc_name,
+                    grade: grade
+                };
+                if (ma_prim.stus.length == 0) {
+                    Object.assign(r, {
+                        // values
+                        OR_n_stus: 0,
+                        OR_sm: NaN,
+                        OR_lower: NaN,
+                        OR_upper: NaN,
+                    });
+                } else {
+                    Object.assign(r, {
+                        // values
+                        OR_n_stus: ma_prim.stus.length,
+                        OR_sm: ma_prim.rsts.OR.random.SM,
+                        OR_lower: ma_prim.rsts.OR.random.SM_lower,
+                        OR_upper: ma_prim.rsts.OR.random.SM_upper,
+                    });
+                }
+
+                // put incidence
+                if (ma_incd.stus.length == 0) {
+                    Object.assign(r, {
+                        // values
+                        INCD_n_stus: 0,
+                        INCD_sm: NaN,
+                        INCD_lower: NaN,
+                        INCD_upper: NaN,
+                    });
+                } else {
+                    Object.assign(r, {
+                        // values
+                        INCD_n_stus: ma_incd.stus.length,
+                        INCD_sm: ma_incd.rsts.INCD.random.SM,
+                        INCD_lower: ma_incd.rsts.INCD.random.SM_lower,
+                        INCD_upper: ma_incd.rsts.INCD.random.SM_upper,
+                    });
+                }
+
+                rs.push(r);
+            }
+        }
+
+        var df = new dfd.DataFrame(rs);
+
+        // get the total time
+        const t1 = performance.now();
+        const dur = (t1 - t0) / 1000;
+
+        console.log('* finished converting ' + rs.length + ' MAs to in ' + dur.toFixed(4) + ' seconds');
+
+        return df;
+    },
+
+    update_vis_data: function(df) {
+        var cols = [
+            'INCD_sm',
+            'OR_sm', 
+            'name',
+            'grade',
+            'OR_n_stus',
+            'OR_lower',
+            'OR_upper',
+            'INCD_lower',
+            'INCD_upper',
+        ];
+        var data_ga = df.loc({
+            rows: df['OR_n_stus'].gt(0).and(
+                df['grade'].eq('GA')
+            ),
+            columns: cols
+        }).values;
+
+        var data_g3h = df.loc({
+            rows: df['OR_n_stus'].gt(0).and(
+                df['grade'].eq('G3H')
+            ),
+            columns: cols
+        }).values;
+
+        var data_g5n = df.loc({
+            rows: df['OR_n_stus'].gt(0).and(
+                df['grade'].eq('G5N')
+            ),
+            columns: cols
+        }).values;
+
+        return {
+            data_ga: data_ga,
+            data_g3h: data_g3h,
+            data_g5n: data_g5n
+        };
+    }
+    
 };
 
 
@@ -1291,10 +2431,18 @@ var jarvis = {
             src = 'cache';
         }
 
+        // clinical question
         var cq = jarvis.get_url_paramter('cq');
         if (cq == '') {
             cq = 'default';
         }
+
+        // work mode
+        var wm = jarvis.get_url_paramter('wm');
+        if (wm == '') {
+            wm = 'plot';
+        }
+        app_pma.vpp_data.work_mode = wm;
 
         // load all data
         $.when(
