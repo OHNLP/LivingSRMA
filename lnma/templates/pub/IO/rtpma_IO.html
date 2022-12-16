@@ -685,7 +685,7 @@ a {
     <div id="app_filter" class="d-flex flex-row">
         <div class="sfilter d-flex fx-col mr-1">
             <div class="sfilter-name">&nbsp;</div>
-            <div style="font-size: 14px; font-weight: bold;">
+            <div style="font-weight: bold;">
                 Filters: 
             </div>
         </div>
@@ -960,8 +960,33 @@ a {
             </div>
         </div>
 
+        
+        <div v-if="flag_is_work_mode_sof"
+            id="app_marst" 
+            class="box" 
+            style="height: calc(100% - 20px);">
+            <div class="box-header">
+                <h4>
+                    <i class="fas fa-table"></i>
+                    Summary of Findings | 
+                </h4>
 
-        <div id="app_marst" 
+                <div class="d-flex flex-align-items-center">
+                    <button v-on:click="export_sof_csv()"
+                        class="mr-2">
+                        <i class="fas fa-file-export"></i>
+                        Export CSV
+                    </button>
+
+                </div>
+                
+            </div>
+        </div>
+        <!-- /#app_marst for SoF table -->
+
+        <!-- for PWMA plots -->
+        <div v-if="flag_is_work_mode_plot"
+            id="app_marst" 
             class="box" 
             style="height: calc(100% - 20px);">
             <div class="box-header">
@@ -1035,6 +1060,9 @@ a {
             </div>
             
         </div>
+        <!-- /#app_marst for PWMA plots -->
+
+
 
     </div>
     <!-- /#app_ocrst -->
@@ -1875,6 +1903,13 @@ var app_pma = {
             }
         },
 
+
+        ///////////////////////////////////////////////////////////
+        // for sof
+        ///////////////////////////////////////////////////////////
+        export_sof_csv: function() {
+
+        },
 
         ///////////////////////////////////////////////////////////
         // app-level functions
