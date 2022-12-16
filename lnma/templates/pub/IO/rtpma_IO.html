@@ -29,6 +29,9 @@
 .fx-jc-space-between {
     justify-content: space-between;
 }
+.cursor-pointer {
+    cursor: pointer !important;
+}
 /* the label values items */
 .bbi-label {
     width: 100%;
@@ -143,6 +146,9 @@ a {
 }
 #app_ocrst {
     height: calc(100% - 50px);
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
 }
 #app_oclist {
     width: 320px;
@@ -155,6 +161,9 @@ a {
     width: 100%;
     overflow-x: hidden;
     overflow-y: auto;
+}
+#app_marst {
+    width: calc(100% - 330px);
 }
 #vw_ocplots_mainpanel {
     width: calc(100% - 320px);
@@ -777,6 +786,18 @@ a {
                             <div class="oc-name" style="font-weight: bold;">
                                 {{ n_all() }}
                                 Outcomes
+
+                                <button class="ml-3"
+                                    v-on:click="update_all_oc_mas();">
+                                    <span v-if="is_updating_all_oc_mas">
+                                        <i class="fas fa-sync fa-spin"></i>
+                                        Updating ...
+                                    </span>
+                                    <span v-else>
+                                        <i class="fa fa-sync"></i>
+                                        Update PWMA
+                                    </span>
+                                </button>
                             </div>
                             <div class="oc-type" title="All Grades">
                                 ALL
@@ -795,16 +816,16 @@ a {
                             v-for="group in rs">
                             <div class="oc-group d-flex flex-row">
                                 <div class="oc-name" 
-                                    v-on:click="toggle_group(group.oc_group)">
+                                    v-on:click="toggle_group(group.group)">
                                     <i class="far fa-folder" v-if="group.is_close"></i>
                                     <i class="far fa-folder-open" v-else></i>
-                                    {{ group.oc_group }} related AEs
+                                    {{ group.group }} related ocs
                                     ({{ n_group(group) }})
                                 </div>
                                 <div class="oc-type">
                                     <a v-if="flag_is_work_mode_sof"
                                         v-on:click="add_group(group, 'GA')"
-                                        :title="'Add [' + group.oc_group + '] GA outcomes'"
+                                        :title="'Add [' + group.group + '] GA outcomes'"
                                         class="btn-add-ocs"
                                         href="javascript:void(0);">
                                         <i class="fa fa-plus"></i>
@@ -812,7 +833,7 @@ a {
                                 </div>
                                 <div class="oc-type">
                                     <a v-if="flag_is_work_mode_sof"
-                                        :title="'Add [' + group.oc_group + '] G3+ outcomes'"
+                                        :title="'Add [' + group.group + '] G3+ outcomes'"
                                         class="btn-add-ocs"
                                         v-on:click="add_group(group, 'G3H')"
                                         href="javascript:void(0);">
@@ -822,7 +843,7 @@ a {
                                 <div class="oc-type">
                                     <a v-if="flag_is_work_mode_sof"
                                         v-on:click="add_group(group, 'G5N')"
-                                        :title="'Add [' + group.oc_group + '] G5 outcomes'"
+                                        :title="'Add [' + group.group + '] G5 outcomes'"
                                         class="btn-add-ocs"
                                         href="javascript:void(0);">
                                         <i class="fa fa-plus"></i>
@@ -833,22 +854,22 @@ a {
                                 v-bind:class="{hide: group.is_close}"
                                 v-show="match_keyword_in_cate(r)">
                                 <div class="oc-cate-info d-flex flex-row">
-                                    <div v-on:click="toggle_cate(group.oc_group, r.oc_cate)"
+                                    <div v-on:click="toggle_cate(group.group, r.cate)"
                                         class="oc-name">
                                         <i class="far fa-folder" v-if="r.is_close"></i>
                                         <i class="far fa-folder-open" v-else></i>
                                         
                                         <span class="badge"
-                                            :class="'badge-' + group.oc_group">
-                                            {{ group.oc_group[0] }}
+                                            :class="'badge-' + group.group">
+                                            {{ group.group[0] }}
                                         </span>
-                                        {{ r.oc_cate }}
+                                        {{ r.cate }}
                                         ({{ n_cate(r) }})
                                     </div>
                                     <div class="oc-type">
                                         <a v-if="flag_is_work_mode_sof"
                                             v-on:click="add_cate(r, 'GA')"
-                                            :title="'Add [' + r.oc_cate + '] GA outcomes'"
+                                            :title="'Add [' + r.cate + '] GA outcomes'"
                                             class="btn-add-ocs"
                                             href="javascript:void(0);">
                                             <i class="fa fa-plus"></i>
@@ -857,7 +878,7 @@ a {
                                     <div class="oc-type">
                                         <a v-if="flag_is_work_mode_sof"
                                             v-on:click="add_cate(r, 'G3H')"
-                                            :title="'Add [' + r.oc_cate + '] G3+ outcomes'"
+                                            :title="'Add [' + r.cate + '] G3+ outcomes'"
                                             class="btn-add-ocs"
                                             href="javascript:void(0);">
                                             <i class="fa fa-plus"></i>
@@ -866,7 +887,7 @@ a {
                                     <div class="oc-type">
                                         <a v-if="flag_is_work_mode_sof"
                                             v-on:click="add_cate(r, 'G5N')"
-                                            :title="'Add [' + r.oc_cate + '] G5 outcomes'"
+                                            :title="'Add [' + r.cate + '] G5 outcomes'"
                                             class="btn-add-ocs"
                                             href="javascript:void(0);">
                                             <i class="fa fa-plus"></i>
@@ -876,18 +897,18 @@ a {
                                 <div class="oc-items d-flex fx-col"
                                     v-bind:class="{hide: r.is_close}">
                                     <div class="oc-item"
-                                        v-for="ae in r.aes">
+                                        v-for="ae in r.ocs">
                                         <div class="oc-item-info d-flex flex-row"
-                                            v-show="show_oc(ae) && match_keyword(ae.oc_name)">
+                                            v-show="show_oc(ae) && match_keyword(ae.name)">
                                             <div class="oc-name">
                                                 <i class="far fa-clipboard"></i>
-                                                {{ ae.oc_name }}
+                                                {{ ae.name }}
                                             </div>
     
                                             
                                             <div class="oc-type"
                                                 v-if="show_oc_grade(ae, 'GA')"
-                                                v-bind:style="{ backgroundColor: get_eft_color(ma_dict[ae.oc_abbr].GA.PRIM.rsts[color_mode_by_sm]) }"
+                                                v-bind:style="{ backgroundColor: get_eft_color(ma_dict[ae.abbr].GA.PRIM.rsts[color_mode_by_sm]) }"
                                                 v-on:click="add_oc(ae, 'GA')">
                                                 {{ ae.cnt_ga }}
                                             </div>
@@ -900,7 +921,7 @@ a {
     
                                             <div class="oc-type"
                                                 v-if="show_oc_grade(ae, 'G3H')"
-                                                v-bind:style="{ backgroundColor: get_eft_color(ma_dict[ae.oc_abbr].G3H.PRIM.rsts[color_mode_by_sm]) }"
+                                                v-bind:style="{ backgroundColor: get_eft_color(ma_dict[ae.abbr].G3H.PRIM.rsts[color_mode_by_sm]) }"
                                                 v-on:click="add_oc(ae, 'G3H')">
                                                 {{ ae.cnt_g3h }}
                                             </div>
@@ -913,7 +934,7 @@ a {
     
                                             <div class="oc-type"
                                                 v-if="show_oc_grade(ae, 'G5N')"
-                                                v-bind:style="{ backgroundColor: get_eft_color(ma_dict[ae.oc_abbr].G5N.PRIM.rsts[color_mode_by_sm]) }"
+                                                v-bind:style="{ backgroundColor: get_eft_color(ma_dict[ae.abbr].G5N.PRIM.rsts[color_mode_by_sm]) }"
                                                 v-on:click="add_oc(ae, 'G5N')">
                                                 {{ ae.cnt_g5n }}
                                             </div>
@@ -937,6 +958,82 @@ a {
         
                 </div>
             </div>
+        </div>
+
+
+        <div id="app_marst" 
+            class="box" 
+            style="height: calc(100% - 20px);">
+            <div class="box-header">
+                <h4>
+                    <i class="fa fa-chart-bar"></i>
+                    Outcome Detail | 
+                </h4>
+
+                <div class="d-flex flex-align-items-center">
+                    <button v-on:click="export_oc_csv()"
+                        class="mr-2">
+                        <i class="fas fa-file-export"></i>
+                        Export CSV
+                    </button>
+
+                </div>
+                
+            </div>
+
+            <div class="box-body" style="height: calc(100% - 20px);">
+                <div class="plot-nav-tab d-flex">
+                    <div class="box-radio-group d-flex fx-row">
+                        <div>
+                            <i class="fa fa-cog"></i>
+                            Measure of effect: 
+                        </div>
+                        <div class="box-radio-item">
+                            <input type="radio" name="vw_ocplots_input_sm"
+                                value="RR" id="vw_ocplots_input_sm_rr"
+                                v-on:change="update_ma_plot_by_sm('RR')"
+                                v-model="plot_sm">
+                            <label for="vw_ocplots_input_sm_rr">Risk Ratio (RR)</label>
+                        </div>
+                        <div class="box-radio-item">
+                            <input type="radio" checked name="vw_ocplots_input_sm"
+                                value="OR" id="vw_ocplots_input_sm_or"
+                                v-on:change="update_ma_plot_by_sm('OR')"
+                                v-model="plot_sm">
+                            <label for="vw_ocplots_input_sm_or">Odds Ratio (OR)</label>
+                        </div>
+                        <div class="box-radio-item">
+                            <input type="radio" name="vw_ocplots_input_sm"
+                                value="INCD" id="vw_ocplots_input_sm_plogit"
+                                v-on:change="update_ma_plot_by_sm('INCD')"
+                                v-model="plot_sm">
+                            <label for="vw_ocplots_input_sm_plogit">Incidence</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="forest-plot-panel"
+                    v-show="plot_sm == 'RR' || plot_sm == 'OR'"
+                    style="height: calc(100% - 20px);">
+                    
+                    <div id="fg_pwma_forest" 
+                        style="width: 100%; height: 100%;">
+                        <svg id="fg_pwma_forest_svg"></svg>
+                    </div>
+                </div>
+
+                <div class="forest-plot-panel"
+                    v-show="plot_sm == 'INCD'"
+                    style="height: calc(100% - 20px);">
+                    
+                    <div id="fg_pwma_forest" 
+                        style="width: 100%; height: 100%;">
+                        <svg id="fg_incd_incd_forest"></svg>
+                    </div>
+                </div>
+
+            </div>
+            
         </div>
 
     </div>
@@ -995,6 +1092,18 @@ if (isIE) {
 {% include 'js/fgmk_incd_forest.js' %}
 {% include 'js/fgmk_cumu_forest.js' %}
 
+// Alias for the pwma plots
+var fg_pwma_forest = fgmk_pwma_forest.make_fig(
+    'fg_pwma_forest'
+);
+// alias for the incidence plots
+var fg_incd_incd_forest = fgmk_incd_forest.make_fig(
+    'fg_incd_incd_forest'
+);
+// alias for the cumulative plots
+var fg_cumu_forest = fgmk_cumu_forest.make_fig(
+    'fg_cumu_forest'
+);
 
 var app_pma = {
     // bind the Vue.js object
@@ -1104,18 +1213,17 @@ var app_pma = {
 
         // for oc list
         group: 'treatment',
-        select_mode: this.select_mode,
         color_mode_by_sm: 'RR',
 
         // rs is a three level dict
         // {
         //     group: {
-        //         oc_group,
+        //         group,
         //         is_close,
         //         cates: {
         //             cate_name: {
-        //                 oc_cate,
-        //                 aes: []
+        //                 cate,
+        //                 ocs: []
         //             }
         //         }
         //     }
@@ -1123,14 +1231,27 @@ var app_pma = {
         rs: {},
         rs_stat: {
             cnt_cates: 0,
-            cnt_aes: 0,
+            cnt_ocs: 0,
         },
         ma_dict: {},
 
         keyword: '',
 
         // for filter number of outcomes
-        cnt_rule: 'ge1'
+        cnt_rule: 'ge1',
+
+        is_updating_all_oc_mas: false,
+
+        ///////////////////////////////////////////////////////////
+        // for plots
+        ///////////////////////////////////////////////////////////
+        plot_oc: null,
+        plot_grade: null,
+        plot_sm: 'RR',
+        
+        plot_params: {
+            fixed_or_random: 'random'
+        }
     },
 
     vpp_methods: {
@@ -1456,9 +1577,9 @@ var app_pma = {
 
         n_cate: function(cate) {
             var n = 0;
-            for (let i = 0; i < cate.aes.length; i++) {
-                const ae = cate.aes[i];
-                if (this.show_oc(ae) && this.match_keyword(ae.oc_name)) {
+            for (let i = 0; i < cate.ocs.length; i++) {
+                const ae = cate.ocs[i];
+                if (this.show_oc(ae) && this.match_keyword(ae.name)) {
                     n += 1;
                 }
             }
@@ -1478,10 +1599,10 @@ var app_pma = {
         },
 
         match_keyword_in_cate(cate) {
-            for (let i = 0; i < cate.aes.length; i++) {
-                const ae = cate.aes[i];
+            for (let i = 0; i < cate.ocs.length; i++) {
+                const ae = cate.ocs[i];
                 
-                if (this.match_keyword(ae.oc_name)) {
+                if (this.match_keyword(ae.name)) {
                     return true;
                 }
             }
@@ -1548,7 +1669,7 @@ var app_pma = {
         add_group: function(group, ae_grade) {
             var cnt = 0;
             var ret = window.confirm(
-                'Adding ALL '+ae_grade+' outcomes in current ['+group.oc_group+'] group may take a while, are sure to continue?'
+                'Adding ALL '+ae_grade+' outcomes in current ['+group.group+'] group may take a while, are sure to continue?'
             );
             if (ret) {
 
@@ -1570,10 +1691,10 @@ var app_pma = {
         add_cate: function(cate, ae_grade) {
             // the cate contains all AE
             var cnt = 0;
-            for (let i = 0; i < cate.aes.length; i++) {
-                const ae = cate.aes[i];
+            for (let i = 0; i < cate.ocs.length; i++) {
+                const ae = cate.ocs[i];
                 
-                if (this.match_keyword(ae.oc_name)) {
+                if (this.match_keyword(ae.name)) {
                     cnt += this.add_oc(
                         ae,
                         ae_grade
@@ -1582,49 +1703,6 @@ var app_pma = {
             }
 
             return cnt;
-        },
-
-        add_oc: function(ae, ae_grade, count) {
-            if (this.show_oc_grade(ae, ae_grade)) {
-
-            } else {
-                // this oc can NOT be displayed for some reason
-                // so won't be added for comparison
-                console.log('* failed to add_oc by show_oc_grade', ae);
-                return 0;
-            }
-
-            if (typeof(count) == 'undefined') {
-
-            } else {
-                // just for counting
-                return 1;
-            }
-            // var group = this.group;
-            // var oc_abbr = event.target.getAttribute('oc_abbr');
-            // var oc_cate = event.target.getAttribute('oc_cate');
-            // var oc_name = event.target.getAttribute('oc_name');
-            // var ae_grade = event.target.getAttribute('ae_grade');
-
-            // add effect
-            // if (this.select_mode == 'checkbox') {
-            //     $(event.target).toggleClass('oc-type-selected');
-            // } else {
-            //     $('.oc-type').removeClass('oc-type-selected');
-            //     $(event.target).addClass('oc-type-selected');
-            // }
-
-            // call the worker to update everything related
-            // jarvis will do this task accordingly
-            return jarvis.add_oc(
-                ae.oc_group, 
-                ae.oc_cate, 
-                ae.oc_name, 
-                ae.oc_abbr, 
-
-                ae_grade, 
-                app_oclist.pids
-            );
         },
 
         get_grade_label: function(g) {
@@ -1678,49 +1756,172 @@ var app_pma = {
             this.clear();
         },
 
+        update_all_oc_mas: function() {
+            this.is_updating_all_oc_mas = true;
+            var cnt_mas = 0;
+            const t0 = performance.now();
+            for (const abbr in this.ma_dict) {
+                for (const grade in this.ma_dict[abbr]) {
+                    var ma_prim = this.ma_dict[abbr][grade].PRIM;
+                    if (ma_prim.stus.length != 0) {
+                        var rst_sm = metajs.metabin(
+                            ma_prim.stus, {
+                                sm: this.color_mode_by_sm
+                            }
+                        );
+
+                        this.ma_dict[abbr][grade].PRIM.rsts[this.color_mode_by_sm] = rst_sm;
+                    }
+                }
+            }
+
+            // get the total time
+            const t1 = performance.now();
+            const dur = (t1 - t0) / 1000;
+
+            console.log('* finished calculation of ' + cnt_mas + ' MAs in ' + dur.toFixed(4) + ' seconds');
+            this.is_updating_all_oc_mas = false;
+        },
+
+        add_oc: function(oc, grade, count) {
+            if (this.show_oc_grade(oc, grade)) {
+
+            } else {
+                // this oc can NOT be displayed for some reason
+                // so won't be added for comparison
+                console.log('* failed to add_oc by show_oc_grade', oc);
+                return 0;
+            }
+
+            if (typeof(count) == 'undefined') {
+
+            } else {
+                // just for counting
+                return 1;
+            }
+
+            // now need to get the pwma result of this oc grade
+            var ma_prim = this.ma_dict[oc.abbr][grade].PRIM;
+            var ma_incd = this.ma_dict[oc.abbr][grade].INCD; 
+
+            /* it returns:
+            {
+                PRIM: { rsts: { OR: metajs_rst_OR, RR: metajs_rst_RR } },
+                INCD: { rsts: { INCD: metajs_rst_INCD } },
+            }
+            */
+            var r = this.calc_prim_incd(ma_prim, ma_incd);
+
+            // add the result to 
+            ma_prim.rsts = r.PRIM.rsts;
+            ma_incd.rsts = r.INCD.rsts;
+
+            // then the following steps depend on which work mode
+            if (this.flag_is_work_mode_sof) {
+
+            } else if (this.flag_is_work_mode_plot) {
+                // just show the forest plots
+                this.plot_oc = oc;
+                this.plot_grade = grade;
+
+                // draw
+                this.draw_ma_plot();
+            }
+        },
+
+
+        ///////////////////////////////////////////////////////////
+        // for plots
+        ///////////////////////////////////////////////////////////
+        update_ma_plot_by_sm: function(sm) {
+            // just reset the sm
+            // this.plot_sm = sm;
+
+            // re-draw
+            this.draw_ma_plot();
+        },
+
+        draw_ma_plot: function() {
+
+            if (this.plot_sm == 'RR' || this.plot_sm == 'OR') {
+                var ma_prim = this.ma_dict[this.plot_oc.abbr][this.plot_grade].PRIM;
+
+                // get the pma data for plot?
+                var r = app_pma.mk_data_cfg_by_ma(
+                    ma_prim,
+                    this.plot_sm,
+                    this.plot_params.fixed_or_random
+                );
+
+                // then draw it?
+                fg_pwma_forest.draw(
+                    r.data,
+                    r.cfg
+                );
+
+            } else if (this.plot_sm == 'INCD') {
+                var ma_incd = this.ma_dict[this.plot_oc.abbr][this.plot_grade].INCD;
+
+                // get the pma data for plot?
+                var r = app_pma.mk_data_cfg_by_ma(
+                    ma_prim,
+                    this.plot_sm,
+                    this.plot_params.fixed_or_random
+                );
+
+                fg_incd_incd_forest.draw(
+
+                );
+            }
+        },
+
 
         ///////////////////////////////////////////////////////////
         // app-level functions
         ///////////////////////////////////////////////////////////
-        add_oc: function(oc_group, oc_cate, oc_name, oc_abbr, ae_grade, pids) {
-            // console.log('* add_oc ' + oc_group + ' | ' + oc_cate + ' | ' +oc_abbr+' , ' + oc_name + ', ' + ae_grade, pids);
-            // vw_ocplot.show_plot(group, oc_cate, oc_name, ae_grade, pids);
 
-            // first, get the filter values
-            var f_vals = this.get_current_filter_values();
-
-            // second, get the raw data and the ma rst
-            var ma = app_oclist.ma_dict[oc_abbr][ae_grade];
-
-            // then, create a f_oc and push to cmp
-            var f_oc = {
-                // basic info
-                oc_group: oc_group,
-                oc_abbr: oc_abbr,
-                oc_cate: oc_cate,
-                oc_name: oc_name,
-                ae_grade: ae_grade,
-
-                // filters
-                f_vals: f_vals,
-                
-                // pids
-                pids: pids,
-
-                // PWMA
-                ma: ma
+        calc_prim_incd: function(ma_prim, ma_incd) {
+            var ret = {
+                PRIM: { rsts: {} },
+                INCD: { rsts: {} },
             };
 
-            var ret = app_comptb.vpp.add_f_oc(f_oc);
-            if (ret) {
-                // ok, added
-                console.log('* added f_oc: ', f_oc);
-                return 1;
-            } else {
-                // no this is a duplicated
-                console.log('* skipped adding f_oc:', f_oc);
-                return 0;
+            if (ma_prim.stus.length != 0) {
+                // OK, let's do INCD ANA
+                var rst_OR = metajs.metabin(
+                    ma_prim.stus, {
+                        sm: 'OR'
+                    }
+                );
+
+                var rst_RR = metajs.metabin(
+                    ma_prim.stus, {
+                        sm: 'RR'
+                    }
+                );
+
+                // update the data
+                ret.PRIM.rsts = {
+                    OR: rst_OR,
+                    RR: rst_RR
+                };
+
             }
+
+            if (ma_incd.stus.length != 0) {
+                // OK, let's do INCD ANA
+                var rst_INCD = metajs.metaprop(
+                    ma_incd.stus, {}
+                );
+
+                // update the data
+                ret.INCD.rsts = {
+                    INCD: rst_INCD
+                };
+
+            }
+
+            return ret;
         },
 
     },
@@ -1728,6 +1929,10 @@ var app_pma = {
     vpp_computed: {
         flag_is_work_mode_sof: function() {
             return this.work_mode == 'sof';
+        },
+
+        flag_is_work_mode_plot: function() {
+            return this.work_mode == 'plot';
         }
     },
 
@@ -1883,7 +2088,7 @@ var app_pma = {
             '  count(case when has_GA = true then pid else null end) as cnt_ga, ' + '\n' +
             '  count(case when has_G3H = true then pid else null end) as cnt_g3h, ' + '\n' +
             '  count(case when has_G5N = true then pid else null end) as cnt_g5n ' + '\n' +
-            'from aes ' + '\n' +
+            'from ocs ' + '\n' +
             'group by oc_group, oc_cate, oc_abbr ' + '\n' +
             'order by oc_group asc, oc_cate asc, oc_name asc';
 
@@ -1912,10 +2117,10 @@ var app_pma = {
             // first, update this abbr in one-level dict
             if (!oc_dict.hasOwnProperty(r.oc_abbr)) {
                 oc_dict[r.oc_abbr] = {
-                    oc_group: r.oc_group,
-                    oc_cate: r.oc_cate,
-                    oc_abbr: r.oc_abbr,
-                    oc_name: r.oc_name,
+                    group: r.oc_group,
+                    cate: r.oc_cate,
+                    abbr: r.oc_abbr,
+                    name: r.oc_name,
                     cnt_ga: r.cnt_ga,
                     cnt_g3h: r.cnt_g3h,
                     cnt_g5n: r.cnt_g5n
@@ -1934,10 +2139,10 @@ var app_pma = {
             if (!oc_dict3[r.oc_group][r.oc_cate].hasOwnProperty(r.oc_abbr)) {
                 
                 oc_dict3[r.oc_group][r.oc_cate][r.oc_abbr] = {
-                    oc_group: r.oc_group,
-                    oc_cate: r.oc_cate,
-                    oc_abbr: r.oc_abbr,
-                    oc_name: r.oc_name,
+                    group: r.oc_group,
+                    cate: r.oc_cate,
+                    abbr: r.oc_abbr,
+                    name: r.oc_name,
                     cnt_ga: r.cnt_ga,
                     cnt_g3h: r.cnt_g3h,
                     cnt_g5n: r.cnt_g5n,
@@ -1958,7 +2163,7 @@ var app_pma = {
             '  count(case when has_GA = true then pid else null end) as cnt_ga, ' + '\n' +
             '  count(case when has_G3H = true then pid else null end) as cnt_g3h, ' + '\n' +
             '  count(case when has_G5N = true then pid else null end) as cnt_g5n ' + '\n' +
-            'from aes ' + '\n' +
+            'from ocs ' + '\n' +
             'where ' + '\n' +
             this.get_condition_by_pids_and_group(pids, group) + ' ' + '\n' +
             'group by oc_group, oc_cate, oc_abbr ' + '\n' +
@@ -1972,7 +2177,7 @@ var app_pma = {
         var rs = {};
         var rs_stat = {
             cnt_cates: 0,
-            cnt_aes: 0,
+            cnt_ocs: 0,
         };
         for (var i = 0; i < raw_rs.length; i++) {
             var r = raw_rs[i];
@@ -1992,7 +2197,7 @@ var app_pma = {
                 //
             } else {
                 rs[r.oc_group] = {
-                    oc_group: r.oc_group,
+                    group: r.oc_group,
                     is_close: false,
                     cates: {}
                 }
@@ -2003,24 +2208,24 @@ var app_pma = {
                 //
             } else {
                 rs[r.oc_group].cates[r.oc_cate] = {
-                    oc_cate: r.oc_cate,
+                    cate: r.oc_cate,
                     is_close: false,
-                    aes: []
+                    ocs: []
                 }
                 rs_stat.cnt_cates += 1;
             }
             // put this ae into cate
-            rs[r.oc_group].cates[r.oc_cate]['aes'].push({
-                oc_group: r.oc_group,
-                oc_cate: r.oc_cate,
-                oc_name: r.oc_name,
-                oc_abbr: r.oc_abbr,
+            rs[r.oc_group].cates[r.oc_cate]['ocs'].push({
+                group: r.oc_group,
+                cate: r.oc_cate,
+                name: r.oc_name,
+                abbr: r.oc_abbr,
 
                 cnt_ga: r.cnt_ga,
                 cnt_g3h: r.cnt_g3h,
                 cnt_g5n: r.cnt_g5n
             });
-            rs_stat.cnt_aes += 1;
+            rs_stat.cnt_ocs += 1;
         }
 
         return {
@@ -2031,7 +2236,7 @@ var app_pma = {
 
     get_ma_dict: function(pids, group) {
         var sql = 'select * ' + '\n' +
-            'from aes ' + '\n' +
+            'from ocs ' + '\n' +
             'where ' + '\n' +
             this.get_condition_by_pids_and_group(pids);
 
@@ -2470,8 +2675,8 @@ var jarvis = {
             alasql('select * into papers from ?', [data1.rs]);
             
             // init the local db for the outcome / AE records
-            alasql('create table aes');
-            alasql('select * into aes from ?', [data2.rs])
+            alasql('create table ocs');
+            alasql('select * into ocs from ?', [data2.rs])
 
             // init the filter with ITABLE data
             app_pma.init(data1, data2);
@@ -2483,10 +2688,6 @@ var jarvis = {
         });
 
         
-    },
-
-    update_plots_by_pmids: function(pmids) {
-        app_oclist.update(pmids);
     },
 
     get_url_paramter: function(name) {
