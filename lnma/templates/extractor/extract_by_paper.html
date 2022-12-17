@@ -129,31 +129,38 @@ html {
                     v-if="is_search_match(paper)"
                     v-bind:id="'paper-table-row-' + paper.paper_id"
                     class="paper-table-row">
-                    <td v-on:click="on_click_paper(paper)">
+                    <td v-on:click="on_click_paper(paper)"
+                        class="cursor-pointer">
                         {{ paper.seq_num }}
                     </td>
-                    <td v-on:click="on_click_paper(paper)">
+                    <td v-on:click="on_click_paper(paper)"
+                        class="cursor-pointer">
                         {{ paper.rct_id }}
                     </td>
-                    <td v-on:click="on_click_paper(paper)">
+                    <td v-on:click="on_click_paper(paper)"
+                        class="cursor-pointer">
                         {{ paper.pid }}
                     </td>
-                    <td class="paper-table-body-td-author"
+                    <td class="paper-table-body-td-author cursor-pointer"
                         v-on:click="on_click_paper(paper)">
                         <div class="paper-table-body-td-author">
                             {{ paper.short_name }}
                         </div>
                     </td>
+
                     <td v-if="has_coe_rob()"
                         class="text-center">
                         <span class="mr-2"
+                            :title="'Reviewer Judgement: ' + get_coe_rob_label(get_coe_rob_value(paper.pid, 'COE_RCT_ROB_OVERALL_RJ'))"
                             :class="'rob-rst-icon-' + get_coe_rob_value(paper.pid, 'COE_RCT_ROB_OVERALL_RJ')">
                             <i class="far fa-user"></i>
                             <span>
                                 {{ get_coe_rob_value(paper.pid, 'COE_RCT_ROB_OVERALL_RJ') }}
                             </span>
                         </span>
-                        <span :class="'rob-rst-icon-' + get_coe_rob_value(paper.pid, 'COE_RCT_ROB_OVERALL_AR')">
+                        <span 
+                            :title="'Reviewer Judgement: ' + get_coe_rob_label(get_coe_rob_value(paper.pid, 'COE_RCT_ROB_OVERALL_AR'))"
+                            :class="'rob-rst-icon-' + get_coe_rob_value(paper.pid, 'COE_RCT_ROB_OVERALL_AR')">
                             <i class="fas fa-code-branch"></i>
                             <span>
                                 {{ get_coe_rob_value(paper.pid, 'COE_RCT_ROB_OVERALL_AR') }}
@@ -689,6 +696,15 @@ var pan_ocpapers = {
             } else {
                 return 'NA';
             }
+        },
+
+        get_coe_rob_label: function(val) {
+            return {
+                'L': 'Low',
+                'M': 'Some Concerns',
+                'H': 'High Risk',
+                'NA': 'Not Decided'
+            }[val];
         }
 
     },
@@ -876,22 +892,28 @@ var pan_ocpapers = {
             true, // flag_skip_is_selected
             function(data) {
                 // the data contain a paer
-                console.log(data);
+                console.log('* update_extract_incr_data returns:', data);
 
                 jarvis.toast('Updated [' + data.extract.meta.full_name + '] with current extraction');
                 pan_ocpapers.vpp.saving_end();
 
                 // reload the page
                 // pan_ocpapers.re_load(data.extract);
-                
+                // 2022-12-18: fix rob not updated bug
                 // just update this extract?
-                pan_ocpapers.update_vpp_extracts(data.extract);
+                if (data.extract.oc_type == 'itable') {
+                    // need to update different
+                    pan_ocpapers.on_load_itable(data.extract);
+                } else {
+                    // standard extract
+                    pan_ocpapers.update_vpp_extracts(data.extract);
+                }
             }
         );
 
-        if (oc_type == 'itable') {
-            pan_ocpapers.update_itable_data();
-        }
+        // if (oc_type == 'itable') {
+            // pan_ocpapers.update_itable_data();
+        // }
     },
 
     show_working_paper: function() {
