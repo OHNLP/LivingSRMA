@@ -316,8 +316,8 @@ a {
 .flex-col {
     flex-direction: column;
 }
-.flex-align-items-baseline {
-    align-items: baseline;
+.flex-align-items-sof_baseline {
+    align-items: sof_baseline;
 }
 .flex-align-items-center {
     align-items: center;
@@ -665,6 +665,53 @@ a {
 .mr-3 {
     margin-right: 3em;
 }
+
+/* for the SoF table */
+.sof-table {
+    /* width: calc(100% - 10px); */
+    width: 1100px;
+    min-width: 800px;
+}
+.sof-table th {
+    text-align: center;
+    background: whitesmoke;
+    padding: 5px 0;
+}
+.sof-table td {
+    text-align: center;
+    line-height: 1.45em;
+    padding: 3px 0;
+    border-bottom: 1px solid #e6e6e6;
+    border-right: 1px solid #e6e6e6;
+    cursor: default;
+}
+.sof-table .col-oc-name {
+    width: 150px;
+    max-width: 180px;
+}
+.sof-table .col-ta-left {
+    text-align: left !important;
+    padding-left: 10px;
+}
+.sof-table .col-flipable {
+    cursor: pointer;
+}
+.sof-table .col-flipable:hover {
+    background: whitesmoke;
+}
+.cie-bene-4 { background: rgb(55, 86, 35); color: white; }
+.cie-bene-3 { background: rgb(169, 208, 142); color: black; }
+.cie-bene-2 { background: rgb(226, 239, 218); color: black; }
+.cie-bene-1 { background: rgb(255, 242, 204); color: black; }
+.cie-harm-4 { background: rgb(150, 0, 0); color: white; }
+.cie-harm-3 { background: rgb(255, 103, 91); color: black; }
+.cie-harm-2 { background: rgb(255, 199, 193); color: black; }
+.cie-harm-1 { background: rgb(255, 242, 204); color: black; }
+.cie-nner-4 { background: rgb(66, 66, 66); color: rgb(255, 255, 255); }
+.cie-nner-3 { background: rgb(128, 128, 128); color: rgb(255, 255, 255); }
+.cie-nner-2 { background: rgb(191, 191, 191); color: black; }
+.cie-nner-1 { background: rgb(255, 242, 204); color: black; }
+
 </style>
 </head>
 
@@ -758,7 +805,7 @@ a {
                     <div class="d-flex fx-col">
                         <div class="d-flex flex-row ">
                             <div class="oc-name" style="font-weight: bold;">
-                                <div class="d-flex flex-row flex-align-items-baseline">
+                                <div class="d-flex flex-row flex-align-items-sof_baseline">
                                     <span>
                                         Search: 
                                     </span>
@@ -980,6 +1027,69 @@ a {
 
                 </div>
                 
+            </div>
+
+            <div class="box-body"
+                style="height: calc(100% - 20px);">
+                <table class="sof-table">
+                    <tr>
+                        <th rowspan="2">Outcome</th>
+                        <th rowspan="2">Grade</th>
+                        <th rowspan="2">Relative</th>
+                        <th colspan="3">Absolute</th>
+                        <th rowspan="2">Certainty in <br>Evidence</th>
+                        <!-- <th rowspan="2">Importance</th> -->
+                    </tr>
+                    <tr>
+                        <th>Intervention</th>
+                        <th>Control</th>
+                        <th>Risk Difference</th>
+                    </tr>
+
+                    <tr v-for="r in sof_rs">
+                        <td class="col-oc-name">
+                            {{ r.name }}
+                        </td>
+                        <td>
+                            {{ r.grade }}
+                        </td>
+                        <td>
+                            {{ sof_sm }}: 
+                            {{ _round2(r.ma.PRIM.rsts[sof_sm].random.SM) }}
+                            <br>
+                            (
+                                {{ _round2(r.ma.PRIM.rsts[sof_sm].random.SM_lower) }} 
+                                to 
+                                {{ _round2(r.ma.PRIM.rsts[sof_sm].random.SM_upper) }}
+                            )
+                        </td>
+
+                        <!-- Absolute values -->
+                        <td>
+                            {{ get_CIR(r).toFixed(0) }} per {{ baseline }}
+                        </td>
+                        <td>
+                            {{ get_ACR(r).toFixed(0) }} per {{ baseline }}
+                        </td>
+                        <td v-if="r.is_show['ARD']" class="col-flipable"
+                            v-on:click="flip_cell(grade, r, 'ARD')">
+                            {{ get_ARD_txt(r) }} per {{ baseline }}
+                        </td>
+                        <td v-else class="col-ta-left col-flipable"
+                            v-on:click="flip_cell(grade, r, 'ARD')">
+                            CI: {{ get_ARD_txt(r, 'lower') }} to 
+                                {{ get_ARD_txt(r, 'upper') }}<br>
+                            RD(%): {{ get_ARDp_txt(r) }}<br>
+                            ({{ get_ARDp_txt(r, 'lower')}} to {{ get_ARDp_txt(r, 'upper')}})
+                        </td>
+
+                        <!-- CoE -->
+                        <td>
+
+                        </td>
+                    </tr>
+                </table>
+
             </div>
         </div>
         <!-- /#app_marst for SoF table -->
@@ -1279,7 +1389,18 @@ var app_pma = {
         
         plot_params: {
             fixed_or_random: 'random'
-        }
+        },
+
+        ///////////////////////////////////////////////////////////
+        // for sof
+        ///////////////////////////////////////////////////////////
+        sof_sm: 'OR',
+        sof_baseline: 1000,
+        sof_external_risk_calculated: 10,
+        sof_use_internal_baseline: true,
+
+        // for display
+        sof_rs: []
     },
 
     vpp_methods: {
@@ -1716,23 +1837,6 @@ var app_pma = {
             return cnt;
         },
 
-        add_cate: function(cate, ae_grade) {
-            // the cate contains all AE
-            var cnt = 0;
-            for (let i = 0; i < cate.ocs.length; i++) {
-                const ae = cate.ocs[i];
-                
-                if (this.match_keyword(ae.name)) {
-                    cnt += this.add_oc(
-                        ae,
-                        ae_grade
-                    );
-                }
-            }
-
-            return cnt;
-        },
-
         get_grade_label: function(g) {
             return jarvis.texts[g];
         },
@@ -1799,6 +1903,7 @@ var app_pma = {
                         );
 
                         this.ma_dict[abbr][grade].PRIM.rsts[this.color_mode_by_sm] = rst_sm;
+                        cnt_mas += 1;
                     }
                 }
             }
@@ -1811,7 +1916,38 @@ var app_pma = {
             this.is_updating_all_oc_mas = false;
         },
 
+        add_cate: function(cate, ae_grade) {
+            // the cate contains all AE
+            var cnt = 0;
+            for (let i = 0; i < cate.ocs.length; i++) {
+                const ae = cate.ocs[i];
+                
+                if (this.match_keyword(ae.name)) {
+                    cnt += this.add_oc(
+                        ae,
+                        ae_grade
+                    );
+                }
+            }
+
+            return cnt;
+        },
+
         add_oc: function(oc, grade, count) {
+            /* 
+            oc is an object like the following:
+            {
+                "abbr": "E69BHJ1A",
+                "group": "treatment",
+                "cate": "Cardiovascular",
+                "name": "Atrial fibrillation",
+                "cnt_ga": 2,
+                "cnt_g3h": 3,
+                "cnt_g5n": 0
+            }
+            so we can use the abbr to search it in ma_dict
+            */
+            console.log("* add oc", oc, grade);
             if (this.show_oc_grade(oc, grade)) {
 
             } else {
@@ -1840,12 +1976,17 @@ var app_pma = {
             */
             var r = this.calc_prim_incd(ma_prim, ma_incd);
 
-            // add the result to 
-            ma_prim.rsts = r.PRIM.rsts;
-            ma_incd.rsts = r.INCD.rsts;
+            // add the result to original place
+            this.ma_dict[oc.abbr][grade].PRIM.rsts = r.PRIM.rsts;
+            this.ma_dict[oc.abbr][grade].INCD.rsts = r.INCD.rsts;
 
             // then the following steps depend on which work mode
             if (this.flag_is_work_mode_sof) {
+                this.add_fl_oc_gd_to_sof(
+                    this.get_current_filter_values(),
+                    oc,
+                    grade
+                );
 
             } else if (this.flag_is_work_mode_plot) {
                 // just show the forest plots
@@ -1905,10 +2046,159 @@ var app_pma = {
 
 
         ///////////////////////////////////////////////////////////
-        // for sof
+        // for soft (Summary of Findings Table)
         ///////////////////////////////////////////////////////////
+        find_fl_oc_gd_in_sof: function(fl, oc, grade) {
+            for (let i = 0; i < this.sof_rs.length; i++) {
+                const r = this.sof_rs[i];
+                if (r.grade == grade &&
+                    r.oc.abbr == oc.abbr &&
+                    this.cmp_vals(r.fl, fl)) {
+                    // found the exact same result!
+                    // same abbr, same grade, under same filter options
+                    return i;
+                }
+            }
+            return -1;
+        },
+
+        add_fl_oc_gd_to_sof: function(fl, oc, grade) {
+            if (this.find_fl_oc_in_sof(fl, oc) >= 0) {
+                // which means this fl-oc has already be added
+                return;
+            }
+            // ok, add this item
+            var ma = this.ma_dict[oc.abbr][grade];
+
+            // get the record for this sof row
+            var r = {
+                fl: fl,
+                oc: oc,
+                grade: grade,
+                ma: ma
+            }
+            this.sof_rs.push(r);
+        },
+
         export_sof_csv: function() {
 
+        },
+
+        get_ACR: function(r) {
+            if (this.sof_use_internal_baseline) {
+                return r.oc.Ec / r.oc.Nc * this.sof_baseline;
+            } else {
+                return external_risk_calculated;
+            }
+        },
+
+        get_obj: function(r, obj, fixed_or_random) {
+            // get the obj of this record
+            // obj could be: sm, lower, upper
+            if (typeof(obj)=='undefined') {
+                obj = 'sm';
+            }
+            if (typeof(fixed_or_random)=='undefined') {
+                fixed_or_random = 'random';
+            }
+            return r.oc.result[this.sof_sm][fixed_or_random].model[obj];
+        },
+
+        get_CIR: function(r, obj) {
+            // get the obj of this CIR
+            // obj could be
+            // sm, lower, upper
+            // calculate the CIR based on measure
+            if (this.sof_sm == 'OR') {
+                var a = this.get_ACR(r) / this.sof_baseline * this.get_obj(r, obj);
+                var b = 1 - this.get_ACR(r) / this.sof_baseline;
+                var c = a + b;
+                var d = a / c;
+                var e = d * this.sof_baseline;
+                return e;
+            } else if (this.sof_sm == 'RR') {
+                var a = this.get_ACR(r) * this.get_obj(r, obj);
+                return a;
+            }
+        },
+
+        get_ARD: function(r, obj) {
+            // get the obj of this CIR
+            // obj could be
+            // sm, lower, upper
+            if (this.sof_sm == 'OR') {
+                var a = (1 - this.get_obj(r, obj)) * this.get_ACR(r) / this.sof_baseline;
+                var b = 1 - this.get_ACR(r) / this.sof_baseline;
+                var c = a + b;
+                var d = a / c;
+                var e = d * this.sof_baseline;
+                return e;
+            } else if (this.sof_sm == 'RR') {
+                var a = this.get_ACR(r) * (1 - this.get_obj(r, obj));
+                return a;
+            }
+        },
+
+        get_ARD_txt: function(r, obj) {
+            var ARD = this.get_ARD(r, obj);
+            var txt = ' less';
+            if (ARD < 0) {
+                txt = ' more';
+            }
+            return Math.abs(ARD).toFixed(0) + txt;
+        },
+
+        get_ARDp_txt: function(r, obj) {
+            var ARDp = 100 * this.get_ARD(r, obj) / this.sof_baseline;
+            var txt = ' less';
+            if (ARDp < 0) {
+                txt = ' more';
+            }
+            return Math.abs(ARDp).toFixed(1) + '%' + txt;
+        },
+
+        get_bg_color_class_by_oc: function(oc_abbr, grade) {
+            var r = {
+                ae: app_softpma.data.oc_dict[oc_abbr].results[grade]
+            };
+            return this.get_bg_color_class(r);
+        },
+
+        get_bg_color_class: function(r) {
+            var fixed_or_random = 'random';
+            var sm = r.oc.result[this.sof_sm][fixed_or_random].model['sm'];
+            var lower = r.oc.result[this.sof_sm][fixed_or_random].model['lower'];
+            var upper = r.oc.result[this.sof_sm][fixed_or_random].model['upper'];
+            var cls =  this.calc_bg_color_class(sm, lower, upper);
+            console.log('* ae class:', cls);
+
+            return cls;
+        },
+
+        calc_bg_color_class: function(sm, lower, upper) {
+            var cie = 2;
+            if (lower < 1 && upper > 1) {
+                cie = 2;
+            } else {
+                cie = 3;
+            }
+            if (sm < 1) {
+                return 'cie-bene-' + cie;
+                // return '';
+            } else if (sm > 1) {
+                return 'cie-harm-' + cie;
+            } else {
+                return 'cie-nner-' + cie;
+            }
+        },
+
+        get_grade_label: function(g) {
+            // return jarvis.texts[g];
+            return g;
+        },
+
+        _round2: function(v) {
+            return (Math.round(v * 100) / 100).toFixed(2);
         },
 
         ///////////////////////////////////////////////////////////
