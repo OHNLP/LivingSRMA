@@ -941,20 +941,20 @@ a {
                                 <div class="oc-items d-flex flex-col"
                                     v-bind:class="{hide: r.is_close}">
                                     <div class="oc-item"
-                                        v-for="ae in r.ocs">
+                                        v-for="oc in r.ocs">
                                         <div class="oc-item-info d-flex flex-row"
-                                            v-show="show_oc(ae) && match_keyword(ae.name)">
+                                            v-show="show_oc(oc) && match_keyword(oc.name)">
                                             <div class="oc-name">
                                                 <i class="far fa-clipboard"></i>
-                                                {{ ae.name }}
+                                                {{ oc.name }}
                                             </div>
     
                                             
                                             <div class="oc-type"
-                                                v-if="show_oc_grade(ae, 'GA')"
-                                                v-bind:style="{ backgroundColor: get_eft_color(ma_dict[ae.abbr].GA.PRIM.rsts[color_mode_by_sm]) }"
-                                                v-on:click="add_oc(ae, 'GA')">
-                                                {{ ae.cnt_ga }}
+                                                v-if="show_oc_grade(oc, 'GA')"
+                                                v-bind:style="{ backgroundColor: get_eft_color(ma_dict[oc.abbr].GA.PRIM.rsts[color_mode_by_sm]) }"
+                                                v-on:click="add_oc(oc, 'GA')">
+                                                {{ oc.cnt_ga }}
                                             </div>
                                             <div class="oc-type"
                                                 v-else
@@ -964,10 +964,10 @@ a {
     
     
                                             <div class="oc-type"
-                                                v-if="show_oc_grade(ae, 'G3H')"
-                                                v-bind:style="{ backgroundColor: get_eft_color(ma_dict[ae.abbr].G3H.PRIM.rsts[color_mode_by_sm]) }"
-                                                v-on:click="add_oc(ae, 'G3H')">
-                                                {{ ae.cnt_g3h }}
+                                                v-if="show_oc_grade(oc, 'G3H')"
+                                                v-bind:style="{ backgroundColor: get_eft_color(ma_dict[oc.abbr].G3H.PRIM.rsts[color_mode_by_sm]) }"
+                                                v-on:click="add_oc(oc, 'G3H')">
+                                                {{ oc.cnt_g3h }}
                                             </div>
                                             <div class="oc-type"
                                                 v-else
@@ -977,10 +977,10 @@ a {
     
     
                                             <div class="oc-type"
-                                                v-if="show_oc_grade(ae, 'G5N')"
-                                                v-bind:style="{ backgroundColor: get_eft_color(ma_dict[ae.abbr].G5N.PRIM.rsts[color_mode_by_sm]) }"
-                                                v-on:click="add_oc(ae, 'G5N')">
-                                                {{ ae.cnt_g5n }}
+                                                v-if="show_oc_grade(oc, 'G5N')"
+                                                v-bind:style="{ backgroundColor: get_eft_color(ma_dict[oc.abbr].G5N.PRIM.rsts[color_mode_by_sm]) }"
+                                                v-on:click="add_oc(oc, 'G5N')">
+                                                {{ oc.cnt_g5n }}
                                             </div>
                                             <div class="oc-type"
                                                 v-else
@@ -1180,9 +1180,11 @@ a {
                         </td>
 
                         <!-- columns for MA -->
-                        <td>
+                        <td v-bind:style="{ backgroundColor: get_eft_color(r.ma.PRIM.rsts[sof_sm]) }">
                             {{ sof_sm }}: 
-                            {{ _round2(r.ma.PRIM.rsts[sof_sm].random.SM) }}
+                            <b>
+                                {{ _round2(r.ma.PRIM.rsts[sof_sm].random.SM) }}
+                            </b>
                             <br>
                             (
                                 {{ _round2(r.ma.PRIM.rsts[sof_sm].random.SM_lower) }} 

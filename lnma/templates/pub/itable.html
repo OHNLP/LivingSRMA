@@ -303,7 +303,7 @@ a {
         </div>
         <div class="box-body flex-container" style="flex-direction: column; ">
             <div class="attr_cate flex-container" style="width:100%; flex-direction: row; border-bottom: 1px dotted #cccccc;"
-                v-if="cate != '_SYS'"
+                v-if="!cate.startsWith('_')"
                 v-for="trunks, cate, cidx in attr_tree">
                 <div class="attr_cate_name" style="min-width: 120px; width: 120px; padding-top: 5px;">{{ cate }}</div>
                 <div class="flex-container" style="width: calc(100%-120px); flex-direction: row; justify-content: flex-start; flex-wrap: wrap;">
@@ -549,7 +549,8 @@ var dt_tbcore = {
             this.attrs[i].is_short_shown = true;
 
             // hide the system
-            this.attrs[i].is_system = this.attrs[i].cate == '_SYS'? true : false;
+            // this.attrs[i].is_system = this.attrs[i].cate == '_SYS'? true : false;
+            this.attrs[i].is_system = this.attrs[i].cate.startsWith('_')? true : false;
 
             // bind to dict
             this.attr_dict[this.attrs[i].attr_id] = this.attrs[i];
