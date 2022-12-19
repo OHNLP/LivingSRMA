@@ -17,17 +17,11 @@
 
 <style>
 {% include 'css/box.css' %}
-.d-flex {
-    display: flex;
-}
-.fx-row {
+.flex-row {
     flex-direction: row;
 }
-.fx-col {
+.flex-col {
     flex-direction: column;
-}
-.fx-jc-space-between {
-    justify-content: space-between;
 }
 .cursor-pointer {
     cursor: pointer !important;
@@ -91,6 +85,9 @@
 .txt-xl {
     font-size: 1.6em;
 }
+.txt-italic {
+    font-style: italic;
+}
 /* font bold */
 .txt-fb {
     font-weight: bold;
@@ -151,7 +148,7 @@ a {
     justify-content: flex-start;
 }
 #app_oclist {
-    width: 320px;
+    width: 300px;
     padding: 0 5px;
     height: 100%;
     /* height: 810px; */
@@ -730,7 +727,7 @@ a {
 <div id="app_pma">
 
     <div id="app_filter" class="d-flex flex-row">
-        <div class="sfilter d-flex fx-col mr-1">
+        <div class="sfilter d-flex flex-col mr-1">
             <div class="sfilter-name">&nbsp;</div>
             <div style="font-weight: bold;">
                 Filters: 
@@ -738,7 +735,7 @@ a {
         </div>
     
         <div v-for="dropdown, dpd_idx in dropdowns"
-            class="sfilter d-flex fx-col mr-3">
+            class="sfilter d-flex flex-col mr-3">
             <div class="sfilter-name">
                 {{ dropdown.display_name }}
             </div>
@@ -755,7 +752,7 @@ a {
             </div>
         </div>
     
-        <div class="d-flex fx-col mr-3">
+        <div class="d-flex flex-col mr-3">
             <div class="sfilter-name">
                 Number of studies
             </div>
@@ -802,7 +799,7 @@ a {
                 </div>
                 <div class="box-body" style="height: calc(100% - 40px);">
                     
-                    <div class="d-flex fx-col">
+                    <div class="d-flex flex-col">
                         <div class="d-flex flex-row ">
                             <div class="oc-name" style="font-weight: bold;">
                                 <div class="d-flex flex-row flex-align-items-sof_baseline">
@@ -828,7 +825,7 @@ a {
                         </div>
                     </div>
         
-                    <div class="oc-cate d-flex fx-col">
+                    <div class="oc-cate d-flex flex-col">
                         <div class="oc-cate-info d-flex flex-row">
                             <div class="oc-name" style="font-weight: bold;">
                                 {{ n_all() }}
@@ -859,7 +856,7 @@ a {
                     </div>
         
                     <div id="app_oclist_aespanel" style="height: calc(100% - 50px);">
-                        <div class="oc-cate d-flex fx-col"
+                        <div class="oc-cate d-flex flex-col"
                             v-for="group in rs">
                             <div class="oc-group d-flex flex-row">
                                 <div class="oc-name" 
@@ -941,7 +938,7 @@ a {
                                         </a>
                                     </div>
                                 </div>
-                                <div class="oc-items d-flex fx-col"
+                                <div class="oc-items d-flex flex-col"
                                     v-bind:class="{hide: r.is_close}">
                                     <div class="oc-item"
                                         v-for="ae in r.ocs">
@@ -1025,16 +1022,113 @@ a {
                         Export CSV
                     </button>
 
+
                 </div>
                 
             </div>
 
             <div class="box-body"
                 style="height: calc(100% - 20px);">
+                <div class="plot-nav-tab d-flex">
+                    <div class="box-radio-group d-flex flex-row">
+                        <div>
+                            <i class="fa fa-cog"></i>
+                            Measure of effect: 
+                        </div>
+                        <div class="box-radio-item">
+                            <input type="radio" 
+                                value="RR" 
+                                id="sof_sm_rr"
+                                class="cursor-pointer"
+                                v-model="sof_sm">
+                            <label for="sof_sm_rr">Risk Ratio (RR)</label>
+                        </div>
+                        <div class="box-radio-item mr-3">
+                            <input type="radio"
+                                value="OR" 
+                                id="sof_sm_or"
+                                class="cursor-pointer"
+                                v-model="sof_sm">
+                            <label for="sof_sm_or">Odds Ratio (OR)</label>
+                        </div>
+
+                        <!-- columns -->
+
+                        <div>
+                            <i class="fa fa-cog"></i>
+                            Columns: 
+                        </div>
+                        <div class="box-radio-item">
+                            <input type="checkbox" 
+                                id="sof_chk_col_1"
+                                class="cursor-pointer"
+                                v-model="sof_columns_totals">
+                            <label for="sof_chk_col_1">Number of Patients</label>
+                        </div>
+                        <div class="box-radio-item">
+                            <input type="checkbox" 
+                                id="sof_chk_col_2"
+                                class="cursor-pointer"
+                                v-model="sof_columns_filters">
+                            <label for="sof_chk_col_2">Treatment</label>
+                        </div>
+                        <!-- <div class="box-radio-item">
+                            <input type="checkbox" 
+                                id="sof_chk_col_3"
+                                v-model="plot_sm">
+                            <label for="sof_chk_col_3">visualization</label>
+                        </div> -->
+                    </div>
+                </div>
+
                 <table class="sof-table">
                     <tr>
+                        <th rowspan="2">Category</th>
                         <th rowspan="2">Outcome</th>
                         <th rowspan="2">Grade</th>
+
+                        <!-- columns for treatment/control -->
+                        <th v-if="sof_columns_filters"
+                            rowspan="2">
+                            Treatment
+                        </th>
+                        <th v-if="sof_columns_filters"
+                            rowspan="2">
+                            Control
+                        </th>
+                        <th v-if="sof_columns_filters"
+                            rowspan="2">
+                            Cancer
+                        </th>
+
+                        <!-- columns for number of patients -->
+                        <th v-if="sof_columns_totals"
+                            title="The total number of studies"
+                            rowspan="2">
+                            Studies
+                        </th>
+                        <th v-if="sof_columns_totals"
+                            title="Ec"
+                            rowspan="2">
+                            Et
+                        </th>
+                        <th v-if="sof_columns_totals"
+                            title="Nt"
+                            rowspan="2">
+                            Nt
+                        </th>
+                        <th v-if="sof_columns_totals"
+                            title="Ec"
+                            rowspan="2">
+                            Ec
+                        </th>
+                        <th v-if="sof_columns_totals"
+                            title="Nc"
+                            rowspan="2">
+                            Nc
+                        </th>
+
+                        <!-- columns for MA -->
                         <th rowspan="2">Relative</th>
                         <th colspan="3">Absolute</th>
                         <th rowspan="2">Certainty in <br>Evidence</th>
@@ -1048,11 +1142,44 @@ a {
 
                     <tr v-for="r in sof_rs">
                         <td class="col-oc-name">
-                            {{ r.name }}
+                            {{ r.oc.cate }}
+                        </td>
+                        <td class="col-oc-name">
+                            {{ r.oc.name }}
                         </td>
                         <td>
-                            {{ r.grade }}
+                            {{ get_txt_by_type(r.grade, 'grade') }}
                         </td>
+
+                        <!-- columns for treatment/control -->
+                        <td v-if="sof_columns_filters">
+                            {{ get_treatment_txt_by_filters(r.fl) }}
+                        </td>
+                        <td v-if="sof_columns_filters">
+                            {{ get_txt_by_type(r.fl[4], 'filter') }}
+                        </td>
+                        <td v-if="sof_columns_filters">
+                            {{ get_txt_by_type(r.fl[5], 'filter') }}
+                        </td>
+
+                        <!-- columns for number of patients -->
+                        <td v-if="sof_columns_totals">
+                            {{ r.ma.PRIM.stus.length }}
+                        </td>
+                        <td v-if="sof_columns_totals">
+                            {{ add_comma_to_number(r.ma.PRIM.total[0]) }}
+                        </td>
+                        <td v-if="sof_columns_totals">
+                            {{ add_comma_to_number(r.ma.PRIM.total[1]) }}
+                        </td>
+                        <td v-if="sof_columns_totals">
+                            {{ add_comma_to_number(r.ma.PRIM.total[2]) }}
+                        </td>
+                        <td v-if="sof_columns_totals">
+                            {{ add_comma_to_number(r.ma.PRIM.total[3]) }}
+                        </td>
+
+                        <!-- columns for MA -->
                         <td>
                             {{ sof_sm }}: 
                             {{ _round2(r.ma.PRIM.rsts[sof_sm].random.SM) }}
@@ -1063,19 +1190,26 @@ a {
                                 {{ _round2(r.ma.PRIM.rsts[sof_sm].random.SM_upper) }}
                             )
                         </td>
-
                         <!-- Absolute values -->
                         <td>
-                            {{ get_CIR(r).toFixed(0) }} per {{ baseline }}
+                            {{ get_CIR(r).toFixed(0) }} 
+                            <br>
+                            <span class="txt-sm txt-italic">per {{ sof_baseline }}</span>
                         </td>
                         <td>
-                            {{ get_ACR(r).toFixed(0) }} per {{ baseline }}
+                            {{ get_ACR(r).toFixed(0) }} 
+                            <br>
+                            <span class="txt-sm txt-italic">per {{ sof_baseline }}</span>
                         </td>
-                        <td v-if="r.is_show['ARD']" class="col-flipable"
+                        <td v-if="r.is_show['ARD']" 
+                            class="col-flipable"
                             v-on:click="flip_cell(grade, r, 'ARD')">
-                            {{ get_ARD_txt(r) }} per {{ baseline }}
+                            {{ get_ARD_txt(r) }} 
+                            <br>
+                            <span class="txt-sm txt-italic">per {{ sof_baseline }}</span>
                         </td>
-                        <td v-else class="col-ta-left col-flipable"
+                        <td v-else 
+                            class="col-ta-left col-flipable"
                             v-on:click="flip_cell(grade, r, 'ARD')">
                             CI: {{ get_ARD_txt(r, 'lower') }} to 
                                 {{ get_ARD_txt(r, 'upper') }}<br>
@@ -1118,7 +1252,7 @@ a {
 
             <div class="box-body" style="height: calc(100% - 20px);">
                 <div class="plot-nav-tab d-flex">
-                    <div class="box-radio-group d-flex fx-row">
+                    <div class="box-radio-group d-flex flex-row">
                         <div>
                             <i class="fa fa-cog"></i>
                             Measure of effect: 
@@ -1398,6 +1532,8 @@ var app_pma = {
         sof_baseline: 1000,
         sof_external_risk_calculated: 10,
         sof_use_internal_baseline: true,
+        sof_columns_filters: false,
+        sof_columns_totals: false,
 
         // for display
         sof_rs: []
@@ -2075,8 +2211,15 @@ var app_pma = {
                 fl: fl,
                 oc: oc,
                 grade: grade,
-                ma: ma
+                ma: ma,
+                is_show: {
+                    // show sm / study info
+                    sm: true,
+                    // show ARD / ARD CI
+                    ARD: true
+                }
             }
+            console.log('* add_fl_oc_gd_to_sof:', r);
             this.sof_rs.push(r);
         },
 
@@ -2086,7 +2229,9 @@ var app_pma = {
 
         get_ACR: function(r) {
             if (this.sof_use_internal_baseline) {
-                return r.oc.Ec / r.oc.Nc * this.sof_baseline;
+                // return r.oc.Ec / r.oc.Nc * this.sof_baseline;
+                // the r.ma.PRIM.total is [Et, Nt, Ec, Nc]
+                return r.ma.PRIM.total[2] / r.ma.PRIM.total[3] * this.sof_baseline;
             } else {
                 return external_risk_calculated;
             }
@@ -2096,12 +2241,15 @@ var app_pma = {
             // get the obj of this record
             // obj could be: sm, lower, upper
             if (typeof(obj)=='undefined') {
-                obj = 'sm';
+                obj = 'SM';
+            }
+            if (obj == 'lower' || obj == 'upper') {
+                obj = 'SM_' + obj;
             }
             if (typeof(fixed_or_random)=='undefined') {
                 fixed_or_random = 'random';
             }
-            return r.oc.result[this.sof_sm][fixed_or_random].model[obj];
+            return r.ma.PRIM.rsts[this.sof_sm][fixed_or_random][obj];
         },
 
         get_CIR: function(r, obj) {
@@ -2157,40 +2305,40 @@ var app_pma = {
             return Math.abs(ARDp).toFixed(1) + '%' + txt;
         },
 
-        get_bg_color_class_by_oc: function(oc_abbr, grade) {
-            var r = {
-                ae: app_softpma.data.oc_dict[oc_abbr].results[grade]
-            };
-            return this.get_bg_color_class(r);
-        },
+        // get_bg_color_class_by_oc: function(oc_abbr, grade) {
+        //     var r = {
+        //         ae: app_softpma.data.oc_dict[oc_abbr].results[grade]
+        //     };
+        //     return this.get_bg_color_class(r);
+        // },
 
-        get_bg_color_class: function(r) {
-            var fixed_or_random = 'random';
-            var sm = r.oc.result[this.sof_sm][fixed_or_random].model['sm'];
-            var lower = r.oc.result[this.sof_sm][fixed_or_random].model['lower'];
-            var upper = r.oc.result[this.sof_sm][fixed_or_random].model['upper'];
-            var cls =  this.calc_bg_color_class(sm, lower, upper);
-            console.log('* ae class:', cls);
+        // get_bg_color_class: function(r) {
+        //     var fixed_or_random = 'random';
+        //     var sm = r.oc.result[this.sof_sm][fixed_or_random].model['sm'];
+        //     var lower = r.oc.result[this.sof_sm][fixed_or_random].model['lower'];
+        //     var upper = r.oc.result[this.sof_sm][fixed_or_random].model['upper'];
+        //     var cls =  this.calc_bg_color_class(sm, lower, upper);
+        //     console.log('* ae class:', cls);
 
-            return cls;
-        },
+        //     return cls;
+        // },
 
-        calc_bg_color_class: function(sm, lower, upper) {
-            var cie = 2;
-            if (lower < 1 && upper > 1) {
-                cie = 2;
-            } else {
-                cie = 3;
-            }
-            if (sm < 1) {
-                return 'cie-bene-' + cie;
-                // return '';
-            } else if (sm > 1) {
-                return 'cie-harm-' + cie;
-            } else {
-                return 'cie-nner-' + cie;
-            }
-        },
+        // calc_bg_color_class: function(sm, lower, upper) {
+        //     var cie = 2;
+        //     if (lower < 1 && upper > 1) {
+        //         cie = 2;
+        //     } else {
+        //         cie = 3;
+        //     }
+        //     if (sm < 1) {
+        //         return 'cie-bene-' + cie;
+        //         // return '';
+        //     } else if (sm > 1) {
+        //         return 'cie-harm-' + cie;
+        //     } else {
+        //         return 'cie-nner-' + cie;
+        //     }
+        // },
 
         get_grade_label: function(g) {
             // return jarvis.texts[g];
@@ -2201,9 +2349,84 @@ var app_pma = {
             return (Math.round(v * 100) / 100).toFixed(2);
         },
 
+
+        flip_cell: function(r) {
+            // first, find this ae in rs
+            // if (this.tbrs[ae_grade].hasOwnProperty(r.abbr)) {
+            //     // flip this cell!
+            //     this.tbrs[ae_grade][r.abbr].is_show[cell] = 
+            //         !this.tbrs[ae_grade][r.abbr].is_show[cell];
+            // } else {
+            //     // how can it be ???
+            // }
+            // this.$forceUpdate();
+        },
+        
+        get_txt_by_type: function(s, type) {
+            if (typeof(type) == 'undefined') {
+                return s;
+            }
+            // for grade
+            if (type == 'grade') {
+                return {
+                    'GA': 'ALL',
+                    'G3H': '3+',
+                    'G5N': '5'
+                }[s];
+
+            } else if (type == 'filter') {
+                if (s == '%' || s == 'all') {
+                    return 'ALL'
+                } else {
+                    return s;
+                }
+
+            } else {
+                return s;
+            }
+        },
+
+        get_treatment_txt_by_filters: function(filter_values) {
+            var txt = this.get_txt_by_type(filter_values[0], 'filter') + 
+                        '.' +
+                        this.get_txt_by_type(filter_values[1], 'filter');
+
+            if (filter_values[2] == '%' || filter_values[2] == 'all') {
+                
+                if (filter_values[1] == '%' || filter_values[1] == 'all') {
+                    return txt;
+                } else {
+                    
+                    return txt + ' (ALL)';
+                }
+                
+            } else if (filter_values[2] == 'Monotherapy') {
+                // mono
+                return txt + ' (MONO)';
+
+            } else {
+                // comb
+                if (filter_values[3] == '%' || filter_values[3] == 'all') {
+                    // all comb
+                    return txt + ' (COMB)';
+                } else {
+                    // specific comb
+                    return txt + ' (' + this.get_txt_by_type(filter_values[3], 'filter') + ')';
+                }
+            }
+        },
+
         ///////////////////////////////////////////////////////////
         // app-level functions
         ///////////////////////////////////////////////////////////
+
+        add_comma_to_number: function(x) {
+            x = x.toString();
+            var pattern = /(-?\d+)(\d{3})/;
+            while (pattern.test(x))
+                x = x.replace(pattern, "$1,$2");
+            return x;
+        },
 
         calc_prim_incd: function(ma_prim, ma_incd) {
             var ret = {
