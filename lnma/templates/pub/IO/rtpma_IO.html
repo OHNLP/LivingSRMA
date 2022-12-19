@@ -802,7 +802,8 @@ a {
                     <div class="d-flex flex-col">
                         <div class="d-flex flex-row ">
                             <div class="oc-name" style="font-weight: bold;">
-                                <div class="d-flex flex-row flex-align-items-sof_baseline">
+                                <div class="d-flex flex-row"
+                                    style="align-items: baseline;">
                                     <span>
                                         Search: 
                                     </span>
@@ -1016,12 +1017,37 @@ a {
                 </h4>
 
                 <div class="d-flex flex-align-items-center">
+
+                    <button v-on:click="remove_all_sof()"
+                        class="mr-2">
+                        <i class="far fa-trash-alt"></i>
+                        Remove All
+                    </button>
+
+                    <span>|</span>
+
                     <button v-on:click="export_sof_csv()"
                         class="mr-2">
                         <i class="fas fa-file-export"></i>
                         Export CSV
                     </button>
 
+                    <span>|</span>
+
+                    <div class="box-menu-group d-flex fx-row">
+                        <div style="margin-right: 15px;">
+                            <span class="cie-bene-2">
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                            </span>&nbsp;
+                            Benefit
+                        </div>
+                        <div style="margin-right: 15px;">
+                            <span class="cie-harm-2">
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                            </span>&nbsp;
+                            Harm
+                        </div>
+                    </div>
 
                 </div>
                 
@@ -2226,7 +2252,17 @@ var app_pma = {
         },
 
         export_sof_csv: function() {
+            var ret = window.confirm('Export all records in the following summary of findings table?');
 
+            if (ret) {
+
+            } else {
+                return;
+            }
+        },
+
+        remove_all_sof: function() {
+            this.sof_rs = [];
         },
 
         get_ACR: function(r) {
@@ -2502,7 +2538,12 @@ var app_pma = {
         });
 
         // update the oc_list
-        // this.update_oclist([]);
+        this.vpp.set_filter_values([
+            'all', 'all', 'all',
+            '%', // type of comb
+            'all', 'all'
+        ]);
+        this.vpp.update_oclist([]);
     },
 
     init_filter: function(data) {
