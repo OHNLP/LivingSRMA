@@ -737,7 +737,8 @@ def graphdata_itable_json(keystr):
     if src == 'db':
         ret = srv_pub_itable.get_itable_attr_rs_cfg_from_db(
             keystr,
-            cq_abbr
+            cq_abbr,
+            True
         )
         latest = srv_project.get_project_latest_stat_by_keystr(keystr)
         ret['latest'] = latest

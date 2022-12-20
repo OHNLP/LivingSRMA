@@ -139,6 +139,7 @@ OC_TYPE_TPL = {
             # for sof
             # and this is the Reviewer's judgement
             # but this certainty is just for reference.
+            # this would be deprecated soon
             'certainty': {
                 'cie': '4',
                 'risk_of_bias': '1',
@@ -234,6 +235,7 @@ OC_TYPE_TPL = {
             "included_in_em": 'yes',
 
             # for sof
+            # this would be deprecated soon
             'certainty': {
                 'cie': '4',
                 'risk_of_bias': '1',
@@ -995,7 +997,7 @@ COE_RCT_ROB = \
     "attrs": [
         {
             "abbr": "COE_RCT_ROB_OVERALL",
-            "name": "Overall",
+            "name": "Overall Risk of Bias",
             "subs": [
                 {
                     "abbr": "COE_RCT_ROB_OVERALL_RJ",
@@ -1009,7 +1011,7 @@ COE_RCT_ROB = \
         },
         {
             "abbr": "COE_RCT_ROB_D1",
-            "name": "D1",
+            "name": "Risk of Bias Domain 1",
             "subs": [
                 {
                     "abbr": "COE_RCT_ROB_D1_RJ",
@@ -1047,7 +1049,7 @@ COE_RCT_ROB = \
         },
         {
             "abbr": "COE_RCT_ROB_D2",
-            "name": "D2",
+            "name": "Risk of Bias Domain 2",
             "subs": [
                 {
                     "abbr": "COE_RCT_ROB_D2_AIM",
@@ -1121,7 +1123,7 @@ COE_RCT_ROB = \
         },
         {
             "abbr": "COE_RCT_ROB_D3",
-            "name": "D3",
+            "name": "Risk of Bias Domain 3",
             "subs": [
                 {
                     "abbr": "COE_RCT_ROB_D3_RJ",
@@ -1167,7 +1169,7 @@ COE_RCT_ROB = \
         },
         {
             "abbr": "COE_RCT_ROB_D4",
-            "name": "D4",
+            "name": "Risk of Bias Domain 4",
             "subs": [
                 {
                     "abbr": "COE_RCT_ROB_D4_RJ",
@@ -1221,7 +1223,7 @@ COE_RCT_ROB = \
         },
         {
             "abbr": "COE_RCT_ROB_D5",
-            "name": "D5",
+            "name": "Risk of Bias Domain 5",
             "subs": [
                 {
                     "abbr": "COE_RCT_ROB_D5_RJ",

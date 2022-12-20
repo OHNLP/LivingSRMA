@@ -6,7 +6,7 @@ from lnma import util
 from lnma import settings
 
 
-def get_itable_attr_rs_cfg_from_db(keystr, cq_abbr="default"):
+def get_itable_attr_rs_cfg_from_db(keystr, cq_abbr="default", with_extract=False):
     '''
     Get everything related to itable from db
     '''
@@ -277,12 +277,19 @@ def get_itable_attr_rs_cfg_from_db(keystr, cq_abbr="default"):
                 'value': 0
             })
 
+    # add the raw extract if needed
+    if with_extract:
+        ext_dict = extract.as_dict()
+    else:
+        ext_dict = {}
+
     # finally, finished!
     ret = {
         'rs': rs,
         'cfg': cfg,
         'attrs': attrs,
-        'paper_dict': selected_paper_dict
+        'paper_dict': selected_paper_dict,
+        'itable': ext_dict
     }
 
     return ret

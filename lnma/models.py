@@ -1070,7 +1070,6 @@ class Extract(db.Model):
         ret['internal_val'] = self.get_internal_val()
         ret['has_internal_val'] = ret['internal_val'] != 0
 
-
         # add the data_type
         ret['data_type'] = self.get_data_type()
 
@@ -1280,7 +1279,6 @@ class Extract(db.Model):
             
         return ret
         
-
 
     def get_treatments_in_data(self):
         '''

@@ -2523,6 +2523,10 @@ var app_pma = {
     },
 
     init: function(data_itable, data_pma) {
+        // bind local access
+        this.data_itable = data_itable;
+        this.data_pma = data_pma;
+
         // just init the dropdown for filters
         this.init_filter(data_itable);
 
@@ -2858,6 +2862,9 @@ var app_pma = {
                 }
             }
 
+            // try to get the RoB for CoE
+            var r_coe_rob = this.get_rob_from_itable_by_pid(r['pid']);
+
             // now check each grade
             for (let j = 0; j < 3; j++) {
                 var grade = {0: 'GA', 1: 'G3H', 2: 'G5N'}[j];
@@ -2875,6 +2882,8 @@ var app_pma = {
                         // add more infor vis
                         r['pid'],
                         r['year'],
+                        // add this RoB for CoE
+                        r_coe_rob,
                     ]);
                     ma_dict[r.oc_abbr][grade].PRIM.total = math.add(
                         ma_dict[r.oc_abbr][grade].PRIM.total,
@@ -2918,6 +2927,22 @@ var app_pma = {
         return ma_dict;
     },
 
+    get_rob_from_itable_by_pid: function(pid) {
+        // reviewer
+        let rj = this.data_itable.itable.data[pid].attrs.main.g0['COE_RCT_ROB_OVERALL_RJ'];
+        // algorithm
+        let ar = this.data_itable.itable.data[pid].attrs.main.g0['COE_RCT_ROB_OVERALL_AR'];
+
+        if (rj === undefined || rj == 'NA') {
+            if (ar === undefined) {
+                return 'NA'
+            } else {
+                return ar;
+            }
+        } else {
+            return rj;
+        }
+    },
 
     mk_data_cfg_by_ma: function(ma_prim, sm, fixed_or_random) {
         if (typeof(fixed_or_random) == 'undefined') {
@@ -3251,26 +3276,23 @@ var jarvis = {
                 {ver: Math.random(), src: src, cq: cq},
             )
         ).done(function(r1, r2) {
-            var data1 = r1[0];
-            var data2 = r2[0];
-
-            jarvis.data1 = data1;
-            jarvis.data2 = data2;
+            var data_itable = r1[0];
+            var data_pma = r2[0];
 
             // init the table
-            console.log(data1);
-            console.log(data2);
+            console.log(data_itable);
+            console.log(data_pma);
 
             // init the local db for the papers
             alasql('create table papers');
-            alasql('select * into papers from ?', [data1.rs]);
+            alasql('select * into papers from ?', [data_itable.rs]);
             
             // init the local db for the outcome / AE records
             alasql('create table ocs');
-            alasql('select * into ocs from ?', [data2.rs])
+            alasql('select * into ocs from ?', [data_pma.rs])
 
             // init the filter with ITABLE data
-            app_pma.init(data1, data2);
+            app_pma.init(data_itable, data_pma);
 
             // ok, remove the 
             jarvis.ssmsg('Almost initialized.');
