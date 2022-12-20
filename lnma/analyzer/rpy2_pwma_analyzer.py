@@ -462,6 +462,7 @@ def analyze_pwma_prcm_coe(rs, cfg, has_cumu=True):
     is_all_high = True
     j_subg = None
     subg_pval = None
+    per_high_stus = 0
     for r in robs:
         if r != 'L':
             is_all_low = False
@@ -471,6 +472,13 @@ def analyze_pwma_prcm_coe(rs, cfg, has_cumu=True):
         if r == 'L':
             is_all_high = False
             break
+
+    for r in robs:
+        if r == 'H':
+            per_high_stus += 1
+
+    if len(robs) != 0:
+        per_high_stus = per_high_stus / len(robs)
 
     if is_all_low:
         risk_of_bias = coe_helper.L1
@@ -492,13 +500,14 @@ def analyze_pwma_prcm_coe(rs, cfg, has_cumu=True):
         r_j_subg = jsonlite.toJSON(r_subg, force=True)
         j_subg = json.loads(r_j_subg[0])
         subg_pval = j_subg['pval.Q.b.random'][0]
+        # the percentage of high-risk
 
-    risk_of_bias = coe_helper.judge_risk_of_bias(
-        is_all_low,
-        is_all_high,
-        subg_pval
-    )
-
+        risk_of_bias = coe_helper.judge_risk_of_bias(
+            is_all_low,
+            is_all_high,
+            subg_pval,
+            per_high_stus
+        )
 
     # convert to R json object
     r_j_prim = jsonlite.toJSON(r_prim, force=True)
@@ -524,13 +533,28 @@ def analyze_pwma_prcm_coe(rs, cfg, has_cumu=True):
         j_cumu = json.loads(r_j_cumu[0])
         j['cumuma'] = j_cumu
 
+    # update the format
+    primma = _meta_trans_metabin(j, cfg)
+    
+    # get the publication_bias
+    n_studies = j_prim['k'][0]
+    egger_test_p_value = j_bias['p.value'][0] if 'p.value' in j_bias else None
+    publication_bias = coe_helper.judge_publication_bias(
+        n_studies,
+        egger_test_p_value
+    )
+
+    # get the inconsistency
+    i2 = primma['heterogeneity']['i2']
+    inconsistency = coe_helper.judge_inconsistency(i2)
+
     # build the return
     ret = {
         'submission_id': 'rpy2',
         'params': cfg,
         'success': True,
         'data': {
-            'primma': _meta_trans_metabin(j, cfg),
+            'primma': primma,
             'raw': {
                 'prim': j_prim,
                 'bias': j_bias,
@@ -538,12 +562,30 @@ def analyze_pwma_prcm_coe(rs, cfg, has_cumu=True):
             },
             'coe': {
                 'risk_of_bias': risk_of_bias,
+                'inconsistency': inconsistency,
+                'publication_bias': publication_bias,
+                'imprecision': None,
+                'indirectness': None,
 
                 'info': {
                     'risk_of_bias': {
                         'is_all_low': is_all_low,
                         'is_all_high': is_all_high,
-                        'subg_pval': subg_pval
+                        'subg_pval': subg_pval,
+                        'per_high_stus': per_high_stus,
+                    },
+                    'inconsistency': {
+                        'i2': i2
+                    },
+                    'publication_bias': {
+                        'n_studies': n_studies,
+                        'egger_test_p_value': egger_test_p_value,
+                    },
+                    'imprecision': {
+
+                    },
+                    'indirectness': {
+                        
                     }
                 }
             }

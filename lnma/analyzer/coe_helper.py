@@ -9,6 +9,7 @@ def judge_risk_of_bias(
     is_all_low, 
     is_all_high, 
     subg_pval, 
+    per_high_stus,
     user_judgement=None
 ):
     if user_judgement is not None:
@@ -20,27 +21,32 @@ def judge_risk_of_bias(
     if is_all_high:
         return L2
     
-    if subg_pval < 0.05:
-        return L2
-    else:
+    if subg_pval >= 0.05:
         return L1
+    else:
+        if per_high_stus >= 0.5:
+            return L3
+        else:
+            return L2
 
 
-def judge_inconsistency(i2):
+def judge_inconsistency(
+    i2
+):
     '''
     Judge the inconsistency by i^2
     '''
     if i2 < 0.5:
-        return L0
-
-    elif i2 <= 0.75:
         return L1
 
     else:
         return L2
 
 
-def judge_publication_bias(n_stus, eggers_test_p_value):
+def judge_publication_bias(
+    n_stus, 
+    eggers_test_p_value
+):
     '''
     Judge publication bias by number of studies and Egger's Test P-value
     '''

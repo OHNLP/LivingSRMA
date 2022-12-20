@@ -27,7 +27,7 @@ PWMA Primary + Cumulative Analysis API Demo
     }
 
     .defs {
-        width: 220px;
+        width: 250px;
         border: 1px solid #DADADA;
         padding: 10px;
         margin: 5px;
@@ -138,13 +138,19 @@ PWMA Primary + Cumulative Analysis API Demo
                         <p class="fact">
                             All Low risk = {{ pma.data.coe.info.risk_of_bias.is_all_low }} <br>
                             All high risk / some concerns = {{ pma.data.coe.info.risk_of_bias.is_all_high }} <br>
-                            Subgroup Analysis (Low vs. High/Some) P-value = {{ pma.data.coe.info.risk_of_bias.subg_pval }}
+                            Subgroup Analysis (Low vs. High/Some) P-value = {{ pma.data.coe.info.risk_of_bias.subg_pval }} <br>
+                            Percentage of High-risk studies = {{ pma.data.coe.info.risk_of_bias.per_high_stus }}
                         </p>
 
                         <p class="result">
                             Result = {{ pma.data.coe.risk_of_bias }}
                             ({{ coe_helper.val_to_label(pma.data.coe.risk_of_bias, 'risk_of_bias') }})
                         </p>
+                        
+                        <pre id="mermaid_rob" 
+                            class="mermaid"
+                            v-html="mermaid_chart_rob">
+                        </pre>
 
                         <p class="defs">
                             0: Not applicable <br>
@@ -172,11 +178,16 @@ PWMA Primary + Cumulative Analysis API Demo
                             'inconsistency') }})
                         </p>
 
+                        <pre id="mermaid_inc" 
+                            class="mermaid"
+                            v-html="mermaid_chart_inc">
+                        </pre>
+
                         <p class="defs">
-                            0: Not applicable <br>
-                            1: No serious <br>
-                            2: Serious <br>
-                            3: Very serious <br>
+                            0: Not inconsistency <br>
+                            1: Serious inconsistency <br>
+                            2: Very serious inconsistency <br>
+                            3: Very serious inconsistency <br>
                         </p>
                         <hr>
                     </div>
@@ -198,10 +209,15 @@ PWMA Primary + Cumulative Analysis API Demo
                             pma.data.raw.bias['p.value'][0]), 'publication_bias') }})
                         </p>
 
+                        <pre id="mermaid_pbb" 
+                            class="mermaid"
+                            v-html="mermaid_chart_pbb">
+                        </pre>
+
                         <p class="defs">
                             0: Not applicable <br>
-                            1: Undeteced   <br>
-                            2: Strongly suspected    <br>
+                            1: Not serious <br>
+                            2: Serious  <br>
                         </p>
 
                         <hr>
@@ -279,86 +295,268 @@ PWMA Primary + Cumulative Analysis API Demo
 <!-- Vue.js -->
 <script src="https://cdn.jsdelivr.net/npm/vue@2.6.11"></script>
 
+<!-- Mermaid -->
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@9/dist/mermaid.esm.min.mjs';
+// mermaid.initialize({ startOnLoad: true });
+window.mermaid = mermaid;
+</script>
+
 <script>
-    {% include 'js/coe_helper.js' %}
+{% include 'js/coe_helper.js' %}
 
-    var rs_sample = [
-        { study: 'Raskob et al', year: 2017, Et: 41, Nt: 522, Ec: 59, Nc: 524, pid: '1234', rob: 'L' },
-        { study: 'Young et al', year: 2018, Et: 8, Nt: 203, Ec: 18, Nc: 203, pid: '2345', rob: 'L' },
-        { study: 'McBane et al', year: 2019, Et: 1, Nt: 145, Ec: 9, Nc: 142, pid: '3456', rob: 'L' },
-        { study: 'Don et al', year: 2020, Et: 32, Nt: 576, Ec: 46, Nc: 579, pid: '4567', rob: 'M' },
-        { study: 'Kim et al', year: 2021, Et: 18, Nt: 276, Ec: 26, Nc: 279, pid: '45678', rob: 'L' },
-        { study: 'Aaskob et al', year: 2017, Et: 45, Nt: 512, Ec: 55, Nc: 524, pid: '1234', rob: 'L' },
-        { study: 'Boung et al', year: 2018, Et: 18, Nt: 213, Ec: 18, Nc: 202, pid: '2341', rob: 'L' },
-        { study: 'DcBane et al', year: 2019, Et: 2, Nt: 125, Ec: 9, Nc: 141, pid: '3451', rob: 'L' },
-        { study: 'Eon et al', year: 2020, Et: 30, Nt: 546, Ec: 43, Nc: 573, pid: '4561', rob: 'L' },
-        { study: 'Fim et al', year: 2021, Et: 15, Nt: 306, Ec: 25, Nc: 272, pid: '45671', rob: 'L' },
-    ];
+var rs_sample = [
+    { study: 'Raskob et al', year: 2017, Et: 41, Nt: 522, Ec: 59, Nc: 524, pid: '1234', rob: 'L' },
+    { study: 'Young et al', year: 2018, Et: 8, Nt: 203, Ec: 18, Nc: 203, pid: '2345', rob: 'L' },
+    { study: 'McBane et al', year: 2019, Et: 1, Nt: 145, Ec: 9, Nc: 142, pid: '3456', rob: 'L' },
+    { study: 'Don et al', year: 2020, Et: 32, Nt: 576, Ec: 46, Nc: 579, pid: '4567', rob: 'M' },
+    { study: 'Kim et al', year: 2021, Et: 18, Nt: 276, Ec: 26, Nc: 279, pid: '45678', rob: 'L' },
+    { study: 'Aaskob et al', year: 2017, Et: 45, Nt: 512, Ec: 55, Nc: 524, pid: '1234', rob: 'L' },
+    { study: 'Boung et al', year: 2018, Et: 18, Nt: 213, Ec: 18, Nc: 202, pid: '2341', rob: 'L' },
+    { study: 'DcBane et al', year: 2019, Et: 2, Nt: 125, Ec: 9, Nc: 141, pid: '3451', rob: 'L' },
+    { study: 'Eon et al', year: 2020, Et: 30, Nt: 546, Ec: 43, Nc: 573, pid: '4561', rob: 'L' },
+    { study: 'Fim et al', year: 2021, Et: 15, Nt: 306, Ec: 25, Nc: 272, pid: '45671', rob: 'L' },
+];
 
-    var app_coe = {
-        vpp: null,
+var coe_mermaid_helper = {
+    activate_link_style: ' stroke:red,color:red;\n',
 
-        init: function () {
-            this.vpp = new Vue({
-                el: '#app_coe',
-                data: {
-                    rs: null,
-                    pma: null,
-                    coe_helper: coe_helper
+    get_inc_mermaid: function(vals) {
+        var chart_desc = `
+graph TD
+%% define class
+classDef HITL fill:yellow,stroke:orange;
+%% define nodes
+s1["I-sq as an indication of statistical heterogeneity"]
+s2["Are 75% of the studies within same category?"]
+s3{{"HITL Review"}}:::HITL
+
+%% define links
+%% link 0
+s1 -- "<50%" --> r1([1: Not serious])
+%% link 1
+s1 -- "≥50%" --> s2
+%% link 2
+s2 -- "Yes" --> r2([1: Not serious])
+%% link 3
+s2 -- "No" --> r3([2: Serious])
+%% link 4
+r3 --> s3 --> r4([3: Very serious])
+        `;
+        if (typeof(vals) == 'undefined') {
+            return chart_desc;
+        }
+
+        // ok, let's add more styles for path
+        if (vals.i2 < 0.5) {
+            chart_desc += 'linkStyle 0' + this.activate_link_style;
+        } else {
+            chart_desc += 'linkStyle 1' + this.activate_link_style;
+        }
+        return chart_desc;
+    },
+
+    get_rob_mermaid: function(vals) {
+        var chart_desc = `
+graph TD
+%% define class
+classDef HITL fill:yellow,stroke:orange;
+%% define nodes
+s1["Are all studies low risk?"]
+s2["Are all studies high risk or some concerns?"]
+s3["Subgroup analysis (low vs. high/some)"]
+s4["Percent of high-risk studies"]
+s_hitl{{"HITL Review"}}:::HITL
+
+%% define links
+%% link 0
+s1 -- "Yes" --> r1([1: Not serious])
+%% link 1
+s1 -- "No" --> s2
+%% link 2
+s2 -- "Yes" --> r2([2: Serious])
+%% link 3
+s2 -- "No" --> s3
+%% link 4
+s3 -- "p<0.05" --> r3([3: Very serious])
+%% link 5
+s3 -- "p≥0.05" --> s4
+%% link 6
+s4 -- "<50%" --> r4([1: Not serious])
+%% link 7
+s4 -- "≥50%" --> r5([2: Serious])
+%% link 8 for HITL
+r2 --> s_hitl --> r6([3-4: Very-Top serious])
+        `
+        if (typeof(vals) == 'undefined') {
+            return chart_desc;
+        }
+
+        // ok, let's add more styles for path
+        if (vals.is_all_low) {
+            chart_desc += 'linkStyle 0' + this.activate_link_style;
+        } else {
+            chart_desc += 'linkStyle 1' + this.activate_link_style;
+        }
+        if (vals.is_all_high) {
+            chart_desc += 'linkStyle 2' + this.activate_link_style;
+        } else {
+            chart_desc += 'linkStyle 3' + this.activate_link_style;
+        }
+        if (vals.subg_pval < 0.05) {
+            chart_desc += 'linkStyle 4' + this.activate_link_style;
+        } else {
+            chart_desc += 'linkStyle 5' + this.activate_link_style;
+        }
+        if (vals.per_high_stus < 0.5) {
+            chart_desc += 'linkStyle 6' + this.activate_link_style;
+        } else {
+            chart_desc += 'linkStyle 7' + this.activate_link_style;
+        }
+
+        return chart_desc;
+    },
+
+    get_pbb_mermaid: function(vals) {
+        var chart_desc = `
+graph TD
+%% define nodes
+s1[Number of studies]
+s2[Egger's Regression Test]
+
+%% define links
+%% link 0
+s1 -- "N<10" --> r1([0: Not applicable])
+%% link 1
+s1 -- "N≥10" --> s2
+%% link 2
+s2 -- "p<0.05" --> r2([2: Serious])
+%% link 3
+s2 -- "p≥0.05" --> r3([1: Not serious])
+        `
+        // if no values, just return this chart
+        if (typeof(vals) == 'undefined') {
+            return chart_desc;
+        }
+
+        // ok, let's add more styles for path
+        if (vals.n_studies < 10) {
+            chart_desc += 'linkStyle 0' + this.activate_link_style;
+        } else {
+            chart_desc += 'linkStyle 1' + this.activate_link_style;
+        }
+
+        if (vals.egger_test_p_value < 0.05) {
+            chart_desc += 'linkStyle 2' + this.activate_link_style;
+        } else {
+            chart_desc += 'linkStyle 3' + this.activate_link_style;
+        }
+
+        return chart_desc;
+    }
+};
+
+var app_coe = {
+    vpp: null,
+
+    init: function () {
+        this.vpp = new Vue({
+            el: '#app_coe',
+            data: {
+                rs: null,
+                pma: null,
+                coe_helper: coe_helper,
+
+                // for mermaid vis
+                mermaid_chart_rob: '',
+                mermaid_chart_pbb: '',
+                mermaid_chart_inc: '',
+            },
+
+            methods: {
+                update_data: function(data_pma) {
+                    this.pma = data_pma;
+
+                    var tmp = '';
+                    // update charts
+
+                    // for publication bias
+                    tmp = coe_mermaid_helper.get_pbb_mermaid(
+                        this.pma.data.coe.info.publication_bias
+                    );
+                    console.log('* Mermaid chart for publication bias', tmp);
+                    this.mermaid_chart_pbb = tmp;
+
+                    // for risk of bias
+                    tmp = coe_mermaid_helper.get_rob_mermaid(
+                        this.pma.data.coe.info.risk_of_bias
+                    );
+                    console.log('* Mermaid chart for risk of bias', tmp);
+                    this.mermaid_chart_rob = tmp;
+
+                    // for inconsistency
+                    tmp = coe_mermaid_helper.get_inc_mermaid(
+                        this.pma.data.coe.info.inconsistency
+                    );
+                    console.log('* Mermaid chart for inconsistency', tmp);
+                    this.mermaid_chart_inc = tmp;
                 },
 
-                methods: {
-                    get_sample_size: function () {
-                        var n = 0;
-                        for (let i = 0; i < this.rs.length; i++) {
-                            const r = this.rs[i];
-                            n += r.Nt;
-                            n += r.Nc;
-                        }
-                        return n;
-                    },
+                get_sample_size: function () {
+                    var n = 0;
+                    for (let i = 0; i < this.rs.length; i++) {
+                        const r = this.rs[i];
+                        n += r.Nt;
+                        n += r.Nc;
+                    }
+                    return n;
+                },
 
-                }
-            });
-        }
+            },
+
+            updated: function() {
+                mermaid.init({ noteMargin: 10 }, '.mermaid');
+            }
+        });
     }
+}
 
-    app_coe.init();
+app_coe.init();
 
-    function get_data() {
-        var params = {
-            am: $('#am').val(),
-            sm: $('#sm').val(),
-            rs: $('#rs').val(),
-            hk: $('#hk').val(),
-            apikey: $('#apikey').val()
-        };
-        console.log(params);
+function get_data() {
+    var params = {
+        am: $('#am').val(),
+        sm: $('#sm').val(),
+        rs: $('#rs').val(),
+        hk: $('#hk').val(),
+        apikey: $('#apikey').val()
+    };
+    console.log(params);
 
-        app_coe.vpp.$data.rs = JSON.parse(params.rs);
+    app_coe.vpp.$data.rs = JSON.parse(params.rs);
 
-        // clear the response area
-        $('#resp').html('Waiting for response ....');
-        $('#img-1').attr('src', '');
-        $('#img-2').attr('src', '');
+    // clear the response area
+    $('#resp').html('Waiting for response ....');
+    $('#img-1').attr('src', '');
+    $('#img-2').attr('src', '');
 
-        var base = '';
-        // var base = 'https://workspace.network-meta-analysis.com/';
-        $.post(
-            base + '/rplt/PWMA_PRCM_COE',
-            params,
-            function (data) {
-                console.log('* get return', data);
+    var base = '';
+    // var base = 'https://workspace.network-meta-analysis.com/';
+    $.post(
+        base + '/rplt/PWMA_PRCM_COE',
+        params,
+        function (data) {
+            console.log('* get return', data);
 
-                app_coe.vpp.$data.pma = data;
+            app_coe.vpp.update_data(data);
 
-                $('#resp').html(JSON.stringify(data, null, 2));
-                // $('#img-1').attr('src', base + data.img['outplt1'].url);
-                // $('#img-2').attr('src', base + data.img['cumuplt'].url);
-            }, 'json'
-        )
-    }
-    // show the JSON content of rs in textarea
-    $('#rs').val(JSON.stringify(rs_sample, null, 2));
+            $('#resp').html(JSON.stringify(data, null, 2));
+            // $('#img-1').attr('src', base + data.img['outplt1'].url);
+            // $('#img-2').attr('src', base + data.img['cumuplt'].url);
+        }, 'json'
+    )
+}
+// show the JSON content of rs in textarea
+$('#rs').val(JSON.stringify(rs_sample, null, 2));
 </script>
 {% endblock %}
