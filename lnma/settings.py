@@ -989,7 +989,7 @@ CIE_PWMA_COLUMNS = [
     "publication_bias"
 ]
 
-# Certainty in Evidence for data extraction
+# Certainty of Evidence for data extraction
 COE_RCT_ROB = \
 {
     "abbr": "COE_RCT_ROB",
@@ -1262,6 +1262,98 @@ COE_RCT_ROB = \
     ]
 }
 
+# Certainty of Evidence: Indirectness
+COE_RCT_IND = \
+{
+    "abbr": "COE_RCT_IND",
+    "name": "_COE_RCT_IND",
+    "attrs": [
+        {
+            "abbr": "COE_RCT_IND_OVERALL",
+            "name": "Overall Indirectness",
+            "subs": [
+                {
+                    "abbr": "COE_RCT_IND_OVERALL_RJ",
+                    "name": "Assessor Judgement"
+                },
+                {
+                    "abbr": "COE_RCT_IND_OVERALL_AR",
+                    "name": "Algorithm Result"
+                }
+            ]
+        },
+        {
+            "abbr": "COE_RCT_IND_Q1",
+            "name": "Indirectness Q1",
+            "subs": [
+                {
+                    "abbr": "COE_RCT_IND_Q1_ANSWER",
+                    "name": "Q1 Answer"
+                },
+                {
+                    "abbr": "COE_RCT_IND_Q1_COMMENT",
+                    "name": "Q1 Comment"
+                },
+            ]
+        },
+        {
+            "abbr": "COE_RCT_IND_Q2",
+            "name": "Indirectness Q2",
+            "subs": [
+                {
+                    "abbr": "COE_RCT_IND_Q2_ANSWER",
+                    "name": "Q2 Answer"
+                },
+                {
+                    "abbr": "COE_RCT_IND_Q2_COMMENT",
+                    "name": "Q2 Comment"
+                },
+            ]
+        },
+        {
+            "abbr": "COE_RCT_IND_Q3",
+            "name": "Indirectness Q3",
+            "subs": [
+                {
+                    "abbr": "COE_RCT_IND_Q3_ANSWER",
+                    "name": "Q3 Answer"
+                },
+                {
+                    "abbr": "COE_RCT_IND_Q3_COMMENT",
+                    "name": "Q3 Comment"
+                },
+            ]
+        },
+        {
+            "abbr": "COE_RCT_IND_Q4",
+            "name": "Indirectness Q4",
+            "subs": [
+                {
+                    "abbr": "COE_RCT_IND_Q4_ANSWER",
+                    "name": "Q4 Answer"
+                },
+                {
+                    "abbr": "COE_RCT_IND_Q4_COMMENT",
+                    "name": "Q4 Comment"
+                },
+            ]
+        },
+        {
+            "abbr": "COE_RCT_IND_Q5",
+            "name": "Indirectness Q5",
+            "subs": [
+                {
+                    "abbr": "COE_RCT_IND_Q5_ANSWER",
+                    "name": "Q5 Answer"
+                },
+                {
+                    "abbr": "COE_RCT_IND_Q5_COMMENT",
+                    "name": "Q5 Comment"
+                },
+            ]
+        }
+    ]
+} 
 
 # the maximum length
 PID_TYPE_MAX_LENGTH = 32

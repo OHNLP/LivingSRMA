@@ -2248,6 +2248,38 @@ var app_pma = {
                 }
             }
             console.log('* add_fl_oc_gd_to_sof:', r);
+
+            // create rs for RPLT API
+            var rplt_rs = [];
+            for (let i = 0; i < ma.PRIM.stus.length; i++) {
+                const stu = ma.PRIM.stus[i];
+                rplt_rs.push({
+                    "Et": stu[0],
+                    "Nt": stu[1],
+                    "Ec": stu[2],
+                    "Nc": stu[3],
+                    "study": stu[4],
+                    "treatment": stu[5],
+                    "control": stu[6],
+                    "pid": stu[7],
+                    "year": stu[8],
+                    "rob": stu[9]
+                });
+            }
+            rplt_rs = JSON.stringify(rplt_rs);
+
+            // send a request for the CoE
+            srv_rpltapi.analyze_pwma_prcm_coe({
+                am: 'FORESTDATA',
+                sm: this.sof_sm,
+                rs: rplt_rs,
+                hk: 'FALSE',
+                apikey: "[[ config['settings'].API_SYSTEM_APIKEYS[0] ]]"
+            }, function(data) {
+                console.log('* analyze_pwma_prcm_coe', data);
+            });
+
+            // update the UI
             this.sof_rs.push(r);
         },
 

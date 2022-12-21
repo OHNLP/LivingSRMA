@@ -455,59 +455,84 @@ def analyze_pwma_prcm_coe(rs, cfg, has_cumu=True):
     )
 
     # get the subg if needed
-    robs = df.rob.to_list()
+    # only use those with non-NA records
+    dft = df[df['rob']!='NA']
+
+    # get all robs of non-NA 
+    robs = dft.rob.to_list()
 
     # check all low or all high
-    is_all_low = True
-    is_all_high = True
+    is_all_low = None
+    is_all_high = None
     j_subg = None
     subg_pval = None
     per_high_stus = 0
-    for r in robs:
-        if r != 'L':
-            is_all_low = False
+    risk_of_bias = coe_helper.L0
+
+    # first of all, need to check how many records left
+    while(True):
+        if (len(dft) == 0):
+            # which means no enough records for this analysis
+            # no need to calculate the follows
             break
-    
-    for r in robs:
-        if r == 'L':
-            is_all_high = False
-            break
+        
+        # set default for these two
+        is_all_low = True
+        is_all_high = True
 
-    for r in robs:
-        if r == 'H':
-            per_high_stus += 1
+        for r in robs:
+            if r != 'L':
+                # ok, not all low
+                is_all_low = False
+                break
+        
+        for r in robs:
+            if r == 'L':
+                # not all high or some
+                is_all_high = False
+                break
 
-    if len(robs) != 0:
-        per_high_stus = per_high_stus / len(robs)
+        for r in robs:
+            if r == 'H':
+                per_high_stus += 1
 
-    if is_all_low:
-        risk_of_bias = coe_helper.L1
-    elif is_all_high:
-        risk_of_bias = coe_helper.L2
-    else:
-        # add a subgroup column for df
-        df['subgroup'] = df['rob'].apply(lambda v: 'L' if v == 'L' else 'H')
-        r_subg =  meta.metabin(
-            df.Et, df.Nt, df.Ec, df.Nc,
-            studlab=df.study,
-            comb_random=cfg['fixed_or_random']=='random',
-            sm=cfg['measure_of_effect'],
-            hakn=True if cfg['is_hakn'] == 'TRUE' else False,
-            method=cfg['pooling_method'],
-            method_tau=cfg['tau_estimation_method'],
-            byvar=df.subgroup
-        )
-        r_j_subg = jsonlite.toJSON(r_subg, force=True)
-        j_subg = json.loads(r_j_subg[0])
-        subg_pval = j_subg['pval.Q.b.random'][0]
-        # the percentage of high-risk
+        if len(robs) != 0:
+            per_high_stus = per_high_stus / len(robs)
 
-        risk_of_bias = coe_helper.judge_risk_of_bias(
-            is_all_low,
-            is_all_high,
-            subg_pval,
-            per_high_stus
-        )
+        if is_all_low:
+            risk_of_bias = coe_helper.L1
+
+        elif is_all_high:
+            # and need human-in-the-loop review
+            risk_of_bias = coe_helper.L2
+
+        else:
+            # add a subgroup column for df
+            dft['subgroup'] = dft['rob'].apply(lambda v: 'L' if v == 'L' else 'H')
+            r_subg = meta.metabin(
+                dft.Et, dft.Nt, dft.Ec, dft.Nc,
+                studlab=dft.study,
+                comb_random=cfg['fixed_or_random']=='random',
+                sm=cfg['measure_of_effect'],
+                hakn=True if cfg['is_hakn'] == 'TRUE' else False,
+                method=cfg['pooling_method'],
+                method_tau=cfg['tau_estimation_method'],
+                byvar=dft.subgroup
+            )
+            r_j_subg = jsonlite.toJSON(r_subg, force=True)
+            j_subg = json.loads(r_j_subg[0])
+            subg_pval = j_subg['pval.Q.b.random'][0]
+            # the percentage of high-risk
+
+            risk_of_bias = coe_helper.judge_risk_of_bias(
+                is_all_low,
+                is_all_high,
+                subg_pval,
+                per_high_stus
+            )
+            
+        # exit the while(True) loop
+        break
 
     # convert to R json object
     r_j_prim = jsonlite.toJSON(r_prim, force=True)

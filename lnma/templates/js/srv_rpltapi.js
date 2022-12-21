@@ -31,7 +31,7 @@ var srv_rpltapi = {
         $.ajax({
             type: 'POST',
             dataType: 'json',
-            url: this.url.pwma_prcm,
+            url: this.url.pwma_prcm_coe,
             data: params,
             cache: false,
             success: callback,
