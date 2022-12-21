@@ -1,0 +1,76 @@
+<!-- special extraction task for IND -->
+<div class="w-cate-item-name">
+    <i class="fas fa-link"></i>
+    Indirectness
+</div>
+
+<div class="w-cate-attrs">
+    <div class="d-flex flex-column mt-1 mb-1"
+        style="border-bottom: 1px dotted #cacaca; padding: 0 0 2px 0;">
+
+        <div class="d-flex flex-row">
+            <div style="width: 90px; line-height: 8px; text-align: center;">
+                <span class="txt-xs">
+                    Reviewer
+                    <br>
+                    Judgement
+                </span>
+            </div>
+            <div style="width: 100px;">
+                <div>
+                    <select v-model="get_working_arm_attrs()['g0']['COE_RCT_IND_OVERALL_RJ']"
+                        :class="'ind-rst-icon-' + get_working_arm_attrs()['g0']['COE_RCT_IND_OVERALL_RJ']"
+                        @change="has_change_unsaved"
+                        style="width: 88px;">
+                        <optgroup label="Reviewer Judgement">
+                            <option value="V">+ Very Close</option>
+                            <option value="M">~ Moderately Close</option>
+                            <option value="N">x Not Close</option>
+                            <option value="NA">? Not Decided</option>
+                        </optgroup>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex flex-row mt-1">
+            <div style="width: 90px; line-height: 8px; text-align: center;">
+                <span class="txt-xs">
+                    Algorithm 
+                    <br>
+                    Result
+                </span>
+            </div>
+            <div v-html="to_ind_symbol(get_working_arm_attrs()['g0']['COE_RCT_IND_OVERALL_AR'])">
+            </div>
+
+        </div>
+    </div>
+
+
+    <div v-for="q_idx in 5"
+        class="rob-rst-qs-box">
+        
+        <div class="rob-dx-q">
+            <div class="rob-q-text">
+                <span>
+                    {{ coe_ind_qs[q_idx] }}
+                </span>
+            </div>
+            <div class="d-flex flex-row">
+                <select class="ind-select"
+                    :class="'ind-rst-icon-' + get_working_arm_attrs()['g0']['COE_RCT_IND_Q'+q_idx+'_ANSWER']"
+                    v-model="get_working_arm_attrs()['g0']['COE_RCT_IND_Q'+q_idx+'_ANSWER']"
+                    @change="on_change_ind_qs">
+                    <option value="I">+  Identical</option>
+                    <option value="B">~  Broadly Similar</option>
+                    <option value="D">-  Dissimilar</option>
+                    <option value="NA">?  Not Decided</option>
+                </select>
+                <input type="text" 
+                    class="ind-comment"
+                    @input="has_change_unsaved"
+                    v-model="get_working_arm_attrs()['g0']['COE_RCT_IND_Q'+q_idx+'_COMMENT']">
+            </div>
+        </div>
+    </div>
+</div>

@@ -674,6 +674,41 @@ var coe_helper = {
         }
     },
 
+    judge_ind_closeness: function(qs) {
+        var n_dis = 0;
+        var n_id_or_br = 0;
+        var n_na = 0;
+
+        for (let i = 0; i < qs.length; i++) {
+            const q = qs[i];
+            if (q == 'NA' || q == '') {
+                // ??? 
+                n_na += 1;
+                continue;
+            }
+            if (q == 'D') {
+                n_dis += 1;
+            } else {
+                n_id_or_br += 1;
+            }
+        }
+
+        if (n_dis == 1) {
+            return 'M'; // moderately close
+        }
+
+        if (n_dis > 1) {
+            return 'N'; // not close
+        }
+
+        if (n_id_or_br == qs.length) {
+            return 'V'; // very close
+        }
+
+        return 'NA'; // I don't know
+
+    },
+
 
     ///////////////////////////////////////////////////////////////////////////
     // General CoE functions

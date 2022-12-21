@@ -1293,7 +1293,7 @@ COE_RCT_IND = \
                 {
                     "abbr": "COE_RCT_IND_Q1_COMMENT",
                     "name": "Q1 Comment"
-                },
+                }
             ]
         },
         {
@@ -1307,7 +1307,7 @@ COE_RCT_IND = \
                 {
                     "abbr": "COE_RCT_IND_Q2_COMMENT",
                     "name": "Q2 Comment"
-                },
+                }
             ]
         },
         {
@@ -1321,7 +1321,7 @@ COE_RCT_IND = \
                 {
                     "abbr": "COE_RCT_IND_Q3_COMMENT",
                     "name": "Q3 Comment"
-                },
+                }
             ]
         },
         {
@@ -1335,7 +1335,7 @@ COE_RCT_IND = \
                 {
                     "abbr": "COE_RCT_IND_Q4_COMMENT",
                     "name": "Q4 Comment"
-                },
+                }
             ]
         },
         {
@@ -1349,7 +1349,7 @@ COE_RCT_IND = \
                 {
                     "abbr": "COE_RCT_IND_Q5_COMMENT",
                     "name": "Q5 Comment"
-                },
+                }
             ]
         }
     ]

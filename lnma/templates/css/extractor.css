@@ -352,6 +352,7 @@ input[type=text].paper-extract-input:focus {
     width: 30px;
     margin: 1px auto;
 }
+.ind-rst-icon,
 .rob-rst-icon {
     width: 24px;
     height: 24px;
@@ -397,4 +398,33 @@ input[type=text].paper-extract-input:focus {
 }
 .rob-q-text {
     line-height: 1.25em;
+}
+
+.ind-select {
+    width: 100px;
+    height: 30px;
+    margin: 0 5px 0 0;
+    font-weight: bold;
+}
+.ind-comment {
+    width: calc(100% - 110px);
+}
+.ind-rst-icon-I,
+.ind-rst-icon-V {
+    border-color: lightgreen;
+    background-color: lightgreen;
+}
+.ind-rst-icon-B,
+.ind-rst-icon-M {
+    border-color: yellow;
+    background-color: yellow;
+}
+.ind-rst-icon-D,
+.ind-rst-icon-N {
+    border-color: pink;
+    background-color: pink;
+}
+.ind-rst-icon-NA {
+    border-color: lightgray;
+    background-color: lightgray;
 }

@@ -74,7 +74,11 @@
                     {% include 'extractor/__pan_ocpapers_working_paper_collector_rob.html' %}
                 </div>
 
-                <div v-else>
+                <div v-if="cate.abbr=='COE_RCT_IND'">
+                    {% include 'extractor/__pan_ocpapers_working_paper_collector_ind.html' %}
+                </div>
+
+                <div v-if="['COE_RCT_ROB', 'COE_RCT_IND'].indexOf(cate.abbr)<0">
                     {% include 'extractor/__pan_ocpapers_working_paper_collector_cate.html' %}
                 </div>
             </div>
