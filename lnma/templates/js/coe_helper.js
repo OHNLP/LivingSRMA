@@ -640,24 +640,32 @@ var coe_helper = {
     // Publication Bias
     ///////////////////////////////////////////////////////////////////////////
 
-    judge_publication_bias: function(n_stus, eggers_test_p_value) {
-        if (n_stus < 10) {
-            return '0'; // Not applicable
+    judge_publication_bias: function(
+        n_studies, 
+        egger_test_p_value,
+        diff_sm_percentage
+    ) {
+        if (n_studies < 10) {
+            return '1'; // Not applicable
         } 
 
         // ok now > 10
-        if (eggers_test_p_value < 0.05) {
-            return '2'; // Strongly suspected
+        if (egger_test_p_value >= 0.05) {
+            return '1'; // Not serious
         }
 
-        return '1'; // Undetected
+        if (diff_sm_percentage > 0.2) {
+            return '2'; // Serious
+        }
+
+        return '1'; // Not serious
     },
 
     ///////////////////////////////////////////////////////////////////////////
     // Imprecision
     ///////////////////////////////////////////////////////////////////////////
 
-    judge_imprecision: function(n_stus, eggers_test_p_value) {
+    judge_imprecision: function() {
         with(this) {
             return L0;
         }
@@ -668,7 +676,7 @@ var coe_helper = {
     // Indirectness
     ///////////////////////////////////////////////////////////////////////////
 
-    judge_indirectness: function(n_stus, eggers_test_p_value) {
+    judge_indirectness: function() {
         with(this) {
             return L0;
         }
@@ -831,14 +839,14 @@ var coe_helper = {
         var ret = "NA";
 
         // check if the followings
-        if (['risk_of_bias', 'imprecision', 'indirectness'].includes(domain)) {
+        if (['risk_of_bias', 'imprecision'].includes(domain)) {
             if (['0', '1', '2', '3', '4', 'L', 'M', 'H', 'NA'].includes(v)) {
                 ret = {
                     '0': 'Not specified',
-                    '1': 'No serious',
+                    '1': 'Not serious',
                     '2': 'Serious',
                     '3': 'Very serious',
-                    '4': 'Very serious',
+                    '4': 'Extremely serious',
                     'L': 'Low risk',
                     'M': 'Some concerns',
                     'H': 'High risk',
@@ -848,13 +856,31 @@ var coe_helper = {
                 ret = 'NA';
             }
 
-        } else if (['inconsistency'].includes(domain)) {
-            if (['0', '1', '2', '3'].includes(v)) {
+        } else if (['indirectness'].includes(domain)) {
+            if (['0', '1', '2', '3', '4', 'V', 'M', 'N', 'NA'].includes(v)) {
                 ret = {
-                    '0': 'Not inconsistency',
-                    '1': 'Serious inconsistency',
-                    '2': 'Very serious inconsistency',
-                    '3': 'Very serious inconsistency',
+                    '0': 'Not applicable',
+                    '1': 'Not serious',
+                    '2': 'Serious',
+                    '3': 'Very serious',
+                    '4': 'Extremely serious',
+                    'V': 'Very close',
+                    'M': 'Moderately close',
+                    'N': "Not close",
+                    'NA': 'Not decided'
+                }[v];
+            } else {
+                ret = 'NA';
+            }
+
+        } else if (['inconsistency'].includes(domain)) {
+            if (['0', '1', '2', '3', '4'].includes(v)) {
+                ret = {
+                    '0': 'Not applicable',
+                    '1': 'Not serious',
+                    '2': 'Serious',
+                    '3': 'Very serious',
+                    '4': 'Extremely serious',
                 }[v];
             } else {
                 ret = 'NA';
@@ -876,8 +902,8 @@ var coe_helper = {
             if (['0', '1', '2'].includes(v)) {
                 ret = {
                     '0': 'Not applicable',
-                    '1': 'Undetected',
-                    '2': 'Strongly suspected'
+                    '1': 'Not serious',
+                    '2': 'Serious'
                 }[v];
             } else {
                 ret = 'NA'

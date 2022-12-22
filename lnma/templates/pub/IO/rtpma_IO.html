@@ -1268,7 +1268,8 @@ a {
                 </h4>
 
                 <div class="d-flex flex-align-items-center">
-                    <button v-on:click="export_oc_csv()"
+                    <button v-if="plot_oc != null"
+                        v-on:click="export_oc_csv()"
                         class="mr-2">
                         <i class="fas fa-file-export"></i>
                         Export CSV
@@ -2208,6 +2209,62 @@ var app_pma = {
             }
         },
 
+        export_oc_csv: function() {
+            var ma_prim = this.ma_dict[this.plot_oc.abbr][this.plot_grade].PRIM;
+            var ma_incd = this.ma_dict[this.plot_oc.abbr][this.plot_grade].INCD;
+
+            // get the plot data
+            var r = app_pma.mk_data_cfg_by_ma(
+                ma_prim,
+                this.plot_sm,
+                this.plot_params.fixed_or_random
+            );
+
+            // prepare a papa csv format object
+            var papa_csv = {
+                fields: [
+                    'study',
+                    'year',
+                    'Et',
+                    'Nt',
+                    'Ec',
+                    'Nc',
+                    'SM',
+                    'SM_lower',
+                    'SM_upper',
+                    'w',
+                    'treatment',
+                    'control',
+                    'pid',
+                ],
+                data: []
+            };
+
+            // convert the the studies
+            for (let i = 0; i < r.data.stus.length; i++) {
+                const stu = r.data.stus[i];
+
+                // data element
+                var d = [];
+                for (let j = 0; j < papa_csv.fields.length; j++) {
+                    const f = papa_csv.fields[j];
+                    d.push(stu[f]);
+                }
+                papa_csv.data.push(d);
+            }
+            
+            // r.data contains model and stus
+            var csv = Papa.unparse(
+                papa_csv
+            );
+
+            var blob = new Blob([csv], {type: "text/plain;charset=utf-8"});
+            var filename = this.plot_oc.cate + '-' + 
+                this.plot_oc.name + "-" +
+                r.data.stus.length + 
+                '.csv';
+            saveAs(blob, filename);
+        },
 
         ///////////////////////////////////////////////////////////
         // for soft (Summary of Findings Table)

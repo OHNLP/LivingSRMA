@@ -1,5 +1,6 @@
 #%% load packages
 import json
+import math
 from pprint import pprint
 import pandas as pd
 import warnings
@@ -33,7 +34,39 @@ from lnma.analyzer import coe_helper
 
 #%% load R packages
 meta = importr('meta')
+pwr = importr('pwr')
 jsonlite = importr('jsonlite')
+
+def calc_OIS_by_p1(p1):
+    '''Calculate OIS by p1 value
+
+    @param p1: p1 is Et/Nt
+
+    For OIS, we need a baseline risk (that should come from the included studies) 
+    and a plausible RRR (usually we use 25%, which is RR of 0.75).
+    Thus, we do not use the RR from the meta-analysis or 2x2 table from the meta-analysis.
+    '''
+    p2 = 0.75 * p1
+    h = 2 * math.asin(math.sqrt(p1)) - 2*math.asin(math.sqrt(p2))
+    return calc_OIS(h)
+
+
+def calc_OIS(h, alpha=0.05, power=0.8, alternative='two.sided'):
+    '''Calculate OIS by R pwr
+    '''
+    r = pwr.pwr_2p_test(
+        h=h,
+        sig_level=alpha,
+        power=power,
+        alternative=alternative
+    )
+    # convert r to dict
+    r_dict = dict(zip(r.names, list(r)))
+
+    n = r_dict['n'][0]
+
+    return n * 2
+
 
 def demo():
     '''
@@ -437,6 +470,12 @@ def analyze_pwma_prcm_coe(rs, cfg, has_cumu=True):
     # create a dataframe first
     df = pd.DataFrame(rs)
 
+    # the sum of Et and Nt
+    ttEt = df.Et.sum()
+    ttNt = df.Nt.sum()
+    ttEc = df.Ec.sum()
+    ttNc = df.Nc.sum()
+
     # get the primary
     r_prim = meta.metabin(
         df.Et, df.Nt, df.Ec, df.Nc,
@@ -448,12 +487,18 @@ def analyze_pwma_prcm_coe(rs, cfg, has_cumu=True):
         method_tau=cfg['tau_estimation_method']
     )
 
+    # get the trimfill primary
+    r_prim_trimfill = meta.trimfill_meta(r_prim)
+
     # get the bias
     r_bias = meta.metabias(
         r_prim,
         method = 'linreg'
     )
 
+    #######################################################
+    # Risk of Bias
+    #######################################################
     # get the subg if needed
     # only use those with non-NA records
     dft = df[df['rob']!='NA']
@@ -530,21 +575,26 @@ def analyze_pwma_prcm_coe(rs, cfg, has_cumu=True):
                 subg_pval,
                 per_high_stus
             )
-            
+
         # exit the while(True) loop
         break
 
     # convert to R json object
     r_j_prim = jsonlite.toJSON(r_prim, force=True)
+    r_j_prim_trimfill = jsonlite.toJSON(r_prim_trimfill, force=True)
     r_j_bias = jsonlite.toJSON(r_bias, force=True)
 
     # convert to Python JSON object
     j_prim = json.loads(r_j_prim[0])
+    j_prim_trimfill = json.loads(r_j_prim_trimfill[0])
     j_bias = json.loads(r_j_bias[0])
 
     # for compability
     j = {
         'primma': j_prim,
+    }
+    j_trimfill = {
+        'primma': j_prim_trimfill,
     }
     
     # get the cumulative
@@ -560,15 +610,39 @@ def analyze_pwma_prcm_coe(rs, cfg, has_cumu=True):
 
     # update the format
     primma = _meta_trans_metabin(j, cfg)
+    primma_trimfill = _meta_trans_metabin(j_trimfill, cfg)
     
+
+    #######################################################
+    # Imprecision
+    #######################################################
+    p1 = ttEt / ttNt
+    # get the OIS
+    OIS = calc_OIS_by_p1(p1)
+    
+    # get the MA size
+    ma_size = ttNt + ttNc
+
+
+    #######################################################
+    # Publication Bias
+    #######################################################
     # get the publication_bias
     n_studies = j_prim['k'][0]
     egger_test_p_value = j_bias['p.value'][0] if 'p.value' in j_bias else None
+    pooled_sm = primma['model']['random']['bt_TE']
+    adjusted_sm = primma_trimfill['model']['random']['bt_TE']
+    diff_sm_percentage = (adjusted_sm - pooled_sm) / pooled_sm
+
     publication_bias = coe_helper.judge_publication_bias(
         n_studies,
-        egger_test_p_value
+        egger_test_p_value,
+        diff_sm_percentage
     )
 
+    #######################################################
+    # Inconsistency
+    #######################################################
     # get the inconsistency
     i2 = primma['heterogeneity']['i2']
     inconsistency = coe_helper.judge_inconsistency(i2)
@@ -605,6 +679,9 @@ def analyze_pwma_prcm_coe(rs, cfg, has_cumu=True):
                     'publication_bias': {
                         'n_studies': n_studies,
                         'egger_test_p_value': egger_test_p_value,
+                        'pooled_sm': pooled_sm,
+                        'adjusted_sm': adjusted_sm,
+                        'diff_sm_percentage': diff_sm_percentage
                     },
                     'imprecision': {
 

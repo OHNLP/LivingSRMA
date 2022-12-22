@@ -45,18 +45,22 @@ def judge_inconsistency(
 
 def judge_publication_bias(
     n_stus, 
-    eggers_test_p_value
+    eggers_test_p_value,
+    diff_sm_percentage,
 ):
     '''
     Judge publication bias by number of studies and Egger's Test P-value
     '''
     if n_stus < 10:
-        return L0 # Not applicable
+        return L1 # Not serious
 
-    if eggers_test_p_value < 0.05:
-        return L2 # Strongly suspected
+    if eggers_test_p_value >= 0.05:
+        return L1 # Not serious
 
-    return L1 # Undetected
+    if diff_sm_percentage > 0.2:
+        return L2 # Serious
+    else:
+        return L1 # Not serious
 
 
 def judge_imprecision():

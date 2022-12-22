@@ -39,6 +39,9 @@ app.app_context().push()
 
 
 def test():
+    print('* in test now')
+
+def test14():
     exts = srv_extract.copy_extracts(
         'IO', 
         'default',
