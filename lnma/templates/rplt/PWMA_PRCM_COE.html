@@ -161,6 +161,8 @@ PWMA Primary + Cumulative Analysis API Demo
 
                         <hr>
                     </div>
+                    <!-- /.box Risk of Bias -->
+
 
 
                     <div class="box">
@@ -191,6 +193,7 @@ PWMA Primary + Cumulative Analysis API Demo
                         </p>
                         <hr>
                     </div>
+                    <!-- /.box Inconsistency -->
 
 
 
@@ -223,7 +226,7 @@ PWMA Primary + Cumulative Analysis API Demo
 
                         <hr>
                     </div>
-
+                    <!-- /.box Publication Bias -->
 
 
                     <div class="box">
@@ -239,7 +242,7 @@ PWMA Primary + Cumulative Analysis API Demo
 
 
                         <p class="result">
-                            Result =
+                            Result = {{ pma.data.coe.imprecision }}
                         </p>
 
                         <pre id="mermaid_imp" 
@@ -257,7 +260,7 @@ PWMA Primary + Cumulative Analysis API Demo
 
                         <hr>
                     </div>
-
+                    <!-- /.box Imprecision -->
 
 
 
@@ -265,12 +268,16 @@ PWMA Primary + Cumulative Analysis API Demo
                     <div class="box">
                         <h5>Indirectness</h5>
                         <p class="fact">
-                            ? <br>
+                            Number of "Very Close" = {{ pma.data.coe.info.indirectness.n_very_close }} <br>
+                            Percentage of "Very Close" = {{ to_percentage(pma.data.coe.info.indirectness.n_very_close / pma.data.coe.info.indirectness.n_studies) }} <br>
+                            Number of "Moderately Close" = {{ pma.data.coe.info.indirectness.n_moderately_close }} <br>
+                            Number of "Not Close" = {{ pma.data.coe.info.indirectness.n_not_close }} <br>
+                            Number of studies = {{ pma.data.coe.info.indirectness.n_studies }}
                         </p>
 
-
                         <p class="result">
-                            Result =
+                            Result = {{ pma.data.coe.indirectness }}
+                            ({{ coe_helper.val_to_label(coe_helper.judge_indirectness(pma.data.coe.info.indirectness.n_very_close, pma.data.coe.info.indirectness.n_moderately_close, pma.data.coe.info.indirectness.n_not_close, pma.data.coe.info.indirectness.n_ind_na, pma.data.coe.info.indirectness.n_studies), 'indirectness') }})
                         </p>
 
                         <pre id="mermaid_ind" 
@@ -289,6 +296,8 @@ PWMA Primary + Cumulative Analysis API Demo
                         <hr>
 
                     </div>
+                    <!-- /.box Indirectness -->
+
 
                 </div>
                 <div v-else>
@@ -319,16 +328,16 @@ window.mermaid = mermaid;
 {% include 'js/coe_helper.js' %}
 
 var rs_sample = [
-    { study: 'Raskob et al', year: 2017, Et: 41, Nt: 522, Ec: 59, Nc: 524, pid: '1234', rob: 'L' },
-    { study: 'Young et al', year: 2018, Et: 8, Nt: 203, Ec: 18, Nc: 203, pid: '2345', rob: 'L' },
-    { study: 'McBane et al', year: 2019, Et: 1, Nt: 145, Ec: 9, Nc: 142, pid: '3456', rob: 'L' },
-    { study: 'Don et al', year: 2020, Et: 32, Nt: 576, Ec: 46, Nc: 579, pid: '4567', rob: 'M' },
-    { study: 'Kim et al', year: 2021, Et: 18, Nt: 276, Ec: 26, Nc: 279, pid: '45678', rob: 'L' },
-    { study: 'Aaskob et al', year: 2017, Et: 45, Nt: 512, Ec: 55, Nc: 524, pid: '1234', rob: 'L' },
-    { study: 'Boung et al', year: 2018, Et: 18, Nt: 213, Ec: 18, Nc: 202, pid: '2341', rob: 'L' },
-    { study: 'DcBane et al', year: 2019, Et: 2, Nt: 125, Ec: 9, Nc: 141, pid: '3451', rob: 'L' },
-    { study: 'Eon et al', year: 2020, Et: 30, Nt: 546, Ec: 43, Nc: 573, pid: '4561', rob: 'L' },
-    { study: 'Fim et al', year: 2021, Et: 15, Nt: 306, Ec: 25, Nc: 272, pid: '45671', rob: 'L' },
+    { study: 'Raskob et al', year: 2017, Et: 41, Nt: 522, Ec: 59, Nc: 524, pid: '1234', rob: 'L', ind: 'V' },
+    { study: 'Young et al', year: 2018, Et: 8, Nt: 203, Ec: 18, Nc: 203, pid: '2345', rob: 'L', ind: 'V' },
+    { study: 'McBane et al', year: 2019, Et: 1, Nt: 145, Ec: 9, Nc: 142, pid: '3456', rob: 'L', ind: 'V' },
+    { study: 'Don et al', year: 2020, Et: 32, Nt: 576, Ec: 46, Nc: 579, pid: '4567', rob: 'M', ind: 'V' },
+    { study: 'Kim et al', year: 2021, Et: 18, Nt: 276, Ec: 26, Nc: 279, pid: '45678', rob: 'L', ind: 'V' },
+    { study: 'Aaskob et al', year: 2017, Et: 45, Nt: 512, Ec: 55, Nc: 524, pid: '1234', rob: 'L', ind: 'M' },
+    { study: 'Boung et al', year: 2018, Et: 18, Nt: 213, Ec: 18, Nc: 202, pid: '2341', rob: 'L', ind: 'N' },
+    { study: 'DcBane et al', year: 2019, Et: 2, Nt: 125, Ec: 9, Nc: 141, pid: '3451', rob: 'L', ind: 'V' },
+    { study: 'Eon et al', year: 2020, Et: 30, Nt: 546, Ec: 43, Nc: 573, pid: '4561', rob: 'L', ind: 'M' },
+    { study: 'Fim et al', year: 2021, Et: 15, Nt: 306, Ec: 25, Nc: 272, pid: '45671', rob: 'L', ind: 'V' },
 ];
 
 var coe_mermaid_helper = {
@@ -539,7 +548,7 @@ s3 -- "MA size < 50% OIS" --> r5([3: Very serious])
 
     get_ind_mermaid: function(vals) {
         var chart_desc = `
-graph TD
+        graph TD
 %% define class
 classDef HITL fill:yellow,stroke:orange;
 %% define nodes
@@ -548,22 +557,42 @@ s2[Is none of studies 'Not Close'?]
 s_init_hitl{{"HITL: Are all studies evaluated?"}}:::HITL
 
 %% define links
-%% link 0
-s1 -- "Yes" --> r1([1: Not serious])
-%% link 1
-s1 -- "No" --> s2
-%% link 2
-s2 -- "Yes" --> r2([2: Serious])
-%% link 3
-s2 -- "No" --> r3([3: Very serious])
-%% link 4: for HITL
+%% link 0: for HITL
 s_init_hitl -- "Yes" --> s1
-%% link 5: for HITL
+%% link 1: for HITL
 s_init_hitl -- "No" --> r0([0: Not applicable])
+%% link 2
+s1 -- "Yes" --> r1([1: Not serious])
+%% link 3
+s1 -- "No" --> s2
+%% link 4
+s2 -- "Yes" --> r2([2: Serious])
+%% link 5
+s2 -- "No" --> r3([3: Very serious])
         `;
         // if no values, just return this chart
         if (typeof(vals) == 'undefined') {
             return chart_desc;
+        }
+
+        // ok, let's add more styles for path
+        if (vals.n_ind_na == 0) {
+            chart_desc += 'linkStyle 0' + this.activate_link_style;
+
+            if (vals.percentage_very_close >= 0.75) {
+                chart_desc += 'linkStyle 2' + this.activate_link_style;
+            } else {
+                chart_desc += 'linkStyle 3' + this.activate_link_style;
+            }
+
+            if (vals.n_not_close == 0) {
+                chart_desc += 'linkStyle 4' + this.activate_link_style;
+            } else {
+                chart_desc += 'linkStyle 5' + this.activate_link_style;
+            }
+
+        } else {
+            chart_desc += 'linkStyle 1' + this.activate_link_style;
         }
 
         return chart_desc;
@@ -642,6 +671,14 @@ var app_coe = {
                     }
                     return n;
                 },
+
+                to_percentage: function(v) {
+                    if (isNaN(v)) {
+                        return 'NA';
+                    }
+
+                    return (v*100).toFixed(2) + '%';
+                }
 
             },
 

@@ -67,5 +67,29 @@ def judge_imprecision():
     return L0
 
 
-def judge_indirectness():
-    return L0
+def judge_indirectness(
+    n_very_close,
+    n_moderately_close,
+    n_not_close,
+    n_ind_na,
+    n_studies
+):
+    '''
+    Judge indirectness by the numbers of each category
+    '''
+    if n_studies == 0:
+        return L0
+
+    if n_ind_na > 0:
+        return L0
+
+    # get the percentage of very close studies
+    percentage_very_close = n_very_close / n_studies
+
+    if percentage_very_close >= 0.75:
+        return L1
+    
+    if n_not_close == 0:
+        return L2
+
+    return L3

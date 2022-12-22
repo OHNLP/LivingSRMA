@@ -676,9 +676,34 @@ var coe_helper = {
     // Indirectness
     ///////////////////////////////////////////////////////////////////////////
 
-    judge_indirectness: function() {
+    judge_indirectness: function(
+        n_very_close,
+        n_moderately_close,
+        n_not_close,
+        n_ind_na,
+        n_studies
+    ) {
         with(this) {
-            return L0;
+            if (n_studies == 0) {
+                return L0;
+            }
+
+            if (n_ind_na > 0) {
+                return L0;
+            }
+
+            // get the percentage of very close studies
+            var percentage_very_close = n_very_close / n_studies;
+
+            if (percentage_very_close >= 0.75) {
+                return L1;
+            }
+            
+            if (n_not_close == 0) {
+                return L2;
+            }
+
+            return L3;
         }
     },
 

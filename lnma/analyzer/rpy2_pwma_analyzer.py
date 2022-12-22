@@ -464,7 +464,8 @@ def analyze_pwma_prcm_coe(rs, cfg, has_cumu=True):
         "Ec": 59,
         "Nc": 524,
         "pid": "1234",
-        "rob": "L"
+        "rob": "L", # L, M, H, NA
+        "ind": "V", # V, M, N, NA
     },
     '''
     # create a dataframe first
@@ -623,7 +624,6 @@ def analyze_pwma_prcm_coe(rs, cfg, has_cumu=True):
     # get the MA size
     ma_size = ttNt + ttNc
 
-
     #######################################################
     # Publication Bias
     #######################################################
@@ -647,6 +647,30 @@ def analyze_pwma_prcm_coe(rs, cfg, has_cumu=True):
     i2 = primma['heterogeneity']['i2']
     inconsistency = coe_helper.judge_inconsistency(i2)
 
+
+
+
+    #######################################################
+    # Indirectness
+    #######################################################
+    n_very_close = len(df[df['ind']=='V'])
+    percentage_very_close = n_very_close / n_studies
+    n_moderately_close = len(df[df['ind']=='M'])
+    n_not_close = len(df[df['ind']=='N'])
+    n_ind_na = len(df[df['ind']=='NA'])
+
+    indirectness = coe_helper.judge_indirectness(
+        n_very_close,
+        n_moderately_close,
+        n_not_close,
+        n_ind_na,
+        n_studies
+    )
+
+    #######################################################
+    # FINALLY! the return object
+    #######################################################
+
     # build the return
     ret = {
         'submission_id': 'rpy2',
@@ -664,7 +688,7 @@ def analyze_pwma_prcm_coe(rs, cfg, has_cumu=True):
                 'inconsistency': inconsistency,
                 'publication_bias': publication_bias,
                 'imprecision': None,
-                'indirectness': None,
+                'indirectness': indirectness,
 
                 'info': {
                     'risk_of_bias': {
@@ -687,7 +711,12 @@ def analyze_pwma_prcm_coe(rs, cfg, has_cumu=True):
 
                     },
                     'indirectness': {
-                        
+                        "n_very_close": n_very_close,
+                        "percentage_very_close": percentage_very_close,
+                        "n_moderately_close": n_moderately_close,
+                        "n_not_close": n_not_close,
+                        "n_ind_na": n_ind_na,
+                        "n_studies": n_studies
                     }
                 }
             }
