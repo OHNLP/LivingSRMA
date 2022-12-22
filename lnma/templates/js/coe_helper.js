@@ -643,7 +643,7 @@ var coe_helper = {
     judge_publication_bias: function(
         n_studies, 
         egger_test_p_value,
-        diff_sm_percentage
+        difference_sm
     ) {
         if (n_studies < 10) {
             return '1'; // Not applicable
@@ -654,7 +654,7 @@ var coe_helper = {
             return '1'; // Not serious
         }
 
-        if (diff_sm_percentage > 0.2) {
+        if (difference_sm > 0.2) {
             return '2'; // Serious
         }
 
@@ -665,9 +665,29 @@ var coe_helper = {
     // Imprecision
     ///////////////////////////////////////////////////////////////////////////
 
-    judge_imprecision: function() {
+    judge_imprecision: function(vals) {
         with(this) {
-            return L0;
+            if (vals['is_t_included_in_ci_of_rd'])
+                if (vals['is_t_user_provided'])
+                    if (vals['is_both_ts_included_in_ci_of_rd'])
+                        return L4
+                    else
+                        return L3
+                else
+                    if (vals['is_both_200p1000_included_in_ci_of_rd'])
+                        return L4
+                    else
+                        return L3
+            else
+                if (vals['is_relative_effect_large'])
+                    if (vals['ma_size'] >= vals['ois'])
+                        return L1
+                    else if (vals['ma_size'] >= vals['ois'] * 0.5)
+                        return L2
+                    else
+                        return L3
+                else
+                    return L1
         }
         
     },

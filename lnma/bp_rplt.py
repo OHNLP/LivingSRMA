@@ -307,6 +307,8 @@ def pwma_prcm_coe():
     sm = request.form.get('sm', '').strip()
     # is_hakn
     hk = request.form.get('hk', '').strip()
+    # indirectness threshold
+    imp_t = request.form.get('imp_t', '').strip()
 
     # check am
     if am not in set(['FOREST', 'FORESTDATA']):
@@ -322,6 +324,20 @@ def pwma_prcm_coe():
     if hk not in set(['TRUE', 'FALSE']):
         ret['msg'] = 'Unsupported value for Hartung-Knapp adjustment'
         return jsonify(ret)
+
+    # check imp_t
+    if imp_t == '':
+        imp_t = 0
+        is_t_user_provided = False
+
+    else:
+        try:
+            imp_t = float(imp_t)
+            is_t_user_provided = True
+        except:
+            ret['msg'] = 'Unsupported value for indirectness threshold T'
+            return jsonify(ret)
+
 
     # extract data
     try:
@@ -342,7 +358,11 @@ def pwma_prcm_coe():
         'sort_by': 'year',
         'pooling_method': 'MH',
         'tau_estimation_method': 'DL',
-        'assumed_baseline': 100
+        'assumed_baseline': 100,
+
+        # for CoE
+        'imp_t': imp_t,
+        'is_t_user_provided': is_t_user_provided
     }
 
     # set the params for callback usage

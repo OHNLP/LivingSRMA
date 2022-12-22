@@ -62,8 +62,8 @@ def calc_OIS(h, alpha=0.05, power=0.8, alternative='two.sided'):
     )
     # convert r to dict
     r_dict = dict(zip(r.names, list(r)))
-
-    n = r_dict['n'][0]
+    # fix the numpy.int64 encoder bug
+    n = int(r_dict['n'][0])
 
     return n * 2
 
@@ -487,6 +487,7 @@ def analyze_pwma_prcm_coe(rs, cfg, has_cumu=True):
         method=cfg['pooling_method'],
         method_tau=cfg['tau_estimation_method']
     )
+    # r_d_prim = dict(zip(r_prim.names, list(r_prim)))
 
     # get the trimfill primary
     r_prim_trimfill = meta.trimfill_meta(r_prim)
@@ -497,92 +498,11 @@ def analyze_pwma_prcm_coe(rs, cfg, has_cumu=True):
         method = 'linreg'
     )
 
-    #######################################################
-    # Risk of Bias
-    #######################################################
-    # get the subg if needed
-    # only use those with non-NA records
-    dft = df[df['rob']!='NA']
-
-    # get all robs of non-NA 
-    robs = dft.rob.to_list()
-
-    # check all low or all high
-    is_all_low = None
-    is_all_high = None
-    j_subg = None
-    subg_pval = None
-    per_high_stus = 0
-    risk_of_bias = coe_helper.L0
-
-    # first of all, need to check how many records left
-    while(True):
-        if (len(dft) == 0):
-            # which means no enough records for this analysis
-            # no need to calculate the follows
-            break
-        
-        # set default for these two
-        is_all_low = True
-        is_all_high = True
-
-        for r in robs:
-            if r != 'L':
-                # ok, not all low
-                is_all_low = False
-                break
-        
-        for r in robs:
-            if r == 'L':
-                # not all high or some
-                is_all_high = False
-                break
-
-        for r in robs:
-            if r == 'H':
-                per_high_stus += 1
-
-        if len(robs) != 0:
-            per_high_stus = per_high_stus / len(robs)
-
-        if is_all_low:
-            risk_of_bias = coe_helper.L1
-
-        elif is_all_high:
-            # and need human-in-the-loop review
-            risk_of_bias = coe_helper.L2
-
-        else:
-            # add a subgroup column for df
-            dft['subgroup'] = dft['rob'].apply(lambda v: 'L' if v == 'L' else 'H')
-            r_subg = meta.metabin(
-                dft.Et, dft.Nt, dft.Ec, dft.Nc,
-                studlab=dft.study,
-                comb_random=cfg['fixed_or_random']=='random',
-                sm=cfg['measure_of_effect'],
-                hakn=True if cfg['is_hakn'] == 'TRUE' else False,
-                method=cfg['pooling_method'],
-                method_tau=cfg['tau_estimation_method'],
-                byvar=dft.subgroup
-            )
-            r_j_subg = jsonlite.toJSON(r_subg, force=True)
-            j_subg = json.loads(r_j_subg[0])
-            subg_pval = j_subg['pval.Q.b.random'][0]
-            # the percentage of high-risk
-
-            risk_of_bias = coe_helper.judge_risk_of_bias(
-                is_all_low,
-                is_all_high,
-                subg_pval,
-                per_high_stus
-            )
-
-        # exit the while(True) loop
-        break
-
     # convert to R json object
     r_j_prim = jsonlite.toJSON(r_prim, force=True)
+    # get adjusted effect
     r_j_prim_trimfill = jsonlite.toJSON(r_prim_trimfill, force=True)
+    # get bias information
     r_j_bias = jsonlite.toJSON(r_bias, force=True)
 
     # convert to Python JSON object
@@ -594,6 +514,7 @@ def analyze_pwma_prcm_coe(rs, cfg, has_cumu=True):
     j = {
         'primma': j_prim,
     }
+    # get adjusted effect for compability
     j_trimfill = {
         'primma': j_prim_trimfill,
     }
@@ -609,20 +530,148 @@ def analyze_pwma_prcm_coe(rs, cfg, has_cumu=True):
         j_cumu = json.loads(r_j_cumu[0])
         j['cumuma'] = j_cumu
 
-    # update the format
+    # update the format for easier usage
     primma = _meta_trans_metabin(j, cfg)
+    # get adjusted effect
     primma_trimfill = _meta_trans_metabin(j_trimfill, cfg)
+
+    #######################################################
+    # Risk of Bias
+    #######################################################
+    # get the everything that needed first
+    # get number of NA studies
+    n_rob_na = len(df[df['rob']!='NA'])
+
+    # only use those with non-NA records
+    dft = df[df['rob']!='NA']
+
+    # get all robs of non-NA 
+    robs = dft.rob.to_list()
+
+    # set default for these two
+    is_all_low = True
+    for r in robs:
+        if r != 'L':
+            # ok, not all low
+            is_all_low = False
+            break
     
+    # get all high
+    is_all_high = True
+    for r in robs:
+        if r != 'H' and r != 'M':
+            # this record is not H and not M, must be L or NA
+            is_all_high = False
+            break
+
+    # get percentage of high
+    per_high_stus = 0
+    for r in robs:
+        if r == 'H':
+            per_high_stus += 1
+    if len(robs) != 0:
+        # the percentage of high-risk
+        per_high_stus = per_high_stus / len(robs)
+
+    # get subg if needed
+    j_subg = None
+    subg_pval = None
+    if is_all_high:
+        # add a subgroup column for df
+        dft['subgroup'] = dft['rob'].apply(lambda v: 'L' if v == 'L' else 'H')
+        r_subg = meta.metabin(
+            dft.Et, dft.Nt, dft.Ec, dft.Nc,
+            studlab=dft.study,
+            comb_random=cfg['fixed_or_random']=='random',
+            sm=cfg['measure_of_effect'],
+            hakn=True if cfg['is_hakn'] == 'TRUE' else False,
+            method=cfg['pooling_method'],
+            method_tau=cfg['tau_estimation_method'],
+            byvar=dft.subgroup
+        )
+        r_j_subg = jsonlite.toJSON(r_subg, force=True)
+        j_subg = json.loads(r_j_subg[0])
+        subg_pval = j_subg['pval.Q.b.random'][0]
+
+    rob_vals = {
+        'n_rob_na': n_rob_na,
+        'is_all_low': is_all_low,
+        'is_all_high': is_all_high,
+        'subg_pval': subg_pval,
+        'per_high_stus': per_high_stus,
+        'user_judgement': cfg.get('rob_user_judgement', None)
+    }
+
+    risk_of_bias = coe_helper.judge_risk_of_bias(rob_vals)
 
     #######################################################
     # Imprecision
     #######################################################
-    p1 = ttEt / ttNt
+    # get the relative effect of this pwma
+    pma_pooled_effect = primma['model']['random']['bt_TE']
+    # get the ci of sm
+    ci_of_sm = [
+        primma['model']['random']['bt_lower'],
+        primma['model']['random']['bt_upper']
+    ]
+    # get a flag for relative effect
+    is_relative_effect_large = bool(pma_pooled_effect < 0.7 or pma_pooled_effect > 1.3)
+
+    # the propotion of treatment group
+    p1 = float(ttEt / ttNt)
     # get the OIS
     OIS = calc_OIS_by_p1(p1)
-    
     # get the MA size
-    ma_size = ttNt + ttNc
+    ma_size = int(ttNt + ttNc)
+
+    # get rd by PMA
+    r_pma_imp = meta.metabin(
+        df.Et, df.Nt, df.Ec, df.Nc,
+        studlab=df.study,
+        comb_random=cfg['fixed_or_random']=='random',
+        sm='RD',
+        hakn=True if cfg['is_hakn'] == 'TRUE' else False,
+        method=cfg['pooling_method'],
+        method_tau=cfg['tau_estimation_method']
+    )
+    # convert to a dictionary for getting values
+    r_d_pma_imp = dict(zip(r_pma_imp.names, list(r_pma_imp)))
+    # get RD, and RD doesn't require backtransf
+    imp_rd = float(r_d_pma_imp['TE.random'][0])
+    # get the confidence interval of RD
+    ci_of_rd = [
+        float(r_d_pma_imp['lower.random'][0]),
+        float(r_d_pma_imp['upper.random'][0])
+    ]
+    imp_t = cfg['imp_t']
+
+    # judge the T included in ci or not
+    # use bool() to fix numpy.bool_ bug
+    is_t_included_in_ci_of_rd = bool(imp_t >= ci_of_rd[0] and imp_t <= ci_of_rd[1])
+    # judge the -T and +T
+    is_both_ts_included_in_ci_of_rd = bool(is_t_included_in_ci_of_rd and \
+        -imp_t >= ci_of_rd[0] and -imp_t <= ci_of_rd[1])
+    # judge the 200 per 1000
+    is_both_200p1000_included_in_ci_of_rd = bool( \
+        -0.2 >= ci_of_rd[0] and -0.2 <= ci_of_rd[1] and \
+        0.2 >= ci_of_rd[0] and 0.2 <= ci_of_rd[1])
+
+    imp_vals = {
+        't': imp_t,
+        'is_t_user_provided': cfg['is_t_user_provided'],
+        'sm': pma_pooled_effect,
+        'ci_of_sm': ci_of_sm,
+        'is_relative_effect_large': is_relative_effect_large,
+        'p1': p1,
+        'rd': imp_rd,
+        'ci_of_rd': ci_of_rd,
+        'is_t_included_in_ci_of_rd': is_t_included_in_ci_of_rd,
+        'is_both_ts_included_in_ci_of_rd': is_both_ts_included_in_ci_of_rd,
+        'is_both_200p1000_included_in_ci_of_rd': is_both_200p1000_included_in_ci_of_rd,
+        'ois': OIS,
+        'ma_size': ma_size
+    }
+    imprecision = coe_helper.judge_imprecision(imp_vals)
 
     #######################################################
     # Publication Bias
@@ -632,22 +681,32 @@ def analyze_pwma_prcm_coe(rs, cfg, has_cumu=True):
     egger_test_p_value = j_bias['p.value'][0] if 'p.value' in j_bias else None
     pooled_sm = primma['model']['random']['bt_TE']
     adjusted_sm = primma_trimfill['model']['random']['bt_TE']
-    diff_sm_percentage = (adjusted_sm - pooled_sm) / pooled_sm
+    difference_sm = adjusted_sm - pooled_sm
 
-    publication_bias = coe_helper.judge_publication_bias(
-        n_studies,
-        egger_test_p_value,
-        diff_sm_percentage
-    )
+    pbb_vals = {
+        'n_studies': n_studies,
+        'egger_test_p_value': egger_test_p_value,
+        'pooled_sm': pooled_sm,
+        'adjusted_sm': adjusted_sm,
+        'difference_sm': difference_sm
+    }
+
+    publication_bias = coe_helper.judge_publication_bias(pbb_vals)
 
     #######################################################
     # Inconsistency
     #######################################################
     # get the inconsistency
     i2 = primma['heterogeneity']['i2']
-    inconsistency = coe_helper.judge_inconsistency(i2)
+    heter_pval = primma['heterogeneity']['p']
+    
+    # get category
 
-
+    inc_vals = {
+        'i2': i2,
+        'heter_pval': heter_pval
+    }
+    inconsistency = coe_helper.judge_inconsistency(inc_vals)
 
 
     #######################################################
@@ -659,13 +718,16 @@ def analyze_pwma_prcm_coe(rs, cfg, has_cumu=True):
     n_not_close = len(df[df['ind']=='N'])
     n_ind_na = len(df[df['ind']=='NA'])
 
-    indirectness = coe_helper.judge_indirectness(
-        n_very_close,
-        n_moderately_close,
-        n_not_close,
-        n_ind_na,
-        n_studies
-    )
+    ind_vals = {
+        "n_very_close": n_very_close,
+        "percentage_very_close": percentage_very_close,
+        "n_moderately_close": n_moderately_close,
+        "n_not_close": n_not_close,
+        "n_ind_na": n_ind_na,
+        "n_studies": n_studies
+    }
+
+    indirectness = coe_helper.judge_indirectness(ind_vals)
 
     #######################################################
     # FINALLY! the return object
@@ -687,41 +749,21 @@ def analyze_pwma_prcm_coe(rs, cfg, has_cumu=True):
                 'risk_of_bias': risk_of_bias,
                 'inconsistency': inconsistency,
                 'publication_bias': publication_bias,
-                'imprecision': None,
+                'imprecision': imprecision,
                 'indirectness': indirectness,
 
                 'info': {
-                    'risk_of_bias': {
-                        'is_all_low': is_all_low,
-                        'is_all_high': is_all_high,
-                        'subg_pval': subg_pval,
-                        'per_high_stus': per_high_stus,
-                    },
-                    'inconsistency': {
-                        'i2': i2
-                    },
-                    'publication_bias': {
-                        'n_studies': n_studies,
-                        'egger_test_p_value': egger_test_p_value,
-                        'pooled_sm': pooled_sm,
-                        'adjusted_sm': adjusted_sm,
-                        'diff_sm_percentage': diff_sm_percentage
-                    },
-                    'imprecision': {
-
-                    },
-                    'indirectness': {
-                        "n_very_close": n_very_close,
-                        "percentage_very_close": percentage_very_close,
-                        "n_moderately_close": n_moderately_close,
-                        "n_not_close": n_not_close,
-                        "n_ind_na": n_ind_na,
-                        "n_studies": n_studies
-                    }
+                    'risk_of_bias': rob_vals,
+                    'inconsistency': inc_vals,
+                    'publication_bias': pbb_vals,
+                    'imprecision': imp_vals,
+                    'indirectness': ind_vals
                 }
             }
         }
     }
+
+    # add cumu info
     if has_cumu:
         ret['data']['cumuma'] = _meta_trans_metacum(j, cfg)
         ret['data']['raw']['cumu'] = j_cumu

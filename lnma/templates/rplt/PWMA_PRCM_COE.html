@@ -90,6 +90,20 @@ PWMA Primary + Cumulative Analysis API Demo
                 </div>
 
                 <div class="form-group row">
+                    <label for="imp_t" class="col-sm-3 col-form-label">
+                        imp_t (optional)
+                    </label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" id="imp_t" value="">
+                        <small id="ind_tHlep" class="form-text text-muted">
+                            ImprecisionT threshold: The threshold for imprecision evaluation.
+                            It's optional. Default value is 0.
+                        </small>
+                    </div>
+
+                </div>
+
+                <div class="form-group row">
                     <label for="hk" class="col-sm-3 col-form-label">hk</label>
                     <div class="col-sm-9">
                         <input type="text" class="form-control" id="hk" value="FALSE">
@@ -205,12 +219,12 @@ PWMA Primary + Cumulative Analysis API Demo
                             Egger's Test p = {{ pma.data.coe.info.publication_bias.egger_test_p_value }} <br>
                             Pooled Effect = {{ pma.data.coe.info.publication_bias.pooled_sm }} <br>
                             Adjusted Effect = {{ pma.data.coe.info.publication_bias.adjusted_sm }} <br>
-                            Effect Difference = {{ pma.data.coe.info.publication_bias.diff_sm_percentage * 100 }}% <br>
+                            Effect Difference = {{ pma.data.coe.info.publication_bias.difference_sm * 100 }}% <br>
                         </p>
 
                         <p class="result">
                             Result = {{ pma.data.coe.publication_bias }}
-                            ({{ coe_helper.val_to_label(coe_helper.judge_publication_bias(pma.data.coe.info.publication_bias.n_studies, pma.data.coe.info.publication_bias.egger_test_p_value, pma.data.coe.info.publication_bias.diff_sm_percentage), 'publication_bias') }})
+                            ({{ coe_helper.val_to_label(coe_helper.judge_publication_bias(pma.data.coe.info.publication_bias.n_studies, pma.data.coe.info.publication_bias.egger_test_p_value, pma.data.coe.info.publication_bias.difference_sm), 'publication_bias') }})
                         </p>
 
                         <pre id="mermaid_pbb" 
@@ -232,17 +246,20 @@ PWMA Primary + Cumulative Analysis API Demo
                     <div class="box">
                         <h5>Imprecision</h5>
                         <p class="fact">
-                            Sample Size N = {{ get_sample_size() }} <br>
-                            Lower CI = {{ pma.data.primma.model.random.bt_lower }} <br>
-                            Upper CI = {{ pma.data.primma.model.random.bt_upper }} <br>
-                            Upper - Lower = {{ pma.data.primma.model.random.bt_upper -
-                            pma.data.primma.model.random.bt_lower }} <br>
-                            OIS = ?
+                            T = {{ pma.data.coe.info.imprecision.t }} (
+                                Is T user-provided? = {{ pma.data.coe.info.imprecision.is_t_user_provided }}) <br>
+                            CI of RD: ({{ pma.data.coe.info.imprecision.ci_of_rd[0].toFixed(4) }}; 
+                                       {{ pma.data.coe.info.imprecision.ci_of_rd[1].toFixed(4) }}) <br>
+                            Does CI of RD include T? = {{ pma.data.coe.info.imprecision.is_t_included_in_ci_of_rd }}) <br>
+                            Relative Effect =  {{ pma.data.coe.info.imprecision.sm }} <br>
+                            MA Size N = {{ pma.data.coe.info.imprecision.ma_size }} <br>
+                            OIS = {{ pma.data.coe.info.imprecision.ois }} <br>
                         </p>
 
 
                         <p class="result">
                             Result = {{ pma.data.coe.imprecision }}
+                            ({{ coe_helper.val_to_label(coe_helper.judge_imprecision(pma.data.coe.info.imprecision), 'imprecision') }})
                         </p>
 
                         <pre id="mermaid_imp" 
@@ -488,7 +505,7 @@ s3 -- "diff≥20%" --> r4([2: Serious])
             chart_desc += 'linkStyle 3' + this.activate_link_style;
         }
 
-        if (vals.diff_sm_percentage < 0.2) {
+        if (vals.difference_sm < 0.2) {
             chart_desc += 'linkStyle 4' + this.activate_link_style;
         } else {
             chart_desc += 'linkStyle 5' + this.activate_link_style;
@@ -541,6 +558,46 @@ s3 -- "MA size < 50% OIS" --> r5([3: Very serious])
         // if no values, just return this chart
         if (typeof(vals) == 'undefined') {
             return chart_desc;
+        }
+        // always get the T first
+        chart_desc += 'linkStyle 0' + this.activate_link_style;
+
+        if (vals.is_t_included_in_ci_of_rd) {
+            chart_desc += 'linkStyle 1' + this.activate_link_style;
+            
+            if (vals.is_t_user_provided) {
+                chart_desc += 'linkStyle 2' + this.activate_link_style;
+
+                if (vals.is_both_ts_included_in_ci_of_rd) {
+                    chart_desc += 'linkStyle 3' + this.activate_link_style;
+                } else {
+                    chart_desc += 'linkStyle 4' + this.activate_link_style;
+                }
+            } else {
+                chart_desc += 'linkStyle 5' + this.activate_link_style;
+                if (vals.is_both_200p1000_included_in_ci_of_rd) {
+                    chart_desc += 'linkStyle 6' + this.activate_link_style;
+                } else {
+                    chart_desc += 'linkStyle 7' + this.activate_link_style;
+                }
+            }
+
+        } else {
+            chart_desc += 'linkStyle 8' + this.activate_link_style;
+        }
+
+        if (vals.is_relative_effect_large) {
+            chart_desc += 'linkStyle 10' + this.activate_link_style;
+            
+            if (vals.ma_size > vals.ois) {
+                chart_desc += 'linkStyle 11' + this.activate_link_style;
+            } else if (vals.ma_size < 0.5 * vals.ois) {
+                chart_desc += 'linkStyle 13' + this.activate_link_style;
+            } else {
+                chart_desc += 'linkStyle 12' + this.activate_link_style;
+            }
+        } else {
+            chart_desc += 'linkStyle 9' + this.activate_link_style;
         }
 
         return chart_desc;
@@ -697,6 +754,7 @@ function get_data() {
         sm: $('#sm').val(),
         rs: $('#rs').val(),
         hk: $('#hk').val(),
+        imp_t: $('#imp_t').val(),
         apikey: $('#apikey').val()
     };
     console.log(params);
