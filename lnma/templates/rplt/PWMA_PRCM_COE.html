@@ -391,10 +391,12 @@ s4 -- "<50%" --> r4([1: Not serious])
 %% link 7
 s4 -- "≥50%" --> r5([2: Serious])
 %% link 8 for HITL
-r2 --> s_hitl --> r6([3-4: Very-Extremely serious])
-%% link 9 for init
+r2 -- "Optional" --> s_hitl 
+%% link 9
+s_hitl -- "Rate down" --> r6([3-4: Very-Extremely serious])
+%% link 10 for init
 s_init_hitl -- "Yes" --> s1
-%% link 10 for init no
+%% link 11 for init no
 s_init_hitl -- "No" --> r00([0: Not applicable])
         `
         if (typeof(vals) == 'undefined') {
@@ -402,27 +404,37 @@ s_init_hitl -- "No" --> r00([0: Not applicable])
         }
 
         // ok, let's add more styles for path
+        if (vals.n_rob_na == 0) {
+            // all studies are reviewed
+            chart_desc += 'linkStyle 10' + this.activate_link_style;
+        } else {
+            chart_desc += 'linkStyle 11' + this.activate_link_style;
+        }
+
         if (vals.is_all_low) {
             chart_desc += 'linkStyle 0' + this.activate_link_style;
         } else {
             chart_desc += 'linkStyle 1' + this.activate_link_style;
         }
+
         if (vals.is_all_high) {
             chart_desc += 'linkStyle 2' + this.activate_link_style;
         } else {
             chart_desc += 'linkStyle 3' + this.activate_link_style;
         }
+
         if (vals.subg_pval < 0.05) {
             chart_desc += 'linkStyle 4' + this.activate_link_style;
         } else {
             chart_desc += 'linkStyle 5' + this.activate_link_style;
-        }
-        if (vals.per_high_stus < 0.5) {
-            chart_desc += 'linkStyle 6' + this.activate_link_style;
-        } else {
-            chart_desc += 'linkStyle 7' + this.activate_link_style;
-        }
 
+            if (vals.per_high_stus < 0.5) {
+                chart_desc += 'linkStyle 6' + this.activate_link_style;
+            } else {
+                chart_desc += 'linkStyle 7' + this.activate_link_style;
+            }
+        }
+        
         return chart_desc;
     },
 
@@ -605,7 +617,7 @@ s3 -- "MA size < 50% OIS" --> r5([3: Very serious])
 
     get_ind_mermaid: function(vals) {
         var chart_desc = `
-        graph TD
+graph TD
 %% define class
 classDef HITL fill:yellow,stroke:orange;
 %% define nodes
@@ -676,8 +688,20 @@ var app_coe = {
             },
 
             methods: {
+                clear_figs: function() {
+                    // update innerHTML
+                    this.mermaid_chart_rob = '';
+                    this.mermaid_chart_pbb = '';
+                    this.mermaid_chart_inc = '';
+                    this.mermaid_chart_imp = '';
+                    this.mermaid_chart_ind = '';
+
+                    $('.mermaid').removeAttr('data-processed');
+                },
                 update_data: function(data_pma) {
                     this.pma = data_pma;
+
+                    this.clear_figs();
 
                     var tmp = '';
                     // update charts

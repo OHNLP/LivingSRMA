@@ -540,7 +540,7 @@ def analyze_pwma_prcm_coe(rs, cfg, has_cumu=True):
     #######################################################
     # get the everything that needed first
     # get number of NA studies
-    n_rob_na = len(df[df['rob']!='NA'])
+    n_rob_na = len(df[df['rob']=='NA'])
 
     # only use those with non-NA records
     dft = df[df['rob']!='NA']
@@ -565,11 +565,12 @@ def analyze_pwma_prcm_coe(rs, cfg, has_cumu=True):
             break
 
     # get percentage of high
-    per_high_stus = 0
-    for r in robs:
-        if r == 'H':
-            per_high_stus += 1
+    per_high_stus = None
     if len(robs) != 0:
+        per_high_stus = 0
+        for r in robs:
+            if r == 'H':
+                per_high_stus += 1
         # the percentage of high-risk
         per_high_stus = per_high_stus / len(robs)
 
