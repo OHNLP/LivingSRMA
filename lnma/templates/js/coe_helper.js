@@ -603,35 +603,20 @@ var coe_helper = {
         return true;
     },
 
-    judge_risk_of_bias: function(is_all_low, is_all_high, subg_pval, user_judgement) {
-        if (typeof(user_judgement) != 'undefined') {
-            return this.L3;
-        }
-        if (is_all_low) {
-            return this.L1;
-        }
-        if (is_all_high) {
-            return this.L2;
-        }
-        if (subg_pval < 0.05) {
-            return this.L2;
-        } else {
-            return this.L1;
-        }
+    judge_risk_of_bias: function(vals) {
+        
     },
 
     ///////////////////////////////////////////////////////////////////////////
     // Inconsistency
     ///////////////////////////////////////////////////////////////////////////
 
-    judge_inconsistency: function(i2) {
+    judge_inconsistency: function(vals) {
         with(this) {
-            if (i2 < 0.5) {
-                return L0; // No inconsistency
-            } else if (i2 <= 0.75) {
-                return L1; // Serious inconsistency
+            if (vals.i2 < 0.5 || vals.heter_pval < 0.1) {
+                return L1; // Not serious
             } else {
-                return L2; // Very serious
+                return L2; // Serious
             }
         }
     },
@@ -983,6 +968,341 @@ var coe_helper = {
         }
 
         return ret;
+    },
+
+
+
+    ///////////////////////////////////////////////////////////////////////////
+    // Visualization Helpers for CoE based on Mermaid
+    ///////////////////////////////////////////////////////////////////////////
+    activate_link_style: ' stroke:red,color:red;\n',
+
+    get_rob_mermaid: function(vals) {
+        var chart_desc = `
+graph TD
+%% define class
+classDef HITL fill:yellow,stroke:orange;
+%% define nodes
+s1["Are all studies low risk?"]
+s2["Are all studies high risk or some concerns?"]
+s3["Subgroup analysis (low vs. high/some)"]
+s4["Percent of high-risk studies"]
+s_init_hitl{{"HITL: Are all studies evaluated?"}}:::HITL
+s_hitl{{"HITL: Review"}}:::HITL
+
+%% define links
+%% link 0
+s1 -- "Yes" --> r1([1: Not serious])
+%% link 1
+s1 -- "No" --> s2
+%% link 2
+s2 -- "Yes" --> r2([2: Serious])
+%% link 3
+s2 -- "No" --> s3
+%% link 4
+s3 -- "p<0.05" --> r3([3: Very serious])
+%% link 5
+s3 -- "p≥0.05" --> s4
+%% link 6
+s4 -- "<50%" --> r4([1: Not serious])
+%% link 7
+s4 -- "≥50%" --> r5([2: Serious])
+%% link 8 for HITL
+r2 -- "Optional" --> s_hitl 
+%% link 9
+s_hitl -- "Rate down" --> r6([3-4: Very-Extremely serious])
+%% link 10 for init
+s_init_hitl -- "Yes" --> s1
+%% link 11 for init no
+s_init_hitl -- "No" --> r00([0: Not applicable])
+        `
+        if (typeof(vals) == 'undefined') {
+            return chart_desc;
+        }
+
+        // ok, let's add more styles for path
+        if (vals.n_rob_na == 0) {
+            // all studies are reviewed
+            chart_desc += 'linkStyle 10' + this.activate_link_style;
+        } else {
+            chart_desc += 'linkStyle 11' + this.activate_link_style;
+
+            // no need to render other conditions
+            return chart_desc;
+        }
+
+        if (vals.is_all_low) {
+            chart_desc += 'linkStyle 0' + this.activate_link_style;
+
+            // no need to render other conditions
+            return chart_desc;
+        } else {
+            chart_desc += 'linkStyle 1' + this.activate_link_style;
+        }
+
+        if (vals.is_all_high) {
+            chart_desc += 'linkStyle 2' + this.activate_link_style;
+            // no need to render other conditions
+            return chart_desc;
+
+        } else {
+            chart_desc += 'linkStyle 3' + this.activate_link_style;
+        }
+
+        if (vals.subg_pval < 0.05) {
+            chart_desc += 'linkStyle 4' + this.activate_link_style;
+            // no need to render other conditions
+            return chart_desc;
+
+        } else {
+            chart_desc += 'linkStyle 5' + this.activate_link_style;
+
+            if (vals.per_high_stus < 0.5) {
+                chart_desc += 'linkStyle 6' + this.activate_link_style;
+            } else {
+                chart_desc += 'linkStyle 7' + this.activate_link_style;
+            }
+        }
+        
+        return chart_desc;
+    },
+
+    get_inc_mermaid: function(vals) {
+        var chart_desc = `
+graph TD
+%% define class
+classDef HITL fill:yellow,stroke:orange;
+%% define nodes
+s1["I-sq as an indication of statistical heterogeneity"]
+s2["Are 75% of the studies within same category?"]
+s3{{"HITL Review"}}:::HITL
+
+%% define links
+%% link 0
+s1 -- "<50%" --> r1([1: Not serious])
+%% link 1
+s1 -- "≥50%" --> s2
+%% link 2
+s2 -- "Yes" --> r2([1: Not serious])
+%% link 3
+s2 -- "No" --> r3([2: Serious])
+%% link 4
+r3 -- "Optional" --> s3
+%% link 5
+s3 -- "Rate down" --> r4([3: Very serious])
+        `;
+        if (typeof(vals) == 'undefined') {
+            return chart_desc;
+        }
+
+        // ok, let's add more styles for path
+        if (vals.i2 < 0.5 || vals.heter_pval < 0.1) {
+            chart_desc += 'linkStyle 0' + this.activate_link_style;
+            // no need to render other conditions
+            return chart_desc;
+
+        } else {
+            chart_desc += 'linkStyle 1' + this.activate_link_style;
+        }
+
+        if (vals.is_major_in_same_category) {
+            chart_desc += 'linkStyle 2' + this.activate_link_style;
+        } else {
+            chart_desc += 'linkStyle 3' + this.activate_link_style;
+        }
+        return chart_desc;
+    },
+
+    get_pbb_mermaid: function(vals) {
+        var chart_desc = `
+graph TD
+%% define class
+classDef HITL fill:yellow,stroke:orange;
+%% define nodes
+s1[Number of studies]
+s2[Egger's Regression Test]
+s3[Does adjusted effect show less benefit?]
+
+%% define links
+%% link 0
+s1 -- "N<10" --> r1([1: Not serious])
+%% link 1
+s1 -- "N≥10" --> s2
+%% link 2
+s2 -- "p<0.05" --> s3
+%% link 3
+s2 -- "p≥0.05" --> r3([1: Not serious])
+%% link 4
+s3 -- "diff<20%" --> r5([1: Not serious])
+%% link 5
+s3 -- "diff≥20%" --> r4([2: Serious])
+        `
+        // if no values, just return this chart
+        if (typeof(vals) == 'undefined') {
+            return chart_desc;
+        }
+
+        // ok, let's add more styles for path
+        if (vals.n_studies < 10) {
+            chart_desc += 'linkStyle 0' + this.activate_link_style;
+        } else {
+            chart_desc += 'linkStyle 1' + this.activate_link_style;
+        }
+
+        if (vals.egger_test_p_value < 0.05) {
+            chart_desc += 'linkStyle 2' + this.activate_link_style;
+        } else {
+            chart_desc += 'linkStyle 3' + this.activate_link_style;
+        }
+
+        if (vals.difference_sm < 0.2) {
+            chart_desc += 'linkStyle 4' + this.activate_link_style;
+        } else {
+            chart_desc += 'linkStyle 5' + this.activate_link_style;
+        }
+
+        return chart_desc;
+    },
+
+    get_imp_mermaid: function(vals) {
+        var chart_desc = `
+graph TD
+%% define class
+classDef HITL fill:yellow,stroke:orange;
+%% define nodes
+s0["Get threshold T\nUser-provided or null(0)"]
+s1["Does CI of RD include T?"]
+s2["Is relative effect (RR/OR)\n<0.7 or >1.3?"]
+s3["Calculate OIS"]
+
+%% define link
+%% link 0
+s0 --> s1
+%% link 1
+s1 -- Yes --> s_tup["Is T user-provided?"]
+%% link 2
+s_tup -- Yes --> s_mpt["Does CI of RD include\nboth - and + T?"]
+%% link 3
+s_mpt -- Yes --> r3a["4: Extremely serious"]
+%% link 4
+s_mpt -- No --> r2a["3: Very serious"]
+%% link 5
+s_tup -- No --> s_200p["Does CI of RD include\nboth - and +\n200 per 1,000?"]
+%% link 6
+s_200p -- Yes --> r3b["4: Extremely serious"]
+%% link 7
+s_200p -- No --> r2b["3: Very serious"]
+%% link 8
+s1 -- No --> s2
+%% link 9
+s2 -- No --> r2([1: Not serious])
+%% link 10
+s2 -- Yes --> s3
+%% link 11
+s3 -- "MA size ≥ OIS" --> r3([1: Not serious])
+%% link 12
+s3 -- "MA size in 50-100% OIS" --> r4([2: Serious])
+%% link 13
+s3 -- "MA size < 50% OIS" --> r5([3: Very serious])
+        `;
+        // if no values, just return this chart
+        if (typeof(vals) == 'undefined') {
+            return chart_desc;
+        }
+        // always get the T first
+        chart_desc += 'linkStyle 0' + this.activate_link_style;
+
+        if (vals.is_t_included_in_ci_of_rd) {
+            chart_desc += 'linkStyle 1' + this.activate_link_style;
+            
+            if (vals.is_t_user_provided) {
+                chart_desc += 'linkStyle 2' + this.activate_link_style;
+
+                if (vals.is_both_ts_included_in_ci_of_rd) {
+                    chart_desc += 'linkStyle 3' + this.activate_link_style;
+                } else {
+                    chart_desc += 'linkStyle 4' + this.activate_link_style;
+                }
+            } else {
+                chart_desc += 'linkStyle 5' + this.activate_link_style;
+                if (vals.is_both_200p1000_included_in_ci_of_rd) {
+                    chart_desc += 'linkStyle 6' + this.activate_link_style;
+                } else {
+                    chart_desc += 'linkStyle 7' + this.activate_link_style;
+                }
+            }
+
+        } else {
+            chart_desc += 'linkStyle 8' + this.activate_link_style;
+        }
+
+        if (vals.is_relative_effect_large) {
+            chart_desc += 'linkStyle 10' + this.activate_link_style;
+            
+            if (vals.ma_size > vals.ois) {
+                chart_desc += 'linkStyle 11' + this.activate_link_style;
+            } else if (vals.ma_size < 0.5 * vals.ois) {
+                chart_desc += 'linkStyle 13' + this.activate_link_style;
+            } else {
+                chart_desc += 'linkStyle 12' + this.activate_link_style;
+            }
+        } else {
+            chart_desc += 'linkStyle 9' + this.activate_link_style;
+        }
+
+        return chart_desc;
+    },
+
+    get_ind_mermaid: function(vals) {
+        var chart_desc = `
+graph TD
+%% define class
+classDef HITL fill:yellow,stroke:orange;
+%% define nodes
+s1[Is >75% of studies 'Very Close'?]
+s2[Is none of studies 'Not Close'?]
+s_init_hitl{{"HITL: Are all studies evaluated?"}}:::HITL
+
+%% define links
+%% link 0: for HITL
+s_init_hitl -- "Yes" --> s1
+%% link 1: for HITL
+s_init_hitl -- "No" --> r0([0: Not applicable])
+%% link 2
+s1 -- "Yes" --> r1([1: Not serious])
+%% link 3
+s1 -- "No" --> s2
+%% link 4
+s2 -- "Yes" --> r2([2: Serious])
+%% link 5
+s2 -- "No" --> r3([3: Very serious])
+        `;
+        // if no values, just return this chart
+        if (typeof(vals) == 'undefined') {
+            return chart_desc;
+        }
+
+        // ok, let's add more styles for path
+        if (vals.n_ind_na == 0) {
+            chart_desc += 'linkStyle 0' + this.activate_link_style;
+
+            if (vals.percentage_very_close >= 0.75) {
+                chart_desc += 'linkStyle 2' + this.activate_link_style;
+            } else {
+                chart_desc += 'linkStyle 3' + this.activate_link_style;
+            }
+
+            if (vals.n_not_close == 0) {
+                chart_desc += 'linkStyle 4' + this.activate_link_style;
+            } else {
+                chart_desc += 'linkStyle 5' + this.activate_link_style;
+            }
+
+        } else {
+            chart_desc += 'linkStyle 1' + this.activate_link_style;
+        }
+
+        return chart_desc;
     },
 
 

@@ -23,8 +23,12 @@ def judge_risk_of_bias(vals):
         # some studies are not evaluated by reviewer yet
         return L0
 
-    if vals['user_judgement'] is not None or \
-        vals['user_judgement'] != '':
+    if vals['user_judgement'] is None:
+        pass
+    elif vals['user_judgement'] == '':
+        pass
+    else:
+        # I don't why but user said something
         return vals['user_judgement']
 
     if vals['is_all_low']:
@@ -49,10 +53,16 @@ def judge_inconsistency(vals):
     vals contains
     {
         'i2': i2,
-        'heter_pval': heter_pval
+        'heter_pval': heter_pval,
+        'major_sm_cate': major_sm_cate,
+        'major_sm_cnt': major_sm_cnt,
+        'is_major_in_same_category': is_major_in_same_category,
     },
     '''
     if (vals['i2'] < 0.5 or vals['heter_pval'] < 0.1):
+        return L1
+
+    if (vals['is_major_in_same_category']):
         return L1
 
     else:

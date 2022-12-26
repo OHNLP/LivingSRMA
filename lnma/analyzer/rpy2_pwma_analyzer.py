@@ -578,6 +578,10 @@ def analyze_pwma_prcm_coe(rs, cfg, has_cumu=True):
     j_subg = None
     subg_pval = None
     if is_all_high:
+        # then no need to further check, just eval
+        pass
+
+    else:
         # add a subgroup column for df
         dft['subgroup'] = dft['rob'].apply(lambda v: 'L' if v == 'L' else 'H')
         r_subg = meta.metabin(
@@ -702,10 +706,36 @@ def analyze_pwma_prcm_coe(rs, cfg, has_cumu=True):
     heter_pval = primma['heterogeneity']['p']
     
     # get category
+    # so, get the SM for all studies first
+    df_inc = pd.DataFrame(primma['stus'])
+    def _get_sm_cate(v):
+        if v>= 0.9:   return 'T' # Trivial
+        elif v>= 0.8: return 'S' # Small
+        elif v>= 0.5: return 'M' # Moderate
+        else:         return 'L' # large
+    df_inc['sm_cate'] = df_inc['bt_TE'].apply(_get_sm_cate)
+    pooled_sm_cate = _get_sm_cate(primma['model']['random']['bt_TE'])
+    df_inc_stat = df_inc[['name', 'sm_cate']] \
+        .groupby(by=['sm_cate'])['name'] \
+        .count() \
+        .sort_values(ascending=False) \
+        .reset_index()
+    # get the top major cate and number
+    major_sm_cate = df_inc_stat.iloc[0]['sm_cate']
+    major_sm_cnt = int(df_inc_stat.iloc[0]['name'])
+
+    # count the cate
+    is_major_in_same_category = \
+        pooled_sm_cate == major_sm_cate and \
+        major_sm_cnt >= 0.75 * len(df)
 
     inc_vals = {
         'i2': i2,
-        'heter_pval': heter_pval
+        'heter_pval': heter_pval,
+        'pooled_sm_cate': pooled_sm_cate,
+        'major_sm_cate': major_sm_cate,
+        'major_sm_cnt': major_sm_cnt,
+        'is_major_in_same_category': is_major_in_same_category,
     }
     inconsistency = coe_helper.judge_inconsistency(inc_vals)
 

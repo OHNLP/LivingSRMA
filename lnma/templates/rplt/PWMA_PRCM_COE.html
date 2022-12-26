@@ -40,8 +40,9 @@ PWMA Primary + Cumulative Analysis API Demo
 {% endblock %}
 
 {% block main %}
-<div class="container-fluid">
-    <div class="row">
+<div class="container-fluid"
+    style="height: 100%;">
+    <div class="row" style="height: 100%;">
         <div class="col-md-5">
             <h2>RPLT PWMA + CoE API Demo</h2>
             <p>
@@ -82,7 +83,7 @@ PWMA Primary + Cumulative Analysis API Demo
                 <div class="form-group row">
                     <label for="rs" class="col-sm-3 col-form-label">rs</label>
                     <div class="col-sm-9">
-                        <textarea class="form-control code" id="rs" rows="20" style="font-size: 9px;"></textarea>
+                        <textarea class="form-control code" id="rs" rows="10" style="font-size: 9px;"></textarea>
                         <small id="rsHelp" class="form-text text-muted">The JSON data for generating plots. Each study
                             is an object, with 6 attributes (case sensitive). The value of this parameter is a
                             stringified JSON object.</small>
@@ -136,7 +137,8 @@ PWMA Primary + Cumulative Analysis API Demo
         </div>
 
 
-        <div class="col-md-7" style="padding-top: 20px;">
+        <div class="col-md-7" 
+            style="padding-top: 20px; height: 100%; overflow-y: auto;">
 
             <h4>Server Response: </h4>
             <pre id="resp" style="width: 100%; max-height: 200px;" class="code">
@@ -148,7 +150,9 @@ PWMA Primary + Cumulative Analysis API Demo
 
 
                     <div class="box">
+
                         <h5>Risk of Bias</h5>
+
                         <p class="fact">
                             All Low risk = {{ pma.data.coe.info.risk_of_bias.is_all_low }} <br>
                             All high risk / some concerns = {{ pma.data.coe.info.risk_of_bias.is_all_high }} <br>
@@ -161,10 +165,10 @@ PWMA Primary + Cumulative Analysis API Demo
                             ({{ coe_helper.val_to_label(pma.data.coe.risk_of_bias, 'risk_of_bias') }})
                         </p>
                         
-                        <pre id="mermaid_rob" 
+                        <div id="mermaid_rob" 
                             class="mermaid"
                             v-html="mermaid_chart_rob">
-                        </pre>
+                        </div>
 
                         <p class="defs">
                             0: Not applicable <br>
@@ -184,26 +188,27 @@ PWMA Primary + Cumulative Analysis API Demo
                         <h5>Inconsistency</h5>
 
                         <p class="fact">
-                            I<sup>2</sup> = {{ pma.data.primma.heterogeneity.i2 }}
+                            I<sup>2</sup> = <b>{{ pma.data.coe.info.inconsistency.i2 }}</b>  <br>
+                            Category of pooled effect size = <b>{{ pma.data.coe.info.inconsistency.pooled_sm_cate }}</b> <br>
+                            Major category of studies: <b>{{ pma.data.coe.info.inconsistency.major_sm_cate }} {{ pma.data.coe.info.inconsistency.major_sm_cnt }}</b> <br>
+                            Is 75% within the same category of pooled effect size? {{ pma.data.coe.info.inconsistency.is_major_in_same_category }} <br>
                         </p>
 
                         <p class="result">
-                            Result = {{ coe_helper.judge_inconsistency(pma.data.primma.heterogeneity.i2) }}
-                            ({{
-                            coe_helper.val_to_label(coe_helper.judge_inconsistency(pma.data.primma.heterogeneity.i2),
-                            'inconsistency') }})
+                            Result = {{ pma.data.coe.inconsistency }}
+                            ({{ coe_helper.val_to_label(pma.data.coe.inconsistency, 'inconsistency') }})
                         </p>
 
-                        <pre id="mermaid_inc" 
+                        <div id="mermaid_inc" 
                             class="mermaid"
                             v-html="mermaid_chart_inc">
-                        </pre>
+                        </div>
 
                         <p class="defs">
-                            0: Not inconsistency <br>
-                            1: Serious inconsistency <br>
-                            2: Very serious inconsistency <br>
-                            3: Very serious inconsistency <br>
+                            0: Not applicable <br>
+                            1: No serious <br>
+                            2: Serious <br>
+                            3: Very serious <br>
                         </p>
                         <hr>
                     </div>
@@ -219,18 +224,18 @@ PWMA Primary + Cumulative Analysis API Demo
                             Egger's Test p = {{ pma.data.coe.info.publication_bias.egger_test_p_value }} <br>
                             Pooled Effect = {{ pma.data.coe.info.publication_bias.pooled_sm }} <br>
                             Adjusted Effect = {{ pma.data.coe.info.publication_bias.adjusted_sm }} <br>
-                            Effect Difference = {{ pma.data.coe.info.publication_bias.difference_sm * 100 }}% <br>
+                            Effect Difference = {{ (pma.data.coe.info.publication_bias.difference_sm).toFixed(4) }}<br>
                         </p>
 
                         <p class="result">
                             Result = {{ pma.data.coe.publication_bias }}
-                            ({{ coe_helper.val_to_label(coe_helper.judge_publication_bias(pma.data.coe.info.publication_bias.n_studies, pma.data.coe.info.publication_bias.egger_test_p_value, pma.data.coe.info.publication_bias.difference_sm), 'publication_bias') }})
+                            ({{ coe_helper.val_to_label(pma.data.coe.publication_bias, 'publication_bias') }})
                         </p>
 
-                        <pre id="mermaid_pbb" 
+                        <div id="mermaid_pbb" 
                             class="mermaid"
                             v-html="mermaid_chart_pbb">
-                        </pre>
+                        </div>
 
                         <p class="defs">
                             0: Not applicable <br>
@@ -247,25 +252,26 @@ PWMA Primary + Cumulative Analysis API Demo
                         <h5>Imprecision</h5>
                         <p class="fact">
                             T = {{ pma.data.coe.info.imprecision.t }} (
-                                Is T user-provided? = {{ pma.data.coe.info.imprecision.is_t_user_provided }}) <br>
+                                Is T user-provided? = <b>{{ pma.data.coe.info.imprecision.is_t_user_provided }}</b> ) <br>
                             CI of RD: ({{ pma.data.coe.info.imprecision.ci_of_rd[0].toFixed(4) }}; 
                                        {{ pma.data.coe.info.imprecision.ci_of_rd[1].toFixed(4) }}) <br>
-                            Does CI of RD include T? = {{ pma.data.coe.info.imprecision.is_t_included_in_ci_of_rd }}) <br>
+                            Does CI of RD include T? <b>{{ pma.data.coe.info.imprecision.is_t_included_in_ci_of_rd }}</b> <br>
                             Relative Effect =  {{ pma.data.coe.info.imprecision.sm }} <br>
-                            MA Size N = {{ pma.data.coe.info.imprecision.ma_size }} <br>
-                            OIS = {{ pma.data.coe.info.imprecision.ois }} <br>
+                            Is relative effect large? <b>{{ pma.data.coe.info.imprecision.is_relative_effect_large }}</b> <br>
+                            MA Size = {{ pma.data.coe.info.imprecision.ma_size }} <br>
+                            OIS = {{ pma.data.coe.info.imprecision.ois }} (50% OIS= {{ pma.data.coe.info.imprecision.ois * 0.5 }}) <br>
                         </p>
 
 
                         <p class="result">
                             Result = {{ pma.data.coe.imprecision }}
-                            ({{ coe_helper.val_to_label(coe_helper.judge_imprecision(pma.data.coe.info.imprecision), 'imprecision') }})
+                            ({{ coe_helper.val_to_label(pma.data.coe.imprecision, 'imprecision') }})
                         </p>
 
-                        <pre id="mermaid_imp" 
+                        <div id="mermaid_imp" 
                             class="mermaid"
                             v-html="mermaid_chart_imp">
-                        </pre>
+                        </div>
 
                         <p class="defs">
                             0: Not applicable <br>
@@ -294,13 +300,13 @@ PWMA Primary + Cumulative Analysis API Demo
 
                         <p class="result">
                             Result = {{ pma.data.coe.indirectness }}
-                            ({{ coe_helper.val_to_label(coe_helper.judge_indirectness(pma.data.coe.info.indirectness.n_very_close, pma.data.coe.info.indirectness.n_moderately_close, pma.data.coe.info.indirectness.n_not_close, pma.data.coe.info.indirectness.n_ind_na, pma.data.coe.info.indirectness.n_studies), 'indirectness') }})
+                            ({{ coe_helper.val_to_label(pma.data.coe.indirectness, 'indirectness') }})
                         </p>
 
-                        <pre id="mermaid_ind" 
+                        <div id="mermaid_ind" 
                             class="mermaid"
                             v-html="mermaid_chart_ind">
-                        </pre>
+                        </div>
 
                         <p class="defs">
                             0: Not applicable <br>
@@ -349,324 +355,14 @@ var rs_sample = [
     { study: 'Young et al', year: 2018, Et: 8, Nt: 203, Ec: 18, Nc: 203, pid: '2345', rob: 'L', ind: 'V' },
     { study: 'McBane et al', year: 2019, Et: 1, Nt: 145, Ec: 9, Nc: 142, pid: '3456', rob: 'L', ind: 'V' },
     { study: 'Don et al', year: 2020, Et: 32, Nt: 576, Ec: 46, Nc: 579, pid: '4567', rob: 'M', ind: 'V' },
-    { study: 'Kim et al', year: 2021, Et: 18, Nt: 276, Ec: 26, Nc: 279, pid: '45678', rob: 'L', ind: 'V' },
-    { study: 'Aaskob et al', year: 2017, Et: 45, Nt: 512, Ec: 55, Nc: 524, pid: '1234', rob: 'L', ind: 'M' },
-    { study: 'Boung et al', year: 2018, Et: 18, Nt: 213, Ec: 18, Nc: 202, pid: '2341', rob: 'L', ind: 'N' },
-    { study: 'DcBane et al', year: 2019, Et: 2, Nt: 125, Ec: 9, Nc: 141, pid: '3451', rob: 'L', ind: 'V' },
-    { study: 'Eon et al', year: 2020, Et: 30, Nt: 546, Ec: 43, Nc: 573, pid: '4561', rob: 'L', ind: 'M' },
-    { study: 'Fim et al', year: 2021, Et: 15, Nt: 306, Ec: 25, Nc: 272, pid: '45671', rob: 'L', ind: 'V' },
+    { study: 'Kim et al', year: 2021, Et: 18, Nt: 276, Ec: 26, Nc: 279, pid: '5678', rob: 'L', ind: 'V' },
+    { study: 'Aaskob et al', year: 2017, Et: 45, Nt: 512, Ec: 55, Nc: 524, pid: '6789', rob: 'L', ind: 'M' },
+    { study: 'Boung et al', year: 2018, Et: 18, Nt: 213, Ec: 18, Nc: 202, pid: '7890', rob: 'L', ind: 'N' },
+    { study: 'DcBane et al', year: 2019, Et: 2, Nt: 125, Ec: 9, Nc: 141, pid: '8901', rob: 'L', ind: 'V' },
+    { study: 'Eon et al', year: 2020, Et: 30, Nt: 546, Ec: 43, Nc: 573, pid: '9012', rob: 'L', ind: 'M' },
+    { study: 'Fim et al', year: 2021, Et: 15, Nt: 306, Ec: 25, Nc: 272, pid: '9123', rob: 'L', ind: 'V' },
 ];
 
-var coe_mermaid_helper = {
-    activate_link_style: ' stroke:red,color:red;\n',
-
-    get_rob_mermaid: function(vals) {
-        var chart_desc = `
-graph TD
-%% define class
-classDef HITL fill:yellow,stroke:orange;
-%% define nodes
-s1["Are all studies low risk?"]
-s2["Are all studies high risk or some concerns?"]
-s3["Subgroup analysis (low vs. high/some)"]
-s4["Percent of high-risk studies"]
-s_init_hitl{{"HITL: Are all studies evaluated?"}}:::HITL
-s_hitl{{"HITL: Review"}}:::HITL
-
-%% define links
-%% link 0
-s1 -- "Yes" --> r1([1: Not serious])
-%% link 1
-s1 -- "No" --> s2
-%% link 2
-s2 -- "Yes" --> r2([2: Serious])
-%% link 3
-s2 -- "No" --> s3
-%% link 4
-s3 -- "p<0.05" --> r3([3: Very serious])
-%% link 5
-s3 -- "p≥0.05" --> s4
-%% link 6
-s4 -- "<50%" --> r4([1: Not serious])
-%% link 7
-s4 -- "≥50%" --> r5([2: Serious])
-%% link 8 for HITL
-r2 -- "Optional" --> s_hitl 
-%% link 9
-s_hitl -- "Rate down" --> r6([3-4: Very-Extremely serious])
-%% link 10 for init
-s_init_hitl -- "Yes" --> s1
-%% link 11 for init no
-s_init_hitl -- "No" --> r00([0: Not applicable])
-        `
-        if (typeof(vals) == 'undefined') {
-            return chart_desc;
-        }
-
-        // ok, let's add more styles for path
-        if (vals.n_rob_na == 0) {
-            // all studies are reviewed
-            chart_desc += 'linkStyle 10' + this.activate_link_style;
-        } else {
-            chart_desc += 'linkStyle 11' + this.activate_link_style;
-        }
-
-        if (vals.is_all_low) {
-            chart_desc += 'linkStyle 0' + this.activate_link_style;
-        } else {
-            chart_desc += 'linkStyle 1' + this.activate_link_style;
-        }
-
-        if (vals.is_all_high) {
-            chart_desc += 'linkStyle 2' + this.activate_link_style;
-        } else {
-            chart_desc += 'linkStyle 3' + this.activate_link_style;
-        }
-
-        if (vals.subg_pval < 0.05) {
-            chart_desc += 'linkStyle 4' + this.activate_link_style;
-        } else {
-            chart_desc += 'linkStyle 5' + this.activate_link_style;
-
-            if (vals.per_high_stus < 0.5) {
-                chart_desc += 'linkStyle 6' + this.activate_link_style;
-            } else {
-                chart_desc += 'linkStyle 7' + this.activate_link_style;
-            }
-        }
-        
-        return chart_desc;
-    },
-
-    get_inc_mermaid: function(vals) {
-        var chart_desc = `
-graph TD
-%% define class
-classDef HITL fill:yellow,stroke:orange;
-%% define nodes
-s1["I-sq as an indication of statistical heterogeneity"]
-s2["Are 75% of the studies within same category?"]
-s3{{"HITL Review"}}:::HITL
-
-%% define links
-%% link 0
-s1 -- "<50%" --> r1([1: Not serious])
-%% link 1
-s1 -- "≥50%" --> s2
-%% link 2
-s2 -- "Yes" --> r2([1: Not serious])
-%% link 3
-s2 -- "No" --> r3([2: Serious])
-%% link 4
-r3 -- "Optional" --> s3
-%% link 5
-s3 -- "Rate down" --> r4([3: Very serious])
-        `;
-        if (typeof(vals) == 'undefined') {
-            return chart_desc;
-        }
-
-        // ok, let's add more styles for path
-        if (vals.i2 < 0.5) {
-            chart_desc += 'linkStyle 0' + this.activate_link_style;
-        } else {
-            chart_desc += 'linkStyle 1' + this.activate_link_style;
-        }
-        return chart_desc;
-    },
-
-    get_pbb_mermaid: function(vals) {
-        var chart_desc = `
-graph TD
-%% define class
-classDef HITL fill:yellow,stroke:orange;
-%% define nodes
-s1[Number of studies]
-s2[Egger's Regression Test]
-s3[Does adjusted effect show less benefit?]
-
-%% define links
-%% link 0
-s1 -- "N<10" --> r1([1: Not serious])
-%% link 1
-s1 -- "N≥10" --> s2
-%% link 2
-s2 -- "p<0.05" --> s3
-%% link 3
-s2 -- "p≥0.05" --> r3([1: Not serious])
-%% link 4
-s3 -- "diff<20%" --> r5([1: Not serious])
-%% link 5
-s3 -- "diff≥20%" --> r4([2: Serious])
-        `
-        // if no values, just return this chart
-        if (typeof(vals) == 'undefined') {
-            return chart_desc;
-        }
-
-        // ok, let's add more styles for path
-        if (vals.n_studies < 10) {
-            chart_desc += 'linkStyle 0' + this.activate_link_style;
-        } else {
-            chart_desc += 'linkStyle 1' + this.activate_link_style;
-        }
-
-        if (vals.egger_test_p_value < 0.05) {
-            chart_desc += 'linkStyle 2' + this.activate_link_style;
-        } else {
-            chart_desc += 'linkStyle 3' + this.activate_link_style;
-        }
-
-        if (vals.difference_sm < 0.2) {
-            chart_desc += 'linkStyle 4' + this.activate_link_style;
-        } else {
-            chart_desc += 'linkStyle 5' + this.activate_link_style;
-        }
-
-        return chart_desc;
-    },
-
-    get_imp_mermaid: function(vals) {
-        var chart_desc = `
-graph TD
-%% define class
-classDef HITL fill:yellow,stroke:orange;
-%% define nodes
-s0["Get threshold T\nUser-provided or null(0)"]
-s1["Does CI of RD include T?"]
-s2["Is relative effect (RR/OR)\n<0.7 or >1.3?"]
-s3["Calculate OIS"]
-
-%% define link
-%% link 0
-s0 --> s1
-%% link 1
-s1 -- Yes --> s_tup["Is T user-provided?"]
-%% link 2
-s_tup -- Yes --> s_mpt["Does CI of RD include\nboth - and + T?"]
-%% link 3
-s_mpt -- Yes --> r3a["4: Extremely serious"]
-%% link 4
-s_mpt -- No --> r2a["3: Very serious"]
-%% link 5
-s_tup -- No --> s_200p["Does CI of RD include\nboth - and +\n200 per 1,000?"]
-%% link 6
-s_200p -- Yes --> r3b["4: Extremely serious"]
-%% link 7
-s_200p -- No --> r2b["3: Very serious"]
-%% link 8
-s1 -- No --> s2
-%% link 9
-s2 -- No --> r2([1: Not serious])
-%% link 10
-s2 -- Yes --> s3
-%% link 11
-s3 -- "MA size ≥ OIS" --> r3([1: Not serious])
-%% link 12
-s3 -- "MA size in 50-100% OIS" --> r4([2: Serious])
-%% link 13
-s3 -- "MA size < 50% OIS" --> r5([3: Very serious])
-        `;
-        // if no values, just return this chart
-        if (typeof(vals) == 'undefined') {
-            return chart_desc;
-        }
-        // always get the T first
-        chart_desc += 'linkStyle 0' + this.activate_link_style;
-
-        if (vals.is_t_included_in_ci_of_rd) {
-            chart_desc += 'linkStyle 1' + this.activate_link_style;
-            
-            if (vals.is_t_user_provided) {
-                chart_desc += 'linkStyle 2' + this.activate_link_style;
-
-                if (vals.is_both_ts_included_in_ci_of_rd) {
-                    chart_desc += 'linkStyle 3' + this.activate_link_style;
-                } else {
-                    chart_desc += 'linkStyle 4' + this.activate_link_style;
-                }
-            } else {
-                chart_desc += 'linkStyle 5' + this.activate_link_style;
-                if (vals.is_both_200p1000_included_in_ci_of_rd) {
-                    chart_desc += 'linkStyle 6' + this.activate_link_style;
-                } else {
-                    chart_desc += 'linkStyle 7' + this.activate_link_style;
-                }
-            }
-
-        } else {
-            chart_desc += 'linkStyle 8' + this.activate_link_style;
-        }
-
-        if (vals.is_relative_effect_large) {
-            chart_desc += 'linkStyle 10' + this.activate_link_style;
-            
-            if (vals.ma_size > vals.ois) {
-                chart_desc += 'linkStyle 11' + this.activate_link_style;
-            } else if (vals.ma_size < 0.5 * vals.ois) {
-                chart_desc += 'linkStyle 13' + this.activate_link_style;
-            } else {
-                chart_desc += 'linkStyle 12' + this.activate_link_style;
-            }
-        } else {
-            chart_desc += 'linkStyle 9' + this.activate_link_style;
-        }
-
-        return chart_desc;
-    },
-
-    get_ind_mermaid: function(vals) {
-        var chart_desc = `
-graph TD
-%% define class
-classDef HITL fill:yellow,stroke:orange;
-%% define nodes
-s1[Is >75% of studies 'Very Close'?]
-s2[Is none of studies 'Not Close'?]
-s_init_hitl{{"HITL: Are all studies evaluated?"}}:::HITL
-
-%% define links
-%% link 0: for HITL
-s_init_hitl -- "Yes" --> s1
-%% link 1: for HITL
-s_init_hitl -- "No" --> r0([0: Not applicable])
-%% link 2
-s1 -- "Yes" --> r1([1: Not serious])
-%% link 3
-s1 -- "No" --> s2
-%% link 4
-s2 -- "Yes" --> r2([2: Serious])
-%% link 5
-s2 -- "No" --> r3([3: Very serious])
-        `;
-        // if no values, just return this chart
-        if (typeof(vals) == 'undefined') {
-            return chart_desc;
-        }
-
-        // ok, let's add more styles for path
-        if (vals.n_ind_na == 0) {
-            chart_desc += 'linkStyle 0' + this.activate_link_style;
-
-            if (vals.percentage_very_close >= 0.75) {
-                chart_desc += 'linkStyle 2' + this.activate_link_style;
-            } else {
-                chart_desc += 'linkStyle 3' + this.activate_link_style;
-            }
-
-            if (vals.n_not_close == 0) {
-                chart_desc += 'linkStyle 4' + this.activate_link_style;
-            } else {
-                chart_desc += 'linkStyle 5' + this.activate_link_style;
-            }
-
-        } else {
-            chart_desc += 'linkStyle 1' + this.activate_link_style;
-        }
-
-        return chart_desc;
-    },
-};
 
 var app_coe = {
     vpp: null,
@@ -700,47 +396,88 @@ var app_coe = {
                 },
                 update_data: function(data_pma) {
                     this.pma = data_pma;
-
                     this.clear_figs();
 
-                    var tmp = '';
+                    //////////////////////////////////// 
                     // update charts
+                    //////////////////////////////////// 
+                    let chart_names = [
+                        'rob', 'inc', 'pbb', 'imp', 'ind'
+                    ]
+                    for (let i = 0; i < chart_names.length; i++) {
+                        const cn = chart_names[i];
+                        this.update_chart(cn);
+                    }
+                },
 
-                    // for publication bias
-                    tmp = coe_mermaid_helper.get_pbb_mermaid(
-                        this.pma.data.coe.info.publication_bias
+                update_chart: function(chart_name) {
+                    var chart_desc = '';
+                    switch (chart_name) {
+                        case 'rob':
+                            chart_desc = coe_helper.get_rob_mermaid(
+                                this.pma.data.coe.info.risk_of_bias
+                            );
+                            this.render_mermaid(
+                                'mermaid_chart_rob',
+                                chart_desc
+                            )
+                            break;
+
+                        case 'inc':
+                            chart_desc = coe_helper.get_inc_mermaid(
+                                this.pma.data.coe.info.inconsistency
+                            );
+                            this.render_mermaid(
+                                'mermaid_chart_inc',
+                                chart_desc
+                            )
+                            break;
+
+                        case 'pbb':
+                            chart_desc = coe_helper.get_pbb_mermaid(
+                                this.pma.data.coe.info.publication_bias
+                            );
+                            this.render_mermaid(
+                                'mermaid_chart_pbb',
+                                chart_desc
+                            )
+                            break;
+
+                        case 'imp':
+                            chart_desc = coe_helper.get_imp_mermaid(
+                                this.pma.data.coe.info.imprecision
+                            );
+                            this.render_mermaid(
+                                'mermaid_chart_imp',
+                                chart_desc
+                            )
+                            break;
+
+                        case 'ind':
+                            chart_desc = coe_helper.get_ind_mermaid(
+                                this.pma.data.coe.info.indirectness
+                            );
+                            this.render_mermaid(
+                                'mermaid_chart_ind',
+                                chart_desc
+                            )
+                            break;
+                    
+                        default:
+                            break;
+                    }
+                },
+
+                render_mermaid: function(chart_name, chart_desc) {
+                    let _this = this;
+                    mermaid.render(
+                        chart_name + '_flowchart',
+                        chart_desc,
+                        (svg_code) => {
+                            // console.log('* render mermaid', chart_name, svg_code);
+                            _this[chart_name] = svg_code;
+                        }
                     );
-                    console.log('* Mermaid chart for publication bias', tmp);
-                    this.mermaid_chart_pbb = tmp;
-
-                    // for risk of bias
-                    tmp = coe_mermaid_helper.get_rob_mermaid(
-                        this.pma.data.coe.info.risk_of_bias
-                    );
-                    console.log('* Mermaid chart for risk of bias', tmp);
-                    this.mermaid_chart_rob = tmp;
-
-                    // for inconsistency
-                    tmp = coe_mermaid_helper.get_inc_mermaid(
-                        this.pma.data.coe.info.inconsistency
-                    );
-                    console.log('* Mermaid chart for inconsistency', tmp);
-                    this.mermaid_chart_inc = tmp;
-
-                    // for imprecision
-                    tmp = coe_mermaid_helper.get_imp_mermaid(
-                        this.pma.data.coe.info.imprecision
-                    );
-                    console.log('* Mermaid chart for imprecision', tmp);
-                    this.mermaid_chart_imp = tmp;
-
-                    // for indirectness
-                    tmp = coe_mermaid_helper.get_ind_mermaid(
-                        this.pma.data.coe.info.indirectness
-                    );
-                    console.log('* Mermaid chart for indirectness', tmp);
-                    this.mermaid_chart_ind = tmp;
-
                 },
 
                 get_sample_size: function () {
@@ -764,7 +501,7 @@ var app_coe = {
             },
 
             updated: function() {
-                mermaid.init({ noteMargin: 10 }, '.mermaid');
+                // mermaid.init({ noteMargin: 10 }, '.mermaid');
             }
         });
     }
