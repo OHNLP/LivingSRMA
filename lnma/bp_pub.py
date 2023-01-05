@@ -77,6 +77,10 @@ def php():
     # first, check this prj and cq exist or not
     keystr = request.args.get('k')
     cq_abbr = request.args.get('c')
+    tpl_name = request.args.get('t')
+
+    if tpl_name == '':
+        tpl_name = 'index'
 
     # get this project
     project = dora.get_project_by_keystr(keystr)
@@ -84,9 +88,12 @@ def php():
     if project is None:
         return 'No such project %s' % keystr
 
-    path_to_homepage = 'pub/%s/%s/index.html' % (
-        keystr, cq_abbr
+    path_to_homepage = 'pub/%s/%s/%s.html' % (
+        keystr, cq_abbr, tpl_name
     )
+    # TODO need to check the file availability here
+    # this template name may not exist
+    
     # last, check this path exists or not
     # if not os.path.exists(os.path.join()):
     year = util.get_current_year_str()

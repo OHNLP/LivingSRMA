@@ -1,0 +1,21 @@
+graph TD
+Screener -- included --> one_study([A Single Study])
+Screener -- included --> study_b[Other studies follow the same]
+
+one_study --> iTable[iTable Extraction]
+one_study --> ocs[Outcome Extraction]
+iTable --> rob[Risk of Bias Extraction]
+iTable --> ind[Indirectness Extraction]
+
+ocs --> Fever
+ocs --> AEs[Other AEs ...]
+
+rob --> coe_rst[Low, High, Very Close, ...]
+ind --> coe_rst
+
+Fever --> oc_rst[Et Nt Ec Nc ...]
+
+coe_rst --> pub
+oc_rst --> pub
+
+pub[IO Public Website] -- request --> coe_calc[CoE Evaluation]
