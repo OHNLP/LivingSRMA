@@ -119,6 +119,13 @@ html {
                         <i class="fas fa-book"></i>
                         Risk of Bias
                     </th>
+                    <th v-if="has_coe_ind()"
+                        title="Indirectness in iTable"
+                        class="text-center"
+                        width="120px">
+                        <i class="fas fa-book"></i>
+                        Indirectness
+                    </th>
                     <th>Outcomes</th>
                     <th>&nbsp;</th>
                 </tr>
@@ -167,6 +174,27 @@ html {
                             </span>
                         </span>
                     </td>
+
+                    <td v-if="has_coe_ind()"
+                        class="text-center">
+                        <span class="mr-2"
+                            :title="'Reviewer Judgement: ' + get_coe_ind_label(get_itable_value(paper.pid, 'COE_RCT_IND_OVERALL_RJ'))"
+                            :class="'ind-rst-icon-' + get_itable_value(paper.pid, 'COE_RCT_IND_OVERALL_RJ')">
+                            <i class="far fa-user"></i>
+                            <span>
+                                {{ get_itable_value(paper.pid, 'COE_RCT_IND_OVERALL_RJ') }}
+                            </span>
+                        </span>
+                        <span 
+                            :title="'Algorithm Result: ' + get_coe_ind_label(get_itable_value(paper.pid, 'COE_RCT_IND_OVERALL_AR'))"
+                            :class="'ind-rst-icon-' + get_itable_value(paper.pid, 'COE_RCT_IND_OVERALL_AR')">
+                            <i class="fas fa-code-branch"></i>
+                            <span>
+                                {{ get_itable_value(paper.pid, 'COE_RCT_IND_OVERALL_AR') }}
+                            </span>
+                        </span>
+                    </td>
+
                     <td>
                         {{ paper.meta.outcome_selections.length }}
                     </td>
@@ -678,6 +706,35 @@ var pan_ocpapers = {
             );
         },
 
+        has_coe_ind: function() {
+            if (this.itable == null) {
+                return false;
+            }
+            return srv_extractor.has_coe_ind_in_itable(
+                this.itable
+            );
+        },
+
+        get_itable_value: function(pid, item) {
+            if (this.itable == null) {
+                return 'NA';
+            }
+            if (!this.itable.data.hasOwnProperty(pid)) {
+                return 'NA';
+            }
+            
+            // OK, let's get the value now
+            if (this.itable.data[pid].attrs.main.g0.hasOwnProperty(item)) {
+                if (this.itable.data[pid].attrs.main.g0[item] == null ||
+                    this.itable.data[pid].attrs.main.g0[item] == '') {
+                        return 'NA';
+                }
+                return this.itable.data[pid].attrs.main.g0[item];
+            } else {
+                return 'NA';
+            }
+        },
+
         get_coe_rob_value: function(pid, item) {
             if (this.itable == null) {
                 return 'NA';
@@ -703,6 +760,15 @@ var pan_ocpapers = {
                 'L': 'Low',
                 'M': 'Some Concerns',
                 'H': 'High Risk',
+                'NA': 'Not Decided'
+            }[val];
+        },
+
+        get_coe_ind_label: function(val) {
+            return {
+                'V': 'Very Close',
+                'M': 'Moderately Close',
+                'N': 'Not Close',
                 'NA': 'Not Decided'
             }[val];
         }

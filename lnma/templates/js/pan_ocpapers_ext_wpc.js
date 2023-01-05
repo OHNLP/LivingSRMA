@@ -296,6 +296,7 @@ Object.assign(pan_ocpapers.vpp_methods, {
         var ind_closeness = coe_helper.judge_ind_closeness(qs);
         console.log('* judge_ind_closeness, ',qs,' : ', ind_closeness);
         this.get_working_arm_attrs()['g0']['COE_RCT_IND_OVERALL_AR'] = ind_closeness;
+        this.$forceUpdate();
         this.has_change_unsaved();
     },
 

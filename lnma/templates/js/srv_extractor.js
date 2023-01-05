@@ -407,6 +407,18 @@ var srv_extractor = {
         return false;
     },
 
+    has_coe_ind_in_itable: function(itable) {
+        for (let i = 0; i < itable.meta.cate_attrs.length; i++) {
+            const cate = itable.meta.cate_attrs[i];
+            if (cate.abbr == 'COE_RCT_IND') {
+                // ok, this itable has Risk of Bias defined
+                return true;
+            }
+        }
+
+        return false;
+    },
+
     get_input_size: function(str) {
         // convert null to empty
         if (typeof(str) == 'undefined' || str == null) {
