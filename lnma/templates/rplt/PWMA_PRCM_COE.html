@@ -154,10 +154,13 @@ PWMA Primary + Cumulative Analysis API Demo
                         <h5>Risk of Bias</h5>
 
                         <p class="fact">
-                            All Low risk = {{ pma.data.coe.info.risk_of_bias.is_all_low }} <br>
-                            All high risk / some concerns = {{ pma.data.coe.info.risk_of_bias.is_all_high }} <br>
-                            Subgroup Analysis (Low vs. High/Some) P-value = {{ pma.data.coe.info.risk_of_bias.subg_pval }} <br>
-                            Percentage of High-risk studies = {{ pma.data.coe.info.risk_of_bias.per_high_stus }}
+                            All evaluated = <b>{{ pma.data.coe.info.risk_of_bias.n_rob_na == 0 }}</b> 
+                            (N_NA = {{ pma.data.coe.info.risk_of_bias.n_rob_na }})
+                            <br>
+                            All Low risk = <b>{{ pma.data.coe.info.risk_of_bias.is_all_low }}</b> <br>
+                            All high risk / some concerns = <b>{{ pma.data.coe.info.risk_of_bias.is_all_high }}</b> <br>
+                            Subgroup Analysis (Low vs. High/Some) P-value = <b>{{ pma.data.coe.info.risk_of_bias.subg_pval }}</b> <br>
+                            Percentage of High-risk studies = <b>{{ pma.data.coe.info.risk_of_bias.per_high_stus }}</b>
                         </p>
 
                         <p class="result">
@@ -175,6 +178,7 @@ PWMA Primary + Cumulative Analysis API Demo
                             1: No serious <br>
                             2: Serious <br>
                             3: Very serious <br>
+                            4: Extremely serious <br>
                         </p>
 
                         <hr>
@@ -191,7 +195,14 @@ PWMA Primary + Cumulative Analysis API Demo
                             I<sup>2</sup> = <b>{{ pma.data.coe.info.inconsistency.i2 }}</b>  <br>
                             Category of pooled effect size = <b>{{ pma.data.coe.info.inconsistency.pooled_sm_cate }}</b> <br>
                             Major category of studies: <b>{{ pma.data.coe.info.inconsistency.major_sm_cate }} {{ pma.data.coe.info.inconsistency.major_sm_cnt }}</b> <br>
-                            Is 75% within the same category of pooled effect size? {{ pma.data.coe.info.inconsistency.is_major_in_same_category }} <br>
+                            RR/OR: <b>T</b>rivial (0.9-1.0), 
+                                <b>S</b>mall (0.8-0.9),
+                                <b>M</b>oderate (0.5-0.8)
+                                <b>L</b>arge (&lt; 0.5)
+                            <br>
+                            Is 75% within the same category of pooled effect size?  
+                                <b>{{ pma.data.coe.info.inconsistency.is_major_in_same_category }}</b>
+                            <br>
                         </p>
 
                         <p class="result">
@@ -209,6 +220,7 @@ PWMA Primary + Cumulative Analysis API Demo
                             1: No serious <br>
                             2: Serious <br>
                             3: Very serious <br>
+                            4: Extremely serious <br>
                         </p>
                         <hr>
                     </div>
@@ -220,11 +232,11 @@ PWMA Primary + Cumulative Analysis API Demo
 
                         <h5>Publication Bias</h5>
                         <p class="fact">
-                            N = {{ pma.data.coe.info.publication_bias.n_studies }} <br>
-                            Egger's Test p = {{ pma.data.coe.info.publication_bias.egger_test_p_value }} <br>
-                            Pooled Effect = {{ pma.data.coe.info.publication_bias.pooled_sm }} <br>
-                            Adjusted Effect = {{ pma.data.coe.info.publication_bias.adjusted_sm }} <br>
-                            Effect Difference = {{ (pma.data.coe.info.publication_bias.difference_sm).toFixed(4) }}<br>
+                            N = <b>{{ pma.data.coe.info.publication_bias.n_studies }}</b> <br>
+                            Egger's Test p = <b>{{ pma.data.coe.info.publication_bias.egger_test_p_value }}</b> <br>
+                            Pooled Effect = <b>{{ pma.data.coe.info.publication_bias.pooled_sm }} </b><br>
+                            Adjusted Effect = <b>{{ pma.data.coe.info.publication_bias.adjusted_sm }}</b> <br>
+                            Effect Difference = <b>{{ (pma.data.coe.info.publication_bias.difference_sm).toFixed(4) }}</b><br>
                         </p>
 
                         <p class="result">
@@ -239,8 +251,10 @@ PWMA Primary + Cumulative Analysis API Demo
 
                         <p class="defs">
                             0: Not applicable <br>
-                            1: Not serious <br>
-                            2: Serious  <br>
+                            1: No serious <br>
+                            2: Serious <br>
+                            3: Very serious <br>
+                            4: Extremely serious <br>
                         </p>
 
                         <hr>
@@ -253,13 +267,18 @@ PWMA Primary + Cumulative Analysis API Demo
                         <p class="fact">
                             T = {{ pma.data.coe.info.imprecision.t }} (
                                 Is T user-provided? = <b>{{ pma.data.coe.info.imprecision.is_t_user_provided }}</b> ) <br>
-                            CI of RD: ({{ pma.data.coe.info.imprecision.ci_of_rd[0].toFixed(4) }}; 
-                                       {{ pma.data.coe.info.imprecision.ci_of_rd[1].toFixed(4) }}) <br>
+                            CI of RD: <b>({{ pma.data.coe.info.imprecision.ci_of_rd[0].toFixed(4) }}; 
+                                       {{ pma.data.coe.info.imprecision.ci_of_rd[1].toFixed(4) }})</b> <br>
                             Does CI of RD include T? <b>{{ pma.data.coe.info.imprecision.is_t_included_in_ci_of_rd }}</b> <br>
-                            Relative Effect =  {{ pma.data.coe.info.imprecision.sm }} <br>
+                            Relative Effect =  <b>{{ pma.data.coe.info.imprecision.sm }}</b> <br>
                             Is relative effect large? <b>{{ pma.data.coe.info.imprecision.is_relative_effect_large }}</b> <br>
-                            MA Size = {{ pma.data.coe.info.imprecision.ma_size }} <br>
-                            OIS = {{ pma.data.coe.info.imprecision.ois }} (50% OIS= {{ pma.data.coe.info.imprecision.ois * 0.5 }}) <br>
+                            MA Size = <b>{{ pma.data.coe.info.imprecision.ma_size }}</b> <br>
+                            Et = <b>{{ pma.data.coe.info.imprecision.ttEt }}</b> <br>
+                            Nt = <b>{{ pma.data.coe.info.imprecision.ttNt }}</b> <br>
+                            Ec = <b>{{ pma.data.coe.info.imprecision.ttEc }}</b> <br>
+                            Nc = <b>{{ pma.data.coe.info.imprecision.ttNc }}</b> <br>
+                            OIS = <b>{{ pma.data.coe.info.imprecision.ois }}</b> 
+                            (50% OIS= <b>{{ pma.data.coe.info.imprecision.ois * 0.5 }}</b> ) <br>
                         </p>
 
 
@@ -291,11 +310,11 @@ PWMA Primary + Cumulative Analysis API Demo
                     <div class="box">
                         <h5>Indirectness</h5>
                         <p class="fact">
-                            Number of "Very Close" = {{ pma.data.coe.info.indirectness.n_very_close }} <br>
-                            Percentage of "Very Close" = {{ to_percentage(pma.data.coe.info.indirectness.n_very_close / pma.data.coe.info.indirectness.n_studies) }} <br>
-                            Number of "Moderately Close" = {{ pma.data.coe.info.indirectness.n_moderately_close }} <br>
-                            Number of "Not Close" = {{ pma.data.coe.info.indirectness.n_not_close }} <br>
-                            Number of studies = {{ pma.data.coe.info.indirectness.n_studies }}
+                            Number of "Very Close" = <b>{{ pma.data.coe.info.indirectness.n_very_close }}</b> <br>
+                            Percentage of "Very Close" = <b>{{ to_percentage(pma.data.coe.info.indirectness.n_very_close / pma.data.coe.info.indirectness.n_studies) }}</b> <br>
+                            Number of "Moderately Close" = <b>{{ pma.data.coe.info.indirectness.n_moderately_close }}</b> <br>
+                            Number of "Not Close" = <b>{{ pma.data.coe.info.indirectness.n_not_close }}</b> <br>
+                            Number of studies = <b>{{ pma.data.coe.info.indirectness.n_studies }}</b>
                         </p>
 
                         <p class="result">

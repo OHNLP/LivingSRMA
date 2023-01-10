@@ -623,7 +623,9 @@ def analyze_pwma_prcm_coe(rs, cfg, has_cumu=True):
     is_relative_effect_large = bool(pma_pooled_effect < 0.7 or pma_pooled_effect > 1.3)
 
     # the propotion of treatment group
-    p1 = float(ttEt / ttNt)
+    # p1 = float(ttEt / ttNt)
+    # the propotion of control group
+    p1 = float(ttEc / ttNc)
     # get the OIS
     OIS = calc_OIS_by_p1(p1)
     # get the MA size
@@ -667,6 +669,10 @@ def analyze_pwma_prcm_coe(rs, cfg, has_cumu=True):
         'sm': pma_pooled_effect,
         'ci_of_sm': ci_of_sm,
         'is_relative_effect_large': is_relative_effect_large,
+        'ttEt': int(ttEt),
+        'ttNt': int(ttNt),
+        'ttEc': int(ttEc),
+        'ttNc': int(ttNc),
         'p1': p1,
         'rd': imp_rd,
         'ci_of_rd': ci_of_rd,
