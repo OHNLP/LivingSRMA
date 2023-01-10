@@ -56,6 +56,7 @@ STANDARD_DATA_COLS = [
     ['INCD_CAT_RAW', ['study', 'year', 'Et', 'Nt', 'treat']]
 ]
 
+# input formats for each analysis
 INPUT_FORMAT_NAMES = {
     "pwma": {
         "PRIM_CAT_PRE": "Categorical Precalculated Data",
@@ -152,8 +153,9 @@ OC_TYPE_TPL = {
 
             # Certainty of evidence by two modes
             'coe' : {
-                # a new level for multiple MA coe in a 
-               'main': {
+                # a new level for multiple MA coe in one OC
+                # for IO project, there can be other keys.
+                'main': {
                     # reviewer judgement
                     'rj': {
                         # final decision
@@ -186,7 +188,7 @@ OC_TYPE_TPL = {
                     # the decision is made at this date
                     # for example: 2022-10-10
                     'date_updated': ''
-               }
+                }
             },
 
             # for the MA
@@ -318,6 +320,9 @@ OC_TYPE_TPL = {
             # for subg, but won't be used
             "is_subg_analysis": 'no',
             "sub_groups": ['A'],
+
+            # just for same data structure
+            "coe": {},
 
             # the filters for default itable
             'filters': [{
@@ -988,6 +993,12 @@ CIE_PWMA_COLUMNS = [
     "imprecision",
     "publication_bias"
 ]
+
+# Certainty of Evidence Category Keys for data type
+COE_CATE_KEYS_BY_INPUT_FORMAT = \
+{
+    "PRIM_CAT_RAW_G5": ['main', 'g34', 'g3h', 'g5n']
+}
 
 # Certainty of Evidence for data extraction
 COE_RCT_ROB = \

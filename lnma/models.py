@@ -947,6 +947,8 @@ class Extract(db.Model):
                 settings.INPUT_FORMAT_TPL[self.oc_type][self.meta['input_format']]
             )
 
+        # 2023-01-10: fix the coe bug
+
 
     def update_data(self):
         '''
@@ -1080,8 +1082,8 @@ class Extract(db.Model):
         if 'certainty' not in self.meta:
             self.meta['certainty'] = self.get_certainty()
 
-        if 'coe' not in self.meta:
-            self.meta['coe'] = self.get_coe()
+        # add/set the coe
+        ret['coe'] = self.get_coe()
 
         return ret
 
@@ -1264,19 +1266,41 @@ class Extract(db.Model):
         '''
         Get certainty of evidence for evaluation
         '''
-        if 'coe' in self.meta:
-            return self.meta['coe']
+        # first, check if coe is added to meta
+        if 'coe' not in self.meta:
+            # just copy the default coe to 
+            self.meta['coe'] = copy.deepcopy(settings.OC_TYPE_TPL[self.oc_type]['default']['coe'])
 
         if self.oc_type == 'pwma':
-            ret = copy.deepcopy(settings.OC_TYPE_TPL['pwma']['default']['coe'])
+            # for IO data type, need to update the coe
+            if self.meta['input_format'] == "PRIM_CAT_RAW_G5":
+                # check the coe cate
+                for coe_cate_key in settings.COE_CATE_KEYS_BY_INPUT_FORMAT[self.meta['input_format']]:
+                    if coe_cate_key in self.meta['coe']:
+                        # ok, this cate has been added or updated
+                        pass
+                    else:
+                        # oh, this coe cate is not there, need to be updated
+                        # just copy the information for setting's default coe
+                        # but a potential issue is, it's not a good practice
+                        # to update the meta info here.
+                        self.meta['coe'][coe_cate_key] = copy.deepcopy(settings.OC_TYPE_TPL['pwma']['default']['coe']['main'])
+                        print('* added the cate_key [%s] in meta.coe for oc [%s]' % (
+                            coe_cate_key,
+                            self.abbr
+                        ))
 
         elif self.oc_type == 'nma':
-            ret = copy.deepcopy(settings.OC_TYPE_TPL['nma']['default']['coe'])
+            # at present, no further update on the NMA
+            pass
 
         else:
             # not need for itable in fact
-            ret = copy.deepcopy(settings.OC_TYPE_TPL['pwma']['default']['coe'])
+            pass
             
+        # finally, just set this coe as the return obj
+        ret = self.meta['coe']
+
         return ret
         
 

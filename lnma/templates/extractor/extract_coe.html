@@ -438,18 +438,18 @@ html {
             <tr>
                 <td class="">
                     <i class="far fa-user"></i>
-                    Reviwer Judgement
+                    Reviwer
                 </td>
                 <td class="text-center">
                     <!-- the overall is automatically calced -->
-                    <span v-bind:class="'coe-val-' + get_val_from_coe(oc_dict[working_oc_abbr].meta.coe.main, 'rj', 'overall')"
+                    <span v-bind:class="'coe-val-' + get_val_from_coe(oc_dict[working_oc_abbr].meta.coe[coe_cate.key], 'rj', 'overall')"
                         class="pl-2 pr-2">
-                        {{ val_to_label(get_val_from_coe(oc_dict[working_oc_abbr].meta.coe.main, 'rj', 'overall'), 'overall') }}
+                        {{ val_to_label(get_val_from_coe(oc_dict[working_oc_abbr].meta.coe[coe_cate.key], 'rj', 'overall'), 'overall') }}
                     </span>
                 </td>
                 <td class="text-center">
-                    <select v-bind:class="'coe-val-' + get_val_from_coe(oc_dict[working_oc_abbr].meta.coe.main, 'rj', 'risk_of_bias')"
-                        v-model="oc_dict[working_oc_abbr].meta.coe.main.rj.decision.risk_of_bias"
+                    <select v-bind:class="'coe-val-' + get_val_from_coe(oc_dict[working_oc_abbr].meta.coe[coe_cate.key], 'rj', 'risk_of_bias')"
+                        v-model="oc_dict[working_oc_abbr].meta.coe[coe_cate.key].rj.decision.risk_of_bias"
                         v-on:change="on_change_coe"
                         class="coe-item-select pl-2 pr-2">
                         <option value="4">Extremely serious</option>
@@ -460,8 +460,8 @@ html {
                     </span>
                 </td>
                 <td class="text-center">
-                    <select v-bind:class="'coe-val-' + get_val_from_coe(oc_dict[working_oc_abbr].meta.coe.main, 'rj', 'inconsistency')"
-                        v-model="oc_dict[working_oc_abbr].meta.coe.main.rj.decision.inconsistency"
+                    <select v-bind:class="'coe-val-' + get_val_from_coe(oc_dict[working_oc_abbr].meta.coe[coe_cate.key], 'rj', 'inconsistency')"
+                        v-model="oc_dict[working_oc_abbr].meta.coe[coe_cate.key].rj.decision.inconsistency"
                         v-on:change="on_change_coe"
                         class="coe-item-select pl-2 pr-2">
                         <option value="4">Extremely serious</option>
@@ -472,8 +472,8 @@ html {
                     </select>
                 </td>
                 <td class="text-center">
-                    <select v-bind:class="'coe-val-' + get_val_from_coe(oc_dict[working_oc_abbr].meta.coe.main, 'rj', 'indirectness')"
-                        v-model="oc_dict[working_oc_abbr].meta.coe.main.rj.decision.indirectness"
+                    <select v-bind:class="'coe-val-' + get_val_from_coe(oc_dict[working_oc_abbr].meta.coe[coe_cate.key], 'rj', 'indirectness')"
+                        v-model="oc_dict[working_oc_abbr].meta.coe[coe_cate.key].rj.decision.indirectness"
                         v-on:change="on_change_coe"
                         class="coe-item-select pl-2 pr-2">
                         <option value="4">Extremely serious</option>
@@ -484,8 +484,8 @@ html {
                     </select>
                 </td>
                 <td class="text-center">
-                    <select v-bind:class="'coe-val-' + get_val_from_coe(oc_dict[working_oc_abbr].meta.coe.main, 'rj', 'imprecision')"
-                        v-model="oc_dict[working_oc_abbr].meta.coe.main.rj.decision.imprecision"
+                    <select v-bind:class="'coe-val-' + get_val_from_coe(oc_dict[working_oc_abbr].meta.coe[coe_cate.key], 'rj', 'imprecision')"
+                        v-model="oc_dict[working_oc_abbr].meta.coe[coe_cate.key].rj.decision.imprecision"
                         v-on:change="on_change_coe"
                         class="coe-item-select pl-2 pr-2">
                         <option value="4">Extremely serious</option>
@@ -496,8 +496,8 @@ html {
                     </select>
                 </td>
                 <td class="text-center">
-                    <select v-bind:class="'coe-val-' + get_val_from_coe(oc_dict[working_oc_abbr].meta.coe.main, 'rj', 'publication_bias')"
-                        v-model="oc_dict[working_oc_abbr].meta.coe.main.rj.decision.publication_bias"
+                    <select v-bind:class="'coe-val-' + get_val_from_coe(oc_dict[working_oc_abbr].meta.coe[coe_cate.key], 'rj', 'publication_bias')"
+                        v-model="oc_dict[working_oc_abbr].meta.coe[coe_cate.key].rj.decision.publication_bias"
                         v-on:change="on_change_coe"
                         class="coe-item-select pl-2 pr-2">
                         <option value="2">Strongly suspected</option>
@@ -506,8 +506,8 @@ html {
                     </select>
                 </td>
                 <td class="text-center">
-                    <select v-bind:class="'coe-val-' + get_val_from_coe(oc_dict[working_oc_abbr].meta.coe.main, 'rj', 'importance')"
-                        v-model="oc_dict[working_oc_abbr].meta.coe.main.rj.decision.importance"
+                    <select v-bind:class="'coe-val-' + get_val_from_coe(oc_dict[working_oc_abbr].meta.coe[coe_cate.key], 'rj', 'importance')"
+                        v-model="oc_dict[working_oc_abbr].meta.coe[coe_cate.key].rj.decision.importance"
                         v-on:change="on_change_coe"
                         class="coe-item-select pl-2 pr-2">
                         <option value="2">Critical</option>
@@ -521,55 +521,55 @@ html {
             <tr>
                 <td>
                     <i class="fas fa-code-branch"></i>
-                    Algorithm Result
+                    Algorithm
                 </td>
                 <td class="text-center">
                     <!-- the overall is automatically calced -->
-                    <span v-bind:class="'coe-val-' + get_val_from_coe(oc_dict[working_oc_abbr].meta.coe.main, 'ar', 'overall')"
+                    <span v-bind:class="'coe-val-' + get_val_from_coe(oc_dict[working_oc_abbr].meta.coe[coe_cate.key], 'ar', 'overall')"
                         class="pl-2 pr-2">
-                        {{ val_to_label(get_val_from_coe(oc_dict[working_oc_abbr].meta.coe.main, 'ar', 'overall'), 'overall') }}
+                        {{ val_to_label(get_val_from_coe(oc_dict[working_oc_abbr].meta.coe[coe_cate.key], 'ar', 'overall'), 'overall') }}
                     </span>
                 </td>
                 <td class="text-center">
                     <!-- this is automatically calculated by algorithm -->
-                    <span v-bind:class="'coe-val-' + get_val_from_coe(oc_dict[working_oc_abbr].meta.coe.main, 'ar', 'risk_of_bias')"
+                    <span v-bind:class="'coe-val-' + get_val_from_coe(oc_dict[working_oc_abbr].meta.coe[coe_cate.key], 'ar', 'risk_of_bias')"
                         class="pl-2 pr-2">
-                        {{ val_to_label(get_val_from_coe(oc_dict[working_oc_abbr].meta.coe.main, 'ar', 'risk_of_bias'), 'risk_of_bias') }}
+                        {{ val_to_label(get_val_from_coe(oc_dict[working_oc_abbr].meta.coe[coe_cate.key], 'ar', 'risk_of_bias'), 'risk_of_bias') }}
                     </span>
                 </td>
                 <td class="text-center">
                     <!-- this is automatically calculated by algorithm -->
-                    <span v-bind:class="'coe-val-' + get_val_from_coe(oc_dict[working_oc_abbr].meta.coe.main, 'ar', 'inconsistency')"
+                    <span v-bind:class="'coe-val-' + get_val_from_coe(oc_dict[working_oc_abbr].meta.coe[coe_cate.key], 'ar', 'inconsistency')"
                         class="pl-2 pr-2">
-                        {{ val_to_label(get_val_from_coe(oc_dict[working_oc_abbr].meta.coe.main, 'ar', 'inconsistency'), 'inconsistency') }}
+                        {{ val_to_label(get_val_from_coe(oc_dict[working_oc_abbr].meta.coe[coe_cate.key], 'ar', 'inconsistency'), 'inconsistency') }}
                     </span>
                 </td>
                 <td class="text-center">
                     <!-- this is automatically calculated by algorithm -->
-                    <span v-bind:class="'coe-val-' + get_val_from_coe(oc_dict[working_oc_abbr].meta.coe.main, 'ar', 'indirectness')"
+                    <span v-bind:class="'coe-val-' + get_val_from_coe(oc_dict[working_oc_abbr].meta.coe[coe_cate.key], 'ar', 'indirectness')"
                         class="pl-2 pr-2">
-                        {{ val_to_label(get_val_from_coe(oc_dict[working_oc_abbr].meta.coe.main, 'ar', 'indirectness'), 'indirectness') }}
+                        {{ val_to_label(get_val_from_coe(oc_dict[working_oc_abbr].meta.coe[coe_cate.key], 'ar', 'indirectness'), 'indirectness') }}
                     </span>
                 </td>
                 <td class="text-center">
                     <!-- this is automatically calculated by algorithm -->
-                    <span v-bind:class="'coe-val-' + get_val_from_coe(oc_dict[working_oc_abbr].meta.coe.main, 'ar', 'imprecision')"
+                    <span v-bind:class="'coe-val-' + get_val_from_coe(oc_dict[working_oc_abbr].meta.coe[coe_cate.key], 'ar', 'imprecision')"
                         class="pl-2 pr-2">
-                        {{ val_to_label(get_val_from_coe(oc_dict[working_oc_abbr].meta.coe.main, 'ar', 'imprecision'), 'imprecision') }}
+                        {{ val_to_label(get_val_from_coe(oc_dict[working_oc_abbr].meta.coe[coe_cate.key], 'ar', 'imprecision'), 'imprecision') }}
                     </span>
                 </td>
                 <td class="text-center">
                     <!-- this is automatically calculated by algorithm -->
-                    <span v-bind:class="'coe-val-' + get_val_from_coe(oc_dict[working_oc_abbr].meta.coe.main, 'ar', 'publication_bias')"
+                    <span v-bind:class="'coe-val-' + get_val_from_coe(oc_dict[working_oc_abbr].meta.coe[coe_cate.key], 'ar', 'publication_bias')"
                         class="pl-2 pr-2">
-                        {{ val_to_label(get_val_from_coe(oc_dict[working_oc_abbr].meta.coe.main, 'ar', 'publication_bias'), 'publication_bias') }}
+                        {{ val_to_label(get_val_from_coe(oc_dict[working_oc_abbr].meta.coe[coe_cate.key], 'ar', 'publication_bias'), 'publication_bias') }}
                     </span>
                 </td>
                 <td class="text-center">
                     <!-- this is automatically calculated by algorithm -->
-                    <span v-bind:class="'coe-val-' + get_val_from_coe(oc_dict[working_oc_abbr].meta.coe.main, 'ar', 'importance')"
+                    <span v-bind:class="'coe-val-' + get_val_from_coe(oc_dict[working_oc_abbr].meta.coe[coe_cate.key], 'ar', 'importance')"
                         class="pl-2 pr-2">
-                        {{ val_to_label(get_val_from_coe(oc_dict[working_oc_abbr].meta.coe.main, 'ar', 'importance'), 'importance') }}
+                        {{ val_to_label(get_val_from_coe(oc_dict[working_oc_abbr].meta.coe[coe_cate.key], 'ar', 'importance'), 'importance') }}
                     </span>
                 </td>
             </tr>
