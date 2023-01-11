@@ -45,9 +45,10 @@ html {
 .coe-cate-box {
     padding: 2em 5px;
     border-bottom: 1px dashed #bebebe;
+    border-left: 2px solid transparent;
 }
 .coe-cate-box:hover {
-    background-color: whitesmoke;
+    /* border-left-color: #3a72eb; */
 }
 .coe-table {
     margin: 1em 0;
@@ -167,6 +168,13 @@ html {
 #pwma_datatable_header {
     position: sticky;
     top: 0;
+}
+
+.active {
+    font-weight: bold;
+}
+.nav-link {
+    cursor: pointer;
 }
 </style>
 
@@ -394,7 +402,7 @@ html {
         </div>
 
 
-    <div style="width: 100%; height: calc(100% - 150px); overflow-y: auto; overflow-x: hidden;">
+    <div style="width: 100%; height: calc(100% - 80px); overflow-y: auto; overflow-x: hidden;">
 
     <!-- loop on different cates of CoE -->
     <!-- <div v-if="working_oc_extract == null">
@@ -575,33 +583,69 @@ html {
             </tr>
         </table>
 
-        <!-- second, for each indicator -->
+        <!-- second, tabs for each indicator -->
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <button class="btn btn-sm btn-default mr-3"
+                    @click="assess_coe_by_algorithm('rob')">
+                    <i class="fas fa-sync"></i>
+                    Assess CoE by Algorithm
+                </button>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" 
+                    :class="{'active': active_coe_tab[coe_cate.key]=='outcome_info'}"
+                    @click="show_coe_tab(coe_cate.key, 'outcome_info')">
+                    Outcome Overview
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" 
+                    :class="{'active': active_coe_tab[coe_cate.key]=='risk_of_bias'}"
+                    @click="show_coe_tab(coe_cate.key, 'risk_of_bias')">
+                    Risk of Bias
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" 
+                    :class="{'active': active_coe_tab[coe_cate.key]=='inconsistency'}"
+                    @click="show_coe_tab(coe_cate.key, 'inconsistency')">
+                    Inconsistency
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" 
+                    :class="{'active': active_coe_tab[coe_cate.key]=='indirectness'}"
+                    @click="show_coe_tab(coe_cate.key, 'indirectness')">
+                    Indirectness
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" 
+                    :class="{'active': active_coe_tab[coe_cate.key]=='imprecision'}"
+                    @click="show_coe_tab(coe_cate.key, 'imprecision')">
+                    Imprecision
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" 
+                    :class="{'active': active_coe_tab[coe_cate.key]=='publication_bias'}"
+                    @click="show_coe_tab(coe_cate.key, 'publication_bias')">
+                    Publication Bias
+                </a>
+            </li>
+        </ul>
 
-        <h5>
-            Risk of Bias
-        </h5>
 
-        <!-- risk of bias -->
-
-        <div class="mb-1 d-flex flex-row">
-            <div class="custom-control custom-switch mr-2">
-                <input type="checkbox" 
-                    class="custom-control-input" 
-                    id="customSwitch1"
-                    v-model="use_itable_rob_data">
-                <label class="custom-control-label" for="customSwitch1">Use iTable's Risk of Bias Data</label>
-            </div>
-
-            <button class="btn btn-sm btn-default mr-3"
-                @click="assess_coe_by_algorithm('rob')">
-                <i class="fas fa-sync"></i>
-                Assess Risk of Bias by Algorithm
-            </button>
+        <!-- Outcome information -->
+        <div v-show="active_coe_tab[coe_cate.key]=='outcome_info'">
         </div>
 
+
+        <!-- risk of bias -->
         <!-- first, show the basic summary -->
-        <div class="d-flex flex-row">
-            <div v-for="exts, paper_rob in get_rob_dist()"
+        <div v-show="active_coe_tab[coe_cate.key]=='risk_of_bias'">
+            <!-- <div v-for="exts, paper_rob in get_working_oc_rob_dist()"
                 class="d-flex flex-column border mr-3 pl-3 pr-3 pt-2 pb-2">
                 <div class="rob-item-label">
                     {{ val_to_label(paper_rob, 'risk_of_bias') }} |
@@ -618,23 +662,37 @@ html {
                         </span>
                     </div>
                 </div>
-            </div>
+            </div> -->
+
         </div>
 
 
-
-
-
         <!-- Inconsistency -->
+        <div v-show="active_coe_tab[coe_cate.key]=='inconsistency'">
+
+            inconsistency
+        </div>
 
 
         <!-- Indirectness -->
+        <div v-show="active_coe_tab[coe_cate.key]=='indirectness'">
+
+            indirectness
+        </div>
 
 
         <!-- Imprecision -->
+        <div v-show="active_coe_tab[coe_cate.key]=='imprecision'">
+
+            imprecision
+        </div>
 
 
         <!-- Publication Bias -->
+        <div v-show="active_coe_tab[coe_cate.key]=='publication_bias'">
+
+            publication_bias
+        </div>
 
     
     
@@ -708,11 +766,17 @@ var app_coemgr = {
           Then, need to define a 
         */
         
-
         filter_keyword: '',
         
         oc_dict: {},
         itable: {},
+
+        active_coe_tab: {
+            main: 'outcome_info',
+            g34: 'outcome_info',
+            g3h: 'outcome_info',
+            g5n: 'outcome_info',
+        },
         
         // related to working on
         display_coe_panel: false,
@@ -737,6 +801,10 @@ var app_coemgr = {
                     {key: 'main', title: ''}
                 ]
             }
+        },
+
+        show_coe_tab: function(coe_cate_key, coe_domain) {
+            this.active_coe_tab[coe_cate_key] = coe_domain;
         },
 
         set_extracts: function(extracts) {
@@ -766,21 +834,25 @@ var app_coemgr = {
         },
 
         show_coe_panel: function(oc_abbr) {
-            this.display_coe_panel = true;
-            this.working_oc_abbr = oc_abbr;
-
             // load data for this oc
             srv_extractor.get_extract_by_id(
-                this.oc_dict[this.working_oc_abbr].extract_id,
-                function(data) {
-                    app_coemgr.vpp.$data.working_oc_extract = data.extract;
-                    console.log('* set working oc', data.extract);
-                    jarvis.toast(
-                        'Loaded outcome [' + 
-                        data.extract.meta.full_name + '] ' + 
-                        'full dataset.'
-                    );
-                }
+                this.oc_dict[oc_abbr].extract_id,
+                this._callback_show_coe_panel
+            );
+        },
+
+        _callback_show_coe_panel: function(data) {
+            // update the working info
+            this.working_oc_extract = data.extract;
+            this.working_oc_abbr = this.working_oc_extract.abbr;
+
+            // show the panel
+            this.display_coe_panel = true;
+            console.log('* set working oc', data.extract);
+            jarvis.toast(
+                'Loaded outcome [' + 
+                data.extract.meta.full_name + '] ' + 
+                'full dataset.'
             );
         },
 
@@ -878,7 +950,7 @@ var app_coemgr = {
             return exts;
         },
 
-        get_rob_dist: function() {
+        get_working_oc_rob_dist: function() {
             // first, get exts
             var exts = this.get_exts(
                 this.working_oc_extract,

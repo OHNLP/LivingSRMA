@@ -328,4 +328,76 @@ var srv_shared = {
         }
 
     },
+
+    /**
+     * Get the rs and cfg for analyzer
+     * 
+     * @param {object} extract an Extract object
+     */
+    get_rs_cfg_from_extract: function(extract, rs_type) {
+        if (typeof(rs_type) == 'undefined') {
+            rs_type = 'main'
+        }
+
+        // prepare th
+        var rs = [];
+        var cfg = {};
+
+
+    },
+
+    /*************************************************
+     * Helpers
+     *************************************************/
+
+    get_int: function(v) {
+        try {
+            var intv = parseInt(v);
+            return intv;
+        } catch {
+            return null;
+        }
+    },
+
+    get_str: function(v) {
+        try {
+            var strv = ""+v;
+            return strv;
+        } catch {
+            return '';
+        }
+    },
+
+    get_year: function(s) {
+        const regex = /\d{4}/gm;
+        let m;
+        if ((m = regex.exec(s)) !== null) {
+            return m[0];
+        }
+        return '';
+    },
+
+    get_first_author: function(s) {
+        var aus = s.split(';');
+        if (aus.length == 1) {
+            aus = s.split(',');
+        }
+        return aus[0];
+    },
+
+    isna: function(v) {
+        if (v == null) {
+            return true;
+        } else if (isNaN(v)) {
+            return true;
+        } else if (v === '') {
+            return true;
+        } else if ((''+v).toLocaleUpperCase() === 'NA') {
+            return true;
+        } else if (v == '-') {
+            return true;
+        } else {
+            return false;
+        }
+    },
 };
