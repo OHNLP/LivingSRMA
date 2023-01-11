@@ -709,6 +709,13 @@ a {
 .cie-nner-2 { background: rgb(191, 191, 191); color: black; }
 .cie-nner-1 { background: rgb(255, 242, 204); color: black; }
 
+.coe-dv { padding: 0 1em; }
+.coe-dv-0 { background: rgb(191, 191, 191); color: black; }
+.coe-dv-1 { background: rgb(255, 250, 237); color: black; }
+.coe-dv-2 { background: rgb(255, 199, 193); color: black; }
+.coe-dv-3 { background: rgb(255, 103, 91); color: black; }
+.coe-dv-4 { background: rgb(150, 0, 0); color: white; }
+
 </style>
 </head>
 
@@ -1247,7 +1254,53 @@ a {
 
                         <!-- CoE -->
                         <td>
+                            <div v-if="r.coe == null">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                Loading ...
+                            </div>
+                            <div v-else
+                                class="cursor-pointer"
+                                @click="r.is_show.coe_detail = !r.is_show.coe_detail">
+                                <div v-if="r.is_show.coe_detail">
+                                    Risk of bias: 
+                                    <span :class="'coe-dv coe-dv-' + r.coe.risk_of_bias"
+                                        :title="r.coe.info.risk_of_bias.reason.msg">
+                                        {{ coe_helper.val_to_label(r.coe.risk_of_bias, 'risk_of_bias') }}
+                                    </span>
+                                    <br>
 
+                                    Inconsistency: 
+                                    <span :class="'coe-dv coe-dv-' + r.coe.inconsistency"
+                                        :title="r.coe.info.inconsistency.reason.msg">
+                                        {{ coe_helper.val_to_label(r.coe.inconsistency, 'inconsistency') }}
+                                    </span>
+                                    <br>
+
+                                    Imprecision: 
+                                    <span :class="'coe-dv coe-dv-' + r.coe.imprecision"
+                                        :title="r.coe.info.imprecision.reason.msg">
+                                        {{ coe_helper.val_to_label(r.coe.imprecision, 'imprecision') }}
+                                    </span>
+                                    <br>
+
+                                    Publication Bias: 
+                                    <span :class="'coe-dv coe-dv-' + r.coe.publication_bias"
+                                        :title="r.coe.info.publication_bias.reason.msg">
+                                        {{ coe_helper.val_to_label(r.coe.publication_bias, 'publication_bias') }}
+                                    </span>
+                                    <br>
+
+                                    Indirectness: 
+                                    <span :class="'coe-dv coe-dv-' + r.coe.indirectness"
+                                        :title="r.coe.info.indirectness.reason.msg">
+                                        {{ coe_helper.val_to_label(r.coe.indirectness, 'indirectness') }}
+                                    </span>
+                                </div>
+                                <div v-else
+                                    title="Click to check more details">
+                                    {{ coe_helper.val_to_label(coe_helper.get_overall_coe(r.coe), 'overall') }}
+                                </div>
+                            </div>
                         </td>
                     </tr>
                 </table>
@@ -1382,8 +1435,14 @@ if (isIE) {
 
 <script>
 
+// for linking to pubmed
 {% include 'js/srv_pubmed.js' %}
+
+// for rplt service
 {% include 'js/srv_rpltapi.js' %}
+
+// for coe_helper
+{% include 'js/coe_helper.js' %}
 
 
 ///////////////////////////////////////////////////////////
@@ -1502,6 +1561,9 @@ var app_pma = {
 
     // vpp data object
     vpp_data: {
+        // coe helper for quick access
+        coe_helper: coe_helper,
+
         // vpp level parameter
         // work mode includes:
         // 1: plot: just show the selected single outcome
@@ -1572,7 +1634,6 @@ var app_pma = {
         ///////////////////////////////////////////////////////////
         // for filters
         ///////////////////////////////////////////////////////////
-
         is_filter_disabled: function(idx) {
             if (idx == 0) {
                 return false;
@@ -2284,7 +2345,7 @@ var app_pma = {
         },
 
         add_fl_oc_gd_to_sof: function(fl, oc, grade) {
-            if (this.find_fl_oc_gd_in_sof(fl, oc) >= 0) {
+            if (this.find_fl_oc_gd_in_sof(fl, oc, grade) >= 0) {
                 // which means this fl-oc has already be added
                 return;
             }
@@ -2301,8 +2362,12 @@ var app_pma = {
                     // show sm / study info
                     sm: true,
                     // show ARD / ARD CI
-                    ARD: true
-                }
+                    ARD: true,
+                    // show coe detail
+                    coe_detail: false
+                },
+                // the CoE information from backend service
+                coe: null
             }
             console.log('* add_fl_oc_gd_to_sof:', r);
 
@@ -2320,24 +2385,45 @@ var app_pma = {
                     "control": stu[6],
                     "pid": stu[7],
                     "year": stu[8],
-                    "rob": stu[9]
+                    "rob": stu[9],
+                    "ind": stu[10]
                 });
             }
             rplt_rs = JSON.stringify(rplt_rs);
 
             // send a request for the CoE
+            let _this = 
             srv_rpltapi.analyze_pwma_prcm_coe({
                 am: 'FORESTDATA',
                 sm: this.sof_sm,
                 rs: rplt_rs,
                 hk: 'FALSE',
                 apikey: "[[ config['settings'].API_SYSTEM_APIKEYS[0] ]]"
-            }, function(data) {
-                console.log('* analyze_pwma_prcm_coe', data);
-            });
+            }, (function(fl, oc, grade){
+                return function(data) {
+                    console.log('* analyze_pwma_prcm_coe result', fl, oc, grade, data);
+                    // The
+                    // update the coe information for this fl-oc-grade item in sof
+                    app_pma.vpp.update_coe_by_fl_oc_gd(
+                        fl, oc, grade, 
+                        data.data.coe
+                    );
+                }
+            })(fl, oc, grade));
 
             // update the UI
             this.sof_rs.push(r);
+        },
+
+        update_coe_by_fl_oc_gd: function(fl, oc, grade, coe) {
+            let sof_r_idx = this.find_fl_oc_gd_in_sof(fl, oc, grade);
+            if (sof_r_idx < 0) {
+                // which means this fl-oc-grade doesn't exist
+                return;
+            }
+
+            // ok, let's update
+            this.sof_rs[sof_r_idx].coe = coe;
         },
 
         export_sof_csv: function() {
@@ -2953,6 +3039,7 @@ var app_pma = {
 
             // try to get the RoB for CoE
             var r_coe_rob = this.get_rob_from_itable_by_pid(r['pid']);
+            var r_coe_ind = this.get_ind_from_itable_by_pid(r['pid']);
 
             // now check each grade
             for (let j = 0; j < 3; j++) {
@@ -2966,13 +3053,17 @@ var app_pma = {
                         r[grade+'_Ec'],
                         r['GA_Nc'],
                         r['author'],
-                        'T',
+                        // treatment
+                        'T', 
+                        // control
                         'C',
                         // add more infor vis
                         r['pid'],
                         r['year'],
                         // add this RoB for CoE
                         r_coe_rob,
+                        // add this Ind for CoE
+                        r_coe_ind
                     ]);
                     ma_dict[r.oc_abbr][grade].PRIM.total = math.add(
                         ma_dict[r.oc_abbr][grade].PRIM.total,
@@ -2994,11 +3085,17 @@ var app_pma = {
                         r[grade+'_Ec'],
                         r['GA_Nc'],
                         r['author'],
-                        'T',
+                        // treatment
+                        'T', 
+                        // control
                         'C',
                         // add more infor vis
                         r['pid'],
                         r['year'],
+                        // add this RoB for CoE
+                        r_coe_rob,
+                        // add this Ind for CoE
+                        r_coe_ind
                     ]);
                     ma_dict[r.oc_abbr][grade].INCD.total = math.add(
                         ma_dict[r.oc_abbr][grade].INCD.total,
@@ -3016,21 +3113,38 @@ var app_pma = {
         return ma_dict;
     },
 
+    get_decision_by_rj_ar: function(rj, ar) {
+        if (rj === undefined || rj == '' || rj == 'NA') {
+            // which means there is no reviewer judgement
+            if (ar === undefined || ar == '') {
+                // which means no algorithm result
+                return 'NA'
+            } else {
+                // whatever it is, it is
+                return ar;
+            }
+        } else {
+            // ok, we have a reviewer judgement
+            return rj;
+        }
+    },
+
     get_rob_from_itable_by_pid: function(pid) {
         // reviewer
         let rj = this.data_itable.itable.data[pid].attrs.main.g0['COE_RCT_ROB_OVERALL_RJ'];
         // algorithm
         let ar = this.data_itable.itable.data[pid].attrs.main.g0['COE_RCT_ROB_OVERALL_AR'];
+        
+        return this.get_decision_by_rj_ar(rj, ar);
+    },
 
-        if (rj === undefined || rj == 'NA') {
-            if (ar === undefined) {
-                return 'NA'
-            } else {
-                return ar;
-            }
-        } else {
-            return rj;
-        }
+    get_ind_from_itable_by_pid: function(pid) {
+        // reviewer
+        let rj = this.data_itable.itable.data[pid].attrs.main.g0['COE_RCT_IND_OVERALL_RJ'];
+        // algorithm
+        let ar = this.data_itable.itable.data[pid].attrs.main.g0['COE_RCT_IND_OVERALL_AR'];
+
+        return this.get_decision_by_rj_ar(rj, ar);
     },
 
     mk_data_cfg_by_ma: function(ma_prim, sm, fixed_or_random) {

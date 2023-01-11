@@ -607,7 +607,10 @@ def analyze_pwma_prcm_coe(rs, cfg, has_cumu=True):
         'user_judgement': cfg.get('rob_user_judgement', None)
     }
 
-    risk_of_bias = coe_helper.judge_risk_of_bias(rob_vals)
+    rob_msgs = { "code": '', "msg": '' }
+    risk_of_bias, rob_msgs['code'], rob_msgs['msg'] = \
+        coe_helper.judge_risk_of_bias(rob_vals)
+    rob_vals['reason'] = rob_msgs
 
     #######################################################
     # Imprecision
@@ -682,7 +685,11 @@ def analyze_pwma_prcm_coe(rs, cfg, has_cumu=True):
         'ois': OIS,
         'ma_size': ma_size
     }
-    imprecision = coe_helper.judge_imprecision(imp_vals)
+
+    imp_msgs = { "code": '', "msg": '' }
+    imprecision, imp_msgs['code'], imp_msgs['msg'] = \
+        coe_helper.judge_imprecision(imp_vals)
+    imp_vals['reason'] = imp_msgs
 
     #######################################################
     # Publication Bias
@@ -702,7 +709,10 @@ def analyze_pwma_prcm_coe(rs, cfg, has_cumu=True):
         'difference_sm': difference_sm
     }
 
-    publication_bias = coe_helper.judge_publication_bias(pbb_vals)
+    pbb_msgs = { "code": '', "msg": '' }
+    publication_bias, pbb_msgs['code'], pbb_msgs['msg'] = \
+        coe_helper.judge_publication_bias(pbb_vals)
+    pbb_vals['reason'] = pbb_msgs
 
     #######################################################
     # Inconsistency
@@ -743,7 +753,11 @@ def analyze_pwma_prcm_coe(rs, cfg, has_cumu=True):
         'major_sm_cnt': major_sm_cnt,
         'is_major_in_same_category': is_major_in_same_category,
     }
-    inconsistency = coe_helper.judge_inconsistency(inc_vals)
+
+    inc_msgs = { "code": '', "msg": '' }
+    inconsistency, inc_msgs['code'], inc_msgs['msg'] = \
+        coe_helper.judge_inconsistency(inc_vals)
+    inc_vals['reason'] = inc_msgs
 
 
     #######################################################
@@ -764,7 +778,11 @@ def analyze_pwma_prcm_coe(rs, cfg, has_cumu=True):
         "n_studies": n_studies
     }
 
-    indirectness = coe_helper.judge_indirectness(ind_vals)
+    ind_msgs = { "code": '', "msg": '' }
+    indirectness, ind_msgs['code'], ind_msgs['msg'] = \
+        coe_helper.judge_indirectness(ind_vals)
+    ind_vals['reason'] = ind_msgs
+
 
     #######################################################
     # FINALLY! the return object

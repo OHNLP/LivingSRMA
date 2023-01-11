@@ -798,8 +798,10 @@ var coe_helper = {
             ret = 4;
 
         } else {
-            // what???
+            // what??? which means non-of the above cases match
+            // the result is not applicable
         }
+        console.log('* get_overall_coe', vals, '->', cnt, '=', ret);
 
         // convert to string
         return '' + ret;
@@ -872,7 +874,7 @@ var coe_helper = {
         if (['risk_of_bias', 'imprecision'].includes(domain)) {
             if (['0', '1', '2', '3', '4', 'L', 'M', 'H', 'NA'].includes(v)) {
                 ret = {
-                    '0': 'Not specified',
+                    '0': 'Not applicable',
                     '1': 'Not serious',
                     '2': 'Serious',
                     '3': 'Very serious',
@@ -953,7 +955,7 @@ var coe_helper = {
         } else if (domain == 'overall') {
             if (['0', '1', '2', '3', '4'].includes(v)) {
                 ret = {
-                    '0': 'NA',
+                    '0': 'Not applicable',
                     '1': 'Very Low',
                     '2': 'Low',
                     '3': 'Moderate',

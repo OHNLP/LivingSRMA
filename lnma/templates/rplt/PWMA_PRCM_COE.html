@@ -21,6 +21,10 @@ PWMA Primary + Cumulative Analysis API Demo
         font-weight: bold;
         padding: 0 0 0 1em;
     }
+    .reason {
+        font-style: italic;
+        text-decoration: underline;
+    }
 
     .box {
         position: relative;
@@ -166,6 +170,10 @@ PWMA Primary + Cumulative Analysis API Demo
                         <p class="result">
                             Result = {{ pma.data.coe.risk_of_bias }}
                             ({{ coe_helper.val_to_label(pma.data.coe.risk_of_bias, 'risk_of_bias') }})
+                            <br>
+                            <span class="reason">
+                                {{ pma.data.coe.info.risk_of_bias.reason.msg }}
+                            </span>
                         </p>
                         
                         <div id="mermaid_rob" 
@@ -208,6 +216,10 @@ PWMA Primary + Cumulative Analysis API Demo
                         <p class="result">
                             Result = {{ pma.data.coe.inconsistency }}
                             ({{ coe_helper.val_to_label(pma.data.coe.inconsistency, 'inconsistency') }})
+                            <br>
+                            <span class="reason">
+                                {{ pma.data.coe.info.inconsistency.reason.msg }}
+                            </span>
                         </p>
 
                         <div id="mermaid_inc" 
@@ -242,6 +254,10 @@ PWMA Primary + Cumulative Analysis API Demo
                         <p class="result">
                             Result = {{ pma.data.coe.publication_bias }}
                             ({{ coe_helper.val_to_label(pma.data.coe.publication_bias, 'publication_bias') }})
+                            <br>
+                            <span class="reason">
+                                {{ pma.data.coe.info.publication_bias.reason.msg }}
+                            </span>
                         </p>
 
                         <div id="mermaid_pbb" 
@@ -285,6 +301,10 @@ PWMA Primary + Cumulative Analysis API Demo
                         <p class="result">
                             Result = {{ pma.data.coe.imprecision }}
                             ({{ coe_helper.val_to_label(pma.data.coe.imprecision, 'imprecision') }})
+                            <br>
+                            <span class="reason">
+                                {{ pma.data.coe.info.imprecision.reason.msg }}
+                            </span>
                         </p>
 
                         <div id="mermaid_imp" 
@@ -320,6 +340,10 @@ PWMA Primary + Cumulative Analysis API Demo
                         <p class="result">
                             Result = {{ pma.data.coe.indirectness }}
                             ({{ coe_helper.val_to_label(pma.data.coe.indirectness, 'indirectness') }})
+                            <br>
+                            <span class="reason">
+                                {{ pma.data.coe.info.indirectness.reason.msg }}
+                            </span>
                         </p>
 
                         <div id="mermaid_ind" 
