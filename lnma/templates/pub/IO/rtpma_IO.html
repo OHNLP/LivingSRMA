@@ -665,9 +665,9 @@ a {
 
 /* for the SoF table */
 .sof-table {
-    /* width: calc(100% - 10px); */
-    width: 1100px;
-    min-width: 800px;
+    min-width: 1100px;
+    width: calc(100% - 10px);
+    /* width: 1100px; */
 }
 .sof-table th {
     text-align: center;
@@ -1064,6 +1064,8 @@ a {
                 style="height: calc(100% - 20px);">
                 <div class="plot-nav-tab d-flex">
                     <div class="box-radio-group d-flex flex-row">
+
+                        <!-- SM -->
                         <div>
                             <i class="fa fa-cog"></i>
                             Measure of effect: 
@@ -1074,7 +1076,10 @@ a {
                                 id="sof_sm_rr"
                                 class="cursor-pointer"
                                 v-model="sof_sm">
-                            <label for="sof_sm_rr">Risk Ratio (RR)</label>
+                            <label for="sof_sm_rr"
+                                class="cursor-pointer">
+                                Risk Ratio (RR)
+                            </label>
                         </div>
                         <div class="box-radio-item mr-3">
                             <input type="radio"
@@ -1082,11 +1087,73 @@ a {
                                 id="sof_sm_or"
                                 class="cursor-pointer"
                                 v-model="sof_sm">
-                            <label for="sof_sm_or">Odds Ratio (OR)</label>
+                            <label for="sof_sm_or"
+                                class="cursor-pointer">
+                                Odds Ratio (OR)
+                            </label>
                         </div>
 
-                        <!-- columns -->
 
+                        <!-- CI -->
+                        <div title="Intervention CI">
+                            <i class="fa fa-cog"></i>
+                            Show CI: 
+                        </div>
+                        <div class="box-radio-item">
+                            <input type="radio" 
+                                :value="true" 
+                                id="sof_show_ci_yes"
+                                class="cursor-pointer"
+                                v-model="sof_show_ci">
+                            <label for="sof_show_ci_yes"
+                                class="cursor-pointer">
+                                Yes
+                            </label>
+                        </div>
+                        <div class="box-radio-item mr-3">
+                            <input type="radio"
+                                :value="false" 
+                                id="sof_show_ci_no"
+                                class="cursor-pointer"
+                                v-model="sof_show_ci">
+                            <label for="sof_show_ci_no"
+                                class="cursor-pointer">
+                                No
+                            </label>
+                        </div>
+
+
+                        <!-- Absolute Risk Difference -->
+                        <div title="Absolute Risk Difference">
+                            <i class="fa fa-cog"></i>
+                            Show ARD: 
+                        </div>
+                        <div class="box-radio-item">
+                            <input type="radio" 
+                                :value="true" 
+                                id="sof_show_ard_yes"
+                                class="cursor-pointer"
+                                v-model="sof_show_ard">
+                            <label for="sof_show_ard_yes"
+                                class="cursor-pointer">
+                                Yes
+                            </label>
+                        </div>
+                        <div class="box-radio-item mr-3">
+                            <input type="radio"
+                                :value="false" 
+                                id="sof_show_ard_no"
+                                class="cursor-pointer"
+                                v-model="sof_show_ard">
+                            <label for="sof_show_ard_no"
+                                class="cursor-pointer">
+                                No
+                            </label>
+                        </div>
+
+                        
+
+                        <!-- columns -->
                         <div>
                             <i class="fa fa-cog"></i>
                             Columns: 
@@ -1096,14 +1163,20 @@ a {
                                 id="sof_chk_col_1"
                                 class="cursor-pointer"
                                 v-model="sof_columns_totals">
-                            <label for="sof_chk_col_1">Number of Patients</label>
+                            <label for="sof_chk_col_1"
+                                class="cursor-pointer">
+                                Number of Patients
+                            </label>
                         </div>
                         <div class="box-radio-item">
                             <input type="checkbox" 
                                 id="sof_chk_col_2"
                                 class="cursor-pointer"
                                 v-model="sof_columns_filters">
-                            <label for="sof_chk_col_2">Treatment</label>
+                            <label for="sof_chk_col_2"
+                                class="cursor-pointer">
+                                Treatment
+                            </label>
                         </div>
                         <!-- <div class="box-radio-item">
                             <input type="checkbox" 
@@ -1225,31 +1298,34 @@ a {
                                 {{ _round2(r.ma.PRIM.rsts[sof_sm].random.SM_upper) }}
                             )
                         </td>
+
                         <!-- Absolute values -->
                         <td>
                             {{ get_CIR(r).toFixed(0) }} 
-                            <br>
                             <span class="txt-sm txt-italic">per {{ sof_baseline }}</span>
+                            <span v-if="sof_show_ci">
+                                <br>
+                                CI: {{ _int(get_CIR(r, 'lower')) }} to 
+                                {{ _int(get_CIR(r, 'upper')) }}
+                            </span>
                         </td>
+                        
                         <td>
                             {{ get_ACR(r).toFixed(0) }} 
-                            <br>
                             <span class="txt-sm txt-italic">per {{ sof_baseline }}</span>
                         </td>
-                        <td v-if="r.is_show['ARD']" 
-                            class="col-flipable"
-                            v-on:click="flip_cell(grade, r, 'ARD')">
+
+                        <td>
                             {{ get_ARD_txt(r) }} 
-                            <br>
                             <span class="txt-sm txt-italic">per {{ sof_baseline }}</span>
-                        </td>
-                        <td v-else 
-                            class="col-ta-left col-flipable"
-                            v-on:click="flip_cell(grade, r, 'ARD')">
-                            CI: {{ get_ARD_txt(r, 'lower') }} to 
-                                {{ get_ARD_txt(r, 'upper') }}<br>
-                            RD(%): {{ get_ARDp_txt(r) }}<br>
-                            ({{ get_ARDp_txt(r, 'lower')}} to {{ get_ARDp_txt(r, 'upper')}})
+                            <span v-if="sof_show_ard" 
+                                class="col-ta-left">
+                                <br>
+                                CI: {{ get_ARD_txt(r, 'lower') }} to 
+                                    {{ get_ARD_txt(r, 'upper') }}<br>
+                                RD(%): {{ get_ARDp_txt(r) }}<br>
+                                ({{ get_ARDp_txt(r, 'lower')}} to {{ get_ARDp_txt(r, 'upper')}})
+                            </span>
                         </td>
 
                         <!-- CoE -->
@@ -1308,6 +1384,8 @@ a {
             </div>
         </div>
         <!-- /#app_marst for SoF table -->
+
+
 
         <!-- for PWMA plots -->
         <div v-if="flag_is_work_mode_plot"
@@ -1625,6 +1703,8 @@ var app_pma = {
         sof_use_internal_baseline: true,
         sof_columns_filters: false,
         sof_columns_totals: false,
+        sof_show_ard: false,
+        sof_show_ci: true,
 
         // for display
         sof_rs: []
@@ -2562,6 +2642,10 @@ var app_pma = {
             return (Math.round(v * 100) / 100).toFixed(2);
         },
 
+
+        _int: function(v) {
+            return Math.round(v);
+        },
 
         flip_cell: function(r) {
             // first, find this ae in rs
