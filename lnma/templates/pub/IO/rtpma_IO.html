@@ -696,18 +696,19 @@ a {
 .sof-table .col-flipable:hover {
     background: whitesmoke;
 }
-.cie-bene-4 { background: rgb(55, 86, 35); color: white; }
-.cie-bene-3 { background: rgb(169, 208, 142); color: black; }
-.cie-bene-2 { background: rgb(226, 239, 218); color: black; }
-.cie-bene-1 { background: rgb(255, 242, 204); color: black; }
-.cie-harm-4 { background: rgb(150, 0, 0); color: white; }
-.cie-harm-3 { background: rgb(255, 103, 91); color: black; }
-.cie-harm-2 { background: rgb(255, 199, 193); color: black; }
-.cie-harm-1 { background: rgb(255, 242, 204); color: black; }
-.cie-nner-4 { background: rgb(66, 66, 66); color: rgb(255, 255, 255); }
-.cie-nner-3 { background: rgb(128, 128, 128); color: rgb(255, 255, 255); }
-.cie-nner-2 { background: rgb(191, 191, 191); color: black; }
-.cie-nner-1 { background: rgb(255, 242, 204); color: black; }
+.coe-bene-4 { background: rgb(55, 86, 35); color: white; }
+.coe-bene-3 { background: rgb(169, 208, 142); color: black; }
+.coe-bene-2 { background: rgb(226, 239, 218); color: black; }
+.coe-bene-1 { background: rgb(255, 242, 204); color: black; }
+.coe-harm-4 { background: rgb(150, 0, 0); color: white; }
+.coe-harm-3 { background: rgb(255, 103, 91); color: black; }
+.coe-harm-2 { background: rgb(255, 199, 193); color: black; }
+.coe-harm-1 { background: rgb(255, 242, 204); color: black; }
+.coe-nner-4 { background: rgb(66, 66, 66); color: rgb(255, 255, 255); }
+.coe-nner-3 { background: rgb(128, 128, 128); color: rgb(255, 255, 255); }
+.coe-nner-2 { background: rgb(191, 191, 191); color: black; }
+.coe-nner-1 { background: rgb(255, 242, 204); color: black; }
+.coe-nner-0 { background: rgb(236, 236, 236); color: black; }
 
 .coe-dv { padding: 0 1em; }
 .coe-dv-0 { background: rgb(191, 191, 191); color: black; }
@@ -730,6 +731,10 @@ a {
 </div>
 
 <div id="wrapper">
+
+<div id="color_guide" style="display: none;" title="Color guide">
+    {% include 'pub/_shared/_table_color_guide_pma.html' %}
+</div>
     
 <div id="app_pma">
 
@@ -1042,18 +1047,24 @@ a {
                     <span>|</span>
 
                     <div class="box-menu-group d-flex fx-row">
-                        <div style="margin-right: 15px;">
-                            <span class="cie-bene-2">
+                        <div class="box-menu-link" 
+                            @click="show_color_guide">
+                            <i class="fa fa-paint-brush"></i>
+                            Color guide
+                        </div>
+
+                        <!-- <div style="margin-right: 15px;">
+                            <span class="coe-bene-2">
                                 &nbsp;&nbsp;&nbsp;&nbsp;
                             </span>&nbsp;
                             Benefit
                         </div>
                         <div style="margin-right: 15px;">
-                            <span class="cie-harm-2">
+                            <span class="coe-harm-2">
                                 &nbsp;&nbsp;&nbsp;&nbsp;
                             </span>&nbsp;
                             Harm
-                        </div>
+                        </div> -->
                     </div>
 
                 </div>
@@ -1329,53 +1340,52 @@ a {
                         </td>
 
                         <!-- CoE -->
-                        <td>
-                            <div v-if="r.coe == null">
-                                <i class="fas fa-spinner fa-spin"></i>
-                                Loading ...
+                        <td v-if="r.coe == null">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            Loading ...
+                        </td>
+                        <td v-else
+                            class="cursor-pointer"
+                            @click="r.is_show.coe_detail = !r.is_show.coe_detail">
+                            <div v-if="r.is_show.coe_detail">
+                                Risk of bias: 
+                                <span :class="'coe-dv coe-dv-' + r.coe.risk_of_bias"
+                                    :title="r.coe.info.risk_of_bias.reason.msg">
+                                    {{ coe_helper.val_to_label(r.coe.risk_of_bias, 'risk_of_bias') }}
+                                </span>
+                                <br>
+
+                                Inconsistency: 
+                                <span :class="'coe-dv coe-dv-' + r.coe.inconsistency"
+                                    :title="r.coe.info.inconsistency.reason.msg">
+                                    {{ coe_helper.val_to_label(r.coe.inconsistency, 'inconsistency') }}
+                                </span>
+                                <br>
+
+                                Imprecision: 
+                                <span :class="'coe-dv coe-dv-' + r.coe.imprecision"
+                                    :title="r.coe.info.imprecision.reason.msg">
+                                    {{ coe_helper.val_to_label(r.coe.imprecision, 'imprecision') }}
+                                </span>
+                                <br>
+
+                                Publication Bias: 
+                                <span :class="'coe-dv coe-dv-' + r.coe.publication_bias"
+                                    :title="r.coe.info.publication_bias.reason.msg">
+                                    {{ coe_helper.val_to_label(r.coe.publication_bias, 'publication_bias') }}
+                                </span>
+                                <br>
+
+                                Indirectness: 
+                                <span :class="'coe-dv coe-dv-' + r.coe.indirectness"
+                                    :title="r.coe.info.indirectness.reason.msg">
+                                    {{ coe_helper.val_to_label(r.coe.indirectness, 'indirectness') }}
+                                </span>
                             </div>
                             <div v-else
-                                class="cursor-pointer"
-                                @click="r.is_show.coe_detail = !r.is_show.coe_detail">
-                                <div v-if="r.is_show.coe_detail">
-                                    Risk of bias: 
-                                    <span :class="'coe-dv coe-dv-' + r.coe.risk_of_bias"
-                                        :title="r.coe.info.risk_of_bias.reason.msg">
-                                        {{ coe_helper.val_to_label(r.coe.risk_of_bias, 'risk_of_bias') }}
-                                    </span>
-                                    <br>
-
-                                    Inconsistency: 
-                                    <span :class="'coe-dv coe-dv-' + r.coe.inconsistency"
-                                        :title="r.coe.info.inconsistency.reason.msg">
-                                        {{ coe_helper.val_to_label(r.coe.inconsistency, 'inconsistency') }}
-                                    </span>
-                                    <br>
-
-                                    Imprecision: 
-                                    <span :class="'coe-dv coe-dv-' + r.coe.imprecision"
-                                        :title="r.coe.info.imprecision.reason.msg">
-                                        {{ coe_helper.val_to_label(r.coe.imprecision, 'imprecision') }}
-                                    </span>
-                                    <br>
-
-                                    Publication Bias: 
-                                    <span :class="'coe-dv coe-dv-' + r.coe.publication_bias"
-                                        :title="r.coe.info.publication_bias.reason.msg">
-                                        {{ coe_helper.val_to_label(r.coe.publication_bias, 'publication_bias') }}
-                                    </span>
-                                    <br>
-
-                                    Indirectness: 
-                                    <span :class="'coe-dv coe-dv-' + r.coe.indirectness"
-                                        :title="r.coe.info.indirectness.reason.msg">
-                                        {{ coe_helper.val_to_label(r.coe.indirectness, 'indirectness') }}
-                                    </span>
-                                </div>
-                                <div v-else
-                                    title="Click to check more details">
-                                    {{ coe_helper.val_to_label(coe_helper.get_overall_coe(r.coe), 'overall') }}
-                                </div>
+                                :class="get_coe_bg_color_cls(coe_helper.get_overall_coe(r.coe), r.ma.PRIM.rsts[sof_sm].random.SM)"
+                                title="Click to check more details">
+                                {{ coe_helper.val_to_label(coe_helper.get_overall_coe(r.coe), 'overall') }}
                             </div>
                         </td>
                     </tr>
@@ -1711,6 +1721,12 @@ var app_pma = {
     },
 
     vpp_methods: {
+        show_color_guide: function() {
+            $('#color_guide').dialog({
+                width: 680
+            });
+        },
+
         ///////////////////////////////////////////////////////////
         // for filters
         ///////////////////////////////////////////////////////////
@@ -2616,22 +2632,20 @@ var app_pma = {
         //     return cls;
         // },
 
-        // calc_bg_color_class: function(sm, lower, upper) {
-        //     var cie = 2;
-        //     if (lower < 1 && upper > 1) {
-        //         cie = 2;
-        //     } else {
-        //         cie = 3;
-        //     }
-        //     if (sm < 1) {
-        //         return 'cie-bene-' + cie;
-        //         // return '';
-        //     } else if (sm > 1) {
-        //         return 'cie-harm-' + cie;
-        //     } else {
-        //         return 'cie-nner-' + cie;
-        //     }
-        // },
+        get_coe_bg_color_cls: function(coe, sm) {
+            if (coe == 0) {
+                return 'coe-nner-0';
+            }
+            if (sm < 1) {
+                return 'coe-bene-' + cie;
+
+            } else if (sm > 1) {
+                return 'coe-harm-' + cie;
+
+            } else {
+                return 'coe-nner-' + cie;
+            }
+        },
 
         get_grade_label: function(g) {
             // return jarvis.texts[g];
