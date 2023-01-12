@@ -63,9 +63,11 @@ def calc_OIS(h, alpha=0.05, power=0.8, alternative='two.sided'):
     # convert r to dict
     r_dict = dict(zip(r.names, list(r)))
     # fix the numpy.int64 encoder bug
-    n = int(r_dict['n'][0])
+    # n = int(r_dict['n'][0])
+    n = r_dict['n'][0]
+    ret = int(np.round(n*2))
 
-    return n * 2
+    return ret
 
 
 def demo():

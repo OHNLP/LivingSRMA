@@ -874,7 +874,7 @@ var coe_helper = {
         if (['risk_of_bias', 'imprecision'].includes(domain)) {
             if (['0', '1', '2', '3', '4', 'L', 'M', 'H', 'NA'].includes(v)) {
                 ret = {
-                    '0': 'Not applicable',
+                    '0': 'Not available',
                     '1': 'Not serious',
                     '2': 'Serious',
                     '3': 'Very serious',
@@ -891,7 +891,7 @@ var coe_helper = {
         } else if (['indirectness'].includes(domain)) {
             if (['0', '1', '2', '3', '4', 'V', 'M', 'N', 'NA'].includes(v)) {
                 ret = {
-                    '0': 'Not applicable',
+                    '0': 'Not available',
                     '1': 'Not serious',
                     '2': 'Serious',
                     '3': 'Very serious',
@@ -1127,7 +1127,7 @@ s3[Does adjusted effect show less benefit?]
 
 %% define links
 %% link 0
-s1 -- "N<10" --> r1([1: Not serious])
+s1 -- "N<10" --> r1([0: Not applicable])
 %% link 1
 s1 -- "N≥10" --> s2
 %% link 2
