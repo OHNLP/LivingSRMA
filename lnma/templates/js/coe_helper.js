@@ -1016,7 +1016,7 @@ s_hitl -- "Rate down" --> r6([3-4: Very-Extremely serious])
 %% link 10 for init
 s_init_hitl -- "Yes" --> s1
 %% link 11 for init no
-s_init_hitl -- "No" --> r00([0: Not applicable])
+s_init_hitl -- "No" --> r00([0: Not available])
         `
         if (typeof(vals) == 'undefined') {
             return chart_desc;
@@ -1269,7 +1269,7 @@ s_init_hitl{{"HITL: Are all studies evaluated?"}}:::HITL
 %% link 0: for HITL
 s_init_hitl -- "Yes" --> s1
 %% link 1: for HITL
-s_init_hitl -- "No" --> r0([0: Not applicable])
+s_init_hitl -- "No" --> r0([0: Not available])
 %% link 2
 s1 -- "Yes" --> r1([1: Not serious])
 %% link 3
