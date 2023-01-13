@@ -6,40 +6,49 @@ PWMA Primary + Cumulative Analysis API Demo
 
 {% block style %}
 <style>
-    .code {
-        font-family: 'Courier New', Courier, monospace;
-        background-color: #eeeeee;
-        font-size: 13px;
-    }
+.code {
+    font-family: 'Courier New', Courier, monospace;
+    background-color: #eeeeee;
+    font-size: 13px;
+}
 
-    .fact {
-        font-style: italic;
-        padding: 0 0 0 1em;
-    }
+.fact {
+    font-style: italic;
+    padding: 0 0 0 1em;
+}
 
-    .result {
-        font-weight: bold;
-        padding: 0 0 0 1em;
-    }
-    .reason {
-        font-style: italic;
-        text-decoration: underline;
-    }
+.result {
+    font-weight: bold;
+    padding: 0 0 0 1em;
+}
+.reason {
+    font-style: italic;
+    text-decoration: underline;
+}
 
-    .box {
-        position: relative;
-    }
+.box {
+    position: relative;
+}
 
-    .defs {
-        width: 250px;
-        border: 1px solid #DADADA;
-        padding: 10px;
-        margin: 5px;
-        position: absolute;
-        top: 0;
-        right: 0;
-        line-height: 1em;
-    }
+.defs {
+    width: 250px;
+    border: 1px solid #DADADA;
+    padding: 10px;
+    margin: 5px;
+    position: absolute;
+    top: 0;
+    right: 0;
+    line-height: 1em;
+}
+.ma-table {
+    width: 100%;
+}
+.ma-table tr {
+    border-bottom: 1px solid #eeeeee;
+}
+.ma-table td {
+    padding: 2px 3px;
+}
 </style>
 {% endblock %}
 
@@ -150,6 +159,75 @@ PWMA Primary + Cumulative Analysis API Demo
 
             <div id="app_coe">
                 <div v-if="pma != null">
+                    <h4>Outcome Overview</h4>
+                    <table class="ma-table"
+                        style="margin-bottom: 3em;">
+                        <tr>
+                            <th>Study</th>
+                            <th>Year</th>
+                            <th>Et</th>
+                            <th>Nt</th>
+                            <th>Ec</th>
+                            <th>Nc</th>
+                            <th>Risk of Bias</th>
+                            <th>Indirectness</th>
+                            <th>{{ pma.params.measure_of_effect }}</th>
+                            <th>Weight</th>
+                        </tr>
+                        <tr v-for="r in pma.data.primma.stus">
+                            <td>{{ r.name }}</td>
+                            <td>{{ r.year }}</td>
+                            <td>{{ r.Et }}</td>
+                            <td>{{ r.Nt }}</td>
+                            <td>{{ r.Ec }}</td>
+                            <td>{{ r.Nc }}</td>
+                            <td>{{ coe_helper.val_to_label(r.rob, 'risk_of_bias') }}</td>
+                            <td>{{ coe_helper.val_to_label(r.ind, 'indirectness') }}</td>
+                            <td>
+                                {{ r.bt_TE }}
+                                (
+                                    {{ r.bt_lower }};
+                                    {{ r.bt_upper }}
+                                )
+                            </td>
+                            <td>{{ to_percentage(r.w_random) }}</td>
+                        </tr>
+
+                        <!-- MA Result -->
+                        <tr>
+                            <td colspan="2">
+                                Random Effect Model:
+                            </td>
+                            <td>{{ pma.data.primma.model.random.Et }}</td>
+                            <td>{{ pma.data.primma.model.random.Nt }}</td>
+                            <td>{{ pma.data.primma.model.random.Ec }}</td>
+                            <td>{{ pma.data.primma.model.random.Nc }}</td>
+                            <td colspan="2">
+                                &nbsp;
+                            </td>
+                            <td>
+                                {{ pma.data.primma.model.random.bt_TE }}
+                                (
+                                    {{ pma.data.primma.model.random.bt_lower }};
+                                    {{ pma.data.primma.model.random.bt_upper }}
+                                )
+                            </td>
+                            <td>100%</td>
+                        </tr>
+
+                        <!-- Heterogeneity -->
+                        <tr>
+                            <td colspan="5">
+                                Heterogeneity: 
+                                <i>I<sup>2</sup></i> = {{ pma.data.primma.heterogeneity.i2 }},
+                                <i>τ<sup>2</sup></i> = {{ pma.data.primma.heterogeneity.tau2 }},
+                                <i>p</i> = {{ pma.data.primma.heterogeneity.p }}
+                            </td>
+                            <td colspan="4"></td>
+                        </tr>
+                    </table>
+
+
                     <h4>Certainty of Evidence</h4>
 
 
