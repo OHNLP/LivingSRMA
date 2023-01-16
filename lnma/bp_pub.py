@@ -79,7 +79,7 @@ def php():
     cq_abbr = request.args.get('c')
     tpl_name = request.args.get('t')
 
-    if tpl_name == '':
+    if tpl_name is None or tpl_name == '':
         tpl_name = 'index'
 
     # get this project

@@ -103,6 +103,7 @@
             <div class="d-flex flex-row">
                 <select class="rob-select"
                     v-model="get_working_arm_attrs()['g0']['COE_RCT_ROB_D'+d_idx+'_Q'+q_idx]"
+                    :disabled="disable_rob_domain_question(d_idx, q_idx, get_working_arm_attrs()['g0'])"
                     @change="on_change_rob_qs">
                     <option value="Y"><b>Y</option>
                     <option value="PY">PY</option>
@@ -113,6 +114,7 @@
                 </select>
                 <input type="text" 
                     class="rob-comment"
+                    :disabled="disable_rob_domain_question(d_idx, q_idx, get_working_arm_attrs()['g0'])"
                     @input="on_change_rob_q_coment"
                     v-model="get_working_arm_attrs()['g0']['COE_RCT_ROB_C'+d_idx+'_Q'+q_idx]">
             </div>

@@ -199,7 +199,17 @@ def get_sof_pma_data_from_db_IO(cq_abbr="default", is_calc_pma=True):
 
     # a helper function
     def __notna(v):
-        return not (v is None or v == '' or v == 'null')
+        if v is None:
+            return False
+        # convert to a temp 
+        t = '%s' % v
+        t = t.strip().lower()
+        # just use exception to judge if it
+        try:
+            int(t)
+            return True
+        except:
+            return False
 
     # a helper function
     def __notzero(v):

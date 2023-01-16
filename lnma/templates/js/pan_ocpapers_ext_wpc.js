@@ -82,7 +82,7 @@ Object.assign(pan_ocpapers.vpp_data, {
         3: {
             1: "3.1 Were data for this outcome available for all, or nearly all, participants randomized?",
             2: "3.2 If N/PN/NI to 3.1: Is there evidence that the result was not biased by missing outcome data?",
-            3: "3.3 If N/PN to 3.2: Could missingness in the outcome depend on its true value?",
+            3: "3.3 If N/PN/NI to 3.2: Could missingness in the outcome depend on its true value?",
             4: "3.4 If Y/PY/NI to 3.3: Is it likely that missingness in the outcome depended on its true value?"
         },
         4: {
@@ -258,6 +258,175 @@ Object.assign(pan_ocpapers.vpp_methods, {
         } else {
             return this.coe_rob_qs[d_idx]
         }
+    },
+
+    disable_rob_domain_question: function(d_idx, q_idx, ext) {
+        if (d_idx == 1) {
+            return false;
+
+        } else if (d_idx == 2) {
+            if (ext['COE_RCT_ROB_D2_AIM'] == 'a') {
+                // for aim A
+                if (q_idx == 1 || q_idx == 2) {
+                    return false;
+
+                } else if (q_idx == 3) {
+                    if (ext['COE_RCT_ROB_D2_Q1'] == 'Y'  ||
+                        ext['COE_RCT_ROB_D2_Q1'] == 'PY' ||
+                        ext['COE_RCT_ROB_D2_Q1'] == 'NI' ||
+                        ext['COE_RCT_ROB_D2_Q2'] == 'Y'  ||
+                        ext['COE_RCT_ROB_D2_Q2'] == 'PY' ||
+                        ext['COE_RCT_ROB_D2_Q2'] == 'NI' ) {
+                        return false;
+
+                    } else {
+                        return true;
+                    }
+                } else if (q_idx == 4) {
+                    if (ext['COE_RCT_ROB_D2_Q3'] == 'Y'  ||
+                        ext['COE_RCT_ROB_D2_Q3'] == 'PY') {
+                        return false;
+
+                    } else {
+                        return true;
+                    }
+                } else if (q_idx == 5) {
+                    if (ext['COE_RCT_ROB_D2_Q4'] == 'Y'  ||
+                        ext['COE_RCT_ROB_D2_Q4'] == 'PY') {
+                        return false;
+
+                    } else {
+                        return true;
+                    }
+                } else if (q_idx == 6) {
+                    return false;
+
+                } else if (q_idx == 7) {
+
+                    if (ext['COE_RCT_ROB_D2_Q6'] == 'N'  ||
+                        ext['COE_RCT_ROB_D2_Q6'] == 'PN'||
+                        ext['COE_RCT_ROB_D2_Q6'] == 'NI') {
+                        return false;
+
+                    } else {
+                        return true;
+                    }
+                }
+            } else {
+                // for aim B
+                if (q_idx == 1 || q_idx == 2) {
+                    return false;
+
+                } else if (q_idx == 3) {
+                    if (ext['COE_RCT_ROB_D2_Q1'] == 'Y'  ||
+                        ext['COE_RCT_ROB_D2_Q1'] == 'PY' ||
+                        ext['COE_RCT_ROB_D2_Q1'] == 'NI' ||
+                        ext['COE_RCT_ROB_D2_Q2'] == 'Y'  ||
+                        ext['COE_RCT_ROB_D2_Q2'] == 'PY' ||
+                        ext['COE_RCT_ROB_D2_Q2'] == 'NI' ) {
+                        return false;
+
+                    } else {
+                        return true;
+                    }
+                } else if (q_idx == 4) {
+                    return false;
+
+                } else if (q_idx == 5) {
+                    return false;
+                    
+                } else if (q_idx == 6) {
+                    
+                    if (ext['COE_RCT_ROB_D2_Q3'] == 'N'  ||
+                        ext['COE_RCT_ROB_D2_Q3'] == 'PN' ||
+                        ext['COE_RCT_ROB_D2_Q3'] == 'NI' ||
+                        ext['COE_RCT_ROB_D2_Q4'] == 'Y'  ||
+                        ext['COE_RCT_ROB_D2_Q4'] == 'PY' ||
+                        ext['COE_RCT_ROB_D2_Q4'] == 'NI' ||
+                        ext['COE_RCT_ROB_D2_Q5'] == 'Y'  ||
+                        ext['COE_RCT_ROB_D2_Q5'] == 'PY' ||
+                        ext['COE_RCT_ROB_D2_Q5'] == 'NI' ) {
+                        return false;
+
+                    } else {
+                        return true;
+                    }
+                }
+            }
+        } else if (d_idx == 3) {
+            if (q_idx == 1) {
+                return false;
+
+            } else if (q_idx == 2) {
+                if (ext['COE_RCT_ROB_D3_Q1'] == 'N'  ||
+                    ext['COE_RCT_ROB_D3_Q1'] == 'PN' ||
+                    ext['COE_RCT_ROB_D3_Q1'] == 'NI') {
+                    return false;
+                } else {
+                    return true;
+                }
+            } else if (q_idx == 3) {
+                if (ext['COE_RCT_ROB_D3_Q2'] == 'N'  ||
+                    ext['COE_RCT_ROB_D3_Q2'] == 'PN' ||
+                    ext['COE_RCT_ROB_D3_Q2'] == 'NI') {
+                    return false;
+                } else {
+                    return true;
+                }
+                
+            } else if (q_idx == 4) {
+                if (ext['COE_RCT_ROB_D3_Q3'] == 'Y'  ||
+                    ext['COE_RCT_ROB_D3_Q3'] == 'PY' ||
+                    ext['COE_RCT_ROB_D3_Q3'] == 'NI') {
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+
+        } else if (d_idx == 4) {
+            if (q_idx == 1 || q_idx == 2) {
+                return false;
+
+            } else if (q_idx == 3) {
+                if (ext['COE_RCT_ROB_D4_Q1'] == 'N'  ||
+                    ext['COE_RCT_ROB_D4_Q1'] == 'PN' ||
+                    ext['COE_RCT_ROB_D4_Q1'] == 'NI' ||
+                    ext['COE_RCT_ROB_D4_Q2'] == 'N'  ||
+                    ext['COE_RCT_ROB_D4_Q2'] == 'PN' ||
+                    ext['COE_RCT_ROB_D4_Q2'] == 'NI' ) {
+                    return false;
+
+                } else {
+                    return true;
+                }
+            } else if (q_idx == 4) {
+                if (ext['COE_RCT_ROB_D4_Q3'] == 'Y'  ||
+                    ext['COE_RCT_ROB_D4_Q3'] == 'PY' ||
+                    ext['COE_RCT_ROB_D4_Q3'] == 'NI') {
+                    return false;
+                } else {
+                    return true;
+                }
+                
+            } else if (q_idx == 5) {
+                if (ext['COE_RCT_ROB_D4_Q4'] == 'Y'  ||
+                    ext['COE_RCT_ROB_D4_Q4'] == 'PY' ||
+                    ext['COE_RCT_ROB_D4_Q4'] == 'NI') {
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+            
+        } else if (d_idx == 5) {
+            return false;
+            
+        } else {
+            // ????
+        }
+
+        return false;
     },
 
     get_coe_rob_d2_aim: function() {

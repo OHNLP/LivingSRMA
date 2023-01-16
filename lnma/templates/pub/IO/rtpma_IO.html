@@ -1079,88 +1079,40 @@ a {
                         <!-- SM -->
                         <div>
                             <i class="fa fa-cog"></i>
-                            Measure of effect: 
+                            Measure of effect: &nbsp;
                         </div>
-                        <div class="box-radio-item">
-                            <input type="radio" 
-                                value="RR" 
-                                id="sof_sm_rr"
-                                class="cursor-pointer"
-                                v-model="sof_sm">
-                            <label for="sof_sm_rr"
-                                class="cursor-pointer">
-                                Risk Ratio (RR)
-                            </label>
-                        </div>
-                        <div class="box-radio-item mr-3">
-                            <input type="radio"
-                                value="OR" 
-                                id="sof_sm_or"
-                                class="cursor-pointer"
-                                v-model="sof_sm">
-                            <label for="sof_sm_or"
-                                class="cursor-pointer">
-                                Odds Ratio (OR)
-                            </label>
-                        </div>
+                        <select v-model="sof_sm"
+                            class="select-sm mr-2"
+                            style="width: 120px;">
+                            <option value="RR">Risk Ratio (RR)</option>
+                            <option value="OR">Odds Ratio (OR)</option>
+                        </select>
 
 
                         <!-- CI -->
                         <div title="Intervention CI">
                             <i class="fa fa-cog"></i>
-                            Show CI: 
+                            Show CI: &nbsp;
                         </div>
-                        <div class="box-radio-item">
-                            <input type="radio" 
-                                :value="true" 
-                                id="sof_show_ci_yes"
-                                class="cursor-pointer"
-                                v-model="sof_show_ci">
-                            <label for="sof_show_ci_yes"
-                                class="cursor-pointer">
-                                Yes
-                            </label>
-                        </div>
-                        <div class="box-radio-item mr-3">
-                            <input type="radio"
-                                :value="false" 
-                                id="sof_show_ci_no"
-                                class="cursor-pointer"
-                                v-model="sof_show_ci">
-                            <label for="sof_show_ci_no"
-                                class="cursor-pointer">
-                                No
-                            </label>
-                        </div>
+                        <select v-model="sof_show_ci"
+                            class="select-sm mr-2"
+                            style="width: 60px;">
+                            <option :value="true">Yes</option>
+                            <option :value="false">No</option>
+                        </select>
 
 
                         <!-- Absolute Risk Difference -->
                         <div title="Absolute Risk Difference">
                             <i class="fa fa-cog"></i>
-                            Show ARD: 
+                            Show ARD: &nbsp;
                         </div>
-                        <div class="box-radio-item">
-                            <input type="radio" 
-                                :value="true" 
-                                id="sof_show_ard_yes"
-                                class="cursor-pointer"
-                                v-model="sof_show_ard">
-                            <label for="sof_show_ard_yes"
-                                class="cursor-pointer">
-                                Yes
-                            </label>
-                        </div>
-                        <div class="box-radio-item mr-3">
-                            <input type="radio"
-                                :value="false" 
-                                id="sof_show_ard_no"
-                                class="cursor-pointer"
-                                v-model="sof_show_ard">
-                            <label for="sof_show_ard_no"
-                                class="cursor-pointer">
-                                No
-                            </label>
-                        </div>
+                        <select v-model="sof_show_ard"
+                            class="select-sm mr-2"
+                            style="width: 60px;">
+                            <option :value="true">Yes</option>
+                            <option :value="false">No</option>
+                        </select>
 
                         
 
@@ -1186,7 +1138,7 @@ a {
                                 v-model="sof_columns_filters">
                             <label for="sof_chk_col_2"
                                 class="cursor-pointer">
-                                Treatment
+                                Filter Details
                             </label>
                         </div>
                         <!-- <div class="box-radio-item">
@@ -2218,6 +2170,9 @@ var app_pma = {
                 for (const grade in this.ma_dict[abbr]) {
                     var ma_prim = this.ma_dict[abbr][grade].PRIM;
                     if (ma_prim.stus.length != 0) {
+
+                console.log('* update_ma_rsts',abbr,grade, this.ma_dict[abbr][grade]);
+
                         var rst_sm = metajs.metabin(
                             ma_prim.stus, {
                                 sm: this.color_mode_by_sm
@@ -3138,6 +3093,7 @@ var app_pma = {
             // try to get the RoB for CoE
             var r_coe_rob = this.get_rob_from_itable_by_pid(r['pid']);
             var r_coe_ind = this.get_ind_from_itable_by_pid(r['pid']);
+            // console.log('* get_ma_dict parsing', r);
 
             // now check each grade
             for (let j = 0; j < 3; j++) {
@@ -3319,6 +3275,7 @@ var app_pma = {
                 // get prim data
                 var ma_prim = ma_dict[abbr][grade].PRIM;
                 var ma_incd = ma_dict[abbr][grade].INCD;
+
 
                 if (ma_prim.stus.length != 0) {
                     // OK, let's do INCD ANA
