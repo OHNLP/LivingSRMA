@@ -1699,19 +1699,43 @@ var tbjs_paperlist = {
         }
 
         // second, add the pmid
-        if (d.pid_type == 'MD5') {
-            if (d.meta.hasOwnProperty('doi') && d.meta.doi != '') {
-                ret += 'N/DOI: ' + jarvis.get_link_doi(d.meta.doi);
-            } else {
-                ret += 'NO ID';
-                
-            }
-        } else if (d.is_pmid) {
+        // 2023-01-16: for de-duplication, try to show PMID as possible
+        if (d.is_pmid) {
+            // if the pid is pmid, just show it
             ret += 'PMID: ' + jarvis.get_link_pmid(d.pid);
+
         } else {
-            ret += '';
-            ret += d.pid;
-        }
+            if (d.meta.hasOwnProperty('ds_id')) {
+                // wow, that's great, it has the ds_id!
+                if (d.meta.ds_id.hasOwnProperty('pmid')) {
+                    // ok, this record has pmid!
+                    ret += 'PMID: ' + jarvis.get_link_pmid(d.meta.ds_id.pmid);
+
+                } else if (d.meta.ds_id.hasOwnProperty('doi')) {
+                    // DOI also works
+                    ret += 'N/DOI: ' + jarvis.get_link_doi(d.meta.ds_id.doi);
+
+                } else {
+                    // ok just show pid
+                    ret += d.pid;
+                }
+
+            } else {
+                // ok, no ds_id, then just try to show what we have
+                // by pid_type
+                if (d.pid_type == 'MD5') {
+                    if (d.meta.hasOwnProperty('doi') && d.meta.doi != '') {
+                        ret += 'N/DOI: ' + jarvis.get_link_doi(d.meta.doi);
+                    } else {
+                        ret += 'NO ID';
+                        
+                    }
+                } else {
+                    ret += d.pid;
+                }
+            }
+            
+        } 
         ret += "</div>"
 
         return ret;
@@ -2510,26 +2534,51 @@ var tbjs_paperlist = {
         var html = [html_study_type];
         
         // now build the id
-        if (d.pid_type == 'MD5') {
-            if (d.meta.hasOwnProperty('doi') && d.meta.doi != '') {
-                html.push(
-                    'N/DOI' + ': ' + 
-                    jarvis.get_link_doi(d.meta.doi)
-                );
-            } else {
-                html.push(
-                    'NOID'
-                );
-            }
-        } else if (d.is_pmid) {
+        if (d.is_pmid) {
+            // the simplest case, just the pmid
             html.push(
-                d.pid_type + ': ' + 
-                jarvis.get_link_pmid(d.pid)
+                'PMID: ' + jarvis.get_link_pmid(d.pid)
             );
         } else {
-            html.push(
-                d.pid_type + ': ' + d.pid
-            );
+            if (d.meta.hasOwnProperty('ds_id')) {
+                // wow, that's great, it has the ds_id!
+                if (d.meta.ds_id.hasOwnProperty('pmid')) {
+                    // ok, this record has pmid!
+                    html.push(
+                        'PMID: ' + jarvis.get_link_pmid(d.meta.ds_id.pmid)
+                    );
+
+                } else {
+                    // just show others
+                    for (const ds_name in d.meta.ds_id) {
+                        html.push(
+                            ds_name.toLocaleUpperCase() + 
+                            ': ' + 
+                            d.meta.ds_id[ds_name] + 
+                            ' | '
+                        );
+                    }
+                } 
+
+            } else {
+                if (d.pid_type == 'MD5') {
+                    if (d.meta.hasOwnProperty('doi') && d.meta.doi != '') {
+                        html.push(
+                            'N/DOI' + ': ' + 
+                            jarvis.get_link_doi(d.meta.doi)
+                        );
+                    } else {
+                        html.push(
+                            'NOID'
+                        );
+                    }
+                } else {
+                    html.push(
+                        d.pid_type + ': ' + d.pid
+                    );
+                }
+            }
+            
         }
 
         // push the edit
@@ -3012,11 +3061,16 @@ var tbjs_paperlist = {
             return;
         }
 
-        srv_screener.set_pmid(paper_id, txt, function(data) {
+        if (txt.indexOf(',')>=0) {
+            // ok, this is for setting other id
+            var ps = txt.split(',');
+            var ds_name = ps[0];
+            var ds_id = ps[1];
 
-            if (data.success) {
+            // send req
+            srv_screener.set_meta_ds_id(paper_id, ds_name, ds_id, function(data) {
                 // console.log('* set RCT_ID!', data);
-                toast("Updated PMID [" + data.paper.pid + '] for ' + data.paper.seq_num);
+                toast("Updated DS ID "+ds_name+" for paper [" + data.paper.pid + '] for ' + data.paper.seq_num);
                 var paper = data.paper;
 
                 // update the UI, well, just update the whole line of info
@@ -3026,11 +3080,31 @@ var tbjs_paperlist = {
 
                 // update the tb data list
                 tbjs_paperlist.update_data_by_paper(data.paper);
+            });
 
-            } else {
-                toast("Existed PMID [" + data.paper.pid + '] for another paper with sequence number [' + data.paper.seq_num + ']', 'error');
-            }
-        });
+        } else {
+
+            srv_screener.set_pmid(paper_id, txt, function(data) {
+
+                if (data.success) {
+                    // console.log('* set RCT_ID!', data);
+                    toast("Updated PMID [" + data.paper.meta.ds_id.pmid + '] for ' + data.paper.seq_num);
+                    var paper = data.paper;
+
+                    // update the UI, well, just update the whole line of info
+                    $('#tb-rowext-info-' + paper.paper_id).html(
+                        tbjs_paperlist.__get_line_info(paper)
+                    );
+
+                    // update the tb data list
+                    tbjs_paperlist.update_data_by_paper(data.paper);
+
+                } else {
+                    // toast("Existed PMID [" + data.paper.pid + '] for another paper with sequence number [' + data.paper.seq_num + ']', 'error');
+                    toast(data.msg);
+                }
+            });
+        }
     },
 
     set_rfc: function(paper_id, rfc, cq_abbr) {

@@ -517,10 +517,12 @@ def _update_papers(prj_update):
             pid_type = 'EMBASE'
             pub_date = paper['DP'] if 'DP' in paper else ''
             journal = paper['JA'] if 'JA' in paper else ''
+
         elif pid_type.startswith('OVID MEDLINE'):
-            pid_type = 'OVID MEDLINE'
+            pid_type = 'MEDLINE'
             pub_date = paper['EP'] if 'EP' in paper else ''
             journal = paper['AS'] if 'AS' in paper else ''
+
         else:
             pid_type = 'OVID'
             pub_date = paper['EP'] if 'EP' in paper else ''

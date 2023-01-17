@@ -263,6 +263,13 @@ class Paper(db.Model):
         rct_seq: 1
         study_type: "followup"
         tags: ['tag',]
+        ds_id: {
+            pmid: '32145678',
+            embase: '201012345678',
+            doi: 'abc.om/test/24',
+            other: 'ddxxa-234',
+            md5: 'xxxx-swww-xxxx-2111'
+        }
     }
 
     The `ss_ex` could also contain a lot:
@@ -520,6 +527,29 @@ class Paper(db.Model):
 
         # ok, that's all
 
+    
+    def update_meta_ds_id_by_self(self):
+        '''
+        Update the meta's ds_id
+        '''
+        ds_name = util.get_ds_name_by_pid_and_type(self.pid, self.pid_type)
+
+        if 'ds_id' not in self.meta:
+            # which means this paper needs to be updated!
+            self.meta['ds_id'] = {
+                ds_name: self.pid
+            }
+            return True
+
+        else:
+            if ds_name not in self.meta['ds_id']:
+                # which means current pid is not added as ds_id???
+                self.meta['ds_id'][ds_name] = self.pid
+                return True
+
+        # for other cases, no need to update    
+        return False
+        
 
     def get_simple_pid_type(self):
         '''
@@ -527,12 +557,12 @@ class Paper(db.Model):
         '''
         pid_type = self.pid_type.upper()
 
-        if 'OVID' in pid_type or \
-            'MEDLINE' in pid_type:
-            return 'MEDLINE'
-        if 'PMID' in pid_type or \
+        if 'MEDLINE' in pid_type or \
+            'PMID' in pid_type or \
+            'NLM' in pid_type or \
             'PUBMED' in pid_type:
             return 'PUBMED'
+
         if 'EMBASE' in pid_type:
             return 'EBASE'
 
@@ -547,8 +577,7 @@ class Paper(db.Model):
         '''
         pid_type = self.pid_type.upper()
 
-        if 'OVID' in pid_type or \
-            'MEDLINE' in pid_type or \
+        if 'MEDLINE' in pid_type or \
             'PMID' in pid_type or \
             'NLM' in pid_type or \
             'PUBMED' in pid_type:
@@ -578,6 +607,9 @@ class Paper(db.Model):
         ret['rct_id'] = self.get_rct_id()
         ret['short_name'] = self.get_short_name()
         ret['study_type'] = self.get_study_type()
+
+        # add ds_id, it will take too long for large retrieval
+        # self.update_meta_ds_id_by_self()
 
         return ret
 

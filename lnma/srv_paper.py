@@ -88,6 +88,60 @@ def get_paper_data_in_itable():
     pass
 
 
+def get_duplicated_papers(keystr):
+    '''
+    Get duplicated papers
+    '''
+    papers = dora.get_papers_by_keystr(keystr)
+    print('* got %s papers for project [%s]' % (
+        len(papers), keystr
+    ))
+
+    all_dups = {}
+    dup_pids = []
+    # for saving duplicates
+    for p1_idx, p1 in enumerate(tqdm(papers)):
+        p1_dups = [p1]
+
+        if p1.pid in dup_pids:
+            # this paper has been check and duplicated with any
+            continue
+
+        # check all other papers
+        for p2 in papers[p1_idx+1:]:
+            is_dup = is_paper_duplicated(p1, p2)
+            if is_dup:
+                p1_dups.append(p2)
+                dup_pids.append(p2.pid)
+            else:
+                pass
+
+        if len(p1_dups) == 1:
+            # which means no dups found for this p1
+            pass
+        else:
+            all_dups[p1.pid] = p1_dups
+    
+    print('* found %s papers have duplicates' % (
+        len(all_dups)
+    ))
+
+    return all_dups
+
+def is_paper_duplicated(p1, p2):
+    '''
+    Judge whether p1 and p2 are duplicated
+    '''
+    t1 = p1.title.lower()
+    t2 = p2.title.lower()
+
+    if t1 == t2:
+        return True
+
+
+    return False
+
+
 def get_included_papers_by_cq(project_id, cq_abbr):
     '''
     Get all papers that meet the requrements

@@ -330,22 +330,7 @@ def update_extract_pwma_pre_data(extract, df, papers, is_subg=False):
             sub_groups
         ))
 
-    # # update meta
-    # ext = dora.update_extract_meta(
-    #     extract.project_id,
-    #     extract.oc_type,
-    #     extract.abbr,
-    #     new_meta
-    # )
-
-    # # update the extract
-    # ext = dora.update_extract_data(
-    #     extract.project_id,
-    #     extract.oc_type,
-    #     extract.abbr,
-    #     data
-    # )
-
+    # update the extract
     ext = dora.update_extract_meta_and_data(
         extract.project_id,
         extract.oc_type,
@@ -496,22 +481,7 @@ def update_extract_pwma_raw_data(extract, df, papers, is_subg=False):
             sub_groups
         ))
 
-    # # update meta
-    # ext = dora.update_extract_meta(
-    #     extract.project_id,
-    #     extract.oc_type,
-    #     extract.abbr,
-    #     new_meta
-    # )
-
-    # # update the extract
-    # ext = dora.update_extract_data(
-    #     extract.project_id,
-    #     extract.oc_type,
-    #     extract.abbr,
-    #     data
-    # )
-
+    # update
     ext = dora.update_extract_meta_and_data(
         extract.project_id,
         extract.oc_type,

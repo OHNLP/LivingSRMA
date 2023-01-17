@@ -559,17 +559,61 @@ def set_paper_rct_id(paper_id, rct_id):
     return True, paper
 
 
-def set_paper_pmid(paper_id, pmid):
+def set_paper_meta_ds_id(paper_id, ds_name, ds_id):
     '''
-    Set the PMID (pid) for a paper
+    Set the data source id for a paper
     '''
     # just call the set pid
-    return set_paper_pid(paper_id, pmid, 'PubMed MEDLINE')
+    paper = get_paper_by_id(paper_id)
+    project_id = paper.project_id
+
+    # 2023-01-16: just set the pmid in place
+    # in case this study doesn't have ds_id yet
+    # just give set it
+    has_updated_meta_ds_id = paper.update_meta_ds_id_by_self()
+
+    # just set it
+    paper.meta['ds_id'][ds_name] = ds_id
+
+    # automatic update the date_updated
+    paper.date_updated = datetime.datetime.now()
+    
+    flag_modified(paper, 'meta')
+    db.session.add(paper)
+    db.session.commit()
+
+    return True, paper
+
+
+def set_paper_pmid(paper_id, pmid):
+    '''
+    Set the PMID for a paper
+    '''
+    # just call the set pid
+    paper = get_paper_by_id(paper_id)
+    project_id = paper.project_id
+
+    # 2023-01-16: just set the pmid in place
+    # in case this study doesn't have ds_id yet
+    # just give set it
+    has_updated_meta_ds_id = paper.update_meta_ds_id_by_self()
+
+    # just set it
+    paper.meta['ds_id']['pmid'] = pmid
+
+    # automatic update the date_updated
+    paper.date_updated = datetime.datetime.now()
+    
+    flag_modified(paper, 'meta')
+    db.session.add(paper)
+    db.session.commit()
+
+    return True, paper
 
 
 def set_paper_pid(paper_id, pid, pid_type='UNKNOWN'):
     '''
-    Set the pid) for a paper
+    Set the pid for a paper
     '''
     paper = get_paper_by_id(paper_id)
     project_id = paper.project_id
@@ -709,11 +753,22 @@ def create_paper(project_id, pid,
     # the meta will contain more information
     all_rct_ids = get_nct_number(abstract)
     rct_id = '' if len(all_rct_ids) == 0 else all_rct_ids[0]
+    
+    # get ds_id
+    ds_name = util.get_ds_name_by_pid_and_type(pid, pid_type)
+
     _meta = {
         'tags': [],
         'pdfs': [],
         'rct_id': rct_id,
-        'all_rct_ids': all_rct_ids
+        'all_rct_ids': all_rct_ids,
+        # 2023-01-16: for de-duplication
+        # just use this to store the correct ID information
+        # we don't want to lose any records in the db
+        # so, even for a duplicated records, we still need to save it
+        'ds_id': {
+            ds_name: pid
+        }
     }
     if meta is None:
         pass
@@ -1038,6 +1093,16 @@ def get_paper_by_keystr_and_pid(keystr, pid):
     )
 
     return paper
+
+
+def get_all_papers():
+    '''
+    Get ALL papers in the database
+
+    Please don't use this function if you are not sure
+    '''
+    papers = Paper.query.all()
+    return papers
 
 
 def get_papers(project_id):

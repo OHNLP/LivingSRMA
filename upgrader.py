@@ -18,6 +18,38 @@ from lnma import models
 from lnma import db
 from lnma import create_app
 
+
+def upgrade_paper_meta_ds_id(keystr='TEST'):
+    '''
+    Upgrade paper meta to include a ds_id information
+
+    This is designed for de-duplication
+    '''
+    if keystr == 'ALL_PRJS':
+        papers = dora.get_all_papers()
+    else:
+        papers = dora.get_papers_by_keystr(keystr)
+
+    print('* found %s papers in the [%s]' % (len(papers), keystr))
+
+    cnt_updated = 0
+    cnt_not = 0
+    for paper in tqdm(papers):
+        has_updated = paper.update_meta_ds_id_by_self()
+
+        if has_updated:
+            # oh, this paper has been updated, need to save
+            dora._update_paper_meta(paper)
+            cnt_updated += 1
+        else:
+            cnt_not += 1
+    
+    print('* done upgrading, %s have been updated, %s not.' % (
+        cnt_updated, 
+        cnt_not
+    ))
+    
+
 def upgrade_project_settings(keystr):
     '''
     Upgrade project settings to support more features
@@ -322,7 +354,7 @@ if __name__ == '__main__':
     app.app_context().push()
 
     # upgrade something?
-    # upgrade_extract_coe_ds('IO')
+    upgrade_paper_meta_ds_id('TEST')
 
 
     print('* done upgrader')

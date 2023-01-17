@@ -34,6 +34,25 @@ def index():
     return render_template('screener.index_v3.html')
 
 
+@bp.route('/deduplicate')
+@login_required
+def deduplicate():
+    '''
+    De-duplicate records
+    '''
+    project_id = request.cookies.get('project_id')
+
+    if project_id is None:
+        return redirect(url_for('project.mylist'))
+
+    project = dora.get_project(project_id)
+    return render_template(
+        'screener/deduplicate.html',
+        project=project,
+        project_json_str=json.dumps(project.as_dict())
+    )
+
+
 @bp.route('/overview')
 @login_required
 def overview():
@@ -282,15 +301,43 @@ def set_pmid():
 
     if util.is_valid_pmid(pmid):
         is_success, paper = dora.set_paper_pmid(paper_id, pmid)
-
+        ret = {
+            'success': is_success,
+            'msg': 'updated',
+            'paper': paper.as_very_simple_dict()
+        }
     else:
-        is_success, paper = dora.set_paper_pid(paper_id, pmid)
+        paper = dora.get_paper_by_id(paper_id)
+        ret = {
+            'success': False,
+            'msg': 'PMID [%s] is invalid',
+            'paper': paper.as_very_simple_dict()
+        } 
 
+    # else:
+    #     is_success, paper = dora.set_paper_pid(paper_id, pmid)
+
+    return jsonify(ret)
+
+
+@bp.route('/set_meta_ds_id', methods=['GET', 'POST'])
+@login_required
+def set_meta_ds_id():
+    paper_id = request.form.get('paper_id')
+    ds_name = request.form.get('ds_name')
+    ds_id = request.form.get('ds_id')
+
+    is_success, paper = dora.set_paper_meta_ds_id(
+        paper_id, 
+        ds_name,
+        ds_id
+    )
     ret = {
         'success': is_success,
+        'msg': 'updated',
         'paper': paper.as_very_simple_dict()
     }
-    
+
     return jsonify(ret)
 
 

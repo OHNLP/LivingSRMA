@@ -39,7 +39,13 @@ app.app_context().push()
 
 
 def test():
+    all_dups = srv_paper.get_duplicated_papers('IO')
+    
+
+
+def test15():
     print('* in test now')
+
 
 def test14():
     exts = srv_extract.copy_extracts(

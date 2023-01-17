@@ -1181,6 +1181,47 @@ def is_pwmable(Et, Nt, Ec, Nc):
     return f1 and f2
 
 
+def get_ds_name_by_pid_and_type(pid, pid_type):
+    '''
+    Get the data source id (ds_id) by pid / pid_type
+
+    This function is designed for summarizing the pid type to a shorter format
+    '''
+    _pid_type = pid_type.lower()
+
+    # by default, we don't know what this ds
+    ds_name = 'other'
+
+    if 'medline' in _pid_type or \
+        'pmid' in _pid_type or \
+        'nlm' in _pid_type or \
+        'pubmed' in _pid_type:
+
+        # if is_valid_pmid(pid):
+        #     ds_id = 'pmid'
+        # else:
+        ds_name = 'pmid'
+
+    elif is_valid_pmid(pid):
+        # sometimes ... yes, just do it.
+        ds_name = 'pmid'
+    
+    elif 'md5' in _pid_type:
+        # ok this is just a our customized id
+        ds_name = 'md5'
+
+    elif 'embase' in _pid_type:
+        ds_name = 'embase'
+
+    elif 'doi' in _pid_type:
+        ds_name = 'doi'
+    
+    else:
+        ds_name = 'other'
+
+    return ds_name
+
+
 ###############################################################################
 # Check the input field to avoid invaild input values
 ###############################################################################
