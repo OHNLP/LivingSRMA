@@ -33,7 +33,8 @@ var srv_shared = {
         } else if (_pid_type.indexOf('md5')>=0) {
             ds_name = 'md5';
 
-        } else if (_pid_type.indexOf('embase')>=0) {
+        } else if (_pid_type.indexOf('embase')>=0 || 
+                   _pid_type.indexOf('ebase')>=0) {
             ds_name = 'embase';
             
         } else if (_pid_type.indexOf('doi')>=0) {

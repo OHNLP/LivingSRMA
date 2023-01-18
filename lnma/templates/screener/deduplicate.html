@@ -127,7 +127,7 @@ Deduplicate
 
 <div v-if="rst == null">
     <p>
-        No results yet
+        Click the buton to load results if it shows <b>COMPLETED</b>
     </p>
 </div>
 <div v-else
@@ -136,51 +136,62 @@ Deduplicate
         style="height: calc(100% - 5px); overflow-y: auto;">
         <tr>
             <th width="80px">#</th>
-            <th>Paper 1</th>
-            <th>Paper 2</th>
+            <th width="calc(50% - 40px)">Paper 1</th>
+            <th width="calc(50% - 40px)">Paper 2</th>
         </tr>
         <template v-for="(ps, title, idx) in rst.dup_dict">
         <tr v-if="has_matched_filter(ps)">
 
             <td>{{ idx }}</td>
-            <td>
-                <span class="txt-pid">{{ ps[0] }}</span> |
-                {{ srv_shared.get_paper_pmid_if_exists(get_paper(ps[0])) }}
-                <br>
-                {{ get_paper(ps[0]).ss_rs }}
-                |
-                {{ get_paper(ps[0]).ext_abbrs }}
-                <br>
-                
-                <button class="btn btn-sm btn-danger mr-2"
-                    @click="exclude_by_tt(get_paper(ps[0]))">
-                    Exclude This
-                </button>
-                
-                <button class="btn btn-sm btn-primary mr-2"
-                    @click="exclude_by_tt(get_paper(ps[0]))">
-                    Include This
-                </button>
+
+            <td v-for="i in [0, 1]">
+                <span v-if="get_paper(ps[i]) != null">
+                    <span class="txt-pid">{{ ps[i] }}</span> |
+                    {{ srv_shared.get_paper_pmid_if_exists(get_paper(ps[i])) }}
+                    <br>
+
+                    {{ get_paper(ps[i]).authors }}
+                    <br>
+
+                    <b>{{ get_paper(ps[i]).journal }}</b>
+                    <br>
+                    
+                    <b>
+                        {{ get_paper(ps[i]).ss_rs }}
+                        ({{ srv_screener.ss.rs[get_paper(ps[i]).ss_rs].name }})
+                    </b>
+                    |
+                    C.Qs: 
+                    <span v-if="['f1','f3'].indexOf(get_paper(ps[i]).ss_rs)>=0">
+                        <template v-for="(v, k) in get_paper(ps[i]).ss_ex.ss_cq">
+                            <span v-if="v.d == 'yes'"
+                                class="badge badge-primary mr-2">
+                                {{ k }}
+                            </span>
+                            <span v-else
+                                class="badge mr-2">
+                                <del>{{ k }} ({{ v.r }})</del>
+                            </span>
+                        </template>
+                    </span>
+                    <br>
+
+                    Outcomes: 
+                    {{ get_paper(ps[i]).ext_abbrs }}
+                    <br>
+                    
+                    <button class="btn btn-sm btn-danger mr-2"
+                        @click="exclude_by_tt(get_paper(ps[i]))">
+                        Exclude This
+                    </button>
+                    
+                </span>
+                <span v-else>
+                    {{ ps[i] }} has been renamed or deleted.
+                </span>
             </td>
-            <td>
-                <span class="txt-pid">{{ ps[1] }}</span> |
-                {{ srv_shared.get_paper_pmid_if_exists(get_paper(ps[1])) }}
-                <br>
-                {{ get_paper(ps[1]).ss_rs }}
-                |
-                {{ get_paper(ps[1]).ext_abbrs }}
-                <br>
-                
-                <button class="btn btn-sm btn-danger mr-2"
-                    @click="exclude_by_tt(get_paper(ps[1]))">
-                    Exclude This
-                </button>
-                
-                <button class="btn btn-sm btn-primary mr-2"
-                    @click="exclude_by_tt(get_paper(ps[1]))">
-                    Include This
-                </button>
-            </td>
+
+
         </tr>
         </template>
     </table>
@@ -218,6 +229,7 @@ var app = {
     vpp: null,
     vpp_data: {
         srv_shared: srv_shared,
+        srv_screener: srv_screener,
         keywords: '',
         project: [[ project_json_str|safe ]],
         papers: null,
@@ -261,6 +273,12 @@ var app = {
         has_matched_filter: function(ps) {
             var p0 = this.get_paper(ps[0]);
             var p1 = this.get_paper(ps[1]);
+
+            if (p0 == null || p1 == null) {
+                // which means one of the record has been removed
+                return false;
+            }
+
             if (this.filter.show_both_included_only) {
                 if (p0.ss_rs.startsWith('f') &&
                     p1.ss_rs.startsWith('f')) {
@@ -284,7 +302,7 @@ var app = {
             var pid = p.pid;
             var flag = false;
 
-            if (this.rst.paper_dict(pid)) {
+            if (this.rst.paper_dict.hasOwnProperty(pid)) {
                 Object.assign(
                     this.rst.paper_dict[pid],
                     p
