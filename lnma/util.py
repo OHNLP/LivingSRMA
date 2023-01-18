@@ -1219,6 +1219,26 @@ def get_ds_name_by_pid_and_type(pid, pid_type):
     return ds_name
 
 
+def get_paper_pmid_if_exists(paper):
+    '''
+    Get the PMID from a paper
+    '''
+    if 'ds_id' in paper.meta:
+        if 'pmid' in paper.meta['ds_id']:
+            return {
+                'type': 'pmid',
+                'id': paper.meta['ds_id']['pmid']
+            }
+    # oh, no ds_id or not pmid
+    return {
+        'type': get_ds_name_by_pid_and_type(
+            paper.pid,
+            paper.pid_type
+        ),
+        'id': paper.pid
+    }
+
+
 ###############################################################################
 # Check the input field to avoid invaild input values
 ###############################################################################

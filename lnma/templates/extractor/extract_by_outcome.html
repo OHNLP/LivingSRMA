@@ -71,7 +71,7 @@ html {
 <div id="main">
 
 
-{% include 'extractor/extract_by_outcome_ocpapers.html' %}
+{% include 'extractor/_extract_by_outcome_ocpapers.html' %}
 
 
 <ul id="pan_ocpapers_ctx_menu" style="display: none;">
@@ -170,7 +170,10 @@ var pan_ocpapers = {
         is_editing_cie: false,
         
         // for test
-        oc_paper_rob: {}
+        oc_paper_rob: {},
+
+        // for quick access
+        srv_shared: srv_shared
     },
 
     vpp_methods: {

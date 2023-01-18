@@ -195,7 +195,11 @@ def get_itable_attr_rs_cfg_from_db(keystr, cq_abbr="default", with_extract=False
                             val = settings.PAPER_STUDY_TYPE_FOLLOWUP
 
             elif attr['abbr'] == 'ba_pmid':
-                val = paper.pid
+                # val = paper.pid
+                # 2023-01-18 after added the ds_id in meta
+                # the pid may not be the PMID
+                # so need to get the PMID from meta.ds_id
+                val = util.get_paper_pmid_if_exists(paper)['id']
 
             elif attr['abbr'] == 'ba_nct':
                 val = paper.meta['rct_id']
