@@ -110,7 +110,7 @@ html {
                 <tr>
                     <th>#</th>
                     <th>NCT</th>
-                    <th>PID</th>
+                    <th>PID/PMID</th>
                     <th>{{ papers.length }} studies</th>
                     <th v-if="has_coe_rob()"
                         title="Risk of Bias in iTable"
@@ -146,7 +146,9 @@ html {
                     </td>
                     <td v-on:click="on_click_paper(paper)"
                         class="cursor-pointer">
-                        {{ paper.pid }}
+                        <span :title="srv_shared.get_paper_pmid_if_exists(paper).type">
+                            {{ srv_shared.get_paper_pmid_if_exists(paper).id }}
+                        </span>
                     </td>
                     <td class="paper-table-body-td-author cursor-pointer"
                         v-on:click="on_click_paper(paper)">
@@ -479,7 +481,10 @@ var pan_ocpapers = {
         all_attrs: [],
 
         // search
-        keywords: ''
+        keywords: '',
+
+        // bind srv
+        srv_shared: srv_shared,
     },
 
     vpp_methods: {

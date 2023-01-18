@@ -87,6 +87,7 @@
             style="margin: 3px 0 5px 0;">
             Aim to assess: 
             <select v-model="get_working_arm_attrs()['g0']['COE_RCT_ROB_D2_AIM']"
+                @change="on_change_rob_qs"
                 style="width: 140px;">
                 <option value="a">assignment to intervention (the intention-to-treat effect)</option>
                 <option value="b">adhering to intervention (th per-protocol effect)</option>
