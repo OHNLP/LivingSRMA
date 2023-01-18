@@ -1,5 +1,7 @@
+import os
 import time
 import json
+from datetime import datetime
 
 from flask import request
 from flask import flash
@@ -17,9 +19,11 @@ from lnma import dora
 from lnma import srv_paper
 from lnma import srv_pub_prisma
 from lnma import srv_project
+from lnma import srv_deduplicate
 from lnma.models import *
 from lnma import ss_state
 from lnma import util
+from lnma import settings
 
 bp = Blueprint("screener", __name__, url_prefix="/screener")
 
@@ -44,12 +48,27 @@ def deduplicate():
 
     if project_id is None:
         return redirect(url_for('project.mylist'))
-
     project = dora.get_project(project_id)
+
+    # get the job and result file names
+    full_fn_job = os.path.join(
+        current_app.instance_path, 
+        settings.PATH_DEDUPLICATE, 
+        project.keystr,
+        'job.json'
+    )
+
+    # get the job
+    dd_job = None
+
+    if os.path.exists(full_fn_job):
+        dd_job = json.load(open(full_fn_job))
+
     return render_template(
         'screener/deduplicate.html',
         project=project,
-        project_json_str=json.dumps(project.as_dict())
+        project_json_str=json.dumps(project.as_dict()),
+        dd_job=dd_job,
     )
 
 
@@ -137,6 +156,93 @@ def timeline():
 #     # now need to check if this paper is really deletable
 
 
+
+@bp.route('/start_deduplicate_search')
+@login_required
+def start_deduplicate_search():
+    '''
+    Start a deduplicate search
+    '''
+    project_id = request.cookies.get('project_id')
+    project = dora.get_project(project_id)
+
+    # set up this task
+    n_papers = dora.get_n_papers_by_project_id(project.project_id)
+
+    # define a job
+    job = srv_deduplicate.make_job(
+        project.keystr, 
+        n_papers
+    )
+
+    # start!
+    # all_dups = srv_paper.get_duplicated_papers('IO')
+
+    return jsonify(job)
+
+
+@bp.route('/get_deduplicate_search_result')
+@login_required
+def get_deduplicate_search_result():
+    '''
+    Get the deduplicate search result
+    '''
+    project_id = request.cookies.get('project_id')
+    project = dora.get_project(project_id)
+    full_fn_rst = os.path.join(
+        current_app.instance_path, 
+        settings.PATH_DEDUPLICATE, 
+        project.keystr,
+        'rst.json'
+    )
+
+    dd_rst = None
+    if not os.path.exists(full_fn_rst):
+        return jsonify({
+            'success': False,
+            'msg': 'Result not found'
+        })
+    
+    try:
+        # get basic results
+        dd_rst = json.load(open(full_fn_rst))
+
+        # then update other information for user
+        # 1. get all pids
+        all_pids = []
+        for title in dd_rst['dup_dict']:
+            all_pids += dd_rst['dup_dict'][title]
+        
+        papers = dora.get_papers_by_pids(project_id, all_pids)
+        paper_dict = dict([ (p.pid, p.as_simple_dict()) for p in papers ])
+
+        # 2. get the selections
+        extracts = dora.get_extracts_by_project_id(project_id)
+        print('* got %s extracts in project [%s]' % (
+            len(extracts),
+            project.keystr
+        ))
+        for pid in paper_dict:
+            ext_abbrs = dora.get_paper_selections_in_extracts(pid, extracts)
+            paper_dict[pid]['ext_abbrs'] = ext_abbrs
+        
+        # ok, add this paper_dict to dd_rst
+        dd_rst['paper_dict'] = paper_dict
+
+        return jsonify({
+            'success': True,
+            'msg': 'OK',
+            'rst': dd_rst
+        })
+
+    except Exception as err:
+        logging.error("* loading deduplicate result %s error" % full_fn_rst)
+        logging.error(err)
+
+        return jsonify({
+            'success': False,
+            'msg': 'Parsing error %s' % err
+        })
 
 
 @bp.route('/get_timeline')
@@ -313,9 +419,6 @@ def set_pmid():
             'msg': 'PMID [%s] is invalid',
             'paper': paper.as_very_simple_dict()
         } 
-
-    # else:
-    #     is_success, paper = dora.set_paper_pid(paper_id, pmid)
 
     return jsonify(ret)
 
@@ -521,8 +624,11 @@ def sspr_exclude_papers_ta():
 def sspr_exclude_papers_tt():
     project_id = request.form.get('project_id')
     paper_ids = request.form.get('paper_ids')
-    reason = ""
+    reason = request.form.get('reason')
     paper_ids = paper_ids.split(',')
+
+    # just remove the None
+    if reason is None: reason = ''
 
     papers = []
 

@@ -1197,9 +1197,6 @@ def get_ds_name_by_pid_and_type(pid, pid_type):
         'nlm' in _pid_type or \
         'pubmed' in _pid_type:
 
-        # if is_valid_pmid(pid):
-        #     ds_id = 'pmid'
-        # else:
         ds_name = 'pmid'
 
     elif is_valid_pmid(pid):
@@ -1210,7 +1207,7 @@ def get_ds_name_by_pid_and_type(pid, pid_type):
         # ok this is just a our customized id
         ds_name = 'md5'
 
-    elif 'embase' in _pid_type:
+    elif 'embase' in _pid_type or 'ebase' in _pid_type:
         ds_name = 'embase'
 
     elif 'doi' in _pid_type:

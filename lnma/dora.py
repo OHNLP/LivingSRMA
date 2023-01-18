@@ -6,6 +6,7 @@ from sqlalchemy.sql.expression import extract
 from werkzeug.security import generate_password_hash
 
 from sqlalchemy import and_, or_, not_
+from sqlalchemy import func
 from sqlalchemy.orm.attributes import flag_modified
 
 from lnma import ss_state
@@ -601,6 +602,32 @@ def set_paper_pmid(paper_id, pmid):
     # just set it
     paper.meta['ds_id']['pmid'] = pmid
 
+    # second, try to update the pid if possible
+    # 1. try to find all possible extracts
+    selected_abbrs = get_paper_selections(project_id, paper.pid)
+    existed_papers = get_papers_by_pids(project_id, [pmid])
+
+    if len(selected_abbrs) == 0:
+        # great! this paper is not used in any extraction yet
+        # just go modify the name
+        if len(existed_papers) == 0:
+            # which means it is not exists
+            # we can update the pid for this paper
+            paper.pid = pmid
+            paper.pid_type = 'PMID'
+
+        else:
+            # oh... too bad, it's better to reset the existed one
+            # but the issue is ... these paper may be used by extracts!
+            # so need to check each one and modify
+            # it's better not to touch this part
+            # but need to let user know.
+            pass
+    else:
+        # this paper is used in some extracts ...
+        # so ... any way, just leave as it is
+        pass
+
     # automatic update the date_updated
     paper.date_updated = datetime.datetime.now()
     
@@ -1105,6 +1132,19 @@ def get_all_papers():
     return papers
 
 
+def get_n_papers_by_project_id(project_id):
+    '''
+    Get the number of papers by project_id
+    '''
+    n = db.session.query(
+        func.count(Paper.paper_id)
+    ).filter(
+        Paper.project_id == project_id
+    ).scalar()
+
+    return n
+
+
 def get_papers(project_id):
     papers = Paper.query.filter(and_(
         Paper.project_id == project_id,
@@ -1137,13 +1177,13 @@ def get_papers_by_seq_nums(project_id, seq_nums):
     return papers
 
 
-def get_papers_by_pids(project_id, pmids):
+def get_papers_by_pids(project_id, pids):
     '''
     Get all the papers according to pmid list
     '''
     papers = Paper.query.filter(and_(
         Paper.project_id == project_id,
-        Paper.pid.in_(pmids)
+        Paper.pid.in_(pids)
     )).all()
     return papers
 
@@ -2015,7 +2055,13 @@ def get_paper_selections(project_id, pid):
     Get the selections of a paper
     '''
     extracts = get_extracts_by_project_id(project_id)
+    return get_paper_selections_in_extracts(pid, extracts)
+    
 
+def get_paper_selections_in_extracts(pid, extracts):
+    '''
+    Get the selections of a paper in specific extracts
+    '''
     # check each extract
     abbrs = []
     for extract in extracts:

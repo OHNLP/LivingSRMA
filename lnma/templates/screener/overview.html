@@ -958,6 +958,8 @@ Screener Overview
 
 {% include 'js/fgmk_prisma_sankey.js' %}
 
+{% include 'js/srv_shared.js' %}
+
 {% include 'js/srv_screener.js' %}
 srv_screener.project = [[ project_json_str|safe ]];
 
@@ -967,7 +969,7 @@ srv_extractor.project = [[ project_json_str|safe ]];
 // update the project information
 srv_screener.project = [[ project_json_str|safe ]];
 
-
+// the UI for category stat
 var ui_category_stat = {
     vpp_id: '#ui_category_stat',
     vpp: null,
@@ -2534,51 +2536,66 @@ var tbjs_paperlist = {
         var html = [html_study_type];
         
         // now build the id
-        if (d.is_pmid) {
-            // the simplest case, just the pmid
+        // if (d.is_pmid) {
+        //     // the simplest case, just the pmid
+        //     html.push(
+        //         'PMID: ' + jarvis.get_link_pmid(d.pid)
+        //     );
+        // } else {
+        //     if (d.meta.hasOwnProperty('ds_id')) {
+        //         // wow, that's great, it has the ds_id!
+        //         if (d.meta.ds_id.hasOwnProperty('pmid')) {
+        //             // ok, this record has pmid!
+        //             html.push(
+        //                 'PMID: ' + jarvis.get_link_pmid(d.meta.ds_id.pmid)
+        //             );
+
+        //         } else {
+        //             // just show others
+        //             for (const ds_name in d.meta.ds_id) {
+        //                 html.push(
+        //                     ds_name.toLocaleUpperCase() + 
+        //                     ': ' + 
+        //                     d.meta.ds_id[ds_name] + 
+        //                     ' | '
+        //                 );
+        //             }
+        //         } 
+
+        //     } else {
+        //         if (d.pid_type == 'MD5') {
+        //             if (d.meta.hasOwnProperty('doi') && d.meta.doi != '') {
+        //                 html.push(
+        //                     'N/DOI' + ': ' + 
+        //                     jarvis.get_link_doi(d.meta.doi)
+        //                 );
+        //             } else {
+        //                 html.push(
+        //                     'NOID'
+        //                 );
+        //             }
+        //         } else {
+        //             html.push(
+        //                 d.pid_type + ': ' + d.pid
+        //             );
+        //         }
+        //     }
+            
+        // }
+        var ds = srv_shared.get_paper_pmid_if_exists(d);
+
+        if (ds.type == 'pmid') {
             html.push(
-                'PMID: ' + jarvis.get_link_pmid(d.pid)
+                'PMID: ' + jarvis.get_link_pmid(ds.id)
+            );
+        } else if (ds.type == 'doi') {
+            html.push(
+                'DOI: ' + jarvis.get_link_doi(d.meta.doi)
             );
         } else {
-            if (d.meta.hasOwnProperty('ds_id')) {
-                // wow, that's great, it has the ds_id!
-                if (d.meta.ds_id.hasOwnProperty('pmid')) {
-                    // ok, this record has pmid!
-                    html.push(
-                        'PMID: ' + jarvis.get_link_pmid(d.meta.ds_id.pmid)
-                    );
-
-                } else {
-                    // just show others
-                    for (const ds_name in d.meta.ds_id) {
-                        html.push(
-                            ds_name.toLocaleUpperCase() + 
-                            ': ' + 
-                            d.meta.ds_id[ds_name] + 
-                            ' | '
-                        );
-                    }
-                } 
-
-            } else {
-                if (d.pid_type == 'MD5') {
-                    if (d.meta.hasOwnProperty('doi') && d.meta.doi != '') {
-                        html.push(
-                            'N/DOI' + ': ' + 
-                            jarvis.get_link_doi(d.meta.doi)
-                        );
-                    } else {
-                        html.push(
-                            'NOID'
-                        );
-                    }
-                } else {
-                    html.push(
-                        d.pid_type + ': ' + d.pid
-                    );
-                }
-            }
-            
+            html.push(
+                ds.type + ': ' + ds.id
+            )
         }
 
         // push the edit

@@ -40,7 +40,6 @@ app.app_context().push()
 
 def test():
     all_dups = srv_paper.get_duplicated_papers('IO')
-    
 
 
 def test15():

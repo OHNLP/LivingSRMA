@@ -147,6 +147,58 @@ mysql> create user lnma@localhost identified with mysql_native_password by 'LNMA
 mysql> grant all on lnma.* to lnma@localhost;
 ```
 
+### Celery task management
+
+You need to install the `celery` for running long time task.
+And we use `Redis` as the broker:
+
+```bash
+sudo apt install redis-server
+pip install celery
+pip install -U celery[redis]
+```
+
+And, a Python package needs to be downgraded according to https://stackoverflow.com/questions/74025035/importerror-cannot-import-name-celery-from-celery. Otherwise you may see the error: `ImportError: cannot import name 'Celery' from 'celery'`.
+
+```bash
+pip install importlib-metadata==4.13.0
+```
+
+Now need to configure the Redis:
+
+```bash
+sudo nano /etc/redis/redis.conf
+```
+
+Inside the file, find the supervised directive. This directive allows you to declare an init system to manage Redis as a service, providing you with more control over its operation. The supervised directive is set to no by default. Since you are running Ubuntu, which uses the systemd init system, change this to systemd:
+
+```bash
+supervised systemd
+```
+
+Then let's restart the Redis
+```bash
+sudo systemctl restart redis.service
+```
+
+You can find the Redis is running by the following command and some outputs:
+
+```bash
+sudo systemctl status redis
+
+● redis-server.service - Advanced key-value store
+   Loaded: loaded (/lib/systemd/system/redis-server.service; enabled; vendor preset: enabled)
+   Active: active (running) since Tue 2023-01-17 17:24:16 UTC; 14s ago
+     Docs: http://redis.io/documentation,
+           man:redis-server(1)
+  Process: 14379 ExecStop=/bin/kill -s TERM $MAINPID (code=exited, status=0/SUCCESS)
+  Process: 14383 ExecStart=/usr/bin/redis-server /etc/redis/redis.conf (code=exited, status=0/SUCCESS)
+ Main PID: 14397 (redis-server)
+    Tasks: 4 (limit: 19141)
+   CGroup: /system.slice/redis-server.service
+           └─14397 /usr/bin/redis-server 127.0.0.1:6379
+
+```
 
 ## R Packages
 

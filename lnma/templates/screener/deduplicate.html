@@ -38,36 +38,28 @@ html {
 .table-ss-cq tbody {
     overflow-y: auto;
 }
-#pan_ocpapers_paperlist {
-    overflow-x: hidden;
-    height: 300px;
-    font-size: 0.9em;
-    max-width: calc(100% - 15px);
+#app {
+    width: calc(100% - 10px);
+    height: 100%;
 }
-#pan_ocpapers_paperlist thead th{
-    position: sticky;
-    top: 0;
-    background-color: #d8d8d8;
-    padding: 0px 3px;
-    vertical-align: bottom;
+.table td {
+    padding: 3px 0;
 }
-#pan_ocpapers_paperlist tbody{
-    overflow-y: auto;
+.table tr:hover {
+    background-color: whitesmoke;
 }
-#pan_ocpapers_paperlist tbody td{
-    padding: 0px 3px;
-    border-right: 1px dotted #cfcfcf;
-    border-bottom: 1px dotted #cfcfcf;
-    vertical-align: middle;
+.table tr:nth-child(odd) {
+    background-color: #efefef;
 }
-#pan_ocpapers_paperlist tbody td input.check{
-    zoom: 1.5;
+.txt-pid {
+    font-size: 1.5em;
+    font-weight: bold;
 }
 </style>
 {% endblock %}
 
 {% block page_name %}
-<i class="fa fa-braille"></i>
+<i class="fas fa-object-group"></i>
 Deduplicate
 {% endblock %}
 
@@ -76,10 +68,131 @@ Deduplicate
 <div id="main">
 
 <div id="app">
+{% if dd_job == None %}
+<div v-if="job == null">
 
+<p>There is no deduplication search job running</p>
+<button class="btn btn-primary"
+    @click="start_deduplicate_search();">
+    Start a deduplication search
+</button>
 </div>
 
+{% endif %}
+
+<div v-if="job == null">
+
 </div>
+<div v-else>
+    <p>
+        <button class="btn btn-primary"
+            @click="restart_deduplicate_search();">
+            Re-start a deduplication search
+        </button>
+  
+        | 
+        Date created: {{ job.date_created }}
+        |
+        Status: 
+        <b>
+            {{ job.status }}
+        </b>
+        | 
+        Total number of papers in the current search: 
+        <b>
+            {{ job.n_papers }}
+        </b>
+        |
+        Completed: 
+        <b>
+            {{ job.n_completed }}
+        </b>
+
+        <button class="btn btn-primary"
+            @click="get_deduplicate_search_result();">
+            Get deduplicate search result
+        </button>
+    </p>
+</div>
+
+<div>
+    <span>
+        Show both duplicates included only: 
+    </span>
+    <select v-model="filter.show_both_included_only">
+        <option :value="true">Yes</option>
+        <option :value="false">No</option>
+    </select>
+</div>
+
+<div v-if="rst == null">
+    <p>
+        No results yet
+    </p>
+</div>
+<div v-else
+    style="height: calc(100% - 100px); overflow-y: auto;">
+    <table class="table"
+        style="height: calc(100% - 5px); overflow-y: auto;">
+        <tr>
+            <th width="80px">#</th>
+            <th>Paper 1</th>
+            <th>Paper 2</th>
+        </tr>
+        <template v-for="(ps, title, idx) in rst.dup_dict">
+        <tr v-if="has_matched_filter(ps)">
+
+            <td>{{ idx }}</td>
+            <td>
+                <span class="txt-pid">{{ ps[0] }}</span> |
+                {{ srv_shared.get_paper_pmid_if_exists(get_paper(ps[0])) }}
+                <br>
+                {{ get_paper(ps[0]).ss_rs }}
+                |
+                {{ get_paper(ps[0]).ext_abbrs }}
+                <br>
+                
+                <button class="btn btn-sm btn-danger mr-2"
+                    @click="exclude_by_tt(get_paper(ps[0]))">
+                    Exclude This
+                </button>
+                
+                <button class="btn btn-sm btn-primary mr-2"
+                    @click="exclude_by_tt(get_paper(ps[0]))">
+                    Include This
+                </button>
+            </td>
+            <td>
+                <span class="txt-pid">{{ ps[1] }}</span> |
+                {{ srv_shared.get_paper_pmid_if_exists(get_paper(ps[1])) }}
+                <br>
+                {{ get_paper(ps[1]).ss_rs }}
+                |
+                {{ get_paper(ps[1]).ext_abbrs }}
+                <br>
+                
+                <button class="btn btn-sm btn-danger mr-2"
+                    @click="exclude_by_tt(get_paper(ps[1]))">
+                    Exclude This
+                </button>
+                
+                <button class="btn btn-sm btn-primary mr-2"
+                    @click="exclude_by_tt(get_paper(ps[1]))">
+                    Include This
+                </button>
+            </td>
+        </tr>
+        </template>
+    </table>
+</div>
+
+
+
+</div>
+<!-- /#app -->
+
+</div>
+<!-- /#main -->
 
 {% endblock %}
 
@@ -92,6 +205,8 @@ Deduplicate
 <!-- my scripts -->
 <script>
 
+{% include 'js/srv_shared.js' %}
+
 ///////////////////////////////////////////////////////////
 // bind the project information to srv_screener.js
 ///////////////////////////////////////////////////////////
@@ -102,13 +217,96 @@ var app = {
     vpp_id: "#app",
     vpp: null,
     vpp_data: {
+        srv_shared: srv_shared,
         keywords: '',
         project: [[ project_json_str|safe ]],
-
-        papers: null
+        papers: null,
+        filter: {
+            show_both_included_only: true
+        },
+        job: [[ dd_job|to_json_str|safe ]],
+        rst: null
     },
     
     vpp_methods: {
+        start_deduplicate_search: function() {
+            srv_screener.start_deduplicate_search(function(data) {
+                console.log('* start start_deduplicate_search', data);
+                app.vpp.$data.job = data;
+            });
+        },
+
+        restart_deduplicate_search: function() {
+            var ret = window.confirm('This will kill the running task if any. Are you sure to restart?');
+            if (ret) {
+                srv_screener.start_deduplicate_search(function(data) {
+                    console.log('* start start_deduplicate_search', data);
+                    app.vpp.$data.job = data;
+                });
+            }
+        },
+
+        get_deduplicate_search_result: function() {
+            srv_screener.get_deduplicate_search_result(function(data) {
+                if (data.success) {
+                    app.vpp.$data.rst = data.rst;
+                    toast('Updated deduplicate search result');
+                } else {
+                    toast('Error when getting result: ' + data.msg, 'warning');
+                }
+
+            });
+        },
+
+        has_matched_filter: function(ps) {
+            var p0 = this.get_paper(ps[0]);
+            var p1 = this.get_paper(ps[1]);
+            if (this.filter.show_both_included_only) {
+                if (p0.ss_rs.startsWith('f') &&
+                    p1.ss_rs.startsWith('f')) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+
+            return true;
+        },
+
+        exclude_by_tt: function(p) {
+            srv_screener.exclude_by_tt(p.paper_id, function(data) {
+                app.vpp.update_paper(data.papers[0]);
+            });
+        },
+
+        update_paper: function(p) {
+            var title = p.title.toLocaleLowerCase();
+            var pid = p.pid;
+            var flag = false;
+
+            if (this.rst.paper_dict(pid)) {
+                Object.assign(
+                    this.rst.paper_dict[pid],
+                    p
+                );
+                flag = true;
+            }
+
+            if (flag) {
+                toast('Updated paper [' + p.pid + ']');
+            } else {
+                toast('Not found paper [' + p.pid + '] in current list?', 'warning');
+            }
+                
+        },
+
+        get_paper: function(pid) {
+            if (this.rst.paper_dict.hasOwnProperty(pid)) {
+                return this.rst.paper_dict[pid];
+            } else {
+                return null;
+            }
+        }
     },
 
     init: function() {
@@ -118,28 +316,15 @@ var app = {
             methods: this.vpp_methods,
         });
 
-        this.resize();
     },
 
     load: function() {
-        var stage = srv_screener.STAGE_INCLUDED_SR;
-        srv_screener.get_papers_by_stage(
-            stage,
-            '',
-            '',
-            function(data) {
-                console.log(data);
-                jarvis.toast('Loaded papers');
-
-                // bind papers
-                pan_ocpapers.vpp.$data.papers = data.papers;
-            }
-        );
+        
     },
 
     resize: function() {
-        var h = $(window).height() - 90;
-        $('#pan_ocpapers_paperlist').height(h);
+        var h = $(window).height() - 20;
+        $(this.vpp_id).css('height', h);
     }
 };
 
@@ -148,14 +333,9 @@ var jarvis = {
     project: [[ project_json_str|safe ]],
 
     init: function () {
-        // init the UI
-        pan_ocpapers.init();
-
-        // the load the papers
-        pan_ocpapers.load();
-
-        // bind resize event
+        app.init();
         this.bind_resize_event();
+        app.resize();
     },
 
     toast: function(msg, type) {
@@ -172,9 +352,10 @@ var jarvis = {
 
     bind_resize_event: function() {
         $(window).on('resize', function(){
-            pan_ocpapers.resize();
+            app.resize();
         });
     }
+
 };
 
 $(document).ready(function () {

@@ -6,6 +6,7 @@ ALLOWED_PDF_UPLOAD_EXTENSIONS = {'pdf'}
 
 TMP_FOLDER = '/dev/shm/lnma'
 PATH_PUBDATA = 'pubdata'
+PATH_DEDUPLICATE = 'deduplicate'
 PATH_PDF_FILES = '/data/lnma/pdfs'
 PATH_PDF_FOLDER_FORMAT = '%Y%m%d'
 

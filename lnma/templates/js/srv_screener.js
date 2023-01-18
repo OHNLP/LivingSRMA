@@ -15,6 +15,10 @@ var srv_screener = {
         include_sr: '[[ url_for("screener.sspr_include_papers_sr") ]]',
         include_srma: '[[ url_for("screener.sspr_include_papers_srma") ]]',
 
+        // for deduplicate search
+        start_deduplicate_search: '[[ url_for("screener.start_deduplicate_search") ]]',
+        get_deduplicate_search_result: '[[ url_for("screener.get_deduplicate_search_result") ]]',
+
         // for labeling 
         set_label_ckl: '[[ url_for("screener.sspr_set_label_ckl") ]]',
         unset_label_ckl: '[[ url_for("screener.sspr_unset_label_ckl") ]]',
@@ -189,6 +193,48 @@ var srv_screener = {
             'json'
         );
     },
+
+    start_deduplicate_search: function(callback) {
+        var project_id = Cookies.get('project_id');
+
+        $.ajax({
+            type: 'GET',
+            dataType: "json",
+            url: this.api_url.start_deduplicate_search,
+            data: {
+                project_id: project_id,
+                rnd: Math.random(),
+            },
+            cache: false,
+            success: callback,
+            error: function(jqXHR, textStatus, errorThrown) {
+                jarvis.toast('Something wrong when starting deduplicate search. Refresh page and try later.', 'error');
+                console.error(textStatus, errorThrown);
+            }
+        });
+    },
+
+    get_deduplicate_search_result: function(callback) {
+        var project_id = Cookies.get('project_id');
+
+        $.ajax({
+            type: 'GET',
+            dataType: "json",
+            url: this.api_url.get_deduplicate_search_result,
+            data: {
+                project_id: project_id,
+                rnd: Math.random(),
+            },
+            cache: false,
+            success: callback,
+            error: function(jqXHR, textStatus, errorThrown) {
+                jarvis.toast('Something wrong when starting deduplicate search. Refresh page and try later.', 'error');
+                console.error(textStatus, errorThrown);
+            }
+        });
+    },
+
+    
 
     get_paper_by_id: function(paper_id, callback) {
         var project_id = Cookies.get('project_id');

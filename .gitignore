@@ -135,3 +135,6 @@ migrations/*
 
 # VIM temp file
 .swp
+
+# tempfile
+tmp/

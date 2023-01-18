@@ -7,8 +7,33 @@ from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_compress import Compress
+from celery import Celery
 
+# for database access
 db = SQLAlchemy()
+
+# for running long task
+def make_celery(app_name):
+    redis_uri = 'redis://localhost:6379'
+    celery = Celery(
+        app_name,
+        backend=redis_uri,
+        broker=redis_uri
+    )
+    return celery
+
+def init_celery(celery_app, flask_app):
+    celery_app.conf.update(flask_app.config["CELERY_CONFIG"])
+
+    class ContextTask(celery_app.Task):
+        def __call__(self, *args, **kwargs):
+            with flask_app.app_context():
+                return self.run(*args, **kwargs)
+
+    celery_app.Task = ContextTask
+
+# config the celery
+celery_app = make_celery('LNMA Celery Client')
 
 def create_app(test_config=None):
     """
@@ -44,11 +69,21 @@ def create_app(test_config=None):
         app.config.update(test_config)
 
     # a helper function for jinja2 to display json
-    def tojson_pretty(value):
+    def to_json_str(value):
+        return json.dumps(
+            value,
+            indent=2, 
+            separators=(',', ': ')
+        )
+
+    app.jinja_env.filters['to_json_str'] = to_json_str
+
+    # a helper function for jinja2 to display json
+    def to_json_pretty(value):
         return json.dumps(value, sort_keys=True,
             indent=4, separators=(',', ': '))
 
-    app.jinja_env.filters['tojson_pretty'] = tojson_pretty
+    app.jinja_env.filters['to_json_pretty'] = to_json_pretty
 
     # a helper function for jinja2 to show something only for localhost
     def show_if_local(value):

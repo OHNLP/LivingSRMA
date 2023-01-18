@@ -528,28 +528,30 @@ class Paper(db.Model):
         # ok, that's all
 
     
-    def update_meta_ds_id_by_self(self):
+    def update_meta_ds_id_by_self(self, force_update=False):
         '''
         Update the meta's ds_id
         '''
         ds_name = util.get_ds_name_by_pid_and_type(self.pid, self.pid_type)
 
-        if 'ds_id' not in self.meta:
+        if 'ds_id' in self.meta:
+            if ds_name in self.meta['ds_id']:
+                if force_update:
+                    # which means current pid is not added as ds_id???
+                    self.meta['ds_id'][ds_name] = self.pid
+                    return True
+                else:
+                    return False
+            else:
+                self.meta['ds_id'][ds_name] = self.pid
+                return True
+        else:
             # which means this paper needs to be updated!
             self.meta['ds_id'] = {
                 ds_name: self.pid
             }
             return True
-
-        else:
-            if ds_name not in self.meta['ds_id']:
-                # which means current pid is not added as ds_id???
-                self.meta['ds_id'][ds_name] = self.pid
-                return True
-
-        # for other cases, no need to update    
-        return False
-        
+            
 
     def get_simple_pid_type(self):
         '''
@@ -564,7 +566,7 @@ class Paper(db.Model):
             return 'PUBMED'
 
         if 'EMBASE' in pid_type:
-            return 'EBASE'
+            return 'EMBASE'
 
         return pid_type
 
@@ -592,9 +594,6 @@ class Paper(db.Model):
                 return True
             else:
                 return False
-
-
-        return False
         
 
     def as_dict(self):
@@ -607,9 +606,6 @@ class Paper(db.Model):
         ret['rct_id'] = self.get_rct_id()
         ret['short_name'] = self.get_short_name()
         ret['study_type'] = self.get_study_type()
-
-        # add ds_id, it will take too long for large retrieval
-        # self.update_meta_ds_id_by_self()
 
         return ret
 

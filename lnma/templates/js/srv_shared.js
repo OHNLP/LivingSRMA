@@ -11,6 +11,62 @@ var srv_shared = {
         'itable': 'Interactive Table'
     },
 
+    regex_pmid: /^\d{6,8}$/,
+    is_valid_pmid: function(pmid) {
+        return this.regex_pmid.test(pmid);
+    },
+
+    get_ds_name_by_pid_and_type: function(pid, pid_type) {
+        var _pid_type = pid_type.toLocaleLowerCase();
+        var ds_name = 'other';
+
+        if (_pid_type.indexOf('medline')>=0 ||
+            _pid_type.indexOf('pmid')>=0 ||
+            _pid_type.indexOf('nlm')>=0 ||
+            _pid_type.indexOf('pubmed')>=0
+        ) {
+            ds_name = 'pmid';
+
+        } else if (this.is_valid_pmid(pid)) {
+            ds_name = 'pmid';
+
+        } else if (_pid_type.indexOf('md5')>=0) {
+            ds_name = 'md5';
+
+        } else if (_pid_type.indexOf('embase')>=0) {
+            ds_name = 'embase';
+            
+        } else if (_pid_type.indexOf('doi')>=0) {
+            ds_name = 'doi';
+            
+        } else {
+            ds_name = 'other';
+        }
+
+        return ds_name;
+    },
+
+    get_paper_pmid_if_exists: function(paper) {
+        if (paper.meta.hasOwnProperty('ds_id')) {
+            if (paper.meta.ds_id.hasOwnProperty('pmid')) {
+                // great, this paper has pmid
+                return {
+                    type: 'pmid',
+                    id: paper.meta.ds_id.pmid
+                };
+            }
+        }
+        // oh, this paper has no ds_id or not pmid
+        // then just just check return the pid
+        return {
+            type: this.get_ds_name_by_pid_and_type(
+                paper.pid,
+                paper.pid_type
+            ),
+            id: paper.pid
+        };
+    },
+
     /**
      * Update the labels by project setting object
      * 

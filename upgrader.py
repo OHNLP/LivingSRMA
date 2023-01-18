@@ -19,7 +19,7 @@ from lnma import db
 from lnma import create_app
 
 
-def upgrade_paper_meta_ds_id(keystr='TEST'):
+def upgrade_paper_meta_ds_id(keystr='TEST', force_update=False):
     '''
     Upgrade paper meta to include a ds_id information
 
@@ -35,7 +35,7 @@ def upgrade_paper_meta_ds_id(keystr='TEST'):
     cnt_updated = 0
     cnt_not = 0
     for paper in tqdm(papers):
-        has_updated = paper.update_meta_ds_id_by_self()
+        has_updated = paper.update_meta_ds_id_by_self(force_update)
 
         if has_updated:
             # oh, this paper has been updated, need to save
@@ -354,7 +354,6 @@ if __name__ == '__main__':
     app.app_context().push()
 
     # upgrade something?
-    upgrade_paper_meta_ds_id('TEST')
-
+    upgrade_paper_meta_ds_id('IO', True)
 
     print('* done upgrader')
