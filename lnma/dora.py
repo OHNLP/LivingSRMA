@@ -2152,6 +2152,16 @@ def update_paper_selections(project_id, cq_abbr, pid, abbrs):
     return paper, abbrs
 
 
+def get_all_extracts():
+    '''
+    Get ALL extracts in the database
+
+    Please don't use this function if you are not sure
+    '''
+    extracts = Extract.query.all()
+    return extracts
+
+
 def get_extracts_by_project_id_and_cq(project_id, cq_abbr):
     '''
     Get all of the extracts by given project and cq
@@ -2292,14 +2302,6 @@ def get_extract_by_keystr_and_cq_and_abbr(keystr, cq_abbr, abbr):
     '''
     Get an extract by keystr, cq, and abbr
     '''
-    # extract = get_extract_by_keystr_and_abbr(keystr, abbr)
-
-    # if extract is None:
-    #     return None
-
-    # if extract.meta['cq_abbr'] != cq_abbr:
-    #     return None
-
     # return extract
     project = get_project_by_keystr(keystr)
 
@@ -2338,10 +2340,14 @@ def get_extract_by_keystr_and_abbr(keystr, abbr):
         # what???
         return None
 
-    extract = Extract.query.filter(and_(
-        Extract.project_id == project.project_id,
-        Extract.abbr == abbr
-    )).first()
+    # extract = Extract.query.filter(and_(
+    #     Extract.project_id == project.project_id,
+    #     Extract.abbr == abbr
+    # )).first()
+    extract = get_extract_by_project_id_and_abbr(
+        project.project_id,
+        abbr
+    )
 
     return extract
 
@@ -2350,7 +2356,7 @@ def get_extract_by_keystr_and_abbr(keystr, abbr):
 # Piece Related Functions
 ###############################################################################
 
-def create_piece(project_id, abbr, pid, data):
+def create_piece(project_id, extract_id, pid, data):
     '''
     Create a new piece for an extract in a project
     '''
@@ -2362,7 +2368,7 @@ def create_piece(project_id, abbr, pid, data):
     piece = Piece(
         piece_id = piece_id,
         project_id = project_id,
-        abbr = abbr,
+        extract_id = extract_id,
         pid = pid,
         data = data,
         date_created = date_created,
@@ -2375,26 +2381,84 @@ def create_piece(project_id, abbr, pid, data):
     return piece
 
 
-def get_pieces_by_project_id_and_abbr(project_id, abbr):
+def create_or_update_piece(project_id, extract_id, pid, data):
+    '''
+    Create or update a single piece
+    '''
+    piece = update_piece(
+        project_id,
+        extract_id,
+        pid,
+        data
+    )
+
+    if piece is None:
+        # this piece doesn't exists
+        piece = create_piece(
+            project_id,
+            extract_id,
+            pid,
+            data
+        )
+
+    return piece
+
+
+def get_pieces_as_data_by_project_id_and_extract_id(project_id, extract_id):
+    '''
+    Get pieces as a pid-data object for extract
+    '''
+    pieces = get_pieces_by_project_id_and_extract_id(project_id, extract_id)
+    data = {}
+    for p in pieces:
+        data[p.pid] = p.data
+
+    return data
+
+
+def get_pieces_by_project_id_and_extract_id(project_id, extract_id):
     '''
     Get all pieces in an extract of a project
     '''
     pieces = Piece.query.filter(
         Piece.project_id == project_id,
-        Piece.abbr == abbr
+        Piece.extract_id == extract_id
     ).all()
 
     return pieces
 
 
-def get_piece_by_project_id_and_abbr_and_pid(project_id, abbr, pid):
+def get_piece_by_project_id_and_abbr_and_pid(project_id, extract_id, pid):
     '''
     Get one piece in an extract of a project
     '''
     piece = Piece.query.filter(
         Piece.project_id == project_id,
-        Piece.abbr == abbr,
+        Piece.extract_id == extract_id,
         Piece.pid == pid
     ).first()
+
+    return piece
+
+
+def update_piece(project_id, extract_id, pid, data):
+    '''
+    Update one piece in an extract
+    '''
+    piece = Piece.query.filter(
+        Piece.project_id == project_id,
+        Piece.extract_id == extract_id,
+        Piece.pid == pid
+    ).first()
+
+    if piece == None:
+        return None
+
+    # just update the data
+    piece.data = data
+    flag_modified(piece, 'data')
+
+    db.session.add(piece)
+    db.session.commit()
 
     return piece

@@ -19,6 +19,29 @@ from lnma import db
 from lnma import create_app
 
 
+def upgrade_pieces_from_extracts(keystr):
+    '''
+    Upgrade the pieces by getting data from extracts
+    '''
+    project = dora.get_project_by_keystr(keystr)
+    if keystr == 'ALL_PRJS':
+        extracts = dora.get_all_extracts()
+    else:
+        extracts = dora.get_extracts_by_keystr(keystr)
+    print('* found %s extracts in the [%s]' % (len(extracts), keystr))
+
+    for extract in tqdm(extracts):
+        for pid in extract.data:
+            piece = dora.create_or_update_piece(
+                project.project_id,
+                extract.extract_id,
+                pid,
+                extract.data[pid]
+            )
+
+    print('* done upgrade the pieces for %s' % (keystr))
+
+
 def upgrade_paper_meta_ds_id(keystr='TEST', force_update=False):
     '''
     Upgrade paper meta to include a ds_id information
@@ -354,6 +377,8 @@ if __name__ == '__main__':
     app.app_context().push()
 
     # upgrade something?
-    upgrade_paper_meta_ds_id('IO', True)
+    # upgrade_paper_meta_ds_id('IO', True)
+
+    upgrade_pieces_from_extracts('TEST')
 
     print('* done upgrader')

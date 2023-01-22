@@ -914,6 +914,12 @@ class Extract(db.Model):
     Some attributes are designed for the public site only.
     More information would be added in the future.
 
+
+    As the extraction is becoming more complex, 
+    it is very possible that N users is working on a same extraction.
+    So the extracted data may be overwrite
+    As a result, the following will be deprecated due to significant conflict.
+
     The `data` attribute contains all the extraction results.
     It's a pid based (e.g., PMID) dictionary.
     {
@@ -1889,8 +1895,8 @@ class Piece(db.Model):
 
     It uses three IDs to locate:
 
-    1. project_id: decide which project is working on
-    2. abbr: decide which extract is working on
+    1. project_id: decide which project
+    2. extract_id: decide which extract
     3. pid: decide which paper
 
     The piece contains the information related to an outcome (or AE).
@@ -1900,11 +1906,15 @@ class Piece(db.Model):
         is_checked: true / false,
         n_arms: 2 / 3 / 4 / 5,
         attrs: {
-            main: {
-                attr_sub_abbr: value
+            main: { 
+                g0: {
+                    attr_sub_abbr: value
+                }
             },
             other: [{
-                attr_sub_abbr: value
+                g0: {
+                    attr_sub_abbr: value
+                }
             }, ...]
         }
     }
@@ -1915,16 +1925,20 @@ class Piece(db.Model):
 
     piece_id = db.Column(db.String(48), primary_key=True, nullable=False)
     project_id = db.Column(db.String(48), index=False)
-    abbr = db.Column(db.String(48), index=False)
+    extract_id = db.Column(db.String(48), index=False)
     pid = db.Column(db.String(settings.PAPER_PID_MAX_LENGTH), index=False)
     data = db.Column(db.JSON, index=False)
     date_created = db.Column(db.DateTime, index=False)
     date_updated = db.Column(db.DateTime, index=False)
 
-    def __repr__(self):
-        return '<Piece {0} in {1}: {2}>'.format(
-            self.pid, self.abbr, self.piece_id)
 
+    def __repr__(self):
+        return '<Piece {0}: {1} in {2}/{3}>'.format(
+            self.piece_id, 
+            self.pid, 
+            self.project_id,
+            self.extract_id
+        )
 
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
