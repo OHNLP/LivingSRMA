@@ -2356,7 +2356,7 @@ def get_extract_by_keystr_and_abbr(keystr, abbr):
 # Piece Related Functions
 ###############################################################################
 
-def create_piece(project_id, extract_id, pid, data):
+def create_piece(project_id, extract_id, pid, data, auto_add=True, auto_commit=True):
     '''
     Create a new piece for an extract in a project
     '''
@@ -2375,10 +2375,48 @@ def create_piece(project_id, extract_id, pid, data):
         date_updated = date_updated
     )
 
-    db.session.add(piece)
-    db.session.commit()
+    if auto_add: db.session.add(piece)
+    if auto_commit: db.session.commit()
 
     return piece
+
+
+def create_or_update_pieces_by_extract_data(project_id, extract_id, ext_data):
+    '''
+    Create or update a single piece
+    '''
+    pieces = []
+    for pid in ext_data:
+        # get the data of this pid
+        data = ext_data[pid]
+
+        # try to find this ext
+        piece = Piece.query.filter(
+            Piece.project_id == project_id,
+            Piece.extract_id == extract_id,
+            Piece.pid == pid
+        ).first()
+
+        if piece == None:
+            # ok, this is a new
+            piece = create_piece(
+                project_id,
+                extract_id,
+                pid,
+                data,
+                auto_commit=False
+            )
+        else:
+            piece.data = data
+            flag_modified(piece, 'data')
+            db.session.add(piece)
+        
+        pieces.append(piece)
+
+    # then, commit all
+    db.session.commit()
+
+    return pieces
 
 
 def create_or_update_piece(project_id, extract_id, pid, data):
@@ -2441,7 +2479,7 @@ def get_piece_by_project_id_and_abbr_and_pid(project_id, extract_id, pid):
     return piece
 
 
-def update_piece(project_id, extract_id, pid, data):
+def update_piece(project_id, extract_id, pid, data, auto_add=True, auto_commit=True):
     '''
     Update one piece in an extract
     '''
@@ -2458,7 +2496,7 @@ def update_piece(project_id, extract_id, pid, data):
     piece.data = data
     flag_modified(piece, 'data')
 
-    db.session.add(piece)
-    db.session.commit()
+    if auto_add: db.session.add(piece)
+    if auto_commit: db.session.commit()
 
     return piece

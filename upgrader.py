@@ -31,13 +31,11 @@ def upgrade_pieces_from_extracts(keystr):
     print('* found %s extracts in the [%s]' % (len(extracts), keystr))
 
     for extract in tqdm(extracts):
-        for pid in extract.data:
-            piece = dora.create_or_update_piece(
-                project.project_id,
-                extract.extract_id,
-                pid,
-                extract.data[pid]
-            )
+        pieces = dora.create_or_update_pieces_by_extract_data(
+            project.project_id,
+            extract.extract_id,
+            extract.data
+        )
 
     print('* done upgrade the pieces for %s' % (keystr))
 
@@ -379,6 +377,6 @@ if __name__ == '__main__':
     # upgrade something?
     # upgrade_paper_meta_ds_id('IO', True)
 
-    upgrade_pieces_from_extracts('TEST')
+    upgrade_pieces_from_extracts('IO')
 
     print('* done upgrader')
