@@ -44,6 +44,8 @@ def run():
         help="Run which action when not loop")
     parser.add_argument("--prj", type=str, default='all',
         help="The prj keystr, e.g., IO, RCC, CAT, etc.")
+    parser.add_argument("--skip_n_days", type=int, default=None,
+        help="skip the emails of N days before")
 
     args = parser.parse_args()
 
@@ -56,16 +58,26 @@ def run():
         # check emails for specified project(s)
         elif args.act == 'check_email':
             if args.prj == 'all':
-                ovid_email_watcher.check_updates()
+                ovid_email_watcher.check_updates(
+                    args.skip_n_days
+                )
             else:
-                ovid_email_watcher.check_update_by_prj_keystr(args.prj)
+                ovid_email_watcher.check_update_by_prj_keystr(
+                    args.prj,
+                    args.skip_n_days
+                )
                 
         # do all checking for specified project(s)
         elif args.act == 'all':
             if args.prj == 'all':
-                ovid_email_watcher.check_updates()
+                ovid_email_watcher.check_updates(
+                    args.skip_n_days
+                )
             else:
-                ovid_email_watcher.check_update_by_prj_keystr(args.prj)
+                ovid_email_watcher.check_update_by_prj_keystr(
+                    args.prj,
+                    args.skip_n_days
+                )
 
         # something wrong?
         else:

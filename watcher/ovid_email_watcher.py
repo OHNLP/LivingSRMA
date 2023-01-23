@@ -17,8 +17,13 @@ logging.basicConfig(level=logging.WARNING, format='%(asctime)s [%(name)s] [%(lev
 from sqlalchemy import and_, or_, not_
 from tqdm import tqdm
 
+# for parsing date
+from dateparser import DateDataParser
+ddp = DateDataParser(languages=['en'])
+
 # for looping the watcher
 from timeloop import Timeloop
+from datetime import datetime
 from datetime import timedelta
 
 # for checking email updates
@@ -46,7 +51,29 @@ WATCHER_EMAIL_PASSWORD = app.config['WATCHER_EMAIL_PASSWORD']
 DS_TYPE = 'OVID_EMAIL_TEXT'
 PAPER_EMAIL_KEY = '_UPDATE'
 
-def check_updates():
+
+def calc_n_days_between_today_and_date(d):
+    '''
+    Calculate the number of days
+    '''
+    if isinstance(d, str):
+        dt = ddp.get_date_data(d)
+        pd = dt.date_obj.replace(tzinfo=None)
+    else:
+        pd = d
+
+    # remove tzone if there is
+
+    # get today
+    td = datetime.now()
+
+    # delta
+    delta = td - pd
+
+    return delta.days
+
+
+def check_updates(skip_n_days_before=None):
     '''
     Check the updates of all projects
     '''
@@ -56,7 +83,7 @@ def check_updates():
     )).all()
 
     # get all emails
-    emails = _get_all_paper_emails_from_inbox()
+    emails = _get_all_paper_emails_from_inbox(skip_n_days_before)
 
     for email in emails:
         ds = dora.create_datasource(
@@ -71,7 +98,7 @@ def check_updates():
     return 0
 
 
-def check_update_by_prj_keystr(prj_keystr):
+def check_update_by_prj_keystr(prj_keystr, skip_n_days_before=None):
     '''
     Check update by project keystr
     '''
@@ -81,7 +108,7 @@ def check_update_by_prj_keystr(prj_keystr):
         return None
 
     # get all emails
-    emails = _get_all_paper_emails_from_inbox()
+    emails = _get_all_paper_emails_from_inbox(skip_n_days_before)
 
     # save emails
     for email in emails:
@@ -95,7 +122,7 @@ def check_update_by_prj_keystr(prj_keystr):
     return ret
 
 
-def _get_all_paper_emails_from_inbox():
+def _get_all_paper_emails_from_inbox(skip_n_days_before=None):
     '''
     Get all paper emails from in the inbox
     '''
@@ -122,14 +149,20 @@ def _get_all_paper_emails_from_inbox():
     for i in tqdm(range(1, len(all_inbox_messages)+1)):
         # get the latest one first
         uid, mail = all_inbox_messages[-i]
+        # logger.info('parsing %s/%s' % (
+        #     mail.date,
+        #     mail.subject
+        # ))
 
         # check the email date, ignore old emails
         # TODO: also check the title
+        if skip_n_days_before is not None:
+            n_days = calc_n_days_between_today_and_date("%s" % mail.date)
+            if n_days > skip_n_days_before:
+                break
 
         # check this email belong to which project or not
         if PAPER_EMAIL_KEY in mail.subject:
-            
-            cnt['paper'] += 1
             # check the content of this email
             content = ''.join(map(lambda v: v if type(v) == str else v.decode('utf8'), mail.body['plain']))
 
@@ -142,6 +175,10 @@ def _get_all_paper_emails_from_inbox():
             if len(mail.attachments) > 0:
                 email_type = 'attachment'
                 attachment_bytes = mail.attachments[0]['content'].getvalue()
+            else:
+                # if this email has no attachment, just skip
+                cnt['other'] += 1
+                continue
 
             paper_email = {
                 'subject': mail.subject,
@@ -152,13 +189,14 @@ def _get_all_paper_emails_from_inbox():
             }
             
             emails.append(paper_email)
+            cnt['paper'] += 1
         else:
             # skip this email?
             cnt['other'] += 1
-            pass
 
-    logger.info('found %s paper email, %s other emails' % (
-        cnt['paper'], cnt['other']
+    logger.info('found %s paper emails match criteria, skip %s other emails' % (
+        cnt['paper'], 
+        cnt['other']
     ))
 
     return emails
