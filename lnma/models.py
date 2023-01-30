@@ -992,9 +992,18 @@ class Extract(db.Model):
 
         # for pid in self.data:
 
+    
+    def update_data_by_pieces(self, pieces):
+        '''
+        Update the current extract with extracted pieces
+        '''
+        for pc in pieces:
+            self.data[pc.pid] = pc.data
+
 
     def update_data_by_papers(self, papers):
         '''
+        Deprecated ... I think
         Extend the current extract with more papers
         according to the given papers.
         And also update existing papers according the extract meta
@@ -1130,7 +1139,7 @@ class Extract(db.Model):
         '''
         full_dict = self.as_dict()
 
-        for attr in ['data', 'project_id']:
+        for attr in ['data']:
             if attr in full_dict:
                 del full_dict[attr]
 

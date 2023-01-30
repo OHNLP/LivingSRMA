@@ -20,6 +20,9 @@ Object.assign(pan_ocpapers.vpp_data, {
     // the working paper
     working_paper: null,
 
+    // working piece
+    working_piece: null,
+
     // working arm
     // null means main arm
     // numbers mean other arm
@@ -517,6 +520,7 @@ Object.assign(pan_ocpapers.vpp_methods, {
     has_change_saved: function() {
         this.has_saved = true;
     },
+    
 
     confirm_close_wpc: function() {
 
@@ -524,6 +528,7 @@ Object.assign(pan_ocpapers.vpp_methods, {
 
     on_change_input_value: function(event) {
         // no matter what happens, trigger this event
+        // console.log('* changed any input', event);
         this.has_change_unsaved();
     },
 
@@ -533,8 +538,38 @@ Object.assign(pan_ocpapers.vpp_methods, {
 
         this.saving_start();
 
-        pan_ocpapers.save_working_paper_extraction(
-            pid, oc
+        // 2023-01-28: a speciall rule for itable update
+        if (this.working_oc.oc_type == 'itable') {
+            // maybe need to update to update the oc info
+            if (!this.hasOwnProperty('itable')) {
+                // ??? why?
+            } else {
+                if (this.hasOwnProperty('working_piece'))
+                // ok, using the current piece to update
+                // get a copy
+                this.itable.data[pid] = JSON.parse(JSON.stringify(this.working_piece.data));
+            }
+        }
+
+        // a special rule for extract outcome page
+        if (this.page_name == 'by_oc') {
+            // which means user is extracting on the by_outcome page
+            // need to copy the piece to the working oc
+            this.working_oc.data[pid] = JSON.parse(JSON.stringify(
+                this.working_piece.data
+            ));
+        }
+
+        // 2023-01-28: Use piece to update
+        srv_extractor.update_extract_piece(
+            this.working_piece,
+            function(data) {
+                // the data contain a paer
+                console.log('* update_extract_piece returns:', data);
+
+                jarvis.toast('Saved [' + data.data.piece.pid + '] extraction with current extraction');
+                pan_ocpapers.vpp.saving_end();
+            }
         );
     },
 
@@ -599,10 +634,15 @@ Object.assign(pan_ocpapers.vpp_methods, {
 
     get_working_arm_attrs: function() {
         // console.log('* get_working_arm_attrs: ' + this.working_paper_arm);
+        // if (this.working_paper_arm == null) {
+        //     return this.working_oc.data[this.working_paper.pid].attrs.main;
+        // } else {
+        //     return this.working_oc.data[this.working_paper.pid].attrs.other[this.working_paper_arm];
+        // }
         if (this.working_paper_arm == null) {
-            return this.working_oc.data[this.working_paper.pid].attrs.main;
+            return this.working_piece.data.attrs.main;
         } else {
-            return this.working_oc.data[this.working_paper.pid].attrs.other[this.working_paper_arm];
+            return this.working_piece.data.attrs.other[this.working_paper_arm];
         }
     },
 

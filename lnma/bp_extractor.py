@@ -317,25 +317,19 @@ def update_paper_one_selection():
     Update just one selection for a paper
     '''
     project_id = request.form.get('project_id')
+    cq_abbr = request.form.get('cq_abbr')
     pid = request.form.get('pid')
     abbr = request.form.get('abbr')
     is_selected = request.form.get('is_selected')
     is_selected = True if is_selected.lower() == 'true' else False
 
-    print('* %s in extract[%s]: %s(%s)' % (
-        pid, abbr, is_selected, type(is_selected)
-    ))
-
-    extract = dora.update_paper_selection(
-        project_id, pid, abbr, is_selected
-    )
-
-    paper = dora.get_paper_by_project_id_and_pid(
-        project_id, pid
-    )
-
-    outcome_selections = dora.get_paper_selections(
-        project_id, pid
+    # update status
+    paper, extract, piece = dora.update_paper_selection(
+        project_id, 
+        cq_abbr,
+        pid, 
+        abbr, 
+        is_selected
     )
 
     msg = 'Updated %s %s %s' % (
@@ -344,15 +338,15 @@ def update_paper_one_selection():
         extract.get_short_title()
     )
 
-    paper.meta['outcome_selections'] = outcome_selections
     ret = {
         'success': True,
         'msg': msg,
-        'paper': paper.as_very_simple_dict(),
         'data': {
+            'cq_abbr': cq_abbr,
             'pid': pid,
             'abbr': abbr,
-            'is_selected': is_selected
+            'is_selected': is_selected,
+            'piece': piece.as_dict()
         }
     }
 
@@ -432,7 +426,10 @@ def get_extract_and_papers():
     abbr = request.args.get('abbr')
     
     # get the exisiting extracts
-    extract = dora.get_extract_by_project_id_and_abbr(project_id, abbr)
+    extract = dora.get_extract_by_project_id_and_abbr(
+        project_id, 
+        abbr
+    )
 
     if extract is None:
         # this is a new extract
@@ -451,8 +448,11 @@ def get_extract_and_papers():
     # update the meta
     extract.update_meta()
 
+    # 2023-01-28: use piece to fill the data
+    extract = dora.attach_extract_data(extract)
+
     # update the extract with papers
-    extract.update_data_by_papers(papers)
+    # extract.update_data_by_papers(papers)
 
     # make the return object
     ret = {
@@ -554,17 +554,15 @@ def update_extract_incr_data():
     '''
     project_id = request.form.get('project_id')
     oc_type = request.form.get('oc_type')
-    abbr = request.form.get('abbr')
+    extract_id = request.form.get('extract_id')
     flag_skip_is_selected = request.form.get('flag_sis') == 'yes'
     
     # the meta of the extract settings
     data = json.loads(request.form.get('data'))
     
     # update the extract with given info
-    extract = dora.update_extract_incr_data(
-        project_id, 
-        oc_type, 
-        abbr, 
+    extract, pieces = dora.update_extract_incr_data(
+        extract_id, 
         data,
         flag_skip_is_selected
     )
@@ -573,7 +571,7 @@ def update_extract_incr_data():
     ret = {
         'success': True,
         'msg': '',
-        'extract': extract.as_dict()
+        'extract': extract.as_simple_dict()
     }
     return jsonify(ret)
 
@@ -1162,6 +1160,71 @@ def import_softable_pma_from_xls_for_IO(fn, group='primary'):
     return extracts
 
 
+@bp.route('/get_extract_piece')
+@login_required
+def get_extract_piece():
+    '''
+    Get extract piece
+    '''
+    project_id = request.args.get('project_id')
+    extract_id = request.args.get('extract_id')
+    pid = request.args.get('pid')
+    
+    piece = dora.get_piece_by_project_id_and_abbr_and_pid(
+        project_id,
+        extract_id,
+        pid
+    )
+
+    if piece is None:
+        return jsonify({
+            'success': False,
+            'data': {
+                'piece': None
+            }
+        })
+
+    return jsonify({
+        'success': True,
+        'data': {
+            'piece': piece.as_dict()
+        }
+    })
+
+
+@bp.route('/update_extract_piece', methods=['POST'])
+@login_required
+def update_extract_piece():
+    '''
+    Get extract piece
+    '''
+    piece_json = json.loads(request.form.get('piece'))
+
+    if 'piece_id' in piece_json:
+        # which means this is an existing piece
+        piece = dora.update_piece_data_by_id(
+            piece_json['piece_id'],
+            piece_json['data']
+        )
+    
+    else:
+        # it's a new piece!
+        piece = dora.create_piece(
+            piece_json['project_id'],
+            piece_json['extract_id'],
+            piece_json['pid'],
+            piece_json['data']
+        )
+
+    return jsonify({
+        'success': True,
+        'msg': 'Updated extract piece',
+        'data': {
+            'piece': piece.as_dict()
+        }
+    })
+
+
 @bp.route('/get_included_papers_and_selections')
 @login_required
 def get_included_papers_and_selections():
@@ -1173,6 +1236,9 @@ def get_included_papers_and_selections():
 
     if cq_abbr is None:
         cq_abbr = 'default'
+    
+    # get this project
+    project = dora.get_project(project_id)
 
     # get all papers
     papers = srv_paper.get_included_papers_by_cq(
@@ -1187,32 +1253,38 @@ def get_included_papers_and_selections():
         cq_abbr
     )
 
+    papers, extracts = dora.update_papers_outcome_selections(
+        project,
+        papers,
+        extracts
+    )
+
     # extend the paper meta with a new attribute
     # outcome_selections
     # and make a pid -> sequence mapping
-    pid2seq = {}
-    for i, paper in enumerate(papers):
-        pid2seq[paper.pid] = i
-        papers[i].meta['outcome_selections'] = []
+    # pid2seq = {}
+    # for i, paper in enumerate(papers):
+    #     pid2seq[paper.pid] = i
+    #     papers[i].meta['outcome_selections'] = []
 
     # check each extract
-    for extract in extracts:
-        for pid in extract.data:
-            if pid in pid2seq:
-                seq = pid2seq[pid]
-                if extract.data[pid]['is_selected']:
-                    # this paper is selected for this outcome
-                    papers[seq].meta['outcome_selections'].append(
-                        extract.abbr
-                    )
-            else:
-                # something wrong, this study should be there
-                # but also maybe excluded
-                # so, just ignore
-                pass
+    # for extract in extracts:
+    #     for pid in extract.data:
+    #         if pid in pid2seq:
+    #             seq = pid2seq[pid]
+    #             if extract.data[pid]['is_selected']:
+    #                 # this paper is selected for this outcome
+    #                 papers[seq].meta['outcome_selections'].append(
+    #                     extract.abbr
+    #                 )
+    #         else:
+    #             # something wrong, this study should be there
+    #             # but also maybe excluded
+    #             # so, just ignore
+    #             pass
     
     json_papers = [ p.as_very_simple_dict() for p in papers ]
-    json_extracts = [ extr.as_dict() for extr in extracts ]
+    json_extracts = [ extr.as_simple_dict() for extr in extracts ]
     # json_extracts = [ extr.as_simple_dict() for extr in extracts ]
 
     ret = {

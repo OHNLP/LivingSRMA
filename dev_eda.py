@@ -28,7 +28,24 @@ print('* got all %s papers for IO' % (len(papers)))
 
 #%% load the itable
 project = dora.get_project_by_keystr('IO')
-itable = dora.get_itable_by_project_id_and_cq(project.project_id, 'default')
+
+# get all extracts of the default
+cq_abbr = 'default'
+extracts = dora.get_extracts_by_project_id_and_cq(
+    project.project_id,
+    cq_abbr
+)
+print('* got %s extracts for [%s]' % (
+    len(extracts),
+    cq_abbr
+))
+
+# there could be multiple itable defined in a project based on CQ
+# so, this time we just check the `default` CQ
+itable = dora.get_itable_by_project_id_and_cq(
+    project.project_id, 
+    cq_abbr
+)
 print('* got the project and itable [%s]' % (
     itable.abbr
 ))
@@ -61,7 +78,7 @@ print('* found %s papers are selected for the itable' % ( n_itable ))
 
 #%% read the xlsx
 df = pd.read_excel(
-    '/tmp/IO_ROB_v8.xlsm',
+    '/tmp/ROB2_IRPG_beta_v8.xlsm',
     sheet_name='Results',
     header=1,
     index_col=None
@@ -139,8 +156,7 @@ col2attr = [
     ["Assessor's overall Judgement", 'COE_RCT_ROB_OVERALL_RJ'],
 ]
 
-#%% get values
-
+#%% helpers
 def find_papers_by_nct(nct, papers):
     ps = []
     for p in papers:
@@ -163,8 +179,12 @@ def cnvt_val(val):
 
     return s
 
+print('* defined helper functions')
+
+#%% parse each row and get record
 n_nct_papers = 0
 n_not_found_paper = 0
+n_missing_piece = 0
 
 unique_vals = set([])
 for _, row in df.iterrows():
@@ -188,27 +208,59 @@ for _, row in df.iterrows():
     # now need to check the paper in itable
     for p in ps:
         n_nct_papers += 1
-        if p.pid not in itable.data:
-            print('* cannot find paper %s' % p.pid)
-            n_not_found_paper += 1
-            continue
+        
+        # first, find this paper in itable
+        piece = dora.get_piece_by_project_id_and_abbr_and_pid(
+            project.project_id,
+            itable.extract_id,
+            p.pid
+        )
+
+        if piece is None:
+            # hmmm, this piece doesn't exist yet???
+            piece_data = util.mk_piece_data(
+                False, 
+                False,
+                2,
+                itable.meta['cate_attrs']
+            )
+            piece = dora.create_piece(
+                project.project_id,
+                itable.extract_id,
+                p.pid,
+                piece_data
+            )
+            n_missing_piece += 1
 
         #########################################################
         # ok, this paper is found in itable, we can update it now
         #########################################################
-        for col_attr in col2attr:
-            col = col_attr[0]
-            attr = col_attr[1]
+        # for col_attr in col2attr:
+        #     col = col_attr[0]
+        #     attr = col_attr[1]
 
-            # get the value from XLS
-            val_raw = row[col]
+        #     # get the value from XLS
+        #     val_raw = row[col]
 
-            # convert the value to itable format
-            val_itb = cnvt_val(val_raw)
+        #     # convert the value to itable format
+        #     val_itb = cnvt_val(val_raw)
 
-            # now just set this new val
-            itable.data[p.pid]
 
 print('* got %s paper ids' % (n_nct_papers))
-print('* missing %s paper ids' % (n_not_found_paper))
+print('* missing %s paper ids' % (n_missing_piece))
 print('* unique_vals: %s' % unique_vals)
+
+
+#%% make a SQL for get paper_selections
+sql_get_paper_selection = """
+select pid, extract_id
+from pieces
+where project_id='{project_id}'
+  and json_extract(data, "$.is_selected") = TRUE
+""".format(project_id='60c0524c-3f41-11eb-b67e-000d3a9afec0')
+
+rs = db.session.execute(
+    sql_get_paper_selection
+).fetchall()
+
+print('* got %s lines' % (len(rs)))

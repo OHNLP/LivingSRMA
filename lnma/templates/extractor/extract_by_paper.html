@@ -157,6 +157,7 @@ html {
                         </div>
                     </td>
 
+                    <!-- for risk of bias -->
                     <td v-if="has_coe_rob()"
                         class="text-center">
                         <span class="mr-2"
@@ -177,6 +178,7 @@ html {
                         </span>
                     </td>
 
+                    <!-- for indirectness -->
                     <td v-if="has_coe_ind()"
                         class="text-center">
                         <span class="mr-2"
@@ -436,6 +438,9 @@ var pan_ocpapers = {
     vpp_id: "#pan_ocpapers",
     vpp: null,
     vpp_data: {
+        // page name by_oc or by_pp
+        page_name: 'by_pp', 
+
         // flags
         show_settings: true,
         only_show_selected: false,
@@ -625,23 +630,33 @@ var pan_ocpapers = {
                     }
                 });
             }
-            // show the panel
-            this.show_working_paper_collector = true;
 
             // set the working oc
             this.working_oc = oc;
+            console.log('* set working_oc', oc);
+            $('.chk-oc').removeClass('chk-oc-extracting');
+            $('#chk_oc_line_' + oc.abbr).addClass('chk-oc-extracting');
+
+            // send request
+            var project_id = Cookies.get('project_id');
+            srv_extractor.get_extract_piece(
+                project_id,
+                this.working_oc.extract_id,
+                this.working_paper.pid,
+                this._on_click_oc_callback
+            );
 
             // add this working paper to the oc
-            if (oc.data.hasOwnProperty(this.working_paper.pid)) {
-                // 2022-02-16: fix the subg bug
-                oc.data[this.working_paper.pid] = srv_extractor.fix_oc_data_attr(
-                    oc.data[this.working_paper.pid],
-                    oc
-                );
-            } else {
-                oc.data[this.working_paper.pid] = srv_extractor.mk_oc_data(oc)
-            }
-            console.log('* extract', this.working_paper, 'for', oc);
+            // if (oc.data.hasOwnProperty(this.working_paper.pid)) {
+            //     // 2022-02-16: fix the subg bug
+            //     oc.data[this.working_paper.pid] = srv_extractor.fix_oc_data_attr(
+            //         oc.data[this.working_paper.pid],
+            //         oc
+            //     );
+            // } else {
+            //     oc.data[this.working_paper.pid] = srv_extractor.mk_oc_data(oc)
+            // }
+            // console.log('* extract', this.working_paper, 'for', oc);
 
             // switch working arm to default
             if (this.hasOwnProperty('switch_working_arm')) {
@@ -650,36 +665,87 @@ var pan_ocpapers = {
                 // ?
             }
 
-            // set the autocomplete to init
-            this.is_wp_ac_inited = false;
+            // // set the autocomplete to init
+            // this.is_wp_ac_inited = false;
 
-            // highlight the oc in list
-            $('.chk-oc').removeClass('chk-oc-extracting');
-            $('#chk_oc_line_' + oc.abbr).addClass('chk-oc-extracting');
+            // // highlight the oc in list
+        },
+
+        _on_click_oc_callback: function(rsp) {
+            if (rsp.success) {
+                this.working_piece = rsp.data.piece;
+                console.log("* got db piece", rsp.data.piece);
+                jarvis.toast('Loaded extraction from database');
+            } else {
+                // which means this paper on this extract no data yet
+                let oc = this.working_oc;
+                let piece_data = srv_extractor.mk_oc_data(oc);
+                this.working_piece = srv_extractor.mk_piece(
+                    Cookies.get('project_id'),
+                    oc.extract_id,
+                    this.working_paper.pid,
+                    piece_data
+                );
+                console.log("* made local piece", this.working_piece);
+                jarvis.toast('Initialized extraction for the current paper');
+            }
+
+            // show the panel only when piece is ready
+            this.show_working_paper_collector = true;
         },
 
         on_click_toggle: function(it) {
             it._is_shown = !it._is_shown;
         },
 
+        update_paper_oc_selection: function(pid, oc_abbr, is_selected) {
+            for (let i = 0; i < this.papers.length; i++) {
+                const p = this.papers[i];
+                if (p.pid == pid) {
+                    if (is_selected) {
+                        this.papers[i].meta.outcome_selections.push(oc_abbr);
+                    } else {
+                        const idx = this.papers[i].meta.outcome_selections.indexOf(oc_abbr);
+                        if (idx>=0) {
+                            this.papers[i].meta.outcome_selections.splice(idx, 1);
+                        }
+                    }
+                    break;
+                }
+            }
+        },
+
         on_change_selection: function(oc_abbr) {
+            var is_selected = this.working_paper_oc_selections[oc_abbr];
             console.log(
-                '*', oc_abbr, 'to',
-                this.working_paper_oc_selections[oc_abbr]
+                '*', oc_abbr, 
+                'to', is_selected
             );
 
             var project_id = Cookies.get('project_id');
-            srv_extractor.update_paper_one_selection(
-                project_id,
+            var cq_abbr = Cookies.get('cq_abbr');
+
+            // change locally
+            this.update_paper_oc_selection(
                 this.working_paper.pid,
                 oc_abbr,
-                this.working_paper_oc_selections[oc_abbr],
+                is_selected
+            );
+
+            // send request
+            srv_extractor.update_paper_one_selection(
+                project_id,
+                cq_abbr,
+                this.working_paper.pid,
+                oc_abbr,
+                is_selected,
                 function(data) {
                     console.log('* update_paper_one_selection', data);
                     jarvis.toast(data.msg);
 
                     // just update this paper in the extraction?
-                    pan_ocpapers.update_vpp_papers(data.paper);
+                    // in fact, nothing change locally.
+                    // pan_ocpapers.update_vpp_papers(data.paper);
                 }
             );
         },
@@ -934,14 +1000,14 @@ var pan_ocpapers = {
         )
     },
 
-    save_working_paper_extraction: function(pid, oc) {
-        var project_id = Cookies.get('project_id');
-        var oc_type = oc.oc_type;
-        var abbr = oc.abbr;
+    // save_working_paper_extraction: function(pid, oc) {
+        // var project_id = Cookies.get('project_id');
+        // var oc_type = oc.oc_type;
+        // var abbr = oc.abbr;
 
         // prepare the incremental data for update
-        var data = {};
-        data[pid] = JSON.parse(JSON.stringify(oc.data[pid]));
+        // var data = {};
+        // data[pid] = JSON.parse(JSON.stringify(oc.data[pid]));
 
         // 2022-07-27: fix overwrite selection bug
         // for this function, just save the extraction
@@ -955,37 +1021,62 @@ var pan_ocpapers = {
         // 2022-12-12: fix overwrite selection bug again
         // the oc data is not directly shared between two vpps
         // so need to manually specify thtat `is_selected` should be skipped
-        srv_extractor.update_extract_incr_data(
-            project_id,
-            oc_type,
-            abbr,
-            data,
-            true, // flag_skip_is_selected
-            function(data) {
-                // the data contain a paer
-                console.log('* update_extract_incr_data returns:', data);
+        // srv_extractor.update_extract_incr_data(
+        //     project_id,
+        //     oc_type,
+        //     abbr,
+        //     data,
+        //     true, // flag_skip_is_selected
+        //     function(data) {
+        //         // the data contain a paer
+        //         console.log('* update_extract_incr_data returns:', data);
 
-                jarvis.toast('Updated [' + data.extract.meta.full_name + '] with current extraction');
-                pan_ocpapers.vpp.saving_end();
+        //         jarvis.toast('Updated [' + data.extract.meta.full_name + '] with current extraction');
+        //         pan_ocpapers.vpp.saving_end();
 
-                // reload the page
-                // pan_ocpapers.re_load(data.extract);
-                // 2022-12-18: fix rob not updated bug
-                // just update this extract?
-                if (data.extract.oc_type == 'itable') {
-                    // need to update different
-                    pan_ocpapers.on_load_itable(data.extract);
-                } else {
-                    // standard extract
-                    pan_ocpapers.update_vpp_extracts(data.extract);
-                }
-            }
-        );
+        //         // reload the page
+        //         // pan_ocpapers.re_load(data.extract);
+        //         // 2022-12-18: fix rob not updated bug
+        //         // just update this extract?
+        //         if (data.extract.oc_type == 'itable') {
+        //             // need to update different
+        //             pan_ocpapers.on_load_itable(data.extract);
+        //         } else {
+        //             // standard extract
+        //             pan_ocpapers.update_vpp_extracts(data.extract);
+        //         }
+        //     }
+        // );
+        
+
+        // 2023-01-26: Use piece to update
+        // srv_extractor.update_extract_piece(
+        //     this.vpp.$data.working_piece,
+        //     function(data) {
+        //         // the data contain a paer
+        //         console.log('* update_extract_piece returns:', data);
+
+        //         jarvis.toast('Saved [' + data.data.piece.pid + '] extraction with current extraction');
+        //         pan_ocpapers.vpp.saving_end();
+
+        //         // reload the page
+        //         // pan_ocpapers.re_load(data.extract);
+        //         // 2022-12-18: fix rob not updated bug
+        //         // just update this extract?
+        //         // if (data.extract.oc_type == 'itable') {
+        //         //     // need to update different
+        //         //     pan_ocpapers.on_load_itable(data.extract);
+        //         // } else {
+        //         //     // standard extract
+        //         //     pan_ocpapers.update_vpp_extracts(data.extract);
+        //         // }
+        //     }
+        // );
 
         // if (oc_type == 'itable') {
             // pan_ocpapers.update_itable_data();
         // }
-    },
+    // },
 
     show_working_paper: function() {
         this.vpp.show_working_paper_pan = true;

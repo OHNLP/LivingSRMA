@@ -14,6 +14,7 @@ var srv_extractor = {
         update_extract_data: "[[ url_for('extractor.update_extract_data') ]]",
         update_extract_incr_data: "[[ url_for('extractor.update_extract_incr_data') ]]",
         update_extract_coe_meta: "[[ url_for('extractor.update_extract_coe_meta') ]]",
+        update_extract_piece: "[[ url_for('extractor.update_extract_piece') ]]",
 
         copy_extract: "[[ url_for('extractor.copy_extract') ]]",
         delete_extract: "[[ url_for('extractor.delete_extract') ]]",
@@ -26,6 +27,7 @@ var srv_extractor = {
         get_extract_by_id: "[[ url_for('extractor.get_extract_by_id') ]]",
         get_extracts: "[[ url_for('extractor.get_extracts') ]]",
         get_extract_and_papers: "[[ url_for('extractor.get_extract_and_papers') ]]",
+        get_extract_piece: "[[ url_for('extractor.get_extract_piece') ]]",        
 
         get_included_papers_and_selections: "[[ url_for('extractor.get_included_papers_and_selections') ]]",
         update_paper_one_selection: "[[ url_for('extractor.update_paper_one_selection') ]]",
@@ -163,10 +165,30 @@ var srv_extractor = {
         });
     },
 
+    update_extract_piece: function(
+        piece,
+        callback
+    ) {
+        $.ajax({
+            type: 'POST',
+            dataType: 'json',
+            url: this.url.update_extract_piece,
+            data: {
+                piece: JSON.stringify(piece)
+            },
+            cache: false,
+            success: callback,
+            error: function(jqXHR, textStatus, errorThrown) {
+                jarvis.toast('Something wrong when saving the updated extraction.', 'alert');
+                console.error(textStatus, errorThrown);
+            }
+        });
+    },
+
     update_extract_incr_data: function(
         project_id,
+        extract_id,
         oc_type,
-        abbr,
         data,
         flag_skip_is_selected,
         callback
@@ -177,8 +199,8 @@ var srv_extractor = {
             url: this.url.update_extract_incr_data,
             data: {
                 project_id:project_id, 
+                extract_id:extract_id,
                 oc_type:oc_type, 
-                abbr:abbr,
                 data:JSON.stringify(data),
                 flag_sis: flag_skip_is_selected?'yes':'no'
             },
@@ -350,7 +372,27 @@ var srv_extractor = {
         });
     },
 
-    update_paper_one_selection: function(project_id, pid, abbr, is_selected, callback) {
+    get_extract_piece: function(project_id, extract_id, pid, callback) {
+        $.ajax({
+            type: 'GET',
+            dataType: "json",
+            url: this.url.get_extract_piece,
+            data: {
+                project_id: project_id,
+                extract_id: extract_id,
+                pid: pid,
+                rnd: Math.random()
+            },
+            cache: false,
+            success: callback,
+            error: function(jqXHR, textStatus, errorThrown) {
+                jarvis.toast('Something wrong when getting paper extraction', 'alert');
+                console.error(textStatus, errorThrown);
+            }
+        });
+    },
+
+    update_paper_one_selection: function(project_id, cq_abbr, pid, abbr, is_selected, callback) {
         $.ajax({
             type: 'POST',
             dataType: "json",
@@ -358,6 +400,7 @@ var srv_extractor = {
             data: {
                 rnd: Math.random(),
                 project_id: project_id,
+                cq_abbr: cq_abbr,
                 pid: pid,
                 abbr: abbr,
                 is_selected: is_selected
@@ -495,6 +538,15 @@ var srv_extractor = {
         }
 
         return d;
+    },
+
+    mk_piece: function(project_id, extract_id, pid, data) {
+        return {
+            project_id: project_id,
+            extract_id: extract_id,
+            pid: pid,
+            data: data
+        };
     },
 
     fix_oc_data_attr: function(d, oc) {

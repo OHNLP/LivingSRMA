@@ -33,7 +33,7 @@
             <select class="form-control form-control-sm"
                 style="width: 50px;"
                 v-on:change="set_n_arms"
-                v-model.number="working_oc.data[working_paper.pid].n_arms">
+                v-model.number="working_piece.data.n_arms">
                 <option value="2">2</option>
                 <option value="3">3</option>
                 <option value="4">4</option>
@@ -48,7 +48,7 @@
                 Comp 1
             </button>
             <button class="ml-1 w-arm-tab btn btn-xs"
-                v-for="arm_seq in (working_oc.data[working_paper.pid].n_arms - 2)"
+                v-for="arm_seq in (working_piece.data.n_arms - 2)"
                 v-bind:id="'working_paper_arm_tab_' + (arm_seq-1)"
                 v-on:click="switch_working_arm(arm_seq-1)">
                 Comp {{ arm_seq + 1 }}

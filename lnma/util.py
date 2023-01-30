@@ -94,19 +94,48 @@ def mk_md5_by_title(title):
     return md5.hexdigest()
 
 
-def mk_empty_extract_paper_data(is_selected=False):
+def mk_piece_data(
+    is_selected=False, 
+    is_checked=False,
+    n_arms=2,
+    init_main_arm_by_cate_attrs=None):
+    '''
+    Make an empty extract paper data (piece)
+    '''
+    return mk_empty_extract_paper_data(
+        is_selected,
+        is_checked,
+        n_arms,
+        init_main_arm_by_cate_attrs
+    )
+
+
+def mk_empty_extract_paper_data(
+    is_selected=False, 
+    is_checked=False,
+    n_arms=2,
+    init_main_arm_by_cate_attrs=None):
     '''
     Make an empty extract paper data
     '''
-    return {
+    pc = {
         'is_selected': is_selected,
-        'is_checked': False,
-        'n_arms': 2,
+        'is_checked': is_checked,
+        'n_arms': n_arms,
         'attrs': {
             'main': {},
             'other': []
         }
     }
+
+    if init_main_arm_by_cate_attrs is not None:
+        pc['attrs']['main'] = \
+            fill_extract_data_arm(
+                pc['attrs']['main'],
+                init_main_arm_by_cate_attrs
+            )
+
+    return pc
 
 
 def fill_extract_data_arm(arm, cate_attrs, g_idx=0):

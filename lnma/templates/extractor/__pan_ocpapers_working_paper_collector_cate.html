@@ -17,29 +17,6 @@
             class="w-attr-item-value d-flex flex-row">
             <div v-for="g, g_idx in working_oc.meta.sub_groups"
                 v-bind:class="{'w-subg-item-value':working_paper_subg == g_idx, 'w-100': working_paper_subg==0}">
-                <!-- v-bind:size="get_input_size(get_working_arm_extracted_value(g_idx, attr.abbr))" -->
-                <!-- <span v-if="working_paper_arm == null">
-                    <input class="paper-extract-input-auto input-auto-complete" type="text" 
-                        v-bind:g_idx="g_idx"
-                        v-bind:abbr="attr.abbr"
-                        v-on:click="switch_working_subg(g_idx)"
-                        v-model="working_oc.data[working_paper.pid].attrs.main['g'+g_idx][attr.abbr]"> 
-                    <span class="w-remove-content"
-                        v-on:click="set_working_paper_arm_by_group_attr_value(g_idx, attr.abbr, '')">
-                        <i class="fa fa-close"></i>
-                    </span>
-                </span>
-                <span v-else>
-                    <input class="paper-extract-input-auto input-auto-complete" type="text" 
-                        v-bind:g_idx="g_idx"
-                        v-bind:abbr="attr.abbr"
-                        v-on:click="switch_working_subg(g_idx)"
-                        v-model="working_oc.data[working_paper.pid].attrs.other[working_paper_arm]['g'+g_idx][attr.abbr]"> 
-                    <span class="w-remove-content"
-                        v-on:click="set_working_paper_arm_by_group_attr_value(g_idx, attr.abbr, '')">
-                        <i class="fa fa-close"></i>
-                    </span>
-                </span> -->
                 <input class="paper-extract-input paper-extract-input-auto input-auto-complete" type="text" 
                     v-bind:oc_abbr="working_oc.abbr"
                     v-bind:g_idx="g_idx"

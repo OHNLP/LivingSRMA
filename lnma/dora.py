@@ -1859,88 +1859,26 @@ def update_extract_coe_meta(extract_id, coe):
     return extract
 
 
-def update_extract_incr_data(project_id, oc_type, abbr, data, flag_skip_is_selected=False):
+def update_extract_incr_data(
+    extract_id, 
+    data, 
+    flag_skip_is_selected=False
+):
     '''
-    Update the existing extract data by the increamental data
+    Update the extract with the given incremental data
 
-    The input data should contains the updated part only.
-    The algorithm will also compare the given data with existing data.
+    The data have been modified in the frontend,
+    so here we just save them.
     '''
-    extract = Extract.query.filter(and_(
-        Extract.project_id == project_id,
-        Extract.abbr == abbr
-    )).first()
-
-    # TODO check if not exists
-
-    # update each paper if it is modified
-    flag_changed = False
-    n_changed = 0
-    pid_changed = {
-        'upd': [], 'new': []
-    }
-    n_compared = 0
-
-    for pid in data:
-        n_compared += 1
-        pid_ext = data[pid]
-
-        # search for this pid in this extract first
-        if pid in extract.data:
-            # OK, this is an existing paper
-            # let's check each attribute
-            is_same = util.is_same_extraction(
-                extract.data[pid],
-                pid_ext,
-                flag_skip_is_selected
-            )
-
-            if is_same:
-                # nice, no need to update this paper
-                pass
-            
-            else:
-                # hmmm, this paper is updated
-                # extract.data[pid] = pid_ext
-
-                # 2022-12-12: fix the overwrite selection bug
-                # copy the pid_ext data to extract.data
-                for key in pid_ext:
-                    if key == 'is_selected' and flag_skip_is_selected:
-                        # skip the is_selected when flags
-                        pass
-                    else:
-                        extract.data[pid][key] = pid_ext[key]
-
-                flag_changed = True
-                n_changed += 1
-                pid_changed['upd'].append(pid)
-            
-        else:
-            # Great, this is a new paper
-            # It's the simplest case, just add this 
-            extract.data[pid] = pid_ext
-            flag_changed = True
-            n_changed += 1
-            pid_changed['new'].append(pid)
+    extract = get_extract(extract_id)
     
-    print("* compared %s extractions, %s changed, %s new (%s), %s update (%s)" % (
-        n_compared, n_changed, 
-        len(pid_changed['new']), pid_changed['new'],
-        len(pid_changed['upd']), pid_changed['upd'],
-    ))
+    pieces = create_or_update_pieces_by_extract_data(
+        extract.project_id,
+        extract.extract_id,
+        data
+    )
 
-    if flag_changed:
-        extract.date_updated = datetime.datetime.now()
-        flag_modified(extract, "data")
-
-        # commit this
-        db.session.add(extract)
-        db.session.commit()
-    else:
-        pass
-
-    return extract
+    return extract, pieces
 
 
 def update_extract_meta_and_data(project_id, oc_type, abbr, meta, data):
@@ -1985,69 +1923,55 @@ def update_extract(extract):
     return extract
 
 
-def update_paper_selection(project_id, pid, abbr, is_selected):
+def update_papers_outcome_selections(project, papers, extracts):
     '''
-    Update the paper outcome selection in one extract
+    Update the papers' outcome selections by
     '''
-    # first, get this selection
-    extract = Extract.query.filter(and_(
-        Extract.project_id == project_id,
-        Extract.abbr == abbr
-    )).first()
+    # create a extract mapping from id to extract
+    ext_dict = {}
+    for ext in extracts: ext_dict[ext.extract_id] = ext
 
-    # TODO if it's NONE???
+    # init the paper outcome selections
+    pid2seq = {}
+    for i, p in enumerate(papers):
+        pid2seq[p.pid] = i
+        papers[i].meta['outcome_selections'] = []
 
-    if pid in extract.data:
-        db_is_selected = extract.data[pid]['is_selected']
-        # print('* %s in %s (%s vs %s)' % (
-        #     pid, oc_abbr, is_selected, db_is_selected
-        # ))
-        if is_selected == db_is_selected:
-            # OK, no need to change the value
-            pass
-        else:
-            # user changed the option, ok, update
-            extract.data[pid]['is_selected'] = is_selected
+    # get the selections
+    sql_get_paper_selection = """
+select pid, extract_id
+from pieces
+where project_id='{project_id}'
+and json_extract(data, "$.is_selected") = TRUE
+    """.format(project_id=project.project_id)
 
-            # add to session
-            flag_modified(extract, "data")
-            db.session.add(extract)
-            db.session.commit()
-            
-            print('* found %s in %s is_selected updated to %s' % (
-                pid, extract.meta['full_name'], is_selected
-            ))
+    rs = db.session.execute(
+        sql_get_paper_selection
+    ).fetchall()
 
-    else:
-        if is_selected:
-            # well, have to add this pid to this outcome
-            # make an empty extraction
-            # {
-            #     'is_selected': is_selected,
-            #     'is_checked': False,
-            #     'n_arms': 2,
-            #     'attrs': {
-            #         'main': {},
-            #         'other': []
-            #     }
-            # }
-            extract.data[pid] = util.mk_empty_extract_paper_data(is_selected)
-            extract.data[pid]['attrs']['main'] = util.fill_extract_data_arm(
-                extract.data[pid]['attrs']['main'],
-                extract.meta['cate_attrs']
-            )
-            flag_modified(extract, "data")
-            db.session.add(extract)
-            db.session.commit()
+    # update the outcome
+    for r in rs:
+        pid = r['pid']
+        extract_id = r['extract_id']
 
-            print('* created %s in %s is_selected updated to %s' % (
-                pid, extract.abbr, is_selected
-            ))
-        else:
-            # since it is not selected, just ignore is fine
-            pass
+        if pid not in pid2seq:
+            # which means this pid is not selected for current CQ
+            continue
 
-    return extract
+        if extract_id not in ext_dict:
+            # this means this extract does not belong to current CQ
+            continue
+
+        # now let's get the abbr for this 
+        abbr = ext_dict[extract_id].abbr
+        
+        # get the idx
+        seq  = pid2seq[pid]
+
+        # update the result
+        papers[seq].meta['outcome_selections'].append(abbr)
+
+    return papers, extracts
 
 
 def get_paper_selections(project_id, pid):
@@ -2074,9 +1998,63 @@ def get_paper_selections_in_extracts(pid, extracts):
     return abbrs
 
 
+def update_paper_selection(project_id, cq_abbr, pid, abbr, is_selected):
+    '''
+    Update the paper outcome selection of single outcome
+    '''
+    # get the extraction/outcome
+    extract = Extract.query.filter(
+        Extract.project_id == project_id,
+        Extract.abbr == abbr,
+        Extract.meta['cq_abbr'] == cq_abbr,
+    ).first()
+
+    # get the paper
+    paper = get_paper_by_project_id_and_pid(
+        project_id, pid
+    )
+
+    # get the piece
+    piece = get_piece_by_project_id_and_abbr_and_pid(
+        project_id,
+        extract.extract_id,
+        pid
+    )
+
+    if piece is None:
+        # no such extraction yet, so just create one
+        data = util.mk_empty_extract_paper_data(is_selected)
+        # I don't remember what it is, just do it by following other function
+        data['attrs']['main'] = util.fill_extract_data_arm(
+            data['attrs']['main'],
+            extract.meta['cate_attrs']
+        )
+        piece = create_piece(
+            project_id,
+            extract.extract_id,
+            pid,
+            data
+        )
+        print('* added %s in extract[%s]: %s' % (
+            pid, abbr, is_selected
+        ))
+    else:
+        # ok, let's update the piece
+        piece.data['is_selected'] = is_selected
+        flag_modified(piece, "data")
+        db.session.add(piece)
+        db.session.commit()
+        print('* updated %s in extract[%s]: %s' % (
+            pid, abbr, is_selected
+        ))
+    
+    # ok, done!
+    return paper, extract, piece
+
+
 def update_paper_selections(project_id, cq_abbr, pid, abbrs):
     '''
-    Update the paper outcome selection in a project
+    Update the paper outcome selections in a project
     '''
     # first, get all extracts of the specific cq
     extracts = Extract.query.filter(
@@ -2269,6 +2247,35 @@ def get_itable_by_project_id_and_cq(project_id, cq_abbr):
         Extract.meta['cq_abbr'] == cq_abbr
     ).first()
 
+    if extract is None:
+        return None
+
+    # ok, let's add all pieces for itable as data attachment
+    extract = attach_extract_data(extract)
+
+    return extract
+
+
+def attach_extract_data(extract, flag_skip_not_selected=True):
+    '''
+    Attach the data to an extract
+    '''
+    pieces = get_pieces_by_project_id_and_extract_id(
+        extract.project_id,
+        extract.extract_id
+    )
+    data = {}
+    for pc in pieces:
+        if flag_skip_not_selected:
+            if pc.data['is_selected']:
+                data[pc.pid] = pc.data
+            else:
+                pass
+        else:
+            data[pc.pid] = pc.data
+
+    extract.data = data
+
     return extract
 
 
@@ -2383,7 +2390,7 @@ def create_piece(project_id, extract_id, pid, data, auto_add=True, auto_commit=T
 
 def create_or_update_pieces_by_extract_data(project_id, extract_id, ext_data):
     '''
-    Create or update a single piece
+    Create or update many pieces for a extract
     '''
     pieces = []
     for pid in ext_data:
@@ -2479,6 +2486,37 @@ def get_piece_by_project_id_and_abbr_and_pid(project_id, extract_id, pid):
     return piece
 
 
+def update_piece_data_by_id(
+    piece_id, 
+    data, 
+    flag_skip_is_selected=True, 
+    auto_add=True, 
+    auto_commit=True
+):
+    '''
+    Update one piece in an extract
+    '''
+    piece = Piece.query.filter(
+        Piece.piece_id == piece_id
+    ).first()
+
+    if flag_skip_is_selected:
+        is_selected = piece.data['is_selected']
+        # just update the data
+        piece.data = data
+        # overwrite
+        piece.data['is_selected'] = is_selected
+    else:
+        piece.data = data
+
+    flag_modified(piece, 'data')
+
+    if auto_add: db.session.add(piece)
+    if auto_commit: db.session.commit()
+
+    return piece
+
+
 def update_piece(project_id, extract_id, pid, data, auto_add=True, auto_commit=True):
     '''
     Update one piece in an extract
@@ -2500,3 +2538,164 @@ def update_piece(project_id, extract_id, pid, data, auto_add=True, auto_commit=T
     if auto_commit: db.session.commit()
 
     return piece
+
+
+
+
+
+
+
+###############################################################################
+# Deprecated
+###############################################################################
+
+# def update_extract_incr_data(
+#     extract_id, 
+#     data, 
+#     flag_skip_is_selected=False
+# ):
+#     '''
+#     Deprecated
+#     Update the existing extract data by the increamental data
+
+#     The input data should contains the updated part only.
+#     The algorithm will also compare the given data with existing data.
+#     '''
+#     extract = get_extract(extract_id)
+
+#     # TODO check if not exists
+
+#     # update each paper if it is modified
+#     flag_changed = False
+#     n_changed = 0
+#     pid_changed = {
+#         'upd': [], 'new': []
+#     }
+#     n_compared = 0
+
+#     for pid in data:
+#         n_compared += 1
+#         pid_ext = data[pid]
+
+#         # search for this pid in this extract first
+#         if pid in extract.data:
+#             # OK, this is an existing paper
+#             # let's check each attribute
+#             is_same = util.is_same_extraction(
+#                 extract.data[pid],
+#                 pid_ext,
+#                 flag_skip_is_selected
+#             )
+
+#             if is_same:
+#                 # nice, no need to update this paper
+#                 pass
+            
+#             else:
+#                 # hmmm, this paper is updated
+#                 # extract.data[pid] = pid_ext
+
+#                 # 2022-12-12: fix the overwrite selection bug
+#                 # copy the pid_ext data to extract.data
+#                 for key in pid_ext:
+#                     if key == 'is_selected' and flag_skip_is_selected:
+#                         # skip the is_selected when flags
+#                         pass
+#                     else:
+#                         extract.data[pid][key] = pid_ext[key]
+
+#                 flag_changed = True
+#                 n_changed += 1
+#                 pid_changed['upd'].append(pid)
+            
+#         else:
+#             # Great, this is a new paper
+#             # It's the simplest case, just add this 
+#             extract.data[pid] = pid_ext
+#             flag_changed = True
+#             n_changed += 1
+#             pid_changed['new'].append(pid)
+    
+#     print("* compared %s extractions, %s changed, %s new (%s), %s update (%s)" % (
+#         n_compared, n_changed, 
+#         len(pid_changed['new']), pid_changed['new'],
+#         len(pid_changed['upd']), pid_changed['upd'],
+#     ))
+
+#     if flag_changed:
+#         extract.date_updated = datetime.datetime.now()
+#         flag_modified(extract, "data")
+
+#         # commit this
+#         db.session.add(extract)
+#         db.session.commit()
+#     else:
+#         pass
+
+#     return extract
+
+
+
+# def update_paper_selection(project_id, pid, abbr, is_selected):
+#     '''
+#     Update the paper outcome selection in one extract
+#     '''
+#     # first, get this selection
+#     extract = Extract.query.filter(and_(
+#         Extract.project_id == project_id,
+#         Extract.abbr == abbr
+#     )).first()
+
+#     # TODO if it's NONE???
+
+#     if pid in extract.data:
+#         db_is_selected = extract.data[pid]['is_selected']
+#         # print('* %s in %s (%s vs %s)' % (
+#         #     pid, oc_abbr, is_selected, db_is_selected
+#         # ))
+#         if is_selected == db_is_selected:
+#             # OK, no need to change the value
+#             pass
+#         else:
+#             # user changed the option, ok, update
+#             extract.data[pid]['is_selected'] = is_selected
+
+#             # add to session
+#             flag_modified(extract, "data")
+#             db.session.add(extract)
+#             db.session.commit()
+            
+#             print('* found %s in %s is_selected updated to %s' % (
+#                 pid, extract.meta['full_name'], is_selected
+#             ))
+
+#     else:
+#         if is_selected:
+#             # well, have to add this pid to this outcome
+#             # make an empty extraction
+#             # {
+#             #     'is_selected': is_selected,
+#             #     'is_checked': False,
+#             #     'n_arms': 2,
+#             #     'attrs': {
+#             #         'main': {},
+#             #         'other': []
+#             #     }
+#             # }
+#             extract.data[pid] = util.mk_empty_extract_paper_data(is_selected)
+#             extract.data[pid]['attrs']['main'] = util.fill_extract_data_arm(
+#                 extract.data[pid]['attrs']['main'],
+#                 extract.meta['cate_attrs']
+#             )
+#             flag_modified(extract, "data")
+#             db.session.add(extract)
+#             db.session.commit()
+
+#             print('* created %s in %s is_selected updated to %s' % (
+#                 pid, extract.abbr, is_selected
+#             ))
+#         else:
+#             # since it is not selected, just ignore is fine
+#             pass
+
+#     return extract

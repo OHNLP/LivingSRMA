@@ -86,6 +86,10 @@
 .paper-table-row-clicked .paper-name {
     font-weight: bold;
 }
+.paper-table-row-modified .paper-table-td-label {
+    color: red !important;
+    font-style: italic !important;
+}
 
 /**********************************************************
  * For the pan_ocpapers_working_paper
