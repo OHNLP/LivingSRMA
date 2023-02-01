@@ -486,7 +486,7 @@ var coe_helper = {
 
 
     /**
-     * Judge the D4 for risk of bias
+     * Judge the D5 for risk of bias
      * 
      * @param {string} q1 Q5.1
      * @param {string} q2 Q5.2
@@ -508,15 +508,15 @@ var coe_helper = {
                 ret = HIGH;
 
             } else if ((q2 == N || q2 == PN) && (q3 == N || q3 == PN)) {
-                if (q5 == Y || q5 == PY) {
+                if (q1 == Y || q1 == PY) {
                     ret = LOW;
 
-                } else if (q5 == N || q5 == PN || q5 == NI) {
-                    ret = this.SOME;
+                } else if (q1 == N || q1 == PN || q1 == NI) {
+                    ret = SOME;
 
                 }
             } else if (q2 == NI || q3 == NI) {
-                ret = this.SOME;
+                ret = SOME;
             }
 
         }

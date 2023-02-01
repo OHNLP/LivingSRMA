@@ -121,6 +121,12 @@ Object.assign(pan_ocpapers.vpp_methods, {
         this.coe_rob_d_active = d_idx;
     },
 
+    load_rob_from_same_trial: function() {
+        // get working paper
+        let paper = this.working_paper;
+        toast('Under development');
+    },
+
     /**
      * Show a question or not based on existing answers
      * @param {Object} ext data extraction

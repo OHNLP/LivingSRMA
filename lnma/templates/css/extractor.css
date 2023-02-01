@@ -153,6 +153,9 @@ div.w-attr-item:nth-child(odd) {background: whitesmoke; }
     overflow: hidden;
     text-overflow: ellipsis;
 }
+.w-cate-item-rob {
+    background: linear-gradient(to right, #efefef 25%, #f58c8c 60%, #ffff00 80%, #00ff00 100%);
+}
 .w-attr-item {
     border-bottom: 1px dotted #dedede;
     padding: 3px 0;
@@ -163,6 +166,13 @@ div.w-attr-item:nth-child(odd) {background: whitesmoke; }
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+.w-attr-item-name-link {
+    color: #333333 !important;
+}
+.w-attr-item-name-link:hover {
+    color: black !important;
+    text-decoration: underline !important;
 }
 .w-attr-subs {
     padding: 0 0 0 5px;

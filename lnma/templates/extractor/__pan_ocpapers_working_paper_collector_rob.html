@@ -1,7 +1,15 @@
 <!-- special extraction task for ROB -->
-<div class="w-cate-item-name">
+<div class="w-cate-item-name w-cate-item-rob">
     <i class="fas fa-balance-scale"></i>
     Risk of Bias
+
+    <!-- <a class="w-attr-item-name-link mr-3"
+        style="float: right;"
+        href="javascript:void(0);"
+        title="Load the existing risk of bias assessment from the clinical trial of this study if available"
+        @click="load_rob_from_same_trial">
+        Load from Trial
+    </a> -->
 </div>
 
 <div class="w-cate-attrs">
@@ -89,8 +97,8 @@
             <select v-model="get_working_arm_attrs()['g0']['COE_RCT_ROB_D2_AIM']"
                 @change="on_change_rob_qs"
                 style="width: 140px;">
-                <option value="a">assignment to intervention (the intention-to-treat effect)</option>
-                <option value="b">adhering to intervention (th per-protocol effect)</option>
+                <option value="a">assignment to intervention (the "intention-to-treat" effect)</option>
+                <option value="b">adhering to intervention (the "per-protocol" effect)</option>
             </select>
         </div>
         
