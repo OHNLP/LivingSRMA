@@ -351,49 +351,49 @@ html {
                 </thead>
 
                 <tbody class="paper-list">
-                    <tr v-for="paper in papers"
+                    <tr v-for="ext, pid in working_oc.data"
                         class="paper-table-row"
-                        :class="get_paper_row_cls(paper)"
-                        :id="'paper-table-row-' + paper.paper_id"
-                        v-show="(is_search_match(paper)) && (!only_show_selected || working_oc.data[paper.pid].is_selected)">
+                        :class="get_paper_row_cls(paper_dict[pid])"
+                        :id="'paper-table-row-' + paper_dict[pid].paper_id"
+                        v-show="(is_search_match(paper_dict[pid])) && (!only_show_selected || working_oc.data[pid].is_selected)">
                         <td class="paper-table-body-td paper-table-td-label">
                             <input type="checkbox" 
-                                v-model="working_oc.data[paper.pid].is_selected"
+                                v-model="working_oc.data[pid].is_selected"
                                 disabled="disabled">
                         </td>
 
                         <td class="paper-table-body-td paper-table-td-label cursor-pointer"
-                            v-on:click="on_click_paper(paper)">
-                            {{ paper.seq_num }}
+                            v-on:click="on_click_paper(paper_dict[pid])">
+                            {{ paper_dict[pid].seq_num }}
                         </td>
 
                         <td class="paper-table-body-td paper-table-td-label cursor-pointer"
-                            v-on:click="on_click_paper(paper)">
-                            {{ paper.meta.rct_id }}
+                            v-on:click="on_click_paper(paper_dict[pid])">
+                            {{ paper_dict[pid].meta.rct_id }}
                         </td>
 
                         <td class="paper-table-body-td paper-table-td-label cursor-pointer"
-                            v-on:click="on_click_paper(paper)">
-                            {{ srv_shared.get_paper_pmid_if_exists(paper).id }}
+                            v-on:click="on_click_paper(paper_dict[pid])">
+                            {{ srv_shared.get_paper_pmid_if_exists(paper_dict[pid]).id }}
                         </td>
 
                         <td class="paper-table-body-td paper-table-td-label"
-                            v-on:click="on_click_paper(paper)">
+                            v-on:click="on_click_paper(paper_dict[pid])">
                             <div class="paper-table-body-td-author"
-                                v-bind:title="get_first_author(paper.authors)">
-                                {{ paper.short_name }}
+                                v-bind:title="get_first_author(paper_dict[pid].authors)">
+                                {{ paper_dict[pid].short_name }}
                             </div>
                         </td>
 
                         <td class="paper-table-body-td">
                             <input type="checkbox" 
-                                v-bind:id="'paper-row-checked'+paper.paper_id"
-                                v-model="working_oc.data[paper.pid].is_checked">
+                                v-bind:id="'paper-row-checked'+paper_dict[pid].paper_id"
+                                v-model="working_oc.data[pid].is_checked">
                         </td>
 
                         <td class="paper-table-body-td">
-                            <select v-model="working_oc.data[paper.pid].n_arms"
-                                @change="on_change_itable_n_arms(paper, $event)">
+                            <select v-model="working_oc.data[pid].n_arms"
+                                @change="on_change_itable_n_arms(paper_dict[pid], $event)">
                                 <option value="2">2</option>
                                 <option value="3">3</option>
                                 <option value="4">4</option>
@@ -419,23 +419,23 @@ html {
                                 <span class="cell-input">
                                     <input class="paper-extract-input-auto-100" type="text" 
                                         v-bind:abbr="attr_sub.abbr"
-                                        @input="on_change_list_input_value(paper, $event)"
-                                        v-model="working_oc.data[paper.pid].attrs.main['g'+g_idx][attr_sub.abbr]">    
+                                        @input="on_change_list_input_value(paper_dict[pid], $event)"
+                                        v-model="working_oc.data[pid].attrs.main['g'+g_idx][attr_sub.abbr]">    
                                 </span>
                             </div>
 
                             <!-- the other tracks if n_arms > 2 -->
-                            <hr class="n-arms-hr" v-if="working_oc.data[paper.pid].n_arms > 2">
+                            <hr class="n-arms-hr" v-if="working_oc.data[pid].n_arms > 2">
 
                             <div v-for="g, g_idx in working_oc.meta.sub_groups">
 
-                                <span v-for="other, other_idx in working_oc.data[paper.pid].attrs.other"
+                                <span v-for="other, other_idx in working_oc.data[pid].attrs.other"
                                     class="cell-input">
                                     <br v-if="other_idx > 0">
                                     <input class="paper-extract-input-auto-100" 
                                         type="text" 
-                                        @input="on_change_list_input_value(paper, $event)"
-                                        v-model="working_oc.data[paper.pid].attrs.other[other_idx]['g'+g_idx][attr_sub.abbr]">  
+                                        @input="on_change_list_input_value(paper_dict[pid], $event)"
+                                        v-model="working_oc.data[pid].attrs.other[other_idx]['g'+g_idx][attr_sub.abbr]">  
                                 </span>
                             </div>
 
@@ -444,9 +444,9 @@ html {
                         <!-- for cie -->
                         <td v-if="is_editing_cie"
                             v-for="rob_idx in [0,1,2,3,4]">
-                            <select v-model="oc_paper_rob[paper.pid][rob_idx]"
+                            <select v-model="oc_paper_rob[pid][rob_idx]"
                                 v-on:change="on_change_cie"
-                                v-bind:class="'cie-rob-val-' + oc_paper_rob[paper.pid][rob_idx]">
+                                v-bind:class="'cie-rob-val-' + oc_paper_rob[pid][rob_idx]">
                                 <option value="1">L</option>
                                 <option value="2">M</option>
                                 <option value="3">H</option>
@@ -462,7 +462,6 @@ html {
         <div id="pan_ocpapers_working_paper"
             class="d-flex flex-row"
             v-if="show_working_paper_pan">
-
         {% include 'extractor/__pan_ocpapers_working_paper_collector.html' %}
         </div>
         <!-- /#pan_ocpapers_working_paper -->
@@ -578,6 +577,7 @@ var pan_ocpapers = {
         show_attrs: null,
         extract: null,
         papers: [],
+        paper_dict: {},
 
         // search
         keywords: '',
@@ -1007,6 +1007,13 @@ var pan_ocpapers = {
         // the data is a combo of extract and papers
         this.vpp.working_oc = data.extract;
         this.vpp.papers = data.papers;
+
+        // update dict
+        this.vpp.paper_dict = {};
+        for (let i = 0; i < this.vpp.papers.length; i++) {
+            const p = this.vpp.papers[i];
+            this.vpp.paper_dict[p.pid] = p;
+        }
 
         // update the test rob
         this.vpp.$data.oc_paper_rob = {};
