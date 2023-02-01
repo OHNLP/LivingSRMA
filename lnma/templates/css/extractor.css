@@ -154,7 +154,12 @@ div.w-attr-item:nth-child(odd) {background: whitesmoke; }
     text-overflow: ellipsis;
 }
 .w-cate-item-rob {
-    background: linear-gradient(to right, #efefef 25%, #f58c8c 60%, #ffff00 80%, #00ff00 100%);
+    /* background: linear-gradient(to right, #efefef 25%, #f58c8c 60%, #ffff00 80%, #00ff00 100%); */
+    background: linear-gradient(to right, #efefef 25%, #00b8ff 100%);
+}
+.w-cate-item-ind {
+    /* background: linear-gradient(to right, #efefef 25%, #f58c8c 60%, #ffff00 80%, #00ff00 100%); */
+    background: linear-gradient(to right, #efefef 25%, #008cff 100%);
 }
 .w-attr-item {
     border-bottom: 1px dotted #dedede;
