@@ -971,15 +971,15 @@ def update_paper_ss_cq_decision_by_keystr_and_pid(
     return paper
 
 
-def _update_paper_meta(paper):
+def _update_paper_meta(paper, auto_add=True, auto_commit=True):
     '''
     The internal function of updating meta 
     '''
     flag_modified(paper, "meta")
     
     # commit this
-    db.session.add(paper)
-    db.session.commit()
+    if auto_add: db.session.add(paper)
+    if auto_commit: db.session.commit()
 
     return paper
 

@@ -431,6 +431,8 @@ def get_extract_and_papers():
         abbr
     )
 
+    old_data = copy.deepcopy(extract.data)
+
     if extract is None:
         # this is a new extract
         ret = {
@@ -453,12 +455,14 @@ def get_extract_and_papers():
 
     # update the extract with papers
     # extract.update_data_by_papers(papers)
+    extract_json = extract.as_dict()
+    extract_json['old_data'] = old_data
 
     # make the return object
     ret = {
         'success': True,
         'msg': '',
-        'extract': extract.as_dict(),
+        'extract': extract_json,
         'papers': [ p.as_very_simple_dict() for p in papers ]
     }
     return jsonify(ret)

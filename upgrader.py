@@ -60,12 +60,22 @@ def upgrade_paper_meta_ds_id(keystr='TEST', force_update=False):
 
         if has_updated:
             # oh, this paper has been updated, need to save
-            dora._update_paper_meta(paper)
+            paper = dora._update_paper_meta(
+                paper,
+                auto_commit=False
+            )
             cnt_updated += 1
         else:
             cnt_not += 1
+
+        # batch commit
+        if cnt_updated>0 and cnt_updated % 100 == 0:
+            db.session.commit()
+
+    # final commit
+    db.session.commit()
     
-    print('* done upgrading, %s have been updated, %s not.' % (
+    print('* done upgrading, %s have been updated, %s not or skipped.' % (
         cnt_updated, 
         cnt_not
     ))
@@ -375,8 +385,10 @@ if __name__ == '__main__':
     app.app_context().push()
 
     # upgrade something?
-    # upgrade_paper_meta_ds_id('IO', True)
-
-    upgrade_pieces_from_extracts('IO')
+    keystr = 'LUNGCA'
+    upgrade_paper_meta_ds_id(keystr, False)
+    print("*" * 60)
+    print('\n\n')
+    upgrade_pieces_from_extracts(keystr)
 
     print('* done upgrader')
