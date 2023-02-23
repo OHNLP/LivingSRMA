@@ -259,6 +259,13 @@ PWMA Primary + Cumulative Analysis API Demo
                             v-html="mermaid_chart_rob">
                         </div>
 
+                        <div>
+                            <button v-on:click="copy_mermaid_code('rob')"
+                                title="Copy the mermaid code">
+                                Copy Mermiad Code
+                            </button>
+                        </div>
+
                         <p class="defs">
                             0: Not available <br>
                             1: No serious <br>
@@ -305,6 +312,13 @@ PWMA Primary + Cumulative Analysis API Demo
                             v-html="mermaid_chart_inc">
                         </div>
 
+                        <div>
+                            <button v-on:click="copy_mermaid_code('inc')"
+                                title="Copy the mermaid code">
+                                Copy Mermiad Code
+                            </button>
+                        </div>
+
                         <p class="defs">
                             0: Not applicable <br>
                             1: No serious <br>
@@ -341,6 +355,13 @@ PWMA Primary + Cumulative Analysis API Demo
                         <div id="mermaid_pbb" 
                             class="mermaid"
                             v-html="mermaid_chart_pbb">
+                        </div>
+
+                        <div>
+                            <button v-on:click="copy_mermaid_code('pbb')"
+                                title="Copy the mermaid code">
+                                Copy Mermiad Code
+                            </button>
                         </div>
 
                         <p class="defs">
@@ -390,6 +411,13 @@ PWMA Primary + Cumulative Analysis API Demo
                             v-html="mermaid_chart_imp">
                         </div>
 
+                        <div>
+                            <button v-on:click="copy_mermaid_code('imp')"
+                                title="Copy the mermaid code">
+                                Copy Mermiad Code
+                            </button>
+                        </div>
+
                         <p class="defs">
                             0: Not applicable <br>
                             1: No serious <br>
@@ -427,6 +455,13 @@ PWMA Primary + Cumulative Analysis API Demo
                         <div id="mermaid_ind" 
                             class="mermaid"
                             v-html="mermaid_chart_ind">
+                        </div>
+
+                        <div>
+                            <button v-on:click="copy_mermaid_code('ind')"
+                                title="Copy the mermaid code">
+                                Copy Mermiad Code
+                            </button>
                         </div>
 
                         <p class="defs">
@@ -529,6 +564,51 @@ var app_coe = {
                         const cn = chart_names[i];
                         this.update_chart(cn);
                     }
+                },
+
+                copy_mermaid_code: function(chart_name) {
+                    var chart_desc = '';
+                    switch (chart_name) {
+                        case 'rob':
+                            chart_desc = coe_helper.get_rob_mermaid(
+                                this.pma.data.coe.info.risk_of_bias
+                            );
+                            break;
+
+                        case 'inc':
+                            chart_desc = coe_helper.get_inc_mermaid(
+                                this.pma.data.coe.info.inconsistency
+                            );
+                            break;
+
+                        case 'pbb':
+                            chart_desc = coe_helper.get_pbb_mermaid(
+                                this.pma.data.coe.info.publication_bias
+                            );
+                            break;
+
+                        case 'imp':
+                            chart_desc = coe_helper.get_imp_mermaid(
+                                this.pma.data.coe.info.imprecision
+                            );
+                            break;
+
+                        case 'ind':
+                            chart_desc = coe_helper.get_ind_mermaid(
+                                this.pma.data.coe.info.indirectness
+                            );
+                            break;
+                    
+                        default:
+                            break;
+                    }
+                    navigator.clipboard.writeText(chart_desc).then(() => {
+                        /* clipboard successfully set */
+                        console.log('* copied ' + chart_desc)
+                    }, () => {
+                        /* clipboard write failed */
+                        console.log('* failed copy?')
+                    });
                 },
 
                 update_chart: function(chart_name) {

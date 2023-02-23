@@ -18,6 +18,7 @@ from lnma import settings
 from lnma import dora
 # from lnma.analyzer import rplt_analyzer
 from lnma.analyzer import rpy2_pwma_analyzer as rplt_analyzer
+from lnma.analyzer import bayes_analyzer
 
 PATH_PUBDATA = 'pubdata'
 
@@ -55,6 +56,75 @@ def apikey_required(f):
 @bp.route('/')
 def index():
     return 'RPLT Service'
+
+
+@bp.route('/NMA_BAYES', methods=['GET', 'POST'])
+@apikey_required
+def nma_bayes():
+    '''
+    NMA Bayesian Analyzer
+    '''
+    if request.method=='GET':
+        return render_template('rplt/NMA_BAYES.html')
+    
+    # prepare the return object
+    ret = {
+        'success': False,
+        'msg': '',
+        'analysis_method': 'nma_bayes'
+    }
+
+    # measure_of_effect
+    sm = request.form.get('sm', '').strip()
+    # reference_treatment
+    rt = request.form.get('rt', '').strip()
+
+    input_format = request.form.get('input_format', '').strip()
+    
+    # check rs
+    if sm not in set(['HR', 'RR', 'OR']):
+        ret['msg'] = 'Unsupported measure of effect'
+        return jsonify(ret)
+    
+    # check hk
+    if input_format not in set(['HRLU']):
+        ret['msg'] = 'Unsupported value for input format'
+        return jsonify(ret)
+
+    # extract data
+    try:
+        rs = request.form.get('rs')
+        rs = json.loads(rs)
+    except Exception as err:
+        print('wrong rs:', err)
+        ret['msg'] = 'Input data is missing or not valid JSON format.'
+        return jsonify(ret) 
+
+    # get all treats
+    trts = []
+    for r in rs:
+        if r['t1'] not in trts: trts.append(r['t1'])
+        if r['t2'] not in trts: trts.append(r['t2'])
+    if rt not in trts:
+        rt = trts[0]
+    
+    cfg = {
+        'analysis_method': 'bayes',
+        'measure_of_effect': sm,
+        'fixed_or_random': 'random',
+        'which_is_better': 'small',
+        'input_format': input_format,
+        'reference_treatment': rt
+    }
+
+    _ret = bayes_analyzer.analyze(rs, cfg)
+    # change the result name
+    _ret['rsts'] = _ret['data']
+    del _ret['data']
+
+    ret['data'] = _ret
+
+    return ret
 
 
 @bp.route('/PWMA_INCD', methods=['GET', 'POST'])

@@ -1,0 +1,143 @@
+{% extends '_layout_bs.html' %}
+
+{% block title %}
+NMA Primary + Cumulative Analysis API Demo
+{% endblock %}
+
+{% block style %}
+<style>
+.code {
+    font-family: 'Courier New', Courier, monospace;
+    background-color: #eeeeee;
+    font-size: 13px;
+}
+</style>
+{% endblock %}
+
+{% block main %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-5">
+            <h2>RPLT NMA API Demo</h2>
+            <p>
+                RPLT NMA Figure API Test for <span class="code">/rplt/NMA_BAYES</span>. <br>
+                The return URL is the relative path to root, please add to absolute path in your own code. The server supports cross-domain access and HTTP header "Access-Control-Allow-Origin" has been added, so this service can be accessed from any server.
+                The usage of this web API in JavaScript is also available in the source code of this page for reference. <br>
+                There are 4 parameters:
+            </p>
+            <div>
+
+                <div class="form-group row">
+                    <label for="sm" class="col-sm-3 col-form-label">sm</label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" id="sm" value="HR">
+                        <small id="smHelp" class="form-text text-muted">The measure of effect. Available values include: <br>
+                            HR, OR, RR, or RD.</small>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label for="rt" class="col-sm-3 col-form-label">rt</label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" id="rt" value="Suni">
+                        <small id="smHelp" class="form-text text-muted">
+                            The reference treatment (Optional) <br>
+                            e.g., Suni or any treatment in data.</small>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label for="input_format" class="col-sm-3 col-form-label">input_format</label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" id="input_format" value="HRLU">
+                        <small class="form-text text-muted">The input format, HRLU</small>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label for="rs" class="col-sm-3 col-form-label">rs</label>
+                    <div class="col-sm-9">
+                        <textarea class="form-control code" id="rs" rows="20" style="font-size: 9px;"></textarea>
+                        <small id="rsHelp" class="form-text text-muted">The JSON data for generating plots. Each study is an object, with 6 attributes (case sensitive). The value of this parameter is a stringified JSON object.</small>
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <label for="apikey" class="col-sm-3 col-form-label">apikey
+                    </label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" id="apikey" value="[[ config['settings'].API_SYSTEM_APIKEYS[0]|show_if_local ]]">
+                        <small id="apikeyHelp" class="form-text text-muted">
+                            For the security of this service, API Key is required for authentication.
+                        </small>
+                    </div>
+ 
+                </div>
+                
+                <div class="form-group row">
+                    <div class="col-sm-10">
+                        <button onclick="get_data();" class="btn btn-primary">
+                            Request figure URLs with above parameters
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-md-7" style="padding-top: 20px;">
+            
+            <h4>Server Response: </h4>
+            <pre id="resp" style="width: 100%; max-height: 500px;" class="code">
+
+            </pre>
+            <img id="img-1" style="width: 100%; border: 3px solid #cccccc; margin: 5px 0;" src="">
+            <img id="img-2" style="width: 100%; border: 3px solid #cccccc; margin: 5px 0;" src="">
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block script %}
+<script>
+var rs_sample = [
+    {t1:"AveAxi",	t2:"Suni",	sm:0.69,	lowerci:0.57,	upperci:0.83,	study:"Choueiri TK et al (2)",	year:"2020",	pid:"32339648"},
+    {t1:"AteBev",	t2:"Suni",	sm:1.00,	lowerci:0.69,	upperci:1.45,	study:"Atkins MB et al (1)",    year:"2017",	pid:"10.1200/JCO.2017"},
+    {t1:"Cabo",	t2:"Suni",	sm:0.48,	lowerci:0.31,	upperci:0.74,	study:"Choueiri TK et al (3)",	year:"2018",	pid:"29550566"},
+    {t1:"Pazo",	t2:"Suni",	sm:1.05,	lowerci:0.90,	upperci:1.22,	study:"Motzer RJ et al (1)",	year:"2013",	pid:"23964934"},
+    {t1:"Tivo",	t2:"Sora",	sm:0.80,	lowerci:0.64,	upperci:0.99,	study:"Motzer RJ et al (2)",	year:"2013",	pid:"24019545"},
+    {t1:"Axi",	t2:"Sora",	sm:0.77,	lowerci:0.56,	upperci:1.05,	study:"Hutson TE et al",	year:"2017",	pid:"27498023"},
+    {t1:"Suni",	t2:"Sora",	sm:0.67,	lowerci:0.42,	upperci:1.08,	study:"Tomita Y et al",	year:"2020",	pid:"32466961"},
+];
+
+function get_data() {
+    var params = {
+        sm: $('#sm').val(),
+        rt: $('#rt').val(),
+        input_format: $('#input_format').val(),
+        rs: $('#rs').val(),
+        apikey: $('#apikey').val()
+    };
+    console.log(params);
+
+    // clear the response area
+    $('#resp').html('Waiting for response ....');
+    $('#img-1').attr('src', '');
+    $('#img-2').attr('src', '');
+
+    var base = '';
+    // var base = 'https://workspace.network-meta-analysis.com/';
+    $.post(
+        base + '/rplt/NMA_BAYES',
+        params,
+        function(data) {
+            console.log('* get return', data);
+            $('#resp').html(JSON.stringify(data, null, 2));
+        }, 'json'
+    )
+}
+// show the JSON content of rs in textarea
+$('#rs').val(JSON.stringify(rs_sample, null, 2));
+</script>
+{% endblock %}
