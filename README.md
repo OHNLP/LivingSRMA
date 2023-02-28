@@ -1,6 +1,9 @@
-# Living Network Meta Analysis
+# Living Systematic Review and Meta-analysis (LivingSRMA)
 
-The Living Network Meta Analysis System is a platform for researchers 
+The Living Systematic Review and Meta-analysis (SRMA) platform is designed for researchers to conduct SRMAs.
+
+The whole system is deployed in a Microsoft Azure Cloud server for international access.
+The details of how to access to the production server is described in the `\docs`.
 
 # Production Environment Setup
 
