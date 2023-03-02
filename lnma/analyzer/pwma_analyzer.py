@@ -13,6 +13,7 @@ from .data_helper import gen_rscript
 from .data_helper import run_rscript
 
 from .rpadapter import _meta_trans_metabin
+from .rpadapter import _meta_trans_metagen
 from .rpadapter import _meta_trans_metacum
 
 from lnma.settings import *
@@ -107,15 +108,25 @@ def analyze(rs, cfg):
     # transform the output json to front end format
     jrst = json.load(open(full_filename_jsonret))
 
-    ret = {
-        'submission_id': params['submission_id'],
-        'params': params,
-        'success': True,
-        'data': {
-            'primma': _meta_trans_metabin(jrst, params)
-            # 'primma': None #_meta_trans_metabin(jrst, params)
+    if cfg['input_format'] == 'PRIM_CAT_PRE':
+        # 2023-03-01: fix for PRE format
+        ret = {
+            'submission_id': params['submission_id'],
+            'params': params,
+            'success': True,
+            'data': {
+                'primma': _meta_trans_metagen(jrst, params)
+            }
         }
-    }
+    else:
+        ret = {
+            'submission_id': params['submission_id'],
+            'params': params,
+            'success': True,
+            'data': {
+                'primma': _meta_trans_metabin(jrst, params)
+            }
+        }
 
     # add cumulative MA results if applied
     if params['cumulative_meta_analysis'] == 'yes':
