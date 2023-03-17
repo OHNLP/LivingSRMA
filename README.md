@@ -143,10 +143,12 @@ $ sudo apt-get install mysql-server
 
 ### Users and Database
 
+Please modify the password in the sample and configuration file.
+
 ```bash
 sudo mysql
 mysql> create database lnma;
-mysql> create user lnma@localhost identified with mysql_native_password by 'LNMA_password_12#$';
+mysql> create user lnma@localhost identified with mysql_native_password by '12345678';
 mysql> grant all on lnma.* to lnma@localhost;
 ```
 
