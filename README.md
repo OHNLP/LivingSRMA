@@ -327,7 +327,7 @@ SECRET_KEY = b'9s8@js-7sJx8-hXs73-&62hx-2aNxh'
 DB_SERVER = 'localhost'
 
 # Flask-SQLAlchemy
-SQLALCHEMY_DATABASE_URI = 'mysql://lnma:LNMA_password_12#$@127.0.0.1:3306/lnma'
+SQLALCHEMY_DATABASE_URI = 'mysql://lnma:12345678@127.0.0.1:3306/lnma'
 SQLALCHEMY_ECHO = False
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
