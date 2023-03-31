@@ -472,6 +472,7 @@ def get_extract_and_papers():
 @login_required
 def update_extract():
     '''
+    Deprecated
     Update the extract meta and data
     '''
     project_id = request.form.get('project_id')

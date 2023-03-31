@@ -650,10 +650,10 @@ var srv_extractor = {
     /**
      * Set number of arms to a paper_data according to oc meta
      */
-    set_n_arms: function(paper_data, n_arms, is_copy_main) {
+    set_n_arms: function(paper_ext_data, n_arms, flag_copy_main) {
         // get the is_copy_main default value
-        if (typeof(is_copy_main) == 'undefined') {
-            is_copy_main = true;
+        if (typeof(flag_copy_main) == 'undefined') {
+            flag_copy_main = true;
         }
 
         // fix the data type error
@@ -662,21 +662,21 @@ var srv_extractor = {
         }
 
         // set the n_arms
-        paper_data.n_arms = n_arms;
+        paper_ext_data.n_arms = n_arms;
 
         // update the others
         var new_n_others = n_arms - 2;
-        if (new_n_others == paper_data.attrs.other.length) {
+        if (new_n_others == paper_ext_data.attrs.other.length) {
             // which means the number of arms doesn't change
 
-        } else if (new_n_others > paper_data.attrs.other.length) {
+        } else if (new_n_others > paper_ext_data.attrs.other.length) {
             // the number of arms increases, need to put more elements
-            var delta = new_n_others - paper_data.attrs.other.length;
+            var delta = new_n_others - paper_ext_data.attrs.other.length;
             // add each as a new ext
             for (let i = 0; i < delta; i++) {
                 // just copy the keys from main track
-                var obj = JSON.parse(JSON.stringify(paper_data.attrs.main));
-                if (is_copy_main) {
+                var obj = JSON.parse(JSON.stringify(paper_ext_data.attrs.main));
+                if (flag_copy_main) {
                     // nothing to do when copy main
 
                 } else {
@@ -687,18 +687,18 @@ var srv_extractor = {
                         }
                     }
                 }
-                paper_data.attrs.other.push(obj);
+                paper_ext_data.attrs.other.push(obj);
             }
 
         } else {
             // the number of arms decreases, need to remove
-            var delta = paper_data.attrs.other.length - new_n_others;
+            var delta = paper_ext_data.attrs.other.length - new_n_others;
             for (let i = 0; i < delta; i++) {
-                paper_data.attrs.other.pop();
+                paper_ext_data.attrs.other.pop();
             }
         }
 
-        return paper_data;
+        return paper_ext_data;
     },
 
     /**

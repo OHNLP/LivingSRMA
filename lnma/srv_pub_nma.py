@@ -70,6 +70,9 @@ def get_graph_nma_data_from_db(keystr, cq_abbr):
             extract.get_repr_str()
         ))
 
+        # 2023-03-30: need to use piece
+        extract = dora.attach_extract_data(extract)
+
         # create an oc object for ... what?
         # treat_list = extract.meta['treatments']
 

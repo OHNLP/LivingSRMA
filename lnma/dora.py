@@ -1809,6 +1809,9 @@ def update_extract_meta(project_id, oc_type, abbr, meta):
 
 def update_extract_data(project_id, oc_type, abbr, data):
     '''
+    Deprecated.
+
+    The extract data should be updated by piece
     Update the existing extract data only
     '''
     extract = Extract.query.filter(and_(
@@ -1909,6 +1912,7 @@ def update_extract_meta_and_data(project_id, oc_type, abbr, meta, data):
 
 def update_extract(extract):
     '''
+    Deprecated
     Update the given extract
     '''
     extract.date_updated = datetime.datetime.now()
@@ -2275,6 +2279,9 @@ def attach_extract_data(extract, flag_skip_not_selected=True):
             data[pc.pid] = pc.data
 
     extract.data = data
+    print('* attached data to extract[%s]' % (
+        extract.extract_id
+    ))
 
     return extract
 

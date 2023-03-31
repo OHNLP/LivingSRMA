@@ -25,6 +25,9 @@ def get_itable_attr_rs_cfg_from_db(keystr, cq_abbr="default", with_extract=False
     )
     if extract is None:
         return None
+    
+    # 2023-03-30: add data
+    extract = dora.attach_extract_data(extract)
 
     # get the papers for this project
     papers = dora.get_papers_of_included_sr(project_id)
@@ -129,7 +132,11 @@ def get_itable_attr_rs_cfg_from_db(keystr, cq_abbr="default", with_extract=False
     
     # 2021-08-08: to insert the data from other arms
     # we abstract the function for getting `r`
-    def _make_r(paper_data, abbr_dict, other_arm=False):
+    def _make_r(paper_data, abbr_dict, arm_idx=0):
+        '''
+        arm_idx is 0 means it's the main
+        otherwise it means it's multi arm
+        '''
         # `r` use name as key to retrive data, 
         # which is used in the itable.html.
         # but the case here is quite complex, the multi-arm issue
@@ -157,7 +164,11 @@ def get_itable_attr_rs_cfg_from_db(keystr, cq_abbr="default", with_extract=False
         # }
         #
         # So, please check the data carefully.
-        r = {}
+        # 2023-03-30: for multi-arm study
+        # we also need to add some information about the arm
+        r = {
+            '_arm_idx': arm_idx
+        }
 
         for abbr in abbr_dict:
             attr_name = abbr_dict[abbr]
@@ -179,8 +190,8 @@ def get_itable_attr_rs_cfg_from_db(keystr, cq_abbr="default", with_extract=False
                 auetal = util.get_author_etal_from_paper(paper)
 
                 # add some information of other arms
-                if other_arm:
-                    val = auetal + '*'
+                if arm_idx > 0:
+                    val = auetal + ' (Comp %s)' % (arm_idx + 1)
                 else:
                     val = auetal
 
@@ -240,7 +251,11 @@ def get_itable_attr_rs_cfg_from_db(keystr, cq_abbr="default", with_extract=False
         
         # the `r` is for the output
         # first, let's get the main arm
-        r = _make_r(paper_ext['attrs']['main']['g0'], abbr2attr_name, False)
+        r = _make_r(
+            paper_ext['attrs']['main']['g0'], 
+            abbr2attr_name, 
+            0
+        )
         rs.append(r)
 
         # check other arms
@@ -250,7 +265,8 @@ def get_itable_attr_rs_cfg_from_db(keystr, cq_abbr="default", with_extract=False
                 r = _make_r(
                     paper_ext['attrs']['other'][arm_idx]['g0'], 
                     abbr2attr_name,
-                    True
+                    # arm_idx starts with 0, so need to add 1
+                    arm_idx + 1
                 )
                 rs.append(r)
         

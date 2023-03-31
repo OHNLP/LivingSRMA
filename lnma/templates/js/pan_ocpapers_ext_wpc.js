@@ -603,28 +603,69 @@ Object.assign(pan_ocpapers.vpp_methods, {
         );
     },
 
-    set_n_arms: function() {
+    set_n_arms: function(flag_copy_main, flag_reset_working_arm, flag_force_update) {
+        if (typeof(flag_copy_main) == 'undefined') {
+            flag_copy_main = false;
+        }
+        if (typeof(flag_reset_working_arm) == 'undefined') {
+            flag_reset_working_arm = true;
+        }
+        if (typeof(flag_force_update) == 'undefined') {
+            flag_force_update = true;
+        }
         // notify unsaved changes first
         this.has_change_unsaved();
 
+        // var n_arms = parseInt(
+        //     this.working_oc.data[this.working_paper.pid].n_arms
+        // );
         var n_arms = parseInt(
-            this.working_oc.data[this.working_paper.pid].n_arms
+            this.working_piece.data.n_arms
         );
         console.log('* set n_arms to', n_arms);
 
         // update the other to match the number
-        this.working_oc.data[this.working_paper.pid] = srv_extractor.set_n_arms(
-            this.working_oc.data[this.working_paper.pid], n_arms
+        // this.working_oc.data[this.working_paper.pid] = srv_extractor.set_n_arms(
+        //     this.working_oc.data[this.working_paper.pid], 
+        //     n_arms
+        // );
+        
+        // 2023-03-30: update to working_piece
+        this.working_piece.data = srv_extractor.set_n_arms(
+            this.working_piece.data,
+            n_arms,
+            flag_copy_main
         );
 
         // update current working arm to main
-        this.switch_working_arm(null);
+        if (flag_reset_working_arm) {
+            this.switch_working_arm(null);
+        }
         
-        this.$forceUpdate();
+        if (flag_force_update) {
+            this.$forceUpdate();
+        }
     },
 
     switch_working_arm: function(arm_idx) {
         console.log('* switch_working_arm', arm_idx);
+
+        // 2023-03-30: this can be tricky for multi-arm study
+        // the working_paper_arm may NOT exist
+        // so need to ensure other arms are available before switch
+        if (arm_idx == null) {
+            // ok, nothing, just switch to main
+        } else if ((arm_idx+1) > this.working_piece.data.attrs.other.length) {
+            // which means the target arm is not there yet???
+            // usually it won't happen, but sometimes ...
+            // due to import issue or other issues
+            // working_piece.data.attrs.other may NOT exist
+            // now need to update the data
+            console.log('* missing other arms in this piece');
+            this.set_n_arms(false, false);
+            // then the piece is updated, now it should be fine to get data
+        }
+
         this.working_paper_arm = arm_idx;
 
         // update the working arm

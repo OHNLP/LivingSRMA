@@ -259,6 +259,11 @@ def get_sof_pma_data_from_db_IO(cq_abbr="default", is_calc_pma=True):
         oc_rs = []
 
         # the extract['data'] con
+        # 2023-03-30: in fact, after using Piece table,
+        # there is no information in extract.data
+        # we need to collect pieces by using dora.attach_extract_data
+        extract = dora.attach_extract_data(extract)
+
         for pid in extract.data:
             # get the extraction 
             ext_pp_data = extract.data[pid]
@@ -279,20 +284,34 @@ def get_sof_pma_data_from_db_IO(cq_abbr="default", is_calc_pma=True):
             # we could make a list to contain all the records
             # the second item is the author name suffix
             # for each paper, there must be one main record
-            # sometimes, there is also multi-arm
+            # sometimes, it can be multi-arm study.
+            # 
+            # so, need to get other arms
+            # first, copy main arm
             ext_pp_rs = [
-                [ext_pp_data['attrs']['main']['g0'].copy(), '']
+                [ext_pp_data['attrs']['main']['g0'].copy(), 0]
             ]
+            # then, copy other arms
             for arm_idx in range(ext_pp_data['n_arms'] - 2):
-                ext_pp_rs.append(
-                    [ext_pp_data['attrs']['other'][arm_idx]['g0'].copy(), ' Comp %s' % (arm_idx + 2)]
-                )
+                ext_pp_rs.append([
+                    ext_pp_data['attrs']['other'][arm_idx]['g0'].copy(), 
+                    arm_idx + 1
+                ])
             
             # then, we just need to run the calculation once
             for item in ext_pp_rs:
+                # item[0] is the extracted data itself
+                # item[1] is arm idx (0 is main, other is multi)
                 r = item[0]
+                arm_idx = item[1]
+
+                # for label purpose
+                author_label_ext = ''
+                if arm_idx > 0:
+                    author_label_ext = '(Comp %s)' % (arm_idx + 1)
                 
                 # make sure the data type is int
+                # copy everything
                 for col in int_cols:
                     if col in r:
                         r[col] = __int(r[col])
@@ -330,13 +349,16 @@ def get_sof_pma_data_from_db_IO(cq_abbr="default", is_calc_pma=True):
                 r['has_G5N_prim'] = __is_pwmable(r, 'G5N')
 
                 # the author name is the combination of paper short name and suffix
-                r['author'] = paper.get_short_name() + item[1]
+                r['author'] = paper.get_short_name() + " " + author_label_ext
                 r['year'] = paper.get_year()
                 r['pid'] = paper.pid
                 r['oc_abbr'] = oc_abbr
                 r['oc_cate'] = oc_cate
                 r['oc_name'] = oc_name
                 r['oc_group'] = oc_group
+
+                # 2023-03-30: add this for indicating multi-arm study record
+                r['_arm_idx'] = arm_idx
 
                 rs.append(r)
                 oc_rs.append(r)

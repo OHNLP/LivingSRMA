@@ -1328,10 +1328,10 @@ class Extract(db.Model):
                         # but a potential issue is, it's not a good practice
                         # to update the meta info here.
                         self.meta['coe'][coe_cate_key] = copy.deepcopy(settings.OC_TYPE_TPL['pwma']['default']['coe']['main'])
-                        print('* added the cate_key [%s] in meta.coe for oc [%s]' % (
-                            coe_cate_key,
-                            self.abbr
-                        ))
+                        # print('* added the cate_key [%s] in meta.coe for oc [%s]' % (
+                        #     coe_cate_key,
+                        #     self.abbr
+                        # ))
 
         elif self.oc_type == 'nma':
             # at present, no further update on the NMA
@@ -1804,7 +1804,7 @@ class Extract(db.Model):
 
                 # for multi arm study, need to have different name
                 if arm_idx > 0:
-                    r['study'] = '%s (%s)' % (study, arm_idx)
+                    r['study'] = '%s (Comp %s)' % (study, arm_idx)
 
                 r['year'] = year
 
