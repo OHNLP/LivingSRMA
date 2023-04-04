@@ -20,6 +20,40 @@ from lnma.models import *
 from lnma import db
 
 
+def validate_or_update_piece_by_outcome(
+    piece, 
+    extract
+):
+    '''
+    Check whether a piece data structure meet the definition of an outcome
+
+    If yes, it's ok. Otherwise, update this piece.
+    '''
+    flag_updated = False
+    for subg_idx, subg in enumerate(extract.meta['sub_groups']):
+        # the group key in extracted piece
+        gx = 'g%s' % subg_idx
+
+        for arm in [piece.data['attrs']['main']] + piece.data['attrs']['other']:
+            # check whether this group exists
+            # g0, g1, etc.
+            if gx in arm:
+                # ok, this arm exists
+                pass
+            else:
+                # oh, no, this group doesn't exist
+                # let's add this group with empty information
+                # by filling the group with information
+                arm = util.fill_extract_data_arm(
+                    arm, 
+                    extract.meta['cate_attrs'], 
+                    subg_idx
+                )
+                flag_updated = True
+    
+    return flag_updated, piece
+
+
 def copy_extracts(
     keystr_a,
     cq_abbr_a,

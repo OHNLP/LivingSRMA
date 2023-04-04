@@ -3,6 +3,7 @@ import json
 import math
 import copy
 import random
+import logging
 from re import template
 import string
 
@@ -1174,7 +1175,8 @@ def get_extract_piece():
     project_id = request.args.get('project_id')
     extract_id = request.args.get('extract_id')
     pid = request.args.get('pid')
-    
+
+    # get the     
     piece = dora.get_piece_by_project_id_and_abbr_and_pid(
         project_id,
         extract_id,
@@ -1188,6 +1190,27 @@ def get_extract_piece():
                 'piece': None
             }
         })
+    
+    # 2023-04-04: fix the subgroup group inconsistency
+    extract = dora.get_extract(extract_id)
+
+    # need to ensure the data completeness and consistency
+    if extract.meta['group'] == 'subgroup':
+        # special rule for subgroup outcome.
+        # Because this group needs to create g1, g2, and even more
+        # so may be issue here
+        flag_updated, piece = srv_extract.validate_or_update_piece_by_outcome(
+            piece, extract
+        )
+        if flag_updated:
+            # which means this piece is updated due to missing group or other?
+            dora.force_update_piece(piece)
+            logging.info('updatded a subg piece due to format changes %s' % (
+                piece.piece_id
+            ))
+    else:
+        # for other group, it's ok
+        pass
 
     return jsonify({
         'success': True,

@@ -2547,6 +2547,16 @@ def update_piece(project_id, extract_id, pid, data, auto_add=True, auto_commit=T
     return piece
 
 
+def force_update_piece(piece):
+    '''
+    Update the given piece
+    '''
+    flag_modified(piece, 'data')
+
+    db.session.add(piece)
+    db.session.commit()
+
+    return piece
 
 
 
