@@ -1730,11 +1730,24 @@ var app_pma = {
             this.set_filter_value_at(new_val, idx, true);
 
             // update other views
-            let pids = this.get_pids_by_filter();
-            this.n_papers = pids.length;
+            let pid_arms = this.get_pid_arms_by_filter();
+            console.log('* pid_arms:', pid_arms);
+            // this.n_papers = pid_arms.length;
+            // 2023-04-06: change the method for calcuating n papers
+            // as the data structure changed, use different way
+            this.update_n_papers_by_pid_arms(pid_arms);
 
             // update oc_list
-            this.update_oclist(pids);
+            this.update_oclist(pid_arms);
+        },
+
+        update_n_papers_by_pid_arms: function(pid_arms) {
+            var pid_set = new Set();
+            for (let i = 0; i < pid_arms.length; i++) {
+                const pa = pid_arms[i];
+                pid_set.add(pa.PMID);
+            }
+            this.n_papers = pid_set.size;
         },
 
         get_current_filter_values: function() {
@@ -1800,7 +1813,7 @@ var app_pma = {
             }
         },
 
-        get_pids_by_filter: function() {
+        get_pid_arms_by_filter: function() {
             // now need to get the pmids
             // so, first, get the current values of all dropdowns
             var conditions = [];
@@ -1821,25 +1834,26 @@ var app_pma = {
                 }
             }
             // second, use the conditions to search for the 
-            var pids = this.get_pids_by_filter_conditions(conditions);
-            return pids;
+            var pid_arms = this.get_pid_arms_by_filter_conditions(conditions);
+            return pid_arms;
         },
 
-        get_pids_by_filter_conditions: function(conditions) {
+        get_pid_arms_by_filter_conditions: function(conditions) {
             var sql_conds = conditions.join(' and \n');
-            var sql = "select PMID from papers " + '\n' +
+            var sql = "select PMID,_arm_idx from papers " + '\n' +
                 "where " + sql_conds + '\n';
             
             var rs = alasql(sql);
+            return rs;
             
-            var pmids = [];
-            for (let i = 0; i < rs.length; i++) {
-                const r = rs[i];
-                // make sure the PMID is a string
-                pmids.push(""+r.PMID);
-            }
+            // var pid_arms = [];
+            // for (let i = 0; i < rs.length; i++) {
+            //     const r = rs[i];
+            //     // make sure the PMID is a string
+            //     pmids.push(""+r.PMID);
+            // }
 
-            return pmids;
+            // return pmids;
         },
 
         get_filter_options: function(idx, skip) {
@@ -2146,9 +2160,9 @@ var app_pma = {
             jarvis.clear_all_ae();
         },
 
-        update_oclist: function(pids) {
+        update_oclist: function(pid_arms) {
             var updated_data = app_pma.get_oclist_data(
-                pids,
+                pid_arms,
                 this.group
             );
 
@@ -2802,15 +2816,23 @@ var app_pma = {
         this.oc_dict3 = ocds.oc_dict3;
     },
 
-    get_condition_by_pids_and_group: function(pids, group) {
-        var conditions = '';
+    get_condition_by_pid_arms_and_group: function(pid_arms, group) {
+        var conditions = [];
         // so first condition is the pid
-        if (pids.length == 0) {
-            conditions += 'pid is not null ';
+        if (pid_arms.length == 0) {
+            conditions = ['pid is not null'];
         } else {
-            var cond = pids.map(function(v) { return '"' + v + '"'}).join(',');
-            conditions += 'pid in (' + cond + ') ';
+            // var cond = pids.map(function(v) { return '"' + v + '"'}).join(',');
+            // conditions += 'pid in (' + cond + ') ';
+            // 2023-04-03: use pid + arm_idx to locate a treatment option
+            for (let i = 0; i < pid_arms.length; i++) {
+                const pa = pid_arms[i];
+                conditions.push(
+                    "(pid = '"+pa.PMID+"' and _arm_idx = "+pa._arm_idx+")"
+                );
+            }
         }
+        conditions = conditions.join(' OR ')
 
         // second condition is the group
         // var group = this.vpp.$data.group;
@@ -2824,41 +2846,22 @@ var app_pma = {
         return conditions;
     },
 
-    get_oclist_data: function(pids, group) {
-        if (typeof(pids) == 'undefined') {
-            pids = [];
+    get_oclist_data: function(pid_arms, group) {
+        if (typeof(pid_arms) == 'undefined') {
+            pid_arms = [];
         }
 
         // get updated rs for oc list
         var oc_list = this.get_oc_list(
-            pids,
+            pid_arms,
             group
         );
-        
-        // bind results 
-        // this.raw_rs = raw_rs;
-        // this.oc_list = oc_list.rs;
-        // this.rs_stat = oc_list.rs_stat;
-
-        // update vpp data
-        // this.vpp.rs = oc_list.rs;
-        // this.vpp.rs_stat = oc_list.rs_stat;
 
         // get updated MAs
         var ma_dict = this.get_ma_dict(
-            pids,
+            pid_arms,
             group
         );
-
-        // update the MA results in real-time!
-        // this.update_ma_rsts(
-        //     ma_dict
-        // );
-
-        // this.ma_dict = ma_dict;
-
-        // update the vpp data
-        // this.vpp.ma_dict = ma_dict;
 
         return {
             rs: oc_list.rs,
@@ -2866,40 +2869,8 @@ var app_pma = {
             ma_dict: ma_dict
         };
 
-        // convert to dataframe for display
-        // var ma_df = this.get_ma_df(
-        //     ma_dict,
-        //     this.oc_dict
-        // );
-        // this.ma_df = ma_df;
-
-        // update the vis
-        // var vis_data = this.update_vis_data(
-        //     ma_df,
-        //     this.oc_dict
-        // );
-        // vis_ocmas.draw_fig_scatter(
-        //     vis_data
-        // );
-        // vis_ocmas.draw_fig_heatmap(
-        //     this.oc_dict3
-        // );
-        // vis_ocmas.draw_fig_sunburst(
-        //     this.oc_dict3,
-        //     this.ma_dict
-        // );
-
-        // update tips
-        // $(document).tooltip({
-        //     position: {
-        //         my: "left top",
-        //         at: "right+5 top-5",
-        //         collision: "none"
-        //     }
-        // });
     },
 
-    
 
     /**
      * Get the init default oc dictionaries for searching oc
@@ -2981,14 +2952,14 @@ var app_pma = {
         };
     },
     
-    get_oc_list: function(pids, group) {
+    get_oc_list: function(pid_arms, group) {
         var sql = 'select oc_group, oc_cate, oc_abbr, first(oc_name) as oc_name, ' + '\n' +
             '  count(case when has_GA = true then pid else null end) as cnt_ga, ' + '\n' +
             '  count(case when has_G3H = true then pid else null end) as cnt_g3h, ' + '\n' +
             '  count(case when has_G5N = true then pid else null end) as cnt_g5n ' + '\n' +
             'from ocs ' + '\n' +
             'where ' + '\n' +
-            this.get_condition_by_pids_and_group(pids, group) + ' ' + '\n' +
+            this.get_condition_by_pid_arms_and_group(pid_arms, group) + ' ' + '\n' +
             'group by oc_group, oc_cate, oc_abbr ' + '\n' +
             'order by oc_group desc, oc_cate asc, oc_name asc';
 
@@ -3057,11 +3028,11 @@ var app_pma = {
         };
     },
 
-    get_ma_dict: function(pids, group) {
+    get_ma_dict: function(pid_arms, group) {
         var sql = 'select * ' + '\n' +
             'from ocs ' + '\n' +
             'where ' + '\n' +
-            this.get_condition_by_pids_and_group(pids);
+            this.get_condition_by_pid_arms_and_group(pid_arms);
 
         var rs = alasql(sql);
         console.log('* rs for mas:', rs);
