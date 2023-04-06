@@ -20,7 +20,7 @@
                 <div>
                     <select v-model="get_working_arm_attrs()['g0']['COE_RCT_IND_OVERALL_RJ']"
                         :class="'ind-rst-icon-' + get_working_arm_attrs()['g0']['COE_RCT_IND_OVERALL_RJ']"
-                        @change="has_change_unsaved"
+                        @change="set_has_change_unsaved"
                         style="width: 88px;">
                         <optgroup label="Reviewer Judgement">
                             <option value="V">+ Very Close</option>
@@ -68,7 +68,7 @@
                 </select>
                 <input type="text" 
                     class="ind-comment"
-                    @input="has_change_unsaved"
+                    @input="set_has_change_unsaved"
                     v-model="get_working_arm_attrs()['g0']['COE_RCT_IND_Q'+q_idx+'_COMMENT']">
             </div>
         </div>

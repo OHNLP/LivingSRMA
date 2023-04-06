@@ -462,7 +462,7 @@ html {
         <div id="pan_ocpapers_working_paper"
             class="d-flex flex-row"
             v-if="show_working_paper_pan">
-        {% include 'extractor/__pan_ocpapers_working_paper_collector.html' %}
+        {% include 'extractor/_working_paper_extractor.html' %}
         </div>
         <!-- /#pan_ocpapers_working_paper -->
 
@@ -486,25 +486,13 @@ html {
 <!-- /#pan_ocpapers -->
 
 
-<ul id="pan_ocpapers_ctx_menu" style="display: none;">
-    
-</ul>
+<ul id="pan_ocpapers_ctx_menu" style="display: none;"></ul>
 
 
-<ul id="pan_ocpapers_ocs_menu" style="display: none;">
-
-</ul>
+<ul id="pan_ocpapers_ocs_menu" style="display: none;"></ul>
 
 
-<div id="win_collector">
-    <div style="position: absolute; top: 0; left: -40px; width: 40px; height: 40px; background-color: white;">
-        <div style="font-size: large; width: 40px; height: 40px; line-height: 40px; text-align: center; cursor: pointer;"
-            onclick="pan_collector.hide(); pan_ocpapers.hide_working_paper_pan();">
-            <i class="fa fa-close"></i>
-        </div>
-    </div>
-    {% include 'extractor/_pan_collector.html' %}
-</div>
+{% include 'extractor/_win_collector.html' %}
 
 
 </div>
@@ -864,7 +852,7 @@ var pan_ocpapers = {
             this.modified_paper_pids.add(pid);
 
             // update unsaved from wpc
-            this.has_change_unsaved();
+            this.set_has_change_unsaved();
         },
 
         on_change_itable_n_arms: function(paper, event) {
@@ -1205,13 +1193,13 @@ var pan_ocpapers = {
         $('#pan_ocpapers_working_paper').css('left', '');
     },
 
-    show: function() {
-        $(this.vpp_id).show();
-    },
+    // show: function() {
+    //     $(this.vpp_id).show();
+    // },
 
-    hide: function() {
-        $(this.vpp_id).hide();
-    },
+    // hide: function() {
+    //     $(this.vpp_id).hide();
+    // },
 
     hide_working_paper_pan: function() {
         this.vpp.show_working_paper_pan = false;
@@ -1238,6 +1226,8 @@ var pan_ocpapers = {
 };
 
 {% include 'js/pan_ocpapers_ext_wpc.js' %}
+{% include 'js/pan_ocpapers_ext_wpc_coe_rob.js' %}
+{% include 'js/pan_ocpapers_ext_wpc_coe_ind.js' %}
 {% include 'js/pan_ocpapers_ext_ocmenu.js' %}
 
 

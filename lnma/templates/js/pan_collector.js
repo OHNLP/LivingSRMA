@@ -204,6 +204,7 @@ var pan_collector = {
     },
 
     hide: function() {
+        // 2023-04-06: complete the logic here
         $('#win_collector').css('right', 5000); 
     },
 

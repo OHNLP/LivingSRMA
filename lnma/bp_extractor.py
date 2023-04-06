@@ -432,8 +432,6 @@ def get_extract_and_papers():
         abbr
     )
 
-    old_data = copy.deepcopy(extract.data)
-
     if extract is None:
         # this is a new extract
         ret = {
@@ -442,17 +440,36 @@ def get_extract_and_papers():
         }
         return jsonify(ret)
 
+    # 2023-04-06: fix None extract
+    old_data = copy.deepcopy(extract.data)
+
     # get papers
     papers = srv_paper.get_included_papers_by_cq(
         project_id, 
         cq_abbr
     )
+    paper_pids = [ p.pid for p in papers ]
     
     # update the meta
     extract.update_meta()
 
     # 2023-01-28: use piece to fill the data
     extract = dora.attach_extract_data(extract)
+
+    # 2023-04-06: fix the removed data issue
+    # It's possible that some studies are excluded after extraction
+    # So, need to double check the pids
+    missing_pids = []
+    for pid in extract.data:
+        if pid in paper_pids:
+            # ok
+            pass
+        else:
+            # oh ...
+            missing_pids.append(pid)
+    # remove those pids
+    for pid in missing_pids:
+        del extract.data[pid]
 
     # update the extract with papers
     # extract.update_data_by_papers(papers)

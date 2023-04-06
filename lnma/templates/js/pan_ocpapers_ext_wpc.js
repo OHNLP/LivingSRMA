@@ -115,384 +115,14 @@ Object.assign(pan_ocpapers.vpp_data, {
 // Extend the vpp methods
 Object.assign(pan_ocpapers.vpp_methods, {
     /////////////////////////////////////////////////////
-    // For the working paper rob extraction
+    // Basic function to show/hide
     /////////////////////////////////////////////////////
-    show_coe_rob_d: function(d_idx) {
-        this.coe_rob_d_active = d_idx;
+    show: function() {
+        this.show_working_paper_pan = true;
     },
 
-    load_rob_from_same_trial: function() {
-        // get working paper
-        let paper = this.working_paper;
-        toast('Under development');
-    },
-
-    /**
-     * Show a question or not based on existing answers
-     * @param {Object} ext data extraction
-     * @param {int} d_idx index of D
-     * @param {int} q_idx index of Question in given D
-     */
-    show_coe_rob_d_q: function(ext, d_idx, q_idx) {
-        
-    },
-
-    show_coe_rob_option_NA: function(d_idx, q_idx) {
-        if (d_idx != 2) {
-            return false;
-        }
-        if (q_idx == 1 || q_idx == 2 || q_idx == 6 || q_idx == 7) {
-            return false;
-        }
-        // only when 3,4,5 when aim is b
-        if (this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D2_AIM'] == 'b') {
-            return true;
-
-        } else {
-            return false;
-        }
-    },
-
-    on_change_rob_q_coment: function() {
-        this.has_change_unsaved();
-    },
-
-    on_change_rob_overall: function() {
-        this.has_change_unsaved();
-    },
-
-    on_change_rob_qs: function() {
-        this.update_rob_ds();
-        this.update_rob_overall_ar();
-        // no matter what happens, trigger this event
-        this.has_change_unsaved();
-    },
-
-    on_change_rob_ds: function() {
-        this.update_rob_overall_ar();
-        // no matter what happens, trigger this event
-        this.has_change_unsaved();
-    },
-
-    update_rob_overall_ar: function() {
-        var ds = ['NA', 'NA', 'NA', "NA", "NA"];
-        for (let i = 0; i < ds.length; i++) {
-            var d_idx = i+1;
-            ds[i] = coe_helper.get_domain(
-                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D'+d_idx+'_RJ'],
-                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D'+d_idx+'_AR']
-            );
-        }
-        var overall = coe_helper.judge_rob_overall(
-            ds[0],
-            ds[1],
-            ds[2],
-            ds[3],
-            ds[4],
-        );
-
-        this.get_working_arm_attrs()['g0']['COE_RCT_ROB_OVERALL_AR'] = overall;
-        this.$forceUpdate();
-    },
-
-    update_rob_ds: function() {
-        for (let i = 1; i <=5 ; i++) {
-            this.update_rob_d(i);
-        }
-        this.$forceUpdate();
-    },
-
-    update_rob_d: function(d_idx) {
-        if (d_idx == 1) {
-            var d1 = coe_helper.judge_rob_d1(
-                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D1_Q1'],
-                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D1_Q2'],
-                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D1_Q3']
-            );
-            this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D1_AR'] = d1;
-
-        } else if (d_idx == 2) {
-            var d2 = coe_helper.judge_rob_d2(
-                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D2_AIM'],
-
-                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D2_Q1'],
-                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D2_Q2'],
-                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D2_Q3'],
-                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D2_Q4'],
-                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D2_Q5'],
-                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D2_Q6'],
-                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D2_Q7']
-            );
-            this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D2_AR'] = d2;
-
-        } else if (d_idx == 3) {
-            var d3 = coe_helper.judge_rob_d3(
-                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D3_Q1'],
-                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D3_Q2'],
-                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D3_Q3'],
-                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D3_Q4'],
-            );
-            this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D3_AR'] = d3;
-
-        } else if (d_idx == 4) {
-            var d4 = coe_helper.judge_rob_d4(
-                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D4_Q1'],
-                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D4_Q2'],
-                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D4_Q3'],
-                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D4_Q4'],
-                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D4_Q5'],
-            );
-            this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D4_AR'] = d4;
-
-        } else if (d_idx == 5) {
-            var d5 = coe_helper.judge_rob_d5(
-                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D5_Q1'],
-                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D5_Q2'],
-                this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D5_Q3'],
-            );
-            this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D5_AR'] = d5;
-
-        }
-
-    },
-
-    get_qs: function(d_idx) {
-        if (d_idx == 2) {
-            var aim = this.get_coe_rob_d2_aim();
-            if (aim == 'NA') {
-                return {};
-            } else {
-                return this.coe_rob_qs[2][aim];
-            }
-        } else {
-            return this.coe_rob_qs[d_idx]
-        }
-    },
-
-    disable_rob_domain_question: function(d_idx, q_idx, ext) {
-        if (d_idx == 1) {
-            return false;
-
-        } else if (d_idx == 2) {
-            if (ext['COE_RCT_ROB_D2_AIM'] == 'a') {
-                // for aim A
-                if (q_idx == 1 || q_idx == 2) {
-                    return false;
-
-                } else if (q_idx == 3) {
-                    if (ext['COE_RCT_ROB_D2_Q1'] == 'Y'  ||
-                        ext['COE_RCT_ROB_D2_Q1'] == 'PY' ||
-                        ext['COE_RCT_ROB_D2_Q1'] == 'NI' ||
-                        ext['COE_RCT_ROB_D2_Q2'] == 'Y'  ||
-                        ext['COE_RCT_ROB_D2_Q2'] == 'PY' ||
-                        ext['COE_RCT_ROB_D2_Q2'] == 'NI' ) {
-                        return false;
-
-                    } else {
-                        return true;
-                    }
-                } else if (q_idx == 4) {
-                    if (ext['COE_RCT_ROB_D2_Q3'] == 'Y'  ||
-                        ext['COE_RCT_ROB_D2_Q3'] == 'PY') {
-                        return false;
-
-                    } else {
-                        return true;
-                    }
-                } else if (q_idx == 5) {
-                    if (ext['COE_RCT_ROB_D2_Q4'] == 'Y'  ||
-                        ext['COE_RCT_ROB_D2_Q4'] == 'PY') {
-                        return false;
-
-                    } else {
-                        return true;
-                    }
-                } else if (q_idx == 6) {
-                    return false;
-
-                } else if (q_idx == 7) {
-
-                    if (ext['COE_RCT_ROB_D2_Q6'] == 'N'  ||
-                        ext['COE_RCT_ROB_D2_Q6'] == 'PN'||
-                        ext['COE_RCT_ROB_D2_Q6'] == 'NI') {
-                        return false;
-
-                    } else {
-                        return true;
-                    }
-                }
-            } else {
-                // for aim B
-                if (q_idx == 1 || q_idx == 2) {
-                    return false;
-
-                } else if (q_idx == 3) {
-                    if (ext['COE_RCT_ROB_D2_Q1'] == 'Y'  ||
-                        ext['COE_RCT_ROB_D2_Q1'] == 'PY' ||
-                        ext['COE_RCT_ROB_D2_Q1'] == 'NI' ||
-                        ext['COE_RCT_ROB_D2_Q2'] == 'Y'  ||
-                        ext['COE_RCT_ROB_D2_Q2'] == 'PY' ||
-                        ext['COE_RCT_ROB_D2_Q2'] == 'NI' ) {
-                        return false;
-
-                    } else {
-                        return true;
-                    }
-                } else if (q_idx == 4) {
-                    return false;
-
-                } else if (q_idx == 5) {
-                    return false;
-                    
-                } else if (q_idx == 6) {
-                    
-                    if (ext['COE_RCT_ROB_D2_Q3'] == 'N'  ||
-                        ext['COE_RCT_ROB_D2_Q3'] == 'PN' ||
-                        ext['COE_RCT_ROB_D2_Q3'] == 'NI' ||
-                        ext['COE_RCT_ROB_D2_Q4'] == 'Y'  ||
-                        ext['COE_RCT_ROB_D2_Q4'] == 'PY' ||
-                        ext['COE_RCT_ROB_D2_Q4'] == 'NI' ||
-                        ext['COE_RCT_ROB_D2_Q5'] == 'Y'  ||
-                        ext['COE_RCT_ROB_D2_Q5'] == 'PY' ||
-                        ext['COE_RCT_ROB_D2_Q5'] == 'NI' ) {
-                        return false;
-
-                    } else {
-                        return true;
-                    }
-                }
-            }
-        } else if (d_idx == 3) {
-            if (q_idx == 1) {
-                return false;
-
-            } else if (q_idx == 2) {
-                if (ext['COE_RCT_ROB_D3_Q1'] == 'N'  ||
-                    ext['COE_RCT_ROB_D3_Q1'] == 'PN' ||
-                    ext['COE_RCT_ROB_D3_Q1'] == 'NI') {
-                    return false;
-                } else {
-                    return true;
-                }
-            } else if (q_idx == 3) {
-                if (ext['COE_RCT_ROB_D3_Q2'] == 'N'  ||
-                    ext['COE_RCT_ROB_D3_Q2'] == 'PN' ||
-                    ext['COE_RCT_ROB_D3_Q2'] == 'NI') {
-                    return false;
-                } else {
-                    return true;
-                }
-                
-            } else if (q_idx == 4) {
-                if (ext['COE_RCT_ROB_D3_Q3'] == 'Y'  ||
-                    ext['COE_RCT_ROB_D3_Q3'] == 'PY' ||
-                    ext['COE_RCT_ROB_D3_Q3'] == 'NI') {
-                    return false;
-                } else {
-                    return true;
-                }
-            }
-
-        } else if (d_idx == 4) {
-            if (q_idx == 1 || q_idx == 2) {
-                return false;
-
-            } else if (q_idx == 3) {
-                if (ext['COE_RCT_ROB_D4_Q1'] == 'N'  ||
-                    ext['COE_RCT_ROB_D4_Q1'] == 'PN' ||
-                    ext['COE_RCT_ROB_D4_Q1'] == 'NI' ||
-                    ext['COE_RCT_ROB_D4_Q2'] == 'N'  ||
-                    ext['COE_RCT_ROB_D4_Q2'] == 'PN' ||
-                    ext['COE_RCT_ROB_D4_Q2'] == 'NI' ) {
-                    return false;
-
-                } else {
-                    return true;
-                }
-            } else if (q_idx == 4) {
-                if (ext['COE_RCT_ROB_D4_Q3'] == 'Y'  ||
-                    ext['COE_RCT_ROB_D4_Q3'] == 'PY' ||
-                    ext['COE_RCT_ROB_D4_Q3'] == 'NI') {
-                    return false;
-                } else {
-                    return true;
-                }
-                
-            } else if (q_idx == 5) {
-                if (ext['COE_RCT_ROB_D4_Q4'] == 'Y'  ||
-                    ext['COE_RCT_ROB_D4_Q4'] == 'PY' ||
-                    ext['COE_RCT_ROB_D4_Q4'] == 'NI') {
-                    return false;
-                } else {
-                    return true;
-                }
-            }
-            
-        } else if (d_idx == 5) {
-            return false;
-            
-        } else {
-            // ????
-        }
-
-        return false;
-    },
-
-    get_coe_rob_d2_aim: function() {
-        var aim = this.get_working_arm_attrs()['g0']['COE_RCT_ROB_D2_AIM'];
-        if (aim == null || aim == '') {
-            return 'NA';
-        }
-        return aim;
-    },
-
-    to_rob_symbol: function(v) {
-        if (typeof(v) == 'undefined' || v == '' || v == null) {
-            v = 'NA';
-        }
-        // console.log('* rob symbol:', v);
-        var html = '<div class="rob-rst-icon rob-rst-icon-'+v+'">';
-        html += {
-            L: '+',
-            M: '!',
-            H: '-',
-            NA: '?'
-        }[v];
-        html += '</div>';
-
-        return html;
-    },
-
-    on_change_ind_qs: function() {
-        var qs = [
-            this.get_working_arm_attrs()['g0']['COE_RCT_IND_Q1_ANSWER'],
-            this.get_working_arm_attrs()['g0']['COE_RCT_IND_Q2_ANSWER'],
-            this.get_working_arm_attrs()['g0']['COE_RCT_IND_Q3_ANSWER'],
-            this.get_working_arm_attrs()['g0']['COE_RCT_IND_Q4_ANSWER'],
-            this.get_working_arm_attrs()['g0']['COE_RCT_IND_Q5_ANSWER']
-        ];
-        var ind_closeness = coe_helper.judge_ind_closeness(qs);
-        console.log('* judge_ind_closeness, ',qs,' : ', ind_closeness);
-        this.get_working_arm_attrs()['g0']['COE_RCT_IND_OVERALL_AR'] = ind_closeness;
-        this.$forceUpdate();
-        this.has_change_unsaved();
-    },
-
-    to_ind_symbol: function(v) {
-        if (typeof(v) == 'undefined' || v == '' || v == null) {
-            v = 'NA';
-        }
-        // console.log('* rob symbol:', v);
-        var html = '<div class="ind-rst-icon-'+v+'">';
-        html += {
-            V: '+ Very Close',
-            M: '~ Moderately Close',
-            N: 'x Not Close',
-            NA: '? Not Decided'
-        }[v];
-        html += '</div>';
-
-        return html;
+    hide: function() {
+        this.show_working_paper_pan = false;
     },
 
     /////////////////////////////////////////////////////
@@ -519,12 +149,31 @@ Object.assign(pan_ocpapers.vpp_methods, {
         this.has_saved = true;
     },
 
-    has_change_unsaved: function() {
+    set_has_change_unsaved: function() {
         this.has_saved = false;
     },
 
-    has_change_saved: function() {
+    set_has_change_saved: function() {
         this.has_saved = true;
+    },
+
+    confirm_drop_unsaved_changes: function() {
+        if (this.has_saved) {
+            // ok, it means no issue with previous
+            return true;
+        } else {
+            var ret = window.confirm('The extraction for ['+ this.working_oc.meta.category+'|'+ this.working_oc.meta.full_name +'] may be changed and the changes are not saved yet. Are you sure to ignore the unsaved changes on ['+this.working_oc.meta.category+'|'+this.working_oc.meta.full_name+'] and work on other extraction?');
+
+            if (ret) {
+                // ok just ignore
+                this.set_has_change_saved();
+                return true;
+
+            } else {
+                // cannot skip
+                return false;
+            }
+        }
     },
     
 
@@ -535,7 +184,7 @@ Object.assign(pan_ocpapers.vpp_methods, {
     on_change_input_value: function(event) {
         // no matter what happens, trigger this event
         // console.log('* changed any input', event);
-        this.has_change_unsaved();
+        this.set_has_change_unsaved();
     },
 
     save_working_paper_extraction: function() {
@@ -614,7 +263,7 @@ Object.assign(pan_ocpapers.vpp_methods, {
             flag_force_update = true;
         }
         // notify unsaved changes first
-        this.has_change_unsaved();
+        this.set_has_change_unsaved();
 
         // var n_arms = parseInt(
         //     this.working_oc.data[this.working_paper.pid].n_arms
@@ -699,7 +348,7 @@ Object.assign(pan_ocpapers.vpp_methods, {
         console.log('* set value ' + old_val + ' -> ' + this.get_working_arm_attrs()['g'+g_idx][abbr]);
         
         // notify changed
-        this.has_change_unsaved();
+        this.set_has_change_unsaved();
 
         this.$forceUpdate();
     },
@@ -709,7 +358,7 @@ Object.assign(pan_ocpapers.vpp_methods, {
         this.get_working_arm_attrs()['g'+this.working_paper_subg][abbr] = value;
         console.log('* set wk_pp_arm_group value ' + old_val + ' -> ' + value);
         // notify changed
-        this.has_change_unsaved();
+        this.set_has_change_unsaved();
     },
 
     set_working_paper_arm_allgroups_by_attr_value: function(abbr, value) {
@@ -717,13 +366,13 @@ Object.assign(pan_ocpapers.vpp_methods, {
             this.get_working_arm_attrs()['g'+i][abbr] = value;
         }
         // notify changed
-        this.has_change_unsaved();
+        this.set_has_change_unsaved();
     },
 
 
     clear_working_arm_attr: function(g_idx, abbr) {
         this.get_working_arm_attrs()['g'+g_idx][abbr] = '';
-        this.has_change_unsaved();
+        this.set_has_change_unsaved();
     },
 
     /**
@@ -877,7 +526,7 @@ Object.assign(pan_ocpapers, {
                     console.log('* selected [', val, '] for g', g_idx, 'abbr', abbr, 'of', pid);
 
                     // notify the changes
-                    pan_ocpapers.vpp.has_change_unsaved();
+                    pan_ocpapers.vpp.set_has_change_unsaved();
 
                     // 2021-04-24: finally fixed this issue!!!
                     // the working arm may be main or other,
@@ -1005,7 +654,10 @@ Object.assign(pan_ocpapers, {
 
         // 2021-08-15: just add to the working arm
         // this.get_working_arm_attrs()['g' + this.working_paper_subg][attr_abbr] = highlight_text;
-        this.vpp.set_working_paper_arm_group_by_attr_value(attr_abbr, highlight_text);
+        this.vpp.set_working_paper_arm_group_by_attr_value(
+            attr_abbr, 
+            highlight_text
+        );
 
         // update UI
         this.vpp.$forceUpdate();
@@ -1045,9 +697,15 @@ Object.assign(pan_ocpapers, {
 
         // this is for the main extracting
         // the last argument is null, means it's the main track
-        html = this.__update_ctx_menu_html(html, highlight_text, pid, null);
+        html = this.__update_ctx_menu_html(
+            html, 
+            highlight_text, 
+            pid, 
+            null
+        );
 
-        var n_arms = this.vpp.$data.working_oc.data[pid].n_arms;
+        // 2023-04-06: use piece to get data
+        var n_arms = this.vpp.$data.working_piece.data.n_arms;
 
         // 2021-08-30: since we use working_arm to decide, no need to have this
         // this is for the other extracting (i.e., multiple arms)
@@ -1068,9 +726,10 @@ Object.assign(pan_ocpapers, {
     },
 
     __update_ctx_menu_html: function(html, highlight_text, pid, seq) {
-
+        // 2023-04-06: to generate the context menu
+        // need to check the current working oc and items to be extracted
         for (let i = 0; i < this.vpp.working_oc.meta.cate_attrs.length; i++) {
-
+            // get the categories from working_oc
             const cate = this.vpp.working_oc.meta.cate_attrs[i];
 
             // put a new cate
@@ -1176,5 +835,17 @@ Object.assign(pan_ocpapers, {
 
     hide_ctx_menu: function() {
         $("#pan_ocpapers_ctx_menu").hide();
+    },
+
+    close_wpc: function() {
+        if (this.vpp.confirm_drop_unsaved_changes()) {
+            // ok, nothing happens here
+        } else {
+            return;
+        }
+
+        // then you can close now
+        this.vpp.hide();
+        pan_collector.hide();
     }
 });

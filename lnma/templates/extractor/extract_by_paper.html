@@ -359,7 +359,7 @@ html {
             </div>
         </div>
 
-        {% include 'extractor/__pan_ocpapers_working_paper_collector.html' %}
+        {% include 'extractor/_working_paper_extractor.html' %}
         
     </div>
 
@@ -373,29 +373,22 @@ html {
 
 </div>
 
+<!-- 
 <div id="config_outcome">
     <div style="position: absolute; top: 0; left: -40px; width: 40px; height: 40px; background-color: white;">
         <div style="font-size: large; width: 40px; height: 40px; line-height: 40px; text-align: center; cursor: pointer;"
-            onclick="$('#config_outcome').css('right', 5000);pan_ocpapers.hide_working_paper();">
+            onclick="$('#config_outcome').css('right', 5000);pan_ocpapers.hide();">
             <i class="fa fa-close"></i>
         </div>
-    </div>
-    
+    </div>    
 </div>
+-->
 
-<ul id="pan_ocpapers_ctx_menu" style="display: none;">
-    
-</ul>
+<ul id="pan_ocpapers_ctx_menu" style="display: none;"></ul>
 
-<div id="win_collector">
-    <div style="position: absolute; top: 0; left: -40px; width: 40px; height: 40px; background-color: white;">
-        <div style="font-size: large; width: 40px; height: 40px; line-height: 40px; text-align: center; cursor: pointer;"
-            onclick="pan_collector.hide(); pan_ocpapers.hide_working_paper();">
-            <i class="fa fa-close"></i>
-        </div>
-    </div>
-    {% include 'extractor/_pan_collector.html' %}
-</div>
+
+{% include 'extractor/_win_collector.html' %}
+
 
 <div id="dialog_confirm_unsaved" 
     style="display: none;"
@@ -600,36 +593,46 @@ var pan_ocpapers = {
 
         on_click_oc: function(oc) {
             // need to check status first
-            if (this.has_saved) {
-                // ok, it means no issue with previous
+            // if (this.has_saved) {
+            //     // ok, it means no issue with previous
+            // } else {
+            //     var ret = window.confirm('The extraction for ['+ this.working_oc.meta.category+'|'+ this.working_oc.meta.full_name +'] may be changed and the changes are not saved yet. Are you sure to ignore the unsaved changes on ['+this.working_oc.meta.category+'|'+this.working_oc.meta.full_name+'] and work on other extraction?');
+
+            //     if (ret) {
+            //         // ok just ignore
+            //         this.set_has_change_saved();
+            //     } else {
+            //         return;
+            //     }
+
+            //     $( "#dialog-confirm" ).dialog({
+            //         resizable: false,
+            //         height: "auto",
+            //         width: 400,
+            //         modal: true,
+            //         butons: {
+            //             "Save before ": function() {
+
+            //             },
+            //             "Delete all items": function() {
+            //                 $( this ).dialog( "close" );
+            //             },
+            //             "Cancel": function() {
+            //             $( this ).dialog( "close" ) 
+            //             }
+            //         }
+            //     });
+            // }
+            // 2023-04-05: make it a function
+            if (this.confirm_drop_unsaved_changes()) {
+                // ok, confirmed
             } else {
-                var ret = window.confirm('The extraction for ['+ this.working_oc.meta.category+'|'+ this.working_oc.meta.full_name +'] may be changed and the changes are not saved yet. Are you sure to ignore the unsaved changes on ['+this.working_oc.meta.category+'|'+this.working_oc.meta.full_name+'] and work on other extraction?');
-
-                if (ret) {
-                    // ok just ignore
-                    this.has_change_saved();
-                } else {
-                    return;
-                }
-
-                $( "#dialog-confirm" ).dialog({
-                    resizable: false,
-                    height: "auto",
-                    width: 400,
-                    modal: true,
-                    butons: {
-                        "Save before ": function() {
-
-                        },
-                        "Delete all items": function() {
-                            $( this ).dialog( "close" );
-                        },
-                        "Cancel": function() {
-                        $( this ).dialog( "close" ) 
-                        }
-                    }
-                });
+                return;
             }
+
+            // 2023-04-06: need to hide the extractor UI
+            // to avoid mismatch data structure
+            this.show_working_paper_collector = false;
 
             // set the working oc
             this.working_oc = oc;
@@ -760,13 +763,13 @@ var pan_ocpapers = {
             );
         },
 
-        saving_start: function() {
-            this.is_saving = true;
-        },
+        // saving_start: function() {
+        //     this.is_saving = true;
+        // },
 
-        saving_end: function() {
-            this.is_saving = false;
-        },
+        // saving_end: function() {
+        //     this.is_saving = false;
+        // },
 
         has_coe_rob: function() {
             if (this.itable == null) {
@@ -1139,19 +1142,6 @@ var pan_ocpapers = {
         }
     },
 
-    hide_working_paper: function() {
-        // also need to check 
-        this.vpp.show_working_paper_pan = false;
-    },
-
-    show: function() {
-        $(this.vpp_id).show();
-    },
-
-    hide: function() {
-        $(this.vpp_id).hide();
-    },
-
     resize: function() {
         var h = $(window).height() - 60;
         $('#pan_ocpapers_paperlist').css('height', h - 30);
@@ -1161,6 +1151,8 @@ var pan_ocpapers = {
 };
 
 {% include "js/pan_ocpapers_ext_wpc.js" %}
+{% include 'js/pan_ocpapers_ext_wpc_coe_rob.js' %}
+{% include 'js/pan_ocpapers_ext_wpc_coe_ind.js' %}
 
 var jarvis = {
     goto_screener: function(project_id, title) {
