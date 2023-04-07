@@ -16,7 +16,6 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" />
 
 <style>
-
 html, body {
     width: 100%;
     height: 100%;
@@ -748,6 +747,11 @@ p {
     box-shadow: 5px 5px 5px #a0a0a0;
     background-color: white;
 }
+
+.td-long-text {
+    max-width: 300px;
+    overflow-wrap: break-word;
+}
 </style>
 </head>
 
@@ -1478,9 +1482,46 @@ p {
 
             <div v-show="plot_active_tab == 'list'"
                 class="box-body"
-                style="height: calc(100% - 20px);">
-                <table class="table">
+                style="height: calc(100% - 20px); overflow-y: auto;">
+                <table class="sof-table">
+                    <thead style="position: sticky; top: 0;">
+                        <tr>
+                            <th colspan="5"></th>
+    
+                            <th colspan="2">Treatment</th>
+                            <th colspan="2">Control</th>
+                        </tr>
+                        <tr>
+                            <th width="200px">Study</th>
+                            <th>Year</th>
+                            <th>PMID</th>
+    
+                            <th>Treatment</th>
+                            <th>Control</th>
+    
+                            <th>Events</th>
+                            <th>Total</th>
+    
+                            <th>Events</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>                            
+                        <tr v-for="r in plot_oc_rs">
+                            <td>{{ r.oc['author'] }}</td>
+                            <td>{{ r.oc['year'] }}</td>
+                            <td>{{ r.oc['pid'] }}</td>
 
+                            <td class="td-long-text">{{ r.pi['Treatment regimen'] }}</td>
+                            <td class="td-long-text">{{ r.pi['Control regimen'] }}</td>
+
+                            <td>{{ r.oc[plot_grade + '_Et'] }}</td>
+                            <td>{{ r.oc['GA_Et'] }}</td>
+
+                            <td>{{ r.oc[plot_grade + '_Ec'] }}</td>
+                            <td>{{ r.oc['GA_Nt'] }}</td>
+                        </tr>
+                    </tbody>
                 </table>
             </div>
         </div>
@@ -1734,6 +1775,7 @@ var app_pma = {
         // for plots
         ///////////////////////////////////////////////////////////
         plot_active_tab: 'plot',
+        plot_fl: null,
         plot_oc: null,
         plot_grade: null,
         plot_sm: 'RR',
@@ -1741,6 +1783,8 @@ var app_pma = {
         plot_params: {
             fixed_or_random: 'random'
         },
+
+        plot_oc_rs: [],
 
         ///////////////////////////////////////////////////////////
         // for sof
@@ -1941,20 +1985,11 @@ var app_pma = {
 
         get_pid_arms_by_filter_conditions: function(conditions) {
             var sql_conds = conditions.join(' and \n');
-            var sql = "select PMID,_arm_idx from papers " + '\n' +
+            var sql = "select pid,_arm_idx from papers " + '\n' +
                 "where " + sql_conds + '\n';
             
             var rs = alasql(sql);
             return rs;
-            
-            // var pid_arms = [];
-            // for (let i = 0; i < rs.length; i++) {
-            //     const r = rs[i];
-            //     // make sure the PMID is a string
-            //     pmids.push(""+r.PMID);
-            // }
-
-            // return pmids;
         },
 
         get_filter_options: function(idx, skip) {
@@ -2382,12 +2417,56 @@ var app_pma = {
 
             } else if (this.flag_is_work_mode_plot) {
                 // just show the forest plots
+                this.plot_fl = this.get_current_filter_values();
                 this.plot_oc = oc;
                 this.plot_grade = grade;
 
                 // draw
                 this.draw_ma_plot();
+
+                // update detail
+                this.view_oc_details();
             }
+        },
+
+        view_oc_details: function(fl, oc, grade) {
+            // get the ma_prim as it contains the raw rs
+            var ma_prim = this.ma_dict[this.plot_oc.abbr][this.plot_grade].PRIM;
+
+            // get papers?
+            var sql = "select * from papers where " + 
+                app_pma.get_condition_by_pid_arms_and_group(ma_prim.rs);
+            var pis = alasql(sql);
+
+            // need to convert to a dictionary
+            var ocpi_dict = {};
+            for (let i = 0; i < pis.length; i++) {
+                const pi = pis[i];
+                
+                if (!ocpi_dict.hasOwnProperty(pi.pid)) {
+                    ocpi_dict[pi.pid] = {}
+                }
+
+                if (!ocpi_dict[pi.pid].hasOwnProperty(pi._arm_idx)) {
+                    ocpi_dict[pi.pid][pi._arm_idx] = pi;
+                }
+            }
+
+            // the oc+paper itable list
+            var ocpis = [];
+
+            for (let i = 0; i < ma_prim.rs.length; i++) {
+                const oc = ma_prim.rs[i];
+                const pi = ocpi_dict[oc.pid][oc._arm_idx];
+
+                ocpis.push({
+                    oc: oc,
+                    pi: pi
+                })
+            }
+
+            // set the rs
+            this.plot_oc_rs = ocpis;
         },
 
 
@@ -2927,13 +3006,18 @@ var app_pma = {
         if (pid_arms.length == 0) {
             conditions = ['pid is not null'];
         } else {
+            // 2023-04-07: get key
+            var pid_key = 'pid'
+            if (pid_arms[0].hasOwnProperty('PMID')) {
+                pid_key = 'PMID';
+            }
             // var cond = pids.map(function(v) { return '"' + v + '"'}).join(',');
             // conditions += 'pid in (' + cond + ') ';
             // 2023-04-03: use pid + arm_idx to locate a treatment option
             for (let i = 0; i < pid_arms.length; i++) {
                 const pa = pid_arms[i];
                 conditions.push(
-                    "(pid = '"+pa.PMID+"' and _arm_idx = "+pa._arm_idx+")"
+                    "(pid = '" + pa[pid_key] + "' and _arm_idx = " + pa._arm_idx + ")"
                 );
             }
         }
@@ -3152,16 +3236,16 @@ var app_pma = {
                 // Oh, no such record yet, save it
                 ma_dict[r.oc_abbr] = {
                     GA: { 
-                        PRIM: { total: [0,0,0,0], stus: [], rsts: {} }, 
-                        INCD: { total: [0,0,0,0], stus: [], rsts: {} } 
+                        PRIM: { total: [0,0,0,0], rs: [], stus: [], rsts: {} }, 
+                        INCD: { total: [0,0,0,0], rs: [], stus: [], rsts: {} } 
                     },
                     G3H: { 
-                        PRIM: { total: [0,0,0,0], stus: [], rsts: {} }, 
-                        INCD: { total: [0,0,0,0], stus: [], rsts: {} } 
+                        PRIM: { total: [0,0,0,0], rs: [], stus: [], rsts: {} }, 
+                        INCD: { total: [0,0,0,0], rs: [], stus: [], rsts: {} } 
                     },
                     G5N: { 
-                        PRIM: { total: [0,0,0,0], stus: [], rsts: {} }, 
-                        INCD: { total: [0,0,0,0], stus: [], rsts: {} } 
+                        PRIM: { total: [0,0,0,0], rs: [], stus: [], rsts: {} }, 
+                        INCD: { total: [0,0,0,0], rs: [], stus: [], rsts: {} } 
                     },
                 }
             }
@@ -3176,6 +3260,8 @@ var app_pma = {
                 var grade = {0: 'GA', 1: 'G3H', 2: 'G5N'}[j];
                 
                 if (r['has_'+grade+'_prim']) {
+                    // save this record for ref
+                    ma_dict[r.oc_abbr][grade].PRIM.rs.push(r);
                     // ok, this has grade prim data
                     ma_dict[r.oc_abbr][grade].PRIM.stus.push([
                         r[grade+'_Et'],
@@ -3208,6 +3294,8 @@ var app_pma = {
                 
                 // add incidence analysis
                 if (r['has_'+grade+'_incd']) {
+                    // save this record for ref
+                    ma_dict[r.oc_abbr][grade].INCD.rs.push(r);
                     // ok, this has grade prim data
                     ma_dict[r.oc_abbr][grade].INCD.stus.push([
                         r[grade+'_Et'],
@@ -3615,6 +3703,11 @@ var jarvis = {
             // init the table
             console.log(data_itable);
             console.log(data_pma);
+
+            // pre-processing to add pid to itable rs
+            for (let i = 0; i < data_itable.rs.length; i++) {
+                data_itable.rs[i].pid = data_itable.rs[i].PMID;
+            }
 
             // init the local db for the papers
             alasql('create table papers');
