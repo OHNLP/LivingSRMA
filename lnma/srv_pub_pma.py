@@ -22,7 +22,7 @@ def get_graph_pma_data_from_db(keystr, cq_abbr):
     '''
     if keystr == 'IO' and cq_abbr == 'default': 
         # for the IO project, the calculation is different
-        return get_sof_pma_data_from_db_IO(cq_abbr, False)
+        return get_sof_pma_data_from_db_IO_format(cq_abbr, False)
 
     return get_pma_by_cq(keystr, cq_abbr, 'plots')
 
@@ -33,7 +33,7 @@ def get_sof_pma_data_from_db(keystr, cq_abbr, is_calc_pma=True):
     '''
     if keystr == 'IO' and cq_abbr == 'default': 
         # for the IO project, the calculation is different
-        return get_sof_pma_data_from_db_IO(cq_abbr, is_calc_pma)
+        return get_sof_pma_data_from_db_IO_format(cq_abbr, is_calc_pma)
 
     # for most cases:
     return get_pma_by_cq(keystr, cq_abbr, 'sof')
@@ -142,9 +142,9 @@ def get_pma_by_cq(keystr, cq_abbr="default", included_in='sof'):
     return ret
 
 
-def get_sof_pma_data_from_db_IO(cq_abbr="default", is_calc_pma=True):
+def get_sof_pma_data_from_db_IO_format(cq_abbr="default", is_calc_pma=True):
     '''
-    The SoF Table of PWMA DATA for IO project
+    The SoF Table of PWMA DATA for IO format
     '''
     # First, get all extracts of pwma
     # But for other projects, need to double check the input type
@@ -229,9 +229,13 @@ def get_sof_pma_data_from_db_IO(cq_abbr="default", is_calc_pma=True):
         # the second condition is not both zero
         f2 = (__notna(r['%s_Et'%gr]) and __notzero(r['%s_Et'%gr])) or \
              (__notna(r['%s_Ec'%gr]) and __notzero(r['%s_Ec'%gr]))
+        
+        # 2023-04-06: Nt and Nc cannot be 0
+        # if Nt or Nc is 0, meta analysis cannot be calculated
+        f3 = __notzero(r['GA_Nt']) and __notzero(r['GA_Nc'])
 
-        # final combine two
-        return f1 and f2
+        # final combine all above
+        return f1 and f2 and f3
 
     # Second, build the oc_dict
     rs = []

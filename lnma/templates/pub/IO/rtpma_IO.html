@@ -1451,7 +1451,7 @@ a {
 
 <!-- load the scripts for meta analysis -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.1.1/math.min.js"></script>
-<script src="https://ohnlp.github.io/Meta.js/dist/metajs-0.0.3.js"></script>
+<script src="https://ohnlp.github.io/Meta.js/dist/metajs-0.0.5.js"></script>
 
 <!-- for data exploration -->
 <script src="https://cdn.jsdelivr.net/npm/danfojs@1.1.0/lib/bundle.js"></script>
@@ -2185,7 +2185,7 @@ var app_pma = {
                     var ma_prim = this.ma_dict[abbr][grade].PRIM;
                     if (ma_prim.stus.length != 0) {
 
-                console.log('* update_ma_rsts',abbr,grade, this.ma_dict[abbr][grade]);
+                // console.log('* update_ma_rsts',abbr,grade, this.ma_dict[abbr][grade]);
 
                         var rst_sm = metajs.metabin(
                             ma_prim.stus, {
