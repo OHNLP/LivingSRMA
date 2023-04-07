@@ -16,6 +16,29 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.css" />
 
 <style>
+
+html, body {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+}
+body {
+    font-size: 12px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+a {
+    color: #333333;
+    text-decoration: none;
+}
+h4 {
+    margin: 0.1em 0;
+}
+p {
+    margin: 0.1em 0;
+}
+
 {% include 'css/box.css' %}
 .flex-row {
     flex-direction: row;
@@ -72,6 +95,17 @@
     min-height: 20px;
     padding: 5px 0 5px 0;
 }
+.box-tab-header {
+    padding: 1px 8px;
+    cursor: pointer;
+    align-items: center;
+}
+.box-tab-header-active {
+    font-weight: bold;
+    border: 1px solid #A0A0A0;
+    border-bottom: 1px solid white;
+    margin-bottom: -1px;
+}
 /* font sizes */
 .txt-sm {
     font-size: 0.9em;
@@ -97,21 +131,6 @@
 }
 .select-sm {
     width: 80px;
-}
-html, body {
-    width: 100%;
-    height: 100%;
-    padding: 0;
-    margin: 0;
-    overflow: hidden;
-}
-body {
-    font-size: 12px;
-    font-family: Arial, Helvetica, sans-serif;
-}
-a {
-    color: #333333;
-    text-decoration: none;
 }
 #wrapper {
     display: flex;
@@ -717,6 +736,18 @@ a {
 .coe-dv-3 { background: rgb(255, 103, 91); color: black; }
 .coe-dv-4 { background: rgb(150, 0, 0); color: white; }
 
+#app_study_viewer {
+    position: absolute;
+    top: 100px;
+    left: 100px;
+    display: none;
+    width: 500px;
+    height: 150px;
+    padding: 5px;
+    border: 1px solid #888888;
+    box-shadow: 5px 5px 5px #a0a0a0;
+    background-color: white;
+}
 </style>
 </head>
 
@@ -773,6 +804,8 @@ a {
             </div>
         </div>
     </div>
+    <!-- /#app_filter -->
+
 
     <div id="app_ocrst">
 
@@ -1016,6 +1049,7 @@ a {
                 </div>
             </div>
         </div>
+        <!-- /#app_oclist tree -->
 
         
         <div v-if="flag_is_work_mode_sof"
@@ -1354,25 +1388,41 @@ a {
             id="app_marst" 
             class="box" 
             style="height: calc(100% - 20px);">
-            <div class="box-header">
-                <h4>
+            <div class="d-flex box-header"
+                style="padding: 0; border-bottom: 1px solid #a0a0a0;">
+                <h4 style="margin-right: 10px">
                     <i class="fa fa-chart-bar"></i>
                     Outcome Detail | 
                 </h4>
 
-                <div class="d-flex flex-align-items-center">
+                <div class="d-flex box-tab-header"
+                    :class="{'box-tab-header-active': plot_active_tab=='plot'}"
+                    @click="show_plot_tab('plot');">
+                    <i class="fa fa-chart-bar"></i>
+                    Forest Plot
+                </div>
+
+                <div class="d-flex box-tab-header"
+                    :class="{'box-tab-header-active': plot_active_tab=='list'}"
+                    @click="show_plot_tab('list')">
+                    <i class="fa fa-list"></i>
+                    Study List
+                </div>
+
+                <!-- <div class="d-flex flex-align-items-center">
                     <button v-if="plot_oc != null"
                         v-on:click="export_oc_csv()"
                         class="mr-2">
                         <i class="fas fa-file-export"></i>
                         Export CSV
                     </button>
-
-                </div>
+                </div> -->
                 
             </div>
 
-            <div class="box-body" style="height: calc(100% - 20px);">
+            <div v-show="plot_active_tab == 'plot'"
+                class="box-body" 
+                style="height: calc(100% - 20px);">
                 <div class="plot-nav-tab d-flex">
                     <div class="box-radio-group d-flex flex-row">
                         <div>
@@ -1425,13 +1475,42 @@ a {
 
             </div>
             
+
+            <div v-show="plot_active_tab == 'list'"
+                class="box-body"
+                style="height: calc(100% - 20px);">
+                <table class="table">
+
+                </table>
+            </div>
         </div>
         <!-- /#app_marst for PWMA plots -->
 
 
-
     </div>
     <!-- /#app_ocrst -->
+
+    <div id="app_study_viewer"
+        v-if="sv_obj != null">
+        <div>
+            <h4>
+                {{ sv_obj.paper.title }}
+            </h4>
+            <p>
+                {{ sv_obj.paper.journal }}, {{ sv_obj.paper.pub_date }},
+                {{ sv_obj.paper.rct_id }}
+            </p>
+            <p>
+                {{ sv_obj.itable['Authors'] }}
+            </p>
+            <hr>
+            <p>
+                Treatment Regimen: <b>{{ sv_obj.itable['Treatment regimen'] }}</b> 
+                <br>
+                Control Regimen: <b>{{ sv_obj.itable['Control regimen'] }}</b>
+            </p>
+        </div>
+    </div>
 
 </div>
 <!-- /#app_pma -->
@@ -1646,8 +1725,15 @@ var app_pma = {
         is_updating_all_oc_mas: false,
 
         ///////////////////////////////////////////////////////////
+        // for study viewer
+        ///////////////////////////////////////////////////////////
+        sv_pid_arm: null,
+        sv_obj: null,
+
+        ///////////////////////////////////////////////////////////
         // for plots
         ///////////////////////////////////////////////////////////
+        plot_active_tab: 'plot',
         plot_oc: null,
         plot_grade: null,
         plot_sm: 'RR',
@@ -1677,6 +1763,21 @@ var app_pma = {
             $('#color_guide').dialog({
                 width: 680
             });
+        },
+
+        show_study_viewer: function() {
+            // this.sv_obj = {
+            //     itable: alasql("select * from papers where pid='' limit 1")[0],
+            //     paper: app_pma.data_itable.paper_dict[pid]
+            // };
+        },
+
+        hide_study_viewer: function() {
+            this.sv_obj = null;
+        },
+
+        show_plot_tab: function(tab_name) {
+            this.plot_active_tab = tab_name;
         },
 
         ///////////////////////////////////////////////////////////
@@ -2791,6 +2892,9 @@ var app_pma = {
             'all', 'all'
         ]);
         this.vpp.update_oclist([]);
+
+        // update the study viewer 
+        this.vpp.show_study_viewer();
     },
 
     init_filter: function(data) {

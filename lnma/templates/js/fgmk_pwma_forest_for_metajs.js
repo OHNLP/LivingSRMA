@@ -306,6 +306,12 @@ var fgmk_pwma_forest = {
                             if (typeof(srv_pubmed)!='undefined') {
                                 srv_pubmed.show(e.attr('pid'));
                             }
+                        })
+                        .on('mouseover', function() {
+                            var e = $(this);
+                            var pid = e.attr('pid');
+                            // if (typeof(jarvis)!='undefined') {
+                            // }
                         });
                     }
                 }
