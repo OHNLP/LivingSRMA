@@ -179,6 +179,7 @@ p {
 }
 #app_marst {
     width: calc(100% - 330px);
+    max-width: 1000px;
 }
 #vw_ocplots_mainpanel {
     width: calc(100% - 320px);
@@ -683,7 +684,7 @@ p {
 
 /* for the SoF table */
 .sof-table {
-    min-width: 1100px;
+    /* min-width: 1100px; */
     width: calc(100% - 10px);
     /* width: 1100px; */
 }
@@ -749,7 +750,7 @@ p {
 }
 
 .td-long-text {
-    max-width: 300px;
+    max-width: 200px;
     overflow-wrap: break-word;
 }
 
@@ -1089,13 +1090,13 @@ p {
 
                     <span>|</span>
 
-                    <button v-on:click="export_sof_csv()"
+                    <!-- <button v-on:click="export_sof_csv()"
                         class="mr-2">
                         <i class="fas fa-file-export"></i>
                         Export CSV
                     </button>
 
-                    <span>|</span>
+                    <span>|</span> -->
 
                     <div class="box-menu-group d-flex fx-row">
                         <div class="box-menu-link" 
@@ -1201,7 +1202,8 @@ p {
                     </div>
                 </div>
 
-                <table class="sof-table">
+                <table class="sof-table"
+                    style="min-width: 1100px;">
                     <tr>
                         <th rowspan="2">Category</th>
                         <th rowspan="2">Outcome</th>
