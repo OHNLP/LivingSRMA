@@ -766,6 +766,9 @@ p {
     border-left: 1px solid #a0a0a0;
     text-indent: 1em;
 }
+.text-align-left {
+    text-align: left !important;
+}
 </style>
 </head>
 
@@ -1547,7 +1550,7 @@ p {
                     </thead>
                     <tbody>                            
                         <tr v-for="r in plot_oc_rs">
-                            <td>{{ r.oc['author'] }}</td>
+                            <td class="text-align-left">{{ r.oc['author'] }}</td>
                             <td>{{ r.oc['year'] }}</td>
                             <td>
                                 <a :href="srv_pubmed.mk_url(r.oc['pid'])"
