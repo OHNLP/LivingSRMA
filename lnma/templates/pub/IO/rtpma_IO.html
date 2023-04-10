@@ -752,6 +752,13 @@ p {
     max-width: 300px;
     overflow-wrap: break-word;
 }
+
+.link-pmid {
+    color: rgb(22, 67, 134);
+}
+.link-pmid:hover {
+    text-decoration: underline;
+}
 </style>
 </head>
 
@@ -1518,6 +1525,7 @@ p {
                             <td>{{ r.oc['year'] }}</td>
                             <td>
                                 <a :href="srv_pubmed.mk_url(r.oc['pid'])"
+                                    class="link-pmid"
                                     target="_blank">
                                     {{ r.oc['pid'] }}
                                 </a>
