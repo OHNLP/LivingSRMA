@@ -759,6 +759,12 @@ p {
 .link-pmid:hover {
     text-decoration: underline;
 }
+
+.plot-header {
+    padding: 5px 0;
+    border-left: 1px solid #a0a0a0;
+    text-indent: 1em;
+}
 </style>
 </head>
 
@@ -1437,6 +1443,15 @@ p {
             <div v-show="plot_active_tab == 'plot'"
                 class="box-body" 
                 style="height: calc(100% - 20px);">
+                <p v-if="plot_oc != null"
+                    class="plot-header">
+                    {{ plot_oc.group }} |
+                    <b>
+                        {{ plot_oc.cate }} |
+                        {{ plot_oc.name }} |
+                        {{ get_grade_label(plot_grade) }}
+                    </b>
+                </p>
                 <div class="plot-nav-tab d-flex">
                     <div class="box-radio-group d-flex flex-row">
                         <div>
@@ -1493,6 +1508,15 @@ p {
             <div v-show="plot_active_tab == 'list'"
                 class="box-body"
                 style="height: calc(100% - 20px); overflow-y: auto;">
+                <p v-if="plot_oc != null"
+                    class="plot-header">
+                    {{ plot_oc.group }} |
+                    <b>
+                        {{ plot_oc.cate }} |
+                        {{ plot_oc.name }} |
+                        {{ get_grade_label(plot_grade) }}
+                    </b>
+                </p>
                 <table class="sof-table">
                     <thead style="position: sticky; top: 0;">
                         <tr>
@@ -2827,10 +2851,10 @@ var app_pma = {
             }
         },
 
-        get_grade_label: function(g) {
-            // return jarvis.texts[g];
-            return g;
-        },
+        // get_grade_label: function(g) {
+        //     // return jarvis.texts[g];
+        //     return g;
+        // },
 
         _round2: function(v) {
             return (Math.round(v * 100) / 100).toFixed(2);
