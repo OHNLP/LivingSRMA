@@ -1334,6 +1334,9 @@ p {
                             <i class="fas fa-spinner fa-spin"></i>
                             Loading ...
                         </td>
+                        <td v-else-if="r.coe == 'NA'">
+                            Insufficient Data
+                        </td>
                         <td v-else
                             class="cursor-pointer"
                             @click="r.is_show.coe_detail = !r.is_show.coe_detail">
@@ -2615,49 +2618,55 @@ var app_pma = {
                 // the CoE information from backend service
                 coe: null
             }
-            console.log('* add_fl_oc_gd_to_sof:', r);
 
-            // create rs for RPLT API
-            var rplt_rs = [];
-            for (let i = 0; i < ma.PRIM.stus.length; i++) {
-                const stu = ma.PRIM.stus[i];
-                rplt_rs.push({
-                    "Et": stu[0],
-                    "Nt": stu[1],
-                    "Ec": stu[2],
-                    "Nc": stu[3],
-                    "study": stu[4],
-                    "treatment": stu[5],
-                    "control": stu[6],
-                    "pid": stu[7],
-                    "year": stu[8],
-                    "rob": stu[9],
-                    "ind": stu[10]
-                });
-            }
-            rplt_rs = JSON.stringify(rplt_rs);
-
-            // send a request for the CoE
-            let _this = 
-            srv_rpltapi.analyze_pwma_prcm_coe({
-                am: 'FORESTDATA',
-                sm: this.sof_sm,
-                rs: rplt_rs,
-                hk: 'FALSE',
-                apikey: "[[ config['settings'].API_SYSTEM_APIKEYS[0] ]]"
-            }, (function(fl, oc, grade){
-                return function(data) {
-                    console.log('* analyze_pwma_prcm_coe result', fl, oc, grade, data);
-                    // The
-                    // update the coe information for this fl-oc-grade item in sof
-                    app_pma.vpp.update_coe_by_fl_oc_gd(
-                        fl, oc, grade, 
-                        data.data.coe
-                    );
+            // 2023-04-10: check the number of studies
+            // if there are less than 3, just skip
+            if (ma.PRIM.stus.length < 3) {
+                r.coe = 'NA';
+            } else {
+                // create rs for RPLT API
+                var rplt_rs = [];
+                for (let i = 0; i < ma.PRIM.stus.length; i++) {
+                    const stu = ma.PRIM.stus[i];
+                    rplt_rs.push({
+                        "Et": stu[0],
+                        "Nt": stu[1],
+                        "Ec": stu[2],
+                        "Nc": stu[3],
+                        "study": stu[4],
+                        "treatment": stu[5],
+                        "control": stu[6],
+                        "pid": stu[7],
+                        "year": stu[8],
+                        "rob": stu[9],
+                        "ind": stu[10]
+                    });
                 }
-            })(fl, oc, grade));
+                rplt_rs = JSON.stringify(rplt_rs);
+
+                // send a request for the CoE
+                let _this = 
+                srv_rpltapi.analyze_pwma_prcm_coe({
+                    am: 'FORESTDATA',
+                    sm: this.sof_sm,
+                    rs: rplt_rs,
+                    hk: 'FALSE',
+                    apikey: "[[ config['settings'].API_SYSTEM_APIKEYS[0] ]]"
+                }, (function(fl, oc, grade){
+                    return function(data) {
+                        console.log('* analyze_pwma_prcm_coe result', fl, oc, grade, data);
+                        // The
+                        // update the coe information for this fl-oc-grade item in sof
+                        app_pma.vpp.update_coe_by_fl_oc_gd(
+                            fl, oc, grade, 
+                            data.data.coe
+                        );
+                    }
+                })(fl, oc, grade));
+            }
 
             // update the UI
+            console.log('* add_fl_oc_gd_to_sof:', r);
             this.sof_rs.push(r);
         },
 
