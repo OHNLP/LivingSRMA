@@ -10,8 +10,12 @@ var srv_pubmed = {
     },
 
     show: function(pmid) {
-        var url = this.url.show + pmid + '/';
+        var url = this.mk_url(pmid);
         window.open(url, "_blank");
+    },
+
+    mk_url: function(pmid) {
+        return this.url.show + pmid + '/';
     },
     
     efetch: function(ids, callback) {

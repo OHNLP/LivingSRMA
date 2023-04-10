@@ -1489,7 +1489,9 @@ p {
                 <table class="sof-table">
                     <thead style="position: sticky; top: 0;">
                         <tr>
-                            <th colspan="5"></th>
+                            <th colspan="6">
+                                Study Information
+                            </th>
     
                             <th colspan="2">Treatment</th>
                             <th colspan="2">Control</th>
@@ -1498,6 +1500,7 @@ p {
                             <th width="200px">Study</th>
                             <th>Year</th>
                             <th>PMID</th>
+                            <th>Class of ICI</th>
     
                             <th>Treatment</th>
                             <th>Control</th>
@@ -1513,10 +1516,18 @@ p {
                         <tr v-for="r in plot_oc_rs">
                             <td>{{ r.oc['author'] }}</td>
                             <td>{{ r.oc['year'] }}</td>
-                            <td>{{ r.oc['pid'] }}</td>
+                            <td>
+                                <a :href="srv_pubmed.mk_url(r.oc['pid'])"
+                                    target="_blank">
+                                    {{ r.oc['pid'] }}
+                                </a>
+                            </td>
 
-                            <td class="td-long-text">{{ r.pi['Treatment regimen'] }}</td>
-                            <td class="td-long-text">{{ r.pi['Control regimen'] }}</td>
+                            <td>{{ r.it['Class of ICI'] }}</td>
+                            <td>{{ r.it['Name of ICI'] }}</td>
+
+                            <td class="td-long-text">{{ r.it['Treatment regimen'] }}</td>
+                            <td class="td-long-text">{{ r.it['Control regimen'] }}</td>
 
                             <td>{{ r.oc[plot_grade + '_Et'] }}</td>
                             <td>{{ r.oc['GA_Et'] }}</td>
@@ -1638,7 +1649,7 @@ var app_pma = {
         display_name: 'ICI Class (Rx)',
         name: 'Class of ICI',
         values: [
-            'PD1',
+            'PD-1',
             'PD-L1',
             'CTLA-4'
         ]
@@ -1726,6 +1737,9 @@ var app_pma = {
     vpp_data: {
         // coe helper for quick access
         coe_helper: coe_helper,
+
+        // pubmed helper for quick access
+        srv_pubmed: srv_pubmed,
 
         // vpp level parameter
         // work mode includes:
@@ -1893,7 +1907,7 @@ var app_pma = {
             var pid_set = new Set();
             for (let i = 0; i < pid_arms.length; i++) {
                 const pa = pid_arms[i];
-                pid_set.add(pa.PMID);
+                pid_set.add(pa.pid);
             }
             this.n_papers = pid_set.size;
         },
@@ -2460,11 +2474,11 @@ var app_pma = {
 
             for (let i = 0; i < ma_prim.rs.length; i++) {
                 const oc = ma_prim.rs[i];
-                const pi = ocpi_dict[oc.pid][oc._arm_idx];
+                const it = ocpi_dict[oc.pid][oc._arm_idx];
 
                 ocpis.push({
                     oc: oc,
-                    pi: pi
+                    it: it
                 })
             }
 
