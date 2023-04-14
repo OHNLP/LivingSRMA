@@ -21,7 +21,8 @@
 <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
 
 <!-- fontawesome -->
-<script src="https://kit.fontawesome.com/cb45cc91b0.js" crossorigin="anonymous"></script>
+<!-- <script src="https://kit.fontawesome.com/cb45cc91b0.js" crossorigin="anonymous"></script> -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
 <!-- js cookie -->
 <script src="https://cdn.jsdelivr.net/npm/js-cookie@2.2.1/src/js.cookie.min.js"></script>
@@ -387,6 +388,15 @@ label {
                   &nbsp;&nbsp;
                   <i class="fa fa-edit nav-icon"></i>
                   <p>Extract by outcome</p>
+                </a>
+              </li>
+              
+
+              <li class="nav-item">
+                <a id="nav-link-extractor-check-data-quality" href="[[ url_for('extractor.check_data_quality') ]]" class="nav-link">
+                  &nbsp;&nbsp;
+                  <i class="far fa-thumbs-up nav-icon"></i>
+                  <p>Check Data Quality</p>
                 </a>
               </li>
               

@@ -1,0 +1,48 @@
+{% extends '_layout_bs.html' %}
+
+{% block title %}
+Check Data Quality 
+{% endblock %}
+
+{% block style %}
+<style>
+.carousel-indicators {
+    bottom: -30px;
+}
+.carousel-indicators li {
+    width: 30px;
+    height: 8px;
+    background-color: #999999;
+}
+.carousel-caption {
+    top: 10px;
+    left: 0;
+    right: 0;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    color: black;
+}
+</style>
+{% endblock %}
+
+{% block page_name %}
+<i class="far fa-thumbs-up"></i>
+Check Data Quality
+{% endblock %}
+
+{% block main %}
+<div id="main" class="container-fluid">
+
+
+</div>
+
+{% endblock %}
+
+{% block script %}
+<script>
+
+$(document).ready(function() {
+    jarvis.init();
+});
+</script>
+{% endblock %}

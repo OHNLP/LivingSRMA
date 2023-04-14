@@ -26,7 +26,8 @@ rel_project_users = db.Table(
 
 
 class User(db.Model):
-    """Data model for users
+    """
+    Data model for users
     """
     __tablename__ = 'users'
     __table_args__ = {'extend_existing': True}
