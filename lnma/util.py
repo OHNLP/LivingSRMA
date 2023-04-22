@@ -1184,7 +1184,7 @@ def notna(v):
     '''
     Check whether a value `v` is NA or not
     '''
-    return not (v is None or v == '' or v== 'null')
+    return not (v is None or v=='' or v=='null' or v=='na' or v=='n/a')
 
 
 def notzero(v):
@@ -1192,6 +1192,79 @@ def notzero(v):
     Check whether a value `v` is 0
     '''
     return v!=0
+
+
+def is_empty(v):
+    '''
+    Check whether a value `v` is empty
+    '''
+    if v is None:
+        return True
+    
+    # convert to string
+    v_str = '%s' % v
+    v_str = v_str.lower()
+    v_str = v_str.strip()
+    
+    if v_str=='' or v_str=='null' or v_str=='na' or v_str=='n/a':
+        return True
+    
+    # maybe other thing?
+    return False
+
+
+def is_missing(v):
+    '''
+    Check whether is missing
+    '''
+    if v is None:
+        return True
+    
+    # convert to string
+    v_str = '%s' % v
+    v_str = v_str.lower()
+    v_str = v_str.strip()
+    
+    if v_str=='':
+        return True
+    
+    # maybe other thing?
+    return False
+
+
+def is_integer(value):
+    '''
+    Check whether a value `v` is an integer
+    '''
+    if isinstance(value, int):
+        return True
+    elif isinstance(value, float) and value.is_integer():
+        return True
+    elif isinstance(value, float) and int(value) == value:
+        return True
+    elif isinstance(value, str):
+        _v = value.strip()
+        if _v.isdigit():
+            return True
+        else:
+            return False
+    else:
+        return False
+
+
+def is_int_zero(value):
+    '''
+    Check whether a value `v` is an integer zero
+    '''
+    v_str = '%s' % value
+    v_str = v_str.lower()
+    v_str = v_str.strip()
+    
+    if v_str=='0':
+        return True
+    
+    # maybe other thing?
+    return False
 
 
 def is_pwmable(Et, Nt, Ec, Nc):
@@ -1206,8 +1279,24 @@ def is_pwmable(Et, Nt, Ec, Nc):
     f2 = (notna(Et) and notzero(Et)) or \
          (notna(Ec) and notzero(Ec))
 
+    # 2023-04-19: Nt and Nc cannot be 0
+    f3 = notzero(Nt) and notzero(Nc)
+
     # final combine two
-    return f1 and f2
+    return f1 and f2 and f3
+
+
+def is_E_gt_N(E, N):
+    '''
+    Check whether two values are ok for pwma
+    '''
+    if is_integer(E) and is_integer(N):
+        val_E = val2int(E)
+        val_N = val2int(N)
+        if val_E > val_N:
+            return True
+    
+    return False
 
 
 def get_ds_name_by_pid_and_type(pid, pid_type):
@@ -1542,6 +1631,7 @@ def val2int(v):
         
     elif type(v) == int:
         ret = v
+
     elif type(v) == float:
         ret = int(v)
 

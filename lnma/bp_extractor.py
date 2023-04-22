@@ -6,6 +6,7 @@ import random
 import logging
 from re import template
 import string
+from datetime import datetime
 
 from pprint import pprint
 
@@ -183,6 +184,80 @@ def check_data_quality():
     )
 
 
+@bp.route('/get_data_quality_report')
+@login_required
+def get_data_quality_report():
+    '''
+    Check data quality
+    '''
+    project_id = request.args.get('project_id')
+
+    if project_id is None:
+        ret = {
+            'success': False,
+            'msg': 'project_id is required'
+        }
+        return jsonify(ret)
+    project = dora.get_project(project_id)
+
+    # decide which cq to use
+    cq_abbr = request.args.get('cq_abbr')
+
+    src = request.args.get('src')
+    if src is None or src == '':
+        # set the default to get things from db
+        src = 'db'
+
+    output_fn = 'DATA_QUALITY.json'
+    full_output_fd = os.path.join(
+        current_app.instance_path, 
+        settings.PUBLIC_PATH_PUBDATA, 
+        project.keystr, 
+        cq_abbr
+    )
+    if not os.path.exists(full_output_fd):
+        os.makedirs(full_output_fd, exist_ok=True)
+        
+    full_output_fn = os.path.join(
+        full_output_fd,
+        output_fn
+    )
+    if src == 'cache':
+        ret = json.load(open(full_output_fn))
+        return jsonify(ret)
+
+    # get report 
+    report = srv_extract.get_data_quality(project_id, cq_abbr)
+
+    # get papers and extracts?
+    papers = srv_paper.get_included_papers_by_cq(
+        project_id, 
+        cq_abbr
+    )
+
+    extracts = dora.get_extracts_by_project_id_and_cq(
+        project_id,
+        cq_abbr
+    )
+
+    json_papers = [ p.as_very_simple_dict() for p in papers ]
+    json_extracts = [ extr.as_simple_dict() for extr in extracts ]
+
+    ret = {
+        'success': True,
+        'last_checked': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+        'data': {
+            'report': report,
+            'papers': json_papers,
+            'extracts': json_extracts
+        }
+    }
+    # cache
+    json.dump(ret, open(full_output_fn, 'w'), default=util.json_encoder)
+
+    return jsonify(ret)
+
+
 @bp.route('/extract_coe')
 @login_required
 def extract_coe():
@@ -258,6 +333,7 @@ def get_paper():
             'success': True,
             'paper': json_paper
         }
+
     return jsonify(ret)
 
 

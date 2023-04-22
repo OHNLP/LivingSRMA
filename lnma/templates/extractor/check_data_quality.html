@@ -1,8 +1,19 @@
-{% extends '_layout_bs.html' %}
+{% extends '_layout_adminlte.html' %}
 
 {% block title %}
 Check Data Quality 
 {% endblock %}
+
+{% block section_cq %}
+{% include 'shared_module/_cq_selector_toolbar.html' %}
+{% endblock %}
+
+{% block page_name %}
+<i class="far fa-thumbs-up"></i>
+Check Data Quality
+{% endblock %}
+
+{% block active_nav_link %}extractor-check-data-quality{% endblock %}
 
 {% block style %}
 <style>
@@ -22,17 +33,151 @@ Check Data Quality
     padding-bottom: 5px;
     color: black;
 }
+.report-row {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+.report-row:nth-child(odd) {
+    background-color: white;
+}
+.report-row:nth-child(even) {
+    background-color: whitesmoke;
+}
+.report-row-paper {
+    width: 100%;
+    padding: 5px;
+}
+.report-row-detail {
+    display: flex;
+    flex-direction: column;
+}
+.report-row-oc {
+    display: flex;
+    flex-direction: row;
+    border-bottom: 1px dashed #cfcfcf;
+    padding: 5px 0;
+}
+.report-row-oc-name {
+    width: 350px;
+    min-width: 350px;
+    padding: 5px;
+}
+.report-row-oc-issues {
+    display: flex;
+    flex-direction: row;
+}
+.report-row-oc-issue-item {
+    border-left: 1px solid #dfdfdf;
+    border-top: 1px solid #dfdfdf;
+    border-right: 1px solid #c5c5c5;
+    border-bottom: 1px solid #c5c5c5;
+    margin: 5px;
+    padding: 5px;
+    background-color: #fff8f8;
+}
+.report-row-oc-issue-item:hover {
+    background-color: #faebeb;
+}
+.issue-reason {
+    font-style: italic;
+    font-size: 0.95em;
+}
 </style>
 {% endblock %}
 
-{% block page_name %}
-<i class="far fa-thumbs-up"></i>
-Check Data Quality
-{% endblock %}
-
-{% block main %}
+{% block content %}
 <div id="main" class="container-fluid">
 
+<div id="app_dqchecker">
+<p v-if="report == null">
+    Loading data quality report ...
+    <i class="fas fa-spinner fa-spin"></i>
+    <br>
+    It may take a while, please wait ...
+    <br>
+    If this page doesn't response after a few minutes, please try reload page or contact administrator.
+    <button @click="on_click_load_report()">
+        <i class="fas fa-sync-alt"></i>
+        Reload
+    </button>
+</p>
+<div v-if="report != null">
+    <p>
+        Quality Statistics ({{ last_checked }}): 
+        Total: <b>{{ stat.n_total_papers }}</b>, 
+        Has issue(s): <b>{{ stat.n_paper_has_issues }}</b>
+        <br>
+        <button @click="on_click_load_report()">
+            <i class="fas fa-sync-alt"></i>
+            Reload
+        </button>
+    </p>
+    <template v-for="(rpt, pid) in report">
+        <div v-if="get_n_keys(rpt.issues) != 0"
+            class="report-row">
+            <div class="report-row-paper">
+                <b>
+                    <i class="far fa-file"></i>
+                    {{ get_paper_attr(pid, 'rct_id') }} 
+                    | 
+                    {{ pid }}
+                    &nbsp;
+                    <button @click="copy_paper_pid(pid)">
+                        <i class="fa fa-copy"></i>
+                        Copy PMID
+                    </button>
+                </b>
+                <br>                
+                {{ get_paper_attr(pid, 'title') }}
+            </div>
+            <div class="report-row-detail">
+                <div v-for="(issues, oc_abbr) in rpt.issues"
+                    class="report-row-oc">
+                    <template v-if="get_extract_meta(oc_abbr, 'oc_type')=='itable'">
+                        <div class="report-row-oc-name">
+                            <i class="fas fa-table"></i>
+                            {{ get_extract_meta(oc_abbr, 'full_name') }}
+                        </div>
+                        <div class="report-row-oc-issues">
+                            <div v-for="issue in issues"
+                                class="report-row-oc-issue-item">
+                                <span class="issue-arm">{{ arm_idx2text(issue.arm_idx) }}</span>
+                                <br>
+                                <span class="issue-reason">{{ issue.reason }}</span>
+                            </div>
+                        </div>
+                    </template>
+
+                    <template v-else>
+                        <div class="report-row-oc-name">
+                            <i class="far fa-folder-open"></i>
+                            {{ get_extract_meta(oc_abbr, 'group') }}
+                            <br>
+                            &nbsp; |- <i class="far fa-folder-open"></i>
+                            {{ get_extract_meta(oc_abbr, 'category') }}
+                            <br>
+                            &nbsp;&nbsp;&nbsp;&nbsp; |- <i class="fas fa-notes-medical"></i>
+                            {{ get_extract_meta(oc_abbr, 'full_name') }}
+                        </div>
+                        <div class="report-row-oc-issues">
+                            <div v-for="issue in issues"
+                                class="report-row-oc-issue-item">
+                                <span class="issue-arm">{{ arm_idx2text(issue.arm_idx) }}</span>
+                                <br>
+                                {{ issue.attr }}: 
+                                <b>{{ issue.value }}</b>
+                                <br>
+                                <span class="issue-reason">{{ issue.reason }}</span>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </template>
+</div>
+</div>
 
 </div>
 
@@ -40,6 +185,210 @@ Check Data Quality
 
 {% block script %}
 <script>
+
+{% include 'js/srv_shared.js' %}
+{% include 'js/srv_analyzer.js' %}
+{% include "js/srv_extractor.js" %}
+
+///////////////////////////////////////////////////////////
+// bind the project information to srv_extractor.js
+///////////////////////////////////////////////////////////
+
+srv_extractor.project = [[ project_json_str|safe ]];
+
+var app_dqchecker = {
+    vpp_id: "#app_dqchecker",
+    vpp: null,
+    vpp_data: {
+        /*
+        Report is a dictionary containing all papers' issues
+        {
+            pid: {
+                issues: {
+                    oc_abbr: [{
+                        arm_idx: 
+                        subg:
+                        attr:
+                        value:
+                        reason:
+                    }]
+                }
+            }
+        }
+        */
+        report: null,
+
+        // paper information
+        paper_dict: null,
+
+        // extract/outcome information
+        extract_dict: null,
+
+        // date of last checked
+        last_checked: null,
+
+        is_loading: false,
+    },
+
+    vpp_methods: {
+        load: function(src) {
+            if (typeof(src) == 'undefined') {
+                src = 'cache';
+            }
+            // load params
+            var project_id = Cookies.get('project_id');
+            var cq_abbr = Cookies.get('cq_abbr');   
+            srv_extractor.get_data_quality_report(
+                project_id,
+                cq_abbr,
+                src,
+                function(rsp) {
+                    app_dqchecker.vpp.$data.is_loading = false;
+                    if (rsp.success) {
+                        app_dqchecker.vpp.update_data(rsp);
+                    }
+                }
+            );
+        },
+
+        update_data: function(rsp) {
+            var data = rsp.data;
+            this.last_checked = rsp.last_checked;
+
+            // init the paper dict
+            this.paper_dict = {};
+            for (let i = 0; i < data.papers.length; i++) {
+                const paper = data.papers[i];
+                this.paper_dict[paper.pid] = paper;
+            }
+
+            // init the extract dict
+            this.extract_dict = {};
+            for (let i = 0; i < data.extracts.length; i++) {
+                const extract = data.extracts[i];
+                this.extract_dict[extract.abbr] = extract;
+            }
+
+            // bind report
+            this.report = data.report;
+        },
+
+        on_click_load_report: function() {
+            var ret = window.confirm(
+                'Checking data quality may take a few minutes as there is intensive calucation in the backend depending on the number of studies and outcomes. Please do not re-check too frequently. Are you sure to re-check the data quality?'
+            );
+
+            // clear all first
+            this.clear();
+            this.is_loading = true;
+
+            if (ret) {
+                // load from database
+                this.load('db');
+
+            } else {
+
+            }
+        },
+
+        clear: function() {
+            this.report = null;
+            this.paper_dict = null;
+            this.extract_dict = null;
+            this.last_checked = null;
+        },
+
+        get_n_keys: function(d) {
+            return Object.keys(d).length;
+        },
+
+        get_paper_attr: function(pid, attr) {
+            if (this.paper_dict.hasOwnProperty(pid)) {
+                if (this.paper_dict[pid].hasOwnProperty(attr)) {
+                    return this.paper_dict[pid][attr];
+                }
+            }
+            return '-';
+        },
+
+        get_extract_meta: function(abbr, attr) {
+            if (this.extract_dict.hasOwnProperty(abbr)) {
+                if (this.extract_dict[abbr].meta.hasOwnProperty(attr)) {
+                    return this.extract_dict[abbr].meta[attr];
+                }
+            }
+            return '-';
+        },
+
+        copy_paper_pid: function(pid) {
+            jarvis.copy_text_to_clipboard(pid);
+        },
+
+        arm_idx2text: function(arm_idx) {
+            switch(arm_idx) {
+                case 0:
+                    return 'Comparison 1';
+                case 1:
+                    return 'Comparison 2';
+                case 2:
+                    return 'Comparison 3';
+                case 3:
+                    return 'Comparison 4';
+                case 4:
+                    return 'Comparison 5';
+                default:
+                    return 'Comp'
+            }
+        }
+    },
+
+    vpp_computed: {
+        stat: function() {
+            var rst = {
+                n_total_papers: 0,
+                n_paper_ok: 0,
+                n_paper_has_issues: 0
+            };
+
+            if (this.report != null) {
+                for (const pid in this.report) {
+                    rst.n_total_papers += 1;
+                    if (this.get_n_keys(this.report[pid].issues) == 0) {
+                        rst.n_paper_ok += 1;
+                    } else {
+                        rst.n_paper_has_issues += 1;
+                    }
+                }
+            }
+
+            return rst;
+        }
+    },
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: this.vpp_data,
+            methods: this.vpp_methods,
+            computed: this.vpp_computed
+        });
+    }
+};
+
+var jarvis = {
+    init: function() {
+        // set cq_abbr if not 
+        this.set_default_cq();
+
+        // init the data quality checker
+        app_dqchecker.init();
+
+        // load report
+        app_dqchecker.vpp.load();
+    }
+}
+
+{% include 'js/jarvis_ext_utils.js' %}
 
 $(document).ready(function() {
     jarvis.init();

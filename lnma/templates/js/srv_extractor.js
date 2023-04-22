@@ -27,7 +27,8 @@ var srv_extractor = {
         get_extract_by_id: "[[ url_for('extractor.get_extract_by_id') ]]",
         get_extracts: "[[ url_for('extractor.get_extracts') ]]",
         get_extract_and_papers: "[[ url_for('extractor.get_extract_and_papers') ]]",
-        get_extract_piece: "[[ url_for('extractor.get_extract_piece') ]]",        
+        get_extract_piece: "[[ url_for('extractor.get_extract_piece') ]]",
+        get_data_quality_report: "[[ url_for('extractor.get_data_quality_report') ]]",
 
         get_included_papers_and_selections: "[[ url_for('extractor.get_included_papers_and_selections') ]]",
         update_paper_one_selection: "[[ url_for('extractor.update_paper_one_selection') ]]",
@@ -387,6 +388,26 @@ var srv_extractor = {
             success: callback,
             error: function(jqXHR, textStatus, errorThrown) {
                 jarvis.toast('Something wrong when getting paper extraction', 'alert');
+                console.error(textStatus, errorThrown);
+            }
+        });
+    },
+
+    get_data_quality_report: function(project_id, cq_abbr, src, callback) {
+        $.ajax({
+            type: 'GET',
+            dataType: "json",
+            url: this.url.get_data_quality_report,
+            data: {
+                project_id: project_id,
+                cq_abbr: cq_abbr,
+                src: src,
+                rnd: Math.random()
+            },
+            cache: false,
+            success: callback,
+            error: function(jqXHR, textStatus, errorThrown) {
+                jarvis.toast('Something wrong when getting data quality report', 'alert');
                 console.error(textStatus, errorThrown);
             }
         });

@@ -1554,6 +1554,282 @@ def get_studies_included_in_ma(keystr, cq_abbr, paper_dict=None):
     return stat
 
 
+def get_data_quality(project_id, cq_abbr):
+    '''
+    Get a report of data quality
+    '''
+    project = dora.get_project(project_id)
+
+    # get all extracts withOUT data
+    extracts = dora.get_extracts_by_project_id_and_cq(
+        project_id,
+        cq_abbr
+    )
+
+    # create a dict for report
+    report = {}
+
+    # get all papers included
+    papers = srv_paper.get_included_papers_by_cq(
+        project_id, 
+        cq_abbr
+    )
+    paper_dict = {}
+    for paper in papers:
+        paper_dict[paper.pid] = paper
+
+    for ext_idx, extract in enumerate(extracts):
+        # first, add data
+        extract = dora.attach_extract_data(extract)
+
+        # now let's check
+        n_issue_papers = 0
+        for pid in extract.data:
+            if pid not in paper_dict:
+                # which means this paper is not included in SR
+                continue
+
+            if pid not in report:
+                # add this pid to report and create basic structure
+                report[pid] = {
+                    # first, we need to know what issues are there
+                    # and there are multiply issues. So just check it.
+                    'issues': {}
+                }
+
+            # ok, now let's check this extraction
+            if not extract.data[pid]['is_selected']:
+                # ok, this paper is not selected
+                continue
+
+            # now let's check issues
+            issues = check_extract_piece_quality(extract, extract.data[pid])
+
+            # then update the issues if any
+            if len(issues) > 0:
+                report[pid]['issues'][extract.abbr] = issues
+                n_issue_papers += 1
+
+        print('* parsed %s/%s extract data quality %s' % (
+            ext_idx+1,
+            len(extracts),
+            n_issue_papers
+        ))
+    
+    return report
+
+
+def check_extract_piece_quality(extract, piece_data):
+    '''
+    Check the quality of a piece in an extract,
+
+    Returns an issue report if found any.
+    Otherwise returns None.
+    '''
+    # special rule for itable checking
+    if extract.oc_type == 'itable':
+        return check_extract_piece_quality_for_ITABLE(extract, piece_data)
+    
+    # for IO-like projects
+    if extract.meta['input_format'] == 'PRIM_CAT_RAW_G5':
+        return check_extract_piece_quality_for_PRIM_CAT_RAW_G5(extract, piece_data)
+    
+    # TODO, other data formats
+    return []
+
+
+def check_extract_piece_quality_for_ITABLE(extract, piece_data):
+    '''
+    A subtype of data quality for iTable extraction
+
+    check missing attributes only
+    '''
+    # only one subg in itable
+    subg = 'g0'
+    issues = []
+    # need to walk all attrs in extract
+    for arm_idx, arm in enumerate([piece_data['attrs']['main']] + \
+                                   piece_data['attrs']['other']):
+        attrs_empty = []
+        for cate in extract.meta['cate_attrs']:
+            if cate['abbr'] == 'COE_RCT_ROB':
+                # skip the COE Risk of Bias as there should be missing
+                continue
+
+            if cate['abbr'] == 'COE_RCT_IND':
+                # skip the COE Indirectness as there should be missing
+                continue
+
+            if cate['name'] == '_SYS':
+                # skip the system search attribute
+                continue
+
+            for attr in cate['attrs']:
+                if attr['subs'] is None:
+                    if attr['abbr'] not in arm[subg]:
+                        # which means this value is not there yet
+                        attrs_empty.append({
+                            'name': attr['name'],
+                            'abbr': attr['abbr']
+                        })
+                        continue
+
+                    # then, just check this attr
+                    value = arm[subg][attr['abbr']]
+                    if util.is_missing(value):
+                        attrs_empty.append({
+                            'name': attr['name'],
+                            'abbr': attr['abbr']
+                        })
+                else:
+                    # there are multiple subs
+                    for sub in attr['subs']:
+                        if sub['abbr'] not in arm[subg]:
+                            # which means this value is not there yet
+                            attrs_empty.append({
+                                'name': attr['name'] + '#' + sub['name'],
+                                'abbr': sub['abbr']
+                            })
+                            continue
+
+                        # ok, there is value!
+                        value = arm[subg][sub['abbr']]
+                        if util.is_missing(value):
+                            attrs_empty.append({
+                                'name': attr['name'] + '#' + sub['name'],
+                                'abbr': sub['abbr']
+                            })
+
+        # make a single issue
+        if len(attrs_empty) == 0:
+            pass
+        else:
+            issues.append({
+                'arm_idx': arm_idx,
+                'subg': subg,
+                'attr': None,
+                'value': None,
+                'reason': 'Missing values in %s attributes [%s]' % (
+                    len(attrs_empty),
+                    ', '.join([ a['name'] for a in attrs_empty ])
+                )
+            })
+    
+    return issues
+
+
+def check_extract_piece_quality_for_PRIM_CAT_RAW_G5(extract, piece_data):
+    '''
+    A subtype of data quality for PRIM_CAT_RAW_G5 format
+
+    In this format, there are 10 attrs to be checked
+    '''
+    attrs_emp_or_int = [
+        'GA_Et', 'GA_Nt', 'GA_Ec', 'GA_Nc', 
+        'G34_Et', 'G34_Ec', 
+        'G3H_Et', 'G3H_Ec',
+        'G5N_Et', 'G5N_Ec',
+    ]
+
+    # those attrs must be greater than 0
+    attrs_gtzero = ['GA_Nt', 'GA_Nc']
+
+    # pairs must be match is not empty
+    attrs_pwmable = [
+        ['GA_Et', 'GA_Nt'],
+        ['GA_Ec', 'GA_Nc'],
+        ['G34_Et', 'GA_Nt'],
+        ['G34_Ec', 'GA_Nc'],
+        ['G3H_Et', 'GA_Nt'],
+        ['G3H_Ec', 'GA_Nc'],
+        ['G5N_Et', 'GA_Nt'],
+        ['G5N_Ec', 'GA_Nc'],
+    ]
+
+    for arm_idx, arm in enumerate([piece_data['attrs']['main']] + \
+                                   piece_data['attrs']['other']):
+        # check all arms, and this format only contains g0 for now
+        # TODO, add other groups later
+        # by default, no issue at all
+        issues = []
+
+        # check subg
+        subg = 'g0'
+
+        # first, all numbers must be empty or integer
+        for attr in attrs_emp_or_int:
+            # get the value of this attr
+            value = arm[subg][attr]
+
+            # flag 1: is empty?
+            f1 = util.is_empty(value)
+
+            # flag 2: is integer?
+            f2 = util.is_integer(value)
+
+            if f1 or f2:
+                # ok, it works
+                pass
+
+            else:
+                # oh, no. it's a value that cannot be parsed
+                issue = {
+                    'arm_idx': arm_idx,
+                    'subg': subg,
+                    'attr': attr,
+                    'value': value,
+                    'reason': 'Unparsable non-empty and non-integer value'
+                }
+
+                issues.append(issue)
+
+        # second, non-zero value for Nt and Nc
+        for attr in attrs_gtzero:
+            # get the value of this attr
+            value = arm[subg][attr]
+
+            # flag 1: is integer?
+            f1 = util.is_integer(value)
+
+            # flag 2: is zero
+            f2 = util.is_int_zero(value)
+
+            if f1 and f2:
+                # oh ... any of the N is zero
+                issue = {
+                    'arm_idx': arm_idx,
+                    'subg': subg,
+                    'attr': attr,
+                    'value': value,
+                    'reason': 'Total number cannot be zero'
+                }
+
+                issues.append(issue)
+
+        # last, pairs
+        for attr_pair in attrs_pwmable:
+            # get the value of this attr
+            value0 = arm[subg][attr_pair[0]]
+            value1 = arm[subg][attr_pair[1]]
+
+            # flag: v0 > v1 ?
+            f1 = util.is_E_gt_N(value0, value1)
+
+            if f1:
+                # what???
+                issue = {
+                    'arm_idx': arm_idx,
+                    'subg': subg,
+                    'attr': attr,
+                    'value': 'E=%s, N=%s' % (value0, value1),
+                    'reason': 'Event cannot be greater than total'
+                }
+
+                issues.append(issue)
+
+        return issues
+
+
 ###########################################################
 # Utils for management
 ###########################################################

@@ -54,5 +54,25 @@ Object.assign(jarvis, {
         while (pattern.test(x))
             x = x.replace(pattern, "$1,$2");
         return x;
+    },
+
+    toast: function(msg, type) {
+        if (typeof(type)=='undefined') {
+            type = 'default';
+        }
+        if (typeof(toast)!='undefined') {
+            toast(msg, type)
+        }
+    },
+
+    copy_text_to_clipboard: function(text) {
+        navigator.clipboard.writeText(text).then(() => {
+            /* clipboard successfully set */
+            console.log('* copied ' + text);
+            jarvis.toast("'" + text + "' is copied to clipboard!");
+        }, () => {
+            /* clipboard write failed */
+            console.log('* failed copy?')
+        });
     }
 });
