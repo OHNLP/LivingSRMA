@@ -92,7 +92,7 @@ Check Data Quality
 <div id="app_dqchecker">
 <p v-if="report == null">
     Loading data quality report ...
-    <i class="fas fa-spinner fa-spin"></i>
+    <i class="fa fa-spinner fa-spin"></i>
     <br>
     It may take a while, please wait ...
     <br>
@@ -229,7 +229,7 @@ var app_dqchecker = {
         // date of last checked
         last_checked: null,
 
-        is_loading: false,
+        is_loading: true,
     },
 
     vpp_methods: {
