@@ -97,7 +97,8 @@ Check Data Quality
     It may take a while, please wait ...
     <br>
     If this page doesn't response after a few minutes, please try reload page or contact administrator.
-    <button @click="on_click_load_report()">
+    <button @click="on_click_load_report()"
+        :disabled="is_loading">
         <i class="fas fa-sync-alt"></i>
         Reload
     </button>
@@ -108,7 +109,8 @@ Check Data Quality
         Total: <b>{{ stat.n_total_papers }}</b>, 
         Has issue(s): <b>{{ stat.n_paper_has_issues }}</b>
         <br>
-        <button @click="on_click_load_report()">
+        <button @click="on_click_load_report()"
+            :disabled="is_loading">
             <i class="fas fa-sync-alt"></i>
             Reload
         </button>
