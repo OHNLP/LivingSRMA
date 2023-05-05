@@ -20,9 +20,9 @@ def get_graph_pma_data_from_db(keystr, cq_abbr):
     '''
     Get the graph data for PWMA
     '''
-    if keystr == 'IO' and cq_abbr == 'default': 
+    if keystr in ['IO', 'PARP'] and cq_abbr == 'default': 
         # for the IO project, the calculation is different
-        return get_sof_pma_data_from_db_IO_format(cq_abbr, False)
+        return get_sof_pma_data_from_db_IO_format(keystr, cq_abbr, False)
 
     return get_pma_by_cq(keystr, cq_abbr, 'plots')
 
@@ -31,9 +31,9 @@ def get_sof_pma_data_from_db(keystr, cq_abbr, is_calc_pma=True):
     '''
     Get the SoF table data for PWMA
     '''
-    if keystr == 'IO' and cq_abbr == 'default': 
+    if keystr in ['IO', 'PARP'] and cq_abbr == 'default': 
         # for the IO project, the calculation is different
-        return get_sof_pma_data_from_db_IO_format(cq_abbr, is_calc_pma)
+        return get_sof_pma_data_from_db_IO_format(keystr, cq_abbr, is_calc_pma)
 
     # for most cases:
     return get_pma_by_cq(keystr, cq_abbr, 'sof')
@@ -142,13 +142,13 @@ def get_pma_by_cq(keystr, cq_abbr="default", included_in='sof'):
     return ret
 
 
-def get_sof_pma_data_from_db_IO_format(cq_abbr="default", is_calc_pma=True):
+def get_sof_pma_data_from_db_IO_format(keystr, cq_abbr="default", is_calc_pma=True):
     '''
     The SoF Table of PWMA DATA for IO format
     '''
     # First, get all extracts of pwma
     # But for other projects, need to double check the input type
-    keystr = 'IO'
+    # keystr = 'IO'
     project = dora.get_project_by_keystr(keystr)
     # papers = dora.get_papers_by_stage(
     #     project.project_id, 
@@ -159,7 +159,7 @@ def get_sof_pma_data_from_db_IO_format(cq_abbr="default", is_calc_pma=True):
         project.project_id, cq_abbr
     )
     print('* found %s papers included in %s-%s' % (
-        len(papers), 'IO', cq_abbr
+        len(papers), keystr, cq_abbr
     ))
     
     # make a dictionary for lookup
@@ -174,7 +174,7 @@ def get_sof_pma_data_from_db_IO_format(cq_abbr="default", is_calc_pma=True):
         'pwma'
     )
     print('* found %s extracts defined in %s-%s' % (
-        len(extracts), 'IO', cq_abbr
+        len(extracts), keystr, cq_abbr
     ))
 
     oc_dict = {}

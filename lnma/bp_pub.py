@@ -219,6 +219,11 @@ def rtpma_IO():
     return render_template('pub/IO/rtpma_IO.html')
 
 
+@bp.route('/rtpma.html')
+def rtpma():
+    return render_template('pub/IO/rtpma_IO.html')
+
+
 @bp.route('/graph_pma_IO.html')
 def graph_pma_IO():
     return render_template('pub/IO/graph_pma_IO.html')

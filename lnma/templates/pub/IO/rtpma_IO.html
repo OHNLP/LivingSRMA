@@ -790,7 +790,9 @@ p {
     
 <div id="app_pma">
 
-    <div id="app_filter" class="d-flex flex-row">
+    <div v-show="is_using_filters"
+        id="app_filter" 
+        class="d-flex flex-row">
         <div class="sfilter d-flex flex-col mr-1">
             <div class="sfilter-name">&nbsp;</div>
             <div style="font-weight: bold;">
@@ -1536,7 +1538,7 @@ p {
                             <th width="200px">Study</th>
                             <th>Year</th>
                             <th>PMID</th>
-                            <th>Class of ICI</th>
+                            <th>Class</th>
     
                             <th>Treatment</th>
                             <th>Control</th>
@@ -1560,10 +1562,10 @@ p {
                                 </a>
                             </td>
 
-                            <td>{{ r.it['Class of ICI'] }}</td>
+                            <td>{{ get_it_val_by_key(r.it, 'Class of ICI') }}</td>
 
-                            <td class="td-long-text">{{ r.it['Treatment regimen'] }}</td>
-                            <td class="td-long-text">{{ r.it['Control regimen'] }}</td>
+                            <td class="td-long-text">{{ get_it_val_by_key(r.it, 'Treatment regimen') }}</td>
+                            <td class="td-long-text">{{ get_it_val_by_key(r.it, 'Control regimen') }}</td>
 
                             <td>{{ r.oc[plot_grade + '_Et'] }}</td>
                             <td>{{ r.oc['GA_Et'] }}</td>
@@ -1818,6 +1820,8 @@ var app_pma = {
 
         is_updating_all_oc_mas: false,
 
+        is_using_filters: true,
+
         ///////////////////////////////////////////////////////////
         // for study viewer
         ///////////////////////////////////////////////////////////
@@ -2015,21 +2019,27 @@ var app_pma = {
             // now need to get the pmids
             // so, first, get the current values of all dropdowns
             var conditions = [];
-            for (let i = 0; i < this.dropdowns.length; i++) {
-                const dropdown = this.dropdowns[i];
-                var name_i = dropdown.name;
-                var val_i = dropdown.value;
-                if (val_i == '%' || val_i == 'all') {
-                    // skip the default
-                    // but we still need a condition, so this one
-                    conditions.push(
-                        '1=1'
-                    );
-                } else {
-                    conditions.push(
-                        '`' + name_i + '` like "%' + val_i + '%"'
-                    );
+            if (this.is_using_filters) {
+                for (let i = 0; i < this.dropdowns.length; i++) {
+                    const dropdown = this.dropdowns[i];
+                    var name_i = dropdown.name;
+                    var val_i = dropdown.value;
+                    if (val_i == '%' || val_i == 'all') {
+                        // skip the default
+                        // but we still need a condition, so this one
+                        conditions.push(
+                            '1=1'
+                        );
+                    } else {
+                        conditions.push(
+                            '`' + name_i + '` like "%' + val_i + '%"'
+                        );
+                    }
                 }
+            } else {
+                conditions.push(
+                    '1=1'
+                );
             }
             // second, use the conditions to search for the 
             var pid_arms = this.get_pid_arms_by_filter_conditions(conditions);
@@ -2510,7 +2520,17 @@ var app_pma = {
 
             for (let i = 0; i < ma_prim.rs.length; i++) {
                 const oc = ma_prim.rs[i];
-                const it = ocpi_dict[oc.pid][oc._arm_idx];
+
+                // init as an null value
+                var it = null;
+                if (ocpi_dict.hasOwnProperty(oc.pid)) {
+                    if (ocpi_dict[oc.pid].hasOwnProperty(oc._arm_idx)) {
+                        ocpi_dict[oc.pid][oc._arm_idx];
+                    } else {
+                        // use the first default arm
+                        ocpi_dict[oc.pid][0];
+                    }
+                }
 
                 ocpis.push({
                     oc: oc,
@@ -2933,6 +2953,20 @@ var app_pma = {
                     // specific comb
                     return txt + ' (' + this.get_txt_by_type(filter_values[3], 'filter') + ')';
                 }
+            }
+        },
+
+        ///////////////////////////////////////////////////////////
+        // for study detail
+        ///////////////////////////////////////////////////////////
+        get_it_val_by_key: function(it, key) {
+            if (it == null) {
+                return 'NULL'
+            }
+            if (it.hasOwnProperty(key)) {
+                return it[key];
+            } else {
+                return 'NA';
             }
         },
 
@@ -3408,18 +3442,31 @@ var app_pma = {
 
     get_rob_from_itable_by_pid: function(pid) {
         // reviewer
-        let rj = this.data_itable.itable.data[pid].attrs.main.g0['COE_RCT_ROB_OVERALL_RJ'];
+        let rj = '';
+        if (this.data_itable.itable.data.hasOwnProperty(pid)) {
+            rj = this.data_itable.itable.data[pid].attrs.main.g0['COE_RCT_ROB_OVERALL_RJ'];
+        }
         // algorithm
-        let ar = this.data_itable.itable.data[pid].attrs.main.g0['COE_RCT_ROB_OVERALL_AR'];
+        let ar = '';
+        if (this.data_itable.itable.data.hasOwnProperty(pid)) {
+            ar = this.data_itable.itable.data[pid].attrs.main.g0['COE_RCT_ROB_OVERALL_AR'];
+        }
         
         return this.get_decision_by_rj_ar(rj, ar);
     },
 
     get_ind_from_itable_by_pid: function(pid) {
         // reviewer
-        let rj = this.data_itable.itable.data[pid].attrs.main.g0['COE_RCT_IND_OVERALL_RJ'];
+        let rj = '';
+        if (this.data_itable.itable.data.hasOwnProperty(pid)) {
+            this.data_itable.itable.data[pid].attrs.main.g0['COE_RCT_IND_OVERALL_RJ'];
+        }
         // algorithm
-        let ar = this.data_itable.itable.data[pid].attrs.main.g0['COE_RCT_IND_OVERALL_AR'];
+        let ar = '';
+
+        if (this.data_itable.itable.data.hasOwnProperty(pid)) {
+            this.data_itable.itable.data[pid].attrs.main.g0['COE_RCT_IND_OVERALL_AR'];
+        }
 
         return this.get_decision_by_rj_ar(rj, ar);
     },
@@ -3720,12 +3767,10 @@ var jarvis = {
 
         // OK, 
         var prj = jarvis.get_url_paramter('prj');
-        if (prj == null) {
+        if (prj == null || prj == '') {
             jarvis.ssmsg('Project information error.')
-            return;
+            prj = 'IO';
         }
-
-        prj = 'IO';
 
         var src = jarvis.get_url_paramter('src');
         if (src == null || src == '') {
@@ -3734,7 +3779,7 @@ var jarvis = {
 
         // clinical question
         var cq = jarvis.get_url_paramter('cq');
-        if (cq == '') {
+        if (cq == null || cq == '') {
             cq = 'default';
         }
 
@@ -3744,6 +3789,15 @@ var jarvis = {
             wm = 'plot';
         }
         app_pma.vpp_data.work_mode = wm;
+
+        // use filters
+        var is_uf = jarvis.get_url_paramter('uf');
+        if (is_uf == '') {
+            is_uf = true;
+        } else {
+            is_uf = false;
+        }
+        app_pma.vpp_data.is_using_filters = is_uf;
 
         // load all data
         $.when(
