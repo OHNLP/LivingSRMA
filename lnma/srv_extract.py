@@ -1554,6 +1554,104 @@ def get_studies_included_in_ma(keystr, cq_abbr, paper_dict=None):
     return stat
 
 
+def get_duplicate_outcomes_from_extracts(extracts, concept_dict={}):
+    '''
+    Find duplicate outcome in the given extract list
+    '''
+    # save those duplicates (just index)
+    dup_oc_idxes = set()
+
+    # save duplicates (relations)
+    # {
+    #     abbr: [
+    #       (abbr_dup_1, msg_1),
+    #       (abbr_dup_2, msg_2),
+    #       ...
+    #     ],
+    # }
+    dup_ocs = {}
+
+    # check all pairs
+    for ext_i in range(len(extracts)):
+        if ext_i in dup_oc_idxes:
+            # which means this extract has been detected
+            continue
+
+        for ext_j in range(ext_i + 1, len(extracts)):
+            if ext_j in dup_oc_idxes:
+                # which means this extract has been detected
+                continue
+
+            # ok, let's compare 
+            flag, msg = is_duplicated_outcome(
+                extracts[ext_i],
+                extracts[ext_j],
+                concept_dict
+            )
+
+            if flag:
+                # just put ext_j
+                dup_oc_idxes.add(ext_i)
+                dup_oc_idxes.add(ext_j)
+
+                # save this dup ocs
+                if extracts[ext_i].abbr not in dup_ocs:
+                    dup_ocs[extracts[ext_i].abbr] = []
+
+                dup_ocs[extracts[ext_i].abbr].append(
+                    (extracts[ext_j].abbr, msg)
+                )
+    
+    return dup_ocs
+
+
+def is_duplicated_outcome(ext_a, ext_b, concept_dict={}):
+    '''
+    Judge whether duplicated
+
+    concept_dict is a mapping from outcome name to a concept
+    {
+        'fever':            'fever',
+        'pyrexia':          'fever',
+        'high temperature': 'fever',
+        'feverishness':     'fever',
+    }
+    by using this simple dictionary, we can identify 
+    whether a name is duplicated with another simiar name
+    '''
+    # the easist case, by id
+    if ext_a.extract_id == ext_b.extract_id:
+        return True, 'same record'
+    
+    # then by meta info
+    # if same oc_type, e.g., nma, pwma, itable
+    #    same group, e.g., primary, second
+    #    same category, e.g., other
+    if ext_a.meta['oc_type'] == ext_b.meta['oc_type'] and \
+        ext_a.meta['group'] == ext_b.meta['group'] and \
+        ext_a.meta['category'] == ext_b.meta['category']:
+        
+        # first, get full name in lower case
+        _fn_a = ext_a.meta['full_name'].lower().strip()
+        _fn_b = ext_b.meta['full_name'].lower().strip()
+
+        if _fn_a == _fn_b:
+            return True, 'same name'
+        
+        else:
+            # check same concept
+            cpt_a = concept_dict.get(_fn_a, None)
+            cpt_b = concept_dict.get(_fn_b, None)
+
+            if cpt_a is not None and \
+                cpt_b is not None and \
+                cpt_a == cpt_b:
+                # which means there 
+                return True, 'same concept'
+
+    return False, ''
+
+
 def get_data_quality(project_id, cq_abbr):
     '''
     Get a report of data quality

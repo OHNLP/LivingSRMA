@@ -184,6 +184,52 @@ def check_data_quality():
     )
 
 
+@bp.route('/get_duplicate_outcomes')
+@login_required
+def get_duplicate_outcomes():
+    '''
+    Get duplicate outcomes
+    '''
+    project_id = request.args.get('project_id')
+
+    if project_id is None:
+        ret = {
+            'success': False,
+            'msg': 'project_id is required'
+        }
+        return jsonify(ret)
+    # project = dora.get_project(project_id)
+
+    # decide which cq to use
+    cq_abbr = request.args.get('cq_abbr')
+
+    # get all extracts of this project/cq
+    extracts = dora.get_extracts_by_project_id_and_cq(
+        project_id,
+        cq_abbr
+    )
+
+    # get all duplicates
+    dup_ocs = srv_extract.get_duplicate_outcomes_from_extracts(
+        extracts,
+        {}
+    )
+
+    # build output
+    json_extracts = [ extr.as_simple_dict() for extr in extracts ]
+
+    ret = {
+        'success': True,
+        'data': {
+            'dup_ocs': dup_ocs,
+            'extract': json_extracts,
+        },
+        'last_checked': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+    }
+
+    return jsonify(ret)
+
+
 @bp.route('/get_data_quality_report')
 @login_required
 def get_data_quality_report():

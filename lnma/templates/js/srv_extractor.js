@@ -29,6 +29,7 @@ var srv_extractor = {
         get_extract_and_papers: "[[ url_for('extractor.get_extract_and_papers') ]]",
         get_extract_piece: "[[ url_for('extractor.get_extract_piece') ]]",
         get_data_quality_report: "[[ url_for('extractor.get_data_quality_report') ]]",
+        get_duplicate_outcomes: "[[ url_for('extractor.get_duplicate_outcomes') ]]",
 
         get_included_papers_and_selections: "[[ url_for('extractor.get_included_papers_and_selections') ]]",
         update_paper_one_selection: "[[ url_for('extractor.update_paper_one_selection') ]]",
@@ -408,6 +409,25 @@ var srv_extractor = {
             success: callback,
             error: function(jqXHR, textStatus, errorThrown) {
                 jarvis.toast('Something wrong when getting data quality report', 'alert');
+                console.error(textStatus, errorThrown);
+            }
+        });
+    },
+
+    get_duplicate_outcomes: function(project_id, cq_abbr, callback) {
+        $.ajax({
+            type: 'GET',
+            dataType: "json",
+            url: this.url.get_duplicate_outcomes,
+            data: {
+                project_id: project_id,
+                cq_abbr: cq_abbr,
+                rnd: Math.random()
+            },
+            cache: false,
+            success: callback,
+            error: function(jqXHR, textStatus, errorThrown) {
+                jarvis.toast('Something wrong when getting duplicate outcomes', 'alert');
                 console.error(textStatus, errorThrown);
             }
         });
