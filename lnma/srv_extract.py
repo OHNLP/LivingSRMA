@@ -1554,6 +1554,17 @@ def get_studies_included_in_ma(keystr, cq_abbr, paper_dict=None):
     return stat
 
 
+def get_stat_outcomes(extracts):
+    '''
+    Get statistics on outcomes
+    '''
+    stat = {
+        'total': len(extracts)
+    }
+
+    return stat
+
+
 def get_duplicate_outcomes_from_extracts(extracts, concept_dict={}):
     '''
     Find duplicate outcome in the given extract list

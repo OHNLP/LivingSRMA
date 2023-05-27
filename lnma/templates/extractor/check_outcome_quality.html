@@ -1,0 +1,314 @@
+{% extends '_layout_adminlte.html' %}
+
+{% block title %}
+Check Outcome Quality 
+{% endblock %}
+
+{% block section_cq %}
+{% include 'shared_module/_cq_selector_toolbar.html' %}
+{% endblock %}
+
+{% block page_name %}
+<i class="far fa-thumbs-up"></i>
+Check Outcome Quality
+{% endblock %}
+
+{% block active_nav_link %}extractor-check-outcome-quality{% endblock %}
+
+{% block style %}
+<style>
+.carousel-indicators {
+    bottom: -30px;
+}
+.carousel-indicators li {
+    width: 30px;
+    height: 8px;
+    background-color: #999999;
+}
+.carousel-caption {
+    top: 10px;
+    left: 0;
+    right: 0;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    color: black;
+}
+.report-row {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+.report-row:nth-child(odd) {
+    background-color: white;
+}
+.report-row:nth-child(even) {
+    background-color: whitesmoke;
+}
+.report-row-paper {
+    width: 100%;
+    padding: 5px;
+}
+.report-row-detail {
+    display: flex;
+    flex-direction: column;
+}
+.report-row-oc {
+    display: flex;
+    flex-direction: row;
+    border-bottom: 1px dashed #cfcfcf;
+    padding: 5px 0;
+}
+.report-row-oc-name {
+    width: 350px;
+    min-width: 350px;
+    padding: 5px;
+}
+.report-row-oc-issues {
+    display: flex;
+    flex-direction: row;
+}
+.report-row-oc-issue-item {
+    border-left: 1px solid #dfdfdf;
+    border-top: 1px solid #dfdfdf;
+    border-right: 1px solid #c5c5c5;
+    border-bottom: 1px solid #c5c5c5;
+    margin: 5px;
+    padding: 5px;
+    background-color: #fff8f8;
+}
+.report-row-oc-issue-item:hover {
+    background-color: #faebeb;
+}
+.issue-reason {
+    font-style: italic;
+    font-size: 0.95em;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="main" class="container-fluid">
+
+<div id="app_dqchecker">
+<p v-if="report == null">
+    Loading outcome quality report ...
+    <i class="fa fa-spinner fa-spin"></i>
+    <br>
+    It may take a while, please wait ...
+    <br>
+    If this page doesn't response after a few minutes, please try reload page or contact administrator.
+    <button @click="on_click_load_report()"
+        :disabled="is_loading">
+        <i class="fas fa-sync-alt"></i>
+        Reload
+    </button>
+</p>
+<div v-if="report != null">
+    <p>
+        Quality Statistics ({{ last_checked }}): 
+        Total Outcomes: <b>{{ stat.n_total_outcomes }}</b>, 
+        Has issue(s): <b>{{ stat.n_outcomes_have_issues }}</b>
+
+        <button @click="on_click_load_report()"
+            :disabled="is_loading">
+            <i class="fas fa-sync-alt"></i>
+            Reload
+        </button>
+    </p>
+    <div v-for="(dups, abbr) in report"
+        class="report-row">
+        <div class="report-row-paper">
+            <i class="far fa-file"></i>
+            <span>
+                {{ get_oc_meta(abbr, 'oc_type') }} / 
+                {{ get_oc_meta(abbr, 'group') }} / 
+                {{ get_oc_meta(abbr, 'category') }} / 
+                <b>
+                    {{ get_oc_meta(abbr, 'full_name') }}
+                </b>
+            </span>
+        </div>
+        <div class="report-row-detail">
+            <div v-for="dup in dups"
+                class="report-row-oc">
+                &nbsp;
+                &nbsp;
+                <span class="issue-reason badge badge-warning">
+                    <i class="fas fa-exclamation-circle"></i>
+                    {{ dup[1] }}
+                </span>
+                &nbsp;
+                <span>
+                    {{ get_oc_meta(dup[0], 'oc_type') }} / 
+                    {{ get_oc_meta(dup[0], 'group') }} / 
+                    {{ get_oc_meta(dup[0], 'category') }} / 
+                    <b>
+                        {{ get_oc_meta(dup[0], 'full_name') }}
+                    </b>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+</div>
+
+{% endblock %}
+
+{% block script %}
+<script>
+
+{% include 'js/srv_shared.js' %}
+{% include 'js/srv_analyzer.js' %}
+{% include "js/srv_extractor.js" %}
+
+///////////////////////////////////////////////////////////
+// bind the project information to srv_extractor.js
+///////////////////////////////////////////////////////////
+
+srv_extractor.project = [[ project_json_str|safe ]];
+
+var app_dqchecker = {
+    vpp_id: "#app_dqchecker",
+    vpp: null,
+    vpp_data: {
+        /*
+        Report is a dictionary containing all extracts' issues
+        {
+            abbr: [
+                (abbr_dup_1, reason),
+                (abbr_dup_2, reason),
+            ]
+        }
+        */
+        report: null,
+
+        // extract/outcome information
+        extract_dict: null,
+
+        // date of last checked
+        last_checked: null,
+
+        is_loading: true,
+    },
+
+    vpp_methods: {
+        load: function(src) {
+            if (typeof(src) == 'undefined') {
+                src = 'cache';
+            }
+            // load params
+            var project_id = Cookies.get('project_id');
+            var cq_abbr = Cookies.get('cq_abbr');   
+            srv_extractor.get_duplicate_outcomes(
+                project_id,
+                cq_abbr,
+                function(rsp) {
+                    app_dqchecker.vpp.$data.is_loading = false;
+                    if (rsp.success) {
+                        app_dqchecker.vpp.update_data(rsp);
+                    }
+                }
+            );
+        },
+
+        get_oc_meta: function(abbr, meta_key) {
+            if (this.extract_dict.hasOwnProperty(abbr)) {
+                return this.extract_dict[abbr].meta[meta_key];
+            } else {
+                return 'NA';
+            }
+        },
+
+        update_data: function(rsp) {
+            var data = rsp.data;
+            this.last_checked = rsp.last_checked;
+
+            // init the extract dict
+            this.extract_dict = {};
+            for (let i = 0; i < data.extracts.length; i++) {
+                const extract = data.extracts[i];
+                this.extract_dict[extract.abbr] = extract;
+            }
+            // bind report
+            this.report = data.report;
+        },
+
+        on_click_load_report: function() {
+            var ret = window.confirm(
+                'Checking data quality may take a few minutes as there is intensive calucation in the backend depending on the number of studies and outcomes. Please do not re-check too frequently. Are you sure to re-check the data quality?'
+            );
+
+            // clear all first
+            this.clear();
+            this.is_loading = true;
+
+            if (ret) {
+                // load from database
+                this.load('db');
+
+            } else {
+
+            }
+        },
+
+        clear: function() {
+            this.report = null;
+            this.paper_dict = null;
+            this.extract_dict = null;
+            this.last_checked = null;
+        },
+    },
+
+    vpp_computed: {
+        stat: function() {
+            var rst = {
+                n_total_outcomes: 0,
+                n_outcomes_have_issues: 0
+            };
+
+            if (this.extract_dict != null) {
+                rst.n_total_outcomes = Object.keys(this.extract_dict).length;
+            }
+
+            if (this.report != null) {
+                for (const abbr in this.report) {
+                    rst.n_paper_has_issues += 1;
+                }
+            }
+
+            return rst;
+        }
+    },
+
+    init: function() {
+        this.vpp = new Vue({
+            el: this.vpp_id,
+            data: this.vpp_data,
+            methods: this.vpp_methods,
+            computed: this.vpp_computed
+        });
+    }
+};
+
+var jarvis = {
+    init: function() {
+        // set cq_abbr if not 
+        this.set_default_cq();
+
+        // init the data quality checker
+        app_dqchecker.init();
+
+        // load report
+        app_dqchecker.vpp.load();
+    }
+}
+
+{% include 'js/jarvis_ext_utils.js' %}
+
+$(document).ready(function() {
+    jarvis.init();
+});
+</script>
+{% endblock %}

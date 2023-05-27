@@ -1764,6 +1764,34 @@ def get_current_year_str():
     '''
     return datetime.datetime.now().strftime('%Y')
 
+
+def get_concept_dict_from_concept_synonyms(concept_synonyms):
+    '''
+    Get the concept_dict from a concept_synonyms def
+    The input concept_synonyms is:
+    {
+        concept_1: [
+            concept_1_synonym_1,
+            concept_1_synonym_2, 
+            ...
+        ],
+        concept_2: []
+    },
+
+    The output concept_dict is:
+    {
+        concept_1_synonym_1: concept_1,
+        concept_1_synonym_2: concept_1,
+        ...
+    }
+    '''
+    concept_dict = {}
+    for cpt in concept_synonyms:
+        for syn in concept_synonyms[cpt]:
+            concept_dict[syn] = cpt
+
+    return concept_dict
+
     
 if __name__ == "__main__":
     fn = '/home/hehuan/Downloads/endnote_test.xml'

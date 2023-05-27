@@ -156,6 +156,34 @@ def extract_by_outcome():
     )
 
 
+@bp.route('/check_outcome_quality')
+@login_required
+def check_outcome_quality():
+    '''
+    Check outcome quality
+    '''
+    project_id = request.cookies.get('project_id')
+    # project_id = request.args.get('project_id')
+    if project_id is None:
+        return redirect(url_for('project.mylist'))
+
+    # decide which cq to use
+    cq_abbr = request.cookies.get('cq_abbr')
+    if cq_abbr is None:
+        cq_abbr = 'default'
+
+    oc_abbr = request.args.get('abbr')
+    project = dora.get_project(project_id)
+
+    return render_template(
+        template_base + 'check_outcome_quality.html', 
+        oc_abbr=oc_abbr,
+        cq_abbr=cq_abbr,
+        project=project,
+        project_json_str=json.dumps(project.as_dict())
+    )
+
+
 @bp.route('/check_data_quality')
 @login_required
 def check_data_quality():
@@ -198,7 +226,7 @@ def get_duplicate_outcomes():
             'msg': 'project_id is required'
         }
         return jsonify(ret)
-    # project = dora.get_project(project_id)
+    project = dora.get_project(project_id)
 
     # decide which cq to use
     cq_abbr = request.args.get('cq_abbr')
@@ -209,10 +237,24 @@ def get_duplicate_outcomes():
         cq_abbr
     )
 
+    # try to get concept_synonyms
+    # if not defined, just get {}
+    concept_synonyms = project.settings.get(
+        'concept_synonyms',
+        {}
+    )
+    concept_dict = util.get_concept_dict_from_concept_synonyms(
+        concept_synonyms
+    )
+
     # get all duplicates
     dup_ocs = srv_extract.get_duplicate_outcomes_from_extracts(
         extracts,
-        {}
+        concept_dict
+    )
+
+    dup_ocs_stat = srv_extract.get_stat_outcomes(
+        extracts
     )
 
     # build output
@@ -221,8 +263,9 @@ def get_duplicate_outcomes():
     ret = {
         'success': True,
         'data': {
-            'dup_ocs': dup_ocs,
-            'extract': json_extracts,
+            'report': dup_ocs,
+            'stat': dup_ocs_stat,
+            'extracts': json_extracts,
         },
         'last_checked': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
     }
