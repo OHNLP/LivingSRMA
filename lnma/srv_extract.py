@@ -1554,6 +1554,18 @@ def get_studies_included_in_ma(keystr, cq_abbr, paper_dict=None):
     return stat
 
 
+def get_selected_pieces(extracts, papers):
+    '''
+    Get selected pieces according given extracts and selected papers
+    '''
+    pieces = dora.get_pieces_by_extracts_and_papers(
+        extracts,
+        papers
+    )
+
+    return pieces
+
+
 def get_stat_outcomes(extracts):
     '''
     Get statistics on outcomes

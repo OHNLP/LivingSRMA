@@ -1080,8 +1080,13 @@ def get_extracts():
             'msg': 'project_id is required'
         }
         return jsonify(ret)
+    project = dora.get_project(project_id)
 
-    with_data = request.args.get('with_data')
+    # with_data = request.args.get('with_data')
+    # if with_data == 'yes':
+    #     with_data = True
+    # else:
+    #     with_data = False
     
     # decide which cq to use
     # cq_abbr = request.cookies.get('cq_abbr')
@@ -1089,11 +1094,6 @@ def get_extracts():
 
     if cq_abbr is None:
         cq_abbr = 'default'
-
-    if with_data == 'yes':
-        with_data = True
-    else:
-        with_data = False
     
     # get the exisiting extracts
     extracts = dora.get_extracts_by_project_id_and_cq(
@@ -1101,22 +1101,30 @@ def get_extracts():
         cq_abbr
     )
 
+    # update all data
+    # extracts = dora.attach_all_extracts_data(extracts)
+    papers = srv_paper.get_included_papers_by_cq(
+        project_id, 
+        cq_abbr
+    )
+
+    # update the selection relations
+    papers, extracts = dora.update_papers_outcome_selections(
+        project,
+        papers,
+        extracts
+    )
+
     for i in range(len(extracts)):
         extracts[i].update_meta()
 
     # build the return obj
-    if with_data:
-        ret = {
-            'success': True,
-            'msg': '',
-            'extracts': [ extr.as_dict() for extr in extracts ]
-        }
-    else:
-        ret = {
-            'success': True,
-            'msg': '',
-            'extracts': [ extr.as_simple_dict() for extr in extracts ]
-        }
+
+    ret = {
+        'success': True,
+        'msg': '',
+        'extracts': [ extr.as_simple_dict() for extr in extracts ]
+    }
         
     return jsonify(ret)
 
@@ -1491,6 +1499,7 @@ def get_included_papers_and_selections():
         cq_abbr
     )
 
+    # update the selection relations
     papers, extracts = dora.update_papers_outcome_selections(
         project,
         papers,

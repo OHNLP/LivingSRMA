@@ -7,6 +7,7 @@ from werkzeug.security import generate_password_hash
 
 from sqlalchemy import and_, or_, not_
 from sqlalchemy import func
+from sqlalchemy import text
 from sqlalchemy.orm.attributes import flag_modified
 
 from lnma import ss_state
@@ -1933,7 +1934,11 @@ def update_papers_outcome_selections(project, papers, extracts):
     '''
     # create a extract mapping from id to extract
     ext_dict = {}
-    for ext in extracts: ext_dict[ext.extract_id] = ext
+    ext2seq = {}
+    for i, ext in enumerate(extracts):
+        extracts[i].meta['updated_selected_papers'] = []
+        ext_dict[ext.extract_id] = ext
+        ext2seq[ext.extract_id] = i
 
     # init the paper outcome selections
     pid2seq = {}
@@ -1970,10 +1975,16 @@ and json_extract(data, "$.is_selected") = TRUE
         abbr = ext_dict[extract_id].abbr
         
         # get the idx
-        seq  = pid2seq[pid]
+        seq_pid = pid2seq[pid]
 
-        # update the result
-        papers[seq].meta['outcome_selections'].append(abbr)
+        # get the idx of extract
+        seq_ext = ext2seq[extract_id]
+
+        # update the paper selection
+        papers[seq_pid].meta['outcome_selections'].append(abbr)
+
+        # update the extract data
+        extracts[seq_ext].meta['updated_selected_papers'].append(pid)
 
     return papers, extracts
 
@@ -2260,6 +2271,18 @@ def get_itable_by_project_id_and_cq(project_id, cq_abbr):
     return extract
 
 
+def attach_all_extracts_data(extracts, flag_skip_not_selected=True):
+    '''
+    Simply attach all extracts' data
+
+    Do NOT use this function, too slow.
+    '''
+    for extract in extracts:
+        extract = attach_extract_data(extract, flag_skip_not_selected)
+
+    return extracts
+
+
 def attach_extract_data(extract, flag_skip_not_selected=True):
     '''
     Attach the data to an extract
@@ -2477,6 +2500,19 @@ def get_pieces_by_project_id_and_extract_id(project_id, extract_id):
         Piece.extract_id == extract_id
     ).all()
 
+    return pieces
+
+
+def get_pieces_by_extracts_and_papers(extracts, papers):
+    '''
+    Get all pieces by given extracts
+    '''
+    extract_ids = [ _.extract_id for _ in extracts ]
+    pids = [ _.pid for _ in papers ]
+    pieces = Piece.query.filter(
+        Piece.extract_id.in_(extract_ids),
+        Piece.pid.in_(pids)
+    )
     return pieces
 
 

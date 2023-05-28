@@ -1078,6 +1078,9 @@ class Extract(db.Model):
             if self.data[pid]['is_selected']:
                 n += 1
 
+        if 'updated_selected_papers' in self.meta:
+            n = len(self.meta['updated_selected_papers'])
+
         return n
 
     
