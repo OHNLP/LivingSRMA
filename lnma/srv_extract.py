@@ -976,7 +976,9 @@ def import_itable_from_xls(
     keystr, 
     cq_abbr, 
     full_fn_itable, 
-    full_fn_filter
+    full_fn_filter,
+    flag_overwrite_decision=True,
+    flag_overwrite_piece=True
 ):
     '''
     Import itable all data from xls file
@@ -1020,7 +1022,9 @@ def import_itable_from_xls(
         meta = copy.deepcopy(settings.OC_TYPE_TPL['itable']['default'])
         meta['cq_abbr'] = cq_abbr
         extract = dora.create_extract(
-            project_id, oc_type, abbr, 
+            project_id, 
+            oc_type, 
+            abbr, 
             settings.OC_TYPE_TPL['itable']['default'],
             {}
         )
@@ -1032,17 +1036,18 @@ def import_itable_from_xls(
     cad, cate_attrs, i2a, data, not_found_pids = get_itable_from_itable_data_xls(
         project.keystr, 
         cq_abbr,
-        full_fn_itable
+        full_fn_itable,
+        flag_overwrite_decision
     )
     if cate_attrs is None:
         # something wrong???
         return None
 
-    print('* not found pid %s' % (
+    print('* not found the following %s pid(s)' % (
         len(not_found_pids)
     ))
     for _ in not_found_pids:
-        print('* - %s' % (_))
+        print('*   %s' % (_))
 
     # update the meta
     meta = extract.meta
@@ -1060,9 +1065,72 @@ def import_itable_from_xls(
 
     # update the extract
     # pprint(filters)
-    itable = dora.update_extract_meta_and_data(
-        project_id, oc_type, abbr, meta, data
+    # 2023-05-29: just update meta first
+    itable = dora.update_extract_meta(
+        project_id, oc_type, abbr, meta
     )
+
+    # get papers for import
+    papers = srv_paper.get_included_papers_by_cq(
+        project_id, 
+        cq_abbr
+    )
+    paper_dict = {}
+    for paper in papers:
+        paper_dict[paper.pid] = paper
+    print('* found %s papers included in SR[%s/%s]' % (
+        len(papers),
+        project.keystr,
+        cq_abbr
+    ))
+
+    # save all data
+    stat_data = {
+        'no_paper': [],
+        'no_piece': [],
+        'has_piece': []
+    }
+    for pid in data:
+        if pid not in paper_dict:
+            stat_data['no_paper'].append(pid)
+            continue
+        
+        # try to search this picec
+        piece = dora.get_piece_by_project_id_and_extract_id_and_pid(
+            project_id,
+            extract.extract_id,
+            pid
+        )
+
+        if piece is None:
+            stat_data['no_piece'].append(pid)
+            # create piece
+            _piece = dora.create_piece(
+                project_id,
+                extract.extract_id,
+                pid,
+                data[pid]
+            )
+
+        else:
+            stat_data['has_piece'].append(pid)
+
+            if flag_overwrite_piece:
+                dora.update_piece_data_by_id(
+                    piece.piece_id,
+                    data[pid]
+                )
+        
+    print('* skipped missing included_in_SR paper %s' % (
+        len(stat_data['no_paper'])
+    ))
+    print('* added no extracted piece %s' % (
+        len(stat_data['no_piece'])
+    ))
+    print('* %s piece %s' % (
+        'updated' if flag_overwrite_piece else 'found(no update)',
+        len(stat_data['has_piece'])
+    ))
 
     return itable
 
@@ -1070,7 +1138,8 @@ def import_itable_from_xls(
 def get_itable_from_itable_data_xls(
     keystr, 
     cq_abbr,
-    full_fn
+    full_fn,
+    flag_overwrite_decision=True
     ):
     '''
     Get the itable extract from ITABLE_ATTR_DATA.xlsx
@@ -1114,14 +1183,16 @@ def get_itable_from_itable_data_xls(
         # find the pmid first
         if 'PMID' in row:
             pmid = row['PMID']
-        else:
+        elif 'PubMed ID' in row:
             pmid = row['PubMed ID']
+        else:
+            pmid = None
 
         # try to make sure it's NOT something like 12345678.0
         if pd.isna(pmid):
             # this is a NaN value for pmid
             # can not parse this kind of value
-            print('* error when parsing NaN pmid at Row[%s]' % ( _ ))
+            print('* skipped Row[%s] duo to NaN pmid' % ( _ ))
             continue
 
         try:
@@ -1134,11 +1205,11 @@ def get_itable_from_itable_data_xls(
             pmid = pmid.strip()
             pmid = '%s' % int(pmid)
         except:
-            print('* error when parsing pmid[%s]' % ( pmid ))
+            pmid = pmid.strip()
+            print('* non-PMID pid[%s]' % ( pmid ))
             # 2022-02-04: now we support DOI as pid
             # just remove the blanks
             # last try, just
-            pmid = pmid.strip()
 
         # get the NCT
         if 'Trial registration #' in row:
@@ -1191,7 +1262,7 @@ def get_itable_from_itable_data_xls(
                 # ok, updated the nct for this paper
                 pass
             else:
-                print('* warning when setting rct_id [%s] to %s, skipped' % (
+                print('* skipped setting rct_id [%s] to %s' % (
                     nct8, pmid
                 ))
 
@@ -1203,7 +1274,7 @@ def get_itable_from_itable_data_xls(
 
             if p is None:
                 # BUT, it is possible that this pmid is not found
-                print('* NOT found pid[%s]' % (
+                print('* NOT found pid[%s] in the current project' % (
                     pmid
                 ))
                 not_found_pids.append(
@@ -1221,20 +1292,21 @@ def get_itable_from_itable_data_xls(
 
                 # set the stage for this paper
                 # change stage!
-                _, p = srv_paper.set_paper_ss_decision(
-                    project, 
-                    cq_abbr,
-                    pmid, 
-                    ss_state.SS_PR_CHECKED_BY_ADMIN,
-                    ss_state.SS_RS_INCLUDED_ONLY_SR,
-                    ss_state.SS_REASON_CHECKED_BY_ADMIN,
-                    ss_state.SS_STAGE_INCLUDED_ONLY_SR
-                )
+                if flag_overwrite_decision:
+                    _, p = srv_paper.set_paper_ss_decision(
+                        project, 
+                        cq_abbr,
+                        pmid, 
+                        ss_state.SS_PR_CHECKED_BY_ADMIN,
+                        ss_state.SS_RS_INCLUDED_ONLY_SR,
+                        ss_state.SS_REASON_CHECKED_BY_ADMIN,
+                        ss_state.SS_STAGE_INCLUDED_ONLY_SR
+                    )
 
-                # OK, updated
-                print('* updated %s from %s to %s' % (
-                    pmid, sss, p.get_ss_stages()
-                ))
+                    # OK, updated
+                    print('* updated decision %s from %s to %s' % (
+                        pmid, sss, p.get_ss_stages()
+                    ))
                     
 
         # now check each column for this study
@@ -1271,7 +1343,7 @@ def get_itable_from_itable_data_xls(
             
             # print('* added col[%s] as abbr[%s] val[%s]' % (col, abbr, val))
 
-        print('* added %s %s arms with [%s]' % (
+        print('* attached %s to data obj %s arms with [%s]' % (
             pmid, data[pmid]['n_arms'], nct8
         ))
 
@@ -1332,7 +1404,7 @@ def get_cate_attr_subs_from_itable_data_xls(full_fn):
         # put this cate if not exists
         if cate not in cate_attr_dict:
             cate_attr_dict[cate] = {
-                'abbr': util.mk_abbr_12(),
+                'abbr': util.mk_hash_12(cate),
                 'name': cate,
                 'attrs': {}
             }
@@ -1349,7 +1421,7 @@ def get_cate_attr_subs_from_itable_data_xls(full_fn):
         # put this attr if not exists
         if attr not in cate_attr_dict[cate]['attrs']:
             cate_attr_dict[cate]['attrs'][attr] = {
-                'abbr': util.mk_abbr_12(),
+                'abbr': util.mk_hash_12('%s|%s'%(cate, attr)),
                 'name': attr,
                 'subs': None
             }
@@ -1358,12 +1430,16 @@ def get_cate_attr_subs_from_itable_data_xls(full_fn):
         if sub is not None:
             if cate_attr_dict[cate]['attrs'][attr]['subs'] is None:
                 cate_attr_dict[cate]['attrs'][attr]['subs'] = [{
-                    'abbr': util.mk_abbr_12(),
+                    'abbr': util.mk_hash_12('%s|%s|%s' % (
+                        cate, attr, sub
+                    )),
                     'name': sub
                 }]
             else:
                 cate_attr_dict[cate]['attrs'][attr]['subs'].append({
-                    'abbr': util.mk_abbr_12(),
+                    'abbr': util.mk_hash_12('%s|%s|%s' % (
+                        cate, attr, sub
+                    )),
                     'name': sub
                 })
             # point the idx to the last sub in current attr

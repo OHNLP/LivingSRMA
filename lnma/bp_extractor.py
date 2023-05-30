@@ -1395,7 +1395,7 @@ def get_extract_piece():
     pid = request.args.get('pid')
 
     # get the     
-    piece = dora.get_piece_by_project_id_and_abbr_and_pid(
+    piece = dora.get_piece_by_project_id_and_extract_id_and_pid(
         project_id,
         extract_id,
         pid

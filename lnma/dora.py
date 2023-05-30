@@ -2030,7 +2030,7 @@ def update_paper_selection(project_id, cq_abbr, pid, abbr, is_selected):
     )
 
     # get the piece
-    piece = get_piece_by_project_id_and_abbr_and_pid(
+    piece = get_piece_by_project_id_and_extract_id_and_pid(
         project_id,
         extract.extract_id,
         pid
@@ -2516,7 +2516,7 @@ def get_pieces_by_extracts_and_papers(extracts, papers):
     return pieces
 
 
-def get_piece_by_project_id_and_abbr_and_pid(project_id, extract_id, pid):
+def get_piece_by_project_id_and_extract_id_and_pid(project_id, extract_id, pid):
     '''
     Get one piece in an extract of a project
     '''

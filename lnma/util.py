@@ -67,7 +67,17 @@ def mk_oc_abbr():
 
 
 def mk_abbr_12():
+    '''
+    Make a random string of length = 12
+    '''
     return mk_abbr(12)
+
+
+def mk_hash_12(t):
+    '''
+    Make hash per given t in 12 chars
+    '''
+    return hashlib.md5(t.encode(encoding='utf8')).hexdigest()[:12].upper()
 
 
 def mk_number_str(length=6):
@@ -269,7 +279,9 @@ def is_valid_rct_id(rct_id):
 
     currently, there is not a good way to know
     '''
-    if len(rct_id)>5:
+    # 2023-05-29: fix nan or none rct_id
+    _rct_id = '%s' % rct_id
+    if len(_rct_id)>5:
         return True
 
     return False

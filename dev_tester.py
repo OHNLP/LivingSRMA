@@ -39,6 +39,23 @@ app.app_context().push()
 
 
 def test():
+    '''
+    Import CRPC itable
+    '''
+    srv_extract.import_itable_from_xls(
+        'LPR',
+        'mcrpc',
+        '/tmp/CRPC/ITABLE_ATTR_DATA_FINALIZED.xlsx',
+        '/tmp/CRPC/ITABLE_FILTERS.xlsx',
+
+        # flags
+        flag_overwrite_decision=False,
+        flag_overwrite_piece=False
+    )
+    print('* done')
+
+
+def test16():
     all_dups = srv_paper.get_duplicated_papers('IO')
 
 
